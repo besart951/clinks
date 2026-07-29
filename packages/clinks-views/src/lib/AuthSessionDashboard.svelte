@@ -1,0 +1,98 @@
+<script lang="ts">
+	import type { AuthDashboardViewModel, AuthPortalViewModel, TranslationBundleViewModel } from '@clinks/clinks-runtime';
+	import { Badge } from '@clinks/ui-shared/components/ui/badge';
+	import { Button } from '@clinks/ui-shared/components/ui/button';
+	import * as Card from '@clinks/ui-shared/components/ui/card';
+	import { Input } from '@clinks/ui-shared/components/ui/input';
+	import { Label } from '@clinks/ui-shared/components/ui/label';
+	import * as Select from '@clinks/ui-shared/components/ui/select';
+
+	let {
+		portalModel,
+		dashboardModel,
+		translations,
+	}: {
+		portalModel: AuthPortalViewModel;
+		dashboardModel: AuthDashboardViewModel;
+		translations: TranslationBundleViewModel;
+	} = $props();
+	const t = (key: string) => translations.t(key);
+</script>
+
+<Card.Root class="p-4 sm:p-8">
+	<Card.Header class="px-0 pt-0">
+		<Badge class="w-fit" variant="secondary">{t('ui.dashboard')}</Badge>
+		<Card.Title class="text-3xl">{t('ui.welcome')}, {portalModel.sessionEmail}</Card.Title>
+		<Card.Description>{t(`ui.application_${portalModel.application}`)} {t('ui.connected_to_tenant')}</Card.Description>
+	</Card.Header>
+	<Card.Content class="space-y-6 px-0">
+		{#if portalModel.session && portalModel.session.memberships.length > 1}
+			<div class="grid max-w-sm gap-2">
+				<Label>{t('ui.active_tenant')}</Label>
+				<Select.Root
+					value={dashboardModel.selectedTenant}
+					onValueChange={(tenantID) => void dashboardModel.selectTenant(tenantID)}
+				>
+					<Select.Trigger>{portalModel.session.activeTenant?.name ?? t('ui.active_tenant')}</Select.Trigger>
+					<Select.Content>
+						{#each portalModel.session.memberships as membership}
+							<Select.Item value={membership.tenant.id}>{membership.tenant.name}</Select.Item>
+						{/each}
+					</Select.Content>
+				</Select.Root>
+			</div>
+		{/if}
+		{#if portalModel.canInviteMembers}
+			<form
+				class="grid max-w-xl gap-3 sm:grid-cols-[1fr_12rem_auto]"
+				onsubmit={(event) => {
+					event.preventDefault();
+					void dashboardModel.inviteMember();
+				}}
+			>
+				<div class="grid gap-2">
+					<Label for="invite-email">{t('ui.invite_user')}</Label>
+					<Input
+						id="invite-email"
+						bind:value={dashboardModel.invitationEmail}
+						type="email"
+						required
+						autocomplete="email"
+					/>
+				</div>
+				<div class="grid gap-2">
+					<Label for="invite-role">{t('ui.role')}</Label>
+					<Select.Root
+						value={dashboardModel.invitationRole}
+						onValueChange={(role) => (dashboardModel.invitationRole = role as typeof dashboardModel.invitationRole)}
+					>
+						<Select.Trigger
+							>{dashboardModel.invitationRole === 'ROLE_USER'
+								? t('ui.role_user')
+								: t('ui.role_tenant_admin')}</Select.Trigger
+						>
+						<Select.Content>
+							<Select.Item value="ROLE_USER">{t('ui.role_user')}</Select.Item>
+							<Select.Item value="ROLE_TENANT_ADMIN">{t('ui.role_tenant_admin')}</Select.Item>
+						</Select.Content>
+					</Select.Root>
+				</div>
+				<Button type="submit" class="self-end">{t('ui.invite_user')}</Button>
+			</form>
+			{#if dashboardModel.createdInvitation}
+				<div class="flex max-w-xl gap-2">
+					<Input readonly value={dashboardModel.createdInvitation.acceptanceUrl} aria-label={t('ui.invitation_link')} />
+					<Button type="button" variant="outline" onclick={() => void dashboardModel.copyInvitation()}
+						>{t('ui.copy')}</Button
+					>
+				</div>
+			{/if}
+		{/if}
+		{#if portalModel.errorMessage}
+			<p class="text-destructive text-sm" aria-live="polite">{portalModel.errorMessage}</p>
+		{/if}
+	</Card.Content>
+	<Card.Footer class="px-0 pb-0"
+		><Button onclick={() => void portalModel.signOut()}>{t('ui.sign_out')}</Button></Card.Footer
+	>
+</Card.Root>

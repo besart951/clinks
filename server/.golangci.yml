@@ -1,0 +1,49 @@
+version: "2"
+
+run:
+  timeout: 3m
+  relative-path-mode: gomod
+
+linters:
+  default: standard
+  enable:
+    - gocritic
+    - gosec
+    - misspell
+    - nilerr
+    - noctx
+    - unconvert
+    - unparam
+  settings:
+    errcheck:
+      check-type-assertions: true
+      check-blank: true
+    gocritic:
+      enabled-tags:
+        - diagnostic
+        - performance
+        - style
+    govet:
+      enable-all: true
+      disable:
+        - fieldalignment
+    staticcheck:
+      checks:
+        - all
+
+formatters:
+  enable:
+    - gofumpt
+    - goimports
+  settings:
+    gofumpt:
+      module-path: github.com/besartmorina/clinks/server
+    goimports:
+      local-prefixes:
+        - github.com/besartmorina/clinks/server
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  exclusions:
+    generated: strict

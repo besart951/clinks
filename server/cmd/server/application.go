@@ -1,0 +1,113 @@
+package main
+
+import (
+	"context"
+	"fmt"
+	"time"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+
+	authadapter "github.com/besartmorina/clinks/server/internal/adapters/auth"
+	"github.com/besartmorina/clinks/server/internal/adapters/http"
+	"github.com/besartmorina/clinks/server/internal/adapters/i18n"
+	mailadapter "github.com/besartmorina/clinks/server/internal/adapters/mail"
+	"github.com/besartmorina/clinks/server/internal/adapters/postgres"
+	appconfig "github.com/besartmorina/clinks/server/internal/config"
+	"github.com/besartmorina/clinks/server/internal/core/domain"
+	"github.com/besartmorina/clinks/server/internal/core/ports"
+	"github.com/besartmorina/clinks/server/internal/core/service"
+)
+
+const defaultReadinessTimeout = 2 * time.Second
+
+type Application struct {
+	server *http.Server
+	pool   *pgxpool.Pool
+	auth   *service.AuthService
+}
+
+func NewApplication(
+	server *http.Server,
+	pool *pgxpool.Pool,
+	auth *service.AuthService,
+) *Application {
+	return &Application{server: server, pool: pool, auth: auth}
+}
+
+func (application *Application) Run(ctx context.Context, bootstrap appconfig.BootstrapConfig, httpConfig *appconfig.HTTPConfig) error {
+	defer application.pool.Close()
+
+	if err := postgres.Migrate(ctx, application.pool); err != nil {
+		return fmt.Errorf("apply migrations: %w", err)
+	}
+	if err := application.auth.EnsureSuperAdmin(
+		ctx, bootstrap.Email, bootstrap.Password, domain.NewLocale(bootstrap.Locale),
+	); err != nil {
+		return fmt.Errorf("bootstrap administrator: %w", err)
+	}
+
+	return NewServer(httpConfig, application.server.Handler()).Run(ctx)
+}
+
+func poolConfig(settings *appconfig.Config) postgres.PoolConfig {
+	return postgres.PoolConfig{
+		DatabaseURL: settings.Database.URL, MaxConns: settings.Database.MaxConns,
+		MinConns: settings.Database.MinConns, MaxConnLifetime: settings.Database.ConnMaxLifetime,
+		MaxConnIdleTime:   settings.Database.ConnMaxIdleTime,
+		HealthCheckPeriod: settings.Database.HealthCheck,
+	}
+}
+
+func httpServerConfig(settings *appconfig.Config) *http.ServerConfig {
+	return &http.ServerConfig{
+		CORSOrigins: settings.HTTP.CORSOrigins, ReadinessTimeout: defaultReadinessTimeout,
+		Cookie: http.CookieConfig{Name: settings.HTTP.SessionCookieName, Secure: settings.HTTP.SessionCookieSecure, Domain: settings.HTTP.SessionCookieDomain, MaxAge: settings.Auth.JWTTTL},
+	}
+}
+
+func inviteBaseURL(settings *appconfig.Config) string {
+	return settings.Invites.PublicBaseURL
+}
+
+func inviteTTL(settings *appconfig.Config) time.Duration {
+	return settings.Invites.TTL
+}
+
+func smtpConfig(settings *appconfig.Config) *mailadapter.SMTPConfig {
+	return &mailadapter.SMTPConfig{Host: settings.SMTP.Host, Port: settings.SMTP.Port, Username: settings.SMTP.Username, Password: settings.SMTP.Password, From: settings.SMTP.From}
+}
+
+func sessionConfig(settings *appconfig.Config) authadapter.SessionConfig {
+	return authadapter.SessionConfig{
+		Secret: []byte(settings.Auth.JWTSecret), Issuer: settings.Auth.JWTIssuer,
+		Audience: settings.Auth.JWTAudience, TTL: settings.Auth.JWTTTL,
+	}
+}
+
+func newAuthService(
+	identities ports.IdentityRepository,
+	provisioner ports.TenantProvisioner,
+	memberships ports.MembershipRepository,
+	passwords ports.PasswordHasher,
+	sessions ports.SessionIssuer,
+	audit ports.AuditLog,
+	mailer ports.InvitationMailer,
+	inviteBaseURL string,
+	inviteTTL time.Duration,
+) *service.AuthService {
+	return service.NewAuthService(&service.AuthDependencies{
+		Identities: identities, Provisioner: provisioner, Memberships: memberships, Passwords: passwords,
+		Sessions: sessions, Audit: audit, Mailer: mailer, InviteBaseURL: inviteBaseURL, InviteTTL: inviteTTL,
+	})
+}
+
+func newHTTPServer(
+	auth *service.AuthService,
+	admin *service.AdminService,
+	localization *service.I18nService,
+	translator *i18n.Translator,
+	readiness ports.ReadinessChecker,
+	config *http.ServerConfig,
+) *http.Server {
+	return http.NewServer(auth, auth, auth, admin, admin, admin, localization, translator, readiness, config)
+}

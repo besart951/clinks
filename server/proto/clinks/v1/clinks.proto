@@ -1,0 +1,154 @@
+syntax = "proto3";
+
+package clinks.v1;
+
+option go_package = "github.com/besartmorina/clinks/server/proto/clinks/v1;clinksv1";
+
+// ClinksService is the sole browser-facing application API. Health probes are
+// deliberately kept outside this contract as plain HTTP endpoints.
+service ClinksService {
+  rpc Login(CredentialsRequest) returns (Session);
+  rpc LoginSuperAdmin(CredentialsRequest) returns (Session);
+  rpc Register(RegisterRequest) returns (Session);
+  rpc Logout(Empty) returns (Empty);
+  rpc GetSession(Empty) returns (Session);
+  rpc SwitchTenant(SwitchTenantRequest) returns (Session);
+
+  rpc CreateInvitation(CreateInvitationRequest) returns (Invitation);
+  rpc AcceptInvitation(AcceptInvitationRequest) returns (Session);
+
+  rpc GetLanguages(Empty) returns (LanguagesResponse);
+  rpc GetTranslations(GetTranslationsRequest) returns (TranslationsResponse);
+
+  rpc ListTenants(Empty) returns (TenantsResponse);
+  rpc CreateTenant(CreateTenantRequest) returns (Tenant);
+  rpc ListManagedLanguages(Empty) returns (LanguagesResponse);
+  rpc SaveLanguage(Language) returns (Empty);
+  rpc SaveTranslation(ScopedTranslation) returns (Empty);
+  rpc ListAuditEvents(ListAuditEventsRequest) returns (AuditEventsResponse);
+}
+
+message Empty {}
+
+message CredentialsRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message RegisterRequest {
+  string email = 1;
+  string password = 2;
+  string tenant_name = 3;
+}
+
+message SwitchTenantRequest {
+  string tenant_id = 1;
+}
+
+message User {
+  string id = 1;
+  string email = 2;
+  string locale = 3;
+  bool is_super_admin = 4;
+}
+
+message Tenant {
+  string id = 1;
+  string name = 2;
+}
+
+message Membership {
+  string id = 1;
+  Tenant tenant = 2;
+  string role = 3;
+  string status = 4;
+}
+
+message Session {
+  User user = 1;
+  Tenant active_tenant = 2;
+  repeated Membership memberships = 3;
+}
+
+message CreateInvitationRequest {
+  string email = 1;
+  string role = 2;
+}
+
+message Invitation {
+  string id = 1;
+  string tenant_id = 2;
+  string email = 3;
+  string role = 4;
+  string expires_at = 5;
+  string acceptance_url = 6;
+  string delivery_status = 7;
+}
+
+message AcceptInvitationRequest {
+  string token = 1;
+  string email = 2;
+  string password = 3;
+}
+
+message Language {
+  string code = 1;
+  string name = 2;
+  bool is_default = 3;
+  bool is_active = 4;
+}
+
+message LanguagesResponse {
+  repeated Language languages = 1;
+}
+
+message GetTranslationsRequest {
+  string application_scope = 1;
+}
+
+message ScopedTranslation {
+  string locale = 1;
+  string application_scope = 2;
+  string key = 3;
+  string value = 4;
+}
+
+message TranslationsResponse {
+  string locale = 1;
+  repeated ScopedTranslation translations = 2;
+}
+
+message TenantsResponse {
+  repeated Tenant tenants = 1;
+}
+
+message CreateTenantRequest {
+  string name = 1;
+}
+
+message ListAuditEventsRequest {
+  string from = 1;
+  string to = 2;
+  string actor_id = 3;
+  string tenant_id = 4;
+  string action = 5;
+  string cursor = 6;
+  uint32 page_size = 7;
+}
+
+message AuditEvent {
+  string id = 1;
+  string occurred_at = 2;
+  string actor_id = 3;
+  string actor_email = 4;
+  string tenant_id = 5;
+  string tenant_name = 6;
+  string action = 7;
+  string target = 8;
+  string description = 9;
+}
+
+message AuditEventsResponse {
+  repeated AuditEvent events = 1;
+  string next_cursor = 2;
+}

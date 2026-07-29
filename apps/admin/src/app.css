@@ -1,0 +1,6 @@
+@import 'tailwindcss';
+@import '@clinks/ui-shared/styles';
+
+html {
+	font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+}

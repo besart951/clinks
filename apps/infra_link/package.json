@@ -1,0 +1,26 @@
+{
+  "name": "@clinks/infra-link",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
+  },
+  "dependencies": {
+    "@clinks/clinks-runtime": "workspace:*",
+    "@clinks/clinks-views": "workspace:*",
+    "@clinks/ui-shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-auto": "^7.0.1",
+    "@sveltejs/kit": "^2.70.1",
+    "@sveltejs/vite-plugin-svelte": "^7.2.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "svelte": "^5.56.4",
+    "svelte-check": "^4.3.4",
+    "typescript": "^6.0.3",
+    "vite": "^8.1.5"
+  }
+}

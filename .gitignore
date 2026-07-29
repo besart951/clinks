@@ -1,0 +1,39 @@
+# Environment files and local secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies and package-manager files
+node_modules/
+.pnpm-store/
+.npm/
+.yarn/
+.yarn-cache/
+
+# Svelte, Vite, and test output
+.svelte-kit/
+.vite/
+build/
+dist/
+coverage/
+playwright-report/
+test-results/
+
+# Go build and test artifacts
+server/clinks-server
+server/server.exe
+server/*.test
+server/coverage.out
+
+# Logs and local tooling
+*.log
+*.tsbuildinfo
+.turbo/
+.eslintcache
+.prettiercache
+
+# Operating system and editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo

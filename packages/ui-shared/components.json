@@ -1,0 +1,19 @@
+{
+  "$schema": "https://shadcn-svelte.com/schema.json",
+  "style": "nova",
+  "tailwind": {
+    "css": "src/styles.css",
+    "baseColor": "zinc"
+  },
+  "aliases": {
+    "lib": "@clinks/ui-shared",
+    "utils": "@clinks/ui-shared/utils",
+    "components": "@clinks/ui-shared/components",
+    "hooks": "@clinks/ui-shared/hooks",
+    "ui": "@clinks/ui-shared/components/ui"
+  },
+  "typescript": {
+    "config": "tsconfig.json"
+  },
+  "registry": "https://shadcn-svelte.com/registry"
+}

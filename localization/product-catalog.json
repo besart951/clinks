@@ -1,0 +1,347 @@
+{
+  "defaultLocale": "de-CH",
+  "translations": {
+    "shared": {
+      "audit.invitation.accepted": {
+        "de-CH": "Einladung angenommen: {target}",
+        "en-US": "Invitation accepted: {target}"
+      },
+      "audit.invitation.created": {
+        "de-CH": "Einladung erstellt: {target}",
+        "en-US": "Invitation created: {target}"
+      },
+      "audit.localization.language_saved": {
+        "de-CH": "Sprache geändert: {target}",
+        "en-US": "Language changed: {target}"
+      },
+      "audit.localization.translation_saved": {
+        "de-CH": "Übersetzung geändert: {target}",
+        "en-US": "Translation changed: {target}"
+      },
+      "audit.localization.translation_override_saved": {
+        "de-CH": "Übersetzungs-Override geändert: {target}",
+        "en-US": "Translation override changed: {target}"
+      },
+      "audit.session.login": {
+        "de-CH": "Anmeldung erfolgreich: {target}",
+        "en-US": "Successful sign-in: {target}"
+      },
+      "audit.session.logout": {
+        "de-CH": "Abmeldung: {target}",
+        "en-US": "Sign-out: {target}"
+      },
+      "audit.tenant.created": {
+        "de-CH": "Mandant erstellt: {target}",
+        "en-US": "Tenant created: {target}"
+      },
+      "audit.tenant.registered": {
+        "de-CH": "Mandant registriert: {target}",
+        "en-US": "Tenant registered: {target}"
+      },
+      "audit.tenant.switch": {
+        "de-CH": "Mandant gewechselt: {target}",
+        "en-US": "Tenant switched: {target}"
+      },
+      "error.email_taken": {
+        "de-CH": "Diese E-Mail-Adresse wird bereits verwendet.",
+        "en-US": "This email address is already in use."
+      },
+      "error.internal": {
+        "de-CH": "Ein interner Fehler ist aufgetreten. Bitte versuche es erneut.",
+        "en-US": "An internal error occurred. Please try again."
+      },
+      "error.invalid_credentials": {
+        "de-CH": "E-Mail oder Passwort ist ungültig.",
+        "en-US": "Email or password is invalid."
+      },
+      "error.invitation_expired": {
+        "de-CH": "Die Einladung ist abgelaufen.",
+        "en-US": "The invitation has expired."
+      },
+      "error.invitation_invalid": {
+        "de-CH": "Die Einladung ist ungültig.",
+        "en-US": "The invitation is invalid."
+      },
+      "error.invitation_used": {
+        "de-CH": "Die Einladung wurde bereits verwendet.",
+        "en-US": "The invitation has already been used."
+      },
+      "error.invite_email_mismatch": {
+        "de-CH": "Diese Einladung gehört zu einer anderen E-Mail-Adresse.",
+        "en-US": "This invitation belongs to a different email address."
+      },
+      "error.membership_not_found": {
+        "de-CH": "Die Mitgliedschaft wurde nicht gefunden.",
+        "en-US": "The membership was not found."
+      },
+      "error.tenant_not_found": {
+        "de-CH": "Der Mandant wurde nicht gefunden.",
+        "en-US": "The tenant was not found."
+      },
+      "error.unauthorized": {
+        "de-CH": "Für diese Aktion fehlen die erforderlichen Rechte.",
+        "en-US": "You do not have permission to perform this action."
+      },
+      "error.validation": {
+        "de-CH": "Bitte überprüfe die eingegebenen Daten.",
+        "en-US": "Please check the submitted values."
+      },
+      "ui.action": {
+        "de-CH": "Aktion",
+        "en-US": "Action"
+      },
+      "ui.active_tenant": {
+        "de-CH": "Aktiver Mandant",
+        "en-US": "Active tenant"
+      },
+      "ui.application_infra_link": {
+        "de-CH": "Infrastruktur",
+        "en-US": "Infrastructure"
+      },
+      "ui.application_planer_link": {
+        "de-CH": "Planung",
+        "en-US": "Planning"
+      },
+      "ui.add_translation": {
+        "de-CH": "Override speichern",
+        "en-US": "Save override"
+      },
+      "ui.admin_login": {
+        "de-CH": "Admin-Anmeldung",
+        "en-US": "Administrator sign in"
+      },
+      "ui.actor_id": {
+        "de-CH": "Benutzer-ID",
+        "en-US": "User ID"
+      },
+      "ui.audit_default_range": {
+        "de-CH": "Standard: letzte 30 Tage.",
+        "en-US": "Default: last 30 days."
+      },
+      "ui.audit_description": {
+        "de-CH": "Beschreibung",
+        "en-US": "Description"
+      },
+      "ui.audit_immutable": {
+        "de-CH": "Ereignisse sind unveränderbar.",
+        "en-US": "Events cannot be changed."
+      },
+      "ui.audit_log": {
+        "de-CH": "Audit-Protokoll",
+        "en-US": "Audit log"
+      },
+      "ui.back_to_home": {
+        "de-CH": "Zurück zur Startseite",
+        "en-US": "Back to Home"
+      },
+      "ui.error_forbidden_desc": {
+        "de-CH": "Du verfügst nicht über die erforderlichen Rechte für diesen Bereich.",
+        "en-US": "You do not have permission to access this area."
+      },
+      "ui.error_forbidden_title": {
+        "de-CH": "Zugriff verweigert",
+        "en-US": "Access denied"
+      },
+      "ui.error_not_found_desc": {
+        "de-CH": "Die angeforderte Seite existiert nicht oder wurde verschoben.",
+        "en-US": "The requested page does not exist or has been moved."
+      },
+      "ui.error_not_found_title": {
+        "de-CH": "Seite nicht gefunden",
+        "en-US": "Page not found"
+      },
+      "ui.error_server_desc": {
+        "de-CH": "Beim Verarbeiten der Anfrage ist ein interner Serverfehler aufgetreten.",
+        "en-US": "An internal server error occurred while processing the request."
+      },
+      "ui.error_server_title": {
+        "de-CH": "Serverfehler",
+        "en-US": "Server error"
+      },
+      "ui.error_generic_desc": {
+        "de-CH": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut.",
+        "en-US": "An unexpected error occurred. Please try again."
+      },
+      "ui.error_generic_title": {
+        "de-CH": "Unerwarteter Fehler",
+        "en-US": "Unexpected error"
+      },
+      "ui.try_again": {
+        "de-CH": "Erneut versuchen",
+        "en-US": "Try Again"
+      },
+      "ui.connected_to_tenant": {
+        "de-CH": "ist mit dem Mandanten verbunden.",
+        "en-US": "is connected to the tenant."
+      },
+      "ui.copy": {
+        "de-CH": "Kopieren",
+        "en-US": "Copy"
+      },
+      "ui.create_tenant": {
+        "de-CH": "Mandant erstellen",
+        "en-US": "Create tenant"
+      },
+      "ui.dashboard": {
+        "de-CH": "Dashboard",
+        "en-US": "Dashboard"
+      },
+      "ui.default": {
+        "de-CH": "Standard",
+        "en-US": "Default"
+      },
+      "ui.email": {
+        "de-CH": "E-Mail-Adresse",
+        "en-US": "Email address"
+      },
+      "ui.filter": {
+        "de-CH": "Filtern",
+        "en-US": "Filter"
+      },
+      "ui.from": {
+        "de-CH": "Von",
+        "en-US": "From"
+      },
+      "ui.invitation_link": {
+        "de-CH": "Einladungslink",
+        "en-US": "Invitation link"
+      },
+      "ui.invite_user": {
+        "de-CH": "Benutzer einladen",
+        "en-US": "Invite user"
+      },
+      "ui.languages": {
+        "de-CH": "Sprachen",
+        "en-US": "Languages"
+      },
+      "ui.load_more": {
+        "de-CH": "Mehr laden",
+        "en-US": "Load more"
+      },
+      "ui.loading": {
+        "de-CH": "Wird geladen …",
+        "en-US": "Loading …"
+      },
+      "ui.locale": {
+        "de-CH": "Gebietsschema",
+        "en-US": "Locale"
+      },
+      "ui.no_tenants": {
+        "de-CH": "Noch keine Mandanten vorhanden.",
+        "en-US": "No tenants yet."
+      },
+      "ui.occurred_at": {
+        "de-CH": "Zeitpunkt",
+        "en-US": "Occurred at"
+      },
+      "ui.password": {
+        "de-CH": "Passwort",
+        "en-US": "Password"
+      },
+      "ui.register": {
+        "de-CH": "Registrieren",
+        "en-US": "Register"
+      },
+      "ui.role": {
+        "de-CH": "Rolle",
+        "en-US": "Role"
+      },
+      "ui.role_tenant_admin": {
+        "de-CH": "Mandantenadministrator",
+        "en-US": "Tenant administrator"
+      },
+      "ui.role_user": {
+        "de-CH": "Benutzer",
+        "en-US": "User"
+      },
+      "ui.save": {
+        "de-CH": "Speichern",
+        "en-US": "Save"
+      },
+      "ui.scope_admin": {
+        "de-CH": "Administration",
+        "en-US": "Administration"
+      },
+      "ui.scope_infra_link": {
+        "de-CH": "Infrastruktur",
+        "en-US": "Infrastructure"
+      },
+      "ui.scope_planer_link": {
+        "de-CH": "Planung",
+        "en-US": "Planning"
+      },
+      "ui.scope_shared": {
+        "de-CH": "Übergreifend",
+        "en-US": "Shared"
+      },
+      "ui.sign_in": {
+        "de-CH": "Anmelden",
+        "en-US": "Sign in"
+      },
+      "ui.sign_out": {
+        "de-CH": "Abmelden",
+        "en-US": "Sign out"
+      },
+      "ui.super_administrator": {
+        "de-CH": "Super-Administrator",
+        "en-US": "Super administrator"
+      },
+      "ui.status_code": {
+        "de-CH": "Status {code}",
+        "en-US": "Status {code}"
+      },
+      "ui.tenant_id": {
+        "de-CH": "Mandanten-ID",
+        "en-US": "Tenant ID"
+      },
+      "ui.tenant_name": {
+        "de-CH": "Mandantenname",
+        "en-US": "Tenant name"
+      },
+      "ui.tenants": {
+        "de-CH": "Mandanten",
+        "en-US": "Tenants"
+      },
+      "ui.theme": {
+        "de-CH": "Darstellung",
+        "en-US": "Theme"
+      },
+      "ui.theme_dark": {
+        "de-CH": "Dunkel",
+        "en-US": "Dark"
+      },
+      "ui.theme_light": {
+        "de-CH": "Hell",
+        "en-US": "Light"
+      },
+      "ui.theme_system": {
+        "de-CH": "System",
+        "en-US": "System"
+      },
+      "ui.to": {
+        "de-CH": "Bis",
+        "en-US": "To"
+      },
+      "ui.translation_key": {
+        "de-CH": "Übersetzungsschlüssel",
+        "en-US": "Translation key"
+      },
+      "ui.translation_scope": {
+        "de-CH": "Bereich",
+        "en-US": "Scope"
+      },
+      "ui.translation_value": {
+        "de-CH": "Override-Text",
+        "en-US": "Override text"
+      },
+      "ui.translations": {
+        "de-CH": "Übersetzungs-Overrides",
+        "en-US": "Translation overrides"
+      },
+      "ui.welcome": {
+        "de-CH": "Willkommen",
+        "en-US": "Welcome"
+      }
+    }
+  }
+}

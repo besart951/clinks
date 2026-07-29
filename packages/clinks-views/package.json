@@ -1,0 +1,31 @@
+{
+  "name": "@clinks/clinks-views",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./auth-portal": {
+      "types": "./src/lib/AuthPortal.svelte",
+      "svelte": "./src/lib/AuthPortal.svelte",
+      "default": "./src/lib/AuthPortal.svelte"
+    },
+    "./admin-dashboard": {
+      "types": "./src/lib/AdminDashboard.svelte",
+      "svelte": "./src/lib/AdminDashboard.svelte",
+      "default": "./src/lib/AdminDashboard.svelte"
+    },
+    "./error-page": {
+      "types": "./src/lib/ErrorPage.svelte",
+      "svelte": "./src/lib/ErrorPage.svelte",
+      "default": "./src/lib/ErrorPage.svelte"
+    }
+  },
+  "peerDependencies": {
+    "svelte": "^5.56.4"
+  },
+  "dependencies": {
+    "@clinks/clinks-runtime": "workspace:*",
+    "@clinks/ui-shared": "workspace:*",
+    "@lucide/svelte": "^1.27.0"
+  }
+}

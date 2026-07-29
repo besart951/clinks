@@ -1,0 +1,39 @@
+{
+  "name": "clinks",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.28.2",
+  "engines": {
+    "node": ">=24.13.0",
+    "pnpm": ">=10.28.2"
+  },
+  "scripts": {
+    "check": "pnpm format:frontend:check && pnpm -r check && pnpm check:translations",
+    "test": "pnpm --filter @clinks/clinks-runtime test",
+    "format:frontend": "prettier --write apps packages .vscode package.json pnpm-workspace.yaml prettier.config.mjs",
+    "format:frontend:check": "prettier --check apps packages .vscode package.json pnpm-workspace.yaml prettier.config.mjs",
+    "generate:translations": "node scripts/generate-translation-catalog.mjs",
+    "check:translations": "node scripts/generate-translation-catalog.mjs --check",
+    "build": "pnpm -r build",
+    "go:format": "go -C server tool golangci-lint fmt",
+    "go:format:check": "go -C server tool golangci-lint fmt --diff",
+    "go:lint": "go -C server tool golangci-lint run ./...",
+    "go:mod": "go -C server mod tidy -diff",
+    "go:vet": "go -C server vet ./...",
+    "go:test": "go -C server test -race -shuffle=on -count=1 ./...",
+    "go:security": "go -C server tool golangci-lint run --enable-only gosec ./...",
+    "go:vuln": "go -C server tool govulncheck ./...",
+    "go:build": "go -C server build -trimpath ./cmd/server",
+    "go:generate": "go -C server generate ./... && go -C server mod tidy",
+    "go:check": "pnpm go:mod && pnpm go:format:check && pnpm go:lint && pnpm go:vet && pnpm go:test && pnpm go:security && pnpm go:vuln && pnpm go:build",
+    "verify:push": "pnpm format:frontend:check && pnpm go:format:check && pnpm build && pnpm go:build",
+    "dev": "concurrently --kill-others-on-fail -n admin,planer,infra,server -c cyan,magenta,yellow,green \"pnpm --filter @clinks/admin dev\" \"pnpm --filter @clinks/planer-link dev\" \"pnpm --filter @clinks/infra-link dev\" \"go -C server run ./cmd/server\"",
+    "start": "docker compose up --build",
+    "down": "docker compose down"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.4",
+    "prettier": "^3.9.6",
+    "prettier-plugin-svelte": "^4.1.1"
+  }
+}

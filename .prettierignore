@@ -1,0 +1,6 @@
+node_modules
+**/.svelte-kit
+**/build
+**/dist
+packages/i18n-types/src/product-translation-key.generated.ts
+packages/api-client/src/gen

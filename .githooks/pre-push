@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+
+set -eu
+
+if command -v pnpm >/dev/null 2>&1; then
+  pnpm verify:push
+elif [ -n "${LOCALAPPDATA:-}" ] && [ -f "$LOCALAPPDATA/pnpm/pnpm.cmd" ]; then
+  "$LOCALAPPDATA/pnpm/pnpm.cmd" verify:push
+else
+  echo "pnpm is required to run the pre-push checks." >&2
+  exit 1
+fi

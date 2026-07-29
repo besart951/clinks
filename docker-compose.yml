@@ -1,0 +1,66 @@
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    volumes:
+      - postgres-data:/var/lib/postgresql
+
+  server:
+    build:
+      context: ./server
+    env_file: .env
+    environment:
+      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
+      CORS_ORIGINS: http://localhost:5173,http://localhost:5174,http://localhost:5175
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+
+  admin:
+    build:
+      context: .
+      dockerfile: apps/Dockerfile
+    command: pnpm --filter @clinks/admin dev --host 0.0.0.0
+    environment:
+      PUBLIC_API_BASE_URL: http://localhost:8080
+    ports:
+      - "5173:5173"
+    depends_on:
+      - server
+
+  planer-link:
+    build:
+      context: .
+      dockerfile: apps/Dockerfile
+    command: pnpm --filter @clinks/planer-link dev --host 0.0.0.0
+    environment:
+      PUBLIC_API_BASE_URL: http://localhost:8080
+    ports:
+      - "5174:5173"
+    depends_on:
+      - server
+
+  infra-link:
+    build:
+      context: .
+      dockerfile: apps/Dockerfile
+    command: pnpm --filter @clinks/infra-link dev --host 0.0.0.0
+    environment:
+      PUBLIC_API_BASE_URL: http://localhost:8080
+    ports:
+      - "5175:5173"
+    depends_on:
+      - server
+
+volumes:
+  postgres-data:
