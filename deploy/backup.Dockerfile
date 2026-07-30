@@ -1,6 +1,6 @@
-FROM alpine:3.22
+FROM postgres:18-alpine
 
-RUN apk add --no-cache postgresql18-client restic
+RUN apk add --no-cache restic
 COPY deploy/backup.sh /usr/local/bin/clinks-backup
 RUN chmod 0555 /usr/local/bin/clinks-backup
 

@@ -69,7 +69,7 @@ type OIDCConfig struct {
 	SuccessURL         string `env:"OIDC_SUCCESS_URL"`
 }
 
-func (config OIDCConfig) Enabled() bool {
+func (config *OIDCConfig) Enabled() bool {
 	return config.GoogleClientID != ""
 }
 

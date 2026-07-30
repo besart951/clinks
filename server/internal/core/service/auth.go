@@ -302,7 +302,7 @@ func (service *AuthService) newInvitation(actor domain.UserID, tenant domain.Ten
 		return domain.Invitation{}, domain.NewError(domain.ErrorInternal)
 	}
 	invitation := domain.Invitation{ID: id, TenantID: tenant, Email: email, Role: role, CreatedBy: actor, ExpiresAt: time.Now().Add(service.inviteTTL)}
-	raw, err := service.tokens.Token(invitation)
+	raw, err := service.tokens.Token(&invitation)
 	if err != nil {
 		return domain.Invitation{}, domain.NewError(domain.ErrorInternal)
 	}

@@ -15,11 +15,11 @@ import (
 )
 
 type SMTPConfig struct {
-	Host     string
-	Port     string
-	Username string
-	Password string
-	From     string
+	Host       string
+	Port       string
+	Username   string
+	Password   string
+	From       string
 	RequireTLS bool
 }
 

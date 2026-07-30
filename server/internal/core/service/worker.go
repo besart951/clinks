@@ -52,7 +52,7 @@ func (worker *InvitationWorker) RunOnce(ctx context.Context) (bool, error) {
 	if job.ID == "" {
 		return false, nil
 	}
-	token, err := worker.tokens.Token(invitation)
+	token, err := worker.tokens.Token(&invitation)
 	if err == nil {
 		invitation.Acceptance = worker.inviteBaseURL + "/invite?token=" + token
 		status, sendErr := worker.mailer.Send(ctx, &invitation)

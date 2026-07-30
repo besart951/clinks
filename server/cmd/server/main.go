@@ -39,7 +39,7 @@ func run(arguments []string) error {
 	}
 	switch command {
 	case "server":
-		return application.Run(ctx, config.Bootstrap, &config.HTTP)
+		return application.Run(ctx, &config.HTTP)
 	case "migrate":
 		return application.MigrateAndBootstrap(ctx, config.Bootstrap)
 	case "healthcheck":

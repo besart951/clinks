@@ -35,7 +35,7 @@ func (signer *InvitationTokenSigner) NewInvitationID() (domain.InvitationID, err
 	return domain.InvitationID(id.String()), nil
 }
 
-func (signer *InvitationTokenSigner) Token(invitation domain.Invitation) (string, error) {
+func (signer *InvitationTokenSigner) Token(invitation *domain.Invitation) (string, error) {
 	if invitation.ID == "" || invitation.ExpiresAt.IsZero() {
 		return "", fmt.Errorf("sign invitation token: invitation id and expiry are required")
 	}

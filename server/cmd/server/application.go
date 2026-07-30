@@ -21,10 +21,10 @@ import (
 const defaultReadinessTimeout = 2 * time.Second
 
 type Application struct {
-	server *http.Server
-	pool   *pgxpool.Pool
-	auth   *service.AuthService
-	oidc   *authadapter.GoogleOIDC
+	server     *http.Server
+	pool       *pgxpool.Pool
+	auth       *service.AuthService
+	oidc       *authadapter.GoogleOIDC
 	oidcConfig http.OIDCConfig
 }
 
@@ -38,7 +38,7 @@ func NewApplication(
 	return &Application{server: server, pool: pool, auth: auth, oidc: oidc, oidcConfig: oidcConfig}
 }
 
-func (application *Application) Run(ctx context.Context, bootstrap appconfig.BootstrapConfig, httpConfig *appconfig.HTTPConfig) error {
+func (application *Application) Run(ctx context.Context, httpConfig *appconfig.HTTPConfig) error {
 	defer application.pool.Close()
 	return NewServer(httpConfig, application.server.HandlerWithOIDC(application.oidc, application.oidcConfig)).Run(ctx)
 }

@@ -22,6 +22,7 @@ type externalIdentityStub struct{}
 func (externalIdentityStub) FindExternalUser(context.Context, domain.ExternalIdentity) (domain.User, error) {
 	return domain.User{}, domain.NewError(domain.ErrorUnauthorized)
 }
+
 func (externalIdentityStub) LinkExternalIdentity(context.Context, domain.UserID, domain.ExternalIdentity) error {
 	return nil
 }
@@ -94,10 +95,6 @@ func (auditStub) Append(context.Context, *domain.AuditEvent) error { return nil 
 func (auditStub) List(context.Context, *domain.AuditFilter) (domain.AuditPage, error) {
 	return domain.AuditPage{}, nil
 }
-
-type mailerStub struct{}
-
-func (mailerStub) Send(context.Context, *domain.Invitation) (string, error) { return "sent", nil }
 
 func newTestAuth(identity *identityStub, passwords *passwordHasherStub, issuer *sessionIssuerStub) *AuthService {
 	return NewAuthService(&AuthDependencies{

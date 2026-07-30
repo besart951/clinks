@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"golang.org/x/oauth2"
@@ -19,8 +20,10 @@ type GoogleOIDCConfig struct {
 }
 
 type GoogleOIDC struct {
-	config GoogleOIDCConfig
-	oauth  oauth2.Config
+	config   GoogleOIDCConfig
+	oauth    oauth2.Config
+	mu       sync.RWMutex
+	provider *oidc.Provider
 }
 
 func NewGoogleOIDC(config GoogleOIDCConfig) *GoogleOIDC {
@@ -28,8 +31,9 @@ func NewGoogleOIDC(config GoogleOIDCConfig) *GoogleOIDC {
 		config: config,
 		oauth: oauth2.Config{
 			ClientID: config.ClientID, ClientSecret: config.ClientSecret, RedirectURL: config.CallbackURL,
+			// #nosec G101 -- Google OIDC protocol endpoints are public URLs, not credentials.
 			Endpoint: oauth2.Endpoint{AuthURL: "https://accounts.google.com/o/oauth2/v2/auth", TokenURL: "https://oauth2.googleapis.com/token"},
-			Scopes: []string{oidc.ScopeOpenID, "email"},
+			Scopes:   []string{oidc.ScopeOpenID, "email"},
 		},
 	}
 }
@@ -51,11 +55,11 @@ func (client *GoogleOIDC) Exchange(ctx context.Context, code, verifier, nonce st
 	if !ok {
 		return domain.ExternalIdentity{}, fmt.Errorf("google response does not contain an id token")
 	}
-	provider, err := oidc.NewProvider(ctx, googleIssuer)
+	oidcProvider, err := client.getProvider(ctx)
 	if err != nil {
-		return domain.ExternalIdentity{}, fmt.Errorf("discover google oidc provider: %w", err)
+		return domain.ExternalIdentity{}, err
 	}
-	idToken, err := provider.Verifier(&oidc.Config{ClientID: client.config.ClientID}).Verify(ctx, rawToken)
+	idToken, err := oidcProvider.Verifier(&oidc.Config{ClientID: client.config.ClientID}).Verify(ctx, rawToken)
 	if err != nil {
 		return domain.ExternalIdentity{}, fmt.Errorf("verify google id token: %w", err)
 	}
@@ -79,4 +83,26 @@ func (client *GoogleOIDC) Exchange(ctx context.Context, code, verifier, nonce st
 		return domain.ExternalIdentity{}, fmt.Errorf("parse google email: %w", err)
 	}
 	return domain.ExternalIdentity{Issuer: googleIssuer, Subject: domain.ExternalSubject(claims.Subject), Email: email}, nil
+}
+
+func (client *GoogleOIDC) getProvider(ctx context.Context) (*oidc.Provider, error) {
+	client.mu.RLock()
+	if client.provider != nil {
+		provider := client.provider
+		client.mu.RUnlock()
+		return provider, nil
+	}
+	client.mu.RUnlock()
+
+	client.mu.Lock()
+	defer client.mu.Unlock()
+	if client.provider != nil {
+		return client.provider, nil
+	}
+	provider, err := oidc.NewProvider(ctx, googleIssuer)
+	if err != nil {
+		return nil, fmt.Errorf("discover google oidc provider: %w", err)
+	}
+	client.provider = provider
+	return client.provider, nil
 }
