@@ -1,0 +1,100 @@
+services:
+  nginx:
+    image: ${WEB_IMAGE}
+    restart: unless-stopped
+    environment:
+      ADMIN_DOMAIN: ${ADMIN_DOMAIN}
+      PLANER_DOMAIN: ${PLANER_DOMAIN}
+      INFRA_DOMAIN: ${INFRA_DOMAIN}
+      API_DOMAIN: ${API_DOMAIN}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./tls:/etc/nginx/tls:ro
+    depends_on:
+      api:
+        condition: service_healthy
+    networks: [public, internal]
+
+  api:
+    image: ${API_IMAGE}
+    command: ["server"]
+    restart: unless-stopped
+    env_file: ${ENV_FILE:-.env}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "/app/clinks-server", "healthcheck"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+    networks: [internal]
+
+  worker:
+    image: ${API_IMAGE}
+    entrypoint: ["/app/clinks-worker"]
+    restart: unless-stopped
+    env_file: ${ENV_FILE:-.env}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "/app/clinks-worker", "healthcheck"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+    networks: [internal]
+
+  migrate:
+    image: ${API_IMAGE}
+    command: ["migrate"]
+    env_file: ${ENV_FILE:-.env}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [internal]
+
+  backup:
+    image: ${BACKUP_IMAGE}
+    profiles: ["maintenance"]
+    env_file: ${ENV_FILE:-.env}
+    environment:
+      PGHOST: postgres
+      PGPORT: "5432"
+      PGDATABASE: ${POSTGRES_DB}
+      PGUSER: ${POSTGRES_USER}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [internal]
+
+  postgres:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks: [internal]
+
+networks:
+  public: {}
+  internal:
+    internal: true
+
+volumes:
+  postgres-data: {}

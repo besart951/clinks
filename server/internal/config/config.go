@@ -18,6 +18,7 @@ type Config struct {
 	Auth      AuthConfig
 	Invites   InviteConfig
 	SMTP      SMTPConfig
+	OIDC      OIDCConfig
 	Bootstrap BootstrapConfig
 }
 
@@ -48,14 +49,28 @@ type AuthConfig struct {
 type InviteConfig struct {
 	PublicBaseURL string        `env:"INVITE_PUBLIC_BASE_URL" envDefault:"http://localhost:5174"`
 	TTL           time.Duration `env:"INVITE_TTL" envDefault:"168h"`
+	TokenSecret   string        `env:"INVITATION_TOKEN_SECRET,required"`
 }
 
 type SMTPConfig struct {
-	Host     string `env:"SMTP_HOST"`
-	Port     string `env:"SMTP_PORT" envDefault:"587"`
-	Username string `env:"SMTP_USERNAME"`
-	Password string `env:"SMTP_PASSWORD"`
-	From     string `env:"SMTP_FROM"`
+	Host       string `env:"SMTP_HOST"`
+	Port       string `env:"SMTP_PORT" envDefault:"587"`
+	Username   string `env:"SMTP_USERNAME"`
+	Password   string `env:"SMTP_PASSWORD"`
+	From       string `env:"SMTP_FROM"`
+	RequireTLS bool   `env:"SMTP_REQUIRE_TLS" envDefault:"true"`
+}
+
+type OIDCConfig struct {
+	GoogleClientID     string `env:"GOOGLE_OIDC_CLIENT_ID"`
+	GoogleClientSecret string `env:"GOOGLE_OIDC_CLIENT_SECRET"`
+	GoogleCallbackURL  string `env:"GOOGLE_OIDC_CALLBACK_URL"`
+	StateSecret        string `env:"OIDC_STATE_SECRET"`
+	SuccessURL         string `env:"OIDC_SUCCESS_URL"`
+}
+
+func (config OIDCConfig) Enabled() bool {
+	return config.GoogleClientID != ""
 }
 
 type BootstrapConfig struct {
@@ -96,8 +111,14 @@ func (config *Config) validate() error {
 	if config.Invites.TTL < 0 {
 		return errors.New("INVITE_TTL must not be negative")
 	}
+	if len(config.Invites.TokenSecret) < 32 || placeholder(config.Invites.TokenSecret) {
+		return errors.New("INVITATION_TOKEN_SECRET must contain at least 32 non-placeholder characters")
+	}
 	if config.SMTP.Host != "" && (config.SMTP.From == "" || config.SMTP.Port == "") {
 		return errors.New("SMTP_FROM and SMTP_PORT are required when SMTP_HOST is configured")
+	}
+	if config.OIDC.Enabled() && (config.OIDC.GoogleClientSecret == "" || config.OIDC.GoogleCallbackURL == "" || config.OIDC.SuccessURL == "" || len(config.OIDC.StateSecret) < 32 || placeholder(config.OIDC.StateSecret)) {
+		return errors.New("GOOGLE_OIDC_CLIENT_SECRET, GOOGLE_OIDC_CALLBACK_URL, OIDC_STATE_SECRET and OIDC_SUCCESS_URL are required when GOOGLE_OIDC_CLIENT_ID is configured")
 	}
 	return nil
 }

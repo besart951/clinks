@@ -24,19 +24,27 @@ type Application struct {
 	server *http.Server
 	pool   *pgxpool.Pool
 	auth   *service.AuthService
+	oidc   *authadapter.GoogleOIDC
+	oidcConfig http.OIDCConfig
 }
 
 func NewApplication(
 	server *http.Server,
 	pool *pgxpool.Pool,
 	auth *service.AuthService,
+	oidc *authadapter.GoogleOIDC,
+	oidcConfig http.OIDCConfig,
 ) *Application {
-	return &Application{server: server, pool: pool, auth: auth}
+	return &Application{server: server, pool: pool, auth: auth, oidc: oidc, oidcConfig: oidcConfig}
 }
 
 func (application *Application) Run(ctx context.Context, bootstrap appconfig.BootstrapConfig, httpConfig *appconfig.HTTPConfig) error {
 	defer application.pool.Close()
+	return NewServer(httpConfig, application.server.HandlerWithOIDC(application.oidc, application.oidcConfig)).Run(ctx)
+}
 
+func (application *Application) MigrateAndBootstrap(ctx context.Context, bootstrap appconfig.BootstrapConfig) error {
+	defer application.pool.Close()
 	if err := postgres.Migrate(ctx, application.pool); err != nil {
 		return fmt.Errorf("apply migrations: %w", err)
 	}
@@ -45,8 +53,12 @@ func (application *Application) Run(ctx context.Context, bootstrap appconfig.Boo
 	); err != nil {
 		return fmt.Errorf("bootstrap administrator: %w", err)
 	}
+	return nil
+}
 
-	return NewServer(httpConfig, application.server.Handler()).Run(ctx)
+func (application *Application) Healthcheck(ctx context.Context) error {
+	defer application.pool.Close()
+	return application.pool.Ping(ctx)
 }
 
 func poolConfig(settings *appconfig.Config) postgres.PoolConfig {
@@ -73,8 +85,20 @@ func inviteTTL(settings *appconfig.Config) time.Duration {
 	return settings.Invites.TTL
 }
 
+func invitationTokenConfig(settings *appconfig.Config) authadapter.InvitationTokenConfig {
+	return authadapter.InvitationTokenConfig{Secret: settings.Invites.TokenSecret}
+}
+
+func googleOIDCConfig(settings *appconfig.Config) authadapter.GoogleOIDCConfig {
+	return authadapter.GoogleOIDCConfig{ClientID: settings.OIDC.GoogleClientID, ClientSecret: settings.OIDC.GoogleClientSecret, CallbackURL: settings.OIDC.GoogleCallbackURL}
+}
+
+func httpOIDCConfig(settings *appconfig.Config) http.OIDCConfig {
+	return http.OIDCConfig{StateSecret: settings.OIDC.StateSecret, SuccessURL: settings.OIDC.SuccessURL}
+}
+
 func smtpConfig(settings *appconfig.Config) *mailadapter.SMTPConfig {
-	return &mailadapter.SMTPConfig{Host: settings.SMTP.Host, Port: settings.SMTP.Port, Username: settings.SMTP.Username, Password: settings.SMTP.Password, From: settings.SMTP.From}
+	return &mailadapter.SMTPConfig{Host: settings.SMTP.Host, Port: settings.SMTP.Port, Username: settings.SMTP.Username, Password: settings.SMTP.Password, From: settings.SMTP.From, RequireTLS: settings.SMTP.RequireTLS}
 }
 
 func sessionConfig(settings *appconfig.Config) authadapter.SessionConfig {
@@ -86,18 +110,19 @@ func sessionConfig(settings *appconfig.Config) authadapter.SessionConfig {
 
 func newAuthService(
 	identities ports.IdentityRepository,
+	federation ports.ExternalIdentityRepository,
 	provisioner ports.TenantProvisioner,
 	memberships ports.MembershipRepository,
 	passwords ports.PasswordHasher,
 	sessions ports.SessionIssuer,
 	audit ports.AuditLog,
-	mailer ports.InvitationMailer,
+	tokens ports.InvitationTokenSigner,
 	inviteBaseURL string,
 	inviteTTL time.Duration,
 ) *service.AuthService {
 	return service.NewAuthService(&service.AuthDependencies{
-		Identities: identities, Provisioner: provisioner, Memberships: memberships, Passwords: passwords,
-		Sessions: sessions, Audit: audit, Mailer: mailer, InviteBaseURL: inviteBaseURL, InviteTTL: inviteTTL,
+		Identities: identities, Federation: federation, Provisioner: provisioner, Memberships: memberships, Passwords: passwords,
+		Sessions: sessions, Audit: audit, Tokens: tokens, InviteBaseURL: inviteBaseURL, InviteTTL: inviteTTL,
 	})
 }
 

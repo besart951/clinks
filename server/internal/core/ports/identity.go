@@ -2,6 +2,7 @@ package ports
 
 import (
 	"context"
+	"time"
 
 	"github.com/besartmorina/clinks/server/internal/core/domain"
 )
@@ -11,6 +12,11 @@ type IdentityRepository interface {
 	FindByEmail(context.Context, domain.Email) (domain.User, domain.PasswordHash, error)
 	FindByID(context.Context, domain.UserID) (domain.User, error)
 	InvalidateSession(context.Context, domain.User) error
+}
+
+type ExternalIdentityRepository interface {
+	FindExternalUser(context.Context, domain.ExternalIdentity) (domain.User, error)
+	LinkExternalIdentity(context.Context, domain.UserID, domain.ExternalIdentity) error
 }
 
 type TenantProvisioner interface {
@@ -28,6 +34,7 @@ type MembershipRepository interface {
 	CreateInvitation(context.Context, *domain.Invitation) (domain.Invitation, error)
 	FindInvitation(context.Context, domain.InvitationHash) (domain.Invitation, error)
 	AcceptInvitation(context.Context, *domain.InvitationAcceptance) (domain.User, domain.Membership, error)
+	AcceptExternalInvitation(context.Context, *domain.InvitationAcceptance, domain.ExternalIdentity) (domain.User, domain.Membership, error)
 }
 
 type PasswordHasher interface {
@@ -47,4 +54,16 @@ type AuditLog interface {
 
 type InvitationMailer interface {
 	Send(context.Context, *domain.Invitation) (string, error)
+}
+
+type InvitationTokenSigner interface {
+	NewInvitationID() (domain.InvitationID, error)
+	Token(domain.Invitation) (string, error)
+}
+
+type OutboxRepository interface {
+	ClaimInvitationEmail(context.Context) (domain.OutboxJob, domain.Invitation, error)
+	Complete(context.Context, domain.OutboxJobID) error
+	Retry(context.Context, domain.OutboxJobID, int, error) error
+	AnonymizeExpiredInvitations(context.Context, time.Time) (int, error)
 }

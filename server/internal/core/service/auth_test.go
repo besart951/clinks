@@ -17,6 +17,15 @@ type identityStub struct {
 	currentErr error
 }
 
+type externalIdentityStub struct{}
+
+func (externalIdentityStub) FindExternalUser(context.Context, domain.ExternalIdentity) (domain.User, error) {
+	return domain.User{}, domain.NewError(domain.ErrorUnauthorized)
+}
+func (externalIdentityStub) LinkExternalIdentity(context.Context, domain.UserID, domain.ExternalIdentity) error {
+	return nil
+}
+
 func (stub *identityStub) EnsureSuperAdmin(context.Context, domain.SuperAdminBootstrap) error {
 	return nil
 }
@@ -58,6 +67,10 @@ func (membershipStub) AcceptInvitation(context.Context, *domain.InvitationAccept
 	return domain.User{}, domain.Membership{}, nil
 }
 
+func (membershipStub) AcceptExternalInvitation(context.Context, *domain.InvitationAcceptance, domain.ExternalIdentity) (domain.User, domain.Membership, error) {
+	return domain.User{}, domain.Membership{}, nil
+}
+
 type passwordHasherStub struct {
 	verifiedHash domain.PasswordHash
 	verified     bool
@@ -88,8 +101,8 @@ func (mailerStub) Send(context.Context, *domain.Invitation) (string, error) { re
 
 func newTestAuth(identity *identityStub, passwords *passwordHasherStub, issuer *sessionIssuerStub) *AuthService {
 	return NewAuthService(&AuthDependencies{
-		Identities: identity, Provisioner: provisionerStub{}, Memberships: membershipStub{}, Passwords: passwords,
-		Sessions: issuer, Audit: auditStub{}, Mailer: mailerStub{}, InviteBaseURL: "https://app.example", InviteTTL: time.Hour,
+		Identities: identity, Federation: externalIdentityStub{}, Provisioner: provisionerStub{}, Memberships: membershipStub{}, Passwords: passwords,
+		Sessions: issuer, Audit: auditStub{}, InviteBaseURL: "https://app.example", InviteTTL: time.Hour,
 	})
 }
 

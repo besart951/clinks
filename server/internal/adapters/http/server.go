@@ -33,6 +33,8 @@ type Server struct {
 	readinessTimeout time.Duration
 	browserPolicy    browserPolicy
 	cookie           CookieConfig
+	oidcStateSecret  string
+	authLimiter      *identityRateLimiter
 }
 
 type sessionService interface {
@@ -94,24 +96,47 @@ func NewServer(sessions sessionService, registration registrationService, invita
 	if config.Cookie.Name == "" {
 		config.Cookie.Name = sessionCookieName
 	}
-	return &Server{sessions: sessions, registration: registration, invitations: invitations, tenants: tenants, localizationEdit: localizationEdit, audit: audit, localization: localization, translator: translator, readiness: readiness, readinessTimeout: config.ReadinessTimeout, browserPolicy: newBrowserPolicy(config.CORSOrigins), cookie: config.Cookie}
+	return &Server{sessions: sessions, registration: registration, invitations: invitations, tenants: tenants, localizationEdit: localizationEdit, audit: audit, localization: localization, translator: translator, readiness: readiness, readinessTimeout: config.ReadinessTimeout, browserPolicy: newBrowserPolicy(config.CORSOrigins), cookie: config.Cookie, authLimiter: newIdentityRateLimiter(5, 10*time.Minute)}
 }
 
 func (server *Server) Handler() stdhttp.Handler {
+	return server.handler(nil, OIDCConfig{})
+}
+
+func (server *Server) HandlerWithOIDC(client oidcClient, config OIDCConfig) stdhttp.Handler {
+	server.oidcStateSecret = config.StateSecret
+	return server.handler(client, config)
+}
+
+func (server *Server) handler(client oidcClient, oidcConfig OIDCConfig) stdhttp.Handler {
 	router := stdhttp.NewServeMux()
 	router.HandleFunc("GET /healthz", server.health)
 	router.HandleFunc("GET /readyz", server.ready)
+	if client != nil && client.Enabled() {
+		router.HandleFunc("GET /auth/oidc/google/start", server.googleOIDCStart(client, oidcConfig))
+		router.HandleFunc("GET /auth/oidc/google/callback", server.googleOIDCCallback(client, oidcConfig))
+	}
 	path, rpcHandler := clinksv1connect.NewClinksServiceHandler(server)
 	router.Handle(path, rpcHandler)
 	return server.browserPolicy.protect(router)
 }
 
 func (server *Server) Login(ctx context.Context, request *connect.Request[clinksv1.CredentialsRequest]) (*connect.Response[clinksv1.Session], error) {
+	if !server.authLimiter.allow("password:" + request.Msg.GetEmail()) {
+		return server.sessionResponse(ctx, request.Header(), new(domain.Session), domain.NewError(domain.ErrorUnauthorized))
+	}
 	session, err := server.sessions.Login(ctx, request.Msg.GetEmail(), request.Msg.GetPassword())
-	return server.sessionResponse(ctx, request.Header(), &session, err)
+	response, responseErr := server.sessionResponse(ctx, request.Header(), &session, err)
+	if responseErr == nil && server.oidcStateSecret != "" {
+		response.Header().Add("Set-Cookie", server.passwordVerifiedCookie(session.Token).String())
+	}
+	return response, responseErr
 }
 
 func (server *Server) LoginSuperAdmin(ctx context.Context, request *connect.Request[clinksv1.CredentialsRequest]) (*connect.Response[clinksv1.Session], error) {
+	if !server.authLimiter.allow("password:" + request.Msg.GetEmail()) {
+		return server.sessionResponse(ctx, request.Header(), new(domain.Session), domain.NewError(domain.ErrorUnauthorized))
+	}
 	session, err := server.sessions.LoginSuperAdmin(ctx, request.Msg.GetEmail(), request.Msg.GetPassword())
 	return server.sessionResponse(ctx, request.Header(), &session, err)
 }
@@ -127,6 +152,9 @@ func (server *Server) Logout(ctx context.Context, request *connect.Request[clink
 	}
 	response := connect.NewResponse(&clinksv1.Empty{})
 	response.Header().Add("Set-Cookie", server.sessionCookie("").String())
+	if server.oidcStateSecret != "" {
+		response.Header().Add("Set-Cookie", server.passwordVerifiedCookie("").String())
+	}
 	return response, nil
 }
 

@@ -23,7 +23,7 @@
     "go:test": "go -C server test -race -shuffle=on -count=1 ./...",
     "go:security": "go -C server tool golangci-lint run --enable-only gosec ./...",
     "go:vuln": "go -C server tool govulncheck ./...",
-    "go:build": "go -C server build -trimpath ./cmd/server",
+    "go:build": "go -C server build -trimpath ./cmd/server ./cmd/worker",
     "go:generate": "go -C server generate ./... && go -C server mod tidy",
     "go:check": "pnpm go:mod && pnpm go:format:check && pnpm go:lint && pnpm go:vet && pnpm go:test && pnpm go:security && pnpm go:vuln && pnpm go:build",
     "verify:push": "pnpm format:frontend:check && pnpm go:format:check && pnpm build && pnpm go:build",

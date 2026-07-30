@@ -1,0 +1,72 @@
+limit_req_zone $binary_remote_addr zone=auth_limit:10m rate=10r/m;
+
+map $http_x_forwarded_proto $hsts_value {
+    default "max-age=63072000; includeSubDomains";
+}
+
+server {
+    listen 80;
+    server_name ${ADMIN_DOMAIN} ${PLANER_DOMAIN} ${INFRA_DOMAIN} ${API_DOMAIN};
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name ${ADMIN_DOMAIN};
+    ssl_certificate /etc/nginx/tls/fullchain.pem;
+    ssl_certificate_key /etc/nginx/tls/privkey.pem;
+    add_header Strict-Transport-Security $hsts_value always;
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy strict-origin-when-cross-origin always;
+    root /usr/share/nginx/admin;
+    location / { try_files $uri $uri/ /200.html; }
+}
+
+server {
+    listen 443 ssl;
+    server_name ${PLANER_DOMAIN};
+    ssl_certificate /etc/nginx/tls/fullchain.pem;
+    ssl_certificate_key /etc/nginx/tls/privkey.pem;
+    add_header Strict-Transport-Security $hsts_value always;
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy strict-origin-when-cross-origin always;
+    root /usr/share/nginx/planer;
+    location / { try_files $uri $uri/ /200.html; }
+}
+
+server {
+    listen 443 ssl;
+    server_name ${INFRA_DOMAIN};
+    ssl_certificate /etc/nginx/tls/fullchain.pem;
+    ssl_certificate_key /etc/nginx/tls/privkey.pem;
+    add_header Strict-Transport-Security $hsts_value always;
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy strict-origin-when-cross-origin always;
+    root /usr/share/nginx/infra;
+    location / { try_files $uri $uri/ /200.html; }
+}
+
+server {
+    listen 443 ssl;
+    server_name ${API_DOMAIN};
+    ssl_certificate /etc/nginx/tls/fullchain.pem;
+    ssl_certificate_key /etc/nginx/tls/privkey.pem;
+    add_header Strict-Transport-Security $hsts_value always;
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy strict-origin-when-cross-origin always;
+    location ~ ^/auth/oidc/(google/start|google/callback)$ {
+        limit_req zone=auth_limit burst=20 nodelay;
+        proxy_pass http://api:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+    location / {
+        proxy_pass http://api:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}

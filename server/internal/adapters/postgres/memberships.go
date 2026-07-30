@@ -54,12 +54,14 @@ func (repository *MembershipRepository) FindActiveMembership(ctx context.Context
 }
 
 func (repository *MembershipRepository) CreateInvitation(ctx context.Context, invitation *domain.Invitation) (domain.Invitation, error) {
-	id, err := newUUID()
-	if err != nil {
-		return domain.Invitation{}, err
+	if invitation.ID == "" {
+		id, err := newUUID()
+		if err != nil {
+			return domain.Invitation{}, err
+		}
+		invitation.ID = domain.InvitationID(id)
 	}
-	invitation.ID = domain.InvitationID(id)
-	err = WithTenantTx(ctx, repository.pool, invitation.TenantID, func(tx pgx.Tx) error {
+	err := WithTenantTx(ctx, repository.pool, invitation.TenantID, func(tx pgx.Tx) error {
 		_, execErr := tx.Exec(ctx, `INSERT INTO invitations
 			(id, tenant_id, email, role, token_hash, expires_at, created_by)
 			VALUES ($1, $2, $3, $4, $5, $6, $7)`, invitation.ID, invitation.TenantID, invitation.Email, invitation.Role, invitation.TokenHash, invitation.ExpiresAt, invitation.CreatedBy)
@@ -67,7 +69,19 @@ func (repository *MembershipRepository) CreateInvitation(ctx context.Context, in
 			return fmt.Errorf("create invitation: %w", execErr)
 		}
 		event := domain.AuditEvent{ActorID: &invitation.CreatedBy, TenantID: &invitation.TenantID, Action: "invitation.created", Target: string(invitation.Email)}
-		return insertAuditEvent(ctx, tx, &event)
+		if auditErr := insertAuditEvent(ctx, tx, &event); auditErr != nil {
+			return auditErr
+		}
+		jobID, idErr := newUUID()
+		if idErr != nil {
+			return idErr
+		}
+		_, execErr = tx.Exec(ctx, `INSERT INTO outbox_jobs (id, tenant_id, kind, invitation_id)
+			VALUES ($1, $2, 'invitation.email', $3)`, jobID, invitation.TenantID, invitation.ID)
+		if execErr != nil {
+			return fmt.Errorf("enqueue invitation email: %w", execErr)
+		}
+		return nil
 	})
 	return *invitation, err
 }
@@ -95,6 +109,14 @@ func (repository *MembershipRepository) FindInvitation(ctx context.Context, hash
 }
 
 func (repository *MembershipRepository) AcceptInvitation(ctx context.Context, acceptance *domain.InvitationAcceptance) (domain.User, domain.Membership, error) {
+	return repository.acceptInvitation(ctx, acceptance, nil)
+}
+
+func (repository *MembershipRepository) AcceptExternalInvitation(ctx context.Context, acceptance *domain.InvitationAcceptance, identity domain.ExternalIdentity) (domain.User, domain.Membership, error) {
+	return repository.acceptInvitation(ctx, acceptance, &identity)
+}
+
+func (repository *MembershipRepository) acceptInvitation(ctx context.Context, acceptance *domain.InvitationAcceptance, identity *domain.ExternalIdentity) (domain.User, domain.Membership, error) {
 	var user domain.User
 	var membership domain.Membership
 	err := withSystemTx(ctx, repository.pool, func(tx pgx.Tx) error {
@@ -108,6 +130,15 @@ func (repository *MembershipRepository) AcceptInvitation(ctx context.Context, ac
 		user, err = acceptIdentity(ctx, tx, acceptance)
 		if err != nil {
 			return err
+		}
+		if identity != nil {
+			if identity.Email != user.Email {
+				return domain.NewError(domain.ErrorInviteEmailMismatch)
+			}
+			if _, err = tx.Exec(ctx, `INSERT INTO external_identities (issuer, subject, user_id, email)
+				VALUES ($1, $2, $3, $4)`, identity.Issuer, identity.Subject, user.ID, identity.Email); err != nil {
+				return fmt.Errorf("link invitation external identity: %w", err)
+			}
 		}
 		membership, err = createMembership(ctx, tx, &invitation, user.ID)
 		if err != nil {
@@ -167,9 +198,6 @@ func acceptIdentity(ctx context.Context, tx pgx.Tx, acceptance *domain.Invitatio
 	if acceptance.User.ID != "" {
 		return acceptance.User, nil
 	}
-	if acceptance.Password == nil {
-		return domain.User{}, domain.NewError(domain.ErrorInternal)
-	}
 	id, err := newUUID()
 	if err != nil {
 		return domain.User{}, err
@@ -177,8 +205,12 @@ func acceptIdentity(ctx context.Context, tx pgx.Tx, acceptance *domain.Invitatio
 	user := acceptance.User
 	user.ID = domain.UserID(id)
 	user.Role = domain.RoleUser
+	var password any
+	if acceptance.Password != nil {
+		password = *acceptance.Password
+	}
 	if _, err = tx.Exec(ctx, `INSERT INTO users (id, tenant_id, email, password_hash, role, global_role, locale)
-		VALUES ($1, NULL, $2, $3, $4, $5, $6)`, user.ID, user.Email, *acceptance.Password, domain.RoleUser, domain.RoleUser, user.Locale); err != nil {
+		VALUES ($1, NULL, $2, $3, $4, $5, $6)`, user.ID, user.Email, password, domain.RoleUser, domain.RoleUser, user.Locale); err != nil {
 		return domain.User{}, mapIdentityDatabaseError(err)
 	}
 	return user, nil

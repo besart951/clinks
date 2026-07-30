@@ -11,6 +11,7 @@ func TestConfigValidate(t *testing.T) {
 	valid := Config{
 		Database:  DatabaseConfig{MinConns: 2, MaxConns: 20},
 		Auth:      AuthConfig{JWTSecret: strings.Repeat("a", 32)},
+		Invites:   InviteConfig{TokenSecret: strings.Repeat("b", 32)},
 		Bootstrap: BootstrapConfig{Password: "a secure password"},
 	}
 	tests := []struct {
@@ -74,6 +75,7 @@ func TestLoad(t *testing.T) {
 	t.Setenv("JWT_ISSUER", "test-issuer")
 	t.Setenv("JWT_AUDIENCE", "test-audience")
 	t.Setenv("JWT_TTL", "20m")
+	t.Setenv("INVITATION_TOKEN_SECRET", strings.Repeat("b", 32))
 	t.Setenv("ADMIN_EMAIL", "admin@example.com")
 	t.Setenv("ADMIN_PASSWORD", "a secure password")
 	t.Setenv("ADMIN_LOCALE", "de-CH")

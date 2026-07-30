@@ -1,0 +1,9 @@
+[Unit]
+Description=Create an encrypted offsite Clinks PostgreSQL backup
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/clinks
+ExecStart=/usr/bin/docker compose --env-file .env -f docker-compose.production.yml --profile maintenance run --rm backup

@@ -3,7 +3,6 @@ package service
 
 import (
 	"context"
-	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
 	"errors"
@@ -16,35 +15,87 @@ import (
 
 type AuthService struct {
 	identities    ports.IdentityRepository
+	federation    ports.ExternalIdentityRepository
 	provisioner   ports.TenantProvisioner
 	memberships   ports.MembershipRepository
 	passwords     ports.PasswordHasher
 	sessions      ports.SessionIssuer
 	audit         ports.AuditLog
-	mailer        ports.InvitationMailer
+	tokens        ports.InvitationTokenSigner
 	inviteBaseURL string
 	inviteTTL     time.Duration
 }
 
 type AuthDependencies struct {
 	Identities    ports.IdentityRepository
+	Federation    ports.ExternalIdentityRepository
 	Provisioner   ports.TenantProvisioner
 	Memberships   ports.MembershipRepository
 	Passwords     ports.PasswordHasher
 	Sessions      ports.SessionIssuer
 	Audit         ports.AuditLog
-	Mailer        ports.InvitationMailer
+	Tokens        ports.InvitationTokenSigner
 	InviteBaseURL string
 	InviteTTL     time.Duration
 }
 
 func NewAuthService(dependencies *AuthDependencies) *AuthService {
 	return &AuthService{
-		identities: dependencies.Identities, provisioner: dependencies.Provisioner,
+		identities: dependencies.Identities, federation: dependencies.Federation, provisioner: dependencies.Provisioner,
 		memberships: dependencies.Memberships, passwords: dependencies.Passwords,
-		sessions: dependencies.Sessions, audit: dependencies.Audit, mailer: dependencies.Mailer,
+		sessions: dependencies.Sessions, audit: dependencies.Audit,
+		tokens:        dependencies.Tokens,
 		inviteBaseURL: strings.TrimRight(dependencies.InviteBaseURL, "/"), inviteTTL: dependencies.InviteTTL,
 	}
+}
+
+func (service *AuthService) LoginExternal(ctx context.Context, identity domain.ExternalIdentity) (domain.Session, error) {
+	user, err := service.federation.FindExternalUser(ctx, identity)
+	if err != nil || user.Role.IsSuperAdmin() {
+		return domain.Session{}, domain.NewError(domain.ErrorUnauthorized)
+	}
+	session, err := service.sessionForUser(ctx, user, nil)
+	if err != nil {
+		return domain.Session{}, err
+	}
+	event := auditEvent(user.ID, tenantID(session.ActiveTenant), "session.oidc_login", string(user.Email))
+	if auditErr := service.audit.Append(ctx, &event); auditErr != nil {
+		return domain.Session{}, auditErr
+	}
+	return service.issue(&session)
+}
+
+func (service *AuthService) LinkExternalIdentity(ctx context.Context, token string, identity domain.ExternalIdentity) error {
+	session, err := service.CurrentSession(ctx, token)
+	if err != nil || session.User.Role.IsSuperAdmin() || session.User.Email != identity.Email {
+		return domain.NewError(domain.ErrorUnauthorized)
+	}
+	if err = service.federation.LinkExternalIdentity(ctx, session.User.ID, identity); err != nil {
+		return domain.NewError(domain.ErrorInternal)
+	}
+	event := auditEvent(session.User.ID, tenantID(session.ActiveTenant), "identity.oidc_linked", string(identity.Issuer))
+	return service.audit.Append(ctx, &event)
+}
+
+func (service *AuthService) AcceptExternalInvitation(ctx context.Context, token string, identity domain.ExternalIdentity, locale domain.Locale) (domain.Session, error) {
+	invitation, err := service.memberships.FindInvitation(ctx, invitationHash(token))
+	if err != nil {
+		return domain.Session{}, err
+	}
+	if invitation.Email != identity.Email {
+		return domain.Session{}, domain.NewError(domain.ErrorInviteEmailMismatch)
+	}
+	if _, _, err = service.identities.FindByEmail(ctx, identity.Email); err == nil {
+		return domain.Session{}, domain.NewError(domain.ErrorUnauthorized)
+	} else if !isInvalidCredentials(err) {
+		return domain.Session{}, domain.NewError(domain.ErrorInternal)
+	}
+	acceptance := domain.InvitationAcceptance{Invitation: invitation, User: domain.User{Email: identity.Email, Role: domain.RoleUser, Locale: locale, SessionVersion: 1}}
+	user, membership, err := service.memberships.AcceptExternalInvitation(ctx, &acceptance, identity)
+	if err != nil {
+		return domain.Session{}, domain.NewError(domain.ErrorUnauthorized)
+	}
+	return service.issue(&domain.Session{User: user, ActiveTenant: &membership.Tenant, Memberships: []domain.Membership{membership}})
 }
 
 func (service *AuthService) Login(ctx context.Context, email, password string) (domain.Session, error) {
@@ -141,10 +192,7 @@ func (service *AuthService) CreateInvitation(ctx context.Context, token, rawEmai
 	if err != nil {
 		return domain.Invitation{}, err
 	}
-	invitation.DeliveryStatus, err = service.mailer.Send(ctx, &invitation)
-	if err != nil {
-		invitation.DeliveryStatus = "failed"
-	}
+	invitation.DeliveryStatus = "queued"
 	return invitation, nil
 }
 
@@ -249,19 +297,18 @@ func (service *AuthService) issue(session *domain.Session) (domain.Session, erro
 }
 
 func (service *AuthService) newInvitation(actor domain.UserID, tenant domain.TenantID, email domain.Email, role domain.Role) (domain.Invitation, error) {
-	raw, err := randomToken()
+	id, err := service.tokens.NewInvitationID()
 	if err != nil {
 		return domain.Invitation{}, domain.NewError(domain.ErrorInternal)
 	}
-	return domain.Invitation{TenantID: tenant, Email: email, Role: role, CreatedBy: actor, TokenHash: invitationHash(raw), ExpiresAt: time.Now().Add(service.inviteTTL), Acceptance: service.inviteBaseURL + "/invite?token=" + raw}, nil
-}
-
-func randomToken() (string, error) {
-	value := make([]byte, 32)
-	if _, err := rand.Read(value); err != nil {
-		return "", err
+	invitation := domain.Invitation{ID: id, TenantID: tenant, Email: email, Role: role, CreatedBy: actor, ExpiresAt: time.Now().Add(service.inviteTTL)}
+	raw, err := service.tokens.Token(invitation)
+	if err != nil {
+		return domain.Invitation{}, domain.NewError(domain.ErrorInternal)
 	}
-	return base64.RawURLEncoding.EncodeToString(value), nil
+	invitation.TokenHash = invitationHash(raw)
+	invitation.Acceptance = service.inviteBaseURL + "/invite?token=" + raw
+	return invitation, nil
 }
 
 func invitationHash(token string) domain.InvitationHash {

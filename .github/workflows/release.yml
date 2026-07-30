@@ -1,0 +1,102 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: production-release
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/${{ github.repository }}
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    outputs:
+      api_digest: ${{ steps.api.outputs.digest }}
+      web_digest: ${{ steps.web.outputs.digest }}
+      backup_digest: ${{ steps.backup.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: api
+        uses: docker/build-push-action@v6
+        with:
+          context: server
+          push: true
+          tags: ${{ env.IMAGE_PREFIX }}/api:${{ github.ref_name }}
+      - id: web
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/web.Dockerfile
+          build-args: PUBLIC_API_BASE_URL=https://${{ vars.API_DOMAIN }}
+          push: true
+          tags: ${{ env.IMAGE_PREFIX }}/web:${{ github.ref_name }}
+      - id: backup
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/backup.Dockerfile
+          push: true
+          tags: ${{ env.IMAGE_PREFIX }}/backup:${{ github.ref_name }}
+
+  scan:
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: aquasecurity/trivy-action@0.33.1
+        with:
+          image-ref: ${{ env.IMAGE_PREFIX }}/api@${{ needs.publish.outputs.api_digest }}
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"
+      - uses: aquasecurity/trivy-action@0.33.1
+        with:
+          image-ref: ${{ env.IMAGE_PREFIX }}/web@${{ needs.publish.outputs.web_digest }}
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"
+
+  deploy:
+    needs: [publish, scan]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v6
+      - uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.VPS_DEPLOY_SSH_KEY }}
+      - name: Install production-only Compose configuration
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+        run: |
+          test -n "$VPS_HOST"
+          test -n "$VPS_USER"
+          ssh -o StrictHostKeyChecking=yes "$VPS_USER@$VPS_HOST" 'mkdir -p /opt/clinks'
+          scp -o StrictHostKeyChecking=yes deploy/docker-compose.production.yml deploy/deploy.sh "$VPS_USER@$VPS_HOST:/opt/clinks/"
+          scp -o StrictHostKeyChecking=yes -r deploy/nginx "$VPS_USER@$VPS_HOST:/opt/clinks/"
+          ssh -o StrictHostKeyChecking=yes "$VPS_USER@$VPS_HOST" 'chmod 0755 /opt/clinks/deploy.sh'
+      - name: Migrate and deploy immutable images
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          API_IMAGE: ${{ env.IMAGE_PREFIX }}/api@${{ needs.publish.outputs.api_digest }}
+          WEB_IMAGE: ${{ env.IMAGE_PREFIX }}/web@${{ needs.publish.outputs.web_digest }}
+          BACKUP_IMAGE: ${{ env.IMAGE_PREFIX }}/backup@${{ needs.publish.outputs.backup_digest }}
+        run: |
+          test -n "$VPS_HOST"
+          test -n "$VPS_USER"
+          ssh -o StrictHostKeyChecking=yes "$VPS_USER@$VPS_HOST" "API_IMAGE='$API_IMAGE' WEB_IMAGE='$WEB_IMAGE' BACKUP_IMAGE='$BACKUP_IMAGE' /opt/clinks/deploy.sh"

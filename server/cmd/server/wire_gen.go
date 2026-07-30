@@ -29,17 +29,21 @@ func InitializeApplication(contextContext context.Context, configConfig *config.
 		return nil, err
 	}
 	userRepository := postgres.NewUserRepository(pool)
+	externalIdentityRepository := postgres.NewExternalIdentityRepository(pool)
 	tenantProvisioner := postgres.NewTenantProvisioner(pool)
 	membershipRepository := postgres.NewMembershipRepository(pool)
 	passwordHasher := security.NewPasswordHasher()
 	authSessionConfig := sessionConfig(configConfig)
 	sessionIssuer := auth.NewSessionIssuer(authSessionConfig)
 	auditRepository := postgres.NewAuditRepository(pool)
-	mailSMTPConfig := smtpConfig(configConfig)
-	smtpMailer := mail.NewSMTPMailer(mailSMTPConfig)
+	authInvitationTokenConfig := invitationTokenConfig(configConfig)
+	invitationTokenSigner, err := auth.NewInvitationTokenSigner(authInvitationTokenConfig)
+	if err != nil {
+		return nil, err
+	}
 	string2 := inviteBaseURL(configConfig)
 	duration := inviteTTL(configConfig)
-	authService := newAuthService(userRepository, tenantProvisioner, membershipRepository, passwordHasher, sessionIssuer, auditRepository, smtpMailer, string2, duration)
+	authService := newAuthService(userRepository, externalIdentityRepository, tenantProvisioner, membershipRepository, passwordHasher, sessionIssuer, auditRepository, invitationTokenSigner, string2, duration)
 	tenantRepository := postgres.NewTenantRepository(pool)
 	localizationRepository := postgres.NewLocalizationRepository(pool)
 	productCatalog := localization.NewProductCatalog(localizationRepository)
@@ -49,7 +53,10 @@ func InitializeApplication(contextContext context.Context, configConfig *config.
 	readiness := postgres.NewReadiness(pool)
 	serverConfig := httpServerConfig(configConfig)
 	server := newHTTPServer(authService, adminService, i18nService, translator, readiness, serverConfig)
-	application := NewApplication(server, pool, authService)
+	authGoogleOIDCConfig := googleOIDCConfig(configConfig)
+	googleOIDC := auth.NewGoogleOIDC(authGoogleOIDCConfig)
+	oidcConfig := httpOIDCConfig(configConfig)
+	application := NewApplication(server, pool, authService, googleOIDC, oidcConfig)
 	return application, nil
 }
 
@@ -58,7 +65,10 @@ func InitializeApplication(contextContext context.Context, configConfig *config.
 var providerSet = wire.NewSet(
 	poolConfig,
 	httpServerConfig,
-	sessionConfig, postgres.NewPool, postgres.NewUserRepository, postgres.NewTenantProvisioner, postgres.NewTenantRepository, postgres.NewMembershipRepository, postgres.NewAuditRepository, postgres.NewLocalizationRepository, localization.NewProductCatalog, postgres.NewReadiness, wire.Bind(new(ports.IdentityRepository), new(*postgres.UserRepository)), wire.Bind(new(ports.TenantProvisioner), new(*postgres.TenantProvisioner)), wire.Bind(new(ports.TenantRepository), new(*postgres.TenantRepository)), wire.Bind(new(ports.MembershipRepository), new(*postgres.MembershipRepository)), wire.Bind(new(ports.AuditLog), new(*postgres.AuditRepository)), wire.Bind(new(ports.LocalizationOverrides), new(*postgres.LocalizationRepository)), wire.Bind(new(ports.LocalizationCatalog), new(*localization.ProductCatalog)), wire.Bind(new(ports.LocalizationEditor), new(*postgres.LocalizationRepository)), wire.Bind(new(ports.ReadinessChecker), new(*postgres.Readiness)), security.NewPasswordHasher, wire.Bind(new(ports.PasswordHasher), new(*security.PasswordHasher)), auth.NewSessionIssuer, wire.Bind(new(ports.SessionIssuer), new(*auth.SessionIssuer)), smtpConfig, mail.NewSMTPMailer, wire.Bind(new(ports.InvitationMailer), new(*mail.SMTPMailer)), inviteBaseURL,
+	sessionConfig, postgres.NewPool, postgres.NewUserRepository, postgres.NewExternalIdentityRepository, postgres.NewTenantProvisioner, postgres.NewTenantRepository, postgres.NewMembershipRepository, postgres.NewAuditRepository, postgres.NewLocalizationRepository, localization.NewProductCatalog, postgres.NewReadiness, wire.Bind(new(ports.IdentityRepository), new(*postgres.UserRepository)), wire.Bind(new(ports.ExternalIdentityRepository), new(*postgres.ExternalIdentityRepository)), wire.Bind(new(ports.TenantProvisioner), new(*postgres.TenantProvisioner)), wire.Bind(new(ports.TenantRepository), new(*postgres.TenantRepository)), wire.Bind(new(ports.MembershipRepository), new(*postgres.MembershipRepository)), wire.Bind(new(ports.AuditLog), new(*postgres.AuditRepository)), wire.Bind(new(ports.LocalizationOverrides), new(*postgres.LocalizationRepository)), wire.Bind(new(ports.LocalizationCatalog), new(*localization.ProductCatalog)), wire.Bind(new(ports.LocalizationEditor), new(*postgres.LocalizationRepository)), wire.Bind(new(ports.ReadinessChecker), new(*postgres.Readiness)), security.NewPasswordHasher, wire.Bind(new(ports.PasswordHasher), new(*security.PasswordHasher)), auth.NewSessionIssuer, wire.Bind(new(ports.SessionIssuer), new(*auth.SessionIssuer)), smtpConfig,
+	invitationTokenConfig,
+	googleOIDCConfig,
+	httpOIDCConfig, mail.NewSMTPMailer, auth.NewInvitationTokenSigner, auth.NewGoogleOIDC, wire.Bind(new(ports.InvitationMailer), new(*mail.SMTPMailer)), wire.Bind(new(ports.InvitationTokenSigner), new(*auth.InvitationTokenSigner)), inviteBaseURL,
 	inviteTTL,
 	newAuthService, service.NewAdminService, service.NewI18nService, i18n.NewTranslator, newHTTPServer,
 	NewApplication,

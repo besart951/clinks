@@ -21,6 +21,9 @@ type (
 	PasswordHash     string
 	InvitationToken  string
 	InvitationHash   string
+	ExternalIssuer   string
+	ExternalSubject  string
+	OutboxJobID      string
 )
 
 const (
@@ -100,6 +103,20 @@ type InvitationAcceptance struct {
 	Invitation Invitation
 	User       User
 	Password   *PasswordHash
+}
+
+type ExternalIdentity struct {
+	Issuer  ExternalIssuer
+	Subject ExternalSubject
+	Email   Email
+	UserID  UserID
+}
+
+type OutboxJob struct {
+	ID           OutboxJobID
+	TenantID     TenantID
+	InvitationID InvitationID
+	Attempts     int
 }
 
 type Language struct {

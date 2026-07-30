@@ -3,6 +3,7 @@ package mail
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"log/slog"
 	"net"
@@ -19,6 +20,7 @@ type SMTPConfig struct {
 	Username string
 	Password string
 	From     string
+	RequireTLS bool
 }
 
 type SMTPMailer struct {
@@ -60,6 +62,14 @@ func (mailer *SMTPMailer) Send(ctx context.Context, invitation *domain.Invitatio
 			slog.Debug("failed to close smtp client", "error", closeErr)
 		}
 	}()
+	if mailer.config.RequireTLS {
+		if ok, _ := client.Extension("STARTTLS"); !ok {
+			return "failed", fmt.Errorf("smtp server does not support STARTTLS")
+		}
+		if tlsErr := client.StartTLS(&tls.Config{ServerName: mailer.config.Host, MinVersion: tls.VersionTLS12}); tlsErr != nil {
+			return "failed", fmt.Errorf("smtp starttls failed: %w", tlsErr)
+		}
+	}
 
 	if mailer.config.Username != "" {
 		auth := smtp.PlainAuth("", mailer.config.Username, mailer.config.Password, mailer.config.Host)

@@ -1,26 +1,70 @@
 # clinks
 
-Go 1.26 monolith with a Svelte 5 / Vite 8 workspace for the Admin, planer_link, and infra_link applications.
+clinks is a multi-tenant planning platform. It has three Svelte applications, a Go API, and PostgreSQL.
 
-1. Copy .env.example to .env and replace every secret placeholder.
-2. Run pnpm start.
+```mermaid
+flowchart LR
+  Browser --> Admin[Admin]
+  Browser --> Planer[planer_link]
+  Browser --> Infra[infra_link]
+  Admin --> API[Go API]
+  Planer --> API
+  Infra --> API
+  API --> DB[(PostgreSQL)]
+  API --> Outbox[(Outbox)]
+  Worker --> Outbox
+  Worker -. invitations .-> SMTP[SMTP]
+```
 
-The one command starts PostgreSQL, applies pending embedded migrations exactly once, creates the configured super-admin when it does not yet exist, then serves:
+## Development
+
+You need Docker Desktop, Node.js 24+, pnpm 10+, and Go 1.26.
+
+```sh
+cp .env.example .env
+pnpm install
+git config core.hooksPath .githooks
+pnpm start
+```
+
+Before starting, replace all secret placeholders in `.env`. Never commit this file.
+
+Open:
 
 - Admin: http://localhost:5173
 - planer_link: http://localhost:5174
 - infra_link: http://localhost:5175
 - API health: http://localhost:8080/healthz
 
-The browser API is Connect-RPC at `http://localhost:8080/clinks.v1.ClinksService/*`. Browser sessions are HttpOnly cookies; API tokens are never stored in localStorage. Configure `SMTP_*` to send invitations by email. Every invitation response also includes a copyable acceptance link.
+`pnpm start` starts PostgreSQL, applies database migrations, creates the configured initial administrator, and starts the API and all three apps.
 
-The first administrator is ADMIN_EMAIL / ADMIN_PASSWORD from .env. Changing these values later does not overwrite an existing password; it only supplies credentials when the account is absent. For local frontend-only development use pnpm install then pnpm dev with a running PostgreSQL instance and DATABASE_URL set in .env.
+For development without Docker, start PostgreSQL yourself, set `DATABASE_URL` in `.env`, then run:
 
-## Go quality tools
+```sh
+pnpm dev
+```
 
-The repository pins its Go developer tools in `server/go.mod`, using Go's native `tool` directives. No global Go tool installation is required.
+## Checks
 
-- `pnpm go:format` formats Go files and organizes imports.
-- `pnpm go:lint`, `pnpm go:vet`, `pnpm go:test`, `pnpm go:security`, and `pnpm go:vuln` run the individual quality checks.
-- `pnpm go:check` runs the complete backend quality gate, including module tidiness and a production build.
-- `pnpm go:generate` refreshes generated Go code after a Wire provider change.
+```sh
+pnpm verify:push
+pnpm test
+pnpm go:test
+```
+
+The pre-push hook runs `pnpm verify:push` automatically. Enable it once per clone with `git config core.hooksPath .githooks`.
+
+## Production deployment
+
+Production is released only with a `v*` Git tag. GitHub Actions builds immutable GHCR images; the VPS receives only those images, Compose/Nginx configuration, TLS files, and its local `.env`—never a source checkout.
+
+Before the first release, choose a real domain and point these records to the VPS:
+
+- `admin.DOMAIN_PLACEHOLDER`
+- `planer.DOMAIN_PLACEHOLDER`
+- `infra.DOMAIN_PLACEHOLDER`
+- `api.DOMAIN_PLACEHOLDER`
+
+Copy [`deploy/.env.production.example`](deploy/.env.production.example) to `/opt/clinks/.env`, replace its placeholders, make it readable only by the deployment user, and install TLS certificates in `/opt/clinks/tls`. Nginx terminates HTTPS and is the only public container; PostgreSQL, API, and worker remain on an internal network.
+
+The complete first-host setup, backup timer, restore drill, and post-release checks are in [`docs/operations.md`](docs/operations.md).
