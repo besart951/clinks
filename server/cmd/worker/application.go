@@ -44,7 +44,7 @@ func workerPoolConfig(settings *appconfig.Config) postgres.PoolConfig {
 	}
 }
 
-func workerSmtpConfig(settings *appconfig.Config) *mailadapter.SMTPConfig {
+func workerSMTPConfig(settings *appconfig.Config) *mailadapter.SMTPConfig {
 	return &mailadapter.SMTPConfig{
 		Host: settings.SMTP.Host, Port: settings.SMTP.Port,
 		Username: settings.SMTP.Username, Password: settings.SMTP.Password,

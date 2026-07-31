@@ -16,7 +16,7 @@ import (
 
 var workerProviderSet = wire.NewSet(
 	workerPoolConfig,
-	workerSmtpConfig,
+	workerSMTPConfig,
 	workerInvitationTokenConfig,
 	workerInviteBaseURL,
 	postgres.NewPool,

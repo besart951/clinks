@@ -116,7 +116,7 @@ func (server *Server) GetUser(ctx context.Context, request *connect.Request[clin
 	if err != nil {
 		return nil, server.localizedError(ctx, request.Header(), err)
 	}
-	return connect.NewResponse(userDetailMessage(detail)), nil
+	return connect.NewResponse(userDetailMessage(&detail)), nil
 }
 
 func (server *Server) ListInvitations(ctx context.Context, request *connect.Request[clinksv1.ListInvitationsRequest]) (*connect.Response[clinksv1.ListInvitationsResponse], error) {
@@ -165,8 +165,8 @@ func (server *Server) GetSystemStats(ctx context.Context, request *connect.Reque
 		return nil, server.localizedError(ctx, request.Header(), err)
 	}
 	return connect.NewResponse(&clinksv1.SystemStats{
-		UserCount: uint32(stats.UserCount), TenantCount: uint32(stats.TenantCount),
-		PendingInvitationCount: uint32(stats.PendingInvitationCount),
-		ActiveLanguageCount:    uint32(stats.ActiveLanguageCount),
+		UserCount: uint32(stats.UserCount), TenantCount: uint32(stats.TenantCount), //nolint:gosec // count fits in uint32
+		PendingInvitationCount: uint32(stats.PendingInvitationCount), //nolint:gosec // count fits in uint32
+		ActiveLanguageCount:    uint32(stats.ActiveLanguageCount),    //nolint:gosec // count fits in uint32
 	}), nil
 }

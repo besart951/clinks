@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Input } from '$lib/components/ui/input';
-	import { Button } from '$lib/components/ui/button';
+	import { Input } from './components/ui/input';
+	import { Button } from './components/ui/button';
 
 	export interface FilterDef {
 		key: string;

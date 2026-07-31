@@ -111,13 +111,13 @@ func userSummaryMessages(summaries []domain.UserSummary) []*clinksv1.UserSummary
 		messages = append(messages, &clinksv1.UserSummary{
 			Id: string(summary.ID), Email: string(summary.Email),
 			Locale: string(summary.Locale), IsSuperAdmin: summary.IsSuperAdmin,
-			MembershipCount: uint32(summary.MembershipCount),
+			MembershipCount: uint32(summary.MembershipCount), //nolint:gosec // count fits in uint32
 		})
 	}
 	return messages
 }
 
-func userDetailMessage(detail domain.UserDetail) *clinksv1.UserDetail {
+func userDetailMessage(detail *domain.UserDetail) *clinksv1.UserDetail {
 	return &clinksv1.UserDetail{
 		User: &clinksv1.UserSummary{
 			Id: string(detail.User.ID), Email: string(detail.User.Email),

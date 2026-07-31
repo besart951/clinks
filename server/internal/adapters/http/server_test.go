@@ -92,7 +92,7 @@ func (readinessStub) Ready(context.Context) error { return nil }
 func TestLoginSetsHTTPOnlyLaxCookieWithoutExposingToken(t *testing.T) {
 	sessionToken := strings.Repeat("x", 32)
 	session := domain.Session{Token: sessionToken, User: domain.User{ID: "user-1", Email: "user@example.com", Locale: "de-CH"}}
-	server := NewServer(ServerDeps{
+	server := NewServer(&ServerDeps{
 		Sessions:         &authenticationStub{session: session},
 		Registration:     &authenticationStub{session: session},
 		Invitations:      &authenticationStub{session: session},
@@ -121,7 +121,7 @@ func TestLoginSetsHTTPOnlyLaxCookieWithoutExposingToken(t *testing.T) {
 }
 
 func TestGetSessionReturnsLocalizedConnectError(t *testing.T) {
-	srv := NewServer(ServerDeps{
+	srv := NewServer(&ServerDeps{
 		Sessions:         &authenticationStub{err: errors.New("expired")},
 		Registration:     &authenticationStub{err: errors.New("expired")},
 		Invitations:      &authenticationStub{err: errors.New("expired")},

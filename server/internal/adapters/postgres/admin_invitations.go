@@ -54,7 +54,7 @@ func (repository *AdminInvitationRepository) ListInvitations(ctx context.Context
 		for _, condition := range conditions[1:] {
 			query += " AND " + condition
 		}
-		query += fmt.Sprintf(" ORDER BY email LIMIT $1")
+		query += " ORDER BY email LIMIT $1"
 
 		rows, err := tx.Query(ctx, query, args...)
 		if err != nil {
@@ -70,7 +70,7 @@ func (repository *AdminInvitationRepository) ListInvitations(ctx context.Context
 			}
 			page.Items = append(page.Items, inv)
 		}
-		if err = rows.Err(); err != nil {
+		if err := rows.Err(); err != nil {
 			return err
 		}
 		if len(page.Items) == limit {

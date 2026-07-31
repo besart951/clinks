@@ -135,7 +135,7 @@ func newHTTPServer(
 	readiness ports.ReadinessChecker,
 	config *http.ServerConfig,
 ) *http.Server {
-	return http.NewServer(http.ServerDeps{
+	return http.NewServer(&http.ServerDeps{
 		Sessions: auth, Registration: auth, Invitations: auth,
 		Tenants: admin, LocalizationEdit: admin, Audit: admin,
 		Localization: localization, Translator: translator, Readiness: readiness,

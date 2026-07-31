@@ -25,7 +25,7 @@ func InitializeWorker(contextContext context.Context, configConfig *config.Confi
 		return nil, err
 	}
 	outboxRepository := postgres.NewOutboxRepository(pool)
-	smtpConfig := workerSmtpConfig(configConfig)
+	smtpConfig := workerSMTPConfig(configConfig)
 	smtpMailer := mail.NewSMTPMailer(smtpConfig)
 	invitationTokenConfig := workerInvitationTokenConfig(configConfig)
 	invitationTokenSigner, err := auth.NewInvitationTokenSigner(invitationTokenConfig)
@@ -42,7 +42,7 @@ func InitializeWorker(contextContext context.Context, configConfig *config.Confi
 
 var workerProviderSet = wire.NewSet(
 	workerPoolConfig,
-	workerSmtpConfig,
+	workerSMTPConfig,
 	workerInvitationTokenConfig,
 	workerInviteBaseURL, postgres.NewPool, postgres.NewOutboxRepository, mail.NewSMTPMailer, auth.NewInvitationTokenSigner, wire.Bind(new(ports.OutboxRepository), new(*postgres.OutboxRepository)), wire.Bind(new(ports.InvitationMailer), new(*mail.SMTPMailer)), wire.Bind(new(ports.InvitationTokenSigner), new(*auth.InvitationTokenSigner)), newInvitationWorker,
 	NewWorkerApplication,

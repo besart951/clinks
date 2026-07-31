@@ -124,7 +124,7 @@ type ServerDeps struct {
 	Overview         systemOverview
 }
 
-func NewServer(deps ServerDeps, config *ServerConfig) *Server {
+func NewServer(deps *ServerDeps, config *ServerConfig) *Server {
 	if config.Cookie.Name == "" {
 		config.Cookie.Name = sessionCookieName
 	}
