@@ -27,6 +27,46 @@ type User struct {
 	SessionVersion int
 }
 
+// UserSummary is a lightweight projection for admin user listings.
+type UserSummary struct {
+	ID              UserID
+	Email           Email
+	Locale          Locale
+	IsSuperAdmin    bool
+	MembershipCount int
+}
+
+// UserDetail is a full user view including all active memberships.
+type UserDetail struct {
+	User        User
+	Memberships []Membership
+}
+
+// UserFilter carries optional search, filter, and pagination for user lists.
+type UserFilter struct {
+	Search string
+	Role   *Role
+	Cursor Cursor
+	Limit  int
+}
+
+// InvitationFilter carries optional filter and pagination for invitation lists.
+type InvitationFilter struct {
+	Search   string
+	TenantID *TenantID
+	Status   string // "pending", "used", "expired", "" means all
+	Cursor   Cursor
+	Limit    int
+}
+
+// SystemStats holds aggregate counts for the admin dashboard overview.
+type SystemStats struct {
+	UserCount              int
+	TenantCount            int
+	PendingInvitationCount int
+	ActiveLanguageCount    int
+}
+
 type Membership struct {
 	ID     MembershipID
 	UserID UserID

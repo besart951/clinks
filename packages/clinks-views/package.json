@@ -9,15 +9,15 @@
       "svelte": "./src/lib/AuthPortal.svelte",
       "default": "./src/lib/AuthPortal.svelte"
     },
-    "./admin-dashboard": {
-      "types": "./src/lib/AdminDashboard.svelte",
-      "svelte": "./src/lib/AdminDashboard.svelte",
-      "default": "./src/lib/AdminDashboard.svelte"
-    },
     "./error-page": {
       "types": "./src/lib/ErrorPage.svelte",
       "svelte": "./src/lib/ErrorPage.svelte",
       "default": "./src/lib/ErrorPage.svelte"
+    },
+    "./src/lib/*": {
+      "types": "./src/lib/*",
+      "svelte": "./src/lib/*",
+      "default": "./src/lib/*"
     }
   },
   "peerDependencies": {

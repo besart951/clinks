@@ -40,6 +40,7 @@ func NewApplication(
 
 func (application *Application) Run(ctx context.Context, httpConfig *appconfig.HTTPConfig) error {
 	defer application.pool.Close()
+	application.server.StartCleanup(ctx)
 	return NewServer(httpConfig, application.server.HandlerWithOIDC(application.oidc, application.oidcConfig)).Run(ctx)
 }
 
@@ -134,5 +135,10 @@ func newHTTPServer(
 	readiness ports.ReadinessChecker,
 	config *http.ServerConfig,
 ) *http.Server {
-	return http.NewServer(auth, auth, auth, admin, admin, admin, localization, translator, readiness, config)
+	return http.NewServer(http.ServerDeps{
+		Sessions: auth, Registration: auth, Invitations: auth,
+		Tenants: admin, LocalizationEdit: admin, Audit: admin,
+		Localization: localization, Translator: translator, Readiness: readiness,
+		Users: admin, InviteAdmin: admin, Overview: admin,
+	}, config)
 }

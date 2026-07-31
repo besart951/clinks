@@ -1,5 +1,6 @@
 <script lang="ts">
-	import type { LocalizationViewModel, TranslationBundleViewModel } from '@clinks/clinks-runtime';
+	import type { LocalizationViewModel } from '@clinks/clinks-runtime';
+	import { useClinksRuntime } from '@clinks/clinks-runtime';
 	import { Badge } from '@clinks/ui-shared/components/ui/badge';
 	import { Button } from '@clinks/ui-shared/components/ui/button';
 	import * as Card from '@clinks/ui-shared/components/ui/card';
@@ -8,8 +9,8 @@
 	import * as Select from '@clinks/ui-shared/components/ui/select';
 	import * as Table from '@clinks/ui-shared/components/ui/table';
 
-	let { model, translations }: { model: LocalizationViewModel; translations: TranslationBundleViewModel } = $props();
-	const t = (key: string) => translations.t(key);
+	let { model }: { model: LocalizationViewModel } = $props();
+	const t = (key: string) => useClinksRuntime().translations.t(key);
 </script>
 
 <Card.Root>
@@ -19,8 +20,9 @@
 			><Table.Header
 				><Table.Row><Table.Head>{t('ui.languages')}</Table.Head><Table.Head>{t('ui.locale')}</Table.Head></Table.Row
 				></Table.Header
-			><Table.Body
-				>{#each model.managedLanguages as language}<Table.Row
+			>
+			<Table.Body
+				>{#each model.languages.data ?? [] as language}<Table.Row
 						><Table.Cell>{language.name}</Table.Cell><Table.Cell
 							><Badge variant="outline">{language.code}{language.isDefault ? ` · ${t('ui.default')}` : ''}</Badge
 							></Table.Cell

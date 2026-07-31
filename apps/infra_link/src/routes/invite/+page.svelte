@@ -5,7 +5,13 @@
 	import AuthPortal from '@clinks/clinks-views/auth-portal';
 
 	const runtime = useClinksRuntime();
-	const model = new AuthPortalViewModel('infra_link', runtime.client, runtime.translations, new BrowserClipboard());
+	const model = new AuthPortalViewModel(
+		'infra_link',
+		runtime.client,
+		runtime.session,
+		runtime.translations,
+		new BrowserClipboard(),
+	);
 	const invitationToken = page.url.searchParams.get('token') ?? '';
 
 	onMount(() => {
@@ -13,4 +19,4 @@
 	});
 </script>
 
-<AuthPortal {model} translations={runtime.translations} theme={runtime.theme} />
+<AuthPortal {model} />

@@ -17,7 +17,7 @@
 	let selectedLanguage = $derived(model.languages.find((language) => language.code === model.locale));
 </script>
 
-<Select.Root value={model.locale} onValueChange={(locale) => void model.setLocale(locale)}>
+<Select.Root type="single" value={model.locale} onValueChange={(locale) => void model.setLocale(locale)}>
 	<Select.Trigger aria-label={label} class="min-w-40" disabled={model.isLoading}>
 		{selectedLanguage?.name ?? label}
 	</Select.Trigger>

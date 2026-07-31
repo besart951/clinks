@@ -1,42 +1,48 @@
-import type { ClinksClient, Invitation, Session } from '@clinks/api-client';
+import type { Invitation, InvitationService, Session } from '@clinks/api-client';
 import { BrowserClipboard } from './browser-clipboard.ts';
 import type { ErrorMessageFormatter } from './auth-portal-view-model.svelte.ts';
+import type { SessionStore } from './session-store.svelte';
 
 export class AuthDashboardViewModel {
-	selectedTenant = $state('');
+	#overrideSelectedTenant = $state<string | null>(null);
 	invitationEmail = $state('');
 	invitationRole = $state<'ROLE_TENANT_ADMIN' | 'ROLE_USER'>('ROLE_USER');
 	createdInvitation = $state<Invitation | null>(null);
 
-	#client: Pick<ClinksClient, 'createInvitation' | 'switchTenant'>;
+	#client: Pick<InvitationService, 'createInvitation'>;
+	#session: Pick<SessionStore, 'current' | 'switchTenant'>;
 	#messages: ErrorMessageFormatter;
 	#clipboard: BrowserClipboard;
-	#getSession: () => Session | null;
-	#setSession: (session: Session) => void;
 	#onError: (message: string) => void;
 
 	constructor(
-		client: Pick<ClinksClient, 'createInvitation' | 'switchTenant'>,
+		client: Pick<InvitationService, 'createInvitation'>,
+		session: Pick<SessionStore, 'current' | 'switchTenant'>,
 		messages: ErrorMessageFormatter,
 		clipboard: BrowserClipboard,
-		getSession: () => Session | null,
-		setSession: (session: Session) => void,
 		onError: (message: string) => void,
 	) {
 		this.#client = client;
+		this.#session = session;
 		this.#messages = messages;
 		this.#clipboard = clipboard;
-		this.#getSession = getSession;
-		this.#setSession = setSession;
 		this.#onError = onError;
 	}
 
+	get selectedTenant() {
+		return this.#overrideSelectedTenant ?? this.#session.current?.activeTenant?.id ?? '';
+	}
+
+	set selectedTenant(value: string) {
+		this.#overrideSelectedTenant = value;
+	}
+
 	async selectTenant(tenantID: string) {
-		const session = this.#getSession();
-		if (!tenantID || tenantID === session?.activeTenant?.id) return;
+		if (!tenantID || tenantID === this.#session.current?.activeTenant?.id) return;
 		this.#onError('');
 		try {
-			this.#setSession(await this.#client.switchTenant(tenantID));
+			await this.#session.switchTenant(tenantID);
+			this.#overrideSelectedTenant = null;
 		} catch (error) {
 			this.#onError(this.#messages.message(error));
 		}
@@ -61,12 +67,8 @@ export class AuthDashboardViewModel {
 		}
 	}
 
-	syncSelectedTenant(session: Session | null) {
-		this.selectedTenant = session?.activeTenant?.id ?? '';
-	}
-
 	clear() {
-		this.selectedTenant = '';
+		this.#overrideSelectedTenant = null;
 		this.invitationEmail = '';
 		this.invitationRole = 'ROLE_USER';
 		this.createdInvitation = null;

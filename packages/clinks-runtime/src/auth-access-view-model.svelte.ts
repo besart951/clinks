@@ -1,6 +1,6 @@
-import type { ClinksClient, Session } from '@clinks/api-client';
 import type { ErrorMessageFormatter } from './auth-portal-view-model.svelte';
 import { centralErrorHandler } from './error-handler.ts';
+import type { SessionStore } from './session-store.svelte';
 
 export class AuthAccessViewModel {
 	email = $state('');
@@ -10,20 +10,17 @@ export class AuthAccessViewModel {
 	registering = $state(false);
 	busy = $state(false);
 
-	#client: Pick<ClinksClient, 'acceptInvitation' | 'login' | 'register'>;
+	#session: Pick<SessionStore, 'acceptInvitation' | 'login' | 'register' | 'current'>;
 	#messages: ErrorMessageFormatter;
-	#setSession: (session: Session) => void;
 	#onError: (message: string) => void;
 
 	constructor(
-		client: Pick<ClinksClient, 'acceptInvitation' | 'login' | 'register'>,
+		session: Pick<SessionStore, 'acceptInvitation' | 'login' | 'register' | 'current'>,
 		messages: ErrorMessageFormatter,
-		setSession: (session: Session) => void,
 		onError: (message: string) => void,
 	) {
-		this.#client = client;
+		this.#session = session;
 		this.#messages = messages;
-		this.#setSession = setSession;
 		this.#onError = onError;
 	}
 
@@ -31,12 +28,13 @@ export class AuthAccessViewModel {
 		this.busy = true;
 		this.#onError('');
 		try {
-			const session = this.invitationToken
-				? await this.#client.acceptInvitation(this.invitationToken, this.email, this.password)
-				: this.registering
-					? await this.#client.register(this.email, this.password, this.tenantName)
-					: await this.#client.login(this.email, this.password);
-			this.#setSession(session);
+			if (this.invitationToken) {
+				await this.#session.acceptInvitation(this.invitationToken, this.email, this.password);
+			} else if (this.registering) {
+				await this.#session.register(this.email, this.password, this.tenantName);
+			} else {
+				await this.#session.login(this.email, this.password);
+			}
 		} catch (error) {
 			const detail = centralErrorHandler.handleError(error, this.#messages.message(error));
 			this.#onError(detail.message);

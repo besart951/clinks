@@ -11,7 +11,8 @@
   "dependencies": {
     "@clinks/clinks-runtime": "workspace:*",
     "@clinks/clinks-views": "workspace:*",
-    "@clinks/ui-shared": "workspace:*"
+    "@clinks/ui-shared": "workspace:*",
+    "@lucide/svelte": "^1.27.0"
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^7.0.1",

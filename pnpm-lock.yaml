@@ -29,6 +29,9 @@ importers:
       '@clinks/ui-shared':
         specifier: workspace:*
         version: link:../../packages/ui-shared
+      '@lucide/svelte':
+        specifier: ^1.27.0
+        version: 1.27.0(svelte@5.56.8)
     devDependencies:
       '@sveltejs/adapter-auto':
         specifier: ^7.0.1

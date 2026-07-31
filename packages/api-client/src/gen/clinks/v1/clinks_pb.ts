@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file clinks/v1/clinks.proto.
  */
 export const file_clinks_v1_clinks: GenFile = /*@__PURE__*/
-  fileDesc("ChZjbGlua3MvdjEvY2xpbmtzLnByb3RvEgljbGlua3MudjEiBwoFRW1wdHkiNQoSQ3JlZGVudGlhbHNSZXF1ZXN0Eg0KBWVtYWlsGAEgASgJEhAKCHBhc3N3b3JkGAIgASgJIkcKD1JlZ2lzdGVyUmVxdWVzdBINCgVlbWFpbBgBIAEoCRIQCghwYXNzd29yZBgCIAEoCRITCgt0ZW5hbnRfbmFtZRgDIAEoCSIoChNTd2l0Y2hUZW5hbnRSZXF1ZXN0EhEKCXRlbmFudF9pZBgBIAEoCSJJCgRVc2VyEgoKAmlkGAEgASgJEg0KBWVtYWlsGAIgASgJEg4KBmxvY2FsZRgDIAEoCRIWCg5pc19zdXBlcl9hZG1pbhgEIAEoCCIiCgZUZW5hbnQSCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCSJZCgpNZW1iZXJzaGlwEgoKAmlkGAEgASgJEiEKBnRlbmFudBgCIAEoCzIRLmNsaW5rcy52MS5UZW5hbnQSDAoEcm9sZRgDIAEoCRIOCgZzdGF0dXMYBCABKAkifgoHU2Vzc2lvbhIdCgR1c2VyGAEgASgLMg8uY2xpbmtzLnYxLlVzZXISKAoNYWN0aXZlX3RlbmFudBgCIAEoCzIRLmNsaW5rcy52MS5UZW5hbnQSKgoLbWVtYmVyc2hpcHMYAyADKAsyFS5jbGlua3MudjEuTWVtYmVyc2hpcCI2ChdDcmVhdGVJbnZpdGF0aW9uUmVxdWVzdBINCgVlbWFpbBgBIAEoCRIMCgRyb2xlGAIgASgJIo0BCgpJbnZpdGF0aW9uEgoKAmlkGAEgASgJEhEKCXRlbmFudF9pZBgCIAEoCRINCgVlbWFpbBgDIAEoCRIMCgRyb2xlGAQgASgJEhIKCmV4cGlyZXNfYXQYBSABKAkSFgoOYWNjZXB0YW5jZV91cmwYBiABKAkSFwoPZGVsaXZlcnlfc3RhdHVzGAcgASgJIkkKF0FjY2VwdEludml0YXRpb25SZXF1ZXN0Eg0KBXRva2VuGAEgASgJEg0KBWVtYWlsGAIgASgJEhAKCHBhc3N3b3JkGAMgASgJIk0KCExhbmd1YWdlEgwKBGNvZGUYASABKAkSDAoEbmFtZRgCIAEoCRISCgppc19kZWZhdWx0GAMgASgIEhEKCWlzX2FjdGl2ZRgEIAEoCCI7ChFMYW5ndWFnZXNSZXNwb25zZRImCglsYW5ndWFnZXMYASADKAsyEy5jbGlua3MudjEuTGFuZ3VhZ2UiMwoWR2V0VHJhbnNsYXRpb25zUmVxdWVzdBIZChFhcHBsaWNhdGlvbl9zY29wZRgBIAEoCSJaChFTY29wZWRUcmFuc2xhdGlvbhIOCgZsb2NhbGUYASABKAkSGQoRYXBwbGljYXRpb25fc2NvcGUYAiABKAkSCwoDa2V5GAMgASgJEg0KBXZhbHVlGAQgASgJIloKFFRyYW5zbGF0aW9uc1Jlc3BvbnNlEg4KBmxvY2FsZRgBIAEoCRIyCgx0cmFuc2xhdGlvbnMYAiADKAsyHC5jbGlua3MudjEuU2NvcGVkVHJhbnNsYXRpb24iNQoPVGVuYW50c1Jlc3BvbnNlEiIKB3RlbmFudHMYASADKAsyES5jbGlua3MudjEuVGVuYW50IiMKE0NyZWF0ZVRlbmFudFJlcXVlc3QSDAoEbmFtZRgBIAEoCSKKAQoWTGlzdEF1ZGl0RXZlbnRzUmVxdWVzdBIMCgRmcm9tGAEgASgJEgoKAnRvGAIgASgJEhAKCGFjdG9yX2lkGAMgASgJEhEKCXRlbmFudF9pZBgEIAEoCRIOCgZhY3Rpb24YBSABKAkSDgoGY3Vyc29yGAYgASgJEhEKCXBhZ2Vfc2l6ZRgHIAEoDSKxAQoKQXVkaXRFdmVudBIKCgJpZBgBIAEoCRITCgtvY2N1cnJlZF9hdBgCIAEoCRIQCghhY3Rvcl9pZBgDIAEoCRITCgthY3Rvcl9lbWFpbBgEIAEoCRIRCgl0ZW5hbnRfaWQYBSABKAkSEwoLdGVuYW50X25hbWUYBiABKAkSDgoGYWN0aW9uGAcgASgJEg4KBnRhcmdldBgIIAEoCRITCgtkZXNjcmlwdGlvbhgJIAEoCSJRChNBdWRpdEV2ZW50c1Jlc3BvbnNlEiUKBmV2ZW50cxgBIAMoCzIVLmNsaW5rcy52MS5BdWRpdEV2ZW50EhMKC25leHRfY3Vyc29yGAIgASgJMr0ICg1DbGlua3NTZXJ2aWNlEjoKBUxvZ2luEh0uY2xpbmtzLnYxLkNyZWRlbnRpYWxzUmVxdWVzdBoSLmNsaW5rcy52MS5TZXNzaW9uEkQKD0xvZ2luU3VwZXJBZG1pbhIdLmNsaW5rcy52MS5DcmVkZW50aWFsc1JlcXVlc3QaEi5jbGlua3MudjEuU2Vzc2lvbhI6CghSZWdpc3RlchIaLmNsaW5rcy52MS5SZWdpc3RlclJlcXVlc3QaEi5jbGlua3MudjEuU2Vzc2lvbhIsCgZMb2dvdXQSEC5jbGlua3MudjEuRW1wdHkaEC5jbGlua3MudjEuRW1wdHkSMgoKR2V0U2Vzc2lvbhIQLmNsaW5rcy52MS5FbXB0eRoSLmNsaW5rcy52MS5TZXNzaW9uEkIKDFN3aXRjaFRlbmFudBIeLmNsaW5rcy52MS5Td2l0Y2hUZW5hbnRSZXF1ZXN0GhIuY2xpbmtzLnYxLlNlc3Npb24STQoQQ3JlYXRlSW52aXRhdGlvbhIiLmNsaW5rcy52MS5DcmVhdGVJbnZpdGF0aW9uUmVxdWVzdBoVLmNsaW5rcy52MS5JbnZpdGF0aW9uEkoKEEFjY2VwdEludml0YXRpb24SIi5jbGlua3MudjEuQWNjZXB0SW52aXRhdGlvblJlcXVlc3QaEi5jbGlua3MudjEuU2Vzc2lvbhI+CgxHZXRMYW5ndWFnZXMSEC5jbGlua3MudjEuRW1wdHkaHC5jbGlua3MudjEuTGFuZ3VhZ2VzUmVzcG9uc2USVQoPR2V0VHJhbnNsYXRpb25zEiEuY2xpbmtzLnYxLkdldFRyYW5zbGF0aW9uc1JlcXVlc3QaHy5jbGlua3MudjEuVHJhbnNsYXRpb25zUmVzcG9uc2USOwoLTGlzdFRlbmFudHMSEC5jbGlua3MudjEuRW1wdHkaGi5jbGlua3MudjEuVGVuYW50c1Jlc3BvbnNlEkEKDENyZWF0ZVRlbmFudBIeLmNsaW5rcy52MS5DcmVhdGVUZW5hbnRSZXF1ZXN0GhEuY2xpbmtzLnYxLlRlbmFudBJGChRMaXN0TWFuYWdlZExhbmd1YWdlcxIQLmNsaW5rcy52MS5FbXB0eRocLmNsaW5rcy52MS5MYW5ndWFnZXNSZXNwb25zZRI1CgxTYXZlTGFuZ3VhZ2USEy5jbGlua3MudjEuTGFuZ3VhZ2UaEC5jbGlua3MudjEuRW1wdHkSQQoPU2F2ZVRyYW5zbGF0aW9uEhwuY2xpbmtzLnYxLlNjb3BlZFRyYW5zbGF0aW9uGhAuY2xpbmtzLnYxLkVtcHR5ElQKD0xpc3RBdWRpdEV2ZW50cxIhLmNsaW5rcy52MS5MaXN0QXVkaXRFdmVudHNSZXF1ZXN0Gh4uY2xpbmtzLnYxLkF1ZGl0RXZlbnRzUmVzcG9uc2VCQFo+Z2l0aHViLmNvbS9iZXNhcnRtb3JpbmEvY2xpbmtzL3NlcnZlci9wcm90by9jbGlua3MvdjE7Y2xpbmtzdjFiBnByb3RvMw");
+  fileDesc("ChZjbGlua3MvdjEvY2xpbmtzLnByb3RvEgljbGlua3MudjEiBwoFRW1wdHkiNQoSQ3JlZGVudGlhbHNSZXF1ZXN0Eg0KBWVtYWlsGAEgASgJEhAKCHBhc3N3b3JkGAIgASgJIkcKD1JlZ2lzdGVyUmVxdWVzdBINCgVlbWFpbBgBIAEoCRIQCghwYXNzd29yZBgCIAEoCRITCgt0ZW5hbnRfbmFtZRgDIAEoCSIoChNTd2l0Y2hUZW5hbnRSZXF1ZXN0EhEKCXRlbmFudF9pZBgBIAEoCSJJCgRVc2VyEgoKAmlkGAEgASgJEg0KBWVtYWlsGAIgASgJEg4KBmxvY2FsZRgDIAEoCRIWCg5pc19zdXBlcl9hZG1pbhgEIAEoCCIiCgZUZW5hbnQSCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCSJZCgpNZW1iZXJzaGlwEgoKAmlkGAEgASgJEiEKBnRlbmFudBgCIAEoCzIRLmNsaW5rcy52MS5UZW5hbnQSDAoEcm9sZRgDIAEoCRIOCgZzdGF0dXMYBCABKAkifgoHU2Vzc2lvbhIdCgR1c2VyGAEgASgLMg8uY2xpbmtzLnYxLlVzZXISKAoNYWN0aXZlX3RlbmFudBgCIAEoCzIRLmNsaW5rcy52MS5UZW5hbnQSKgoLbWVtYmVyc2hpcHMYAyADKAsyFS5jbGlua3MudjEuTWVtYmVyc2hpcCI2ChdDcmVhdGVJbnZpdGF0aW9uUmVxdWVzdBINCgVlbWFpbBgBIAEoCRIMCgRyb2xlGAIgASgJIo0BCgpJbnZpdGF0aW9uEgoKAmlkGAEgASgJEhEKCXRlbmFudF9pZBgCIAEoCRINCgVlbWFpbBgDIAEoCRIMCgRyb2xlGAQgASgJEhIKCmV4cGlyZXNfYXQYBSABKAkSFgoOYWNjZXB0YW5jZV91cmwYBiABKAkSFwoPZGVsaXZlcnlfc3RhdHVzGAcgASgJIkkKF0FjY2VwdEludml0YXRpb25SZXF1ZXN0Eg0KBXRva2VuGAEgASgJEg0KBWVtYWlsGAIgASgJEhAKCHBhc3N3b3JkGAMgASgJIk0KCExhbmd1YWdlEgwKBGNvZGUYASABKAkSDAoEbmFtZRgCIAEoCRISCgppc19kZWZhdWx0GAMgASgIEhEKCWlzX2FjdGl2ZRgEIAEoCCI7ChFMYW5ndWFnZXNSZXNwb25zZRImCglsYW5ndWFnZXMYASADKAsyEy5jbGlua3MudjEuTGFuZ3VhZ2UiMwoWR2V0VHJhbnNsYXRpb25zUmVxdWVzdBIZChFhcHBsaWNhdGlvbl9zY29wZRgBIAEoCSJaChFTY29wZWRUcmFuc2xhdGlvbhIOCgZsb2NhbGUYASABKAkSGQoRYXBwbGljYXRpb25fc2NvcGUYAiABKAkSCwoDa2V5GAMgASgJEg0KBXZhbHVlGAQgASgJIloKFFRyYW5zbGF0aW9uc1Jlc3BvbnNlEg4KBmxvY2FsZRgBIAEoCRIyCgx0cmFuc2xhdGlvbnMYAiADKAsyHC5jbGlua3MudjEuU2NvcGVkVHJhbnNsYXRpb24iNQoPVGVuYW50c1Jlc3BvbnNlEiIKB3RlbmFudHMYASADKAsyES5jbGlua3MudjEuVGVuYW50IiMKE0NyZWF0ZVRlbmFudFJlcXVlc3QSDAoEbmFtZRgBIAEoCSKaAQoWTGlzdEF1ZGl0RXZlbnRzUmVxdWVzdBIMCgRmcm9tGAEgASgJEgoKAnRvGAIgASgJEhAKCGFjdG9yX2lkGAMgASgJEhEKCXRlbmFudF9pZBgEIAEoCRIOCgZhY3Rpb24YBSABKAkSDgoGc2VhcmNoGAggASgJEg4KBmN1cnNvchgGIAEoCRIRCglwYWdlX3NpemUYByABKA0isQEKCkF1ZGl0RXZlbnQSCgoCaWQYASABKAkSEwoLb2NjdXJyZWRfYXQYAiABKAkSEAoIYWN0b3JfaWQYAyABKAkSEwoLYWN0b3JfZW1haWwYBCABKAkSEQoJdGVuYW50X2lkGAUgASgJEhMKC3RlbmFudF9uYW1lGAYgASgJEg4KBmFjdGlvbhgHIAEoCRIOCgZ0YXJnZXQYCCABKAkSEwoLZGVzY3JpcHRpb24YCSABKAkiUQoTQXVkaXRFdmVudHNSZXNwb25zZRIlCgZldmVudHMYASADKAsyFS5jbGlua3MudjEuQXVkaXRFdmVudBITCgtuZXh0X2N1cnNvchgCIAEoCSJTChBMaXN0VXNlcnNSZXF1ZXN0Eg4KBnNlYXJjaBgBIAEoCRIMCgRyb2xlGAIgASgJEg4KBmN1cnNvchgDIAEoCRIRCglwYWdlX3NpemUYBCABKA0iagoLVXNlclN1bW1hcnkSCgoCaWQYASABKAkSDQoFZW1haWwYAiABKAkSDgoGbG9jYWxlGAMgASgJEhYKDmlzX3N1cGVyX2FkbWluGAQgASgIEhgKEG1lbWJlcnNoaXBfY291bnQYBSABKA0iTwoRTGlzdFVzZXJzUmVzcG9uc2USJQoFdXNlcnMYASADKAsyFi5jbGlua3MudjEuVXNlclN1bW1hcnkSEwoLbmV4dF9jdXJzb3IYAiABKAkiIQoOR2V0VXNlclJlcXVlc3QSDwoHdXNlcl9pZBgBIAEoCSJeCgpVc2VyRGV0YWlsEiQKBHVzZXIYASABKAsyFi5jbGlua3MudjEuVXNlclN1bW1hcnkSKgoLbWVtYmVyc2hpcHMYAiADKAsyFS5jbGlua3MudjEuTWVtYmVyc2hpcCJuChZMaXN0SW52aXRhdGlvbnNSZXF1ZXN0EhEKCXRlbmFudF9pZBgBIAEoCRIOCgZzdGF0dXMYAiABKAkSDgoGc2VhcmNoGAMgASgJEg4KBmN1cnNvchgEIAEoCRIRCglwYWdlX3NpemUYBSABKA0iWgoXTGlzdEludml0YXRpb25zUmVzcG9uc2USKgoLaW52aXRhdGlvbnMYASADKAsyFS5jbGlua3MudjEuSW52aXRhdGlvbhITCgtuZXh0X2N1cnNvchgCIAEoCSIwChdSZXZva2VJbnZpdGF0aW9uUmVxdWVzdBIVCg1pbnZpdGF0aW9uX2lkGAEgASgJIngKC1N5c3RlbVN0YXRzEhIKCnVzZXJfY291bnQYASABKA0SFAoMdGVuYW50X2NvdW50GAIgASgNEiAKGHBlbmRpbmdfaW52aXRhdGlvbl9jb3VudBgDIAEoDRIdChVhY3RpdmVfbGFuZ3VhZ2VfY291bnQYBCABKA0yogsKDUNsaW5rc1NlcnZpY2USOgoFTG9naW4SHS5jbGlua3MudjEuQ3JlZGVudGlhbHNSZXF1ZXN0GhIuY2xpbmtzLnYxLlNlc3Npb24SRAoPTG9naW5TdXBlckFkbWluEh0uY2xpbmtzLnYxLkNyZWRlbnRpYWxzUmVxdWVzdBoSLmNsaW5rcy52MS5TZXNzaW9uEjoKCFJlZ2lzdGVyEhouY2xpbmtzLnYxLlJlZ2lzdGVyUmVxdWVzdBoSLmNsaW5rcy52MS5TZXNzaW9uEiwKBkxvZ291dBIQLmNsaW5rcy52MS5FbXB0eRoQLmNsaW5rcy52MS5FbXB0eRIyCgpHZXRTZXNzaW9uEhAuY2xpbmtzLnYxLkVtcHR5GhIuY2xpbmtzLnYxLlNlc3Npb24SQgoMU3dpdGNoVGVuYW50Eh4uY2xpbmtzLnYxLlN3aXRjaFRlbmFudFJlcXVlc3QaEi5jbGlua3MudjEuU2Vzc2lvbhJNChBDcmVhdGVJbnZpdGF0aW9uEiIuY2xpbmtzLnYxLkNyZWF0ZUludml0YXRpb25SZXF1ZXN0GhUuY2xpbmtzLnYxLkludml0YXRpb24SSgoQQWNjZXB0SW52aXRhdGlvbhIiLmNsaW5rcy52MS5BY2NlcHRJbnZpdGF0aW9uUmVxdWVzdBoSLmNsaW5rcy52MS5TZXNzaW9uEj4KDEdldExhbmd1YWdlcxIQLmNsaW5rcy52MS5FbXB0eRocLmNsaW5rcy52MS5MYW5ndWFnZXNSZXNwb25zZRJVCg9HZXRUcmFuc2xhdGlvbnMSIS5jbGlua3MudjEuR2V0VHJhbnNsYXRpb25zUmVxdWVzdBofLmNsaW5rcy52MS5UcmFuc2xhdGlvbnNSZXNwb25zZRI7CgtMaXN0VGVuYW50cxIQLmNsaW5rcy52MS5FbXB0eRoaLmNsaW5rcy52MS5UZW5hbnRzUmVzcG9uc2USQQoMQ3JlYXRlVGVuYW50Eh4uY2xpbmtzLnYxLkNyZWF0ZVRlbmFudFJlcXVlc3QaES5jbGlua3MudjEuVGVuYW50EkYKFExpc3RNYW5hZ2VkTGFuZ3VhZ2VzEhAuY2xpbmtzLnYxLkVtcHR5GhwuY2xpbmtzLnYxLkxhbmd1YWdlc1Jlc3BvbnNlEjUKDFNhdmVMYW5ndWFnZRITLmNsaW5rcy52MS5MYW5ndWFnZRoQLmNsaW5rcy52MS5FbXB0eRJBCg9TYXZlVHJhbnNsYXRpb24SHC5jbGlua3MudjEuU2NvcGVkVHJhbnNsYXRpb24aEC5jbGlua3MudjEuRW1wdHkSVAoPTGlzdEF1ZGl0RXZlbnRzEiEuY2xpbmtzLnYxLkxpc3RBdWRpdEV2ZW50c1JlcXVlc3QaHi5jbGlua3MudjEuQXVkaXRFdmVudHNSZXNwb25zZRJGCglMaXN0VXNlcnMSGy5jbGlua3MudjEuTGlzdFVzZXJzUmVxdWVzdBocLmNsaW5rcy52MS5MaXN0VXNlcnNSZXNwb25zZRI7CgdHZXRVc2VyEhkuY2xpbmtzLnYxLkdldFVzZXJSZXF1ZXN0GhUuY2xpbmtzLnYxLlVzZXJEZXRhaWwSWAoPTGlzdEludml0YXRpb25zEiEuY2xpbmtzLnYxLkxpc3RJbnZpdGF0aW9uc1JlcXVlc3QaIi5jbGlua3MudjEuTGlzdEludml0YXRpb25zUmVzcG9uc2USSAoQUmV2b2tlSW52aXRhdGlvbhIiLmNsaW5rcy52MS5SZXZva2VJbnZpdGF0aW9uUmVxdWVzdBoQLmNsaW5rcy52MS5FbXB0eRI6Cg5HZXRTeXN0ZW1TdGF0cxIQLmNsaW5rcy52MS5FbXB0eRoWLmNsaW5rcy52MS5TeXN0ZW1TdGF0c0JAWj5naXRodWIuY29tL2Jlc2FydG1vcmluYS9jbGlua3Mvc2VydmVyL3Byb3RvL2NsaW5rcy92MTtjbGlua3N2MWIGcHJvdG8z");
 
 /**
  * @generated from message clinks.v1.Empty
@@ -484,6 +484,11 @@ export type ListAuditEventsRequest = Message<"clinks.v1.ListAuditEventsRequest">
   action: string;
 
   /**
+   * @generated from field: string search = 8;
+   */
+  search: string;
+
+  /**
    * @generated from field: string cursor = 6;
    */
   cursor: string;
@@ -579,6 +584,244 @@ export type AuditEventsResponse = Message<"clinks.v1.AuditEventsResponse"> & {
  */
 export const AuditEventsResponseSchema: GenMessage<AuditEventsResponse> = /*@__PURE__*/
   messageDesc(file_clinks_v1_clinks, 20);
+
+/**
+ * @generated from message clinks.v1.ListUsersRequest
+ */
+export type ListUsersRequest = Message<"clinks.v1.ListUsersRequest"> & {
+  /**
+   * @generated from field: string search = 1;
+   */
+  search: string;
+
+  /**
+   * @generated from field: string role = 2;
+   */
+  role: string;
+
+  /**
+   * @generated from field: string cursor = 3;
+   */
+  cursor: string;
+
+  /**
+   * @generated from field: uint32 page_size = 4;
+   */
+  pageSize: number;
+};
+
+/**
+ * Describes the message clinks.v1.ListUsersRequest.
+ * Use `create(ListUsersRequestSchema)` to create a new message.
+ */
+export const ListUsersRequestSchema: GenMessage<ListUsersRequest> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 21);
+
+/**
+ * @generated from message clinks.v1.UserSummary
+ */
+export type UserSummary = Message<"clinks.v1.UserSummary"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string email = 2;
+   */
+  email: string;
+
+  /**
+   * @generated from field: string locale = 3;
+   */
+  locale: string;
+
+  /**
+   * @generated from field: bool is_super_admin = 4;
+   */
+  isSuperAdmin: boolean;
+
+  /**
+   * @generated from field: uint32 membership_count = 5;
+   */
+  membershipCount: number;
+};
+
+/**
+ * Describes the message clinks.v1.UserSummary.
+ * Use `create(UserSummarySchema)` to create a new message.
+ */
+export const UserSummarySchema: GenMessage<UserSummary> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 22);
+
+/**
+ * @generated from message clinks.v1.ListUsersResponse
+ */
+export type ListUsersResponse = Message<"clinks.v1.ListUsersResponse"> & {
+  /**
+   * @generated from field: repeated clinks.v1.UserSummary users = 1;
+   */
+  users: UserSummary[];
+
+  /**
+   * @generated from field: string next_cursor = 2;
+   */
+  nextCursor: string;
+};
+
+/**
+ * Describes the message clinks.v1.ListUsersResponse.
+ * Use `create(ListUsersResponseSchema)` to create a new message.
+ */
+export const ListUsersResponseSchema: GenMessage<ListUsersResponse> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 23);
+
+/**
+ * @generated from message clinks.v1.GetUserRequest
+ */
+export type GetUserRequest = Message<"clinks.v1.GetUserRequest"> & {
+  /**
+   * @generated from field: string user_id = 1;
+   */
+  userId: string;
+};
+
+/**
+ * Describes the message clinks.v1.GetUserRequest.
+ * Use `create(GetUserRequestSchema)` to create a new message.
+ */
+export const GetUserRequestSchema: GenMessage<GetUserRequest> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 24);
+
+/**
+ * @generated from message clinks.v1.UserDetail
+ */
+export type UserDetail = Message<"clinks.v1.UserDetail"> & {
+  /**
+   * @generated from field: clinks.v1.UserSummary user = 1;
+   */
+  user?: UserSummary | undefined;
+
+  /**
+   * @generated from field: repeated clinks.v1.Membership memberships = 2;
+   */
+  memberships: Membership[];
+};
+
+/**
+ * Describes the message clinks.v1.UserDetail.
+ * Use `create(UserDetailSchema)` to create a new message.
+ */
+export const UserDetailSchema: GenMessage<UserDetail> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 25);
+
+/**
+ * @generated from message clinks.v1.ListInvitationsRequest
+ */
+export type ListInvitationsRequest = Message<"clinks.v1.ListInvitationsRequest"> & {
+  /**
+   * @generated from field: string tenant_id = 1;
+   */
+  tenantId: string;
+
+  /**
+   * @generated from field: string status = 2;
+   */
+  status: string;
+
+  /**
+   * @generated from field: string search = 3;
+   */
+  search: string;
+
+  /**
+   * @generated from field: string cursor = 4;
+   */
+  cursor: string;
+
+  /**
+   * @generated from field: uint32 page_size = 5;
+   */
+  pageSize: number;
+};
+
+/**
+ * Describes the message clinks.v1.ListInvitationsRequest.
+ * Use `create(ListInvitationsRequestSchema)` to create a new message.
+ */
+export const ListInvitationsRequestSchema: GenMessage<ListInvitationsRequest> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 26);
+
+/**
+ * @generated from message clinks.v1.ListInvitationsResponse
+ */
+export type ListInvitationsResponse = Message<"clinks.v1.ListInvitationsResponse"> & {
+  /**
+   * @generated from field: repeated clinks.v1.Invitation invitations = 1;
+   */
+  invitations: Invitation[];
+
+  /**
+   * @generated from field: string next_cursor = 2;
+   */
+  nextCursor: string;
+};
+
+/**
+ * Describes the message clinks.v1.ListInvitationsResponse.
+ * Use `create(ListInvitationsResponseSchema)` to create a new message.
+ */
+export const ListInvitationsResponseSchema: GenMessage<ListInvitationsResponse> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 27);
+
+/**
+ * @generated from message clinks.v1.RevokeInvitationRequest
+ */
+export type RevokeInvitationRequest = Message<"clinks.v1.RevokeInvitationRequest"> & {
+  /**
+   * @generated from field: string invitation_id = 1;
+   */
+  invitationId: string;
+};
+
+/**
+ * Describes the message clinks.v1.RevokeInvitationRequest.
+ * Use `create(RevokeInvitationRequestSchema)` to create a new message.
+ */
+export const RevokeInvitationRequestSchema: GenMessage<RevokeInvitationRequest> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 28);
+
+/**
+ * @generated from message clinks.v1.SystemStats
+ */
+export type SystemStats = Message<"clinks.v1.SystemStats"> & {
+  /**
+   * @generated from field: uint32 user_count = 1;
+   */
+  userCount: number;
+
+  /**
+   * @generated from field: uint32 tenant_count = 2;
+   */
+  tenantCount: number;
+
+  /**
+   * @generated from field: uint32 pending_invitation_count = 3;
+   */
+  pendingInvitationCount: number;
+
+  /**
+   * @generated from field: uint32 active_language_count = 4;
+   */
+  activeLanguageCount: number;
+};
+
+/**
+ * Describes the message clinks.v1.SystemStats.
+ * Use `create(SystemStatsSchema)` to create a new message.
+ */
+export const SystemStatsSchema: GenMessage<SystemStats> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 29);
 
 /**
  * ClinksService is the sole browser-facing application API. Health probes are
@@ -714,6 +957,46 @@ export const ClinksService: GenService<{
     methodKind: "unary";
     input: typeof ListAuditEventsRequestSchema;
     output: typeof AuditEventsResponseSchema;
+  },
+  /**
+   * @generated from rpc clinks.v1.ClinksService.ListUsers
+   */
+  listUsers: {
+    methodKind: "unary";
+    input: typeof ListUsersRequestSchema;
+    output: typeof ListUsersResponseSchema;
+  },
+  /**
+   * @generated from rpc clinks.v1.ClinksService.GetUser
+   */
+  getUser: {
+    methodKind: "unary";
+    input: typeof GetUserRequestSchema;
+    output: typeof UserDetailSchema;
+  },
+  /**
+   * @generated from rpc clinks.v1.ClinksService.ListInvitations
+   */
+  listInvitations: {
+    methodKind: "unary";
+    input: typeof ListInvitationsRequestSchema;
+    output: typeof ListInvitationsResponseSchema;
+  },
+  /**
+   * @generated from rpc clinks.v1.ClinksService.RevokeInvitation
+   */
+  revokeInvitation: {
+    methodKind: "unary";
+    input: typeof RevokeInvitationRequestSchema;
+    output: typeof EmptySchema;
+  },
+  /**
+   * @generated from rpc clinks.v1.ClinksService.GetSystemStats
+   */
+  getSystemStats: {
+    methodKind: "unary";
+    input: typeof EmptySchema;
+    output: typeof SystemStatsSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_clinks_v1_clinks, 0);

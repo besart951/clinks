@@ -44,7 +44,8 @@ func (repository *MembershipRepository) FindActiveMembership(ctx context.Context
 	var membership domain.Membership
 	err := WithTenantTx(ctx, repository.pool, tenantID, func(tx pgx.Tx) error {
 		row := tx.QueryRow(ctx, membershipQuery+" WHERE membership.user_id = $1 AND membership.tenant_id = $2 AND membership.status = $3", userID, tenantID, domain.MembershipActive)
-		_, scanErr := scanMembership(row, &membership)
+		var scanErr error
+		membership, scanErr = scanMembership(row)
 		return scanErr
 	})
 	if errors.Is(err, pgx.ErrNoRows) {
@@ -160,17 +161,11 @@ type membershipScanner interface {
 	Scan(...any) error
 }
 
-func scanMembership(scanner membershipScanner, target ...*domain.Membership) (domain.Membership, error) {
-	membership := domain.Membership{}
-	if len(target) == 1 {
-		membership = *target[0]
-	}
+func scanMembership(scanner membershipScanner) (domain.Membership, error) {
+	var membership domain.Membership
 	err := scanner.Scan(&membership.ID, &membership.UserID, &membership.Tenant.ID, &membership.Tenant.Name, &membership.Role, &membership.Status)
 	if err != nil {
 		return domain.Membership{}, err
-	}
-	if len(target) == 1 {
-		*target[0] = membership
 	}
 	return membership, nil
 }

@@ -25,14 +25,29 @@ export class CentralErrorHandler {
 		}
 
 		if (typeof err === 'object' && err !== null) {
-			const record = err as Record<string, any>;
-			const rawMessage = record.message || record.rawMessage || String(err);
-			const metadata = record.meta || record.metadata;
+			const record = err as Record<string, unknown>;
+			const rawMessage =
+				typeof record.message === 'string' && record.message
+					? record.message
+					: typeof record.rawMessage === 'string' && record.rawMessage
+						? record.rawMessage
+						: String(err);
 
+			const metadata = record.meta ?? record.metadata;
 			let kind = 'internal';
-			if (metadata && typeof metadata.get === 'function') {
-				kind = metadata.get('Clinks-Error-Kind') || metadata.get('clinks-error-kind') || kind;
-			} else if (record.kind) {
+
+			if (
+				metadata != null &&
+				typeof metadata === 'object' &&
+				'get' in metadata &&
+				typeof (metadata as { get: (key: string) => unknown }).get === 'function'
+			) {
+				const getFn = (key: string) => (metadata as { get: (key: string) => unknown }).get(key);
+				const val = getFn('Clinks-Error-Kind') ?? getFn('clinks-error-kind');
+				if (typeof val === 'string' && val) {
+					kind = val;
+				}
+			} else if (record.kind != null) {
 				kind = String(record.kind);
 			}
 
@@ -48,7 +63,7 @@ export class CentralErrorHandler {
 			return {
 				message: localized || fallbackMessage,
 				kind,
-				code: record.code ? String(record.code) : undefined,
+				code: record.code != null ? String(record.code) : undefined,
 			};
 		}
 

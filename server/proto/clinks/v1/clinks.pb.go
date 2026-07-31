@@ -1036,6 +1036,7 @@ type ListAuditEventsRequest struct {
 	ActorId       string                 `protobuf:"bytes,3,opt,name=actor_id,json=actorId,proto3" json:"actor_id,omitempty"`
 	TenantId      string                 `protobuf:"bytes,4,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
 	Action        string                 `protobuf:"bytes,5,opt,name=action,proto3" json:"action,omitempty"`
+	Search        string                 `protobuf:"bytes,8,opt,name=search,proto3" json:"search,omitempty"`
 	Cursor        string                 `protobuf:"bytes,6,opt,name=cursor,proto3" json:"cursor,omitempty"`
 	PageSize      uint32                 `protobuf:"varint,7,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -1103,6 +1104,13 @@ func (x *ListAuditEventsRequest) GetTenantId() string {
 func (x *ListAuditEventsRequest) GetAction() string {
 	if x != nil {
 		return x.Action
+	}
+	return ""
+}
+
+func (x *ListAuditEventsRequest) GetSearch() string {
+	if x != nil {
+		return x.Search
 	}
 	return ""
 }
@@ -1281,6 +1289,538 @@ func (x *AuditEventsResponse) GetNextCursor() string {
 	return ""
 }
 
+type ListUsersRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Search        string                 `protobuf:"bytes,1,opt,name=search,proto3" json:"search,omitempty"`
+	Role          string                 `protobuf:"bytes,2,opt,name=role,proto3" json:"role,omitempty"`
+	Cursor        string                 `protobuf:"bytes,3,opt,name=cursor,proto3" json:"cursor,omitempty"`
+	PageSize      uint32                 `protobuf:"varint,4,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListUsersRequest) Reset() {
+	*x = ListUsersRequest{}
+	mi := &file_clinks_v1_clinks_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListUsersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListUsersRequest) ProtoMessage() {}
+
+func (x *ListUsersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_clinks_v1_clinks_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListUsersRequest.ProtoReflect.Descriptor instead.
+func (*ListUsersRequest) Descriptor() ([]byte, []int) {
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *ListUsersRequest) GetSearch() string {
+	if x != nil {
+		return x.Search
+	}
+	return ""
+}
+
+func (x *ListUsersRequest) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
+func (x *ListUsersRequest) GetCursor() string {
+	if x != nil {
+		return x.Cursor
+	}
+	return ""
+}
+
+func (x *ListUsersRequest) GetPageSize() uint32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type UserSummary struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Id              string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Email           string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
+	Locale          string                 `protobuf:"bytes,3,opt,name=locale,proto3" json:"locale,omitempty"`
+	IsSuperAdmin    bool                   `protobuf:"varint,4,opt,name=is_super_admin,json=isSuperAdmin,proto3" json:"is_super_admin,omitempty"`
+	MembershipCount uint32                 `protobuf:"varint,5,opt,name=membership_count,json=membershipCount,proto3" json:"membership_count,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *UserSummary) Reset() {
+	*x = UserSummary{}
+	mi := &file_clinks_v1_clinks_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UserSummary) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UserSummary) ProtoMessage() {}
+
+func (x *UserSummary) ProtoReflect() protoreflect.Message {
+	mi := &file_clinks_v1_clinks_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UserSummary.ProtoReflect.Descriptor instead.
+func (*UserSummary) Descriptor() ([]byte, []int) {
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *UserSummary) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *UserSummary) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *UserSummary) GetLocale() string {
+	if x != nil {
+		return x.Locale
+	}
+	return ""
+}
+
+func (x *UserSummary) GetIsSuperAdmin() bool {
+	if x != nil {
+		return x.IsSuperAdmin
+	}
+	return false
+}
+
+func (x *UserSummary) GetMembershipCount() uint32 {
+	if x != nil {
+		return x.MembershipCount
+	}
+	return 0
+}
+
+type ListUsersResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Users         []*UserSummary         `protobuf:"bytes,1,rep,name=users,proto3" json:"users,omitempty"`
+	NextCursor    string                 `protobuf:"bytes,2,opt,name=next_cursor,json=nextCursor,proto3" json:"next_cursor,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListUsersResponse) Reset() {
+	*x = ListUsersResponse{}
+	mi := &file_clinks_v1_clinks_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListUsersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListUsersResponse) ProtoMessage() {}
+
+func (x *ListUsersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_clinks_v1_clinks_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListUsersResponse.ProtoReflect.Descriptor instead.
+func (*ListUsersResponse) Descriptor() ([]byte, []int) {
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *ListUsersResponse) GetUsers() []*UserSummary {
+	if x != nil {
+		return x.Users
+	}
+	return nil
+}
+
+func (x *ListUsersResponse) GetNextCursor() string {
+	if x != nil {
+		return x.NextCursor
+	}
+	return ""
+}
+
+type GetUserRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUserRequest) Reset() {
+	*x = GetUserRequest{}
+	mi := &file_clinks_v1_clinks_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUserRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserRequest) ProtoMessage() {}
+
+func (x *GetUserRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_clinks_v1_clinks_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserRequest.ProtoReflect.Descriptor instead.
+func (*GetUserRequest) Descriptor() ([]byte, []int) {
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *GetUserRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+type UserDetail struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	User          *UserSummary           `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	Memberships   []*Membership          `protobuf:"bytes,2,rep,name=memberships,proto3" json:"memberships,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UserDetail) Reset() {
+	*x = UserDetail{}
+	mi := &file_clinks_v1_clinks_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UserDetail) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UserDetail) ProtoMessage() {}
+
+func (x *UserDetail) ProtoReflect() protoreflect.Message {
+	mi := &file_clinks_v1_clinks_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UserDetail.ProtoReflect.Descriptor instead.
+func (*UserDetail) Descriptor() ([]byte, []int) {
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *UserDetail) GetUser() *UserSummary {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
+func (x *UserDetail) GetMemberships() []*Membership {
+	if x != nil {
+		return x.Memberships
+	}
+	return nil
+}
+
+type ListInvitationsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TenantId      string                 `protobuf:"bytes,1,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
+	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	Search        string                 `protobuf:"bytes,3,opt,name=search,proto3" json:"search,omitempty"`
+	Cursor        string                 `protobuf:"bytes,4,opt,name=cursor,proto3" json:"cursor,omitempty"`
+	PageSize      uint32                 `protobuf:"varint,5,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListInvitationsRequest) Reset() {
+	*x = ListInvitationsRequest{}
+	mi := &file_clinks_v1_clinks_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListInvitationsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListInvitationsRequest) ProtoMessage() {}
+
+func (x *ListInvitationsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_clinks_v1_clinks_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListInvitationsRequest.ProtoReflect.Descriptor instead.
+func (*ListInvitationsRequest) Descriptor() ([]byte, []int) {
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *ListInvitationsRequest) GetTenantId() string {
+	if x != nil {
+		return x.TenantId
+	}
+	return ""
+}
+
+func (x *ListInvitationsRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *ListInvitationsRequest) GetSearch() string {
+	if x != nil {
+		return x.Search
+	}
+	return ""
+}
+
+func (x *ListInvitationsRequest) GetCursor() string {
+	if x != nil {
+		return x.Cursor
+	}
+	return ""
+}
+
+func (x *ListInvitationsRequest) GetPageSize() uint32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type ListInvitationsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Invitations   []*Invitation          `protobuf:"bytes,1,rep,name=invitations,proto3" json:"invitations,omitempty"`
+	NextCursor    string                 `protobuf:"bytes,2,opt,name=next_cursor,json=nextCursor,proto3" json:"next_cursor,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListInvitationsResponse) Reset() {
+	*x = ListInvitationsResponse{}
+	mi := &file_clinks_v1_clinks_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListInvitationsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListInvitationsResponse) ProtoMessage() {}
+
+func (x *ListInvitationsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_clinks_v1_clinks_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListInvitationsResponse.ProtoReflect.Descriptor instead.
+func (*ListInvitationsResponse) Descriptor() ([]byte, []int) {
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *ListInvitationsResponse) GetInvitations() []*Invitation {
+	if x != nil {
+		return x.Invitations
+	}
+	return nil
+}
+
+func (x *ListInvitationsResponse) GetNextCursor() string {
+	if x != nil {
+		return x.NextCursor
+	}
+	return ""
+}
+
+type RevokeInvitationRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	InvitationId  string                 `protobuf:"bytes,1,opt,name=invitation_id,json=invitationId,proto3" json:"invitation_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RevokeInvitationRequest) Reset() {
+	*x = RevokeInvitationRequest{}
+	mi := &file_clinks_v1_clinks_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RevokeInvitationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RevokeInvitationRequest) ProtoMessage() {}
+
+func (x *RevokeInvitationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_clinks_v1_clinks_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RevokeInvitationRequest.ProtoReflect.Descriptor instead.
+func (*RevokeInvitationRequest) Descriptor() ([]byte, []int) {
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *RevokeInvitationRequest) GetInvitationId() string {
+	if x != nil {
+		return x.InvitationId
+	}
+	return ""
+}
+
+type SystemStats struct {
+	state                  protoimpl.MessageState `protogen:"open.v1"`
+	UserCount              uint32                 `protobuf:"varint,1,opt,name=user_count,json=userCount,proto3" json:"user_count,omitempty"`
+	TenantCount            uint32                 `protobuf:"varint,2,opt,name=tenant_count,json=tenantCount,proto3" json:"tenant_count,omitempty"`
+	PendingInvitationCount uint32                 `protobuf:"varint,3,opt,name=pending_invitation_count,json=pendingInvitationCount,proto3" json:"pending_invitation_count,omitempty"`
+	ActiveLanguageCount    uint32                 `protobuf:"varint,4,opt,name=active_language_count,json=activeLanguageCount,proto3" json:"active_language_count,omitempty"`
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *SystemStats) Reset() {
+	*x = SystemStats{}
+	mi := &file_clinks_v1_clinks_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SystemStats) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SystemStats) ProtoMessage() {}
+
+func (x *SystemStats) ProtoReflect() protoreflect.Message {
+	mi := &file_clinks_v1_clinks_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SystemStats.ProtoReflect.Descriptor instead.
+func (*SystemStats) Descriptor() ([]byte, []int) {
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *SystemStats) GetUserCount() uint32 {
+	if x != nil {
+		return x.UserCount
+	}
+	return 0
+}
+
+func (x *SystemStats) GetTenantCount() uint32 {
+	if x != nil {
+		return x.TenantCount
+	}
+	return 0
+}
+
+func (x *SystemStats) GetPendingInvitationCount() uint32 {
+	if x != nil {
+		return x.PendingInvitationCount
+	}
+	return 0
+}
+
+func (x *SystemStats) GetActiveLanguageCount() uint32 {
+	if x != nil {
+		return x.ActiveLanguageCount
+	}
+	return 0
+}
+
 var File_clinks_v1_clinks_proto protoreflect.FileDescriptor
 
 const file_clinks_v1_clinks_proto_rawDesc = "" +
@@ -1353,13 +1893,14 @@ const file_clinks_v1_clinks_proto_rawDesc = "" +
 	"\x0fTenantsResponse\x12+\n" +
 	"\atenants\x18\x01 \x03(\v2\x11.clinks.v1.TenantR\atenants\")\n" +
 	"\x13CreateTenantRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\"\xc1\x01\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\"\xd9\x01\n" +
 	"\x16ListAuditEventsRequest\x12\x12\n" +
 	"\x04from\x18\x01 \x01(\tR\x04from\x12\x0e\n" +
 	"\x02to\x18\x02 \x01(\tR\x02to\x12\x19\n" +
 	"\bactor_id\x18\x03 \x01(\tR\aactorId\x12\x1b\n" +
 	"\ttenant_id\x18\x04 \x01(\tR\btenantId\x12\x16\n" +
 	"\x06action\x18\x05 \x01(\tR\x06action\x12\x16\n" +
+	"\x06search\x18\b \x01(\tR\x06search\x12\x16\n" +
 	"\x06cursor\x18\x06 \x01(\tR\x06cursor\x12\x1b\n" +
 	"\tpage_size\x18\a \x01(\rR\bpageSize\"\x89\x02\n" +
 	"\n" +
@@ -1379,7 +1920,46 @@ const file_clinks_v1_clinks_proto_rawDesc = "" +
 	"\x13AuditEventsResponse\x12-\n" +
 	"\x06events\x18\x01 \x03(\v2\x15.clinks.v1.AuditEventR\x06events\x12\x1f\n" +
 	"\vnext_cursor\x18\x02 \x01(\tR\n" +
-	"nextCursor2\xbd\b\n" +
+	"nextCursor\"s\n" +
+	"\x10ListUsersRequest\x12\x16\n" +
+	"\x06search\x18\x01 \x01(\tR\x06search\x12\x12\n" +
+	"\x04role\x18\x02 \x01(\tR\x04role\x12\x16\n" +
+	"\x06cursor\x18\x03 \x01(\tR\x06cursor\x12\x1b\n" +
+	"\tpage_size\x18\x04 \x01(\rR\bpageSize\"\x9c\x01\n" +
+	"\vUserSummary\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
+	"\x05email\x18\x02 \x01(\tR\x05email\x12\x16\n" +
+	"\x06locale\x18\x03 \x01(\tR\x06locale\x12$\n" +
+	"\x0eis_super_admin\x18\x04 \x01(\bR\fisSuperAdmin\x12)\n" +
+	"\x10membership_count\x18\x05 \x01(\rR\x0fmembershipCount\"b\n" +
+	"\x11ListUsersResponse\x12,\n" +
+	"\x05users\x18\x01 \x03(\v2\x16.clinks.v1.UserSummaryR\x05users\x12\x1f\n" +
+	"\vnext_cursor\x18\x02 \x01(\tR\n" +
+	"nextCursor\")\n" +
+	"\x0eGetUserRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\"q\n" +
+	"\n" +
+	"UserDetail\x12*\n" +
+	"\x04user\x18\x01 \x01(\v2\x16.clinks.v1.UserSummaryR\x04user\x127\n" +
+	"\vmemberships\x18\x02 \x03(\v2\x15.clinks.v1.MembershipR\vmemberships\"\x9a\x01\n" +
+	"\x16ListInvitationsRequest\x12\x1b\n" +
+	"\ttenant_id\x18\x01 \x01(\tR\btenantId\x12\x16\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\x12\x16\n" +
+	"\x06search\x18\x03 \x01(\tR\x06search\x12\x16\n" +
+	"\x06cursor\x18\x04 \x01(\tR\x06cursor\x12\x1b\n" +
+	"\tpage_size\x18\x05 \x01(\rR\bpageSize\"s\n" +
+	"\x17ListInvitationsResponse\x127\n" +
+	"\vinvitations\x18\x01 \x03(\v2\x15.clinks.v1.InvitationR\vinvitations\x12\x1f\n" +
+	"\vnext_cursor\x18\x02 \x01(\tR\n" +
+	"nextCursor\">\n" +
+	"\x17RevokeInvitationRequest\x12#\n" +
+	"\rinvitation_id\x18\x01 \x01(\tR\finvitationId\"\xbd\x01\n" +
+	"\vSystemStats\x12\x1d\n" +
+	"\n" +
+	"user_count\x18\x01 \x01(\rR\tuserCount\x12!\n" +
+	"\ftenant_count\x18\x02 \x01(\rR\vtenantCount\x128\n" +
+	"\x18pending_invitation_count\x18\x03 \x01(\rR\x16pendingInvitationCount\x122\n" +
+	"\x15active_language_count\x18\x04 \x01(\rR\x13activeLanguageCount2\xa2\v\n" +
 	"\rClinksService\x12:\n" +
 	"\x05Login\x12\x1d.clinks.v1.CredentialsRequest\x1a\x12.clinks.v1.Session\x12D\n" +
 	"\x0fLoginSuperAdmin\x12\x1d.clinks.v1.CredentialsRequest\x1a\x12.clinks.v1.Session\x12:\n" +
@@ -1397,7 +1977,12 @@ const file_clinks_v1_clinks_proto_rawDesc = "" +
 	"\x14ListManagedLanguages\x12\x10.clinks.v1.Empty\x1a\x1c.clinks.v1.LanguagesResponse\x125\n" +
 	"\fSaveLanguage\x12\x13.clinks.v1.Language\x1a\x10.clinks.v1.Empty\x12A\n" +
 	"\x0fSaveTranslation\x12\x1c.clinks.v1.ScopedTranslation\x1a\x10.clinks.v1.Empty\x12T\n" +
-	"\x0fListAuditEvents\x12!.clinks.v1.ListAuditEventsRequest\x1a\x1e.clinks.v1.AuditEventsResponseB@Z>github.com/besartmorina/clinks/server/proto/clinks/v1;clinksv1b\x06proto3"
+	"\x0fListAuditEvents\x12!.clinks.v1.ListAuditEventsRequest\x1a\x1e.clinks.v1.AuditEventsResponse\x12F\n" +
+	"\tListUsers\x12\x1b.clinks.v1.ListUsersRequest\x1a\x1c.clinks.v1.ListUsersResponse\x12;\n" +
+	"\aGetUser\x12\x19.clinks.v1.GetUserRequest\x1a\x15.clinks.v1.UserDetail\x12X\n" +
+	"\x0fListInvitations\x12!.clinks.v1.ListInvitationsRequest\x1a\".clinks.v1.ListInvitationsResponse\x12H\n" +
+	"\x10RevokeInvitation\x12\".clinks.v1.RevokeInvitationRequest\x1a\x10.clinks.v1.Empty\x12:\n" +
+	"\x0eGetSystemStats\x12\x10.clinks.v1.Empty\x1a\x16.clinks.v1.SystemStatsB@Z>github.com/besartmorina/clinks/server/proto/clinks/v1;clinksv1b\x06proto3"
 
 var (
 	file_clinks_v1_clinks_proto_rawDescOnce sync.Once
@@ -1411,7 +1996,7 @@ func file_clinks_v1_clinks_proto_rawDescGZIP() []byte {
 	return file_clinks_v1_clinks_proto_rawDescData
 }
 
-var file_clinks_v1_clinks_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
+var file_clinks_v1_clinks_proto_msgTypes = make([]protoimpl.MessageInfo, 30)
 var file_clinks_v1_clinks_proto_goTypes = []any{
 	(*Empty)(nil),                   // 0: clinks.v1.Empty
 	(*CredentialsRequest)(nil),      // 1: clinks.v1.CredentialsRequest
@@ -1434,6 +2019,15 @@ var file_clinks_v1_clinks_proto_goTypes = []any{
 	(*ListAuditEventsRequest)(nil),  // 18: clinks.v1.ListAuditEventsRequest
 	(*AuditEvent)(nil),              // 19: clinks.v1.AuditEvent
 	(*AuditEventsResponse)(nil),     // 20: clinks.v1.AuditEventsResponse
+	(*ListUsersRequest)(nil),        // 21: clinks.v1.ListUsersRequest
+	(*UserSummary)(nil),             // 22: clinks.v1.UserSummary
+	(*ListUsersResponse)(nil),       // 23: clinks.v1.ListUsersResponse
+	(*GetUserRequest)(nil),          // 24: clinks.v1.GetUserRequest
+	(*UserDetail)(nil),              // 25: clinks.v1.UserDetail
+	(*ListInvitationsRequest)(nil),  // 26: clinks.v1.ListInvitationsRequest
+	(*ListInvitationsResponse)(nil), // 27: clinks.v1.ListInvitationsResponse
+	(*RevokeInvitationRequest)(nil), // 28: clinks.v1.RevokeInvitationRequest
+	(*SystemStats)(nil),             // 29: clinks.v1.SystemStats
 }
 var file_clinks_v1_clinks_proto_depIdxs = []int32{
 	5,  // 0: clinks.v1.Membership.tenant:type_name -> clinks.v1.Tenant
@@ -1444,43 +2038,57 @@ var file_clinks_v1_clinks_proto_depIdxs = []int32{
 	14, // 5: clinks.v1.TranslationsResponse.translations:type_name -> clinks.v1.ScopedTranslation
 	5,  // 6: clinks.v1.TenantsResponse.tenants:type_name -> clinks.v1.Tenant
 	19, // 7: clinks.v1.AuditEventsResponse.events:type_name -> clinks.v1.AuditEvent
-	1,  // 8: clinks.v1.ClinksService.Login:input_type -> clinks.v1.CredentialsRequest
-	1,  // 9: clinks.v1.ClinksService.LoginSuperAdmin:input_type -> clinks.v1.CredentialsRequest
-	2,  // 10: clinks.v1.ClinksService.Register:input_type -> clinks.v1.RegisterRequest
-	0,  // 11: clinks.v1.ClinksService.Logout:input_type -> clinks.v1.Empty
-	0,  // 12: clinks.v1.ClinksService.GetSession:input_type -> clinks.v1.Empty
-	3,  // 13: clinks.v1.ClinksService.SwitchTenant:input_type -> clinks.v1.SwitchTenantRequest
-	8,  // 14: clinks.v1.ClinksService.CreateInvitation:input_type -> clinks.v1.CreateInvitationRequest
-	10, // 15: clinks.v1.ClinksService.AcceptInvitation:input_type -> clinks.v1.AcceptInvitationRequest
-	0,  // 16: clinks.v1.ClinksService.GetLanguages:input_type -> clinks.v1.Empty
-	13, // 17: clinks.v1.ClinksService.GetTranslations:input_type -> clinks.v1.GetTranslationsRequest
-	0,  // 18: clinks.v1.ClinksService.ListTenants:input_type -> clinks.v1.Empty
-	17, // 19: clinks.v1.ClinksService.CreateTenant:input_type -> clinks.v1.CreateTenantRequest
-	0,  // 20: clinks.v1.ClinksService.ListManagedLanguages:input_type -> clinks.v1.Empty
-	11, // 21: clinks.v1.ClinksService.SaveLanguage:input_type -> clinks.v1.Language
-	14, // 22: clinks.v1.ClinksService.SaveTranslation:input_type -> clinks.v1.ScopedTranslation
-	18, // 23: clinks.v1.ClinksService.ListAuditEvents:input_type -> clinks.v1.ListAuditEventsRequest
-	7,  // 24: clinks.v1.ClinksService.Login:output_type -> clinks.v1.Session
-	7,  // 25: clinks.v1.ClinksService.LoginSuperAdmin:output_type -> clinks.v1.Session
-	7,  // 26: clinks.v1.ClinksService.Register:output_type -> clinks.v1.Session
-	0,  // 27: clinks.v1.ClinksService.Logout:output_type -> clinks.v1.Empty
-	7,  // 28: clinks.v1.ClinksService.GetSession:output_type -> clinks.v1.Session
-	7,  // 29: clinks.v1.ClinksService.SwitchTenant:output_type -> clinks.v1.Session
-	9,  // 30: clinks.v1.ClinksService.CreateInvitation:output_type -> clinks.v1.Invitation
-	7,  // 31: clinks.v1.ClinksService.AcceptInvitation:output_type -> clinks.v1.Session
-	12, // 32: clinks.v1.ClinksService.GetLanguages:output_type -> clinks.v1.LanguagesResponse
-	15, // 33: clinks.v1.ClinksService.GetTranslations:output_type -> clinks.v1.TranslationsResponse
-	16, // 34: clinks.v1.ClinksService.ListTenants:output_type -> clinks.v1.TenantsResponse
-	5,  // 35: clinks.v1.ClinksService.CreateTenant:output_type -> clinks.v1.Tenant
-	12, // 36: clinks.v1.ClinksService.ListManagedLanguages:output_type -> clinks.v1.LanguagesResponse
-	0,  // 37: clinks.v1.ClinksService.SaveLanguage:output_type -> clinks.v1.Empty
-	0,  // 38: clinks.v1.ClinksService.SaveTranslation:output_type -> clinks.v1.Empty
-	20, // 39: clinks.v1.ClinksService.ListAuditEvents:output_type -> clinks.v1.AuditEventsResponse
-	24, // [24:40] is the sub-list for method output_type
-	8,  // [8:24] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	22, // 8: clinks.v1.ListUsersResponse.users:type_name -> clinks.v1.UserSummary
+	22, // 9: clinks.v1.UserDetail.user:type_name -> clinks.v1.UserSummary
+	6,  // 10: clinks.v1.UserDetail.memberships:type_name -> clinks.v1.Membership
+	9,  // 11: clinks.v1.ListInvitationsResponse.invitations:type_name -> clinks.v1.Invitation
+	1,  // 12: clinks.v1.ClinksService.Login:input_type -> clinks.v1.CredentialsRequest
+	1,  // 13: clinks.v1.ClinksService.LoginSuperAdmin:input_type -> clinks.v1.CredentialsRequest
+	2,  // 14: clinks.v1.ClinksService.Register:input_type -> clinks.v1.RegisterRequest
+	0,  // 15: clinks.v1.ClinksService.Logout:input_type -> clinks.v1.Empty
+	0,  // 16: clinks.v1.ClinksService.GetSession:input_type -> clinks.v1.Empty
+	3,  // 17: clinks.v1.ClinksService.SwitchTenant:input_type -> clinks.v1.SwitchTenantRequest
+	8,  // 18: clinks.v1.ClinksService.CreateInvitation:input_type -> clinks.v1.CreateInvitationRequest
+	10, // 19: clinks.v1.ClinksService.AcceptInvitation:input_type -> clinks.v1.AcceptInvitationRequest
+	0,  // 20: clinks.v1.ClinksService.GetLanguages:input_type -> clinks.v1.Empty
+	13, // 21: clinks.v1.ClinksService.GetTranslations:input_type -> clinks.v1.GetTranslationsRequest
+	0,  // 22: clinks.v1.ClinksService.ListTenants:input_type -> clinks.v1.Empty
+	17, // 23: clinks.v1.ClinksService.CreateTenant:input_type -> clinks.v1.CreateTenantRequest
+	0,  // 24: clinks.v1.ClinksService.ListManagedLanguages:input_type -> clinks.v1.Empty
+	11, // 25: clinks.v1.ClinksService.SaveLanguage:input_type -> clinks.v1.Language
+	14, // 26: clinks.v1.ClinksService.SaveTranslation:input_type -> clinks.v1.ScopedTranslation
+	18, // 27: clinks.v1.ClinksService.ListAuditEvents:input_type -> clinks.v1.ListAuditEventsRequest
+	21, // 28: clinks.v1.ClinksService.ListUsers:input_type -> clinks.v1.ListUsersRequest
+	24, // 29: clinks.v1.ClinksService.GetUser:input_type -> clinks.v1.GetUserRequest
+	26, // 30: clinks.v1.ClinksService.ListInvitations:input_type -> clinks.v1.ListInvitationsRequest
+	28, // 31: clinks.v1.ClinksService.RevokeInvitation:input_type -> clinks.v1.RevokeInvitationRequest
+	0,  // 32: clinks.v1.ClinksService.GetSystemStats:input_type -> clinks.v1.Empty
+	7,  // 33: clinks.v1.ClinksService.Login:output_type -> clinks.v1.Session
+	7,  // 34: clinks.v1.ClinksService.LoginSuperAdmin:output_type -> clinks.v1.Session
+	7,  // 35: clinks.v1.ClinksService.Register:output_type -> clinks.v1.Session
+	0,  // 36: clinks.v1.ClinksService.Logout:output_type -> clinks.v1.Empty
+	7,  // 37: clinks.v1.ClinksService.GetSession:output_type -> clinks.v1.Session
+	7,  // 38: clinks.v1.ClinksService.SwitchTenant:output_type -> clinks.v1.Session
+	9,  // 39: clinks.v1.ClinksService.CreateInvitation:output_type -> clinks.v1.Invitation
+	7,  // 40: clinks.v1.ClinksService.AcceptInvitation:output_type -> clinks.v1.Session
+	12, // 41: clinks.v1.ClinksService.GetLanguages:output_type -> clinks.v1.LanguagesResponse
+	15, // 42: clinks.v1.ClinksService.GetTranslations:output_type -> clinks.v1.TranslationsResponse
+	16, // 43: clinks.v1.ClinksService.ListTenants:output_type -> clinks.v1.TenantsResponse
+	5,  // 44: clinks.v1.ClinksService.CreateTenant:output_type -> clinks.v1.Tenant
+	12, // 45: clinks.v1.ClinksService.ListManagedLanguages:output_type -> clinks.v1.LanguagesResponse
+	0,  // 46: clinks.v1.ClinksService.SaveLanguage:output_type -> clinks.v1.Empty
+	0,  // 47: clinks.v1.ClinksService.SaveTranslation:output_type -> clinks.v1.Empty
+	20, // 48: clinks.v1.ClinksService.ListAuditEvents:output_type -> clinks.v1.AuditEventsResponse
+	23, // 49: clinks.v1.ClinksService.ListUsers:output_type -> clinks.v1.ListUsersResponse
+	25, // 50: clinks.v1.ClinksService.GetUser:output_type -> clinks.v1.UserDetail
+	27, // 51: clinks.v1.ClinksService.ListInvitations:output_type -> clinks.v1.ListInvitationsResponse
+	0,  // 52: clinks.v1.ClinksService.RevokeInvitation:output_type -> clinks.v1.Empty
+	29, // 53: clinks.v1.ClinksService.GetSystemStats:output_type -> clinks.v1.SystemStats
+	33, // [33:54] is the sub-list for method output_type
+	12, // [12:33] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
 func init() { file_clinks_v1_clinks_proto_init() }
@@ -1494,7 +2102,7 @@ func file_clinks_v1_clinks_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_clinks_v1_clinks_proto_rawDesc), len(file_clinks_v1_clinks_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   21,
+			NumMessages:   30,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

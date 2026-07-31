@@ -1,5 +1,6 @@
 <script lang="ts">
-	import type { ApplicationScope, AuthAccessViewModel, TranslationBundleViewModel } from '@clinks/clinks-runtime';
+	import type { ApplicationScope, AuthAccessViewModel } from '@clinks/clinks-runtime';
+	import { useClinksRuntime } from '@clinks/clinks-runtime';
 	import * as Alert from '@clinks/ui-shared/components/ui/alert';
 	import { Badge } from '@clinks/ui-shared/components/ui/badge';
 	import { Button } from '@clinks/ui-shared/components/ui/button';
@@ -11,14 +12,12 @@
 		model,
 		application,
 		errorMessage,
-		translations,
 	}: {
 		model: AuthAccessViewModel;
 		application: ApplicationScope;
 		errorMessage: string;
-		translations: TranslationBundleViewModel;
 	} = $props();
-	const t = (key: string) => translations.t(key);
+	const t = (key: string) => useClinksRuntime().translations.t(key);
 </script>
 
 <Card.Root class="mx-auto max-w-md p-4 shadow-xl shadow-black/5 sm:p-7">

@@ -8,11 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	authadapter "github.com/besartmorina/clinks/server/internal/adapters/auth"
-	mailadapter "github.com/besartmorina/clinks/server/internal/adapters/mail"
-	"github.com/besartmorina/clinks/server/internal/adapters/postgres"
 	appconfig "github.com/besartmorina/clinks/server/internal/config"
-	"github.com/besartmorina/clinks/server/internal/core/service"
 )
 
 func main() {
@@ -30,29 +26,16 @@ func run(arguments []string) error {
 	}
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
-	pool, err := postgres.NewPool(ctx, postgres.PoolConfig{
-		DatabaseURL: settings.Database.URL, MaxConns: settings.Database.MaxConns,
-		MinConns: settings.Database.MinConns, MaxConnLifetime: settings.Database.ConnMaxLifetime,
-		MaxConnIdleTime: settings.Database.ConnMaxIdleTime, HealthCheckPeriod: settings.Database.HealthCheck,
-	})
+
+	application, err := InitializeWorker(ctx, &settings)
 	if err != nil {
-		return err
+		return fmt.Errorf("build worker: %w", err)
 	}
-	defer pool.Close()
 	if len(arguments) > 0 && arguments[0] == "healthcheck" {
-		return pool.Ping(ctx)
+		return application.Healthcheck(ctx)
 	}
 	if len(arguments) > 0 {
 		return fmt.Errorf("unknown command %q", arguments[0])
 	}
-	tokens, err := authadapter.NewInvitationTokenSigner(authadapter.InvitationTokenConfig{Secret: settings.Invites.TokenSecret})
-	if err != nil {
-		return err
-	}
-	mailer := mailadapter.NewSMTPMailer(&mailadapter.SMTPConfig{
-		Host: settings.SMTP.Host, Port: settings.SMTP.Port, Username: settings.SMTP.Username,
-		Password: settings.SMTP.Password, From: settings.SMTP.From, RequireTLS: settings.SMTP.RequireTLS,
-	})
-	worker := service.NewInvitationWorker(postgres.NewOutboxRepository(pool), mailer, tokens, settings.Invites.PublicBaseURL)
-	return worker.Run(ctx)
+	return application.Run(ctx)
 }

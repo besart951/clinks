@@ -1,5 +1,6 @@
 <script lang="ts">
-	import type { AuditLogViewModel, TranslationBundleViewModel } from '@clinks/clinks-runtime';
+	import type { AuditLogViewModel } from '@clinks/clinks-runtime';
+	import { useClinksRuntime } from '@clinks/clinks-runtime';
 	import { Badge } from '@clinks/ui-shared/components/ui/badge';
 	import { Button } from '@clinks/ui-shared/components/ui/button';
 	import * as Card from '@clinks/ui-shared/components/ui/card';
@@ -7,8 +8,9 @@
 	import { Label } from '@clinks/ui-shared/components/ui/label';
 	import * as Table from '@clinks/ui-shared/components/ui/table';
 
-	let { model, translations }: { model: AuditLogViewModel; translations: TranslationBundleViewModel } = $props();
-	const t = (key: string) => translations.t(key);
+	let { model }: { model: AuditLogViewModel } = $props();
+	const runtime = useClinksRuntime();
+	const t = (key: string) => runtime.translations.t(key);
 </script>
 
 <Card.Root class="lg:col-span-2">
@@ -59,7 +61,7 @@
 				></Table.Header
 			><Table.Body
 				>{#each model.auditEvents as event}<Table.Row
-						><Table.Cell>{new Date(event.occurredAt).toLocaleString(translations.locale)}</Table.Cell><Table.Cell
+						><Table.Cell>{model.formatDate(event.occurredAt, runtime.translations.locale)}</Table.Cell><Table.Cell
 							>{event.actorEmail || event.actorId}</Table.Cell
 						><Table.Cell>{event.tenantName || event.tenantId}</Table.Cell><Table.Cell
 							><Badge variant="outline">{event.action}</Badge></Table.Cell

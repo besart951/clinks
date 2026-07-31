@@ -22,6 +22,7 @@ type AuditFilter struct {
 	ActorID  *UserID
 	TenantID *TenantID
 	Action   string
+	Search   string
 	Cursor   string
 	PageSize int
 }

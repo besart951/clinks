@@ -2,12 +2,13 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 (globalThis as any).$state ??= (v: any) => v;
+(globalThis as any).$derived ??= (v: any) => (typeof v === 'function' ? v() : v);
 
 import { AuditLogViewModel } from '../src/audit-log-view-model.svelte.ts';
 
 describe('AuditLogViewModel', () => {
 	it('loads audit events and handles pagination cursor', async () => {
-		const mockClient = {
+		const mockService = {
 			auditEvents: async (filter: { cursor?: string }) => ({
 				events: filter.cursor
 					? [
@@ -40,8 +41,7 @@ describe('AuditLogViewModel', () => {
 			}),
 		};
 
-		let lastError = '';
-		const model = new AuditLogViewModel(mockClient, { message: (e) => String(e) }, (msg) => (lastError = msg));
+		const model = new AuditLogViewModel(mockService, { message: (e) => String(e) });
 
 		await model.filterAuditEvents();
 		assert.equal(model.auditEvents.length, 1);
@@ -52,6 +52,6 @@ describe('AuditLogViewModel', () => {
 		assert.equal(model.auditEvents.length, 2);
 		assert.equal(model.auditEvents[1].id, 'evt-2');
 		assert.equal(model.nextAuditCursor, '');
-		assert.equal(lastError, '');
+		assert.equal(model.error, '');
 	});
 });

@@ -8,10 +8,16 @@ import {
 	type TranslationResponse,
 } from '@clinks/i18n-types';
 
+export type { Language, Locale, LocalizedError, TranslationResponse };
+export { productDefaultLocale };
+
 import type {
 	AuditEvent as AuditEventMessage,
 	Invitation as InvitationMessage,
 	Session as SessionMessage,
+	UserSummary as UserSummaryMessage,
+	UserDetail as UserDetailMessage,
+	SystemStats as SystemStatsMessage,
 } from './gen/clinks/v1/clinks_pb.ts';
 import { ClinksService } from './gen/clinks/v1/clinks_pb.ts';
 
@@ -48,6 +54,7 @@ export interface Invitation {
 	email: string;
 	role: 'ROLE_TENANT_ADMIN' | 'ROLE_USER';
 	expiresAt: string;
+	usedAt?: string;
 	acceptanceUrl: string;
 	deliveryStatus: 'sent' | 'failed' | 'not_configured';
 }
@@ -84,6 +91,51 @@ export interface AuditFilter {
 export interface AuditPage {
 	events: AuditEvent[];
 	nextCursor: string;
+}
+
+export interface UserSummary {
+	id: string;
+	email: string;
+	locale: Locale;
+	isSuperAdmin: boolean;
+	membershipCount: number;
+}
+
+export interface UserDetail {
+	user: UserSummary;
+	memberships: Membership[];
+}
+
+export interface UserFilter {
+	search?: string;
+	role?: string;
+	cursor?: string;
+	pageSize?: number;
+}
+
+export interface UserPage {
+	users: UserSummary[];
+	nextCursor: string;
+}
+
+export interface InvitationFilter {
+	tenantId?: string;
+	status?: string;
+	search?: string;
+	cursor?: string;
+	pageSize?: number;
+}
+
+export interface InvitationPage {
+	invitations: Invitation[];
+	nextCursor: string;
+}
+
+export interface SystemStats {
+	userCount: number;
+	tenantCount: number;
+	pendingInvitationCount: number;
+	activeLanguageCount: number;
 }
 
 export class APIError extends Error implements LocalizedError {
@@ -137,10 +189,27 @@ export function createClient(options: ClientOptions) {
 		saveLanguage: (value: Language) => call(options, () => rpc.saveLanguage(value).then(() => undefined)),
 		saveTranslation: (value: TranslationInput) => call(options, () => rpc.saveTranslation(value).then(() => undefined)),
 		auditEvents: (filter: AuditFilter) => call(options, () => rpc.listAuditEvents(filter).then(auditPage)),
+		listUsers: (filter: UserFilter) => call(options, () => rpc.listUsers(filter).then(userPage)),
+		getUser: (userId: string) => call(options, () => rpc.getUser({ userId }).then(userDetail)),
+		listInvitations: (filter: InvitationFilter) =>
+			call(options, () => rpc.listInvitations(filter).then(invitationPage)),
+		revokeInvitation: (invitationId: string) =>
+			call(options, () => rpc.revokeInvitation({ invitationId }).then(() => undefined)),
+		systemStats: () => call(options, () => rpc.getSystemStats({}).then(systemStats)),
 	};
 }
 
 export type ClinksClient = ReturnType<typeof createClient>;
+
+export type {
+	AuditService,
+	InvitationService,
+	LocalizationAdminService,
+	SessionService,
+	SystemService,
+	TenantService,
+	UserAdminService,
+} from './services.js';
 
 async function call<T>(options: ClientOptions, action: () => Promise<T>): Promise<T> {
 	try {
@@ -155,6 +224,17 @@ async function call<T>(options: ClientOptions, action: () => Promise<T>): Promis
 		}
 		throw error;
 	}
+}
+
+function parseRole(role: string): Membership['role'] {
+	return role === 'ROLE_TENANT_ADMIN' ? 'ROLE_TENANT_ADMIN' : 'ROLE_USER';
+}
+
+function parseDeliveryStatus(status: string): Invitation['deliveryStatus'] {
+	if (status === 'sent' || status === 'failed' || status === 'not_configured') {
+		return status;
+	}
+	return 'not_configured';
 }
 
 function session(value: SessionMessage): Session {
@@ -172,8 +252,8 @@ function session(value: SessionMessage): Session {
 						{
 							id: value.id,
 							tenant: tenant(value.tenant),
-							role: value.role as Membership['role'],
-							status: value.status as Membership['status'],
+							role: parseRole(value.role),
+							status: 'ACTIVE',
 						},
 					]
 				: [],
@@ -190,10 +270,10 @@ function invitation(value: InvitationMessage): Invitation {
 		id: value.id,
 		tenantId: value.tenantId,
 		email: value.email,
-		role: value.role as Invitation['role'],
+		role: parseRole(value.role),
 		expiresAt: value.expiresAt,
 		acceptanceUrl: value.acceptanceUrl,
-		deliveryStatus: value.deliveryStatus as Invitation['deliveryStatus'],
+		deliveryStatus: parseDeliveryStatus(value.deliveryStatus),
 	};
 }
 
@@ -219,5 +299,57 @@ function auditEvent(value: AuditEventMessage): AuditEvent {
 		action: value.action,
 		target: value.target,
 		description: value.description,
+	};
+}
+
+function userSummary(value: UserSummaryMessage): UserSummary {
+	return {
+		id: value.id,
+		email: value.email,
+		locale: value.locale ?? productDefaultLocale,
+		isSuperAdmin: value.isSuperAdmin ?? false,
+		membershipCount: value.membershipCount ?? 0,
+	};
+}
+
+function userPage(value: { users: UserSummaryMessage[]; nextCursor: string }): UserPage {
+	return { users: value.users.map(userSummary), nextCursor: value.nextCursor };
+}
+
+function userDetail(value: UserDetailMessage): UserDetail {
+	if (!value.user) {
+		throw new APIError({
+			code: 'INVALID_RESPONSE',
+			message: 'Malformed response: user detail missing',
+			locale: productDefaultLocale,
+		});
+	}
+	return {
+		user: userSummary(value.user),
+		memberships: value.memberships.flatMap((m) =>
+			m.tenant
+				? [
+						{
+							id: m.id,
+							tenant: tenant(m.tenant),
+							role: parseRole(m.role),
+							status: 'ACTIVE',
+						},
+					]
+				: [],
+		),
+	};
+}
+
+function invitationPage(value: { invitations: InvitationMessage[]; nextCursor: string }): InvitationPage {
+	return { invitations: value.invitations.map(invitation), nextCursor: value.nextCursor };
+}
+
+function systemStats(value: SystemStatsMessage): SystemStats {
+	return {
+		userCount: value.userCount ?? 0,
+		tenantCount: value.tenantCount ?? 0,
+		pendingInvitationCount: value.pendingInvitationCount ?? 0,
+		activeLanguageCount: value.activeLanguageCount ?? 0,
 	};
 }

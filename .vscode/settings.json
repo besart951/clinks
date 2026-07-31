@@ -31,5 +31,6 @@
     "formatting.local": "github.com/besartmorina/clinks/server",
     "staticcheck": true,
     "ui.semanticTokens": true
-  }
+  },
+  "css.lint.unknownAtRules": "ignore"
 }

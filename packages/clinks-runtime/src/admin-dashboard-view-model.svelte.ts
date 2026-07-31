@@ -1,108 +1,71 @@
-import type { ClinksClient, Session } from '@clinks/api-client';
-import { AuditLogViewModel } from './audit-log-view-model.svelte.ts';
+import type { ClinksClient } from '@clinks/api-client';
 import type { ErrorMessageFormatter } from './auth-portal-view-model.svelte.ts';
+import { InvitationViewModel } from './invitation-view-model.svelte.ts';
 import { LocalizationViewModel } from './localization-view-model.svelte.ts';
+import { SystemStatsViewModel } from './system-stats-view-model.svelte.ts';
 import { TenantViewModel } from './tenant-view-model.svelte.ts';
+import { UserManagementViewModel } from './user-management-view-model.svelte.ts';
+import { AuditLogViewModel } from './audit-log-view-model.svelte.ts';
+import type { SessionStore } from './session-store.svelte.ts';
 
 export class AdminDashboardViewModel {
-	session = $state<Session | null>(null);
-	email = $state('');
-	password = $state('');
-	busy = $state(false);
 	errorMessage = $state('');
 
 	readonly tenantModel: TenantViewModel;
 	readonly localizationModel: LocalizationViewModel;
 	readonly auditLogModel: AuditLogViewModel;
+	readonly userModel: UserManagementViewModel;
+	readonly invitationModel: InvitationViewModel;
+	readonly statsModel: SystemStatsViewModel;
 
-	#client: Pick<
-		ClinksClient,
-		| 'adminLanguages'
-		| 'adminLogin'
-		| 'auditEvents'
-		| 'createTenant'
-		| 'getSession'
-		| 'logout'
-		| 'saveTranslation'
-		| 'tenants'
-	>;
-	#messages: ErrorMessageFormatter;
+	#session: Pick<SessionStore, 'current'>;
 
 	constructor(
-		client: Pick<
-			ClinksClient,
-			| 'adminLanguages'
-			| 'adminLogin'
-			| 'auditEvents'
-			| 'createTenant'
-			| 'getSession'
-			| 'logout'
-			| 'saveTranslation'
-			| 'tenants'
-		>,
+		client: ClinksClient,
+		session: Pick<SessionStore, 'current'>,
 		messages: ErrorMessageFormatter,
 		refreshTranslations: () => Promise<void>,
 		locale: () => string,
 	) {
-		this.#client = client;
-		this.#messages = messages;
+		this.#session = session;
 
-		const setError = (msg: string) => {
-			this.errorMessage = msg;
-		};
-		this.tenantModel = new TenantViewModel(this.#client, this.#messages, setError);
-		this.localizationModel = new LocalizationViewModel(
-			this.#client,
-			this.#messages,
-			refreshTranslations,
-			locale,
-			setError,
-		);
-		this.auditLogModel = new AuditLogViewModel(this.#client, this.#messages, setError);
+		this.tenantModel = new TenantViewModel(client, messages);
+		this.localizationModel = new LocalizationViewModel(client, messages, refreshTranslations, locale);
+		this.auditLogModel = new AuditLogViewModel(client, messages);
+		this.userModel = new UserManagementViewModel(client);
+		this.invitationModel = new InvitationViewModel(client);
+		this.statsModel = new SystemStatsViewModel(client);
 	}
 
-	async initialize() {
-		try {
-			this.session = await this.#client.getSession();
-			if (this.isSuperAdministrator) await this.loadDashboard();
-		} catch {
-			this.session = null;
-		}
-	}
-
-	async login() {
-		this.busy = true;
-		this.errorMessage = '';
-		try {
-			this.session = await this.#client.adminLogin(this.email, this.password);
-			await this.loadDashboard();
-		} catch (error) {
-			this.errorMessage = this.#messages.message(error);
-		} finally {
-			this.busy = false;
-		}
-	}
-
-	async signOut() {
-		try {
-			await this.#client.logout();
-		} finally {
-			this.session = null;
-			this.tenantModel.clear();
-			this.localizationModel.clear();
-			this.auditLogModel.clear();
+	async loadSection(section: string) {
+		const key = section === 'dashboard' ? 'overview' : section;
+		switch (key) {
+			case 'tenants':
+				if (!this.tenantModel.tenants.loaded) await this.tenantModel.load();
+				break;
+			case 'localization':
+				if (!this.localizationModel.languages.loaded) await this.localizationModel.load();
+				break;
+			case 'audit':
+				if (this.auditLogModel.auditEvents.length === 0) await this.auditLogModel.filterAuditEvents();
+				break;
+			case 'users':
+				if (this.userModel.list.items.length === 0) await this.userModel.load();
+				break;
+			case 'invites':
+				if (this.invitationModel.list.items.length === 0) await this.invitationModel.load();
+				break;
+			case 'overview':
+				if (!this.statsModel.stats.loaded) await this.statsModel.load();
+				break;
 		}
 	}
 
 	get isSuperAdministrator() {
-		return this.session?.user.isSuperAdmin ?? false;
+		return this.#session.current?.user.isSuperAdmin ?? false;
 	}
 
 	get sessionEmail() {
-		return this.session?.user.email ?? '';
-	}
-
-	private async loadDashboard() {
-		await Promise.all([this.tenantModel.load(), this.localizationModel.load(), this.auditLogModel.load()]);
+		return this.#session.current?.user.email ?? '';
 	}
 }

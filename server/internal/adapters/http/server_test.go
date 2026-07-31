@@ -92,7 +92,17 @@ func (readinessStub) Ready(context.Context) error { return nil }
 func TestLoginSetsHTTPOnlyLaxCookieWithoutExposingToken(t *testing.T) {
 	sessionToken := strings.Repeat("x", 32)
 	session := domain.Session{Token: sessionToken, User: domain.User{ID: "user-1", Email: "user@example.com", Locale: "de-CH"}}
-	server := NewServer(&authenticationStub{session: session}, &authenticationStub{session: session}, &authenticationStub{session: session}, administrationStub{}, administrationStub{}, administrationStub{}, localizationStub{}, translatorStub{}, readinessStub{}, &ServerConfig{Cookie: CookieConfig{MaxAge: time.Minute}})
+	server := NewServer(ServerDeps{
+		Sessions:         &authenticationStub{session: session},
+		Registration:     &authenticationStub{session: session},
+		Invitations:      &authenticationStub{session: session},
+		Tenants:          administrationStub{},
+		LocalizationEdit: administrationStub{},
+		Audit:            administrationStub{},
+		Localization:     localizationStub{},
+		Translator:       translatorStub{},
+		Readiness:        readinessStub{},
+	}, &ServerConfig{Cookie: CookieConfig{MaxAge: time.Minute}})
 	request := connect.NewRequest(&clinksv1.CredentialsRequest{Email: "user@example.com", Password: "password"})
 	response, err := server.Login(context.Background(), request)
 	if err != nil {
@@ -111,10 +121,24 @@ func TestLoginSetsHTTPOnlyLaxCookieWithoutExposingToken(t *testing.T) {
 }
 
 func TestGetSessionReturnsLocalizedConnectError(t *testing.T) {
-	server := NewServer(&authenticationStub{err: errors.New("expired")}, &authenticationStub{err: errors.New("expired")}, &authenticationStub{err: errors.New("expired")}, administrationStub{}, administrationStub{}, administrationStub{}, localizationStub{}, translatorStub{}, readinessStub{}, &ServerConfig{})
-	request := connect.NewRequest(&clinksv1.Empty{})
-	request.Header().Set("Accept-Language", "de-CH")
-	_, err := server.GetSession(context.Background(), request)
+	srv := NewServer(ServerDeps{
+		Sessions:         &authenticationStub{err: errors.New("expired")},
+		Registration:     &authenticationStub{err: errors.New("expired")},
+		Invitations:      &authenticationStub{err: errors.New("expired")},
+		Tenants:          administrationStub{},
+		LocalizationEdit: administrationStub{},
+		Audit:            administrationStub{},
+		Localization:     localizationStub{},
+		Translator:       translatorStub{},
+		Readiness:        readinessStub{},
+	}, &ServerConfig{})
+	testServer := httptest.NewServer(srv.Handler())
+	defer testServer.Close()
+
+	req := connect.NewRequest(&clinksv1.Empty{})
+	req.Header().Set("Accept-Language", "de-CH")
+	client := clinksv1connect.NewClinksServiceClient(testServer.Client(), testServer.URL)
+	_, err := client.GetSession(context.Background(), req)
 	connectError := new(connect.Error)
 	if !errors.As(err, &connectError) || connectError.Message() != "Localized error" {
 		t.Fatalf("GetSession() error = %v", err)

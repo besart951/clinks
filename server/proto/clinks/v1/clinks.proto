@@ -26,6 +26,12 @@ service ClinksService {
   rpc SaveLanguage(Language) returns (Empty);
   rpc SaveTranslation(ScopedTranslation) returns (Empty);
   rpc ListAuditEvents(ListAuditEventsRequest) returns (AuditEventsResponse);
+
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse);
+  rpc GetUser(GetUserRequest) returns (UserDetail);
+  rpc ListInvitations(ListInvitationsRequest) returns (ListInvitationsResponse);
+  rpc RevokeInvitation(RevokeInvitationRequest) returns (Empty);
+  rpc GetSystemStats(Empty) returns (SystemStats);
 }
 
 message Empty {}
@@ -132,6 +138,7 @@ message ListAuditEventsRequest {
   string actor_id = 3;
   string tenant_id = 4;
   string action = 5;
+  string search = 8;
   string cursor = 6;
   uint32 page_size = 7;
 }
@@ -151,4 +158,63 @@ message AuditEvent {
 message AuditEventsResponse {
   repeated AuditEvent events = 1;
   string next_cursor = 2;
+}
+
+// --- User management ---
+
+message ListUsersRequest {
+  string search = 1;
+  string role = 2;
+  string cursor = 3;
+  uint32 page_size = 4;
+}
+
+message UserSummary {
+  string id = 1;
+  string email = 2;
+  string locale = 3;
+  bool is_super_admin = 4;
+  uint32 membership_count = 5;
+}
+
+message ListUsersResponse {
+  repeated UserSummary users = 1;
+  string next_cursor = 2;
+}
+
+message GetUserRequest {
+  string user_id = 1;
+}
+
+message UserDetail {
+  UserSummary user = 1;
+  repeated Membership memberships = 2;
+}
+
+// --- Invitation management ---
+
+message ListInvitationsRequest {
+  string tenant_id = 1;
+  string status = 2;
+  string search = 3;
+  string cursor = 4;
+  uint32 page_size = 5;
+}
+
+message ListInvitationsResponse {
+  repeated Invitation invitations = 1;
+  string next_cursor = 2;
+}
+
+message RevokeInvitationRequest {
+  string invitation_id = 1;
+}
+
+// --- System overview ---
+
+message SystemStats {
+  uint32 user_count = 1;
+  uint32 tenant_count = 2;
+  uint32 pending_invitation_count = 3;
+  uint32 active_language_count = 4;
 }

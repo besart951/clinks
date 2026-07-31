@@ -1,32 +1,28 @@
 <script lang="ts">
-	import type { AuthPortalViewModel, ThemeViewModel, TranslationBundleViewModel } from '@clinks/clinks-runtime';
+	import type { AuthPortalViewModel } from '@clinks/clinks-runtime';
+	import { useClinksRuntime } from '@clinks/clinks-runtime';
 	import AppHeader from './AppHeader.svelte';
 	import AuthAccessForm from './AuthAccessForm.svelte';
 	import AuthSessionDashboard from './AuthSessionDashboard.svelte';
 
-	let {
-		model,
-		translations,
-		theme,
-	}: {
-		model: AuthPortalViewModel;
-		translations: TranslationBundleViewModel;
-		theme: ThemeViewModel;
-	} = $props();
+	let { model }: { model: AuthPortalViewModel } = $props();
+	const runtime = useClinksRuntime();
+	const t = (key: string) => runtime.translations.t(key);
+
+	async function signOut() {
+		await runtime.session.logout();
+		model.authAccess.clear();
+		model.authDashboard.clear();
+	}
 </script>
 
 <main class="min-h-screen bg-slate-50 px-5 py-8 text-slate-900 dark:bg-slate-950 dark:text-slate-50">
 	<div class="mx-auto max-w-5xl">
-		<AppHeader title={translations.t(`ui.application_${model.application}`)} {translations} {theme} />
-		{#if model.session}
-			<AuthSessionDashboard portalModel={model} dashboardModel={model.authDashboard} {translations} />
+		<AppHeader title={t(`ui.application_${model.application}`)} theme={runtime.theme} />
+		{#if runtime.session.isAuthenticated}
+			<AuthSessionDashboard portalModel={model} dashboardModel={model.authDashboard} {signOut} />
 		{:else}
-			<AuthAccessForm
-				model={model.authAccess}
-				application={model.application}
-				errorMessage={model.errorMessage}
-				{translations}
-			/>
+			<AuthAccessForm model={model.authAccess} application={model.application} errorMessage={model.errorMessage} />
 		{/if}
 	</div>
 </main>

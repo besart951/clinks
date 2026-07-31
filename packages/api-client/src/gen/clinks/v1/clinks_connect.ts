@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { AcceptInvitationRequest, AuditEventsResponse, CreateInvitationRequest, CreateTenantRequest, CredentialsRequest, Empty, GetTranslationsRequest, Invitation, Language, LanguagesResponse, ListAuditEventsRequest, RegisterRequest, ScopedTranslation, Session, SwitchTenantRequest, Tenant, TenantsResponse, TranslationsResponse } from "./clinks_pb.js";
+import { AcceptInvitationRequest, AuditEventsResponse, CreateInvitationRequest, CreateTenantRequest, CredentialsRequest, Empty, GetTranslationsRequest, GetUserRequest, Invitation, Language, LanguagesResponse, ListAuditEventsRequest, ListInvitationsRequest, ListInvitationsResponse, ListUsersRequest, ListUsersResponse, RegisterRequest, RevokeInvitationRequest, ScopedTranslation, Session, SwitchTenantRequest, SystemStats, Tenant, TenantsResponse, TranslationsResponse, UserDetail } from "./clinks_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -157,6 +157,51 @@ export const ClinksService = {
       name: "ListAuditEvents",
       I: ListAuditEventsRequest,
       O: AuditEventsResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc clinks.v1.ClinksService.ListUsers
+     */
+    listUsers: {
+      name: "ListUsers",
+      I: ListUsersRequest,
+      O: ListUsersResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc clinks.v1.ClinksService.GetUser
+     */
+    getUser: {
+      name: "GetUser",
+      I: GetUserRequest,
+      O: UserDetail,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc clinks.v1.ClinksService.ListInvitations
+     */
+    listInvitations: {
+      name: "ListInvitations",
+      I: ListInvitationsRequest,
+      O: ListInvitationsResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc clinks.v1.ClinksService.RevokeInvitation
+     */
+    revokeInvitation: {
+      name: "RevokeInvitation",
+      I: RevokeInvitationRequest,
+      O: Empty,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc clinks.v1.ClinksService.GetSystemStats
+     */
+    getSystemStats: {
+      name: "GetSystemStats",
+      I: Empty,
+      O: SystemStats,
       kind: MethodKind.Unary,
     },
   }

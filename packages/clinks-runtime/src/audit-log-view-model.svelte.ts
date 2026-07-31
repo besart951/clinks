@@ -1,4 +1,4 @@
-import type { AuditEvent, ClinksClient } from '@clinks/api-client';
+import type { AuditEvent, AuditService } from '@clinks/api-client';
 import type { ErrorMessageFormatter } from './auth-portal-view-model.svelte';
 
 export class AuditLogViewModel {
@@ -9,23 +9,24 @@ export class AuditLogViewModel {
 	auditAction = $state('');
 	auditFrom = $state('');
 	auditTo = $state('');
+	error = $state('');
+	busy = $state(false);
 
-	#client: Pick<ClinksClient, 'auditEvents'>;
+	#service: AuditService;
 	#messages: ErrorMessageFormatter;
-	#onError: (message: string) => void;
 
-	constructor(
-		client: Pick<ClinksClient, 'auditEvents'>,
-		messages: ErrorMessageFormatter,
-		onError: (message: string) => void,
-	) {
-		this.#client = client;
+	constructor(service: AuditService, messages: ErrorMessageFormatter) {
+		this.#service = service;
 		this.#messages = messages;
-		this.#onError = onError;
+	}
+
+	formatDate(dateString: string, locale: string): string {
+		if (!dateString) return '';
+		return new Date(dateString).toLocaleString(locale);
 	}
 
 	async load(cursor = '') {
-		const page = await this.#client.auditEvents({
+		const page = await this.#service.auditEvents({
 			from: toISOString(this.auditFrom),
 			to: toISOString(this.auditTo),
 			actorId: this.auditActor || undefined,
@@ -39,19 +40,28 @@ export class AuditLogViewModel {
 	}
 
 	async filterAuditEvents() {
-		this.#onError('');
+		if (this.busy) return;
+		this.busy = true;
+		this.error = '';
 		try {
 			await this.load();
 		} catch (error) {
-			this.#onError(this.#messages.message(error));
+			this.error = this.#messages.message(error);
+		} finally {
+			this.busy = false;
 		}
 	}
 
 	async loadMoreAuditEvents() {
+		if (this.busy || !this.nextAuditCursor) return;
+		this.busy = true;
+		this.error = '';
 		try {
 			await this.load(this.nextAuditCursor);
 		} catch (error) {
-			this.#onError(this.#messages.message(error));
+			this.error = this.#messages.message(error);
+		} finally {
+			this.busy = false;
 		}
 	}
 
@@ -63,6 +73,8 @@ export class AuditLogViewModel {
 		this.auditAction = '';
 		this.auditFrom = '';
 		this.auditTo = '';
+		this.error = '';
+		this.busy = false;
 	}
 }
 

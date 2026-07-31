@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 (globalThis as any).$state ??= (v: any) => v;
+(globalThis as any).$derived ??= (v: any) => (typeof v === 'function' ? v() : v);
 
 import { AuthPortalViewModel } from '../src/auth-portal-view-model.svelte.ts';
 
@@ -20,10 +21,44 @@ describe('AuthPortalViewModel', () => {
 			],
 		};
 
+		let storedSession: unknown = null;
+		const mockSession = {
+			get current() {
+				return storedSession as any;
+			},
+			async hydrate() {
+				storedSession = null;
+			},
+			async login() {
+				storedSession = session;
+			},
+			async register() {
+				storedSession = session;
+			},
+			async acceptInvitation() {
+				storedSession = session;
+			},
+			async switchTenant() {
+				storedSession = session;
+			},
+			async logout() {
+				storedSession = null;
+			},
+			get isAuthenticated() {
+				return storedSession != null;
+			},
+			get email() {
+				return (storedSession as any)?.user?.email ?? '';
+			},
+			get memberships() {
+				return (storedSession as any)?.memberships ?? [];
+			},
+			get activeTenant() {
+				return (storedSession as any)?.activeTenant;
+			},
+		};
+
 		const mockClient = {
-			getSession: async () => null,
-			login: async () => session,
-			acceptInvitation: async () => session,
 			createInvitation: async () => ({
 				id: 'inv-1',
 				tenantId: 't1',
@@ -33,22 +68,25 @@ describe('AuthPortalViewModel', () => {
 				acceptanceUrl: 'http://localhost/accept',
 				deliveryStatus: 'sent' as const,
 			}),
-			logout: async () => undefined,
-			register: async () => session,
-			switchTenant: async () => session,
 		};
 
 		const mockClipboard = { copy: async () => undefined };
-		const model = new AuthPortalViewModel('planer_link', mockClient, { message: (e) => String(e) }, mockClipboard);
+		const model = new AuthPortalViewModel(
+			'planer_link',
+			mockClient,
+			mockSession as any,
+			{ message: (e) => String(e) },
+			mockClipboard,
+		);
 
 		await model.initialize();
-		assert.equal(model.session, null);
+		assert.equal(storedSession, null);
 
 		model.authAccess.email = 'user@clinks.test';
 		model.authAccess.password = 'password123456';
 		await model.authAccess.submit();
 
-		assert.notEqual(model.session, null);
+		assert.notEqual(storedSession, null);
 		assert.equal(model.sessionEmail, 'user@clinks.test');
 		assert.equal(model.canInviteMembers, true);
 		assert.equal(model.authDashboard.selectedTenant, 't1');

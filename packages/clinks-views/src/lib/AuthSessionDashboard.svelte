@@ -1,5 +1,6 @@
 <script lang="ts">
-	import type { AuthDashboardViewModel, AuthPortalViewModel, TranslationBundleViewModel } from '@clinks/clinks-runtime';
+	import type { AuthDashboardViewModel, AuthPortalViewModel } from '@clinks/clinks-runtime';
+	import { useClinksRuntime } from '@clinks/clinks-runtime';
 	import { Badge } from '@clinks/ui-shared/components/ui/badge';
 	import { Button } from '@clinks/ui-shared/components/ui/button';
 	import * as Card from '@clinks/ui-shared/components/ui/card';
@@ -10,32 +11,34 @@
 	let {
 		portalModel,
 		dashboardModel,
-		translations,
+		signOut,
 	}: {
 		portalModel: AuthPortalViewModel;
 		dashboardModel: AuthDashboardViewModel;
-		translations: TranslationBundleViewModel;
+		signOut: () => Promise<void>;
 	} = $props();
-	const t = (key: string) => translations.t(key);
+	const runtime = useClinksRuntime();
+	const t = (key: string) => runtime.translations.t(key);
+	const session = runtime.session;
 </script>
 
 <Card.Root class="p-4 sm:p-8">
 	<Card.Header class="px-0 pt-0">
 		<Badge class="w-fit" variant="secondary">{t('ui.dashboard')}</Badge>
-		<Card.Title class="text-3xl">{t('ui.welcome')}, {portalModel.sessionEmail}</Card.Title>
+		<Card.Title class="text-3xl">{t('ui.welcome')}, {session.email}</Card.Title>
 		<Card.Description>{t(`ui.application_${portalModel.application}`)} {t('ui.connected_to_tenant')}</Card.Description>
 	</Card.Header>
 	<Card.Content class="space-y-6 px-0">
-		{#if portalModel.session && portalModel.session.memberships.length > 1}
+		{#if session.memberships.length > 1}
 			<div class="grid max-w-sm gap-2">
 				<Label>{t('ui.active_tenant')}</Label>
 				<Select.Root
 					value={dashboardModel.selectedTenant}
 					onValueChange={(tenantID) => void dashboardModel.selectTenant(tenantID)}
 				>
-					<Select.Trigger>{portalModel.session.activeTenant?.name ?? t('ui.active_tenant')}</Select.Trigger>
+					<Select.Trigger>{session.activeTenant?.name ?? t('ui.active_tenant')}</Select.Trigger>
 					<Select.Content>
-						{#each portalModel.session.memberships as membership}
+						{#each session.memberships as membership}
 							<Select.Item value={membership.tenant.id}>{membership.tenant.name}</Select.Item>
 						{/each}
 					</Select.Content>
@@ -92,7 +95,5 @@
 			<p class="text-destructive text-sm" aria-live="polite">{portalModel.errorMessage}</p>
 		{/if}
 	</Card.Content>
-	<Card.Footer class="px-0 pb-0"
-		><Button onclick={() => void portalModel.signOut()}>{t('ui.sign_out')}</Button></Card.Footer
-	>
+	<Card.Footer class="px-0 pb-0"><Button onclick={signOut}>{t('ui.sign_out')}</Button></Card.Footer>
 </Card.Root>

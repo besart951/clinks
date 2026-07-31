@@ -1,19 +1,20 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { AdminDashboardViewModel, useClinksRuntime } from '@clinks/clinks-runtime';
-	import AdminDashboard from '@clinks/clinks-views/admin-dashboard';
+	import { useClinksRuntime } from '@clinks/clinks-runtime';
+	import AdminLogin from '$lib/AdminLogin.svelte';
 
 	const runtime = useClinksRuntime();
-	const model = new AdminDashboardViewModel(
-		runtime.client,
-		runtime.translations,
-		runtime.translations.refresh,
-		() => runtime.translations.locale,
-	);
 
 	onMount(() => {
-		void model.initialize();
+		if (runtime.session.isSuperAdmin) {
+			void goto('/dashboard');
+		}
 	});
 </script>
 
-<AdminDashboard {model} translations={runtime.translations} theme={runtime.theme} />
+<svelte:head><title>Clinks Admin</title></svelte:head>
+
+<main class="flex min-h-screen items-center justify-center bg-slate-50 px-5 py-8 dark:bg-slate-950">
+	<AdminLogin />
+</main>

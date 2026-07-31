@@ -78,6 +78,19 @@ const (
 	// ClinksServiceListAuditEventsProcedure is the fully-qualified name of the ClinksService's
 	// ListAuditEvents RPC.
 	ClinksServiceListAuditEventsProcedure = "/clinks.v1.ClinksService/ListAuditEvents"
+	// ClinksServiceListUsersProcedure is the fully-qualified name of the ClinksService's ListUsers RPC.
+	ClinksServiceListUsersProcedure = "/clinks.v1.ClinksService/ListUsers"
+	// ClinksServiceGetUserProcedure is the fully-qualified name of the ClinksService's GetUser RPC.
+	ClinksServiceGetUserProcedure = "/clinks.v1.ClinksService/GetUser"
+	// ClinksServiceListInvitationsProcedure is the fully-qualified name of the ClinksService's
+	// ListInvitations RPC.
+	ClinksServiceListInvitationsProcedure = "/clinks.v1.ClinksService/ListInvitations"
+	// ClinksServiceRevokeInvitationProcedure is the fully-qualified name of the ClinksService's
+	// RevokeInvitation RPC.
+	ClinksServiceRevokeInvitationProcedure = "/clinks.v1.ClinksService/RevokeInvitation"
+	// ClinksServiceGetSystemStatsProcedure is the fully-qualified name of the ClinksService's
+	// GetSystemStats RPC.
+	ClinksServiceGetSystemStatsProcedure = "/clinks.v1.ClinksService/GetSystemStats"
 )
 
 // ClinksServiceClient is a client for the clinks.v1.ClinksService service.
@@ -98,6 +111,11 @@ type ClinksServiceClient interface {
 	SaveLanguage(context.Context, *connect.Request[v1.Language]) (*connect.Response[v1.Empty], error)
 	SaveTranslation(context.Context, *connect.Request[v1.ScopedTranslation]) (*connect.Response[v1.Empty], error)
 	ListAuditEvents(context.Context, *connect.Request[v1.ListAuditEventsRequest]) (*connect.Response[v1.AuditEventsResponse], error)
+	ListUsers(context.Context, *connect.Request[v1.ListUsersRequest]) (*connect.Response[v1.ListUsersResponse], error)
+	GetUser(context.Context, *connect.Request[v1.GetUserRequest]) (*connect.Response[v1.UserDetail], error)
+	ListInvitations(context.Context, *connect.Request[v1.ListInvitationsRequest]) (*connect.Response[v1.ListInvitationsResponse], error)
+	RevokeInvitation(context.Context, *connect.Request[v1.RevokeInvitationRequest]) (*connect.Response[v1.Empty], error)
+	GetSystemStats(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.SystemStats], error)
 }
 
 // NewClinksServiceClient constructs a client for the clinks.v1.ClinksService service. By default,
@@ -207,6 +225,36 @@ func NewClinksServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(clinksServiceMethods.ByName("ListAuditEvents")),
 			connect.WithClientOptions(opts...),
 		),
+		listUsers: connect.NewClient[v1.ListUsersRequest, v1.ListUsersResponse](
+			httpClient,
+			baseURL+ClinksServiceListUsersProcedure,
+			connect.WithSchema(clinksServiceMethods.ByName("ListUsers")),
+			connect.WithClientOptions(opts...),
+		),
+		getUser: connect.NewClient[v1.GetUserRequest, v1.UserDetail](
+			httpClient,
+			baseURL+ClinksServiceGetUserProcedure,
+			connect.WithSchema(clinksServiceMethods.ByName("GetUser")),
+			connect.WithClientOptions(opts...),
+		),
+		listInvitations: connect.NewClient[v1.ListInvitationsRequest, v1.ListInvitationsResponse](
+			httpClient,
+			baseURL+ClinksServiceListInvitationsProcedure,
+			connect.WithSchema(clinksServiceMethods.ByName("ListInvitations")),
+			connect.WithClientOptions(opts...),
+		),
+		revokeInvitation: connect.NewClient[v1.RevokeInvitationRequest, v1.Empty](
+			httpClient,
+			baseURL+ClinksServiceRevokeInvitationProcedure,
+			connect.WithSchema(clinksServiceMethods.ByName("RevokeInvitation")),
+			connect.WithClientOptions(opts...),
+		),
+		getSystemStats: connect.NewClient[v1.Empty, v1.SystemStats](
+			httpClient,
+			baseURL+ClinksServiceGetSystemStatsProcedure,
+			connect.WithSchema(clinksServiceMethods.ByName("GetSystemStats")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -228,6 +276,11 @@ type clinksServiceClient struct {
 	saveLanguage         *connect.Client[v1.Language, v1.Empty]
 	saveTranslation      *connect.Client[v1.ScopedTranslation, v1.Empty]
 	listAuditEvents      *connect.Client[v1.ListAuditEventsRequest, v1.AuditEventsResponse]
+	listUsers            *connect.Client[v1.ListUsersRequest, v1.ListUsersResponse]
+	getUser              *connect.Client[v1.GetUserRequest, v1.UserDetail]
+	listInvitations      *connect.Client[v1.ListInvitationsRequest, v1.ListInvitationsResponse]
+	revokeInvitation     *connect.Client[v1.RevokeInvitationRequest, v1.Empty]
+	getSystemStats       *connect.Client[v1.Empty, v1.SystemStats]
 }
 
 // Login calls clinks.v1.ClinksService.Login.
@@ -310,6 +363,31 @@ func (c *clinksServiceClient) ListAuditEvents(ctx context.Context, req *connect.
 	return c.listAuditEvents.CallUnary(ctx, req)
 }
 
+// ListUsers calls clinks.v1.ClinksService.ListUsers.
+func (c *clinksServiceClient) ListUsers(ctx context.Context, req *connect.Request[v1.ListUsersRequest]) (*connect.Response[v1.ListUsersResponse], error) {
+	return c.listUsers.CallUnary(ctx, req)
+}
+
+// GetUser calls clinks.v1.ClinksService.GetUser.
+func (c *clinksServiceClient) GetUser(ctx context.Context, req *connect.Request[v1.GetUserRequest]) (*connect.Response[v1.UserDetail], error) {
+	return c.getUser.CallUnary(ctx, req)
+}
+
+// ListInvitations calls clinks.v1.ClinksService.ListInvitations.
+func (c *clinksServiceClient) ListInvitations(ctx context.Context, req *connect.Request[v1.ListInvitationsRequest]) (*connect.Response[v1.ListInvitationsResponse], error) {
+	return c.listInvitations.CallUnary(ctx, req)
+}
+
+// RevokeInvitation calls clinks.v1.ClinksService.RevokeInvitation.
+func (c *clinksServiceClient) RevokeInvitation(ctx context.Context, req *connect.Request[v1.RevokeInvitationRequest]) (*connect.Response[v1.Empty], error) {
+	return c.revokeInvitation.CallUnary(ctx, req)
+}
+
+// GetSystemStats calls clinks.v1.ClinksService.GetSystemStats.
+func (c *clinksServiceClient) GetSystemStats(ctx context.Context, req *connect.Request[v1.Empty]) (*connect.Response[v1.SystemStats], error) {
+	return c.getSystemStats.CallUnary(ctx, req)
+}
+
 // ClinksServiceHandler is an implementation of the clinks.v1.ClinksService service.
 type ClinksServiceHandler interface {
 	Login(context.Context, *connect.Request[v1.CredentialsRequest]) (*connect.Response[v1.Session], error)
@@ -328,6 +406,11 @@ type ClinksServiceHandler interface {
 	SaveLanguage(context.Context, *connect.Request[v1.Language]) (*connect.Response[v1.Empty], error)
 	SaveTranslation(context.Context, *connect.Request[v1.ScopedTranslation]) (*connect.Response[v1.Empty], error)
 	ListAuditEvents(context.Context, *connect.Request[v1.ListAuditEventsRequest]) (*connect.Response[v1.AuditEventsResponse], error)
+	ListUsers(context.Context, *connect.Request[v1.ListUsersRequest]) (*connect.Response[v1.ListUsersResponse], error)
+	GetUser(context.Context, *connect.Request[v1.GetUserRequest]) (*connect.Response[v1.UserDetail], error)
+	ListInvitations(context.Context, *connect.Request[v1.ListInvitationsRequest]) (*connect.Response[v1.ListInvitationsResponse], error)
+	RevokeInvitation(context.Context, *connect.Request[v1.RevokeInvitationRequest]) (*connect.Response[v1.Empty], error)
+	GetSystemStats(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.SystemStats], error)
 }
 
 // NewClinksServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -433,6 +516,36 @@ func NewClinksServiceHandler(svc ClinksServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(clinksServiceMethods.ByName("ListAuditEvents")),
 		connect.WithHandlerOptions(opts...),
 	)
+	clinksServiceListUsersHandler := connect.NewUnaryHandler(
+		ClinksServiceListUsersProcedure,
+		svc.ListUsers,
+		connect.WithSchema(clinksServiceMethods.ByName("ListUsers")),
+		connect.WithHandlerOptions(opts...),
+	)
+	clinksServiceGetUserHandler := connect.NewUnaryHandler(
+		ClinksServiceGetUserProcedure,
+		svc.GetUser,
+		connect.WithSchema(clinksServiceMethods.ByName("GetUser")),
+		connect.WithHandlerOptions(opts...),
+	)
+	clinksServiceListInvitationsHandler := connect.NewUnaryHandler(
+		ClinksServiceListInvitationsProcedure,
+		svc.ListInvitations,
+		connect.WithSchema(clinksServiceMethods.ByName("ListInvitations")),
+		connect.WithHandlerOptions(opts...),
+	)
+	clinksServiceRevokeInvitationHandler := connect.NewUnaryHandler(
+		ClinksServiceRevokeInvitationProcedure,
+		svc.RevokeInvitation,
+		connect.WithSchema(clinksServiceMethods.ByName("RevokeInvitation")),
+		connect.WithHandlerOptions(opts...),
+	)
+	clinksServiceGetSystemStatsHandler := connect.NewUnaryHandler(
+		ClinksServiceGetSystemStatsProcedure,
+		svc.GetSystemStats,
+		connect.WithSchema(clinksServiceMethods.ByName("GetSystemStats")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/clinks.v1.ClinksService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ClinksServiceLoginProcedure:
@@ -467,6 +580,16 @@ func NewClinksServiceHandler(svc ClinksServiceHandler, opts ...connect.HandlerOp
 			clinksServiceSaveTranslationHandler.ServeHTTP(w, r)
 		case ClinksServiceListAuditEventsProcedure:
 			clinksServiceListAuditEventsHandler.ServeHTTP(w, r)
+		case ClinksServiceListUsersProcedure:
+			clinksServiceListUsersHandler.ServeHTTP(w, r)
+		case ClinksServiceGetUserProcedure:
+			clinksServiceGetUserHandler.ServeHTTP(w, r)
+		case ClinksServiceListInvitationsProcedure:
+			clinksServiceListInvitationsHandler.ServeHTTP(w, r)
+		case ClinksServiceRevokeInvitationProcedure:
+			clinksServiceRevokeInvitationHandler.ServeHTTP(w, r)
+		case ClinksServiceGetSystemStatsProcedure:
+			clinksServiceGetSystemStatsHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -538,4 +661,24 @@ func (UnimplementedClinksServiceHandler) SaveTranslation(context.Context, *conne
 
 func (UnimplementedClinksServiceHandler) ListAuditEvents(context.Context, *connect.Request[v1.ListAuditEventsRequest]) (*connect.Response[v1.AuditEventsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.ListAuditEvents is not implemented"))
+}
+
+func (UnimplementedClinksServiceHandler) ListUsers(context.Context, *connect.Request[v1.ListUsersRequest]) (*connect.Response[v1.ListUsersResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.ListUsers is not implemented"))
+}
+
+func (UnimplementedClinksServiceHandler) GetUser(context.Context, *connect.Request[v1.GetUserRequest]) (*connect.Response[v1.UserDetail], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.GetUser is not implemented"))
+}
+
+func (UnimplementedClinksServiceHandler) ListInvitations(context.Context, *connect.Request[v1.ListInvitationsRequest]) (*connect.Response[v1.ListInvitationsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.ListInvitations is not implemented"))
+}
+
+func (UnimplementedClinksServiceHandler) RevokeInvitation(context.Context, *connect.Request[v1.RevokeInvitationRequest]) (*connect.Response[v1.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.RevokeInvitation is not implemented"))
+}
+
+func (UnimplementedClinksServiceHandler) GetSystemStats(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.SystemStats], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.GetSystemStats is not implemented"))
 }

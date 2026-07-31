@@ -19,7 +19,7 @@
 	let activeLabel = $derived(labels[model.mode]);
 </script>
 
-<Select.Root value={model.mode} onValueChange={(value) => model.setMode(value as ThemeMode)}>
+<Select.Root type="single" value={model.mode} onValueChange={(value) => model.setMode(value as ThemeMode)}>
 	<Select.Trigger aria-label={labels.label} class="min-w-24">
 		{activeLabel}
 	</Select.Trigger>

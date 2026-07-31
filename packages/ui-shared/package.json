@@ -22,7 +22,13 @@
     "./components/ui/*": {
       "svelte": "./src/lib/components/ui/*/index.ts",
       "default": "./src/lib/components/ui/*/index.ts"
-    }
+    },
+    "./components/ui/*/*": {
+      "svelte": "./src/lib/components/ui/*/*.svelte",
+      "default": "./src/lib/components/ui/*/*.svelte"
+    },
+    "./SearchFilterBar.svelte": "./src/lib/SearchFilterBar.svelte",
+    "./actions/infinite-scroll.ts": "./src/lib/actions/infinite-scroll.ts"
   },
   "peerDependencies": {
     "svelte": "^5.56.4"

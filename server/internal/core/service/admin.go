@@ -12,13 +12,19 @@ type AdminService struct {
 	*TenantAdministration
 	*LocalizationAdministration
 	*AuditLog
+	*UserAdministration
+	*InvitationAdministration
+	*SystemOverview
 }
 
-func NewAdminService(tenants ports.TenantRepository, localization ports.LocalizationCatalog, editor ports.LocalizationEditor, audit ports.AuditLog) *AdminService {
+func NewAdminService(tenants ports.TenantRepository, localization ports.LocalizationCatalog, editor ports.LocalizationEditor, audit ports.AuditLog, users ports.AdminUserRepository, invitations ports.AdminInvitationRepository, stats ports.SystemStatsRepository) *AdminService {
 	return &AdminService{
 		TenantAdministration:       NewTenantAdministration(tenants),
 		LocalizationAdministration: NewLocalizationAdministration(localization, editor),
 		AuditLog:                   NewAuditLog(audit),
+		UserAdministration:         NewUserAdministration(users),
+		InvitationAdministration:   NewInvitationAdministration(invitations),
+		SystemOverview:             NewSystemOverview(stats),
 	}
 }
 
@@ -85,4 +91,48 @@ func NewAuditLog(audit ports.AuditLog) *AuditLog {
 
 func (log *AuditLog) AuditEvents(ctx context.Context, filter *domain.AuditFilter) (domain.AuditPage, error) {
 	return log.audit.List(ctx, filter)
+}
+
+type UserAdministration struct {
+	users ports.AdminUserRepository
+}
+
+func NewUserAdministration(users ports.AdminUserRepository) *UserAdministration {
+	return &UserAdministration{users: users}
+}
+
+func (administration *UserAdministration) ListUsers(ctx context.Context, filter domain.UserFilter) (domain.Page[domain.UserSummary], error) {
+	return administration.users.ListUsers(ctx, filter)
+}
+
+func (administration *UserAdministration) GetUser(ctx context.Context, id domain.UserID) (domain.UserDetail, error) {
+	return administration.users.GetUser(ctx, id)
+}
+
+type InvitationAdministration struct {
+	invitations ports.AdminInvitationRepository
+}
+
+func NewInvitationAdministration(invitations ports.AdminInvitationRepository) *InvitationAdministration {
+	return &InvitationAdministration{invitations: invitations}
+}
+
+func (administration *InvitationAdministration) ListInvitations(ctx context.Context, filter domain.InvitationFilter) (domain.Page[domain.Invitation], error) {
+	return administration.invitations.ListInvitations(ctx, filter)
+}
+
+func (administration *InvitationAdministration) RevokeInvitation(ctx context.Context, id domain.InvitationID) error {
+	return administration.invitations.RevokeInvitation(ctx, id)
+}
+
+type SystemOverview struct {
+	stats ports.SystemStatsRepository
+}
+
+func NewSystemOverview(stats ports.SystemStatsRepository) *SystemOverview {
+	return &SystemOverview{stats: stats}
+}
+
+func (overview *SystemOverview) Stats(ctx context.Context) (domain.SystemStats, error) {
+	return overview.stats.Stats(ctx)
 }

@@ -286,7 +286,8 @@ func (service *AuthService) sessionForUser(ctx context.Context, user domain.User
 func (service *AuthService) issue(session *domain.Session) (domain.Session, error) {
 	claim := domain.SessionClaim{User: session.User}
 	if session.ActiveTenant != nil {
-		claim.ActiveTenantID = new(session.ActiveTenant.ID)
+		id := session.ActiveTenant.ID
+		claim.ActiveTenantID = &id
 	}
 	token, err := service.sessions.Issue(&claim)
 	if err != nil {
@@ -337,5 +338,6 @@ func tenantID(tenant *domain.Tenant) *domain.TenantID {
 	if tenant == nil {
 		return nil
 	}
-	return new(tenant.ID)
+	id := tenant.ID
+	return &id
 }

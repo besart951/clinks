@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { AdminDashboardViewModel, TranslationBundleViewModel } from '@clinks/clinks-runtime';
+	import { useClinksRuntime } from '@clinks/clinks-runtime';
 	import * as Alert from '@clinks/ui-shared/components/ui/alert';
 	import { Badge } from '@clinks/ui-shared/components/ui/badge';
 	import { Button } from '@clinks/ui-shared/components/ui/button';
@@ -7,8 +7,25 @@
 	import { Input } from '@clinks/ui-shared/components/ui/input';
 	import { Label } from '@clinks/ui-shared/components/ui/label';
 
-	let { model, translations }: { model: AdminDashboardViewModel; translations: TranslationBundleViewModel } = $props();
-	const t = (key: string) => translations.t(key);
+	const runtime = useClinksRuntime();
+	const t = (key: string) => runtime.translations.t(key);
+
+	let email = $state('');
+	let password = $state('');
+	let busy = $state(false);
+	let errorMessage = $state('');
+
+	async function login() {
+		busy = true;
+		errorMessage = '';
+		try {
+			await runtime.session.adminLogin(email, password);
+		} catch (err) {
+			errorMessage = runtime.translations.message(err);
+		} finally {
+			busy = false;
+		}
+	}
 </script>
 
 <Card.Root class="mx-auto max-w-md p-4 shadow-xl shadow-black/5 sm:p-7">
@@ -19,15 +36,15 @@
 	<Card.Content class="px-0">
 		<form
 			class="space-y-4"
-			onsubmit={(event) => {
-				event.preventDefault();
-				void model.login();
+			onsubmit={(e) => {
+				e.preventDefault();
+				void login();
 			}}
 		>
 			<div class="grid gap-2">
 				<Label for="admin-email">{t('ui.email')}</Label><Input
 					id="admin-email"
-					bind:value={model.email}
+					bind:value={email}
 					type="email"
 					required
 					autocomplete="email"
@@ -36,18 +53,16 @@
 			<div class="grid gap-2">
 				<Label for="admin-password">{t('ui.password')}</Label><Input
 					id="admin-password"
-					bind:value={model.password}
+					bind:value={password}
 					type="password"
 					required
 					autocomplete="current-password"
 				/>
 			</div>
-			{#if model.errorMessage}<Alert.Root variant="destructive" aria-live="polite"
-					><Alert.Description>{model.errorMessage}</Alert.Description></Alert.Root
+			{#if errorMessage}<Alert.Root variant="destructive" aria-live="polite"
+					><Alert.Description>{errorMessage}</Alert.Description></Alert.Root
 				>{/if}
-			<Button type="submit" disabled={model.busy} class="w-full"
-				>{model.busy ? t('ui.loading') : t('ui.sign_in')}</Button
-			>
+			<Button type="submit" disabled={busy} class="w-full">{busy ? t('ui.loading') : t('ui.sign_in')}</Button>
 		</form>
 	</Card.Content>
 </Card.Root>
