@@ -4,6 +4,7 @@ package config
 import (
 	"errors"
 	"fmt"
+	"net"
 	"os"
 	"strings"
 	"time"
@@ -28,6 +29,10 @@ type HTTPConfig struct {
 	SessionCookieName   string   `env:"SESSION_COOKIE_NAME" envDefault:"clinks_session"`
 	SessionCookieSecure bool     `env:"SESSION_COOKIE_SECURE" envDefault:"false"`
 	SessionCookieDomain string   `env:"SESSION_COOKIE_DOMAIN"`
+}
+
+func (config *HTTPConfig) Address() string {
+	return net.JoinHostPort("", config.Port)
 }
 
 type DatabaseConfig struct {
@@ -79,10 +84,6 @@ type BootstrapConfig struct {
 	Locale   string `env:"ADMIN_LOCALE" envDefault:"en-US"`
 }
 
-func (config *HTTPConfig) Address() string {
-	return ":" + config.Port
-}
-
 func Load() (Config, error) {
 	if err := loadDotEnv(); err != nil {
 		return Config{}, err
@@ -92,35 +93,64 @@ func Load() (Config, error) {
 	if err := env.Parse(&config); err != nil {
 		return Config{}, fmt.Errorf("parse environment configuration: %w", err)
 	}
+
 	if err := config.validate(); err != nil {
 		return Config{}, fmt.Errorf("validate configuration: %w", err)
 	}
+
 	return config, nil
 }
 
 func (config *Config) validate() error {
+	var errs []error
+
+	// Database validations
+	if config.Database.MaxConns <= 0 {
+		errs = append(errs, errors.New("DATABASE_MAX_CONNS must be greater than 0"))
+	}
+	if config.Database.MinConns < 0 {
+		errs = append(errs, errors.New("DATABASE_MIN_CONNS must not be negative"))
+	}
 	if config.Database.MinConns > config.Database.MaxConns {
-		return errors.New("DATABASE_MIN_CONNS must not exceed DATABASE_MAX_CONNS")
+		errs = append(errs, errors.New("DATABASE_MIN_CONNS must not exceed DATABASE_MAX_CONNS"))
 	}
+
+	// Secret validations
 	if len(config.Auth.JWTSecret) < 32 || placeholder(config.Auth.JWTSecret) {
-		return errors.New("JWT_SECRET must contain at least 32 non-placeholder characters")
-	}
-	if len(config.Bootstrap.Password) < 12 || placeholder(config.Bootstrap.Password) {
-		return errors.New("ADMIN_PASSWORD must contain at least 12 non-placeholder characters")
-	}
-	if config.Invites.TTL < 0 {
-		return errors.New("INVITE_TTL must not be negative")
+		errs = append(errs, errors.New("JWT_SECRET must contain at least 32 non-placeholder characters"))
 	}
 	if len(config.Invites.TokenSecret) < 32 || placeholder(config.Invites.TokenSecret) {
-		return errors.New("INVITATION_TOKEN_SECRET must contain at least 32 non-placeholder characters")
+		errs = append(errs, errors.New("INVITATION_TOKEN_SECRET must contain at least 32 non-placeholder characters"))
 	}
+	if len(config.Bootstrap.Password) < 12 || placeholder(config.Bootstrap.Password) {
+		errs = append(errs, errors.New("ADMIN_PASSWORD must contain at least 12 non-placeholder characters"))
+	}
+
+	// TTL validations
+	if config.Invites.TTL < 0 {
+		errs = append(errs, errors.New("INVITE_TTL must not be negative"))
+	}
+	if config.Auth.JWTTTL <= 0 {
+		errs = append(errs, errors.New("JWT_TTL must be greater than 0"))
+	}
+
+	// SMTP conditional validation
 	if config.SMTP.Host != "" && (config.SMTP.From == "" || config.SMTP.Port == "") {
-		return errors.New("SMTP_FROM and SMTP_PORT are required when SMTP_HOST is configured")
+		errs = append(errs, errors.New("SMTP_FROM and SMTP_PORT are required when SMTP_HOST is configured"))
 	}
-	if config.OIDC.Enabled() && (config.OIDC.GoogleClientSecret == "" || config.OIDC.GoogleCallbackURL == "" || config.OIDC.SuccessURL == "" || len(config.OIDC.StateSecret) < 32 || placeholder(config.OIDC.StateSecret)) {
-		return errors.New("GOOGLE_OIDC_CLIENT_SECRET, GOOGLE_OIDC_CALLBACK_URL, OIDC_STATE_SECRET and OIDC_SUCCESS_URL are required when GOOGLE_OIDC_CLIENT_ID is configured")
+
+	// OIDC conditional validation
+	if config.OIDC.Enabled() {
+		if config.OIDC.GoogleClientSecret == "" ||
+			config.OIDC.GoogleCallbackURL == "" ||
+			config.OIDC.SuccessURL == "" ||
+			len(config.OIDC.StateSecret) < 32 ||
+			placeholder(config.OIDC.StateSecret) {
+			errs = append(errs, errors.New("GOOGLE_OIDC_CLIENT_SECRET, GOOGLE_OIDC_CALLBACK_URL, OIDC_SUCCESS_URL, and OIDC_STATE_SECRET (min 32 chars) are required when GOOGLE_OIDC_CLIENT_ID is configured"))
+		}
 	}
-	return nil
+
+	return errors.Join(errs...)
 }
 
 func loadDotEnv() error {
@@ -133,5 +163,11 @@ func loadDotEnv() error {
 }
 
 func placeholder(value string) bool {
-	return strings.Contains(strings.ToLower(value), "replace-with")
+	lower := strings.ToLower(value)
+	for _, sub := range []string{"replace-with", "change-me", "your-secret-here"} {
+		if strings.Contains(lower, sub) {
+			return true
+		}
+	}
+	return false
 }

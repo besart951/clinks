@@ -14,23 +14,43 @@ import (
 	"github.com/besartmorina/clinks/server/internal/core/ports"
 )
 
-var workerProviderSet = wire.NewSet(
+var configSet = wire.NewSet(
 	workerPoolConfig,
 	workerSMTPConfig,
 	workerInvitationTokenConfig,
 	workerInviteBaseURL,
+)
+
+var postgresSet = wire.NewSet(
 	postgres.NewPool,
 	postgres.NewOutboxRepository,
-	mailadapter.NewSMTPMailer,
-	authadapter.NewInvitationTokenSigner,
 	wire.Bind(new(ports.OutboxRepository), new(*postgres.OutboxRepository)),
+)
+
+var mailSet = wire.NewSet(
+	mailadapter.NewSMTPMailer,
 	wire.Bind(new(ports.InvitationMailer), new(*mailadapter.SMTPMailer)),
+)
+
+var authSet = wire.NewSet(
+	authadapter.NewInvitationTokenSigner,
 	wire.Bind(new(ports.InvitationTokenSigner), new(*authadapter.InvitationTokenSigner)),
+)
+
+var workerSet = wire.NewSet(
 	newInvitationWorker,
 	NewWorkerApplication,
 )
 
-func InitializeWorker(context.Context, *appconfig.Config) (*WorkerApplication, error) {
+var workerProviderSet = wire.NewSet(
+	configSet,
+	postgresSet,
+	mailSet,
+	authSet,
+	workerSet,
+)
+
+func InitializeWorker(ctx context.Context, cfg *appconfig.Config) (*WorkerApplication, func(), error) {
 	wire.Build(workerProviderSet)
-	return nil, nil
+	return nil, nil, nil
 }

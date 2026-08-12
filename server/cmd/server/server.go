@@ -6,9 +6,6 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
 	appconfig "github.com/besartmorina/clinks/server/internal/config"
@@ -41,14 +38,12 @@ func NewServer(config *appconfig.HTTPConfig, handler http.Handler) *Server {
 	}
 }
 
-func (server *Server) Run(ctx context.Context) error {
-	ctx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
-	defer stop()
-
+func (srv *Server) Run(ctx context.Context) error {
 	serverErr := make(chan error, 1)
+
 	go func() {
-		slog.Info("clinks server starting", "address", server.httpServer.Addr)
-		serverErr <- server.httpServer.ListenAndServe()
+		slog.Info("clinks server starting", "address", srv.httpServer.Addr)
+		serverErr <- srv.httpServer.ListenAndServe()
 	}()
 
 	select {
@@ -56,16 +51,19 @@ func (server *Server) Run(ctx context.Context) error {
 		if !errors.Is(err, http.ErrServerClosed) {
 			return fmt.Errorf("serve HTTP server: %w", err)
 		}
-		return errors.New("HTTP server stopped before receiving a shutdown signal")
+		return errors.New("HTTP server stopped unexpectedly before receiving shutdown signal")
+
 	case <-ctx.Done():
-		slog.Info("shutdown requested")
+		slog.Info("shutdown signal received, draining connections", "timeout", srv.shutdownTimeout)
 	}
 
-	shutdownContext, cancel := context.WithTimeout(context.Background(), server.shutdownTimeout)
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), srv.shutdownTimeout)
 	defer cancel()
-	shutdownErr := server.httpServer.Shutdown(shutdownContext)
+
+	shutdownErr := srv.httpServer.Shutdown(shutdownCtx)
 	if shutdownErr != nil {
-		closeErr := server.httpServer.Close()
+		slog.Warn("graceful shutdown timed out, forcing close", "error", shutdownErr)
+		closeErr := srv.httpServer.Close()
 		if closeErr != nil && !errors.Is(closeErr, http.ErrServerClosed) {
 			shutdownErr = errors.Join(shutdownErr, fmt.Errorf("force close HTTP server: %w", closeErr))
 		}
@@ -74,6 +72,7 @@ func (server *Server) Run(ctx context.Context) error {
 	if err := <-serverErr; err != nil && !errors.Is(err, http.ErrServerClosed) {
 		return fmt.Errorf("serve HTTP server: %w", err)
 	}
+
 	if shutdownErr != nil {
 		return fmt.Errorf("gracefully shut down HTTP server: %w", shutdownErr)
 	}

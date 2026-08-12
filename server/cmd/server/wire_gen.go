@@ -22,27 +22,33 @@ import (
 
 // Injectors from wire.go:
 
-func InitializeApplication(contextContext context.Context, configConfig *config.Config) (*Application, error) {
-	postgresPoolConfig := poolConfig(configConfig)
-	pool, err := postgres.NewPool(contextContext, postgresPoolConfig)
+// InitializeApplication generates the dependency injection graph via Google Wire.
+func InitializeApplication(ctx context.Context, cfg *config.Config) (*Application, func(), error) {
+	postgresPoolConfig := poolConfig(cfg)
+	pool, cleanup, err := postgres.NewPool(ctx, postgresPoolConfig)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	userRepository := postgres.NewUserRepository(pool)
 	externalIdentityRepository := postgres.NewExternalIdentityRepository(pool)
 	tenantProvisioner := postgres.NewTenantProvisioner(pool)
 	membershipRepository := postgres.NewMembershipRepository(pool)
 	passwordHasher := security.NewPasswordHasher()
-	authSessionConfig := sessionConfig(configConfig)
-	sessionIssuer := auth.NewSessionIssuer(authSessionConfig)
+	authSessionConfig := sessionConfig(cfg)
+	sessionIssuer, err := auth.NewSessionIssuer(authSessionConfig)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
 	auditRepository := postgres.NewAuditRepository(pool)
-	authInvitationTokenConfig := invitationTokenConfig(configConfig)
+	authInvitationTokenConfig := invitationTokenConfig(cfg)
 	invitationTokenSigner, err := auth.NewInvitationTokenSigner(authInvitationTokenConfig)
 	if err != nil {
-		return nil, err
+		cleanup()
+		return nil, nil, err
 	}
-	string2 := inviteBaseURL(configConfig)
-	duration := inviteTTL(configConfig)
+	string2 := inviteBaseURL(cfg)
+	duration := inviteTTL(cfg)
 	authService := newAuthService(userRepository, externalIdentityRepository, tenantProvisioner, membershipRepository, passwordHasher, sessionIssuer, auditRepository, invitationTokenSigner, string2, duration)
 	tenantRepository := postgres.NewTenantRepository(pool)
 	localizationRepository := postgres.NewLocalizationRepository(pool)
@@ -54,25 +60,57 @@ func InitializeApplication(contextContext context.Context, configConfig *config.
 	i18nService := service.NewI18nService(productCatalog)
 	translator := i18n.NewTranslator(productCatalog)
 	readiness := postgres.NewReadiness(pool)
-	serverConfig := httpServerConfig(configConfig)
+	serverConfig := httpServerConfig(cfg)
 	server := newHTTPServer(authService, adminService, i18nService, translator, readiness, serverConfig)
-	authGoogleOIDCConfig := googleOIDCConfig(configConfig)
+	authGoogleOIDCConfig := googleOIDCConfig(cfg)
 	googleOIDC := auth.NewGoogleOIDC(authGoogleOIDCConfig)
-	oidcConfig := httpOIDCConfig(configConfig)
+	oidcConfig := httpOIDCConfig(cfg)
 	application := NewApplication(server, pool, authService, googleOIDC, oidcConfig)
-	return application, nil
+	return application, func() {
+		cleanup()
+	}, nil
 }
 
 // wire.go:
 
-var providerSet = wire.NewSet(
+var configSet = wire.NewSet(
 	poolConfig,
 	httpServerConfig,
-	sessionConfig, postgres.NewPool, postgres.NewUserRepository, postgres.NewExternalIdentityRepository, postgres.NewTenantProvisioner, postgres.NewTenantRepository, postgres.NewMembershipRepository, postgres.NewAuditRepository, postgres.NewLocalizationRepository, postgres.NewAdminUserRepository, postgres.NewAdminInvitationRepository, postgres.NewSystemStatsRepository, localization.NewProductCatalog, postgres.NewReadiness, wire.Bind(new(ports.IdentityRepository), new(*postgres.UserRepository)), wire.Bind(new(ports.ExternalIdentityRepository), new(*postgres.ExternalIdentityRepository)), wire.Bind(new(ports.TenantProvisioner), new(*postgres.TenantProvisioner)), wire.Bind(new(ports.TenantRepository), new(*postgres.TenantRepository)), wire.Bind(new(ports.MembershipRepository), new(*postgres.MembershipRepository)), wire.Bind(new(ports.AuditLog), new(*postgres.AuditRepository)), wire.Bind(new(ports.LocalizationOverrides), new(*postgres.LocalizationRepository)), wire.Bind(new(ports.LocalizationCatalog), new(*localization.ProductCatalog)), wire.Bind(new(ports.LocalizationEditor), new(*postgres.LocalizationRepository)), wire.Bind(new(ports.AdminUserRepository), new(*postgres.AdminUserRepository)), wire.Bind(new(ports.AdminInvitationRepository), new(*postgres.AdminInvitationRepository)), wire.Bind(new(ports.SystemStatsRepository), new(*postgres.SystemStatsRepository)), wire.Bind(new(ports.ReadinessChecker), new(*postgres.Readiness)), security.NewPasswordHasher, wire.Bind(new(ports.PasswordHasher), new(*security.PasswordHasher)), auth.NewSessionIssuer, wire.Bind(new(ports.SessionIssuer), new(*auth.SessionIssuer)), smtpConfig,
+	sessionConfig,
+	smtpConfig,
 	invitationTokenConfig,
 	googleOIDCConfig,
-	httpOIDCConfig, mail.NewSMTPMailer, auth.NewInvitationTokenSigner, auth.NewGoogleOIDC, wire.Bind(new(ports.InvitationMailer), new(*mail.SMTPMailer)), wire.Bind(new(ports.InvitationTokenSigner), new(*auth.InvitationTokenSigner)), inviteBaseURL,
+	httpOIDCConfig,
+	inviteBaseURL,
 	inviteTTL,
-	newAuthService, service.NewAdminService, service.NewI18nService, i18n.NewTranslator, newHTTPServer,
+)
+
+var postgresSet = wire.NewSet(postgres.NewPool, postgres.NewUserRepository, wire.Bind(new(ports.IdentityRepository), new(*postgres.UserRepository)), postgres.NewExternalIdentityRepository, wire.Bind(new(ports.ExternalIdentityRepository), new(*postgres.ExternalIdentityRepository)), postgres.NewTenantProvisioner, wire.Bind(new(ports.TenantProvisioner), new(*postgres.TenantProvisioner)), postgres.NewTenantRepository, wire.Bind(new(ports.TenantRepository), new(*postgres.TenantRepository)), postgres.NewMembershipRepository, wire.Bind(new(ports.MembershipRepository), new(*postgres.MembershipRepository)), postgres.NewAuditRepository, wire.Bind(new(ports.AuditLog), new(*postgres.AuditRepository)), postgres.NewLocalizationRepository, wire.Bind(new(ports.LocalizationOverrides), new(*postgres.LocalizationRepository)), wire.Bind(new(ports.LocalizationEditor), new(*postgres.LocalizationRepository)), postgres.NewAdminUserRepository, wire.Bind(new(ports.AdminUserRepository), new(*postgres.AdminUserRepository)), postgres.NewAdminInvitationRepository, wire.Bind(new(ports.AdminInvitationRepository), new(*postgres.AdminInvitationRepository)), postgres.NewSystemStatsRepository, wire.Bind(new(ports.SystemStatsRepository), new(*postgres.SystemStatsRepository)), postgres.NewReadiness, wire.Bind(new(ports.ReadinessChecker), new(*postgres.Readiness)))
+
+var securitySet = wire.NewSet(security.NewPasswordHasher, wire.Bind(new(ports.PasswordHasher), new(*security.PasswordHasher)))
+
+var authSet = wire.NewSet(auth.NewSessionIssuer, wire.Bind(new(ports.SessionIssuer), new(*auth.SessionIssuer)), auth.NewInvitationTokenSigner, wire.Bind(new(ports.InvitationTokenSigner), new(*auth.InvitationTokenSigner)), auth.NewGoogleOIDC)
+
+var mailSet = wire.NewSet(mail.NewSMTPMailer, wire.Bind(new(ports.InvitationMailer), new(*mail.SMTPMailer)))
+
+var localizationSet = wire.NewSet(localization.NewProductCatalog, wire.Bind(new(ports.LocalizationCatalog), new(*localization.ProductCatalog)), i18n.NewTranslator)
+
+var serviceSet = wire.NewSet(
+	newAuthService, service.NewAdminService, service.NewI18nService,
+)
+
+var httpSet = wire.NewSet(
+	newHTTPServer,
 	NewApplication,
+)
+
+var providerSet = wire.NewSet(
+	configSet,
+	postgresSet,
+	securitySet,
+	authSet,
+	mailSet,
+	localizationSet,
+	serviceSet,
+	httpSet,
 )

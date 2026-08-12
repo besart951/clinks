@@ -35,21 +35,25 @@ func NewApplication(
 	oidc *authadapter.GoogleOIDC,
 	oidcConfig http.OIDCConfig,
 ) *Application {
-	return &Application{server: server, pool: pool, auth: auth, oidc: oidc, oidcConfig: oidcConfig}
+	return &Application{
+		server:     server,
+		pool:       pool,
+		auth:       auth,
+		oidc:       oidc,
+		oidcConfig: oidcConfig,
+	}
 }
 
-func (application *Application) Run(ctx context.Context, httpConfig *appconfig.HTTPConfig) error {
-	defer application.pool.Close()
-	application.server.StartCleanup(ctx)
-	return NewServer(httpConfig, application.server.HandlerWithOIDC(application.oidc, application.oidcConfig)).Run(ctx)
+func (app *Application) Run(ctx context.Context, httpConfig *appconfig.HTTPConfig) error {
+	app.server.StartCleanup(ctx)
+	return NewServer(httpConfig, app.server.HandlerWithOIDC(app.oidc, app.oidcConfig)).Run(ctx)
 }
 
-func (application *Application) MigrateAndBootstrap(ctx context.Context, bootstrap appconfig.BootstrapConfig) error {
-	defer application.pool.Close()
-	if err := postgres.Migrate(ctx, application.pool); err != nil {
+func (app *Application) MigrateAndBootstrap(ctx context.Context, bootstrap appconfig.BootstrapConfig) error {
+	if err := postgres.Migrate(ctx, app.pool); err != nil {
 		return fmt.Errorf("apply migrations: %w", err)
 	}
-	if err := application.auth.EnsureSuperAdmin(
+	if err := app.auth.EnsureSuperAdmin(
 		ctx, bootstrap.Email, bootstrap.Password, domain.NewLocale(bootstrap.Locale),
 	); err != nil {
 		return fmt.Errorf("bootstrap administrator: %w", err)
@@ -57,15 +61,16 @@ func (application *Application) MigrateAndBootstrap(ctx context.Context, bootstr
 	return nil
 }
 
-func (application *Application) Healthcheck(ctx context.Context) error {
-	defer application.pool.Close()
-	return application.pool.Ping(ctx)
+func (app *Application) Healthcheck(ctx context.Context) error {
+	return app.pool.Ping(ctx)
 }
 
 func poolConfig(settings *appconfig.Config) postgres.PoolConfig {
 	return postgres.PoolConfig{
-		DatabaseURL: settings.Database.URL, MaxConns: settings.Database.MaxConns,
-		MinConns: settings.Database.MinConns, MaxConnLifetime: settings.Database.ConnMaxLifetime,
+		DatabaseURL:       settings.Database.URL,
+		MaxConns:          settings.Database.MaxConns,
+		MinConns:          settings.Database.MinConns,
+		MaxConnLifetime:   settings.Database.ConnMaxLifetime,
 		MaxConnIdleTime:   settings.Database.ConnMaxIdleTime,
 		HealthCheckPeriod: settings.Database.HealthCheck,
 	}
@@ -73,8 +78,14 @@ func poolConfig(settings *appconfig.Config) postgres.PoolConfig {
 
 func httpServerConfig(settings *appconfig.Config) *http.ServerConfig {
 	return &http.ServerConfig{
-		CORSOrigins: settings.HTTP.CORSOrigins, ReadinessTimeout: defaultReadinessTimeout,
-		Cookie: http.CookieConfig{Name: settings.HTTP.SessionCookieName, Secure: settings.HTTP.SessionCookieSecure, Domain: settings.HTTP.SessionCookieDomain, MaxAge: settings.Auth.JWTTTL},
+		CORSOrigins:      settings.HTTP.CORSOrigins,
+		ReadinessTimeout: defaultReadinessTimeout,
+		Cookie: http.CookieConfig{
+			Name:   settings.HTTP.SessionCookieName,
+			Secure: settings.HTTP.SessionCookieSecure,
+			Domain: settings.HTTP.SessionCookieDomain,
+			MaxAge: settings.Auth.JWTTTL,
+		},
 	}
 }
 
@@ -87,25 +98,43 @@ func inviteTTL(settings *appconfig.Config) time.Duration {
 }
 
 func invitationTokenConfig(settings *appconfig.Config) authadapter.InvitationTokenConfig {
-	return authadapter.InvitationTokenConfig{Secret: settings.Invites.TokenSecret}
+	return authadapter.InvitationTokenConfig{
+		Secret: settings.Invites.TokenSecret,
+	}
 }
 
 func googleOIDCConfig(settings *appconfig.Config) authadapter.GoogleOIDCConfig {
-	return authadapter.GoogleOIDCConfig{ClientID: settings.OIDC.GoogleClientID, ClientSecret: settings.OIDC.GoogleClientSecret, CallbackURL: settings.OIDC.GoogleCallbackURL}
+	return authadapter.GoogleOIDCConfig{
+		ClientID:     settings.OIDC.GoogleClientID,
+		ClientSecret: settings.OIDC.GoogleClientSecret,
+		CallbackURL:  settings.OIDC.GoogleCallbackURL,
+	}
 }
 
 func httpOIDCConfig(settings *appconfig.Config) http.OIDCConfig {
-	return http.OIDCConfig{StateSecret: settings.OIDC.StateSecret, SuccessURL: settings.OIDC.SuccessURL}
+	return http.OIDCConfig{
+		StateSecret: settings.OIDC.StateSecret,
+		SuccessURL:  settings.OIDC.SuccessURL,
+	}
 }
 
 func smtpConfig(settings *appconfig.Config) *mailadapter.SMTPConfig {
-	return &mailadapter.SMTPConfig{Host: settings.SMTP.Host, Port: settings.SMTP.Port, Username: settings.SMTP.Username, Password: settings.SMTP.Password, From: settings.SMTP.From, RequireTLS: settings.SMTP.RequireTLS}
+	return &mailadapter.SMTPConfig{
+		Host:       settings.SMTP.Host,
+		Port:       settings.SMTP.Port,
+		Username:   settings.SMTP.Username,
+		Password:   settings.SMTP.Password,
+		From:       settings.SMTP.From,
+		RequireTLS: settings.SMTP.RequireTLS,
+	}
 }
 
 func sessionConfig(settings *appconfig.Config) authadapter.SessionConfig {
 	return authadapter.SessionConfig{
-		Secret: []byte(settings.Auth.JWTSecret), Issuer: settings.Auth.JWTIssuer,
-		Audience: settings.Auth.JWTAudience, TTL: settings.Auth.JWTTTL,
+		Secret:   []byte(settings.Auth.JWTSecret),
+		Issuer:   settings.Auth.JWTIssuer,
+		Audience: settings.Auth.JWTAudience,
+		TTL:      settings.Auth.JWTTTL,
 	}
 }
 
@@ -122,8 +151,16 @@ func newAuthService(
 	inviteTTL time.Duration,
 ) *service.AuthService {
 	return service.NewAuthService(&service.AuthDependencies{
-		Identities: identities, Federation: federation, Provisioner: provisioner, Memberships: memberships, Passwords: passwords,
-		Sessions: sessions, Audit: audit, Tokens: tokens, InviteBaseURL: inviteBaseURL, InviteTTL: inviteTTL,
+		Identities:    identities,
+		Federation:    federation,
+		Provisioner:   provisioner,
+		Memberships:   memberships,
+		Passwords:     passwords,
+		Sessions:      sessions,
+		Audit:         audit,
+		Tokens:        tokens,
+		InviteBaseURL: inviteBaseURL,
+		InviteTTL:     inviteTTL,
 	})
 }
 
@@ -136,9 +173,17 @@ func newHTTPServer(
 	config *http.ServerConfig,
 ) *http.Server {
 	return http.NewServer(&http.ServerDeps{
-		Sessions: auth, Registration: auth, Invitations: auth,
-		Tenants: admin, LocalizationEdit: admin, Audit: admin,
-		Localization: localization, Translator: translator, Readiness: readiness,
-		Users: admin, InviteAdmin: admin, Overview: admin,
+		Sessions:         auth,
+		Registration:     auth,
+		Invitations:      auth,
+		Tenants:          admin,
+		LocalizationEdit: admin,
+		Audit:            admin,
+		Localization:     localization,
+		Translator:       translator,
+		Readiness:        readiness,
+		Users:            admin,
+		InviteAdmin:      admin,
+		Overview:         admin,
 	}, config)
 }

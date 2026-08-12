@@ -22,23 +22,26 @@ func NewWorkerApplication(
 	pool *pgxpool.Pool,
 	worker *service.InvitationWorker,
 ) *WorkerApplication {
-	return &WorkerApplication{pool: pool, worker: worker}
+	return &WorkerApplication{
+		pool:   pool,
+		worker: worker,
+	}
 }
 
-func (application *WorkerApplication) Run(ctx context.Context) error {
-	defer application.pool.Close()
-	return application.worker.Run(ctx)
+func (app *WorkerApplication) Run(ctx context.Context) error {
+	return app.worker.Run(ctx)
 }
 
-func (application *WorkerApplication) Healthcheck(ctx context.Context) error {
-	defer application.pool.Close()
-	return application.pool.Ping(ctx)
+func (app *WorkerApplication) Healthcheck(ctx context.Context) error {
+	return app.pool.Ping(ctx)
 }
 
 func workerPoolConfig(settings *appconfig.Config) postgres.PoolConfig {
 	return postgres.PoolConfig{
-		DatabaseURL: settings.Database.URL, MaxConns: settings.Database.MaxConns,
-		MinConns: settings.Database.MinConns, MaxConnLifetime: settings.Database.ConnMaxLifetime,
+		DatabaseURL:       settings.Database.URL,
+		MaxConns:          settings.Database.MaxConns,
+		MinConns:          settings.Database.MinConns,
+		MaxConnLifetime:   settings.Database.ConnMaxLifetime,
 		MaxConnIdleTime:   settings.Database.ConnMaxIdleTime,
 		HealthCheckPeriod: settings.Database.HealthCheck,
 	}
@@ -46,14 +49,19 @@ func workerPoolConfig(settings *appconfig.Config) postgres.PoolConfig {
 
 func workerSMTPConfig(settings *appconfig.Config) *mailadapter.SMTPConfig {
 	return &mailadapter.SMTPConfig{
-		Host: settings.SMTP.Host, Port: settings.SMTP.Port,
-		Username: settings.SMTP.Username, Password: settings.SMTP.Password,
-		From: settings.SMTP.From, RequireTLS: settings.SMTP.RequireTLS,
+		Host:       settings.SMTP.Host,
+		Port:       settings.SMTP.Port,
+		Username:   settings.SMTP.Username,
+		Password:   settings.SMTP.Password,
+		From:       settings.SMTP.From,
+		RequireTLS: settings.SMTP.RequireTLS,
 	}
 }
 
 func workerInvitationTokenConfig(settings *appconfig.Config) authadapter.InvitationTokenConfig {
-	return authadapter.InvitationTokenConfig{Secret: settings.Invites.TokenSecret}
+	return authadapter.InvitationTokenConfig{
+		Secret: settings.Invites.TokenSecret,
+	}
 }
 
 func workerInviteBaseURL(settings *appconfig.Config) string {

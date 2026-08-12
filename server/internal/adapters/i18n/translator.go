@@ -14,27 +14,29 @@ type Translator struct {
 	catalog ports.LocalizationCatalog
 }
 
+func NewTranslator(catalog ports.LocalizationCatalog) *Translator {
+	return &Translator{catalog: catalog}
+}
+
 func (translator *Translator) AuditDescription(
 	ctx context.Context,
 	locale domain.Locale,
 	event *domain.AuditEvent,
 ) string {
-	key := "audit." + event.Action
-	message, err := translator.catalog.Message(ctx, locale, key)
-	if err != nil {
-		defaultLocale, defaultErr := translator.catalog.DefaultLocale(ctx)
-		if defaultErr == nil {
-			message, err = translator.catalog.Message(ctx, defaultLocale, key)
-		}
+	if event == nil {
+		return ""
 	}
-	if err != nil {
-		return event.Action + ": " + event.Target
-	}
-	return strings.ReplaceAll(message, "{target}", event.Target)
-}
 
-func NewTranslator(catalog ports.LocalizationCatalog) *Translator {
-	return &Translator{catalog: catalog}
+	key := "audit." + event.Action
+	message, err := translator.resolveMessage(ctx, locale, key)
+	if err != nil {
+		if event.Target != "" {
+			return event.Action + ": " + event.Target
+		}
+		return event.Action
+	}
+
+	return strings.ReplaceAll(message, "{target}", event.Target)
 }
 
 func (translator *Translator) ErrorMessage(
@@ -42,22 +44,46 @@ func (translator *Translator) ErrorMessage(
 	locale domain.Locale,
 	err error,
 ) string {
+	if err == nil {
+		return ""
+	}
+
 	key := errorKey(err)
-	if message, lookupErr := translator.catalog.Message(ctx, locale, key); lookupErr == nil {
+	if message, resolveErr := translator.resolveMessage(ctx, locale, key); resolveErr == nil {
 		return message
 	}
+
+	if translator.catalog != nil {
+		return translator.catalog.FallbackMessage()
+	}
+	return "error.internal"
+}
+
+func (translator *Translator) resolveMessage(
+	ctx context.Context,
+	locale domain.Locale,
+	key string,
+) (string, error) {
+	if translator.catalog == nil {
+		return "", errors.New("localization catalog is nil")
+	}
+
+	message, err := translator.catalog.Message(ctx, locale, key)
+	if err == nil {
+		return message, nil
+	}
+
 	defaultLocale, defaultErr := translator.catalog.DefaultLocale(ctx)
 	if defaultErr == nil && defaultLocale != locale {
-		if message, lookupErr := translator.catalog.Message(ctx, defaultLocale, key); lookupErr == nil {
-			return message
-		}
+		return translator.catalog.Message(ctx, defaultLocale, key)
 	}
-	return translator.catalog.FallbackMessage()
+
+	return "", err
 }
 
 func errorKey(err error) string {
 	var domainError *domain.Error
-	if errors.As(err, &domainError) {
+	if errors.As(err, &domainError) && domainError.Kind != "" {
 		return "error." + string(domainError.Kind)
 	}
 	return "error.internal"

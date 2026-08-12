@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"sync"
 
 	"connectrpc.com/connect"
 
@@ -10,51 +11,53 @@ import (
 
 type sessionContextKey struct{}
 
-type sessionResult struct {
-	session domain.Session
-	err     error
-}
+type sessionResolver func(ctx context.Context) (domain.Session, error)
 
-// sessionInterceptor extracts the session cookie on every RPC and stores the
-// result in context. Handlers that require authentication call requireSession;
-// public endpoints may safely ignore it.
+// sessionInterceptor attaches a lazy session resolver to the request context.
+// Session lookups in the store are deferred until requireSession is explicitly invoked,
+// eliminating unnecessary I/O overhead on public endpoints.
 func (server *Server) sessionInterceptor() connect.UnaryInterceptorFunc {
 	return func(next connect.UnaryFunc) connect.UnaryFunc {
 		return func(ctx context.Context, request connect.AnyRequest) (connect.AnyResponse, error) {
 			token := server.cookieToken(request.Header())
 			if token == "" {
-				ctx = context.WithValue(ctx, sessionContextKey{}, sessionResult{err: domain.NewError(domain.ErrorUnauthorized)})
-			} else {
-				session, err := server.sessions.CurrentSession(ctx, token)
-				ctx = context.WithValue(ctx, sessionContextKey{}, sessionResult{session: session, err: err})
+				return next(ctx, request)
 			}
+
+			var (
+				once    sync.Once
+				session domain.Session
+				err     error
+			)
+
+			resolver := func(ctx context.Context) (domain.Session, error) {
+				once.Do(func() {
+					session, err = server.sessions.CurrentSession(ctx, token)
+				})
+				return session, err
+			}
+
+			ctx = context.WithValue(ctx, sessionContextKey{}, sessionResolver(resolver))
 			return next(ctx, request)
 		}
 	}
 }
 
-// sessionFromContext returns the (possibly invalid) session extracted by the
-// interceptor. The caller is responsible for checking the error.
+// sessionFromContext resolves and returns the session from context if a resolver exists.
 func sessionFromContext(ctx context.Context) (domain.Session, error) {
-	result, ok := ctx.Value(sessionContextKey{}).(sessionResult)
+	resolver, ok := ctx.Value(sessionContextKey{}).(sessionResolver)
 	if !ok {
 		return domain.Session{}, domain.NewError(domain.ErrorUnauthorized)
 	}
-	return result.session, result.err
+	return resolver(ctx)
 }
 
-// requireSession extracts the session from context and fails if the
-// interceptor could not resolve a valid session.
+// requireSession extracts the authenticated session from context.
 func requireSession(ctx context.Context) (domain.Session, error) {
-	session, err := sessionFromContext(ctx)
-	if err != nil {
-		return domain.Session{}, err
-	}
-	return session, nil
+	return sessionFromContext(ctx)
 }
 
-// requireSuperAdmin extracts the session from context and enforces the
-// ROLE_SUPER_ADMIN check that was previously in server.superAdmin().
+// requireSuperAdmin extracts the session from context and enforces the ROLE_SUPER_ADMIN check.
 func requireSuperAdmin(ctx context.Context) (domain.User, error) {
 	session, err := requireSession(ctx)
 	if err != nil || !session.User.Role.IsSuperAdmin() {

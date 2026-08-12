@@ -18,32 +18,53 @@ import (
 
 // Injectors from wire.go:
 
-func InitializeWorker(contextContext context.Context, configConfig *config.Config) (*WorkerApplication, error) {
-	poolConfig := workerPoolConfig(configConfig)
-	pool, err := postgres.NewPool(contextContext, poolConfig)
+func InitializeWorker(ctx context.Context, cfg *config.Config) (*WorkerApplication, func(), error) {
+	poolConfig := workerPoolConfig(cfg)
+	pool, cleanup, err := postgres.NewPool(ctx, poolConfig)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	outboxRepository := postgres.NewOutboxRepository(pool)
-	smtpConfig := workerSMTPConfig(configConfig)
+	smtpConfig := workerSMTPConfig(cfg)
 	smtpMailer := mail.NewSMTPMailer(smtpConfig)
-	invitationTokenConfig := workerInvitationTokenConfig(configConfig)
+	invitationTokenConfig := workerInvitationTokenConfig(cfg)
 	invitationTokenSigner, err := auth.NewInvitationTokenSigner(invitationTokenConfig)
 	if err != nil {
-		return nil, err
+		cleanup()
+		return nil, nil, err
 	}
-	string2 := workerInviteBaseURL(configConfig)
+	string2 := workerInviteBaseURL(cfg)
 	invitationWorker := newInvitationWorker(outboxRepository, smtpMailer, invitationTokenSigner, string2)
 	workerApplication := NewWorkerApplication(pool, invitationWorker)
-	return workerApplication, nil
+	return workerApplication, func() {
+		cleanup()
+	}, nil
 }
 
 // wire.go:
 
-var workerProviderSet = wire.NewSet(
+var configSet = wire.NewSet(
 	workerPoolConfig,
 	workerSMTPConfig,
 	workerInvitationTokenConfig,
-	workerInviteBaseURL, postgres.NewPool, postgres.NewOutboxRepository, mail.NewSMTPMailer, auth.NewInvitationTokenSigner, wire.Bind(new(ports.OutboxRepository), new(*postgres.OutboxRepository)), wire.Bind(new(ports.InvitationMailer), new(*mail.SMTPMailer)), wire.Bind(new(ports.InvitationTokenSigner), new(*auth.InvitationTokenSigner)), newInvitationWorker,
+	workerInviteBaseURL,
+)
+
+var postgresSet = wire.NewSet(postgres.NewPool, postgres.NewOutboxRepository, wire.Bind(new(ports.OutboxRepository), new(*postgres.OutboxRepository)))
+
+var mailSet = wire.NewSet(mail.NewSMTPMailer, wire.Bind(new(ports.InvitationMailer), new(*mail.SMTPMailer)))
+
+var authSet = wire.NewSet(auth.NewInvitationTokenSigner, wire.Bind(new(ports.InvitationTokenSigner), new(*auth.InvitationTokenSigner)))
+
+var workerSet = wire.NewSet(
+	newInvitationWorker,
 	NewWorkerApplication,
+)
+
+var workerProviderSet = wire.NewSet(
+	configSet,
+	postgresSet,
+	mailSet,
+	authSet,
+	workerSet,
 )

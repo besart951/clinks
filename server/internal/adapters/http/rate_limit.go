@@ -12,30 +12,48 @@ type identityRateLimiter struct {
 	entries map[string][]time.Time
 	limit   int
 	window  time.Duration
+	nowFunc func() time.Time
 }
 
 func newIdentityRateLimiter(limit int, window time.Duration) *identityRateLimiter {
-	return &identityRateLimiter{entries: make(map[string][]time.Time), limit: limit, window: window}
+	if limit <= 0 {
+		limit = 5
+	}
+	if window <= 0 {
+		window = 10 * time.Minute
+	}
+
+	return &identityRateLimiter{
+		entries: make(map[string][]time.Time),
+		limit:   limit,
+		window:  window,
+		nowFunc: time.Now,
+	}
 }
 
 func (limiter *identityRateLimiter) allow(key string) bool {
-	now := time.Now()
+	now := limiter.nowFunc()
 	key = strings.ToLower(strings.TrimSpace(key))
+	cutoff := now.Add(-limiter.window)
+
 	limiter.mu.Lock()
 	defer limiter.mu.Unlock()
-	entries := limiter.entries[key]
-	cutoff := now.Add(-limiter.window)
-	limiter.entries[key] = trimExpired(entries, cutoff)
-	if len(limiter.entries[key]) >= limiter.limit {
+
+	entries := trimExpired(limiter.entries[key], cutoff)
+
+	if len(entries) >= limiter.limit {
+		limiter.entries[key] = entries
 		return false
 	}
-	limiter.entries[key] = append(limiter.entries[key], now)
+
+	limiter.entries[key] = append(entries, now)
 	return true
 }
 
 func (limiter *identityRateLimiter) runCleanup(ctx context.Context) {
 	ticker := time.NewTicker(limiter.window)
 	defer ticker.Stop()
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -47,23 +65,27 @@ func (limiter *identityRateLimiter) runCleanup(ctx context.Context) {
 }
 
 func (limiter *identityRateLimiter) cleanup() {
+	now := limiter.nowFunc()
+	cutoff := now.Add(-limiter.window)
+
 	limiter.mu.Lock()
 	defer limiter.mu.Unlock()
-	cutoff := time.Now().Add(-limiter.window)
+
 	for key, entries := range limiter.entries {
-		limiter.entries[key] = trimExpired(entries, cutoff)
-		if len(limiter.entries[key]) == 0 {
+		trimmed := trimExpired(entries, cutoff)
+		if len(trimmed) == 0 {
 			delete(limiter.entries, key)
+		} else {
+			limiter.entries[key] = trimmed
 		}
 	}
 }
 
 func trimExpired(entries []time.Time, cutoff time.Time) []time.Time {
-	kept := entries[:0]
-	for _, entry := range entries {
+	for i, entry := range entries {
 		if entry.After(cutoff) {
-			kept = append(kept, entry)
+			return entries[i:]
 		}
 	}
-	return kept
+	return nil
 }

@@ -20,8 +20,8 @@ func main() {
 	}
 }
 
-func run(arguments []string) error {
-	config, err := appconfig.Load()
+func run(args []string) error {
+	cfg, err := appconfig.Load()
 	if err != nil {
 		return fmt.Errorf("load configuration: %w", err)
 	}
@@ -29,22 +29,27 @@ func run(arguments []string) error {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
-	application, err := InitializeApplication(ctx, &config)
+	app, cleanup, err := InitializeApplication(ctx, &cfg)
 	if err != nil {
 		return fmt.Errorf("build application: %w", err)
 	}
+	defer cleanup()
+
 	command := "server"
-	if len(arguments) > 0 {
-		command = arguments[0]
+	if len(args) > 0 {
+		command = args[0]
 	}
+
+	slog.Info("executing command", "command", command)
+
 	switch command {
 	case "server":
-		return application.Run(ctx, &config.HTTP)
+		return app.Run(ctx, &cfg.HTTP)
 	case "migrate":
-		return application.MigrateAndBootstrap(ctx, config.Bootstrap)
+		return app.MigrateAndBootstrap(ctx, cfg.Bootstrap)
 	case "healthcheck":
-		return application.Healthcheck(ctx)
+		return app.Healthcheck(ctx)
 	default:
-		return fmt.Errorf("unknown command %q", command)
+		return fmt.Errorf("unknown command %q (supported commands: server, migrate, healthcheck)", command)
 	}
 }

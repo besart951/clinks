@@ -3,6 +3,7 @@ package localization
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sort"
 
@@ -10,7 +11,8 @@ import (
 	"github.com/besartmorina/clinks/server/internal/core/ports"
 )
 
-// ProductCatalog combines immutable product texts with database Translation Overrides.
+var ErrNilOverrides = errors.New("localization overrides port is nil")
+
 type ProductCatalog struct {
 	overrides ports.LocalizationOverrides
 }
@@ -20,10 +22,16 @@ func NewProductCatalog(overrides ports.LocalizationOverrides) *ProductCatalog {
 }
 
 func (catalog *ProductCatalog) ActiveLanguages(ctx context.Context) ([]domain.Language, error) {
+	if catalog.overrides == nil {
+		return nil, ErrNilOverrides
+	}
 	return catalog.overrides.ActiveLanguages(ctx)
 }
 
 func (catalog *ProductCatalog) AllLanguages(ctx context.Context) ([]domain.Language, error) {
+	if catalog.overrides == nil {
+		return nil, ErrNilOverrides
+	}
 	return catalog.overrides.AllLanguages(ctx)
 }
 
@@ -32,9 +40,12 @@ func (catalog *ProductCatalog) DefaultLocale(context.Context) (domain.Locale, er
 }
 
 func (*ProductCatalog) FallbackMessage() string {
-	for _, translation := range productTranslations(productDefaultLocale, domain.ScopeShared) {
-		if translation.Key == "error.internal" {
-			return translation.Value
+	for i := range productTranslationEntries {
+		entry := productTranslationEntries[i]
+		if entry.Locale == productDefaultLocale &&
+			entry.ApplicationScope == domain.ScopeShared &&
+			entry.Key == "error.internal" {
+			return entry.Value
 		}
 	}
 	return "error.internal"
@@ -45,11 +56,17 @@ func (catalog *ProductCatalog) Translations(
 	locale domain.Locale,
 	scope domain.ApplicationScope,
 ) ([]domain.Translation, error) {
-	overrides, err := catalog.overrides.Translations(ctx, locale, scope)
-	if err != nil {
-		return nil, err
+	var overrides []domain.Translation
+	if catalog.overrides != nil {
+		var err error
+		overrides, err = catalog.overrides.Translations(ctx, locale, scope)
+		if err != nil {
+			return nil, err
+		}
 	}
-	return mergeTranslations(productTranslations(locale, scope), overrides), nil
+
+	baseline := productTranslations(locale, scope)
+	return mergeTranslations(baseline, overrides), nil
 }
 
 func (catalog *ProductCatalog) Message(ctx context.Context, locale domain.Locale, key string) (string, error) {
@@ -57,9 +74,10 @@ func (catalog *ProductCatalog) Message(ctx context.Context, locale domain.Locale
 	if err != nil {
 		return "", err
 	}
-	for _, translation := range translations {
-		if translation.Key == key {
-			return translation.Value, nil
+
+	for i := range translations {
+		if translations[i].Key == key {
+			return translations[i].Value, nil
 		}
 	}
 	return "", fmt.Errorf("find translation: %s", key)
@@ -67,44 +85,55 @@ func (catalog *ProductCatalog) Message(ctx context.Context, locale domain.Locale
 
 func productTranslations(locale domain.Locale, scope domain.ApplicationScope) []domain.Translation {
 	byKey := make(map[string]domain.Translation)
-	for _, translation := range productTranslationEntries {
-		if translation.Locale == locale && translation.ApplicationScope == domain.ScopeShared {
-			byKey[translation.Key] = translation
+
+	for i := range productTranslationEntries {
+		entry := productTranslationEntries[i]
+		if entry.Locale != locale {
+			continue
 		}
-	}
-	if scope != domain.ScopeShared {
-		for _, translation := range productTranslationEntries {
-			if translation.Locale == locale && translation.ApplicationScope == scope {
-				byKey[translation.Key] = translation
+
+		if entry.ApplicationScope == scope && scope != domain.ScopeShared {
+			byKey[entry.Key] = entry
+		} else if entry.ApplicationScope == domain.ScopeShared {
+			if existing, found := byKey[entry.Key]; !found || existing.ApplicationScope != scope {
+				byKey[entry.Key] = entry
 			}
 		}
 	}
+
 	translations := make([]domain.Translation, 0, len(byKey))
 	for _, translation := range byKey {
 		translations = append(translations, translation)
 	}
+
 	sortTranslations(translations)
 	return translations
 }
 
 func mergeTranslations(baseline, overrides []domain.Translation) []domain.Translation {
+	if len(overrides) == 0 {
+		return baseline
+	}
+
 	byKey := make(map[string]domain.Translation, len(baseline)+len(overrides))
-	for _, translation := range baseline {
-		byKey[translation.Key] = translation
+	for i := range baseline {
+		byKey[baseline[i].Key] = baseline[i]
 	}
-	for _, translation := range overrides {
-		byKey[translation.Key] = translation
+	for i := range overrides {
+		byKey[overrides[i].Key] = overrides[i]
 	}
+
 	translations := make([]domain.Translation, 0, len(byKey))
 	for _, translation := range byKey {
 		translations = append(translations, translation)
 	}
+
 	sortTranslations(translations)
 	return translations
 }
 
 func sortTranslations(translations []domain.Translation) {
-	sort.Slice(translations, func(left, right int) bool {
-		return translations[left].Key < translations[right].Key
+	sort.Slice(translations, func(i, j int) bool {
+		return translations[i].Key < translations[j].Key
 	})
 }

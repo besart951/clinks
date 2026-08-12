@@ -39,10 +39,12 @@ func (signer *InvitationTokenSigner) Token(invitation *domain.Invitation) (strin
 	if invitation.ID == "" || invitation.ExpiresAt.IsZero() {
 		return "", fmt.Errorf("sign invitation token: invitation id and expiry are required")
 	}
+
 	payload := string(invitation.ID) + "." + strconv.FormatInt(invitation.ExpiresAt.UTC().Unix(), 10)
+
 	mac := hmac.New(sha256.New, signer.secret)
-	if _, err := mac.Write([]byte(payload)); err != nil {
-		return "", fmt.Errorf("sign invitation token: %w", err)
-	}
-	return payload + "." + base64.RawURLEncoding.EncodeToString(mac.Sum(nil)), nil
+	mac.Write([]byte(payload))
+
+	signature := base64.RawURLEncoding.EncodeToString(mac.Sum(nil))
+	return payload + "." + signature, nil
 }

@@ -22,10 +22,10 @@ type PoolConfig struct {
 	HealthCheckPeriod time.Duration
 }
 
-func NewPool(ctx context.Context, poolConfig PoolConfig) (*pgxpool.Pool, error) {
+func NewPool(ctx context.Context, poolConfig PoolConfig) (*pgxpool.Pool, func(), error) {
 	config, err := pgxpool.ParseConfig(poolConfig.DatabaseURL)
 	if err != nil {
-		return nil, fmt.Errorf("parse database URL: %w", err)
+		return nil, nil, fmt.Errorf("parse database URL: %w", err)
 	}
 	config.MaxConns = poolConfig.MaxConns
 	config.MinConns = poolConfig.MinConns
@@ -34,13 +34,13 @@ func NewPool(ctx context.Context, poolConfig PoolConfig) (*pgxpool.Pool, error) 
 	config.HealthCheckPeriod = poolConfig.HealthCheckPeriod
 	pool, err := pgxpool.NewWithConfig(ctx, config)
 	if err != nil {
-		return nil, fmt.Errorf("open postgres pool: %w", err)
+		return nil, nil, fmt.Errorf("open postgres pool: %w", err)
 	}
 	if err = pool.Ping(ctx); err != nil {
 		pool.Close()
-		return nil, fmt.Errorf("ping postgres: %w", err)
+		return nil, nil, fmt.Errorf("ping postgres: %w", err)
 	}
-	return pool, nil
+	return pool, pool.Close, nil
 }
 
 func WithTenantTx(

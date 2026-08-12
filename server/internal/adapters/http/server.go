@@ -1,4 +1,4 @@
-// Package http exposes Connect-RPC and the two plain HTTP health probes.
+// Package http exposes Connect-RPC and the plain HTTP health probes.
 package http
 
 import (
@@ -17,10 +17,15 @@ import (
 	"github.com/besartmorina/clinks/server/proto/clinks/v1/clinksv1connect"
 )
 
-const sessionCookieName = "clinks_session"
+const (
+	sessionCookieName       = "clinks_session"
+	defaultReadinessTimeout = 5 * time.Second
+	defaultLocale           = domain.Locale("en-US")
+)
 
 type Server struct {
 	clinksv1connect.UnimplementedClinksServiceHandler
+
 	sessions         sessionService
 	registration     registrationService
 	invitations      invitationService
@@ -125,17 +130,42 @@ type ServerDeps struct {
 }
 
 func NewServer(deps *ServerDeps, config *ServerConfig) *Server {
-	if config.Cookie.Name == "" {
-		config.Cookie.Name = sessionCookieName
+	cookieCfg := config.Cookie
+	if cookieCfg.Name == "" {
+		cookieCfg.Name = sessionCookieName
 	}
-	return &Server{sessions: deps.Sessions, registration: deps.Registration, invitations: deps.Invitations, tenants: deps.Tenants, localizationEdit: deps.LocalizationEdit, audit: deps.Audit, localization: deps.Localization, translator: deps.Translator, readiness: deps.Readiness, readinessTimeout: config.ReadinessTimeout, browserPolicy: newBrowserPolicy(config.CORSOrigins), cookie: config.Cookie, authLimiter: newIdentityRateLimiter(5, 10*time.Minute), users: deps.Users, inviteAdmin: deps.InviteAdmin, overview: deps.Overview}
+
+	readinessTimeout := config.ReadinessTimeout
+	if readinessTimeout <= 0 {
+		readinessTimeout = defaultReadinessTimeout
+	}
+
+	return &Server{
+		sessions:         deps.Sessions,
+		registration:     deps.Registration,
+		invitations:      deps.Invitations,
+		tenants:          deps.Tenants,
+		localizationEdit: deps.LocalizationEdit,
+		audit:            deps.Audit,
+		localization:     deps.Localization,
+		translator:       deps.Translator,
+		readiness:        deps.Readiness,
+		readinessTimeout: readinessTimeout,
+		browserPolicy:    newBrowserPolicy(config.CORSOrigins),
+		cookie:           cookieCfg,
+		authLimiter:      newIdentityRateLimiter(5, 10*time.Minute),
+		users:            deps.Users,
+		inviteAdmin:      deps.InviteAdmin,
+		overview:         deps.Overview,
+	}
 }
 
-// StartCleanup begins background goroutines owned by the server (e.g., rate
-// limiter entry eviction). Callers should pass the process-level context.
+// StartCleanup begins background goroutines owned by the server (e.g., rate-limiter eviction).
 func (server *Server) StartCleanup(ctx context.Context) {
 	go server.authLimiter.runCleanup(ctx)
 }
+
+// --- Routing & Handlers ---
 
 func (server *Server) Handler() stdhttp.Handler {
 	return server.handler(nil, OIDCConfig{})
@@ -150,27 +180,34 @@ func (server *Server) handler(client oidcClient, oidcConfig OIDCConfig) stdhttp.
 	router := stdhttp.NewServeMux()
 	router.HandleFunc("GET /healthz", server.health)
 	router.HandleFunc("GET /readyz", server.ready)
+
 	if client != nil && client.Enabled() {
 		router.HandleFunc("GET /auth/oidc/google/start", server.googleOIDCStart(client, oidcConfig))
 		router.HandleFunc("GET /auth/oidc/google/callback", server.googleOIDCCallback(client, oidcConfig))
 	}
-	path, rpcHandler := clinksv1connect.NewClinksServiceHandler(server, connect.WithInterceptors(server.sessionInterceptor()))
+
+	path, rpcHandler := clinksv1connect.NewClinksServiceHandler(
+		server,
+		connect.WithInterceptors(server.sessionInterceptor()),
+	)
 	router.Handle(path, rpcHandler)
+
 	return server.browserPolicy.protect(router)
 }
 
-func (server *Server) health(response stdhttp.ResponseWriter, _ *stdhttp.Request) {
-	response.WriteHeader(stdhttp.StatusOK)
+func (server *Server) health(w stdhttp.ResponseWriter, _ *stdhttp.Request) {
+	w.WriteHeader(stdhttp.StatusOK)
 }
 
-func (server *Server) ready(response stdhttp.ResponseWriter, request *stdhttp.Request) {
-	ctx, cancel := context.WithTimeout(request.Context(), server.readinessTimeout)
+func (server *Server) ready(w stdhttp.ResponseWriter, r *stdhttp.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), server.readinessTimeout)
 	defer cancel()
+
 	if err := server.readiness.Ready(ctx); err != nil {
-		response.WriteHeader(stdhttp.StatusServiceUnavailable)
+		w.WriteHeader(stdhttp.StatusServiceUnavailable)
 		return
 	}
-	response.WriteHeader(stdhttp.StatusOK)
+	w.WriteHeader(stdhttp.StatusOK)
 }
 
 func (server *Server) sessionResponse(ctx context.Context, header stdhttp.Header, session *domain.Session, err error) (*connect.Response[clinksv1.Session], error) {
@@ -184,24 +221,31 @@ func (server *Server) sessionResponse(ctx context.Context, header stdhttp.Header
 
 func (server *Server) localizedError(ctx context.Context, header stdhttp.Header, err error) error {
 	code := connectCode(err)
-	message := server.translator.ErrorMessage(ctx, requestLocale(header), err)
+	locale := requestLocale(header)
+	message := server.translator.ErrorMessage(ctx, locale, err)
+
 	if code == connect.CodeInternal {
 		slog.Error("RPC request failed", "error", err)
 	}
+
 	response := connect.NewError(code, errors.New(message))
-	response.Meta().Set("Clinks-Locale", string(requestLocale(header)))
+	response.Meta().Set("Clinks-Locale", string(locale))
+
 	var domainErr *domain.Error
 	if errors.As(err, &domainErr) {
 		response.Meta().Set("Clinks-Error-Kind", string(domainErr.Kind))
 	} else {
 		response.Meta().Set("Clinks-Error-Kind", string(domain.ErrorInternal))
 	}
+
 	return response
 }
 
+// --- Cookie & Header Helpers ---
+
 func (server *Server) cookieToken(header stdhttp.Header) string {
-	request := stdhttp.Request{Header: header}
-	cookie, err := request.Cookie(server.cookie.Name)
+	req := stdhttp.Request{Header: header}
+	cookie, err := req.Cookie(server.cookie.Name)
 	if err != nil {
 		return ""
 	}
@@ -209,23 +253,40 @@ func (server *Server) cookieToken(header stdhttp.Header) string {
 }
 
 func (server *Server) sessionCookie(token string) *stdhttp.Cookie {
-	cookie := &stdhttp.Cookie{Name: server.cookie.Name, Value: token, Path: "/", Domain: server.cookie.Domain, HttpOnly: true, Secure: server.cookie.Secure, SameSite: stdhttp.SameSiteLaxMode} // #nosec G124 -- plaintext cookies require explicit local-development configuration.
+	//nolint:gosec // Secure may be disabled only by explicit local-development configuration.
+	cookie := &stdhttp.Cookie{
+		Name:     server.cookie.Name,
+		Value:    token,
+		Path:     "/",
+		Domain:   server.cookie.Domain,
+		HttpOnly: true,
+		Secure:   server.cookie.Secure,
+		SameSite: stdhttp.SameSiteLaxMode,
+	}
+
 	if token == "" {
 		cookie.MaxAge = -1
 		cookie.Expires = time.Unix(1, 0)
 		return cookie
 	}
+
 	cookie.MaxAge = int(server.cookie.MaxAge.Seconds())
 	return cookie
 }
 
 func requestLocale(header stdhttp.Header) domain.Locale {
-	value := strings.Split(header.Get("Accept-Language"), ",")[0]
-	value = strings.TrimSpace(strings.Split(value, ";")[0])
-	if value == "" {
-		return "en-US"
+	rawHeader := header.Get("Accept-Language")
+	if rawHeader == "" {
+		return defaultLocale
 	}
-	return domain.NewLocale(value)
+
+	primaryTag := strings.Split(rawHeader, ",")[0]
+	cleanTag := strings.TrimSpace(strings.Split(primaryTag, ";")[0])
+
+	if cleanTag == "" {
+		return defaultLocale
+	}
+	return domain.NewLocale(cleanTag)
 }
 
 func connectCode(err error) connect.Code {
@@ -233,6 +294,7 @@ func connectCode(err error) connect.Code {
 	if !errors.As(err, &domainError) {
 		return connect.CodeInternal
 	}
+
 	switch domainError.Kind {
 	case domain.ErrorInvalidCredentials:
 		return connect.CodeUnauthenticated

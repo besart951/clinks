@@ -2,12 +2,14 @@
 package security
 
 import (
+	"fmt"
+
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/besartmorina/clinks/server/internal/core/domain"
 )
 
-// rejectedPasswordHash is a bcrypt hash at the default cost used for unknown users.
+// rejectedPasswordHash is a dummy bcrypt hash used for missing users to mitigate timing attacks.
 //
 // #nosec G101 -- This is a public dummy hash, never a credential.
 const rejectedPasswordHash = "$2a$10$7EqJtq98hPqEX7fNZaFWoOePP0bY3eV3ikPvN8YODjXpzYp9eR4Gi"
@@ -21,7 +23,7 @@ func NewPasswordHasher() *PasswordHasher {
 }
 
 func NewPasswordHasherWithCost(cost int) *PasswordHasher {
-	if cost == 0 {
+	if cost < bcrypt.MinCost || cost > bcrypt.MaxCost {
 		cost = bcrypt.DefaultCost
 	}
 	return &PasswordHasher{cost: cost}
@@ -30,7 +32,7 @@ func NewPasswordHasherWithCost(cost int) *PasswordHasher {
 func (hasher *PasswordHasher) Hash(password string) (domain.PasswordHash, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), hasher.cost)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("hash password: %w", err)
 	}
 	return domain.PasswordHash(hash), nil
 }

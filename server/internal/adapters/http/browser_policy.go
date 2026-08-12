@@ -7,6 +7,8 @@ import (
 	"github.com/besartmorina/clinks/server/proto/clinks/v1/clinksv1connect"
 )
 
+const corsMaxAgeSeconds = "86400" // 24 hours
+
 type browserPolicy struct {
 	origins map[string]struct{}
 }
@@ -23,7 +25,9 @@ var readOnlyProcedures = map[string]struct{}{
 func newBrowserPolicy(origins []string) browserPolicy {
 	allowedOrigins := make(map[string]struct{}, len(origins))
 	for _, origin := range origins {
-		allowedOrigins[normalizeOrigin(origin)] = struct{}{}
+		if normalized := normalizeOrigin(origin); normalized != "" {
+			allowedOrigins[normalized] = struct{}{}
+		}
 	}
 	return browserPolicy{origins: allowedOrigins}
 }
@@ -33,35 +37,41 @@ func (policy browserPolicy) protect(next stdhttp.Handler) stdhttp.Handler {
 }
 
 func (policy browserPolicy) cors(next stdhttp.Handler) stdhttp.Handler {
-	return stdhttp.HandlerFunc(func(response stdhttp.ResponseWriter, request *stdhttp.Request) {
-		origin := normalizeOrigin(request.Header.Get("Origin"))
+	return stdhttp.HandlerFunc(func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
+		origin := normalizeOrigin(r.Header.Get("Origin"))
 		if policy.allows(origin) {
-			response.Header().Set("Access-Control-Allow-Origin", origin)
-			response.Header().Set("Access-Control-Allow-Credentials", "true")
-			response.Header().Set("Access-Control-Allow-Headers", "Content-Type, Connect-Protocol-Version, Connect-Timeout-Ms, Accept-Language")
-			response.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
-			response.Header().Add("Vary", "Origin")
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			w.Header().Set("Access-Control-Allow-Credentials", "true")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Connect-Protocol-Version, Connect-Timeout-Ms, Accept-Language")
+			w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+			w.Header().Set("Access-Control-Max-Age", corsMaxAgeSeconds)
+			w.Header().Add("Vary", "Origin")
 		}
-		if request.Method == stdhttp.MethodOptions {
-			response.WriteHeader(stdhttp.StatusNoContent)
+
+		if r.Method == stdhttp.MethodOptions {
+			w.WriteHeader(stdhttp.StatusNoContent)
 			return
 		}
-		next.ServeHTTP(response, request)
+
+		next.ServeHTTP(w, r)
 	})
 }
 
 func (policy browserPolicy) originGuard(next stdhttp.Handler) stdhttp.Handler {
-	return stdhttp.HandlerFunc(func(response stdhttp.ResponseWriter, request *stdhttp.Request) {
-		origin := normalizeOrigin(request.Header.Get("Origin"))
-		if origin != "" && policy.requiresTrustedOrigin(request.URL.Path) && !policy.allows(origin) {
-			stdhttp.Error(response, "forbidden origin", stdhttp.StatusForbidden)
+	return stdhttp.HandlerFunc(func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
+		origin := normalizeOrigin(r.Header.Get("Origin"))
+		if origin != "" && policy.requiresTrustedOrigin(r.URL.Path) && !policy.allows(origin) {
+			stdhttp.Error(w, "forbidden origin", stdhttp.StatusForbidden)
 			return
 		}
-		next.ServeHTTP(response, request)
+		next.ServeHTTP(w, r)
 	})
 }
 
 func (policy browserPolicy) allows(origin string) bool {
+	if origin == "" {
+		return false
+	}
 	_, allowed := policy.origins[origin]
 	return allowed
 }
@@ -72,5 +82,5 @@ func (browserPolicy) requiresTrustedOrigin(procedure string) bool {
 }
 
 func normalizeOrigin(origin string) string {
-	return strings.TrimRight(origin, "/")
+	return strings.ToLower(strings.TrimRight(strings.TrimSpace(origin), "/"))
 }

@@ -10,7 +10,7 @@ import (
 func TestConfigValidate(t *testing.T) {
 	valid := Config{
 		Database:  DatabaseConfig{MinConns: 2, MaxConns: 20},
-		Auth:      AuthConfig{JWTSecret: strings.Repeat("a", 32)},
+		Auth:      AuthConfig{JWTSecret: strings.Repeat("a", 32), JWTTTL: time.Hour},
 		Invites:   InviteConfig{TokenSecret: strings.Repeat("b", 32)},
 		Bootstrap: BootstrapConfig{Password: "a secure password"},
 	}
@@ -37,6 +37,25 @@ func TestConfigValidate(t *testing.T) {
 				return config
 			}(),
 			want: "JWT_SECRET",
+		},
+		{
+			name: "non-positive JWT TTL",
+			config: func() Config {
+				config := valid
+				config.Auth.JWTTTL = 0
+				return config
+			}(),
+			want: "JWT_TTL",
+		},
+		{
+			name: "collects independent validation errors",
+			config: func() Config {
+				config := valid
+				config.Database.MaxConns = 0
+				config.Auth.JWTSecret = "short"
+				return config
+			}(),
+			want: "DATABASE_MAX_CONNS",
 		},
 		{
 			name: "placeholder administrator password",

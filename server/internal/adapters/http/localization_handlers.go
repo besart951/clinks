@@ -14,7 +14,10 @@ func (server *Server) GetLanguages(ctx context.Context, request *connect.Request
 	if err != nil {
 		return nil, server.localizedError(ctx, request.Header(), err)
 	}
-	return connect.NewResponse(&clinksv1.LanguagesResponse{Languages: languageMessages(languages)}), nil
+
+	return connect.NewResponse(&clinksv1.LanguagesResponse{
+		Languages: languageMessages(languages),
+	}), nil
 }
 
 func (server *Server) GetTranslations(ctx context.Context, request *connect.Request[clinksv1.GetTranslationsRequest]) (*connect.Response[clinksv1.TranslationsResponse], error) {
@@ -26,5 +29,9 @@ func (server *Server) GetTranslations(ctx context.Context, request *connect.Requ
 	if err != nil {
 		return nil, server.localizedError(ctx, request.Header(), err)
 	}
-	return connect.NewResponse(&clinksv1.TranslationsResponse{Locale: string(bundle.Locale), Translations: translationMessages(bundle.Translations)}), nil
+
+	return connect.NewResponse(&clinksv1.TranslationsResponse{
+		Locale:       string(bundle.Locale),
+		Translations: translationMessages(bundle.Translations),
+	}), nil
 }

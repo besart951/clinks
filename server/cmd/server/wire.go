@@ -18,60 +18,106 @@ import (
 	"github.com/besartmorina/clinks/server/internal/core/service"
 )
 
-var providerSet = wire.NewSet(
+var configSet = wire.NewSet(
 	poolConfig,
 	httpServerConfig,
 	sessionConfig,
-	postgres.NewPool,
-	postgres.NewUserRepository,
-	postgres.NewExternalIdentityRepository,
-	postgres.NewTenantProvisioner,
-	postgres.NewTenantRepository,
-	postgres.NewMembershipRepository,
-	postgres.NewAuditRepository,
-	postgres.NewLocalizationRepository,
-	postgres.NewAdminUserRepository,
-	postgres.NewAdminInvitationRepository,
-	postgres.NewSystemStatsRepository,
-	localization.NewProductCatalog,
-	postgres.NewReadiness,
-	wire.Bind(new(ports.IdentityRepository), new(*postgres.UserRepository)),
-	wire.Bind(new(ports.ExternalIdentityRepository), new(*postgres.ExternalIdentityRepository)),
-	wire.Bind(new(ports.TenantProvisioner), new(*postgres.TenantProvisioner)),
-	wire.Bind(new(ports.TenantRepository), new(*postgres.TenantRepository)),
-	wire.Bind(new(ports.MembershipRepository), new(*postgres.MembershipRepository)),
-	wire.Bind(new(ports.AuditLog), new(*postgres.AuditRepository)),
-	wire.Bind(new(ports.LocalizationOverrides), new(*postgres.LocalizationRepository)),
-	wire.Bind(new(ports.LocalizationCatalog), new(*localization.ProductCatalog)),
-	wire.Bind(new(ports.LocalizationEditor), new(*postgres.LocalizationRepository)),
-	wire.Bind(new(ports.AdminUserRepository), new(*postgres.AdminUserRepository)),
-	wire.Bind(new(ports.AdminInvitationRepository), new(*postgres.AdminInvitationRepository)),
-	wire.Bind(new(ports.SystemStatsRepository), new(*postgres.SystemStatsRepository)),
-	wire.Bind(new(ports.ReadinessChecker), new(*postgres.Readiness)),
-	security.NewPasswordHasher,
-	wire.Bind(new(ports.PasswordHasher), new(*security.PasswordHasher)),
-	auth.NewSessionIssuer,
-	wire.Bind(new(ports.SessionIssuer), new(*auth.SessionIssuer)),
 	smtpConfig,
 	invitationTokenConfig,
 	googleOIDCConfig,
 	httpOIDCConfig,
-	mailadapter.NewSMTPMailer,
-	auth.NewInvitationTokenSigner,
-	auth.NewGoogleOIDC,
-	wire.Bind(new(ports.InvitationMailer), new(*mailadapter.SMTPMailer)),
-	wire.Bind(new(ports.InvitationTokenSigner), new(*auth.InvitationTokenSigner)),
 	inviteBaseURL,
 	inviteTTL,
+)
+
+var postgresSet = wire.NewSet(
+	postgres.NewPool,
+
+	postgres.NewUserRepository,
+	wire.Bind(new(ports.IdentityRepository), new(*postgres.UserRepository)),
+
+	postgres.NewExternalIdentityRepository,
+	wire.Bind(new(ports.ExternalIdentityRepository), new(*postgres.ExternalIdentityRepository)),
+
+	postgres.NewTenantProvisioner,
+	wire.Bind(new(ports.TenantProvisioner), new(*postgres.TenantProvisioner)),
+
+	postgres.NewTenantRepository,
+	wire.Bind(new(ports.TenantRepository), new(*postgres.TenantRepository)),
+
+	postgres.NewMembershipRepository,
+	wire.Bind(new(ports.MembershipRepository), new(*postgres.MembershipRepository)),
+
+	postgres.NewAuditRepository,
+	wire.Bind(new(ports.AuditLog), new(*postgres.AuditRepository)),
+
+	postgres.NewLocalizationRepository,
+	wire.Bind(new(ports.LocalizationOverrides), new(*postgres.LocalizationRepository)),
+	wire.Bind(new(ports.LocalizationEditor), new(*postgres.LocalizationRepository)),
+
+	postgres.NewAdminUserRepository,
+	wire.Bind(new(ports.AdminUserRepository), new(*postgres.AdminUserRepository)),
+
+	postgres.NewAdminInvitationRepository,
+	wire.Bind(new(ports.AdminInvitationRepository), new(*postgres.AdminInvitationRepository)),
+
+	postgres.NewSystemStatsRepository,
+	wire.Bind(new(ports.SystemStatsRepository), new(*postgres.SystemStatsRepository)),
+
+	postgres.NewReadiness,
+	wire.Bind(new(ports.ReadinessChecker), new(*postgres.Readiness)),
+)
+
+var securitySet = wire.NewSet(
+	security.NewPasswordHasher,
+	wire.Bind(new(ports.PasswordHasher), new(*security.PasswordHasher)),
+)
+
+var authSet = wire.NewSet(
+	auth.NewSessionIssuer,
+	wire.Bind(new(ports.SessionIssuer), new(*auth.SessionIssuer)),
+
+	auth.NewInvitationTokenSigner,
+	wire.Bind(new(ports.InvitationTokenSigner), new(*auth.InvitationTokenSigner)),
+
+	auth.NewGoogleOIDC,
+)
+
+var mailSet = wire.NewSet(
+	mailadapter.NewSMTPMailer,
+	wire.Bind(new(ports.InvitationMailer), new(*mailadapter.SMTPMailer)),
+)
+
+var localizationSet = wire.NewSet(
+	localization.NewProductCatalog,
+	wire.Bind(new(ports.LocalizationCatalog), new(*localization.ProductCatalog)),
+	i18n.NewTranslator,
+)
+
+var serviceSet = wire.NewSet(
 	newAuthService,
 	service.NewAdminService,
 	service.NewI18nService,
-	i18n.NewTranslator,
+)
+
+var httpSet = wire.NewSet(
 	newHTTPServer,
 	NewApplication,
 )
 
-func InitializeApplication(context.Context, *appconfig.Config) (*Application, error) {
+var providerSet = wire.NewSet(
+	configSet,
+	postgresSet,
+	securitySet,
+	authSet,
+	mailSet,
+	localizationSet,
+	serviceSet,
+	httpSet,
+)
+
+// InitializeApplication generates the dependency injection graph via Google Wire.
+func InitializeApplication(ctx context.Context, cfg *appconfig.Config) (*Application, func(), error) {
 	wire.Build(providerSet)
-	return nil, nil
+	return nil, nil, nil
 }

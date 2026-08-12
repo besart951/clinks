@@ -18,7 +18,7 @@ func TestPoolConfig_InvalidURL(t *testing.T) {
 		DatabaseURL: "invalid://dsn",
 	}
 
-	_, err := postgres.NewPool(ctx, config)
+	_, _, err := postgres.NewPool(ctx, config)
 	if err == nil {
 		t.Error("expected error when parsing invalid database URL, got nil")
 	}
