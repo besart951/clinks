@@ -2,68 +2,224 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
 	"time"
 
+	"github.com/besartmorina/clinks/server/internal/core/domain"
 	"github.com/besartmorina/clinks/server/internal/core/ports"
 )
 
+const (
+	invitationPollInterval    = 2 * time.Second
+	invitationCleanupInterval = 24 * time.Hour
+	invitationRetentionDays   = 30
+
+	invitationDeliverySent = "sent"
+)
+
 type InvitationWorker struct {
-	outbox        ports.OutboxRepository
-	mailer        ports.InvitationMailer
-	tokens        ports.InvitationTokenSigner
-	inviteBaseURL string
+	outbox ports.OutboxRepository
+	mailer ports.InvitationMailer
+	tokens ports.InvitationTokenSigner
+	links  invitationLinkBuilder
+	now    func() time.Time
 }
 
-func NewInvitationWorker(outbox ports.OutboxRepository, mailer ports.InvitationMailer, tokens ports.InvitationTokenSigner, inviteBaseURL string) *InvitationWorker {
-	return &InvitationWorker{outbox: outbox, mailer: mailer, tokens: tokens, inviteBaseURL: strings.TrimRight(inviteBaseURL, "/")}
-}
-
-func (worker *InvitationWorker) Run(ctx context.Context) error {
-	if _, err := worker.outbox.AnonymizeExpiredInvitations(ctx, time.Now().AddDate(0, 0, -30)); err != nil {
-		return fmt.Errorf("anonymize expired invitations: %w", err)
+func NewInvitationWorker(
+	outbox ports.OutboxRepository,
+	mailer ports.InvitationMailer,
+	tokens ports.InvitationTokenSigner,
+	inviteBaseURL string,
+) (*InvitationWorker, error) {
+	links, err := newInvitationLinkBuilder(inviteBaseURL)
+	if err != nil {
+		return nil, err
 	}
-	poll := time.NewTicker(2 * time.Second)
-	cleanup := time.NewTicker(24 * time.Hour)
-	defer poll.Stop()
-	defer cleanup.Stop()
+
+	return &InvitationWorker{
+		outbox: outbox,
+		mailer: mailer,
+		tokens: tokens,
+		links:  links,
+		now:    time.Now,
+	}, nil
+}
+
+func (worker *InvitationWorker) Run(
+	ctx context.Context,
+) error {
+	if err := worker.cleanupExpired(ctx); err != nil {
+		return err
+	}
+
+	if err := worker.drain(ctx); err != nil {
+		return err
+	}
+
+	pollTicker := time.NewTicker(
+		invitationPollInterval,
+	)
+	defer pollTicker.Stop()
+
+	cleanupTicker := time.NewTicker(
+		invitationCleanupInterval,
+	)
+	defer cleanupTicker.Stop()
+
 	for {
-		if _, err := worker.RunOnce(ctx); err != nil {
-			return err
-		}
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
-		case <-poll.C:
-		case <-cleanup.C:
-			if _, err := worker.outbox.AnonymizeExpiredInvitations(ctx, time.Now().AddDate(0, 0, -30)); err != nil {
+
+		case <-pollTicker.C:
+			if err := worker.drain(ctx); err != nil {
+				return err
+			}
+
+		case <-cleanupTicker.C:
+			if err := worker.cleanupExpired(ctx); err != nil {
 				return err
 			}
 		}
 	}
 }
 
-func (worker *InvitationWorker) RunOnce(ctx context.Context) (bool, error) {
-	job, invitation, err := worker.outbox.ClaimInvitationEmail(ctx)
+func (worker *InvitationWorker) RunOnce(
+	ctx context.Context,
+) (bool, error) {
+	job, invitation, err :=
+		worker.outbox.ClaimInvitationEmail(ctx)
 	if err != nil {
-		return false, fmt.Errorf("claim invitation email: %w", err)
+		return false,
+			fmt.Errorf(
+				"claim invitation email: %w",
+				err,
+			)
 	}
+
 	if job.ID == "" {
 		return false, nil
 	}
-	token, err := worker.tokens.Token(&invitation)
-	if err == nil {
-		invitation.Acceptance = worker.inviteBaseURL + "/invite?token=" + token
-		status, sendErr := worker.mailer.Send(ctx, &invitation)
-		if sendErr != nil {
-			err = sendErr
-		} else if status != "sent" {
-			err = fmt.Errorf("invitation delivery status: %s", status)
+
+	token, err := worker.tokens.Token(invitation)
+	if err != nil {
+		return true, worker.retry(
+			ctx,
+			job,
+			fmt.Errorf(
+				"create invitation token: %w",
+				err,
+			),
+		)
+	}
+
+	invitation.Acceptance = worker.links.URL(token)
+
+	status, err := worker.mailer.Send(
+		ctx,
+		invitation,
+	)
+	if err != nil {
+		return true, worker.retry(
+			ctx,
+			job,
+			fmt.Errorf(
+				"send invitation email: %w",
+				err,
+			),
+		)
+	}
+
+	if status != invitationDeliverySent {
+		return true, worker.retry(
+			ctx,
+			job,
+			fmt.Errorf(
+				"unexpected invitation delivery status %q",
+				status,
+			),
+		)
+	}
+
+	if err := worker.outbox.Complete(
+		ctx,
+		job.ID,
+	); err != nil {
+		return true,
+			fmt.Errorf(
+				"complete invitation job %s: %w",
+				job.ID,
+				err,
+			)
+	}
+
+	return true, nil
+}
+
+func (worker *InvitationWorker) drain(
+	ctx context.Context,
+) error {
+	for {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+
+		processed, err := worker.RunOnce(ctx)
+		if err != nil {
+			return err
+		}
+
+		if !processed {
+			return nil
 		}
 	}
-	if err != nil {
-		return true, worker.outbox.Retry(ctx, job.ID, job.Attempts, err)
+}
+
+func (worker *InvitationWorker) retry(
+	ctx context.Context,
+	job domain.OutboxJob,
+	cause error,
+) error {
+	if err := worker.outbox.Retry(
+		ctx,
+		job.ID,
+		job.Attempts,
+		cause,
+	); err != nil {
+		return errors.Join(
+			cause,
+			fmt.Errorf(
+				"schedule invitation job retry: %w",
+				err,
+			),
+		)
 	}
-	return true, worker.outbox.Complete(ctx, job.ID)
+
+	return nil
+}
+
+func (worker *InvitationWorker) cleanupExpired(
+	ctx context.Context,
+) error {
+	cutoff := worker.now().
+		UTC().
+		AddDate(
+			0,
+			0,
+			-invitationRetentionDays,
+		)
+
+	if _, err :=
+		worker.outbox.AnonymizeExpiredInvitations(
+			ctx,
+			cutoff,
+		); err != nil {
+		return fmt.Errorf(
+			"anonymize expired invitations: %w",
+			err,
+		)
+	}
+
+	return nil
 }

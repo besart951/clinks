@@ -188,22 +188,28 @@ func newAuthService(
 	federation ports.ExternalIdentityRepository,
 	provisioner ports.TenantProvisioner,
 	memberships ports.MembershipRepository,
+	roles ports.RoleReader,
+	invitations ports.InvitationRepository,
 	passwords ports.PasswordHasher,
 	sessions ports.SessionIssuer,
-	audit ports.AuditLog,
+	audit ports.AuditAppender,
+	invitationIDs ports.InvitationIDGenerator,
 	tokens ports.InvitationTokenSigner,
 	inviteBaseURL string,
 	inviteTTL time.Duration,
-) *service.AuthService {
+) (*service.AuthService, error) {
 	return service.NewAuthService(
-		&service.AuthDependencies{
+		service.AuthDependencies{
 			Identities:    identities,
 			Federation:    federation,
 			Provisioner:   provisioner,
 			Memberships:   memberships,
+			Roles:         roles,
+			Invitations:   invitations,
 			Passwords:     passwords,
 			Sessions:      sessions,
 			Audit:         audit,
+			InvitationIDs: invitationIDs,
 			Tokens:        tokens,
 			InviteBaseURL: inviteBaseURL,
 			InviteTTL:     inviteTTL,

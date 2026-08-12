@@ -11,8 +11,12 @@ type I18nService struct {
 	catalog ports.LocalizationCatalog
 }
 
-func NewI18nService(catalog ports.LocalizationCatalog) *I18nService {
-	return &I18nService{catalog: catalog}
+func NewI18nService(
+	catalog ports.LocalizationCatalog,
+) *I18nService {
+	return &I18nService{
+		catalog: catalog,
+	}
 }
 
 func (service *I18nService) ActiveLanguages(
@@ -26,46 +30,95 @@ func (service *I18nService) TranslationBundle(
 	locale domain.Locale,
 	scope domain.ApplicationScope,
 ) (domain.TranslationBundle, error) {
-	translations, err := service.catalog.Translations(ctx, locale, scope)
-	if err != nil {
-		return domain.TranslationBundle{Locale: locale, Translations: translations}, err
+	if !scope.IsValid() {
+		return domain.TranslationBundle{},
+			domain.NewError(domain.ErrorValidation)
 	}
+
+	locale = domain.NewLocale(string(locale))
+
+	if !locale.IsValid() {
+		return domain.TranslationBundle{},
+			domain.NewError(domain.ErrorValidation)
+	}
+
+	translations, err := service.catalog.Translations(
+		ctx,
+		locale,
+		scope,
+	)
+	if err != nil {
+		return domain.TranslationBundle{}, err
+	}
+
 	defaultLocale, err := service.catalog.DefaultLocale(ctx)
-	if err != nil || defaultLocale == locale {
-		return domain.TranslationBundle{Locale: locale, Translations: translations}, err
-	}
-	defaultTranslations, err := service.catalog.Translations(ctx, defaultLocale, scope)
 	if err != nil {
-		return domain.TranslationBundle{Locale: locale, Translations: translations}, err
+		return domain.TranslationBundle{}, err
 	}
+
+	if locale == defaultLocale {
+		return domain.TranslationBundle{
+			Locale:       locale,
+			Translations: translations,
+		}, nil
+	}
+
+	fallbackTranslations, err :=
+		service.catalog.Translations(
+			ctx,
+			defaultLocale,
+			scope,
+		)
+	if err != nil {
+		return domain.TranslationBundle{}, err
+	}
+
 	if len(translations) == 0 {
-		return domain.TranslationBundle{Locale: defaultLocale, Translations: defaultTranslations}, nil
+		return domain.TranslationBundle{
+			Locale:       defaultLocale,
+			Translations: fallbackTranslations,
+		}, nil
 	}
+
 	return domain.TranslationBundle{
-		Locale:       locale,
-		Translations: mergeTranslations(defaultTranslations, translations),
+		Locale: locale,
+		Translations: mergeTranslations(
+			fallbackTranslations,
+			translations,
+		),
 	}, nil
 }
 
-func mergeTranslations(fallback, overrides []domain.Translation) []domain.Translation {
-	byKey := make(map[string]domain.Translation, len(fallback)+len(overrides))
-	for _, translation := range overrides {
-		byKey[translation.Key] = translation
+func mergeTranslations(
+	fallback,
+	overrides []domain.Translation,
+) []domain.Translation {
+	result := make(
+		[]domain.Translation,
+		len(fallback),
+		len(fallback)+len(overrides),
+	)
+
+	copy(result, fallback)
+
+	indexByKey := make(
+		map[string]int,
+		len(fallback)+len(overrides),
+	)
+
+	for index, translation := range result {
+		indexByKey[translation.Key] = index
 	}
-	translations := make([]domain.Translation, 0, len(fallback)+len(overrides))
-	for _, translation := range fallback {
-		if override, found := byKey[translation.Key]; found {
-			translations = append(translations, override)
-			delete(byKey, translation.Key)
+
+	for _, override := range overrides {
+		if index, found := indexByKey[override.Key]; found {
+			result[index] = override
 			continue
 		}
-		translations = append(translations, translation)
+
+		indexByKey[override.Key] = len(result)
+		result = append(result, override)
 	}
-	for _, translation := range overrides {
-		if override, found := byKey[translation.Key]; found {
-			translations = append(translations, override)
-			delete(byKey, translation.Key)
-		}
-	}
-	return translations
+
+	return result
 }
