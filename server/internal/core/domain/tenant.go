@@ -16,23 +16,22 @@ type TenantOwnerRegistration struct {
 	TenantName   string
 }
 
-type SuperAdminBootstrap struct {
-	Email        Email
-	PasswordHash PasswordHash
-	Locale       Locale
-}
-
-func NewTenantID(id string) TenantID {
-	return TenantID(id)
+func NewTenantID(value string) TenantID {
+	return TenantID(
+		strings.TrimSpace(value),
+	)
 }
 
 func (tenantID TenantID) IsValid() bool {
-	return strings.TrimSpace(string(tenantID)) != ""
+	return strings.TrimSpace(
+		string(tenantID),
+	) != ""
 }
 
 func (tenantID TenantID) Validate() error {
 	if !tenantID.IsValid() {
 		return NewError(ErrorValidation)
 	}
+
 	return nil
 }

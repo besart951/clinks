@@ -3,7 +3,7 @@ package domain
 type ErrorKind string
 
 const (
-	ErrorInvalidCredentials  ErrorKind = "invalid_credentials" // #nosec G101 -- This is a public error identifier, not a credential.
+	ErrorInvalidCredentials  ErrorKind = "invalid_credentials" // #nosec G101 -- Public error identifier, not a credential.
 	ErrorUnauthorized        ErrorKind = "unauthorized"
 	ErrorValidation          ErrorKind = "validation"
 	ErrorEmailTaken          ErrorKind = "email_taken"
@@ -21,9 +21,44 @@ type Error struct {
 }
 
 func NewError(kind ErrorKind) *Error {
-	return &Error{Kind: kind}
+	return &Error{
+		Kind: kind,
+	}
 }
 
-func (errorValue *Error) Error() string {
-	return string(errorValue.Kind)
+func (err *Error) Error() string {
+	if err == nil {
+		return ""
+	}
+
+	return string(err.Kind)
+}
+
+func (err *Error) Is(target error) bool {
+	other, ok := target.(*Error)
+
+	return ok &&
+		err != nil &&
+		other != nil &&
+		err.Kind == other.Kind
+}
+
+func (kind ErrorKind) IsValid() bool {
+	switch kind {
+	case ErrorInvalidCredentials,
+		ErrorUnauthorized,
+		ErrorValidation,
+		ErrorEmailTaken,
+		ErrorTenantNotFound,
+		ErrorMembershipNotFound,
+		ErrorInvitationInvalid,
+		ErrorInvitationExpired,
+		ErrorInvitationUsed,
+		ErrorInviteEmailMismatch,
+		ErrorInternal:
+		return true
+
+	default:
+		return false
+	}
 }

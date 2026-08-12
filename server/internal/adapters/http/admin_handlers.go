@@ -126,7 +126,7 @@ func (server *Server) ListAuditEvents(ctx context.Context, request *connect.Requ
 
 	return connect.NewResponse(&clinksv1.AuditEventsResponse{
 		Events:     server.auditMessages(ctx, request.Header(), page.Events),
-		NextCursor: page.NextCursor,
+		NextCursor: string(page.NextCursor),
 	}), nil
 }
 
@@ -141,8 +141,7 @@ func (server *Server) ListUsers(ctx context.Context, request *connect.Request[cl
 		Limit:  int(request.Msg.GetPageSize()),
 	}
 	if role := request.Msg.GetRole(); role != "" {
-		r := domain.Role(role)
-		filter.Role = &r
+		filter.Role = new(domain.Role(role))
 	}
 
 	page, err := server.users.ListUsers(ctx, filter)
@@ -180,9 +179,8 @@ func (server *Server) ListInvitations(ctx context.Context, request *connect.Requ
 		Cursor: domain.Cursor(request.Msg.GetCursor()),
 		Limit:  int(request.Msg.GetPageSize()),
 	}
-	if tid := request.Msg.GetTenantId(); tid != "" {
-		t := domain.TenantID(tid)
-		filter.TenantID = &t
+	if tenantID := request.Msg.GetTenantId(); tenantID != "" {
+		filter.TenantID = new(domain.TenantID(tenantID))
 	}
 
 	page, err := server.inviteAdmin.ListInvitations(ctx, filter)

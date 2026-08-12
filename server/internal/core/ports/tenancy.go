@@ -7,10 +7,20 @@ import (
 )
 
 type TenantProvisioner interface {
-	CreateTenantOwner(context.Context, domain.TenantOwnerRegistration) (domain.Session, error)
+	CreateTenantOwner(
+		ctx context.Context,
+		registration domain.TenantOwnerRegistration,
+	) (domain.Session, error)
 }
 
 type TenantRepository interface {
-	Create(context.Context, string, domain.UserID) (domain.Tenant, error)
-	List(context.Context) ([]domain.Tenant, error)
+	Create(
+		ctx context.Context,
+		name string,
+		createdBy domain.UserID,
+	) (domain.Tenant, error)
+
+	List(
+		ctx context.Context,
+	) ([]domain.Tenant, error)
 }

@@ -6,19 +6,30 @@ import (
 	"github.com/besartmorina/clinks/server/internal/core/domain"
 )
 
-// AdminUserRepository provides super-admin user management queries.
+// AdminUserRepository provides user-management queries for platform
+// administrators.
 type AdminUserRepository interface {
-	ListUsers(context.Context, domain.UserFilter) (domain.Page[domain.UserSummary], error)
-	GetUser(ctx context.Context, id domain.UserID) (domain.UserDetail, error)
+	ListUsers(
+		ctx context.Context,
+		filter domain.UserFilter,
+	) (domain.Page[domain.UserSummary], error)
+
+	GetUser(
+		ctx context.Context,
+		id domain.UserID,
+	) (domain.UserDetail, error)
 }
 
-// AdminInvitationRepository provides super-admin invitation management queries.
+// AdminInvitationRepository provides invitation-management operations
+// for platform administrators.
 type AdminInvitationRepository interface {
-	ListInvitations(context.Context, domain.InvitationFilter) (domain.Page[domain.Invitation], error)
-	RevokeInvitation(ctx context.Context, id domain.InvitationID) error
-}
+	ListInvitations(
+		ctx context.Context,
+		filter domain.InvitationFilter,
+	) (domain.Page[domain.Invitation], error)
 
-// SystemStatsRepository provides aggregate counts for the admin overview.
-type SystemStatsRepository interface {
-	Stats(context.Context) (domain.SystemStats, error)
+	RevokeInvitation(
+		ctx context.Context,
+		id domain.InvitationID,
+	) error
 }

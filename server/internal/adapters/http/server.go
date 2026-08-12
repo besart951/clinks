@@ -1,19 +1,17 @@
-// Package http exposes Connect-RPC and the plain HTTP health probes.
+// Package http exposes the application's Connect-RPC and plain HTTP endpoints.
 package http
 
 import (
 	"context"
 	"errors"
-	"log/slog"
+	"fmt"
 	stdhttp "net/http"
-	"strings"
 	"time"
 
 	"connectrpc.com/connect"
 
 	"github.com/besartmorina/clinks/server/internal/core/domain"
 	"github.com/besartmorina/clinks/server/internal/core/ports"
-	clinksv1 "github.com/besartmorina/clinks/server/proto/clinks/v1"
 	"github.com/besartmorina/clinks/server/proto/clinks/v1/clinksv1connect"
 )
 
@@ -35,14 +33,15 @@ type Server struct {
 	localization     localizationService
 	translator       errorTranslator
 	readiness        ports.ReadinessChecker
-	readinessTimeout time.Duration
-	browserPolicy    browserPolicy
-	cookie           CookieConfig
-	oidcStateSecret  string
-	authLimiter      *identityRateLimiter
 	users            userAdministration
 	inviteAdmin      invitationAdministration
 	overview         systemOverview
+
+	readinessTimeout time.Duration
+	browserPolicy    browserPolicy
+	cookie           CookieConfig
+	authLimiter      *rateLimiter
+	oidcStateSecret  string
 }
 
 type sessionService interface {
@@ -98,7 +97,7 @@ type localizationService interface {
 
 type errorTranslator interface {
 	ErrorMessage(context.Context, domain.Locale, error) string
-	AuditDescription(context.Context, domain.Locale, *domain.AuditEvent) string
+	AuditDescription(context.Context, domain.Locale, domain.AuditEvent) string
 }
 
 type ServerConfig struct {
@@ -129,15 +128,21 @@ type ServerDeps struct {
 	Overview         systemOverview
 }
 
-func NewServer(deps *ServerDeps, config *ServerConfig) *Server {
-	cookieCfg := config.Cookie
-	if cookieCfg.Name == "" {
-		cookieCfg.Name = sessionCookieName
+func NewServer(deps ServerDeps, config ServerConfig) (*Server, error) {
+	if err := validateServerDeps(deps); err != nil {
+		return nil, err
 	}
 
-	readinessTimeout := config.ReadinessTimeout
-	if readinessTimeout <= 0 {
-		readinessTimeout = defaultReadinessTimeout
+	browserPolicy, err := newBrowserPolicy(config.CORSOrigins)
+	if err != nil {
+		return nil, fmt.Errorf("http: browser policy: %w", err)
+	}
+
+	if config.Cookie.Name == "" {
+		config.Cookie.Name = sessionCookieName
+	}
+	if config.ReadinessTimeout <= 0 {
+		config.ReadinessTimeout = defaultReadinessTimeout
 	}
 
 	return &Server{
@@ -150,30 +155,66 @@ func NewServer(deps *ServerDeps, config *ServerConfig) *Server {
 		localization:     deps.Localization,
 		translator:       deps.Translator,
 		readiness:        deps.Readiness,
-		readinessTimeout: readinessTimeout,
-		browserPolicy:    newBrowserPolicy(config.CORSOrigins),
-		cookie:           cookieCfg,
-		authLimiter:      newIdentityRateLimiter(5, 10*time.Minute),
 		users:            deps.Users,
 		inviteAdmin:      deps.InviteAdmin,
 		overview:         deps.Overview,
+		readinessTimeout: config.ReadinessTimeout,
+		browserPolicy:    browserPolicy,
+		cookie:           config.Cookie,
+		authLimiter:      newRateLimiter(5, 10*time.Minute),
+	}, nil
+}
+
+func validateServerDeps(deps ServerDeps) error {
+	switch {
+	case deps.Sessions == nil:
+		return errors.New("http: sessions dependency is required")
+	case deps.Registration == nil:
+		return errors.New("http: registration dependency is required")
+	case deps.Invitations == nil:
+		return errors.New("http: invitations dependency is required")
+	case deps.Tenants == nil:
+		return errors.New("http: tenants dependency is required")
+	case deps.LocalizationEdit == nil:
+		return errors.New("http: localization administration dependency is required")
+	case deps.Audit == nil:
+		return errors.New("http: audit dependency is required")
+	case deps.Localization == nil:
+		return errors.New("http: localization dependency is required")
+	case deps.Translator == nil:
+		return errors.New("http: translator dependency is required")
+	case deps.Readiness == nil:
+		return errors.New("http: readiness dependency is required")
+	case deps.Users == nil:
+		return errors.New("http: users dependency is required")
+	case deps.InviteAdmin == nil:
+		return errors.New("http: invitation administration dependency is required")
+	case deps.Overview == nil:
+		return errors.New("http: system overview dependency is required")
+	default:
+		return nil
 	}
 }
-
-// StartCleanup begins background goroutines owned by the server (e.g., rate-limiter eviction).
-func (server *Server) StartCleanup(ctx context.Context) {
-	go server.authLimiter.runCleanup(ctx)
-}
-
-// --- Routing & Handlers ---
 
 func (server *Server) Handler() stdhttp.Handler {
 	return server.handler(nil, OIDCConfig{})
 }
 
-func (server *Server) HandlerWithOIDC(client oidcClient, config OIDCConfig) stdhttp.Handler {
-	server.oidcStateSecret = config.StateSecret
-	return server.handler(client, config)
+func (server *Server) HandlerWithOIDC(client oidcClient, config OIDCConfig) (stdhttp.Handler, error) {
+	if client == nil || !client.Enabled() {
+		return server.Handler(), nil
+	}
+	if err := validateOIDCConfig(config); err != nil {
+		return nil, err
+	}
+	if _, ok := server.sessions.(oidcSessionService); !ok {
+		return nil, errors.New("http: session service does not support OIDC")
+	}
+
+	// Build an immutable configured handler without mutating the base Server.
+	configured := *server
+	configured.oidcStateSecret = config.StateSecret
+	return configured.handler(client, config), nil
 }
 
 func (server *Server) handler(client oidcClient, oidcConfig OIDCConfig) stdhttp.Handler {
@@ -207,110 +248,8 @@ func (server *Server) ready(w stdhttp.ResponseWriter, r *stdhttp.Request) {
 		w.WriteHeader(stdhttp.StatusServiceUnavailable)
 		return
 	}
+
 	w.WriteHeader(stdhttp.StatusOK)
-}
-
-func (server *Server) sessionResponse(ctx context.Context, header stdhttp.Header, session *domain.Session, err error) (*connect.Response[clinksv1.Session], error) {
-	if err != nil {
-		return nil, server.localizedError(ctx, header, err)
-	}
-	response := connect.NewResponse(sessionMessage(session))
-	response.Header().Add("Set-Cookie", server.sessionCookie(session.Token).String())
-	return response, nil
-}
-
-func (server *Server) localizedError(ctx context.Context, header stdhttp.Header, err error) error {
-	code := connectCode(err)
-	locale := requestLocale(header)
-	message := server.translator.ErrorMessage(ctx, locale, err)
-
-	if code == connect.CodeInternal {
-		slog.Error("RPC request failed", "error", err)
-	}
-
-	response := connect.NewError(code, errors.New(message))
-	response.Meta().Set("Clinks-Locale", string(locale))
-
-	var domainErr *domain.Error
-	if errors.As(err, &domainErr) {
-		response.Meta().Set("Clinks-Error-Kind", string(domainErr.Kind))
-	} else {
-		response.Meta().Set("Clinks-Error-Kind", string(domain.ErrorInternal))
-	}
-
-	return response
-}
-
-// --- Cookie & Header Helpers ---
-
-func (server *Server) cookieToken(header stdhttp.Header) string {
-	req := stdhttp.Request{Header: header}
-	cookie, err := req.Cookie(server.cookie.Name)
-	if err != nil {
-		return ""
-	}
-	return cookie.Value
-}
-
-func (server *Server) sessionCookie(token string) *stdhttp.Cookie {
-	//nolint:gosec // Secure may be disabled only by explicit local-development configuration.
-	cookie := &stdhttp.Cookie{
-		Name:     server.cookie.Name,
-		Value:    token,
-		Path:     "/",
-		Domain:   server.cookie.Domain,
-		HttpOnly: true,
-		Secure:   server.cookie.Secure,
-		SameSite: stdhttp.SameSiteLaxMode,
-	}
-
-	if token == "" {
-		cookie.MaxAge = -1
-		cookie.Expires = time.Unix(1, 0)
-		return cookie
-	}
-
-	cookie.MaxAge = int(server.cookie.MaxAge.Seconds())
-	return cookie
-}
-
-func requestLocale(header stdhttp.Header) domain.Locale {
-	rawHeader := header.Get("Accept-Language")
-	if rawHeader == "" {
-		return defaultLocale
-	}
-
-	primaryTag := strings.Split(rawHeader, ",")[0]
-	cleanTag := strings.TrimSpace(strings.Split(primaryTag, ";")[0])
-
-	if cleanTag == "" {
-		return defaultLocale
-	}
-	return domain.NewLocale(cleanTag)
-}
-
-func connectCode(err error) connect.Code {
-	var domainError *domain.Error
-	if !errors.As(err, &domainError) {
-		return connect.CodeInternal
-	}
-
-	switch domainError.Kind {
-	case domain.ErrorInvalidCredentials:
-		return connect.CodeUnauthenticated
-	case domain.ErrorUnauthorized, domain.ErrorMembershipNotFound:
-		return connect.CodePermissionDenied
-	case domain.ErrorValidation, domain.ErrorInviteEmailMismatch:
-		return connect.CodeInvalidArgument
-	case domain.ErrorEmailTaken:
-		return connect.CodeAlreadyExists
-	case domain.ErrorTenantNotFound, domain.ErrorInvitationInvalid:
-		return connect.CodeNotFound
-	case domain.ErrorInvitationExpired, domain.ErrorInvitationUsed:
-		return connect.CodeFailedPrecondition
-	default:
-		return connect.CodeInternal
-	}
 }
 
 var _ clinksv1connect.ClinksServiceHandler = (*Server)(nil)

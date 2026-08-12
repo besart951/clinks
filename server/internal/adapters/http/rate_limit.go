@@ -1,83 +1,83 @@
 package http
 
 import (
-	"context"
-	"strings"
 	"sync"
 	"time"
 )
 
-type identityRateLimiter struct {
-	mu      sync.Mutex
+const (
+	defaultRateLimit  = 5
+	defaultRateWindow = 10 * time.Minute
+)
+
+type rateLimiter struct {
+	mu sync.Mutex
+
 	entries map[string][]time.Time
 	limit   int
 	window  time.Duration
-	nowFunc func() time.Time
+
+	nextCleanup time.Time
+	now         func() time.Time
 }
 
-func newIdentityRateLimiter(limit int, window time.Duration) *identityRateLimiter {
+func newRateLimiter(limit int, window time.Duration) *rateLimiter {
 	if limit <= 0 {
-		limit = 5
+		limit = defaultRateLimit
 	}
 	if window <= 0 {
-		window = 10 * time.Minute
+		window = defaultRateWindow
 	}
 
-	return &identityRateLimiter{
+	return &rateLimiter{
 		entries: make(map[string][]time.Time),
 		limit:   limit,
 		window:  window,
-		nowFunc: time.Now,
+		now:     time.Now,
 	}
 }
 
-func (limiter *identityRateLimiter) allow(key string) bool {
-	now := limiter.nowFunc()
-	key = strings.ToLower(strings.TrimSpace(key))
+func (limiter *rateLimiter) allow(key string) (bool, time.Duration) {
+	now := limiter.now()
 	cutoff := now.Add(-limiter.window)
 
 	limiter.mu.Lock()
 	defer limiter.mu.Unlock()
 
-	entries := trimExpired(limiter.entries[key], cutoff)
+	if limiter.nextCleanup.IsZero() || !now.Before(limiter.nextCleanup) {
+		limiter.cleanupLocked(cutoff)
+		limiter.nextCleanup = now.Add(limiter.window / 2)
+	}
 
+	entries := trimExpired(limiter.entries[key], cutoff)
 	if len(entries) >= limiter.limit {
 		limiter.entries[key] = entries
-		return false
+		retryAfter := entries[0].Add(limiter.window).Sub(now)
+		if retryAfter < 0 {
+			retryAfter = 0
+		}
+		return false, retryAfter
 	}
 
 	limiter.entries[key] = append(entries, now)
-	return true
+	return true, 0
 }
 
-func (limiter *identityRateLimiter) runCleanup(ctx context.Context) {
-	ticker := time.NewTicker(limiter.window)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case <-ticker.C:
-			limiter.cleanup()
-		}
-	}
-}
-
-func (limiter *identityRateLimiter) cleanup() {
-	now := limiter.nowFunc()
-	cutoff := now.Add(-limiter.window)
-
+func (limiter *rateLimiter) reset(key string) {
 	limiter.mu.Lock()
-	defer limiter.mu.Unlock()
+	delete(limiter.entries, key)
+	limiter.mu.Unlock()
+}
 
+func (limiter *rateLimiter) cleanupLocked(cutoff time.Time) {
 	for key, entries := range limiter.entries {
-		trimmed := trimExpired(entries, cutoff)
-		if len(trimmed) == 0 {
+		entries = trimExpired(entries, cutoff)
+		if len(entries) == 0 {
 			delete(limiter.entries, key)
-		} else {
-			limiter.entries[key] = trimmed
+			continue
 		}
+
+		limiter.entries[key] = entries
 	}
 }
 
@@ -87,5 +87,6 @@ func trimExpired(entries []time.Time, cutoff time.Time) []time.Time {
 			return entries[i:]
 		}
 	}
+
 	return nil
 }

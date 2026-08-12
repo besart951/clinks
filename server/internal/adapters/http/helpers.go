@@ -1,0 +1,143 @@
+package http
+
+import (
+	"context"
+	"errors"
+	"log/slog"
+	stdhttp "net/http"
+	"strconv"
+	"strings"
+	"time"
+
+	"connectrpc.com/connect"
+
+	"github.com/besartmorina/clinks/server/internal/core/domain"
+	clinksv1 "github.com/besartmorina/clinks/server/proto/clinks/v1"
+)
+
+const transportErrorRateLimited = "rate_limited"
+
+func (server *Server) sessionResponse(
+	ctx context.Context,
+	header stdhttp.Header,
+	session domain.Session,
+	err error,
+) (*connect.Response[clinksv1.Session], error) {
+	if err != nil {
+		return nil, server.localizedError(ctx, header, err)
+	}
+
+	response := connect.NewResponse(sessionMessage(&session))
+	response.Header().Add("Set-Cookie", server.sessionCookie(session.Token).String())
+	return response, nil
+}
+
+func (server *Server) localizedError(ctx context.Context, header stdhttp.Header, err error) error {
+	code := connectCode(err)
+	locale := requestLocale(header)
+	message := server.translator.ErrorMessage(ctx, locale, err)
+
+	if code == connect.CodeInternal {
+		slog.ErrorContext(ctx, "RPC request failed", "error", err)
+	}
+
+	response := connect.NewError(code, errors.New(message))
+	response.Meta().Set("Clinks-Locale", string(locale))
+
+	if domainError, ok := errors.AsType[*domain.Error](err); ok {
+		response.Meta().Set("Clinks-Error-Kind", string(domainError.Kind))
+	} else {
+		response.Meta().Set("Clinks-Error-Kind", string(domain.ErrorInternal))
+	}
+
+	return response
+}
+
+func rateLimitError(header stdhttp.Header, retryAfter time.Duration) error {
+	response := connect.NewError(
+		connect.CodeResourceExhausted,
+		errors.New("too many authentication attempts"),
+	)
+	response.Meta().Set("Clinks-Error-Kind", transportErrorRateLimited)
+	response.Meta().Set("Clinks-Locale", string(requestLocale(header)))
+	if retryAfter > 0 {
+		seconds := int64((retryAfter + time.Second - 1) / time.Second)
+		response.Meta().Set("Retry-After", strconv.FormatInt(seconds, 10))
+	}
+	return response
+}
+
+func connectCode(err error) connect.Code {
+	domainError, ok := errors.AsType[*domain.Error](err)
+	if !ok {
+		return connect.CodeInternal
+	}
+
+	switch domainError.Kind {
+	case domain.ErrorInvalidCredentials:
+		return connect.CodeUnauthenticated
+	case domain.ErrorUnauthorized, domain.ErrorMembershipNotFound:
+		return connect.CodePermissionDenied
+	case domain.ErrorValidation, domain.ErrorInviteEmailMismatch:
+		return connect.CodeInvalidArgument
+	case domain.ErrorEmailTaken:
+		return connect.CodeAlreadyExists
+	case domain.ErrorTenantNotFound, domain.ErrorInvitationInvalid:
+		return connect.CodeNotFound
+	case domain.ErrorInvitationExpired, domain.ErrorInvitationUsed:
+		return connect.CodeFailedPrecondition
+	default:
+		return connect.CodeInternal
+	}
+}
+
+func (server *Server) cookieToken(header stdhttp.Header) string {
+	request := stdhttp.Request{Header: header}
+	cookie, err := request.Cookie(server.cookie.Name)
+	if err != nil {
+		return ""
+	}
+
+	return cookie.Value
+}
+
+func (server *Server) sessionCookie(token string) *stdhttp.Cookie {
+	//nolint:gosec // Secure may be disabled only by explicit local-development configuration.
+	cookie := &stdhttp.Cookie{
+		Name:     server.cookie.Name,
+		Value:    token,
+		Path:     "/",
+		Domain:   server.cookie.Domain,
+		HttpOnly: true,
+		Secure:   server.cookie.Secure,
+		SameSite: stdhttp.SameSiteLaxMode,
+	}
+
+	if token == "" {
+		cookie.MaxAge = -1
+		cookie.Expires = time.Unix(1, 0)
+		return cookie
+	}
+
+	if server.cookie.MaxAge > 0 {
+		cookie.MaxAge = int(server.cookie.MaxAge.Seconds())
+		cookie.Expires = time.Now().Add(server.cookie.MaxAge)
+	}
+
+	return cookie
+}
+
+func requestLocale(header stdhttp.Header) domain.Locale {
+	rawHeader := header.Get("Accept-Language")
+	if rawHeader == "" {
+		return defaultLocale
+	}
+
+	primaryTag := strings.Split(rawHeader, ",")[0]
+	cleanTag := strings.TrimSpace(strings.Split(primaryTag, ";")[0])
+	if cleanTag == "" {
+		return defaultLocale
+	}
+
+	return domain.NewLocale(cleanTag)
+}

@@ -9,9 +9,11 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	stdhttp "net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -21,10 +23,11 @@ import (
 const (
 	oidcCookieName             = "clinks_oidc"
 	passwordVerifiedCookieName = "clinks_password_verified"
-	oidcAttemptMaxAgeSeconds   = 600 // 10 minutes
+	oidcAttemptTTL             = 10 * time.Minute
+	passwordVerificationTTL    = 10 * time.Minute
 )
 
-// --- Types & Interfaces ---
+var errInvalidOIDCAttempt = errors.New("invalid OIDC attempt")
 
 type OIDCConfig struct {
 	StateSecret string
@@ -52,118 +55,164 @@ type oidcAttempt struct {
 	ExpiresAt       int64  `json:"expires_at"`
 }
 
-// --- Handlers ---
+func validateOIDCConfig(config OIDCConfig) error {
+	if len(config.StateSecret) < 32 {
+		return errors.New("http: OIDC state secret must contain at least 32 bytes")
+	}
+
+	target, err := url.Parse(config.SuccessURL)
+	if err != nil {
+		return fmt.Errorf("http: invalid OIDC success URL: %w", err)
+	}
+	if target.Scheme != "http" && target.Scheme != "https" {
+		return fmt.Errorf("http: OIDC success URL uses unsupported scheme %q", target.Scheme)
+	}
+	if target.Host == "" {
+		return errors.New("http: OIDC success URL requires a host")
+	}
+
+	return nil
+}
 
 func (server *Server) googleOIDCStart(client oidcClient, config OIDCConfig) stdhttp.HandlerFunc {
-	return func(response stdhttp.ResponseWriter, request *stdhttp.Request) {
-		_, ok := server.sessions.(oidcSessionService)
-		if !ok || len(config.StateSecret) < 32 {
-			stdhttp.NotFound(response, request)
-			return
-		}
-
-		mode := request.URL.Query().Get("mode")
+	return func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
+		mode := r.URL.Query().Get("mode")
 		switch mode {
 		case "link":
-			if _, err := server.sessions.CurrentSession(request.Context(), server.cookieToken(request.Header)); err != nil || !server.hasPasswordVerified(request) {
-				server.oidcFailure(response, request, config)
+			token := server.cookieToken(r.Header)
+			if token == "" {
+				server.oidcFailure(w, r, config)
 				return
 			}
+			if _, err := server.sessions.CurrentSession(r.Context(), token); err != nil {
+				server.oidcFailure(w, r, config)
+				return
+			}
+			if !server.hasPasswordVerified(r) {
+				server.oidcFailure(w, r, config)
+				return
+			}
+
 		case "invite":
-			if strings.TrimSpace(request.URL.Query().Get("token")) == "" {
-				server.oidcFailure(response, request, config)
+			if strings.TrimSpace(r.URL.Query().Get("token")) == "" {
+				server.oidcFailure(w, r, config)
 				return
 			}
+
 		case "", "login":
 			mode = "login"
+
 		default:
-			server.oidcFailure(response, request, config)
+			server.oidcFailure(w, r, config)
 			return
 		}
 
-		attempt, err := newOIDCAttempt(mode)
-		if err != nil {
-			server.oidcFailure(response, request, config)
-			return
-		}
+		attempt := newOIDCAttempt(mode)
 		if mode == "invite" {
-			attempt.InvitationToken = request.URL.Query().Get("token")
+			attempt.InvitationToken = r.URL.Query().Get("token")
 		}
 
-		sealedValue, err := sealOIDCAttempt(config.StateSecret, &attempt)
+		sealedValue, err := sealOIDCAttempt(config.StateSecret, attempt)
 		if err != nil {
-			server.oidcFailure(response, request, config)
+			server.oidcFailure(w, r, config)
 			return
 		}
 
-		stdhttp.SetCookie(response, server.oidcAttemptCookie(sealedValue))
-		stdhttp.Redirect(response, request, client.AuthorizationURL(attempt.State, attempt.Nonce, attempt.Verifier), stdhttp.StatusFound)
+		stdhttp.SetCookie(w, server.oidcAttemptCookie(sealedValue))
+		stdhttp.Redirect(
+			w,
+			r,
+			client.AuthorizationURL(attempt.State, attempt.Nonce, attempt.Verifier),
+			stdhttp.StatusFound,
+		)
 	}
 }
 
 func (server *Server) googleOIDCCallback(client oidcClient, config OIDCConfig) stdhttp.HandlerFunc {
-	return func(response stdhttp.ResponseWriter, request *stdhttp.Request) {
-		cookie, err := request.Cookie(oidcCookieName)
-		if err != nil || request.URL.Query().Get("error") != "" {
-			server.oidcFailure(response, request, config)
+	return func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
+		cookie, err := r.Cookie(oidcCookieName)
+		if err != nil {
+			server.oidcFailure(w, r, config)
+			return
+		}
+		stdhttp.SetCookie(w, server.clearOIDCAttemptCookie())
+
+		if r.URL.Query().Get("error") != "" {
+			server.oidcFailure(w, r, config)
 			return
 		}
 
 		attempt, err := openOIDCAttempt(config.StateSecret, cookie.Value)
-		if err != nil || attempt.State != request.URL.Query().Get("state") {
-			server.oidcFailure(response, request, config)
+		if err != nil || !constantTimeEqual(attempt.State, r.URL.Query().Get("state")) {
+			server.oidcFailure(w, r, config)
+			return
+		}
+
+		code := strings.TrimSpace(r.URL.Query().Get("code"))
+		if code == "" {
+			server.oidcFailure(w, r, config)
 			return
 		}
 
 		auth, ok := server.sessions.(oidcSessionService)
 		if !ok {
-			server.oidcFailure(response, request, config)
+			server.oidcFailure(w, r, config)
 			return
 		}
 
-		identity, err := client.Exchange(request.Context(), request.URL.Query().Get("code"), attempt.Verifier, attempt.Nonce)
+		identity, err := client.Exchange(r.Context(), code, attempt.Verifier, attempt.Nonce)
 		if err != nil {
-			server.oidcFailure(response, request, config)
-			return
-		}
-
-		limiterKey := fmt.Sprintf("oidc:%s:%s", identity.Issuer, identity.Subject)
-		if !server.authLimiter.allow(limiterKey) {
-			server.oidcFailure(response, request, config)
+			server.oidcFailure(w, r, config)
 			return
 		}
 
 		switch attempt.Mode {
 		case "link":
-			err = auth.LinkExternalIdentity(request.Context(), server.cookieToken(request.Header), identity)
+			err = auth.LinkExternalIdentity(
+				r.Context(),
+				server.cookieToken(r.Header),
+				identity,
+			)
+			if err == nil {
+				stdhttp.SetCookie(w, server.passwordVerifiedCookie(""))
+			}
+
 		case "invite":
 			var session domain.Session
-			session, err = auth.AcceptExternalInvitation(request.Context(), attempt.InvitationToken, identity, requestLocale(request.Header))
+			session, err = auth.AcceptExternalInvitation(
+				r.Context(),
+				attempt.InvitationToken,
+				identity,
+				requestLocale(r.Header),
+			)
 			if err == nil {
-				response.Header().Add("Set-Cookie", server.sessionCookie(session.Token).String())
+				stdhttp.SetCookie(w, server.sessionCookie(session.Token))
 			}
-		default:
+
+		case "login":
 			var session domain.Session
-			session, err = auth.LoginExternal(request.Context(), identity)
+			session, err = auth.LoginExternal(r.Context(), identity)
 			if err == nil {
-				response.Header().Add("Set-Cookie", server.sessionCookie(session.Token).String())
+				stdhttp.SetCookie(w, server.sessionCookie(session.Token))
 			}
+
+		default:
+			err = errInvalidOIDCAttempt
 		}
 
 		if err != nil {
-			server.oidcFailure(response, request, config)
+			server.oidcFailure(w, r, config)
 			return
 		}
 
-		stdhttp.SetCookie(response, server.clearOIDCAttemptCookie())
-		stdhttp.Redirect(response, request, config.SuccessURL, stdhttp.StatusFound)
+		stdhttp.Redirect(w, r, config.SuccessURL, stdhttp.StatusFound)
 	}
 }
 
-func (server *Server) oidcFailure(response stdhttp.ResponseWriter, request *stdhttp.Request, config OIDCConfig) {
+func (server *Server) oidcFailure(w stdhttp.ResponseWriter, r *stdhttp.Request, config OIDCConfig) {
 	target, err := url.Parse(config.SuccessURL)
 	if err != nil || target.Scheme == "" || target.Host == "" {
-		stdhttp.Error(response, "authentication failed", stdhttp.StatusUnauthorized)
+		stdhttp.Error(w, "authentication failed", stdhttp.StatusUnauthorized)
 		return
 	}
 
@@ -171,48 +220,31 @@ func (server *Server) oidcFailure(response stdhttp.ResponseWriter, request *stdh
 	query.Set("error", "authentication_failed")
 	target.RawQuery = query.Encode()
 
-	stdhttp.Redirect(response, request, target.String(), stdhttp.StatusFound)
+	stdhttp.Redirect(w, r, target.String(), stdhttp.StatusFound)
 }
 
-// --- Encryption & Sealing Helpers ---
-
-func newOIDCAttempt(mode string) (oidcAttempt, error) {
-	state, err := randomOIDCValue(32)
-	if err != nil {
-		return oidcAttempt{}, err
-	}
-	nonce, err := randomOIDCValue(32)
-	if err != nil {
-		return oidcAttempt{}, err
-	}
-	verifier, err := randomOIDCValue(48)
-	if err != nil {
-		return oidcAttempt{}, err
-	}
-
+func newOIDCAttempt(mode string) oidcAttempt {
 	return oidcAttempt{
-		State:     state,
-		Nonce:     nonce,
-		Verifier:  verifier,
+		State:     randomOIDCValue(32),
+		Nonce:     randomOIDCValue(32),
+		Verifier:  randomOIDCValue(48),
 		Mode:      mode,
-		ExpiresAt: time.Now().Add(10 * time.Minute).Unix(),
-	}, nil
+		ExpiresAt: time.Now().Add(oidcAttemptTTL).Unix(),
+	}
 }
 
-func randomOIDCValue(size int) (string, error) {
+func randomOIDCValue(size int) string {
 	value := make([]byte, size)
-	if _, err := rand.Read(value); err != nil {
-		return "", err
-	}
-	return base64.RawURLEncoding.EncodeToString(value), nil
+	rand.Read(value)
+	return base64.RawURLEncoding.EncodeToString(value)
 }
 
-func sealOIDCAttempt(secret string, attempt *oidcAttempt) (string, error) {
+func sealOIDCAttempt(secret string, attempt oidcAttempt) (string, error) {
 	if len(secret) < 32 {
-		return "", stdhttp.ErrNoCookie
+		return "", errInvalidOIDCAttempt
 	}
 
-	key := sha256.Sum256([]byte(secret))
+	key := oidcAttemptEncryptionKey(secret)
 	block, err := aes.NewCipher(key[:])
 	if err != nil {
 		return "", err
@@ -224,9 +256,7 @@ func sealOIDCAttempt(secret string, attempt *oidcAttempt) (string, error) {
 	}
 
 	nonce := make([]byte, gcm.NonceSize())
-	if _, err = rand.Read(nonce); err != nil {
-		return "", err
-	}
+	rand.Read(nonce)
 
 	payload, err := json.Marshal(attempt)
 	if err != nil {
@@ -239,7 +269,7 @@ func sealOIDCAttempt(secret string, attempt *oidcAttempt) (string, error) {
 
 func openOIDCAttempt(secret, value string) (oidcAttempt, error) {
 	if len(secret) < 32 {
-		return oidcAttempt{}, stdhttp.ErrNoCookie
+		return oidcAttempt{}, errInvalidOIDCAttempt
 	}
 
 	encoded, err := base64.RawURLEncoding.DecodeString(strings.TrimSpace(value))
@@ -247,7 +277,7 @@ func openOIDCAttempt(secret, value string) (oidcAttempt, error) {
 		return oidcAttempt{}, err
 	}
 
-	key := sha256.Sum256([]byte(secret))
+	key := oidcAttemptEncryptionKey(secret)
 	block, err := aes.NewCipher(key[:])
 	if err != nil {
 		return oidcAttempt{}, err
@@ -257,9 +287,8 @@ func openOIDCAttempt(secret, value string) (oidcAttempt, error) {
 	if err != nil {
 		return oidcAttempt{}, err
 	}
-
 	if len(encoded) < gcm.NonceSize() {
-		return oidcAttempt{}, stdhttp.ErrNoCookie
+		return oidcAttempt{}, errInvalidOIDCAttempt
 	}
 
 	nonce := encoded[:gcm.NonceSize()]
@@ -275,14 +304,38 @@ func openOIDCAttempt(secret, value string) (oidcAttempt, error) {
 		return oidcAttempt{}, err
 	}
 
-	if attempt.ExpiresAt < time.Now().Unix() || attempt.State == "" || attempt.Nonce == "" || attempt.Verifier == "" {
-		return oidcAttempt{}, stdhttp.ErrNoCookie
+	if !validOIDCAttempt(attempt, time.Now()) {
+		return oidcAttempt{}, errInvalidOIDCAttempt
 	}
 
 	return attempt, nil
 }
 
-// --- Cookie & HMAC Helpers ---
+func validOIDCAttempt(attempt oidcAttempt, now time.Time) bool {
+	if attempt.State == "" || attempt.Nonce == "" || attempt.Verifier == "" {
+		return false
+	}
+	if attempt.ExpiresAt <= now.Unix() {
+		return false
+	}
+
+	switch attempt.Mode {
+	case "login", "link":
+		return attempt.InvitationToken == ""
+	case "invite":
+		return strings.TrimSpace(attempt.InvitationToken) != ""
+	default:
+		return false
+	}
+}
+
+func oidcAttemptEncryptionKey(secret string) [sha256.Size]byte {
+	return sha256.Sum256([]byte("clinks:oidc-attempt:v1\x00" + secret))
+}
+
+func constantTimeEqual(left, right string) bool {
+	return hmac.Equal([]byte(left), []byte(right))
+}
 
 func (server *Server) oidcAttemptCookie(value string) *stdhttp.Cookie {
 	//nolint:gosec // Secure may be disabled only by explicit local-development configuration.
@@ -293,7 +346,8 @@ func (server *Server) oidcAttemptCookie(value string) *stdhttp.Cookie {
 		HttpOnly: true,
 		Secure:   server.cookie.Secure,
 		SameSite: stdhttp.SameSiteLaxMode,
-		MaxAge:   oidcAttemptMaxAgeSeconds,
+		MaxAge:   int(oidcAttemptTTL.Seconds()),
+		Expires:  time.Now().Add(oidcAttemptTTL),
 	}
 }
 
@@ -307,10 +361,11 @@ func (server *Server) clearOIDCAttemptCookie() *stdhttp.Cookie {
 		Secure:   server.cookie.Secure,
 		SameSite: stdhttp.SameSiteLaxMode,
 		MaxAge:   -1,
+		Expires:  time.Unix(1, 0),
 	}
 }
 
-func (server *Server) passwordVerifiedCookie(token string) *stdhttp.Cookie {
+func (server *Server) passwordVerifiedCookie(sessionToken string) *stdhttp.Cookie {
 	//nolint:gosec // Secure may be disabled only by explicit local-development configuration.
 	cookie := &stdhttp.Cookie{
 		Name:     passwordVerifiedCookieName,
@@ -320,27 +375,61 @@ func (server *Server) passwordVerifiedCookie(token string) *stdhttp.Cookie {
 		SameSite: stdhttp.SameSiteLaxMode,
 	}
 
-	if token == "" {
+	if sessionToken == "" {
 		cookie.MaxAge = -1
+		cookie.Expires = time.Unix(1, 0)
 		return cookie
 	}
 
-	mac := hmac.New(sha256.New, []byte(server.oidcStateSecret))
-	_, _ = mac.Write([]byte(token))
-	cookie.Value = base64.RawURLEncoding.EncodeToString(mac.Sum(nil))
-	cookie.MaxAge = oidcAttemptMaxAgeSeconds
+	expiresAt := time.Now().Add(passwordVerificationTTL)
+	expiresUnix := strconv.FormatInt(expiresAt.Unix(), 10)
+	signature := server.passwordVerificationMAC(sessionToken, expiresUnix)
+
+	cookie.Value = expiresUnix + "." + base64.RawURLEncoding.EncodeToString(signature)
+	cookie.MaxAge = int(passwordVerificationTTL.Seconds())
+	cookie.Expires = expiresAt
 	return cookie
 }
 
-func (server *Server) hasPasswordVerified(request *stdhttp.Request) bool {
-	if server.oidcStateSecret == "" {
+func (server *Server) hasPasswordVerified(r *stdhttp.Request) bool {
+	if len(server.oidcStateSecret) < 32 {
 		return false
 	}
-	cookie, err := request.Cookie(passwordVerifiedCookieName)
+
+	cookie, err := r.Cookie(passwordVerifiedCookieName)
 	if err != nil {
 		return false
 	}
 
-	expected := server.passwordVerifiedCookie(server.cookieToken(request.Header)).Value
-	return hmac.Equal([]byte(cookie.Value), []byte(expected))
+	expiresUnix, encodedSignature, ok := strings.Cut(cookie.Value, ".")
+	if !ok {
+		return false
+	}
+
+	expiresAt, err := strconv.ParseInt(expiresUnix, 10, 64)
+	if err != nil || time.Now().Unix() >= expiresAt {
+		return false
+	}
+
+	signature, err := base64.RawURLEncoding.DecodeString(encodedSignature)
+	if err != nil {
+		return false
+	}
+
+	sessionToken := server.cookieToken(r.Header)
+	if sessionToken == "" {
+		return false
+	}
+
+	expected := server.passwordVerificationMAC(sessionToken, expiresUnix)
+	return hmac.Equal(signature, expected)
+}
+
+func (server *Server) passwordVerificationMAC(sessionToken, expiresUnix string) []byte {
+	key := sha256.Sum256([]byte("clinks:password-verification:v1\x00" + server.oidcStateSecret))
+	mac := hmac.New(sha256.New, key[:])
+	_, _ = mac.Write([]byte(sessionToken))
+	_, _ = mac.Write([]byte{0})
+	_, _ = mac.Write([]byte(expiresUnix))
+	return mac.Sum(nil)
 }

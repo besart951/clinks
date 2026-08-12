@@ -1,16 +1,22 @@
+// Package postgres implements persistence adapters backed by PostgreSQL.
 package postgres
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"log/slog"
 	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/besartmorina/clinks/server/internal/core/domain"
+)
+
+const (
+	tenantSettingKey = "app.current_tenant"
+	systemSettingKey = "app.bypass_rls"
+
+	defaultPoolPingTimeout = 5 * time.Second
 )
 
 type PoolConfig struct {
@@ -20,26 +26,65 @@ type PoolConfig struct {
 	MaxConnLifetime   time.Duration
 	MaxConnIdleTime   time.Duration
 	HealthCheckPeriod time.Duration
+	PingTimeout       time.Duration
 }
 
-func NewPool(ctx context.Context, poolConfig PoolConfig) (*pgxpool.Pool, func(), error) {
-	config, err := pgxpool.ParseConfig(poolConfig.DatabaseURL)
+func NewPool(
+	ctx context.Context,
+	poolConfig PoolConfig,
+) (*pgxpool.Pool, func(), error) {
+	config, err := pgxpool.ParseConfig(
+		poolConfig.DatabaseURL,
+	)
 	if err != nil {
-		return nil, nil, fmt.Errorf("parse database URL: %w", err)
+		return nil, nil,
+			fmt.Errorf("parse database URL: %w", err)
 	}
-	config.MaxConns = poolConfig.MaxConns
-	config.MinConns = poolConfig.MinConns
-	config.MaxConnLifetime = poolConfig.MaxConnLifetime
-	config.MaxConnIdleTime = poolConfig.MaxConnIdleTime
-	config.HealthCheckPeriod = poolConfig.HealthCheckPeriod
-	pool, err := pgxpool.NewWithConfig(ctx, config)
+
+	if poolConfig.MaxConns > 0 {
+		config.MaxConns = poolConfig.MaxConns
+	}
+
+	if poolConfig.MinConns >= 0 {
+		config.MinConns = poolConfig.MinConns
+	}
+
+	if poolConfig.MaxConnLifetime > 0 {
+		config.MaxConnLifetime =
+			poolConfig.MaxConnLifetime
+	}
+
+	if poolConfig.MaxConnIdleTime > 0 {
+		config.MaxConnIdleTime =
+			poolConfig.MaxConnIdleTime
+	}
+
+	if poolConfig.HealthCheckPeriod > 0 {
+		config.HealthCheckPeriod =
+			poolConfig.HealthCheckPeriod
+	}
+
+	config.PingTimeout = poolConfig.PingTimeout
+	if config.PingTimeout <= 0 {
+		config.PingTimeout = defaultPoolPingTimeout
+	}
+
+	pool, err := pgxpool.NewWithConfig(
+		ctx,
+		config,
+	)
 	if err != nil {
-		return nil, nil, fmt.Errorf("open postgres pool: %w", err)
+		return nil, nil,
+			fmt.Errorf("open postgres pool: %w", err)
 	}
-	if err = pool.Ping(ctx); err != nil {
+
+	if err := pool.Ping(ctx); err != nil {
 		pool.Close()
-		return nil, nil, fmt.Errorf("ping postgres: %w", err)
+
+		return nil, nil,
+			fmt.Errorf("ping postgres: %w", err)
 	}
+
 	return pool, pool.Close, nil
 }
 
@@ -49,7 +94,13 @@ func WithTenantTx(
 	tenantID domain.TenantID,
 	operation func(pgx.Tx) error,
 ) error {
-	return withSettingTx(ctx, pool, "app.current_tenant", string(tenantID), operation)
+	return withSettingTx(
+		ctx,
+		pool,
+		tenantSettingKey,
+		string(tenantID),
+		operation,
+	)
 }
 
 func withSystemTx(
@@ -57,49 +108,64 @@ func withSystemTx(
 	pool *pgxpool.Pool,
 	operation func(pgx.Tx) error,
 ) error {
-	return withSettingTx(ctx, pool, "app.bypass_rls", "true", operation)
+	return withSettingTx(
+		ctx,
+		pool,
+		systemSettingKey,
+		"true",
+		operation,
+	)
+}
+
+func withSettingTx(
+	ctx context.Context,
+	pool *pgxpool.Pool,
+	key,
+	value string,
+	operation func(pgx.Tx) error,
+) error {
+	return pgx.BeginFunc(
+		ctx,
+		pool,
+		func(tx pgx.Tx) error {
+			if _, err := tx.Exec(
+				ctx,
+				"SELECT set_config($1, $2, true)",
+				key,
+				value,
+			); err != nil {
+				return fmt.Errorf(
+					"set transaction context: %w",
+					err,
+				)
+			}
+
+			return operation(tx)
+		},
+	)
 }
 
 type Readiness struct {
 	pool *pgxpool.Pool
 }
 
-func NewReadiness(pool *pgxpool.Pool) *Readiness {
-	return &Readiness{pool: pool}
-}
-
-func (readiness *Readiness) Ready(ctx context.Context) error {
-	if err := readiness.pool.Ping(ctx); err != nil {
-		return fmt.Errorf("ping postgres: %w", err)
-	}
-	return nil
-}
-
-func withSettingTx(
-	ctx context.Context,
+func NewReadiness(
 	pool *pgxpool.Pool,
-	key string,
-	value string,
-	operation func(pgx.Tx) error,
-) error {
-	tx, err := pool.Begin(ctx)
-	if err != nil {
-		return fmt.Errorf("begin transaction: %w", err)
+) *Readiness {
+	return &Readiness{
+		pool: pool,
 	}
-	defer func() {
-		if rollbackErr := tx.Rollback(ctx); rollbackErr != nil && !errors.Is(rollbackErr, pgx.ErrTxClosed) {
-			slog.Error("rollback tenant transaction", "error", rollbackErr)
-		}
-	}()
+}
 
-	if _, err = tx.Exec(ctx, "SELECT set_config($1, $2, true)", key, value); err != nil {
-		return fmt.Errorf("set transaction context: %w", err)
+func (readiness *Readiness) Ready(
+	ctx context.Context,
+) error {
+	if err := readiness.pool.Ping(ctx); err != nil {
+		return fmt.Errorf(
+			"ping postgres: %w",
+			err,
+		)
 	}
-	if operationErr := operation(tx); operationErr != nil {
-		return operationErr
-	}
-	if err = tx.Commit(ctx); err != nil {
-		return fmt.Errorf("commit transaction: %w", err)
-	}
+
 	return nil
 }

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net"
 	"net/http"
 	"time"
 
@@ -19,14 +20,17 @@ const (
 	defaultShutdownTimeout   = 10 * time.Second
 )
 
-type Server struct {
-	httpServer      *http.Server
+type HTTPServer struct {
+	server          *http.Server
 	shutdownTimeout time.Duration
 }
 
-func NewServer(config *appconfig.HTTPConfig, handler http.Handler) *Server {
-	return &Server{
-		httpServer: &http.Server{
+func NewHTTPServer(
+	config appconfig.HTTPConfig,
+	handler http.Handler,
+) *HTTPServer {
+	return &HTTPServer{
+		server: &http.Server{
 			Addr:              config.Address(),
 			Handler:           handler,
 			ReadHeaderTimeout: defaultReadHeaderTimeout,
@@ -38,45 +42,112 @@ func NewServer(config *appconfig.HTTPConfig, handler http.Handler) *Server {
 	}
 }
 
-func (srv *Server) Run(ctx context.Context) error {
+func (server *HTTPServer) Run(ctx context.Context) error {
+	var listenConfig net.ListenConfig
+
+	listener, err := listenConfig.Listen(
+		ctx,
+		"tcp",
+		server.server.Addr,
+	)
+	if err != nil {
+		return fmt.Errorf(
+			"listen on %s: %w",
+			server.server.Addr,
+			err,
+		)
+	}
+
 	serverErr := make(chan error, 1)
 
 	go func() {
-		slog.Info("clinks server starting", "address", srv.httpServer.Addr)
-		serverErr <- srv.httpServer.ListenAndServe()
+		slog.Info(
+			"clinks server starting",
+			"address",
+			listener.Addr().String(),
+		)
+
+		serverErr <- server.server.Serve(listener)
 	}()
 
 	select {
 	case err := <-serverErr:
-		if !errors.Is(err, http.ErrServerClosed) {
-			return fmt.Errorf("serve HTTP server: %w", err)
+		if errors.Is(err, http.ErrServerClosed) {
+			return errors.New(
+				"HTTP server stopped unexpectedly",
+			)
 		}
-		return errors.New("HTTP server stopped unexpectedly before receiving shutdown signal")
+
+		return fmt.Errorf(
+			"serve HTTP server: %w",
+			err,
+		)
 
 	case <-ctx.Done():
-		slog.Info("shutdown signal received, draining connections", "timeout", srv.shutdownTimeout)
+		slog.Info(
+			"shutdown signal received",
+			"timeout",
+			server.shutdownTimeout,
+		)
 	}
 
-	shutdownCtx, cancel := context.WithTimeout(context.Background(), srv.shutdownTimeout)
-	defer cancel()
+	shutdownErr := server.shutdown(ctx)
 
-	shutdownErr := srv.httpServer.Shutdown(shutdownCtx)
+	serveErr := <-serverErr
+	if serveErr != nil &&
+		!errors.Is(serveErr, http.ErrServerClosed) {
+		shutdownErr = errors.Join(
+			shutdownErr,
+			fmt.Errorf(
+				"serve HTTP server: %w",
+				serveErr,
+			),
+		)
+	}
+
 	if shutdownErr != nil {
-		slog.Warn("graceful shutdown timed out, forcing close", "error", shutdownErr)
-		closeErr := srv.httpServer.Close()
-		if closeErr != nil && !errors.Is(closeErr, http.ErrServerClosed) {
-			shutdownErr = errors.Join(shutdownErr, fmt.Errorf("force close HTTP server: %w", closeErr))
-		}
-	}
-
-	if err := <-serverErr; err != nil && !errors.Is(err, http.ErrServerClosed) {
-		return fmt.Errorf("serve HTTP server: %w", err)
-	}
-
-	if shutdownErr != nil {
-		return fmt.Errorf("gracefully shut down HTTP server: %w", shutdownErr)
+		return shutdownErr
 	}
 
 	slog.Info("clinks server exited cleanly")
+
+	return nil
+}
+
+func (server *HTTPServer) shutdown(
+	ctx context.Context,
+) error {
+	shutdownCtx, cancel := context.WithTimeout(
+		context.WithoutCancel(ctx),
+		server.shutdownTimeout,
+	)
+	defer cancel()
+
+	if err := server.server.Shutdown(shutdownCtx); err != nil {
+		slog.Warn(
+			"graceful shutdown failed, forcing close",
+			"error",
+			err,
+		)
+
+		shutdownErr := fmt.Errorf(
+			"gracefully shut down HTTP server: %w",
+			err,
+		)
+
+		if closeErr := server.server.Close(); closeErr != nil &&
+			!errors.Is(closeErr, http.ErrServerClosed) {
+			shutdownErr = errors.Join(
+				shutdownErr,
+				fmt.Errorf(
+					"force close HTTP server: %w",
+					closeErr,
+				),
+			)
+		}
+
+		return shutdownErr
+	}
+
 	return nil
 }

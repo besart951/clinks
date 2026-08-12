@@ -2,7 +2,10 @@
 package auth
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -11,15 +14,10 @@ import (
 	"github.com/besartmorina/clinks/server/internal/core/domain"
 )
 
-const defaultSessionTTL = 24 * time.Hour
-
-type SessionIssuer struct {
-	secret   []byte
-	issuer   string
-	audience string
-	ttl      time.Duration
-	clock    func() time.Time
-}
+const (
+	defaultSessionTTL         = 24 * time.Hour
+	minimumSessionSecretBytes = 32
+)
 
 type SessionConfig struct {
 	Secret   []byte
@@ -29,23 +27,46 @@ type SessionConfig struct {
 	Clock    func() time.Time
 }
 
+type SessionIssuer struct {
+	secret   []byte
+	issuer   string
+	audience string
+	ttl      time.Duration
+	clock    func() time.Time
+}
+
 type sessionClaims struct {
 	TenantID string `json:"tenant_id,omitempty"`
 	Email    string `json:"email"`
 	Role     string `json:"role"`
 	Locale   string `json:"locale"`
 	Version  int    `json:"version"`
+
 	jwt.RegisteredClaims
 }
 
-func NewSessionIssuer(config SessionConfig) (*SessionIssuer, error) {
-	if len(config.Secret) < 32 {
-		return nil, fmt.Errorf("session issuer secret must contain at least 32 bytes")
+func NewSessionIssuer(
+	config SessionConfig,
+) (*SessionIssuer, error) {
+	if len(config.Secret) < minimumSessionSecretBytes {
+		return nil, fmt.Errorf(
+			"session issuer secret must contain at least %d bytes",
+			minimumSessionSecretBytes,
+		)
 	}
 
-	clock := config.Clock
-	if clock == nil {
-		clock = time.Now
+	issuerName := strings.TrimSpace(config.Issuer)
+	if issuerName == "" {
+		return nil, errors.New(
+			"session issuer is required",
+		)
+	}
+
+	audience := strings.TrimSpace(config.Audience)
+	if audience == "" {
+		return nil, errors.New(
+			"session audience is required",
+		)
 	}
 
 	ttl := config.TTL
@@ -53,24 +74,35 @@ func NewSessionIssuer(config SessionConfig) (*SessionIssuer, error) {
 		ttl = defaultSessionTTL
 	}
 
+	clock := config.Clock
+	if clock == nil {
+		clock = time.Now
+	}
+
 	return &SessionIssuer{
-		secret:   config.Secret,
-		issuer:   config.Issuer,
-		audience: config.Audience,
+		secret:   bytes.Clone(config.Secret),
+		issuer:   issuerName,
+		audience: audience,
 		ttl:      ttl,
 		clock:    clock,
 	}, nil
 }
 
-func (issuer *SessionIssuer) Issue(claim *domain.SessionClaim) (string, error) {
-	if claim == nil {
-		return "", fmt.Errorf("issue session token: claim cannot be nil")
+func (issuer *SessionIssuer) Issue(
+	claim *domain.SessionClaim,
+) (string, error) {
+	if err := validateSessionClaim(claim); err != nil {
+		return "", err
 	}
 
-	now := issuer.clock()
+	now := issuer.clock().UTC()
+
 	tokenID, err := newTokenID()
 	if err != nil {
-		return "", fmt.Errorf("generate session token id: %w", err)
+		return "", fmt.Errorf(
+			"generate session token id: %w",
+			err,
+		)
 	}
 
 	claims := sessionClaims{
@@ -78,6 +110,7 @@ func (issuer *SessionIssuer) Issue(claim *domain.SessionClaim) (string, error) {
 		Role:    string(claim.User.Role),
 		Locale:  string(claim.User.Locale),
 		Version: claim.User.SessionVersion,
+
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   string(claim.User.ID),
 			Issuer:    issuer.issuer,
@@ -92,50 +125,143 @@ func (issuer *SessionIssuer) Issue(claim *domain.SessionClaim) (string, error) {
 		claims.TenantID = string(*claim.ActiveTenantID)
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(issuer.secret)
+	token := jwt.NewWithClaims(
+		jwt.SigningMethodHS256,
+		claims,
+	)
+
+	signedToken, err := token.SignedString(issuer.secret)
+	if err != nil {
+		return "", fmt.Errorf(
+			"sign session token: %w",
+			err,
+		)
+	}
+
+	return signedToken, nil
 }
 
-func (issuer *SessionIssuer) Verify(token string) (domain.SessionClaim, error) {
-	var parsed sessionClaims
-	_, err := jwt.ParseWithClaims(
-		token,
-		&parsed,
-		func(value *jwt.Token) (any, error) {
-			if value.Method != jwt.SigningMethodHS256 {
-				return nil, fmt.Errorf("unexpected JWT signing algorithm: %v", value.Header["alg"])
-			}
+func (issuer *SessionIssuer) Verify(
+	rawToken string,
+) (domain.SessionClaim, error) {
+	if strings.TrimSpace(rawToken) == "" {
+		return invalidSessionClaim()
+	}
+
+	var claims sessionClaims
+
+	token, err := jwt.ParseWithClaims(
+		rawToken,
+		&claims,
+		func(_ *jwt.Token) (any, error) {
 			return issuer.secret, nil
 		},
-		jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}),
+		jwt.WithValidMethods(
+			[]string{jwt.SigningMethodHS256.Alg()},
+		),
 		jwt.WithIssuer(issuer.issuer),
 		jwt.WithAudience(issuer.audience),
 		jwt.WithExpirationRequired(),
 		jwt.WithIssuedAt(),
+		jwt.WithStrictDecoding(),
 		jwt.WithTimeFunc(issuer.clock),
 	)
-	if err != nil {
-		return domain.SessionClaim{}, domain.NewError(domain.ErrorUnauthorized)
+	if err != nil || token == nil || !token.Valid {
+		return invalidSessionClaim()
 	}
 
-	if parsed.Subject == "" || parsed.Version < 1 || parsed.ID == "" {
-		return domain.SessionClaim{}, domain.NewError(domain.ErrorUnauthorized)
+	if !validSessionClaims(&claims) {
+		return invalidSessionClaim()
+	}
+
+	email, err := domain.ParseEmail(claims.Email)
+	if err != nil {
+		return invalidSessionClaim()
 	}
 
 	user := domain.User{
-		ID:             domain.UserID(parsed.Subject),
-		Email:          domain.Email(parsed.Email),
-		Role:           domain.Role(parsed.Role),
-		Locale:         domain.Locale(parsed.Locale),
-		SessionVersion: parsed.Version,
+		ID:             domain.UserID(claims.Subject),
+		Email:          email,
+		Role:           domain.Role(claims.Role),
+		Locale:         domain.NewLocale(claims.Locale),
+		SessionVersion: claims.Version,
 	}
 
-	claim := domain.SessionClaim{User: user}
-	if parsed.TenantID != "" {
-		claim.ActiveTenantID = new(domain.TenantID(parsed.TenantID))
+	claim := domain.SessionClaim{
+		User: user,
+	}
+
+	if claims.TenantID != "" {
+		claim.ActiveTenantID = new(
+			domain.TenantID(claims.TenantID),
+		)
 	}
 
 	return claim, nil
+}
+
+func validateSessionClaim(
+	claim *domain.SessionClaim,
+) error {
+	if claim == nil {
+		return errors.New(
+			"issue session token: claim cannot be nil",
+		)
+	}
+
+	if claim.User.ID == "" {
+		return errors.New(
+			"issue session token: user id is required",
+		)
+	}
+
+	if claim.User.Email == "" {
+		return errors.New(
+			"issue session token: user email is required",
+		)
+	}
+
+	if claim.User.Role == "" {
+		return errors.New(
+			"issue session token: user role is required",
+		)
+	}
+
+	if claim.User.Locale == "" {
+		return errors.New(
+			"issue session token: user locale is required",
+		)
+	}
+
+	if claim.User.SessionVersion < 1 {
+		return errors.New(
+			"issue session token: session version must be positive",
+		)
+	}
+
+	return nil
+}
+
+func validSessionClaims(
+	claims *sessionClaims,
+) bool {
+	return claims != nil &&
+		claims.Subject != "" &&
+		claims.ID != "" &&
+		claims.Email != "" &&
+		claims.Role != "" &&
+		claims.Locale != "" &&
+		claims.Version > 0 &&
+		claims.IssuedAt != nil &&
+		claims.ExpiresAt != nil
+}
+
+func invalidSessionClaim() (
+	domain.SessionClaim,
+	error,
+) {
+	return domain.SessionClaim{},
+		domain.NewError(domain.ErrorInvalidCredentials)
 }
 
 func newTokenID() (string, error) {
@@ -143,5 +269,6 @@ func newTokenID() (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	return id.String(), nil
 }

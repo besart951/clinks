@@ -1,42 +1,63 @@
-// Package i18n adapts localized messages for HTTP responses.
+// Package i18n adapts domain errors and audit events into localized
+// presentation messages.
 package i18n
 
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/besartmorina/clinks/server/internal/core/domain"
 	"github.com/besartmorina/clinks/server/internal/core/ports"
 )
 
+const (
+	errorMessagePrefix      = "error."
+	auditMessagePrefix      = "audit."
+	internalErrorMessageKey = "error.internal"
+	auditTargetPlaceholder  = "{target}"
+)
+
 type Translator struct {
 	catalog ports.LocalizationCatalog
 }
 
-func NewTranslator(catalog ports.LocalizationCatalog) *Translator {
-	return &Translator{catalog: catalog}
+func NewTranslator(
+	catalog ports.LocalizationCatalog,
+) (*Translator, error) {
+	if catalog == nil {
+		return nil, errors.New(
+			"i18n translator: localization catalog is required",
+		)
+	}
+
+	return &Translator{
+		catalog: catalog,
+	}, nil
 }
 
 func (translator *Translator) AuditDescription(
 	ctx context.Context,
 	locale domain.Locale,
-	event *domain.AuditEvent,
+	event domain.AuditEvent,
 ) string {
-	if event == nil {
-		return ""
-	}
+	key := auditMessagePrefix + event.Action
 
-	key := "audit." + event.Action
-	message, err := translator.resolveMessage(ctx, locale, key)
+	message, err := translator.resolveMessage(
+		ctx,
+		locale,
+		key,
+	)
 	if err != nil {
-		if event.Target != "" {
-			return event.Action + ": " + event.Target
-		}
-		return event.Action
+		return auditFallback(event)
 	}
 
-	return strings.ReplaceAll(message, "{target}", event.Target)
+	return strings.ReplaceAll(
+		message,
+		auditTargetPlaceholder,
+		event.Target,
+	)
 }
 
 func (translator *Translator) ErrorMessage(
@@ -48,15 +69,23 @@ func (translator *Translator) ErrorMessage(
 		return ""
 	}
 
-	key := errorKey(err)
-	if message, resolveErr := translator.resolveMessage(ctx, locale, key); resolveErr == nil {
+	message, resolveErr := translator.resolveMessage(
+		ctx,
+		locale,
+		errorKey(err),
+	)
+	if resolveErr == nil {
 		return message
 	}
 
-	if translator.catalog != nil {
-		return translator.catalog.FallbackMessage()
+	fallback := strings.TrimSpace(
+		translator.catalog.FallbackMessage(),
+	)
+	if fallback != "" {
+		return fallback
 	}
-	return "error.internal"
+
+	return internalErrorMessageKey
 }
 
 func (translator *Translator) resolveMessage(
@@ -64,27 +93,65 @@ func (translator *Translator) resolveMessage(
 	locale domain.Locale,
 	key string,
 ) (string, error) {
-	if translator.catalog == nil {
-		return "", errors.New("localization catalog is nil")
-	}
-
-	message, err := translator.catalog.Message(ctx, locale, key)
+	message, err := translator.catalog.Message(
+		ctx,
+		locale,
+		key,
+	)
 	if err == nil {
 		return message, nil
 	}
 
-	defaultLocale, defaultErr := translator.catalog.DefaultLocale(ctx)
-	if defaultErr == nil && defaultLocale != locale {
-		return translator.catalog.Message(ctx, defaultLocale, key)
+	defaultLocale, defaultErr :=
+		translator.catalog.DefaultLocale(ctx)
+	if defaultErr != nil {
+		return "", errors.Join(
+			err,
+			fmt.Errorf(
+				"resolve default locale: %w",
+				defaultErr,
+			),
+		)
 	}
 
-	return "", err
+	if defaultLocale == locale {
+		return "", err
+	}
+
+	fallback, fallbackErr := translator.catalog.Message(
+		ctx,
+		defaultLocale,
+		key,
+	)
+	if fallbackErr != nil {
+		return "", errors.Join(
+			err,
+			fmt.Errorf(
+				"resolve fallback message: %w",
+				fallbackErr,
+			),
+		)
+	}
+
+	return fallback, nil
 }
 
 func errorKey(err error) string {
-	var domainError *domain.Error
-	if errors.As(err, &domainError) && domainError.Kind != "" {
-		return "error." + string(domainError.Kind)
+	domainError, ok := errors.AsType[*domain.Error](err)
+	if !ok ||
+		domainError == nil ||
+		!domainError.Kind.IsValid() {
+		return internalErrorMessageKey
 	}
-	return "error.internal"
+
+	return errorMessagePrefix +
+		string(domainError.Kind)
+}
+
+func auditFallback(event domain.AuditEvent) string {
+	if event.Target == "" {
+		return event.Action
+	}
+
+	return event.Action + ": " + event.Target
 }

@@ -5,19 +5,15 @@ const (
 	MaxPageSize     = 100
 )
 
-// Cursor is an opaque pagination token returned by cursor-based list queries.
+// Cursor is an opaque pagination token.
 type Cursor string
 
-// Page holds items and an optional cursor for the next page.
+// Page represents one cursor-based result page.
 type Page[T any] struct {
 	Items      []T
 	NextCursor Cursor
 }
 
-// EffectiveLimit returns a normalized page size.
-//
-// A non-positive limit uses DefaultPageSize.
-// Values above MaxPageSize are capped.
 func EffectiveLimit(limit int) int {
 	switch {
 	case limit <= 0:

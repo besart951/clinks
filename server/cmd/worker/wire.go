@@ -14,43 +14,75 @@ import (
 	"github.com/besartmorina/clinks/server/internal/core/ports"
 )
 
-var configSet = wire.NewSet(
+var workerConfigSet = wire.NewSet(
 	workerPoolConfig,
 	workerSMTPConfig,
 	workerInvitationTokenConfig,
 	workerInviteBaseURL,
 )
 
-var postgresSet = wire.NewSet(
+var workerPostgresSet = wire.NewSet(
 	postgres.NewPool,
+
 	postgres.NewOutboxRepository,
-	wire.Bind(new(ports.OutboxRepository), new(*postgres.OutboxRepository)),
+	wire.Bind(
+		new(ports.OutboxRepository),
+		new(*postgres.OutboxRepository),
+	),
 )
 
-var mailSet = wire.NewSet(
+var workerMailSet = wire.NewSet(
 	mailadapter.NewSMTPMailer,
-	wire.Bind(new(ports.InvitationMailer), new(*mailadapter.SMTPMailer)),
+	wire.Bind(
+		new(ports.InvitationMailer),
+		new(*mailadapter.SMTPMailer),
+	),
 )
 
-var authSet = wire.NewSet(
+var workerAuthSet = wire.NewSet(
 	authadapter.NewInvitationTokenSigner,
-	wire.Bind(new(ports.InvitationTokenSigner), new(*authadapter.InvitationTokenSigner)),
+	wire.Bind(
+		new(ports.InvitationTokenSigner),
+		new(*authadapter.InvitationTokenSigner),
+	),
 )
 
-var workerSet = wire.NewSet(
+var invitationWorkerSet = wire.NewSet(
 	newInvitationWorker,
 	NewWorkerApplication,
 )
 
 var workerProviderSet = wire.NewSet(
-	configSet,
-	postgresSet,
-	mailSet,
-	authSet,
-	workerSet,
+	workerConfigSet,
+	workerPostgresSet,
+	workerMailSet,
+	workerAuthSet,
+	invitationWorkerSet,
 )
 
-func InitializeWorker(ctx context.Context, cfg *appconfig.Config) (*WorkerApplication, func(), error) {
+// InitializeWorker constructs the invitation worker dependency graph.
+func InitializeWorker(
+	ctx context.Context,
+	config *appconfig.Config,
+) (*WorkerApplication, func(), error) {
 	wire.Build(workerProviderSet)
+
+	return nil, nil, nil
+}
+
+var workerHealthcheckSet = wire.NewSet(
+	workerPoolConfig,
+	postgres.NewPool,
+	NewWorkerHealthcheck,
+)
+
+// InitializeWorkerHealthcheck constructs only the dependencies required
+// to verify worker database connectivity.
+func InitializeWorkerHealthcheck(
+	ctx context.Context,
+	config *appconfig.Config,
+) (*WorkerHealthcheck, func(), error) {
+	wire.Build(workerHealthcheckSet)
+
 	return nil, nil, nil
 }

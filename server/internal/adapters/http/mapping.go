@@ -30,15 +30,15 @@ func userMessage(user domain.User) *clinksv1.User {
 }
 
 func userSummaryMessages(summaries []domain.UserSummary) []*clinksv1.UserSummary {
-	messages := make([]*clinksv1.UserSummary, 0, len(summaries))
-	for _, summary := range summaries {
-		messages = append(messages, &clinksv1.UserSummary{
+	messages := make([]*clinksv1.UserSummary, len(summaries))
+	for i, summary := range summaries {
+		messages[i] = &clinksv1.UserSummary{
 			Id:              string(summary.ID),
 			Email:           string(summary.Email),
 			Locale:          string(summary.Locale),
 			IsSuperAdmin:    summary.IsSuperAdmin,
 			MembershipCount: uint32(summary.MembershipCount), //nolint:gosec // count fits in uint32
-		})
+		}
 	}
 	return messages
 }
@@ -73,22 +73,22 @@ func tenantMessagePointer(tenant *domain.Tenant) *clinksv1.Tenant {
 }
 
 func tenantMessages(tenants []domain.Tenant) []*clinksv1.Tenant {
-	messages := make([]*clinksv1.Tenant, 0, len(tenants))
-	for _, tenant := range tenants {
-		messages = append(messages, tenantMessage(tenant))
+	messages := make([]*clinksv1.Tenant, len(tenants))
+	for i, tenant := range tenants {
+		messages[i] = tenantMessage(tenant)
 	}
 	return messages
 }
 
 func membershipMessages(memberships []domain.Membership) []*clinksv1.Membership {
-	messages := make([]*clinksv1.Membership, 0, len(memberships))
-	for _, membership := range memberships {
-		messages = append(messages, &clinksv1.Membership{
+	messages := make([]*clinksv1.Membership, len(memberships))
+	for i, membership := range memberships {
+		messages[i] = &clinksv1.Membership{
 			Id:     string(membership.ID),
 			Tenant: tenantMessage(membership.Tenant),
 			Role:   string(membership.Role),
 			Status: string(membership.Status),
-		})
+		}
 	}
 	return messages
 }
@@ -109,27 +109,27 @@ func invitationMessage(invitation *domain.Invitation) *clinksv1.Invitation {
 }
 
 func languageMessages(languages []domain.Language) []*clinksv1.Language {
-	messages := make([]*clinksv1.Language, 0, len(languages))
-	for _, language := range languages {
-		messages = append(messages, &clinksv1.Language{
+	messages := make([]*clinksv1.Language, len(languages))
+	for i, language := range languages {
+		messages[i] = &clinksv1.Language{
 			Code:      string(language.Code),
 			Name:      language.Name,
 			IsDefault: language.IsDefault,
 			IsActive:  language.IsActive,
-		})
+		}
 	}
 	return messages
 }
 
 func translationMessages(translations []domain.Translation) []*clinksv1.ScopedTranslation {
-	messages := make([]*clinksv1.ScopedTranslation, 0, len(translations))
-	for _, translation := range translations {
-		messages = append(messages, &clinksv1.ScopedTranslation{
+	messages := make([]*clinksv1.ScopedTranslation, len(translations))
+	for i, translation := range translations {
+		messages[i] = &clinksv1.ScopedTranslation{
 			Locale:           string(translation.Locale),
 			ApplicationScope: string(translation.ApplicationScope),
 			Key:              translation.Key,
 			Value:            translation.Value,
-		})
+		}
 	}
 	return messages
 }
@@ -141,7 +141,7 @@ func auditFilter(request *clinksv1.ListAuditEventsRequest) (domain.AuditFilter, 
 
 	filter := domain.AuditFilter{
 		Action:   request.GetAction(),
-		Cursor:   request.GetCursor(),
+		Cursor:   domain.Cursor(request.GetCursor()),
 		PageSize: int(request.GetPageSize()),
 	}
 
@@ -183,7 +183,7 @@ func (server *Server) auditMessages(ctx context.Context, header stdhttp.Header, 
 			TenantName:  event.TenantName,
 			Action:      event.Action,
 			Target:      event.Target,
-			Description: server.translator.AuditDescription(ctx, locale, event),
+			Description: server.translator.AuditDescription(ctx, locale, event[i]),
 		}
 		if event.ActorID != nil {
 			message.ActorId = string(*event.ActorID)

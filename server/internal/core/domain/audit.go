@@ -23,11 +23,11 @@ type AuditFilter struct {
 	TenantID *TenantID
 	Action   string
 	Search   string
-	Cursor   string
+	Cursor   Cursor
 	PageSize int
 }
 
 type AuditPage struct {
 	Events     []AuditEvent
-	NextCursor string
+	NextCursor Cursor
 }

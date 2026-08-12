@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	authadapter "github.com/besartmorina/clinks/server/internal/adapters/auth"
-	"github.com/besartmorina/clinks/server/internal/adapters/http"
+	httpadapter "github.com/besartmorina/clinks/server/internal/adapters/http"
 	"github.com/besartmorina/clinks/server/internal/adapters/i18n"
 	mailadapter "github.com/besartmorina/clinks/server/internal/adapters/mail"
 	"github.com/besartmorina/clinks/server/internal/adapters/postgres"
@@ -18,25 +18,28 @@ import (
 	"github.com/besartmorina/clinks/server/internal/core/service"
 )
 
-const defaultReadinessTimeout = 2 * time.Second
+const (
+	defaultReadinessTimeout   = 2 * time.Second
+	defaultHealthcheckTimeout = 5 * time.Second
+)
 
 type Application struct {
-	server     *http.Server
+	api        *httpadapter.Server
 	pool       *pgxpool.Pool
 	auth       *service.AuthService
 	oidc       *authadapter.GoogleOIDC
-	oidcConfig http.OIDCConfig
+	oidcConfig httpadapter.OIDCConfig
 }
 
 func NewApplication(
-	server *http.Server,
+	api *httpadapter.Server,
 	pool *pgxpool.Pool,
 	auth *service.AuthService,
 	oidc *authadapter.GoogleOIDC,
-	oidcConfig http.OIDCConfig,
+	oidcConfig httpadapter.OIDCConfig,
 ) *Application {
 	return &Application{
-		server:     server,
+		api:        api,
 		pool:       pool,
 		auth:       auth,
 		oidc:       oidc,
@@ -44,28 +47,58 @@ func NewApplication(
 	}
 }
 
-func (app *Application) Run(ctx context.Context, httpConfig *appconfig.HTTPConfig) error {
-	app.server.StartCleanup(ctx)
-	return NewServer(httpConfig, app.server.HandlerWithOIDC(app.oidc, app.oidcConfig)).Run(ctx)
+func (app *Application) Run(
+	ctx context.Context,
+	config appconfig.HTTPConfig,
+) error {
+	handler, err := app.api.HandlerWithOIDC(
+		app.oidc,
+		app.oidcConfig,
+	)
+	if err != nil {
+		return fmt.Errorf("build HTTP handler: %w", err)
+	}
+
+	return NewHTTPServer(config, handler).Run(ctx)
 }
 
-func (app *Application) MigrateAndBootstrap(ctx context.Context, bootstrap appconfig.BootstrapConfig) error {
+func (app *Application) MigrateAndBootstrap(
+	ctx context.Context,
+	bootstrap appconfig.BootstrapConfig,
+) error {
 	if err := postgres.Migrate(ctx, app.pool); err != nil {
 		return fmt.Errorf("apply migrations: %w", err)
 	}
+
 	if err := app.auth.EnsureSuperAdmin(
-		ctx, bootstrap.Email, bootstrap.Password, domain.NewLocale(bootstrap.Locale),
+		ctx,
+		bootstrap.Email,
+		bootstrap.Password,
+		domain.NewLocale(bootstrap.Locale),
 	); err != nil {
 		return fmt.Errorf("bootstrap administrator: %w", err)
 	}
+
 	return nil
 }
 
 func (app *Application) Healthcheck(ctx context.Context) error {
-	return app.pool.Ping(ctx)
+	ctx, cancel := context.WithTimeout(
+		ctx,
+		defaultHealthcheckTimeout,
+	)
+	defer cancel()
+
+	if err := app.pool.Ping(ctx); err != nil {
+		return fmt.Errorf("ping database: %w", err)
+	}
+
+	return nil
 }
 
-func poolConfig(settings *appconfig.Config) postgres.PoolConfig {
+func poolConfig(
+	settings *appconfig.Config,
+) postgres.PoolConfig {
 	return postgres.PoolConfig{
 		DatabaseURL:       settings.Database.URL,
 		MaxConns:          settings.Database.MaxConns,
@@ -76,11 +109,13 @@ func poolConfig(settings *appconfig.Config) postgres.PoolConfig {
 	}
 }
 
-func httpServerConfig(settings *appconfig.Config) *http.ServerConfig {
-	return &http.ServerConfig{
+func httpServerConfig(
+	settings *appconfig.Config,
+) httpadapter.ServerConfig {
+	return httpadapter.ServerConfig{
 		CORSOrigins:      settings.HTTP.CORSOrigins,
 		ReadinessTimeout: defaultReadinessTimeout,
-		Cookie: http.CookieConfig{
+		Cookie: httpadapter.CookieConfig{
 			Name:   settings.HTTP.SessionCookieName,
 			Secure: settings.HTTP.SessionCookieSecure,
 			Domain: settings.HTTP.SessionCookieDomain,
@@ -97,13 +132,17 @@ func inviteTTL(settings *appconfig.Config) time.Duration {
 	return settings.Invites.TTL
 }
 
-func invitationTokenConfig(settings *appconfig.Config) authadapter.InvitationTokenConfig {
+func invitationTokenConfig(
+	settings *appconfig.Config,
+) authadapter.InvitationTokenConfig {
 	return authadapter.InvitationTokenConfig{
 		Secret: settings.Invites.TokenSecret,
 	}
 }
 
-func googleOIDCConfig(settings *appconfig.Config) authadapter.GoogleOIDCConfig {
+func googleOIDCConfig(
+	settings *appconfig.Config,
+) authadapter.GoogleOIDCConfig {
 	return authadapter.GoogleOIDCConfig{
 		ClientID:     settings.OIDC.GoogleClientID,
 		ClientSecret: settings.OIDC.GoogleClientSecret,
@@ -111,14 +150,18 @@ func googleOIDCConfig(settings *appconfig.Config) authadapter.GoogleOIDCConfig {
 	}
 }
 
-func httpOIDCConfig(settings *appconfig.Config) http.OIDCConfig {
-	return http.OIDCConfig{
+func httpOIDCConfig(
+	settings *appconfig.Config,
+) httpadapter.OIDCConfig {
+	return httpadapter.OIDCConfig{
 		StateSecret: settings.OIDC.StateSecret,
 		SuccessURL:  settings.OIDC.SuccessURL,
 	}
 }
 
-func smtpConfig(settings *appconfig.Config) *mailadapter.SMTPConfig {
+func smtpConfig(
+	settings *appconfig.Config,
+) *mailadapter.SMTPConfig {
 	return &mailadapter.SMTPConfig{
 		Host:       settings.SMTP.Host,
 		Port:       settings.SMTP.Port,
@@ -129,7 +172,9 @@ func smtpConfig(settings *appconfig.Config) *mailadapter.SMTPConfig {
 	}
 }
 
-func sessionConfig(settings *appconfig.Config) authadapter.SessionConfig {
+func sessionConfig(
+	settings *appconfig.Config,
+) authadapter.SessionConfig {
 	return authadapter.SessionConfig{
 		Secret:   []byte(settings.Auth.JWTSecret),
 		Issuer:   settings.Auth.JWTIssuer,
@@ -150,40 +195,45 @@ func newAuthService(
 	inviteBaseURL string,
 	inviteTTL time.Duration,
 ) *service.AuthService {
-	return service.NewAuthService(&service.AuthDependencies{
-		Identities:    identities,
-		Federation:    federation,
-		Provisioner:   provisioner,
-		Memberships:   memberships,
-		Passwords:     passwords,
-		Sessions:      sessions,
-		Audit:         audit,
-		Tokens:        tokens,
-		InviteBaseURL: inviteBaseURL,
-		InviteTTL:     inviteTTL,
-	})
+	return service.NewAuthService(
+		&service.AuthDependencies{
+			Identities:    identities,
+			Federation:    federation,
+			Provisioner:   provisioner,
+			Memberships:   memberships,
+			Passwords:     passwords,
+			Sessions:      sessions,
+			Audit:         audit,
+			Tokens:        tokens,
+			InviteBaseURL: inviteBaseURL,
+			InviteTTL:     inviteTTL,
+		},
+	)
 }
 
-func newHTTPServer(
+func newHTTPAdapter(
 	auth *service.AuthService,
 	admin *service.AdminService,
 	localization *service.I18nService,
 	translator *i18n.Translator,
 	readiness ports.ReadinessChecker,
-	config *http.ServerConfig,
-) *http.Server {
-	return http.NewServer(&http.ServerDeps{
-		Sessions:         auth,
-		Registration:     auth,
-		Invitations:      auth,
-		Tenants:          admin,
-		LocalizationEdit: admin,
-		Audit:            admin,
-		Localization:     localization,
-		Translator:       translator,
-		Readiness:        readiness,
-		Users:            admin,
-		InviteAdmin:      admin,
-		Overview:         admin,
-	}, config)
+	config httpadapter.ServerConfig,
+) (*httpadapter.Server, error) {
+	return httpadapter.NewServer(
+		httpadapter.ServerDeps{
+			Sessions:         auth,
+			Registration:     auth,
+			Invitations:      auth,
+			Tenants:          admin,
+			LocalizationEdit: admin,
+			Audit:            admin,
+			Localization:     localization,
+			Translator:       translator,
+			Readiness:        readiness,
+			Users:            admin,
+			InviteAdmin:      admin,
+			Overview:         admin,
+		},
+		config,
+	)
 }

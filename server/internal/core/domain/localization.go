@@ -34,40 +34,117 @@ type TranslationBundle struct {
 }
 
 func NewLocale(value string) Locale {
-	return Locale(strings.TrimSpace(value))
+	value = strings.TrimSpace(value)
+
+	language, region, hasRegion := strings.Cut(value, "-")
+
+	language = strings.ToLower(language)
+
+	if !hasRegion {
+		return Locale(language)
+	}
+
+	return Locale(
+		language +
+			"-" +
+			strings.ToUpper(region),
+	)
 }
 
-func ParseApplicationScope(value string) (ApplicationScope, error) {
-	scope := ApplicationScope(strings.TrimSpace(value))
-	if scope == "" {
-		return ScopeShared, nil
-	}
-	if !scope.IsValid() {
+func ParseLocale(value string) (Locale, error) {
+	locale := NewLocale(value)
+
+	if !locale.IsValid() {
 		return "", NewError(ErrorValidation)
 	}
-	return scope, nil
+
+	return locale, nil
 }
 
 func (locale Locale) IsValid() bool {
-	parts := strings.Split(string(locale), "-")
-	if len(parts) < 1 || len(parts) > 2 || !letters(parts[0], 'a', 'z', 2, 3) {
+	language, region, hasRegion := strings.Cut(
+		string(locale),
+		"-",
+	)
+
+	if !lowerASCIILetters(language, 2, 3) {
 		return false
 	}
-	return len(parts) == 1 || letters(parts[1], 'A', 'Z', 2, 2)
+
+	if !hasRegion {
+		return true
+	}
+
+	return upperASCIILetters(region, 2)
+}
+
+func ParseApplicationScope(
+	value string,
+) (ApplicationScope, error) {
+	value = strings.ToLower(
+		strings.TrimSpace(value),
+	)
+
+	if value == "" {
+		return ScopeShared, nil
+	}
+
+	scope := ApplicationScope(value)
+
+	if !scope.IsValid() {
+		return "", NewError(ErrorValidation)
+	}
+
+	return scope, nil
 }
 
 func (scope ApplicationScope) IsValid() bool {
-	return scope == ScopeShared || scope == ScopeAdmin || scope == ScopePlanerLink || scope == ScopeInfraLink
-}
+	switch scope {
+	case ScopeShared,
+		ScopeAdmin,
+		ScopePlanerLink,
+		ScopeInfraLink:
+		return true
 
-func letters(value string, minimum, maximum rune, minimumLength, maximumLength int) bool {
-	if len(value) < minimumLength || len(value) > maximumLength {
+	default:
 		return false
 	}
+}
+
+func lowerASCIILetters(
+	value string,
+	minimumLength,
+	maximumLength int,
+) bool {
+	if len(value) < minimumLength ||
+		len(value) > maximumLength {
+		return false
+	}
+
 	for _, character := range value {
-		if character < minimum || character > maximum {
+		if character < 'a' ||
+			character > 'z' {
 			return false
 		}
 	}
+
+	return true
+}
+
+func upperASCIILetters(
+	value string,
+	length int,
+) bool {
+	if len(value) != length {
+		return false
+	}
+
+	for _, character := range value {
+		if character < 'A' ||
+			character > 'Z' {
+			return false
+		}
+	}
+
 	return true
 }
