@@ -3,7 +3,9 @@
 ## Go
 
 - Use gofmt and Go 1.26.
-- Favor small focused functions, guard clauses, context-aware I/O, and typed domain IDs such as domain.TenantID and domain.Locale.
+- Favor small focused functions, guard clauses, context-aware I/O, and typed IDs such as clinks.TenantID and clinks.Locale.
+- Keep packages flat and named for responsibilities. Do not introduce `domain`, `ports`, `service`, `controller`, or `repository` package layers.
+- Define interfaces in the consuming package and keep them to the methods that consumer needs. Return concrete types.
 - Keep exported API documentation concise. Do not return raw domain errors from an HTTP handler.
 - SQL uses positional arguments. Tenant queries must use WithTenantTx.
 - Use `new(expression)` for direct initialization of optional pointer values; do not introduce a temporary variable solely to take its address.

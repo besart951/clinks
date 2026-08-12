@@ -9,29 +9,28 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	authadapter "github.com/besartmorina/clinks/server/internal/adapters/auth"
-	mailadapter "github.com/besartmorina/clinks/server/internal/adapters/mail"
-	"github.com/besartmorina/clinks/server/internal/adapters/postgres"
-	appconfig "github.com/besartmorina/clinks/server/internal/config"
-	"github.com/besartmorina/clinks/server/internal/core/ports"
-	"github.com/besartmorina/clinks/server/internal/core/service"
+	clinks "github.com/besartmorina/clinks/server"
+	"github.com/besartmorina/clinks/server/auth"
+	appconfig "github.com/besartmorina/clinks/server/config"
+	"github.com/besartmorina/clinks/server/mail"
+	"github.com/besartmorina/clinks/server/postgres"
 )
 
 const defaultWorkerHealthcheckTimeout = 5 * time.Second
 
-type WorkerApplication struct {
-	worker *service.InvitationWorker
+type workerApplication struct {
+	worker *clinks.InvitationWorker
 }
 
-func NewWorkerApplication(
-	worker *service.InvitationWorker,
-) *WorkerApplication {
-	return &WorkerApplication{
+func newWorkerApplication(
+	worker *clinks.InvitationWorker,
+) *workerApplication {
+	return &workerApplication{
 		worker: worker,
 	}
 }
 
-func (app *WorkerApplication) Run(ctx context.Context) error {
+func (app *workerApplication) run(ctx context.Context) error {
 	if err := app.worker.Run(ctx); err != nil {
 		if ctx.Err() != nil && errors.Is(err, context.Canceled) {
 			return nil
@@ -43,19 +42,19 @@ func (app *WorkerApplication) Run(ctx context.Context) error {
 	return nil
 }
 
-type WorkerHealthcheck struct {
+type workerHealthcheck struct {
 	pool *pgxpool.Pool
 }
 
-func NewWorkerHealthcheck(
+func newWorkerHealthcheck(
 	pool *pgxpool.Pool,
-) *WorkerHealthcheck {
-	return &WorkerHealthcheck{
+) *workerHealthcheck {
+	return &workerHealthcheck{
 		pool: pool,
 	}
 }
 
-func (healthcheck *WorkerHealthcheck) Run(
+func (healthcheck *workerHealthcheck) run(
 	ctx context.Context,
 ) error {
 	ctx, cancel := context.WithTimeout(
@@ -86,8 +85,8 @@ func workerPoolConfig(
 
 func workerSMTPConfig(
 	settings *appconfig.Config,
-) mailadapter.SMTPConfig {
-	return mailadapter.SMTPConfig{
+) mail.SMTPConfig {
+	return mail.SMTPConfig{
 		Host:       settings.SMTP.Host,
 		Port:       settings.SMTP.Port,
 		Username:   settings.SMTP.Username,
@@ -100,8 +99,8 @@ func workerSMTPConfig(
 
 func workerInvitationTokenConfig(
 	settings *appconfig.Config,
-) authadapter.InvitationTokenConfig {
-	return authadapter.InvitationTokenConfig{
+) auth.InvitationTokenConfig {
+	return auth.InvitationTokenConfig{
 		Secret: settings.Invites.TokenSecret,
 	}
 }
@@ -110,20 +109,4 @@ func workerInviteBaseURL(
 	settings *appconfig.Config,
 ) string {
 	return settings.Invites.PublicBaseURL
-}
-
-func newInvitationWorker(
-	outbox ports.OutboxRepository,
-	mailer ports.InvitationMailer,
-	tokens ports.InvitationTokenSigner,
-	messages ports.MessageCatalog,
-	inviteBaseURL string,
-) (*service.InvitationWorker, error) {
-	return service.NewInvitationWorker(
-		outbox,
-		mailer,
-		tokens,
-		messages,
-		inviteBaseURL,
-	)
 }

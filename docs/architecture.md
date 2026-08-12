@@ -1,17 +1,24 @@
 # Architecture
 
-The server is a modular Go monolith using hexagonal architecture:
+The server is a flat Go application. Application behavior and shared domain
+types live in the root `clinks` package. One-level packages own concrete
+technical concerns:
 
-- core/domain: dependency-free entities, value types, and domain errors.
-- core/ports: interfaces needed by use cases.
-- core/service: application use cases.
-- adapters/postgres: one pgx `Store`, migrations, RLS transactions, and UUIDv7 generation.
-- adapters/i18n: backend translation lookup and localized error mapping.
-- adapters/http: Connect-RPC transport, cookie-session extraction, Origin/CORS enforcement, locale extraction, and localized response formatting.
+- `auth`: JWT, password hashing, invitation tokens, and Google OIDC.
+- `config`: environment configuration.
+- `localization`: the product catalog and localized public-error mapping.
+- `mail`: SMTP invitation delivery.
+- `postgres`: one pgx `Store`, migrations, RLS transactions, and UUIDv7 generation.
+- `web`: Connect-RPC handlers, cookies, browser policy, locale extraction, and response mapping.
 
-Deep application modules own identity/session, Invitations, Tenancy/Memberships/Tenant Roles, localization, audit, Super Administration, and Invitation delivery. Consumer-owned ports keep each hexagonal seam small. The PostgreSQL Store implements those ports without exposing pool-owning repository objects. Adapters depend inward on ports and domain; the domain has no knowledge of HTTP, PostgreSQL, JWT, SMTP, or UI.
+There are no `domain`, `ports`, `service`, `controller`, or `repository`
+package layers. Interfaces are defined by the package that consumes them. The
+root application package owns the small store interfaces required by its
+operations; `web` and `localization` own their boundary interfaces locally.
+Concrete implementations do not import interface packages merely to declare
+conformance. `cmd/server` and `cmd/worker` wire concrete values together.
 
-The API and worker have direct composition roots under `cmd/server` and `cmd/worker`. The API graph never constructs SMTP. Worker `run` validates SMTP during composition and fails before polling; worker `healthcheck` constructs only PostgreSQL connectivity.
+The API and worker have direct composition roots under `cmd/server` and `cmd/worker`. Command-only types and constructors remain unexported. The API graph never constructs SMTP. Worker `run` validates SMTP during composition and fails before polling; worker `healthcheck` constructs only PostgreSQL connectivity.
 
 Connect-RPC is the only public application interface. `/healthz` and `/readyz` remain plain HTTP. The browser client is generated from `server/proto`, sends `credentials: include`, and hydrates from `GetSession`; no application token is exposed to JavaScript.
 

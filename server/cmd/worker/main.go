@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	appconfig "github.com/besartmorina/clinks/server/internal/config"
+	appconfig "github.com/besartmorina/clinks/server/config"
 )
 
 type workerCommand string
@@ -85,7 +85,7 @@ func runWorker(
 	ctx context.Context,
 	settings *appconfig.Config,
 ) error {
-	app, cleanup, err := InitializeWorker(
+	app, cleanup, err := initializeWorker(
 		ctx,
 		settings,
 	)
@@ -97,14 +97,14 @@ func runWorker(
 	}
 	defer cleanup()
 
-	return app.Run(ctx)
+	return app.run(ctx)
 }
 
 func runWorkerHealthcheck(
 	ctx context.Context,
 	settings *appconfig.Config,
 ) error {
-	healthcheck, cleanup, err := InitializeWorkerHealthcheck(
+	healthcheck, cleanup, err := initializeWorkerHealthcheck(
 		ctx,
 		settings,
 	)
@@ -116,7 +116,7 @@ func runWorkerHealthcheck(
 	}
 	defer cleanup()
 
-	return healthcheck.Run(ctx)
+	return healthcheck.run(ctx)
 }
 
 func parseWorkerCommand(

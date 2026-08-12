@@ -6,14 +6,11 @@ import (
 	"log/slog"
 	"time"
 
-	authadapter "github.com/besartmorina/clinks/server/internal/adapters/auth"
-	httpadapter "github.com/besartmorina/clinks/server/internal/adapters/http"
-	"github.com/besartmorina/clinks/server/internal/adapters/i18n"
-	"github.com/besartmorina/clinks/server/internal/adapters/postgres"
-	appconfig "github.com/besartmorina/clinks/server/internal/config"
-	"github.com/besartmorina/clinks/server/internal/core/domain"
-	"github.com/besartmorina/clinks/server/internal/core/ports"
-	"github.com/besartmorina/clinks/server/internal/core/service"
+	clinks "github.com/besartmorina/clinks/server"
+	"github.com/besartmorina/clinks/server/auth"
+	appconfig "github.com/besartmorina/clinks/server/config"
+	"github.com/besartmorina/clinks/server/postgres"
+	"github.com/besartmorina/clinks/server/web"
 )
 
 const (
@@ -21,20 +18,20 @@ const (
 	defaultHealthcheckTimeout = 5 * time.Second
 )
 
-type Application struct {
-	api        *httpadapter.Server
-	oidc       *authadapter.GoogleOIDC
-	oidcConfig httpadapter.OIDCConfig
+type application struct {
+	api        *web.Server
+	oidc       *auth.GoogleOIDC
+	oidcConfig web.OIDCConfig
 	logger     *slog.Logger
 }
 
-func NewApplication(
-	api *httpadapter.Server,
-	oidc *authadapter.GoogleOIDC,
-	oidcConfig httpadapter.OIDCConfig,
+func newApplication(
+	api *web.Server,
+	oidc *auth.GoogleOIDC,
+	oidcConfig web.OIDCConfig,
 	logger *slog.Logger,
-) *Application {
-	return &Application{
+) *application {
+	return &application{
 		api:        api,
 		oidc:       oidc,
 		oidcConfig: oidcConfig,
@@ -42,7 +39,7 @@ func NewApplication(
 	}
 }
 
-func (app *Application) Run(
+func (app *application) run(
 	ctx context.Context,
 	config appconfig.HTTPConfig,
 ) error {
@@ -54,7 +51,7 @@ func (app *Application) Run(
 		return fmt.Errorf("build HTTP handler: %w", err)
 	}
 
-	return NewHTTPServer(config, handler, app.logger).Run(ctx)
+	return newHTTPServer(config, handler, app.logger).run(ctx)
 }
 
 func poolConfig(
@@ -72,13 +69,13 @@ func poolConfig(
 
 func httpServerConfig(
 	settings *appconfig.Config,
-	defaultLocale domain.Locale,
-) httpadapter.ServerConfig {
-	return httpadapter.ServerConfig{
+	defaultLocale clinks.Locale,
+) web.ServerConfig {
+	return web.ServerConfig{
 		CORSOrigins:      settings.HTTP.CORSOrigins,
 		ReadinessTimeout: defaultReadinessTimeout,
 		DefaultLocale:    defaultLocale,
-		Cookie: httpadapter.CookieConfig{
+		Cookie: web.CookieConfig{
 			Name:   settings.HTTP.SessionCookieName,
 			Secure: settings.HTTP.SessionCookieSecure,
 			Domain: settings.HTTP.SessionCookieDomain,
@@ -97,16 +94,16 @@ func inviteTTL(settings *appconfig.Config) time.Duration {
 
 func invitationTokenConfig(
 	settings *appconfig.Config,
-) authadapter.InvitationTokenConfig {
-	return authadapter.InvitationTokenConfig{
+) auth.InvitationTokenConfig {
+	return auth.InvitationTokenConfig{
 		Secret: settings.Invites.TokenSecret,
 	}
 }
 
 func googleOIDCConfig(
 	settings *appconfig.Config,
-) authadapter.GoogleOIDCConfig {
-	return authadapter.GoogleOIDCConfig{
+) auth.GoogleOIDCConfig {
+	return auth.GoogleOIDCConfig{
 		ClientID:     settings.OIDC.GoogleClientID,
 		ClientSecret: settings.OIDC.GoogleClientSecret,
 		CallbackURL:  settings.OIDC.GoogleCallbackURL,
@@ -115,8 +112,8 @@ func googleOIDCConfig(
 
 func httpOIDCConfig(
 	settings *appconfig.Config,
-) httpadapter.OIDCConfig {
-	return httpadapter.OIDCConfig{
+) web.OIDCConfig {
+	return web.OIDCConfig{
 		StateSecret: settings.OIDC.StateSecret,
 		SuccessURL:  settings.OIDC.SuccessURL,
 	}
@@ -124,85 +121,11 @@ func httpOIDCConfig(
 
 func sessionConfig(
 	settings *appconfig.Config,
-) authadapter.SessionConfig {
-	return authadapter.SessionConfig{
+) auth.SessionConfig {
+	return auth.SessionConfig{
 		Secret:   []byte(settings.Auth.JWTSecret),
 		Issuer:   settings.Auth.JWTIssuer,
 		Audience: settings.Auth.JWTAudience,
 		TTL:      settings.Auth.JWTTTL,
 	}
-}
-
-func newAuthServices(
-	identities ports.SessionIdentityRepository,
-	federation ports.ExternalIdentityRepository,
-	provisioner ports.TenantProvisioner,
-	memberships ports.MembershipSessionReader,
-	roles ports.RoleLookup,
-	invitations ports.InvitationRepository,
-	passwords ports.PasswordHasher,
-	sessions ports.SessionIssuer,
-	audit ports.AuditAppender,
-	invitationIDs ports.InvitationIDGenerator,
-	tokens ports.InvitationTokenSigner,
-	inviteBaseURL string,
-	inviteTTL time.Duration,
-) (service.AuthServices, error) {
-	return service.NewAuthServices(
-		service.AuthDependencies{
-			Identities:    identities,
-			Federation:    federation,
-			Provisioner:   provisioner,
-			Memberships:   memberships,
-			Roles:         roles,
-			Invitations:   invitations,
-			Passwords:     passwords,
-			Sessions:      sessions,
-			Audit:         audit,
-			InvitationIDs: invitationIDs,
-			Tokens:        tokens,
-			InviteBaseURL: inviteBaseURL,
-			InviteTTL:     inviteTTL,
-		},
-	)
-}
-
-func newHTTPAdapter(
-	credentials *service.CredentialService,
-	sessions *service.SessionService,
-	invitations *service.InvitationService,
-	externalIdentities *service.ExternalIdentityService,
-	tenants *service.TenantAdministration,
-	localizationEdit *service.LocalizationAdministration,
-	audit *service.AuditAdministration,
-	users *service.UserAdministration,
-	inviteAdmin *service.InvitationAdministration,
-	overview *service.SystemOverview,
-	tenantManagement *service.TenantManagement,
-	localization *service.I18nService,
-	translator *i18n.Translator,
-	readiness ports.ReadinessChecker,
-	config httpadapter.ServerConfig,
-) (*httpadapter.Server, error) {
-	return httpadapter.NewServer(
-		httpadapter.ServerDeps{
-			Sessions:         sessions,
-			Credentials:      credentials,
-			OIDCSessions:     externalIdentities,
-			Registration:     credentials,
-			Invitations:      invitations,
-			Tenants:          tenants,
-			LocalizationEdit: localizationEdit,
-			Audit:            audit,
-			Localization:     localization,
-			Translator:       translator,
-			Readiness:        readiness,
-			Users:            users,
-			InviteAdmin:      inviteAdmin,
-			Overview:         overview,
-			TenantManagement: tenantManagement,
-			Logger:           slog.Default(),
-		},
-		config,
-	)
 }

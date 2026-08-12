@@ -3,36 +3,36 @@ package main
 import (
 	"context"
 
-	authadapter "github.com/besartmorina/clinks/server/internal/adapters/auth"
-	"github.com/besartmorina/clinks/server/internal/adapters/localization"
-	mailadapter "github.com/besartmorina/clinks/server/internal/adapters/mail"
-	"github.com/besartmorina/clinks/server/internal/adapters/postgres"
-	appconfig "github.com/besartmorina/clinks/server/internal/config"
+	clinks "github.com/besartmorina/clinks/server"
+	"github.com/besartmorina/clinks/server/auth"
+	appconfig "github.com/besartmorina/clinks/server/config"
+	"github.com/besartmorina/clinks/server/localization"
+	"github.com/besartmorina/clinks/server/mail"
+	"github.com/besartmorina/clinks/server/postgres"
 )
 
-// InitializeWorker constructs the worker graph. SMTP configuration is checked
-// here so the run command fails before it starts polling the outbox.
-func InitializeWorker(
+// The worker composition validates SMTP before polling the outbox.
+func initializeWorker(
 	ctx context.Context,
 	config *appconfig.Config,
-) (*WorkerApplication, func(), error) {
+) (*workerApplication, func(), error) {
 	pool, cleanup, err := postgres.NewPool(ctx, workerPoolConfig(config))
 	if err != nil {
 		return nil, nil, err
 	}
 	store := postgres.NewStore(pool)
 
-	fail := func(err error) (*WorkerApplication, func(), error) {
+	fail := func(err error) (*workerApplication, func(), error) {
 		cleanup()
 		return nil, nil, err
 	}
 
-	mailer, err := mailadapter.NewSMTPMailer(workerSMTPConfig(config))
+	mailer, err := mail.NewSMTPMailer(workerSMTPConfig(config))
 	if err != nil {
 		return fail(err)
 	}
 
-	tokens, err := authadapter.NewInvitationTokenSigner(
+	tokens, err := auth.NewInvitationTokenSigner(
 		workerInvitationTokenConfig(config),
 	)
 	if err != nil {
@@ -43,28 +43,28 @@ func InitializeWorker(
 		return fail(err)
 	}
 
-	worker, err := newInvitationWorker(
-		store,
-		mailer,
-		tokens,
-		catalog,
-		workerInviteBaseURL(config),
-	)
+	worker, err := clinks.NewInvitationWorker(clinks.WorkerDependencies{
+		Outbox:        store,
+		Mailer:        mailer,
+		Tokens:        tokens,
+		Messages:      catalog,
+		InviteBaseURL: workerInviteBaseURL(config),
+	})
 	if err != nil {
 		return fail(err)
 	}
 
-	return NewWorkerApplication(worker), cleanup, nil
+	return newWorkerApplication(worker), cleanup, nil
 }
 
-func InitializeWorkerHealthcheck(
+func initializeWorkerHealthcheck(
 	ctx context.Context,
 	config *appconfig.Config,
-) (*WorkerHealthcheck, func(), error) {
+) (*workerHealthcheck, func(), error) {
 	pool, cleanup, err := postgres.NewPool(ctx, workerPoolConfig(config))
 	if err != nil {
 		return nil, nil, err
 	}
 
-	return NewWorkerHealthcheck(pool), cleanup, nil
+	return newWorkerHealthcheck(pool), cleanup, nil
 }

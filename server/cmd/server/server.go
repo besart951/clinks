@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	appconfig "github.com/besartmorina/clinks/server/internal/config"
+	appconfig "github.com/besartmorina/clinks/server/config"
 )
 
 const (
@@ -20,18 +20,18 @@ const (
 	defaultShutdownTimeout   = 10 * time.Second
 )
 
-type HTTPServer struct {
+type httpServer struct {
 	server          *http.Server
 	shutdownTimeout time.Duration
 	logger          *slog.Logger
 }
 
-func NewHTTPServer(
+func newHTTPServer(
 	config appconfig.HTTPConfig,
 	handler http.Handler,
 	logger *slog.Logger,
-) *HTTPServer {
-	return &HTTPServer{
+) *httpServer {
+	return &httpServer{
 		server: &http.Server{
 			Addr:              config.Address(),
 			Handler:           handler,
@@ -45,7 +45,7 @@ func NewHTTPServer(
 	}
 }
 
-func (server *HTTPServer) Run(ctx context.Context) error {
+func (server *httpServer) run(ctx context.Context) error {
 	var listenConfig net.ListenConfig
 
 	listener, err := listenConfig.Listen(
@@ -117,7 +117,7 @@ func (server *HTTPServer) Run(ctx context.Context) error {
 	return nil
 }
 
-func (server *HTTPServer) shutdown(
+func (server *httpServer) shutdown(
 	ctx context.Context,
 ) error {
 	shutdownCtx, cancel := context.WithTimeout(

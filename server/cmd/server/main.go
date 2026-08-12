@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	appconfig "github.com/besartmorina/clinks/server/internal/config"
+	appconfig "github.com/besartmorina/clinks/server/config"
 )
 
 type command string
