@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { ClinksRuntimeProvider } from '@clinks/clinks-runtime';
+	import { goto } from '$app/navigation';
+	import { AuthProvider } from '@clinks/auth';
 	import { Toaster } from '@clinks/ui-shared/toaster';
 	import '../app.css';
 	let { children } = $props();
 </script>
 
-<ClinksRuntimeProvider applicationScope="infra_link">
+<AuthProvider applicationScope="infra_link" navigate={goto}>
 	{@render children()}
 	<Toaster />
-</ClinksRuntimeProvider>
+</AuthProvider>

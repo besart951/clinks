@@ -1,13 +1,12 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
-	import { useClinksRuntime } from '@clinks/clinks-runtime';
+	import { useAuth } from '@clinks/auth';
 	import AdminLogin from '$lib/AdminLogin.svelte';
 
-	const runtime = useClinksRuntime();
+	const auth = useAuth();
 
-	onMount(() => {
-		if (runtime.session.isSuperAdmin) {
+	$effect(() => {
+		if (auth.isSuperAdministrator) {
 			void goto('/dashboard');
 		}
 	});

@@ -1,23 +1,29 @@
-import type { Invitation, InvitationService, Session } from '@clinks/api-client';
+import type { Invitation, InvitationService, Permission, Role, Session } from '@clinks/api-client';
 import { BrowserClipboard } from './browser-clipboard.ts';
 import type { ErrorMessageFormatter } from './auth-portal-view-model.svelte.ts';
-import type { SessionStore } from './session-store.svelte';
+
+export interface AuthDashboardSession {
+	readonly current: Session | null;
+	switchTenant(tenantId: string): Promise<void>;
+	hasPermission(permission: Permission, tenantId?: string): boolean;
+}
 
 export class AuthDashboardViewModel {
 	#overrideSelectedTenant = $state<string | null>(null);
 	invitationEmail = $state('');
-	invitationRole = $state<'ROLE_TENANT_ADMIN' | 'ROLE_USER'>('ROLE_USER');
-	createdInvitation = $state<Invitation | null>(null);
+	invitationRoleId = $state('');
+	roles = $state.raw<Role[]>([]);
+	createdInvitation = $state.raw<Invitation | null>(null);
 
-	#client: Pick<InvitationService, 'createInvitation'>;
-	#session: Pick<SessionStore, 'current' | 'switchTenant'>;
+	#client: Pick<InvitationService, 'createInvitation' | 'roles'>;
+	#session: AuthDashboardSession;
 	#messages: ErrorMessageFormatter;
 	#clipboard: BrowserClipboard;
 	#onError: (message: string) => void;
 
 	constructor(
-		client: Pick<InvitationService, 'createInvitation'>,
-		session: Pick<SessionStore, 'current' | 'switchTenant'>,
+		client: Pick<InvitationService, 'createInvitation' | 'roles'>,
+		session: AuthDashboardSession,
 		messages: ErrorMessageFormatter,
 		clipboard: BrowserClipboard,
 		onError: (message: string) => void,
@@ -43,17 +49,40 @@ export class AuthDashboardViewModel {
 		try {
 			await this.#session.switchTenant(tenantID);
 			this.#overrideSelectedTenant = null;
+			await this.loadRoles();
 		} catch (error) {
 			this.#onError(this.#messages.message(error));
 		}
 	}
 
 	async inviteMember() {
+		if (!this.invitationRoleId) return;
 		this.#onError('');
 		try {
-			this.createdInvitation = await this.#client.createInvitation(this.invitationEmail, this.invitationRole);
+			this.createdInvitation = await this.#client.createInvitation(this.invitationEmail, this.invitationRoleId);
 			this.invitationEmail = '';
 		} catch (error) {
+			this.#onError(this.#messages.message(error));
+		}
+	}
+
+	async loadRoles() {
+		const activeTenantId = this.#session.current?.activeTenant?.id;
+		const canManageInvitations =
+			this.#session.hasPermission('user.manage', activeTenantId) &&
+			this.#session.hasPermission('role.read', activeTenantId);
+		if (!activeTenantId || !canManageInvitations) {
+			this.roles = [];
+			this.invitationRoleId = '';
+			return;
+		}
+		try {
+			this.roles = await this.#client.roles();
+			const defaultRole = this.roles.find((role) => role.kind === 'user') ?? this.roles[0];
+			this.invitationRoleId = defaultRole?.id ?? '';
+		} catch (error) {
+			this.roles = [];
+			this.invitationRoleId = '';
 			this.#onError(this.#messages.message(error));
 		}
 	}
@@ -70,7 +99,8 @@ export class AuthDashboardViewModel {
 	clear() {
 		this.#overrideSelectedTenant = null;
 		this.invitationEmail = '';
-		this.invitationRole = 'ROLE_USER';
+		this.invitationRoleId = '';
+		this.roles = [];
 		this.createdInvitation = null;
 	}
 }

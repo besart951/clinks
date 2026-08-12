@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./errors": "./src/errors.ts"
   },
   "dependencies": {
     "@bufbuild/protobuf": "^2.13.0",

@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-(globalThis as any).$state ??= (v: any) => v;
+const state = (value: any) => value;
+state.raw = state;
+(globalThis as any).$state ??= state;
 (globalThis as any).$derived ??= (v: any) => (typeof v === 'function' ? v() : v);
 
 import { AuthPortalViewModel } from '../src/auth-portal-view-model.svelte.ts';
@@ -9,14 +11,23 @@ import { AuthPortalViewModel } from '../src/auth-portal-view-model.svelte.ts';
 describe('AuthPortalViewModel', () => {
 	it('handles login and hydrates session across sub-models', async () => {
 		const session = {
-			user: { id: 'u1', email: 'user@clinks.test', locale: 'de-CH', isSuperAdmin: false },
-			activeTenant: { id: 't1', name: 'Tenant One' },
+			user: { id: 'u1', email: 'user@clinks.test', locale: 'de-CH', globalRole: 'user' as const },
+			activeTenant: { id: 't1', name: 'Tenant One', revision: 1n },
 			memberships: [
 				{
 					id: 'm1',
-					tenant: { id: 't1', name: 'Tenant One' },
-					role: 'ROLE_TENANT_ADMIN' as const,
-					status: 'ACTIVE' as const,
+					userId: 'u1',
+					userEmail: 'user@clinks.test',
+					tenant: { id: 't1', name: 'Tenant One', revision: 1n },
+					role: {
+						id: 'role-admin',
+						name: 'Administrator',
+						kind: 'administrator' as const,
+						permissions: ['user.manage' as const, 'role.read' as const],
+						revision: 1n,
+					},
+					status: 'active' as const,
+					revision: 1n,
 				},
 			],
 		};
@@ -26,7 +37,7 @@ describe('AuthPortalViewModel', () => {
 			get current() {
 				return storedSession as any;
 			},
-			async hydrate() {
+			async initialize() {
 				storedSession = null;
 			},
 			async login() {
@@ -40,6 +51,9 @@ describe('AuthPortalViewModel', () => {
 			},
 			async switchTenant() {
 				storedSession = session;
+			},
+			hasPermission(permission: string) {
+				return session.memberships[0].role.permissions.includes(permission as any);
 			},
 			async logout() {
 				storedSession = null;
@@ -59,11 +73,30 @@ describe('AuthPortalViewModel', () => {
 		};
 
 		const mockClient = {
+			roles: async () => [
+				{
+					id: 'role-user',
+					tenantId: 't1',
+					name: 'User',
+					kind: 'user' as const,
+					permissions: ['project.read' as const],
+					revision: 1n,
+					createdAt: '',
+					updatedAt: '',
+				},
+			],
 			createInvitation: async () => ({
 				id: 'inv-1',
 				tenantId: 't1',
 				email: 'invited@test.com',
-				role: 'ROLE_USER' as const,
+				role: {
+					id: 'role-user',
+					name: 'User',
+					kind: 'user' as const,
+					permissions: ['project.read' as const],
+					revision: 1n,
+				},
+				status: 'pending' as const,
 				expiresAt: '2026-12-31T00:00:00Z',
 				acceptanceUrl: 'http://localhost/accept',
 				deliveryStatus: 'sent' as const,
@@ -88,7 +121,7 @@ describe('AuthPortalViewModel', () => {
 
 		assert.notEqual(storedSession, null);
 		assert.equal(model.sessionEmail, 'user@clinks.test');
-		assert.equal(model.canInviteMembers, true);
 		assert.equal(model.authDashboard.selectedTenant, 't1');
+		assert.equal(model.authDashboard.invitationRoleId, 'role-user');
 	});
 });

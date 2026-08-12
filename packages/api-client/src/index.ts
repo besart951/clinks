@@ -1,4 +1,4 @@
-import { ConnectError, createClient as createConnectClient } from '@connectrpc/connect';
+import { Code, ConnectError, createClient as createConnectClient } from '@connectrpc/connect';
 import { createConnectTransport } from '@connectrpc/connect-web';
 import {
 	productDefaultLocale,
@@ -7,39 +7,91 @@ import {
 	type LocalizedError,
 	type TranslationResponse,
 } from '@clinks/i18n-types';
-
-export type { Language, Locale, LocalizedError, TranslationResponse };
-export { productDefaultLocale };
-
 import type {
 	AuditEvent as AuditEventMessage,
 	Invitation as InvitationMessage,
+	Membership as MembershipMessage,
+	Role as RoleMessage,
 	Session as SessionMessage,
-	UserSummary as UserSummaryMessage,
-	UserDetail as UserDetailMessage,
 	SystemStats as SystemStatsMessage,
+	UserDetail as UserDetailMessage,
+	UserSummary as UserSummaryMessage,
 } from './gen/clinks/v1/clinks_pb.ts';
-import { ClinksService } from './gen/clinks/v1/clinks_pb.ts';
+import { APIError } from './errors.ts';
+import {
+	ClinksService,
+	GlobalRole as ProtoGlobalRole,
+	InvitationStatus as ProtoInvitationStatus,
+	MembershipStatus as ProtoMembershipStatus,
+	RoleKind as ProtoRoleKind,
+} from './gen/clinks/v1/clinks_pb.ts';
+
+export type { Language, Locale, LocalizedError, TranslationResponse };
+export { productDefaultLocale };
+export { APIError, isUnauthenticatedError } from './errors.ts';
 
 export type ApplicationScope = 'admin' | 'planer_link' | 'infra_link';
+export type GlobalRole = 'user' | 'super_administrator';
+export type RoleKind = 'administrator' | 'user' | 'custom';
+export type MembershipStatus = 'active' | 'inactive';
+export type InvitationStatus = 'pending' | 'used' | 'expired' | 'revoked';
+
+export const permissions = [
+	'tenant.read',
+	'tenant.manage',
+	'user.read',
+	'user.manage',
+	'project.read',
+	'project.create',
+	'project.edit',
+	'project.delete',
+	'role.read',
+	'role.manage',
+] as const;
+
+export type Permission = (typeof permissions)[number];
+
+const permissionSet = new Set<string>(permissions);
+
+export function isPermission(value: string): value is Permission {
+	return permissionSet.has(value);
+}
 
 export interface User {
 	id: string;
 	email: string;
 	locale: Locale;
-	isSuperAdmin: boolean;
+	globalRole: GlobalRole;
 }
 
 export interface Tenant {
 	id: string;
 	name: string;
+	revision: bigint;
+}
+
+export interface RoleSummary {
+	id: string;
+	name: string;
+	kind: RoleKind;
+	permissions: Permission[];
+	revision: bigint;
+}
+
+export interface Role extends RoleSummary {
+	tenantId: string;
+	createdAt: string;
+	updatedAt: string;
 }
 
 export interface Membership {
 	id: string;
+	userId: string;
+	userEmail: string;
 	tenant: Tenant;
-	role: 'ROLE_TENANT_ADMIN' | 'ROLE_USER';
-	status: 'ACTIVE';
+	role: RoleSummary;
+	status: MembershipStatus;
+	revision: bigint;
 }
 
 export interface Session {
@@ -52,9 +104,11 @@ export interface Invitation {
 	id: string;
 	tenantId: string;
 	email: string;
-	role: 'ROLE_TENANT_ADMIN' | 'ROLE_USER';
+	role: RoleSummary;
+	status: InvitationStatus;
 	expiresAt: string;
 	usedAt?: string;
+	revokedAt?: string;
 	acceptanceUrl: string;
 	deliveryStatus: 'sent' | 'failed' | 'not_configured';
 }
@@ -97,7 +151,7 @@ export interface UserSummary {
 	id: string;
 	email: string;
 	locale: Locale;
-	isSuperAdmin: boolean;
+	globalRole: GlobalRole;
 	membershipCount: number;
 }
 
@@ -138,18 +192,6 @@ export interface SystemStats {
 	activeLanguageCount: number;
 }
 
-export class APIError extends Error implements LocalizedError {
-	code: string;
-	locale: Locale;
-
-	constructor(error: LocalizedError) {
-		super(error.message);
-		this.name = 'APIError';
-		this.code = error.code;
-		this.locale = error.locale;
-	}
-}
-
 export interface ClientOptions {
 	baseURL: string;
 	locale: () => Locale;
@@ -157,6 +199,7 @@ export interface ClientOptions {
 }
 
 export function createClient(options: ClientOptions) {
+	let unauthenticatedHandler: (() => void) | undefined;
 	const transport = createConnectTransport({
 		baseUrl: options.baseURL,
 		fetch: (input, init) => {
@@ -166,36 +209,62 @@ export function createClient(options: ClientOptions) {
 		},
 	});
 	const rpc = createConnectClient(ClinksService, transport);
+	const invoke = <T>(action: () => Promise<T>) => call(options, action, () => unauthenticatedHandler?.());
 
 	return {
-		login: (email: string, password: string) => call(options, () => rpc.login({ email, password }).then(session)),
+		setUnauthenticatedHandler(handler?: () => void) {
+			unauthenticatedHandler = handler;
+		},
+		login: (email: string, password: string) => invoke(() => rpc.login({ email, password }).then(session)),
 		adminLogin: (email: string, password: string) =>
-			call(options, () => rpc.loginSuperAdmin({ email, password }).then(session)),
+			invoke(() => rpc.loginSuperAdmin({ email, password }).then(session)),
 		register: (email: string, password: string, tenantName: string) =>
-			call(options, () => rpc.register({ email, password, tenantName }).then(session)),
-		logout: () => call(options, () => rpc.logout({}).then(() => undefined)),
-		getSession: () => call(options, () => rpc.getSession({}).then(session)),
-		switchTenant: (tenantId: string) => call(options, () => rpc.switchTenant({ tenantId }).then(session)),
-		createInvitation: (email: string, role: Invitation['role']) =>
-			call(options, () => rpc.createInvitation({ email, role }).then(invitation)),
+			invoke(() => rpc.register({ email, password, tenantName }).then(session)),
+		logout: () => invoke(() => rpc.logout({}).then(() => undefined)),
+		getSession: () => invoke(() => rpc.getSession({}).then(session)),
+		switchTenant: (tenantId: string) => invoke(() => rpc.switchTenant({ tenantId }).then(session)),
+		createInvitation: (email: string, roleId: string) =>
+			invoke(() => rpc.createInvitation({ email, roleId }).then(invitation)),
 		acceptInvitation: (token: string, email: string, password: string) =>
-			call(options, () => rpc.acceptInvitation({ token, email, password }).then(session)),
-		languages: () => call(options, () => rpc.getLanguages({}).then((response) => response.languages)),
+			invoke(() => rpc.acceptInvitation({ token, email, password }).then(session)),
+		roles: () => invoke(() => rpc.listRoles({ pageSize: 100 }).then((response) => response.roles.map(role))),
+		languages: () => invoke(() => rpc.getLanguages({}).then((response) => response.languages.map(language))),
 		translations: () =>
-			call(options, () => rpc.getTranslations({ applicationScope: options.applicationScope() }).then(translations)),
-		tenants: () => call(options, () => rpc.listTenants({}).then((response) => response.tenants.map(tenant))),
-		createTenant: (name: string) => call(options, () => rpc.createTenant({ name }).then(tenant)),
-		adminLanguages: () => call(options, () => rpc.listManagedLanguages({}).then((response) => response.languages)),
-		saveLanguage: (value: Language) => call(options, () => rpc.saveLanguage(value).then(() => undefined)),
-		saveTranslation: (value: TranslationInput) => call(options, () => rpc.saveTranslation(value).then(() => undefined)),
-		auditEvents: (filter: AuditFilter) => call(options, () => rpc.listAuditEvents(filter).then(auditPage)),
-		listUsers: (filter: UserFilter) => call(options, () => rpc.listUsers(filter).then(userPage)),
-		getUser: (userId: string) => call(options, () => rpc.getUser({ userId }).then(userDetail)),
+			invoke(() => rpc.getTranslations({ applicationScope: options.applicationScope() }).then(translations)),
+		tenants: () => invoke(() => rpc.listTenants({}).then((response) => response.tenants.map(tenant))),
+		createTenant: (name: string) => invoke(() => rpc.createTenant({ name }).then(tenant)),
+		adminLanguages: () =>
+			invoke(() => rpc.listManagedLanguages({}).then((response) => response.languages.map(language))),
+		saveTranslation: (value: TranslationInput) =>
+			invoke(() => rpc.upsertTranslationOverride({ override: { ...value, revision: 0n } }).then(() => undefined)),
+		auditEvents: (filter: AuditFilter) => invoke(() => rpc.listAuditEvents(filter).then(auditPage)),
+		listUsers: (filter: UserFilter) =>
+			invoke(() =>
+				rpc
+					.listUsers({
+						search: filter.search,
+						globalRole: protoGlobalRoleFilter(filter.role),
+						cursor: filter.cursor,
+						pageSize: filter.pageSize,
+					})
+					.then(userPage),
+			),
+		getUser: (userId: string) => invoke(() => rpc.getUser({ userId }).then(userDetail)),
 		listInvitations: (filter: InvitationFilter) =>
-			call(options, () => rpc.listInvitations(filter).then(invitationPage)),
+			invoke(() =>
+				rpc
+					.listInvitations({
+						tenantId: filter.tenantId,
+						status: protoInvitationStatusFilter(filter.status),
+						search: filter.search,
+						cursor: filter.cursor,
+						pageSize: filter.pageSize,
+					})
+					.then(invitationPage),
+			),
 		revokeInvitation: (invitationId: string) =>
-			call(options, () => rpc.revokeInvitation({ invitationId }).then(() => undefined)),
-		systemStats: () => call(options, () => rpc.getSystemStats({}).then(systemStats)),
+			invoke(() => rpc.revokeInvitation({ invitationId }).then(() => undefined)),
+		systemStats: () => invoke(() => rpc.getSystemStats({}).then(systemStats)),
 	};
 }
 
@@ -211,70 +280,102 @@ export type {
 	UserAdminService,
 } from './services.js';
 
-async function call<T>(options: ClientOptions, action: () => Promise<T>): Promise<T> {
+async function call<T>(options: ClientOptions, action: () => Promise<T>, onUnauthenticated: () => void): Promise<T> {
 	try {
 		return await action();
 	} catch (error) {
 		if (error instanceof ConnectError) {
-			throw new APIError({
-				code: error.code.toString(),
-				message: error.rawMessage,
-				locale: error.metadata.get('Clinks-Locale') ?? options.locale(),
-			});
+			if (error.code === Code.Unauthenticated) onUnauthenticated();
+			throw new APIError(
+				{
+					code: error.code.toString(),
+					message: error.rawMessage,
+					locale: error.metadata.get('Clinks-Locale') ?? options.locale(),
+				},
+				error.code,
+			);
 		}
 		throw error;
 	}
 }
 
-function parseRole(role: string): Membership['role'] {
-	return role === 'ROLE_TENANT_ADMIN' ? 'ROLE_TENANT_ADMIN' : 'ROLE_USER';
-}
-
-function parseDeliveryStatus(status: string): Invitation['deliveryStatus'] {
-	if (status === 'sent' || status === 'failed' || status === 'not_configured') {
-		return status;
-	}
-	return 'not_configured';
-}
-
 function session(value: SessionMessage): Session {
+	if (!value.user) throw invalidResponse('session user missing');
 	return {
 		user: {
-			id: value.user?.id ?? '',
-			email: value.user?.email ?? '',
-			locale: value.user?.locale ?? productDefaultLocale,
-			isSuperAdmin: value.user?.isSuperAdmin ?? false,
+			id: value.user.id,
+			email: value.user.email,
+			locale: value.user.locale || productDefaultLocale,
+			globalRole: globalRole(value.user.globalRole),
 		},
 		activeTenant: value.activeTenant ? tenant(value.activeTenant) : undefined,
-		memberships: value.memberships.flatMap((value) =>
-			value.tenant
-				? [
-						{
-							id: value.id,
-							tenant: tenant(value.tenant),
-							role: parseRole(value.role),
-							status: 'ACTIVE',
-						},
-					]
-				: [],
-		),
+		memberships: value.memberships.flatMap((value) => {
+			const parsed = membership(value);
+			return parsed ? [parsed] : [];
+		}),
 	};
 }
 
-function tenant(value: { id: string; name: string }): Tenant {
-	return { id: value.id, name: value.name };
+function tenant(value: { id: string; name: string; revision: bigint }): Tenant {
+	return { id: value.id, name: value.name, revision: value.revision };
+}
+
+function roleSummary(value: {
+	id: string;
+	name: string;
+	kind: ProtoRoleKind;
+	permissions: string[];
+	revision: bigint;
+}): RoleSummary {
+	return {
+		id: value.id,
+		name: value.name,
+		kind: roleKind(value.kind),
+		permissions: value.permissions.filter(isPermission),
+		revision: value.revision,
+	};
+}
+
+function role(value: RoleMessage): Role {
+	return {
+		...roleSummary(value),
+		tenantId: value.tenantId,
+		createdAt: value.createdAt,
+		updatedAt: value.updatedAt,
+	};
+}
+
+function membership(value: MembershipMessage): Membership | undefined {
+	if (!value.tenant || !value.role) return undefined;
+	return {
+		id: value.id,
+		userId: value.userId,
+		userEmail: value.userEmail,
+		tenant: tenant(value.tenant),
+		role: roleSummary(value.role),
+		status: membershipStatus(value.status),
+		revision: value.revision,
+	};
 }
 
 function invitation(value: InvitationMessage): Invitation {
+	if (!value.role) throw invalidResponse('invitation role missing');
 	return {
 		id: value.id,
 		tenantId: value.tenantId,
 		email: value.email,
-		role: parseRole(value.role),
+		role: roleSummary(value.role),
+		status: invitationStatus(value.status),
 		expiresAt: value.expiresAt,
+		usedAt: value.usedAt || undefined,
+		revokedAt: value.revokedAt || undefined,
 		acceptanceUrl: value.acceptanceUrl,
-		deliveryStatus: parseDeliveryStatus(value.deliveryStatus),
+		deliveryStatus: deliveryStatus(value.deliveryStatus),
 	};
+}
+
+function language(value: { code: string; name: string; isDefault: boolean; isActive: boolean }): Language {
+	return { code: value.code, name: value.name, isDefault: value.isDefault, isActive: value.isActive };
 }
 
 function translations(value: { locale: string; translations: { key: string; value: string }[] }): TranslationResponse {
@@ -306,9 +407,9 @@ function userSummary(value: UserSummaryMessage): UserSummary {
 	return {
 		id: value.id,
 		email: value.email,
-		locale: value.locale ?? productDefaultLocale,
-		isSuperAdmin: value.isSuperAdmin ?? false,
-		membershipCount: value.membershipCount ?? 0,
+		locale: value.locale || productDefaultLocale,
+		globalRole: globalRole(value.globalRole),
+		membershipCount: value.membershipCount,
 	};
 }
 
@@ -317,27 +418,13 @@ function userPage(value: { users: UserSummaryMessage[]; nextCursor: string }): U
 }
 
 function userDetail(value: UserDetailMessage): UserDetail {
-	if (!value.user) {
-		throw new APIError({
-			code: 'INVALID_RESPONSE',
-			message: 'Malformed response: user detail missing',
-			locale: productDefaultLocale,
-		});
-	}
+	if (!value.user) throw invalidResponse('user detail missing');
 	return {
 		user: userSummary(value.user),
-		memberships: value.memberships.flatMap((m) =>
-			m.tenant
-				? [
-						{
-							id: m.id,
-							tenant: tenant(m.tenant),
-							role: parseRole(m.role),
-							status: 'ACTIVE',
-						},
-					]
-				: [],
-		),
+		memberships: value.memberships.flatMap((value) => {
+			const parsed = membership(value);
+			return parsed ? [parsed] : [];
+		}),
 	};
 }
 
@@ -347,9 +434,70 @@ function invitationPage(value: { invitations: InvitationMessage[]; nextCursor: s
 
 function systemStats(value: SystemStatsMessage): SystemStats {
 	return {
-		userCount: value.userCount ?? 0,
-		tenantCount: value.tenantCount ?? 0,
-		pendingInvitationCount: value.pendingInvitationCount ?? 0,
-		activeLanguageCount: value.activeLanguageCount ?? 0,
+		userCount: value.userCount,
+		tenantCount: value.tenantCount,
+		pendingInvitationCount: value.pendingInvitationCount,
+		activeLanguageCount: value.activeLanguageCount,
 	};
+}
+
+function globalRole(value: ProtoGlobalRole): GlobalRole {
+	return value === ProtoGlobalRole.SUPER_ADMINISTRATOR ? 'super_administrator' : 'user';
+}
+
+function roleKind(value: ProtoRoleKind): RoleKind {
+	switch (value) {
+		case ProtoRoleKind.ADMINISTRATOR:
+			return 'administrator';
+		case ProtoRoleKind.CUSTOM:
+			return 'custom';
+		default:
+			return 'user';
+	}
+}
+
+function membershipStatus(value: ProtoMembershipStatus): MembershipStatus {
+	return value === ProtoMembershipStatus.ACTIVE ? 'active' : 'inactive';
+}
+
+function invitationStatus(value: ProtoInvitationStatus): InvitationStatus {
+	switch (value) {
+		case ProtoInvitationStatus.USED:
+			return 'used';
+		case ProtoInvitationStatus.EXPIRED:
+			return 'expired';
+		case ProtoInvitationStatus.REVOKED:
+			return 'revoked';
+		default:
+			return 'pending';
+	}
+}
+
+function deliveryStatus(value: string): Invitation['deliveryStatus'] {
+	return value === 'sent' || value === 'failed' ? value : 'not_configured';
+}
+
+function protoGlobalRoleFilter(value?: string): ProtoGlobalRole {
+	if (value === 'super_administrator') return ProtoGlobalRole.SUPER_ADMINISTRATOR;
+	if (value === 'user') return ProtoGlobalRole.USER;
+	return ProtoGlobalRole.UNSPECIFIED;
+}
+
+function protoInvitationStatusFilter(value?: string): ProtoInvitationStatus {
+	switch (value) {
+		case 'pending':
+			return ProtoInvitationStatus.PENDING;
+		case 'used':
+			return ProtoInvitationStatus.USED;
+		case 'expired':
+			return ProtoInvitationStatus.EXPIRED;
+		case 'revoked':
+			return ProtoInvitationStatus.REVOKED;
+		default:
+			return ProtoInvitationStatus.UNSPECIFIED;
+	}
+}
+
+function invalidResponse(detail: string): Error {
+	return new Error(`Malformed response: ${detail}`);
 }

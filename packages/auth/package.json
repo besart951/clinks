@@ -1,0 +1,24 @@
+{
+  "name": "@clinks/auth",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "types": "./src/index.ts",
+  "scripts": {
+    "test": "node --test test/access.test.ts test/auth-store.test.ts test/navigation.test.ts"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "svelte": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "peerDependencies": {
+    "svelte": "^5.56.4"
+  },
+  "dependencies": {
+    "@clinks/api-client": "workspace:*",
+    "@clinks/clinks-runtime": "workspace:*"
+  }
+}

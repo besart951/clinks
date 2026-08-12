@@ -1,6 +1,11 @@
 import type { ErrorMessageFormatter } from './auth-portal-view-model.svelte';
 import { centralErrorHandler } from './error-handler.ts';
-import type { SessionStore } from './session-store.svelte';
+
+export interface AuthAccessSession {
+	login(credentials: { email: string; password: string }): Promise<void>;
+	register(registration: { email: string; password: string; tenantName: string }): Promise<void>;
+	acceptInvitation(acceptance: { token: string; email: string; password: string }): Promise<void>;
+}
 
 export class AuthAccessViewModel {
 	email = $state('');
@@ -10,18 +15,21 @@ export class AuthAccessViewModel {
 	registering = $state(false);
 	busy = $state(false);
 
-	#session: Pick<SessionStore, 'acceptInvitation' | 'login' | 'register' | 'current'>;
+	#session: AuthAccessSession;
 	#messages: ErrorMessageFormatter;
 	#onError: (message: string) => void;
+	#onAuthenticated: () => Promise<void>;
 
 	constructor(
-		session: Pick<SessionStore, 'acceptInvitation' | 'login' | 'register' | 'current'>,
+		session: AuthAccessSession,
 		messages: ErrorMessageFormatter,
 		onError: (message: string) => void,
+		onAuthenticated: () => Promise<void>,
 	) {
 		this.#session = session;
 		this.#messages = messages;
 		this.#onError = onError;
+		this.#onAuthenticated = onAuthenticated;
 	}
 
 	async submit() {
@@ -29,12 +37,17 @@ export class AuthAccessViewModel {
 		this.#onError('');
 		try {
 			if (this.invitationToken) {
-				await this.#session.acceptInvitation(this.invitationToken, this.email, this.password);
+				await this.#session.acceptInvitation({
+					token: this.invitationToken,
+					email: this.email,
+					password: this.password,
+				});
 			} else if (this.registering) {
-				await this.#session.register(this.email, this.password, this.tenantName);
+				await this.#session.register({ email: this.email, password: this.password, tenantName: this.tenantName });
 			} else {
-				await this.#session.login(this.email, this.password);
+				await this.#session.login({ email: this.email, password: this.password });
 			}
+			await this.#onAuthenticated();
 		} catch (error) {
 			const detail = centralErrorHandler.handleError(error, this.#messages.message(error));
 			this.#onError(detail.message);

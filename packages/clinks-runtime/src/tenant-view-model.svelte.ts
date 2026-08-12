@@ -29,7 +29,7 @@ export class TenantViewModel {
 		this.error = '';
 		this.tenantName = '';
 		const snapshot = this.tenants.data;
-		const optimistic: Tenant = { id: 'pending', name };
+		const optimistic: Tenant = { id: 'pending', name, revision: 0n };
 		this.tenants.data = [...(snapshot ?? []), optimistic];
 		try {
 			await this.#service.createTenant(name);

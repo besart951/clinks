@@ -3,7 +3,13 @@ import type { InvitationService } from '@clinks/api-client';
 import { AuthAccessViewModel } from './auth-access-view-model.svelte.ts';
 import { AuthDashboardViewModel } from './auth-dashboard-view-model.svelte.ts';
 import { BrowserClipboard } from './browser-clipboard.ts';
-import type { SessionStore } from './session-store.svelte';
+import type { AuthAccessSession } from './auth-access-view-model.svelte.ts';
+import type { AuthDashboardSession } from './auth-dashboard-view-model.svelte.ts';
+
+export interface AuthPortalSession extends AuthAccessSession, AuthDashboardSession {
+	readonly email: string;
+	initialize(): Promise<void>;
+}
 
 export interface ErrorMessageFormatter {
 	message(error: unknown): string;
@@ -16,14 +22,14 @@ export class AuthPortalViewModel {
 	readonly authAccess: AuthAccessViewModel;
 	readonly authDashboard: AuthDashboardViewModel;
 
-	#client: Pick<InvitationService, 'createInvitation'>;
-	#session: SessionStore;
+	#client: Pick<InvitationService, 'createInvitation' | 'roles'>;
+	#session: AuthPortalSession;
 	#messages: ErrorMessageFormatter;
 
 	constructor(
 		application: ApplicationScope,
-		client: Pick<InvitationService, 'createInvitation'>,
-		session: SessionStore,
+		client: Pick<InvitationService, 'createInvitation' | 'roles'>,
+		session: AuthPortalSession,
 		messages: ErrorMessageFormatter,
 		clipboard: BrowserClipboard,
 	) {
@@ -36,22 +42,17 @@ export class AuthPortalViewModel {
 			this.errorMessage = msg;
 		};
 
-		this.authAccess = new AuthAccessViewModel(session, this.#messages, setError);
 		this.authDashboard = new AuthDashboardViewModel(this.#client, session, this.#messages, clipboard, setError);
+		this.authAccess = new AuthAccessViewModel(session, this.#messages, setError, () => this.authDashboard.loadRoles());
 	}
 
 	async initialize(invitationToken = '') {
 		this.authAccess.invitationToken = invitationToken;
-		await this.#session.hydrate();
+		await this.#session.initialize();
+		if (this.#session.current) await this.authDashboard.loadRoles();
 	}
 
 	get sessionEmail() {
 		return this.#session.email;
-	}
-
-	get canInviteMembers() {
-		return this.#session.memberships.some(
-			(m) => m.tenant.id === this.#session.activeTenant?.id && m.role === 'ROLE_TENANT_ADMIN',
-		);
 	}
 }

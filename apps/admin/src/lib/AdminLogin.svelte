@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { useClinksRuntime } from '@clinks/clinks-runtime';
+	import { useAuth } from '@clinks/auth';
 	import * as Alert from '@clinks/ui-shared/components/ui/alert';
 	import { Badge } from '@clinks/ui-shared/components/ui/badge';
 	import { Button } from '@clinks/ui-shared/components/ui/button';
@@ -8,6 +9,7 @@
 	import { Label } from '@clinks/ui-shared/components/ui/label';
 
 	const runtime = useClinksRuntime();
+	const auth = useAuth();
 	const t = (key: string) => runtime.translations.t(key);
 
 	let email = $state('');
@@ -19,7 +21,8 @@
 		busy = true;
 		errorMessage = '';
 		try {
-			await runtime.session.adminLogin(email, password);
+			await auth.loginSuperAdministrator({ email, password });
+			await auth.continueAfterLogin('/dashboard');
 		} catch (err) {
 			errorMessage = runtime.translations.message(err);
 		} finally {

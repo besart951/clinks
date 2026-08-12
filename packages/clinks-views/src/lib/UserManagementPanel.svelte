@@ -33,8 +33,8 @@
 					label: t('ui.role'),
 					value: model.list.filters.role,
 					options: [
-						{ value: 'ROLE_USER', label: t('ui.role_user') },
-						{ value: 'ROLE_SUPER_ADMIN', label: t('ui.super_administrator') },
+						{ value: 'user', label: t('ui.role_user') },
+						{ value: 'super_administrator', label: t('ui.super_administrator') },
 					],
 				},
 			]}
@@ -51,12 +51,14 @@
 					></Table.Header
 				>
 				<Table.Body>
-					{#each model.list.items as user}
+					{#each model.list.items as user (user.id)}
 						<Table.Row class="cursor-pointer hover:bg-muted" onclick={() => model.openDetail(user.id)}>
 							<Table.Cell>{user.email}</Table.Cell>
 							<Table.Cell>{user.locale}</Table.Cell>
 							<Table.Cell>
-								<Badge variant="outline">{user.isSuperAdmin ? t('ui.super_administrator') : t('ui.role_user')}</Badge>
+								<Badge variant="outline"
+									>{user.globalRole === 'super_administrator' ? t('ui.super_administrator') : t('ui.role_user')}</Badge
+								>
 							</Table.Cell>
 							<Table.Cell>{user.membershipCount}</Table.Cell>
 						</Table.Row>
@@ -87,10 +89,10 @@
 						></Table.Header
 					>
 					<Table.Body>
-						{#each model.detail.data.memberships as m}
+						{#each model.detail.data.memberships as m (m.id)}
 							<Table.Row
 								><Table.Cell>{m.tenant.name}</Table.Cell><Table.Cell
-									><Badge variant="outline">{m.role}</Badge></Table.Cell
+									><Badge variant="outline">{m.role.name}</Badge></Table.Cell
 								></Table.Row
 							>
 						{/each}

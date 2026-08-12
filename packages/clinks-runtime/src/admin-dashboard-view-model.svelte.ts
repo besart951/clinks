@@ -1,4 +1,4 @@
-import type { ClinksClient } from '@clinks/api-client';
+import type { ClinksClient, Session } from '@clinks/api-client';
 import type { ErrorMessageFormatter } from './auth-portal-view-model.svelte.ts';
 import { InvitationViewModel } from './invitation-view-model.svelte.ts';
 import { LocalizationViewModel } from './localization-view-model.svelte.ts';
@@ -6,7 +6,10 @@ import { SystemStatsViewModel } from './system-stats-view-model.svelte.ts';
 import { TenantViewModel } from './tenant-view-model.svelte.ts';
 import { UserManagementViewModel } from './user-management-view-model.svelte.ts';
 import { AuditLogViewModel } from './audit-log-view-model.svelte.ts';
-import type { SessionStore } from './session-store.svelte.ts';
+
+interface AdminSessionReader {
+	readonly current: Session | null;
+}
 
 export class AdminDashboardViewModel {
 	errorMessage = $state('');
@@ -18,11 +21,11 @@ export class AdminDashboardViewModel {
 	readonly invitationModel: InvitationViewModel;
 	readonly statsModel: SystemStatsViewModel;
 
-	#session: Pick<SessionStore, 'current'>;
+	#session: AdminSessionReader;
 
 	constructor(
 		client: ClinksClient,
-		session: Pick<SessionStore, 'current'>,
+		session: AdminSessionReader,
 		messages: ErrorMessageFormatter,
 		refreshTranslations: () => Promise<void>,
 		locale: () => string,
@@ -62,7 +65,7 @@ export class AdminDashboardViewModel {
 	}
 
 	get isSuperAdministrator() {
-		return this.#session.current?.user.isSuperAdmin ?? false;
+		return this.#session.current?.user.globalRole === 'super_administrator';
 	}
 
 	get sessionEmail() {

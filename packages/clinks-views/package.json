@@ -24,6 +24,7 @@
     "svelte": "^5.56.4"
   },
   "dependencies": {
+    "@clinks/auth": "workspace:*",
     "@clinks/clinks-runtime": "workspace:*",
     "@clinks/ui-shared": "workspace:*",
     "@lucide/svelte": "^1.27.0"

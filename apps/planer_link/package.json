@@ -9,6 +9,7 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
   },
   "dependencies": {
+    "@clinks/auth": "workspace:*",
     "@clinks/clinks-runtime": "workspace:*",
     "@clinks/clinks-views": "workspace:*",
     "@clinks/ui-shared": "workspace:*"

@@ -3,7 +3,6 @@
 	import { createClient, type ApplicationScope } from '@clinks/api-client';
 	import { BrowserPreferences } from './browser-preferences';
 	import { setClinksRuntime } from './context.svelte';
-	import { SessionStore } from './session-store.svelte';
 	import { ThemeViewModel } from './theme-view-model.svelte';
 	import { TranslationBundleViewModel } from './translation-bundle-view-model.svelte';
 
@@ -24,9 +23,7 @@
 	});
 	translations = new TranslationBundleViewModel(client, preferences);
 	const theme = new ThemeViewModel(preferences);
-	const session = new SessionStore(client);
-
-	setClinksRuntime({ client, theme, translations, session });
+	setClinksRuntime({ client, theme, translations });
 
 	onMount(() => {
 		theme.initialize();

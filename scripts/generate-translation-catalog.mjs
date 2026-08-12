@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const catalogPath = join(root, "localization/product-catalog.json");
 const typeOutputPath = join(root, "packages/i18n-types/src/product-translation-key.generated.ts");
-const goOutputPath = join(root, "server/internal/adapters/localization/product_catalog.generated.go");
+const goOutputPath = join(root, "server/localization/product_catalog.generated.go");
 const validScopes = new Map([
 	["shared", "ScopeShared"],
 	["admin", "ScopeAdmin"],
@@ -92,10 +92,10 @@ function renderTypeScript(defaultLocale, entries) {
 }
 
 function renderGo(defaultLocale, entries) {
-	return `// Code generated from localization/product-catalog.json. DO NOT EDIT.\n\npackage localization\n\nimport "github.com/besartmorina/clinks/server/internal/core/domain"\n\nconst productDefaultLocale domain.Locale = ${goString(defaultLocale)}\n\nvar productTranslationEntries = []domain.Translation{\n${entries
+	return `// Code generated from localization/product-catalog.json. DO NOT EDIT.\n\npackage localization\n\nimport clinks "github.com/besartmorina/clinks/server"\n\nconst productDefaultLocale clinks.Locale = ${goString(defaultLocale)}\n\nvar productTranslationEntries = []clinks.Translation{\n${entries
 		.map(
 			(entry) =>
-				`\t{Locale: ${goString(entry.locale)}, ApplicationScope: domain.${validScopes.get(entry.scope)}, Key: ${goString(entry.key)}, Value: ${goString(entry.value)}},`
+				`\t{Locale: ${goString(entry.locale)}, ApplicationScope: clinks.${validScopes.get(entry.scope)}, Key: ${goString(entry.key)}, Value: ${goString(entry.value)}},`
 		)
 		.join("\n")}\n}\n`;
 }

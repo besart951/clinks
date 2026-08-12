@@ -28,7 +28,12 @@ describe('AdminDashboardViewModel', () => {
 		};
 		const mockSession = {
 			current: {
-				user: { id: 'usr-admin', email: 'admin@clinks.test', locale: 'de-CH', isSuperAdmin: true },
+				user: {
+					id: 'usr-admin',
+					email: 'admin@clinks.test',
+					locale: 'de-CH',
+					globalRole: 'super_administrator' as const,
+				},
 				memberships: [],
 			},
 		};
@@ -69,7 +74,12 @@ describe('AdminDashboardViewModel', () => {
 		};
 		const mockSession = {
 			current: {
-				user: { id: 'usr-admin', email: 'admin@clinks.test', locale: 'de-CH', isSuperAdmin: true },
+				user: {
+					id: 'usr-admin',
+					email: 'admin@clinks.test',
+					locale: 'de-CH',
+					globalRole: 'super_administrator' as const,
+				},
 				memberships: [],
 			},
 		};

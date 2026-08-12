@@ -52,12 +52,12 @@
 					></Table.Header
 				>
 				<Table.Body>
-					{#each model.list.items as inv}
+					{#each model.list.items as inv (inv.id)}
 						{@const pending = !inv.usedAt && new Date(inv.expiresAt) > new Date()}
 						<Table.Row>
 							<Table.Cell>{inv.email}</Table.Cell>
 							<Table.Cell>{inv.tenantId}</Table.Cell>
-							<Table.Cell><Badge variant="outline">{inv.role}</Badge></Table.Cell>
+							<Table.Cell><Badge variant="outline">{inv.role.name}</Badge></Table.Cell>
 							<Table.Cell>
 								{#if pending}
 									<Button type="button" variant="destructive" size="sm" onclick={() => model.revoke(inv.id)}

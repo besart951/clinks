@@ -7,6 +7,7 @@ import type {
 	InvitationPage,
 	Language,
 	Locale,
+	Role,
 	Session,
 	SystemStats,
 	Tenant,
@@ -30,7 +31,8 @@ export interface UserAdminService {
 
 /** Invitation lifecycle — creation (tenant portal), listing + revocation (admin). */
 export interface InvitationService {
-	createInvitation(email: string, role: Invitation['role']): Promise<Invitation>;
+	createInvitation(email: string, roleId: string): Promise<Invitation>;
+	roles(): Promise<Role[]>;
 	listInvitations(filter: InvitationFilter): Promise<InvitationPage>;
 	revokeInvitation(invitationId: string): Promise<void>;
 }

@@ -20,6 +20,9 @@ importers:
 
   apps/admin:
     dependencies:
+      '@clinks/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
       '@clinks/clinks-runtime':
         specifier: workspace:*
         version: link:../../packages/clinks-runtime
@@ -63,6 +66,9 @@ importers:
 
   apps/infra_link:
     dependencies:
+      '@clinks/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
       '@clinks/clinks-runtime':
         specifier: workspace:*
         version: link:../../packages/clinks-runtime
@@ -103,6 +109,9 @@ importers:
 
   apps/planer_link:
     dependencies:
+      '@clinks/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
       '@clinks/clinks-runtime':
         specifier: workspace:*
         version: link:../../packages/clinks-runtime
@@ -156,6 +165,18 @@ importers:
         specifier: ^2.1.0
         version: 2.1.2(@bufbuild/protobuf@2.13.0)(@connectrpc/connect@2.1.2(@bufbuild/protobuf@2.13.0))
 
+  packages/auth:
+    dependencies:
+      '@clinks/api-client':
+        specifier: workspace:*
+        version: link:../api-client
+      '@clinks/clinks-runtime':
+        specifier: workspace:*
+        version: link:../clinks-runtime
+      svelte:
+        specifier: ^5.56.4
+        version: 5.56.8
+
   packages/clinks-runtime:
     dependencies:
       '@clinks/api-client':
@@ -173,6 +194,9 @@ importers:
 
   packages/clinks-views:
     dependencies:
+      '@clinks/auth':
+        specifier: workspace:*
+        version: link:../auth
       '@clinks/clinks-runtime':
         specifier: workspace:*
         version: link:../clinks-runtime

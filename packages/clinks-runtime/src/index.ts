@@ -13,7 +13,6 @@ export { SystemStatsViewModel } from './system-stats-view-model.svelte';
 export { SearchableViewModel } from './searchable-view-model.svelte';
 export type { FetchPageParams, Page } from './searchable-view-model.svelte';
 export { QueryState } from './query-state.svelte';
-export { SessionStore } from './session-store.svelte';
 export { BrowserClipboard } from './browser-clipboard';
 export { ThemeViewModel } from './theme-view-model.svelte';
 export { TranslationBundleViewModel } from './translation-bundle-view-model.svelte';

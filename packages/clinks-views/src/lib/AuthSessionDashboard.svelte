@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { AuthDashboardViewModel, AuthPortalViewModel } from '@clinks/clinks-runtime';
 	import { useClinksRuntime } from '@clinks/clinks-runtime';
+	import { Show, useAuth } from '@clinks/auth';
 	import { Badge } from '@clinks/ui-shared/components/ui/badge';
 	import { Button } from '@clinks/ui-shared/components/ui/button';
 	import * as Card from '@clinks/ui-shared/components/ui/card';
@@ -19,7 +20,7 @@
 	} = $props();
 	const runtime = useClinksRuntime();
 	const t = (key: string) => runtime.translations.t(key);
-	const session = runtime.session;
+	const session = useAuth();
 </script>
 
 <Card.Root class="p-4 sm:p-8">
@@ -38,14 +39,14 @@
 				>
 					<Select.Trigger>{session.activeTenant?.name ?? t('ui.active_tenant')}</Select.Trigger>
 					<Select.Content>
-						{#each session.memberships as membership}
+						{#each session.memberships as membership (membership.id)}
 							<Select.Item value={membership.tenant.id}>{membership.tenant.name}</Select.Item>
 						{/each}
 					</Select.Content>
 				</Select.Root>
 			</div>
 		{/if}
-		{#if portalModel.canInviteMembers}
+		<Show policy={{ permissions: ['user.manage', 'role.read'] }}>
 			<form
 				class="grid max-w-xl gap-3 sm:grid-cols-[1fr_12rem_auto]"
 				onsubmit={(event) => {
@@ -66,21 +67,22 @@
 				<div class="grid gap-2">
 					<Label for="invite-role">{t('ui.role')}</Label>
 					<Select.Root
-						value={dashboardModel.invitationRole}
-						onValueChange={(role) => (dashboardModel.invitationRole = role as typeof dashboardModel.invitationRole)}
+						value={dashboardModel.invitationRoleId}
+						onValueChange={(roleId) => (dashboardModel.invitationRoleId = roleId)}
 					>
 						<Select.Trigger
-							>{dashboardModel.invitationRole === 'ROLE_USER'
-								? t('ui.role_user')
-								: t('ui.role_tenant_admin')}</Select.Trigger
+							>{dashboardModel.roles.find((role) => role.id === dashboardModel.invitationRoleId)?.name ??
+								t('ui.role')}</Select.Trigger
 						>
 						<Select.Content>
-							<Select.Item value="ROLE_USER">{t('ui.role_user')}</Select.Item>
-							<Select.Item value="ROLE_TENANT_ADMIN">{t('ui.role_tenant_admin')}</Select.Item>
+							{#each dashboardModel.roles as role (role.id)}
+								<Select.Item value={role.id}>{role.name}</Select.Item>
+							{/each}
 						</Select.Content>
 					</Select.Root>
 				</div>
-				<Button type="submit" class="self-end">{t('ui.invite_user')}</Button>
+				<Button type="submit" class="self-end" disabled={!dashboardModel.invitationRoleId}>{t('ui.invite_user')}</Button
+				>
 			</form>
 			{#if dashboardModel.createdInvitation}
 				<div class="flex max-w-xl gap-2">
@@ -90,7 +92,7 @@
 					>
 				</div>
 			{/if}
-		{/if}
+		</Show>
 		{#if portalModel.errorMessage}
 			<p class="text-destructive text-sm" aria-live="polite">{portalModel.errorMessage}</p>
 		{/if}

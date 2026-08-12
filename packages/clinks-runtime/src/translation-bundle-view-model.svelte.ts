@@ -1,4 +1,5 @@
-import { APIError, type ClinksClient } from '@clinks/api-client';
+import type { ClinksClient } from '@clinks/api-client';
+import { APIError } from '@clinks/api-client/errors';
 import { productDefaultLocale, type Language, type Locale, type ProductTranslationKey } from '@clinks/i18n-types';
 import { BrowserPreferences } from './browser-preferences.ts';
 

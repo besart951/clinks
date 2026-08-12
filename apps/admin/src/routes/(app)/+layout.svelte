@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { onMount, type Snippet } from 'svelte';
+	import { RequireAccess, RequireAuth, useAuth } from '@clinks/auth';
 	import { AdminDashboardViewModel, useClinksRuntime } from '@clinks/clinks-runtime';
 	import * as Alert from '@clinks/ui-shared/components/ui/alert';
 	import { Badge } from '@clinks/ui-shared/components/ui/badge';
@@ -12,11 +13,12 @@
 
 	let { children }: { children: Snippet } = $props();
 	const runtime = useClinksRuntime();
+	const auth = useAuth();
 	const t = (key: string) => runtime.translations.t(key);
 
 	const model = new AdminDashboardViewModel(
 		runtime.client,
-		runtime.session,
+		auth,
 		runtime.translations,
 		runtime.translations.refresh,
 		() => runtime.translations.locale,
@@ -32,16 +34,13 @@
 	}
 
 	async function signOut() {
-		await runtime.session.logout();
+		await auth.logout();
 		void goto('/');
 	}
 
 	onMount(async () => {
-		await runtime.session.hydrate();
-		if (!runtime.session.isSuperAdmin) {
-			void goto('/');
-			return;
-		}
+		await auth.initialize();
+		if (!auth.isSuperAdministrator) return;
 		const path = page.url.pathname.replace(/^\//, '') || 'dashboard';
 		activeSection = path;
 		void model.loadSection(path);
@@ -50,23 +49,27 @@
 
 <svelte:head><title>Clinks Admin</title></svelte:head>
 
-<SidebarProvider>
-	<AdminSidebar {activeSection} onNavigate={navigate} />
-	<SidebarInset>
-		<div class="flex items-center gap-4 border-b px-4 py-3">
-			<SidebarTrigger />
-			<Badge variant="secondary">{t('ui.super_administrator')}</Badge>
-			<span class="text-sm font-medium">{model.sessionEmail}</span>
-			<div class="flex-1"></div>
-			<Button type="button" variant="outline" size="sm" onclick={signOut}>{t('ui.sign_out')}</Button>
-		</div>
-		<main class="p-6">
-			{#if model.errorMessage}
-				<Alert.Root class="mb-6" variant="destructive" aria-live="polite">
-					<Alert.Description>{model.errorMessage}</Alert.Description>
-				</Alert.Root>
-			{/if}
-			{@render children()}
-		</main>
-	</SidebarInset>
-</SidebarProvider>
+<RequireAuth redirectTo="/">
+	<RequireAccess policy={{ superAdministrator: true }} redirectTo="/">
+		<SidebarProvider>
+			<AdminSidebar {activeSection} onNavigate={navigate} />
+			<SidebarInset>
+				<div class="flex items-center gap-4 border-b px-4 py-3">
+					<SidebarTrigger />
+					<Badge variant="secondary">{t('ui.super_administrator')}</Badge>
+					<span class="text-sm font-medium">{model.sessionEmail}</span>
+					<div class="flex-1"></div>
+					<Button type="button" variant="outline" size="sm" onclick={signOut}>{t('ui.sign_out')}</Button>
+				</div>
+				<main class="p-6">
+					{#if model.errorMessage}
+						<Alert.Root class="mb-6" variant="destructive" aria-live="polite">
+							<Alert.Description>{model.errorMessage}</Alert.Description>
+						</Alert.Root>
+					{/if}
+					{@render children()}
+				</main>
+			</SidebarInset>
+		</SidebarProvider>
+	</RequireAccess>
+</RequireAuth>

@@ -9,7 +9,7 @@
   },
   "scripts": {
     "check": "pnpm format:frontend:check && pnpm -r check && pnpm check:translations",
-    "test": "pnpm --filter @clinks/clinks-runtime test",
+    "test": "pnpm --filter @clinks/auth test && pnpm --filter @clinks/clinks-runtime test",
     "format:frontend": "prettier --write apps packages .vscode package.json pnpm-workspace.yaml prettier.config.mjs",
     "format:frontend:check": "prettier --check apps packages .vscode package.json pnpm-workspace.yaml prettier.config.mjs",
     "generate:translations": "node scripts/generate-translation-catalog.mjs",
