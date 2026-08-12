@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	stdhttp "net/http"
 	"time"
 
@@ -18,13 +19,14 @@ import (
 const (
 	sessionCookieName       = "clinks_session"
 	defaultReadinessTimeout = 5 * time.Second
-	defaultLocale           = domain.Locale("en-US")
 )
 
 type Server struct {
 	clinksv1connect.UnimplementedClinksServiceHandler
 
 	sessions         sessionService
+	credentials      credentialService
+	oidcSessions     oidcSessionService
 	registration     registrationService
 	invitations      invitationService
 	tenants          tenantAdministration
@@ -36,20 +38,26 @@ type Server struct {
 	users            userAdministration
 	inviteAdmin      invitationAdministration
 	overview         systemOverview
+	tenantManagement tenantManagement
 
 	readinessTimeout time.Duration
 	browserPolicy    browserPolicy
 	cookie           CookieConfig
 	authLimiter      *rateLimiter
 	oidcStateSecret  string
+	logger           *slog.Logger
+	defaultLocale    domain.Locale
 }
 
 type sessionService interface {
-	Login(context.Context, string, string) (domain.Session, error)
-	LoginSuperAdmin(context.Context, string, string) (domain.Session, error)
 	Logout(context.Context, string) error
 	CurrentSession(context.Context, string) (domain.Session, error)
 	SwitchTenant(context.Context, string, domain.TenantID) (domain.Session, error)
+}
+
+type credentialService interface {
+	Login(context.Context, string, string) (domain.Session, error)
+	LoginSuperAdmin(context.Context, string, string) (domain.Session, error)
 }
 
 type registrationService interface {
@@ -57,19 +65,34 @@ type registrationService interface {
 }
 
 type invitationService interface {
-	CreateInvitation(context.Context, string, string, domain.Role) (domain.Invitation, error)
+	CreateInvitation(context.Context, string, string, domain.RoleID) (domain.Invitation, error)
 	AcceptInvitation(context.Context, string, string, string, domain.Locale) (domain.Session, error)
 }
 
 type tenantAdministration interface {
 	CreateTenant(context.Context, string, domain.UserID) (domain.Tenant, error)
-	Tenants(context.Context) ([]domain.Tenant, error)
+	Tenants(context.Context, domain.TenantFilter) (domain.Page[domain.Tenant], error)
+	UpdateTenant(context.Context, domain.Tenant, domain.UserID) (domain.Tenant, error)
+}
+
+type tenantManagement interface {
+	UpdateCurrentTenant(context.Context, domain.Session, string, uint64) (domain.Tenant, error)
+	ListMemberships(context.Context, domain.Session, domain.MembershipFilter) (domain.Page[domain.Membership], error)
+	UpdateMembership(context.Context, domain.Session, domain.Membership) (domain.Membership, error)
+	ListRoles(context.Context, domain.Session, domain.RoleFilter) (domain.Page[domain.Role], error)
+	CreateRole(context.Context, domain.Session, string, []domain.Permission) (domain.Role, error)
+	UpdateRole(context.Context, domain.Session, domain.Role) (domain.Role, error)
+	DeleteRole(context.Context, domain.Session, domain.RoleID, uint64) error
+	ListInvitations(context.Context, domain.Session, domain.InvitationFilter) (domain.Page[domain.Invitation], error)
+	RevokeInvitation(context.Context, domain.Session, domain.InvitationID) error
 }
 
 type localizationAdministration interface {
-	Languages(context.Context) ([]domain.Language, error)
-	SaveLanguage(context.Context, domain.Language, domain.UserID) error
-	SaveTranslationOverride(context.Context, domain.Translation, domain.UserID) error
+	Languages(context.Context, domain.LanguageFilter) (domain.Page[domain.Language], error)
+	SaveLanguage(context.Context, domain.Language, domain.UserID) (domain.Language, error)
+	SaveTranslationOverride(context.Context, domain.Translation, domain.UserID) (domain.Translation, error)
+	TranslationOverrides(context.Context, domain.TranslationFilter) (domain.Page[domain.Translation], error)
+	DeleteTranslationOverride(context.Context, domain.Translation, domain.UserID) error
 }
 
 type auditLog interface {
@@ -83,7 +106,7 @@ type userAdministration interface {
 
 type invitationAdministration interface {
 	ListInvitations(context.Context, domain.InvitationFilter) (domain.Page[domain.Invitation], error)
-	RevokeInvitation(context.Context, domain.InvitationID) error
+	RevokeInvitation(context.Context, domain.InvitationID, domain.UserID) error
 }
 
 type systemOverview interface {
@@ -104,6 +127,7 @@ type ServerConfig struct {
 	CORSOrigins      []string
 	ReadinessTimeout time.Duration
 	Cookie           CookieConfig
+	DefaultLocale    domain.Locale
 }
 
 type CookieConfig struct {
@@ -115,6 +139,8 @@ type CookieConfig struct {
 
 type ServerDeps struct {
 	Sessions         sessionService
+	Credentials      credentialService
+	OIDCSessions     oidcSessionService
 	Registration     registrationService
 	Invitations      invitationService
 	Tenants          tenantAdministration
@@ -126,6 +152,8 @@ type ServerDeps struct {
 	Users            userAdministration
 	InviteAdmin      invitationAdministration
 	Overview         systemOverview
+	TenantManagement tenantManagement
+	Logger           *slog.Logger
 }
 
 func NewServer(deps ServerDeps, config ServerConfig) (*Server, error) {
@@ -144,9 +172,14 @@ func NewServer(deps ServerDeps, config ServerConfig) (*Server, error) {
 	if config.ReadinessTimeout <= 0 {
 		config.ReadinessTimeout = defaultReadinessTimeout
 	}
+	if !config.DefaultLocale.IsValid() {
+		return nil, errors.New("http: default locale is invalid")
+	}
 
 	return &Server{
 		sessions:         deps.Sessions,
+		credentials:      deps.Credentials,
+		oidcSessions:     deps.OIDCSessions,
 		registration:     deps.Registration,
 		invitations:      deps.Invitations,
 		tenants:          deps.Tenants,
@@ -158,6 +191,9 @@ func NewServer(deps ServerDeps, config ServerConfig) (*Server, error) {
 		users:            deps.Users,
 		inviteAdmin:      deps.InviteAdmin,
 		overview:         deps.Overview,
+		tenantManagement: deps.TenantManagement,
+		logger:           deps.Logger,
+		defaultLocale:    config.DefaultLocale,
 		readinessTimeout: config.ReadinessTimeout,
 		browserPolicy:    browserPolicy,
 		cookie:           config.Cookie,
@@ -169,6 +205,10 @@ func validateServerDeps(deps ServerDeps) error {
 	switch {
 	case deps.Sessions == nil:
 		return errors.New("http: sessions dependency is required")
+	case deps.Credentials == nil:
+		return errors.New("http: credentials dependency is required")
+	case deps.OIDCSessions == nil:
+		return errors.New("http: OIDC sessions dependency is required")
 	case deps.Registration == nil:
 		return errors.New("http: registration dependency is required")
 	case deps.Invitations == nil:
@@ -191,6 +231,10 @@ func validateServerDeps(deps ServerDeps) error {
 		return errors.New("http: invitation administration dependency is required")
 	case deps.Overview == nil:
 		return errors.New("http: system overview dependency is required")
+	case deps.TenantManagement == nil:
+		return errors.New("http: tenant management dependency is required")
+	case deps.Logger == nil:
+		return errors.New("http: logger dependency is required")
 	default:
 		return nil
 	}
@@ -207,10 +251,6 @@ func (server *Server) HandlerWithOIDC(client oidcClient, config OIDCConfig) (std
 	if err := validateOIDCConfig(config); err != nil {
 		return nil, err
 	}
-	if _, ok := server.sessions.(oidcSessionService); !ok {
-		return nil, errors.New("http: session service does not support OIDC")
-	}
-
 	// Build an immutable configured handler without mutating the base Server.
 	configured := *server
 	configured.oidcStateSecret = config.StateSecret

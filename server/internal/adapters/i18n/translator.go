@@ -20,11 +20,11 @@ const (
 )
 
 type Translator struct {
-	catalog ports.LocalizationCatalog
+	catalog ports.ErrorCatalog
 }
 
 func NewTranslator(
-	catalog ports.LocalizationCatalog,
+	catalog ports.ErrorCatalog,
 ) (*Translator, error) {
 	if catalog == nil {
 		return nil, errors.New(
@@ -102,8 +102,7 @@ func (translator *Translator) resolveMessage(
 		return message, nil
 	}
 
-	defaultLocale, defaultErr :=
-		translator.catalog.DefaultLocale(ctx)
+	defaultLocale, defaultErr := translator.catalog.DefaultLocale(ctx)
 	if defaultErr != nil {
 		return "", errors.Join(
 			err,

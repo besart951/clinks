@@ -14,11 +14,11 @@ A global authenticated identity. A User may have zero or more active **Membershi
 _Avoid_: account
 
 **Membership**:
-The active relationship between one User and one Tenant. It carries the Tenant Role `ROLE_TENANT_ADMIN` or `ROLE_USER`.
+The relationship between one User and one Tenant. It references an editable Tenant Role and is retained with `inactive` status instead of being deleted.
 _Avoid_: tenant user
 
 **Super Administrator**:
-A global User with `ROLE_SUPER_ADMIN` in the global identity role, no Membership, and access to the platform administration and Audit Log.
+A global User with the `super_administrator` Global Role, no Membership, and access to the platform administration and Audit Log.
 _Avoid_: tenant administrator
 
 **Session**:
@@ -28,6 +28,13 @@ _Avoid_: access token, login token
 **Invitation**:
 A single-use, expiring request for a specific email address to join a Tenant with a Tenant Role.
 _Avoid_: registration link
+
+**Tenant Role**:
+A Tenant-owned named set of Permissions. Every Tenant starts with protected Administrator and User Roles; other Roles are editable.
+_Avoid_: global role, fixed role
+
+**Permission**:
+A stable capability such as `user.manage` or `role.read` granted through a Tenant Role.
 
 **Application Scope**:
 One of `shared`, `admin`, `planer_link`, or `infra_link`. A Translation Bundle resolves `shared` first and lets its application-specific scope override matching keys.
@@ -41,7 +48,7 @@ An append-only, sanitized record of a security-relevant or administrative action
 ## Relationships
 
 - A User may have active Memberships in multiple Tenants.
-- A Tenant has zero or more Memberships.
+- A Tenant has Administrator and User Roles plus zero or more custom Roles.
 - A Session represents one User and, unless that User is a Super Administrator, one active Tenant selected from its Memberships.
 - An Invitation creates or activates exactly one Membership once accepted.
 - A Super Administrator has no Tenant Membership.
@@ -49,7 +56,11 @@ An append-only, sanitized record of a security-relevant or administrative action
 - A Translation Bundle contains shared Translations plus the selected Application Scope.
 - A Translation Bundle starts with the source-controlled German product catalog and applies Translation Overrides for its default and requested Language.
 - Audit Events are never updated or deleted.
-- `users.global_role` is the sole source for global authorization. Legacy `users.tenant_id` and `users.role` are compatibility data only during the transition release.
+- `users.global_role` is the sole source for global authorization. Tenant authorization comes only from Membership → Tenant Role → Permissions.
+- Administrator and User Roles cannot be renamed, deleted, or assigned different Permissions.
+- Administrator Membership mutations are serialized per Tenant; deactivating or demoting the final active Administrator Membership is rejected transactionally even under concurrency.
+- Mutable managed records carry a revision; stale writes are rejected.
+- Managed lists are filtered, sorted, and keyset-paginated in PostgreSQL; cursors are bound to the complete normalized query.
 
 ## Example dialogue
 
@@ -58,4 +69,4 @@ An append-only, sanitized record of a security-relevant or administrative action
 
 ## Flagged ambiguities
 
-- "Admin" is ambiguous: a **Super Administrator** is global; a **Tenant Administrator** is a Membership with `ROLE_TENANT_ADMIN`.
+- "Admin" is ambiguous: a **Super Administrator** is global; a **Tenant Administrator** is an active Membership whose Role kind is `administrator`.

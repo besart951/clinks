@@ -11,7 +11,7 @@ import (
 
 const invitationDeliveryQueued = "queued"
 
-func (service *AuthService) CreateInvitation(
+func (service *authService) CreateInvitation(
 	ctx context.Context,
 	token,
 	rawEmail string,
@@ -27,7 +27,7 @@ func (service *AuthService) CreateInvitation(
 		return domain.Invitation{}, err
 	}
 
-	if session.User.IsSuperAdmin ||
+	if session.User.GlobalRole.IsSuperAdministrator() ||
 		session.ActiveTenant == nil {
 		return domain.Invitation{},
 			domain.NewError(domain.ErrorUnauthorized)
@@ -39,18 +39,19 @@ func (service *AuthService) CreateInvitation(
 		ctx,
 		session.User.ID,
 		tenantID,
-		domain.PermissionTenantManage,
+		domain.PermissionUserManage,
 	); err != nil {
 		return domain.Invitation{}, err
 	}
 
 	// This also verifies that the target role belongs to the
 	// currently active tenant.
-	if _, err := service.roles.FindRole(
+	role, err := service.roles.FindRole(
 		ctx,
 		tenantID,
 		roleID,
-	); err != nil {
+	)
+	if err != nil {
 		return domain.Invitation{}, err
 	}
 
@@ -64,10 +65,12 @@ func (service *AuthService) CreateInvitation(
 		tenantID,
 		email,
 		roleID,
+		session.User.Locale,
 	)
 	if err != nil {
 		return domain.Invitation{}, err
 	}
+	invitation.Role = role
 
 	invitation, err = service.invitations.CreateInvitation(
 		ctx,
@@ -84,7 +87,7 @@ func (service *AuthService) CreateInvitation(
 	return invitation, nil
 }
 
-func (service *AuthService) AcceptInvitation(
+func (service *authService) AcceptInvitation(
 	ctx context.Context,
 	token,
 	rawEmail,
@@ -116,17 +119,18 @@ func (service *AuthService) AcceptInvitation(
 			domain.NewError(domain.ErrorInviteEmailMismatch)
 	}
 
-	user, currentPasswordHash, findErr :=
-		service.identities.FindByEmail(
-			ctx,
-			email,
-		)
+	user, currentPasswordHash, findErr := service.identities.FindByEmail(
+		ctx,
+		email,
+	)
 
-	var newPasswordHash *domain.PasswordHash
+	var passwordHash domain.PasswordHash
+	existingUser := false
 
 	switch {
 	case findErr == nil:
-		if user.IsSuperAdmin {
+		existingUser = true
+		if user.GlobalRole.IsSuperAdministrator() {
 			return domain.Session{},
 				domain.NewError(domain.ErrorUnauthorized)
 		}
@@ -142,17 +146,15 @@ func (service *AuthService) AcceptInvitation(
 		}
 
 	case isInvalidCredentials(findErr):
-		passwordHash, err := service.passwords.Hash(password)
+		passwordHash, err = service.passwords.Hash(password)
 		if err != nil {
 			return domain.Session{},
 				domain.NewError(domain.ErrorInternal)
 		}
 
-		newPasswordHash = new(passwordHash)
-
 		user = domain.User{
 			Email:          email,
-			IsSuperAdmin:   false,
+			GlobalRole:     domain.GlobalRoleUser,
 			Locale:         locale,
 			SessionVersion: 1,
 		}
@@ -161,17 +163,17 @@ func (service *AuthService) AcceptInvitation(
 		return domain.Session{}, findErr
 	}
 
-	acceptance := domain.InvitationAcceptance{
-		Invitation: invitation,
-		User:       user,
-		Password:   newPasswordHash,
+	acceptance := domain.PasswordInvitationAcceptance{
+		Invitation:   invitation,
+		User:         user,
+		PasswordHash: passwordHash,
+		ExistingUser: existingUser,
 	}
 
-	acceptedUser, membership, err :=
-		service.invitations.AcceptInvitation(
-			ctx,
-			acceptance,
-		)
+	acceptedUser, membership, err := service.invitations.AcceptInvitation(
+		ctx,
+		acceptance,
+	)
 	if err != nil {
 		return domain.Session{}, err
 	}
@@ -189,20 +191,10 @@ func (service *AuthService) AcceptInvitation(
 		return domain.Session{}, err
 	}
 
-	if err := service.appendAudit(
-		ctx,
-		acceptedUser.ID,
-		new(membership.Tenant.ID),
-		"invitation.accepted",
-		string(invitation.ID),
-	); err != nil {
-		return domain.Session{}, err
-	}
-
 	return session, nil
 }
 
-func (service *AuthService) findInvitation(
+func (service *authService) findInvitation(
 	ctx context.Context,
 	token string,
 ) (domain.Invitation, error) {
@@ -233,14 +225,14 @@ func (service *AuthService) findInvitation(
 	return invitation, nil
 }
 
-func (service *AuthService) newInvitation(
+func (service *authService) newInvitation(
 	actorID domain.UserID,
 	tenantID domain.TenantID,
 	email domain.Email,
 	roleID domain.RoleID,
+	locale domain.Locale,
 ) (domain.Invitation, string, error) {
-	invitationID, err :=
-		service.invitationIDs.NewInvitationID()
+	invitationID, err := service.invitationIDs.NewInvitationID()
 	if err != nil {
 		return domain.Invitation{},
 			"",
@@ -255,6 +247,7 @@ func (service *AuthService) newInvitation(
 		ExpiresAt:      service.now().UTC().Add(service.inviteTTL),
 		CreatedBy:      actorID,
 		DeliveryStatus: invitationDeliveryQueued,
+		Locale:         locale,
 	}
 
 	rawToken, err := service.tokens.Token(invitation)

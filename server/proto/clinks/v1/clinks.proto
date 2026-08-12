@@ -4,8 +4,6 @@ package clinks.v1;
 
 option go_package = "github.com/besartmorina/clinks/server/proto/clinks/v1;clinksv1";
 
-// ClinksService is the sole browser-facing application API. Health probes are
-// deliberately kept outside this contract as plain HTTP endpoints.
 service ClinksService {
   rpc Login(CredentialsRequest) returns (Session);
   rpc LoginSuperAdmin(CredentialsRequest) returns (Session);
@@ -13,28 +11,73 @@ service ClinksService {
   rpc Logout(Empty) returns (Empty);
   rpc GetSession(Empty) returns (Session);
   rpc SwitchTenant(SwitchTenantRequest) returns (Session);
-
-  rpc CreateInvitation(CreateInvitationRequest) returns (Invitation);
   rpc AcceptInvitation(AcceptInvitationRequest) returns (Session);
 
   rpc GetLanguages(Empty) returns (LanguagesResponse);
   rpc GetTranslations(GetTranslationsRequest) returns (TranslationsResponse);
 
-  rpc ListTenants(Empty) returns (TenantsResponse);
+  rpc ListTenants(ListTenantsRequest) returns (ListTenantsResponse);
   rpc CreateTenant(CreateTenantRequest) returns (Tenant);
-  rpc ListManagedLanguages(Empty) returns (LanguagesResponse);
-  rpc SaveLanguage(Language) returns (Empty);
-  rpc SaveTranslation(ScopedTranslation) returns (Empty);
-  rpc ListAuditEvents(ListAuditEventsRequest) returns (AuditEventsResponse);
-
+  rpc UpdateTenant(UpdateTenantRequest) returns (Tenant);
   rpc ListUsers(ListUsersRequest) returns (ListUsersResponse);
   rpc GetUser(GetUserRequest) returns (UserDetail);
   rpc ListInvitations(ListInvitationsRequest) returns (ListInvitationsResponse);
   rpc RevokeInvitation(RevokeInvitationRequest) returns (Empty);
+  rpc ListManagedLanguages(ListLanguagesRequest) returns (ListLanguagesResponse);
+  rpc CreateLanguage(CreateLanguageRequest) returns (Language);
+  rpc UpdateLanguage(UpdateLanguageRequest) returns (Language);
+  rpc ListTranslationOverrides(ListTranslationOverridesRequest) returns (ListTranslationOverridesResponse);
+  rpc UpsertTranslationOverride(UpsertTranslationOverrideRequest) returns (TranslationOverride);
+  rpc DeleteTranslationOverride(DeleteTranslationOverrideRequest) returns (Empty);
+  rpc ListAuditEvents(ListAuditEventsRequest) returns (ListAuditEventsResponse);
   rpc GetSystemStats(Empty) returns (SystemStats);
+
+  rpc UpdateCurrentTenant(UpdateCurrentTenantRequest) returns (Tenant);
+  rpc ListMemberships(ListMembershipsRequest) returns (ListMembershipsResponse);
+  rpc UpdateMembership(UpdateMembershipRequest) returns (Membership);
+  rpc ListRoles(ListRolesRequest) returns (ListRolesResponse);
+  rpc CreateRole(CreateRoleRequest) returns (Role);
+  rpc UpdateRole(UpdateRoleRequest) returns (Role);
+  rpc DeleteRole(DeleteRoleRequest) returns (Empty);
+  rpc ListTenantInvitations(ListTenantInvitationsRequest) returns (ListInvitationsResponse);
+  rpc CreateInvitation(CreateInvitationRequest) returns (Invitation);
+  rpc RevokeTenantInvitation(RevokeInvitationRequest) returns (Empty);
 }
 
 message Empty {}
+
+enum SortDirection {
+  SORT_DIRECTION_UNSPECIFIED = 0;
+  SORT_DIRECTION_ASCENDING = 1;
+  SORT_DIRECTION_DESCENDING = 2;
+}
+
+enum GlobalRole {
+  GLOBAL_ROLE_UNSPECIFIED = 0;
+  GLOBAL_ROLE_USER = 1;
+  GLOBAL_ROLE_SUPER_ADMINISTRATOR = 2;
+}
+
+enum RoleKind {
+  ROLE_KIND_UNSPECIFIED = 0;
+  ROLE_KIND_ADMINISTRATOR = 1;
+  ROLE_KIND_USER = 2;
+  ROLE_KIND_CUSTOM = 3;
+}
+
+enum MembershipStatus {
+  MEMBERSHIP_STATUS_UNSPECIFIED = 0;
+  MEMBERSHIP_STATUS_ACTIVE = 1;
+  MEMBERSHIP_STATUS_INACTIVE = 2;
+}
+
+enum InvitationStatus {
+  INVITATION_STATUS_UNSPECIFIED = 0;
+  INVITATION_STATUS_PENDING = 1;
+  INVITATION_STATUS_USED = 2;
+  INVITATION_STATUS_EXPIRED = 3;
+  INVITATION_STATUS_REVOKED = 4;
+}
 
 message CredentialsRequest {
   string email = 1;
@@ -45,29 +88,59 @@ message RegisterRequest {
   string email = 1;
   string password = 2;
   string tenant_name = 3;
+  string locale = 4;
 }
 
-message SwitchTenantRequest {
-  string tenant_id = 1;
-}
+message SwitchTenantRequest { string tenant_id = 1; }
 
 message User {
   string id = 1;
   string email = 2;
   string locale = 3;
-  bool is_super_admin = 4;
+  GlobalRole global_role = 4;
+}
+
+message UserSummary {
+  string id = 1;
+  string email = 2;
+  string locale = 3;
+  GlobalRole global_role = 4;
+  uint32 membership_count = 5;
 }
 
 message Tenant {
   string id = 1;
   string name = 2;
+  uint64 revision = 3;
+}
+
+message RoleSummary {
+  string id = 1;
+  string name = 2;
+  RoleKind kind = 3;
+  repeated string permissions = 4;
+  uint64 revision = 5;
+}
+
+message Role {
+  string id = 1;
+  string tenant_id = 2;
+  string name = 3;
+  RoleKind kind = 4;
+  repeated string permissions = 5;
+  uint64 revision = 6;
+  string created_at = 7;
+  string updated_at = 8;
 }
 
 message Membership {
   string id = 1;
-  Tenant tenant = 2;
-  string role = 3;
-  string status = 4;
+  string user_id = 2;
+  string user_email = 3;
+  Tenant tenant = 4;
+  RoleSummary role = 5;
+  MembershipStatus status = 6;
+  uint64 revision = 7;
 }
 
 message Session {
@@ -76,41 +149,14 @@ message Session {
   repeated Membership memberships = 3;
 }
 
-message CreateInvitationRequest {
-  string email = 1;
-  string role = 2;
-}
-
-message Invitation {
-  string id = 1;
-  string tenant_id = 2;
-  string email = 3;
-  string role = 4;
-  string expires_at = 5;
-  string acceptance_url = 6;
-  string delivery_status = 7;
-}
-
 message AcceptInvitationRequest {
   string token = 1;
   string email = 2;
   string password = 3;
+  string locale = 4;
 }
 
-message Language {
-  string code = 1;
-  string name = 2;
-  bool is_default = 3;
-  bool is_active = 4;
-}
-
-message LanguagesResponse {
-  repeated Language languages = 1;
-}
-
-message GetTranslationsRequest {
-  string application_scope = 1;
-}
+message GetTranslationsRequest { string application_scope = 1; }
 
 message ScopedTranslation {
   string locale = 1;
@@ -124,12 +170,197 @@ message TranslationsResponse {
   repeated ScopedTranslation translations = 2;
 }
 
-message TenantsResponse {
-  repeated Tenant tenants = 1;
+enum TenantSort {
+  TENANT_SORT_UNSPECIFIED = 0;
+  TENANT_SORT_NAME = 1;
+  TENANT_SORT_CREATED_AT = 2;
 }
 
-message CreateTenantRequest {
-  string name = 1;
+message ListTenantsRequest {
+  string search = 1;
+  TenantSort sort = 2;
+  SortDirection direction = 3;
+  string cursor = 4;
+  uint32 page_size = 5;
+}
+
+message ListTenantsResponse {
+  repeated Tenant tenants = 1;
+  string next_cursor = 2;
+}
+
+message CreateTenantRequest { string name = 1; }
+
+message UpdateTenantRequest {
+  string tenant_id = 1;
+  string name = 2;
+  uint64 revision = 3;
+}
+
+enum UserSort {
+  USER_SORT_UNSPECIFIED = 0;
+  USER_SORT_EMAIL = 1;
+  USER_SORT_CREATED_AT = 2;
+}
+
+message ListUsersRequest {
+  string search = 1;
+  GlobalRole global_role = 2;
+  UserSort sort = 3;
+  SortDirection direction = 4;
+  string cursor = 5;
+  uint32 page_size = 6;
+}
+
+message ListUsersResponse {
+  repeated UserSummary users = 1;
+  string next_cursor = 2;
+}
+
+message GetUserRequest { string user_id = 1; }
+
+message UserDetail {
+  UserSummary user = 1;
+  repeated Membership memberships = 2;
+}
+
+enum InvitationSort {
+  INVITATION_SORT_UNSPECIFIED = 0;
+  INVITATION_SORT_CREATED_AT = 1;
+  INVITATION_SORT_EMAIL = 2;
+  INVITATION_SORT_EXPIRES_AT = 3;
+}
+
+message ListInvitationsRequest {
+  string tenant_id = 1;
+  InvitationStatus status = 2;
+  string search = 3;
+  InvitationSort sort = 4;
+  SortDirection direction = 5;
+  string cursor = 6;
+  uint32 page_size = 7;
+}
+
+message ListTenantInvitationsRequest {
+  InvitationStatus status = 1;
+  string search = 2;
+  InvitationSort sort = 3;
+  SortDirection direction = 4;
+  string cursor = 5;
+  uint32 page_size = 6;
+}
+
+message Invitation {
+  string id = 1;
+  string tenant_id = 2;
+  string email = 3;
+  RoleSummary role = 4;
+  InvitationStatus status = 5;
+  string expires_at = 6;
+  string used_at = 7;
+  string revoked_at = 8;
+  string acceptance_url = 9;
+  string delivery_status = 10;
+}
+
+message ListInvitationsResponse {
+  repeated Invitation invitations = 1;
+  string next_cursor = 2;
+}
+
+message RevokeInvitationRequest { string invitation_id = 1; }
+
+message CreateInvitationRequest {
+  string email = 1;
+  string role_id = 2;
+}
+
+enum LanguageSort {
+  LANGUAGE_SORT_UNSPECIFIED = 0;
+  LANGUAGE_SORT_NAME = 1;
+  LANGUAGE_SORT_CODE = 2;
+}
+
+message Language {
+  string code = 1;
+  string name = 2;
+  bool is_default = 3;
+  bool is_active = 4;
+  uint64 revision = 5;
+}
+
+message LanguagesResponse { repeated Language languages = 1; }
+
+message ListLanguagesRequest {
+  string search = 1;
+  optional bool active = 2;
+  LanguageSort sort = 3;
+  SortDirection direction = 4;
+  string cursor = 5;
+  uint32 page_size = 6;
+}
+
+message ListLanguagesResponse {
+  repeated Language languages = 1;
+  string next_cursor = 2;
+}
+
+message CreateLanguageRequest {
+  string code = 1;
+  string name = 2;
+  bool is_active = 3;
+}
+
+message UpdateLanguageRequest {
+  string code = 1;
+  string name = 2;
+  bool is_active = 3;
+  uint64 revision = 4;
+}
+
+enum TranslationSort {
+  TRANSLATION_SORT_UNSPECIFIED = 0;
+  TRANSLATION_SORT_KEY = 1;
+  TRANSLATION_SORT_UPDATED_AT = 2;
+}
+
+message TranslationOverride {
+  string locale = 1;
+  string application_scope = 2;
+  string key = 3;
+  string value = 4;
+  uint64 revision = 5;
+}
+
+message ListTranslationOverridesRequest {
+  string search = 1;
+  string locale = 2;
+  string application_scope = 3;
+  TranslationSort sort = 4;
+  SortDirection direction = 5;
+  string cursor = 6;
+  uint32 page_size = 7;
+}
+
+message ListTranslationOverridesResponse {
+  repeated TranslationOverride overrides = 1;
+  string next_cursor = 2;
+}
+
+message UpsertTranslationOverrideRequest {
+  TranslationOverride override = 1;
+}
+
+message DeleteTranslationOverrideRequest {
+  string locale = 1;
+  string application_scope = 2;
+  string key = 3;
+  uint64 revision = 4;
+}
+
+enum AuditSort {
+  AUDIT_SORT_UNSPECIFIED = 0;
+  AUDIT_SORT_OCCURRED_AT = 1;
 }
 
 message ListAuditEventsRequest {
@@ -138,9 +369,11 @@ message ListAuditEventsRequest {
   string actor_id = 3;
   string tenant_id = 4;
   string action = 5;
-  string search = 8;
-  string cursor = 6;
-  uint32 page_size = 7;
+  string search = 6;
+  AuditSort sort = 7;
+  SortDirection direction = 8;
+  string cursor = 9;
+  uint32 page_size = 10;
 }
 
 message AuditEvent {
@@ -155,62 +388,80 @@ message AuditEvent {
   string description = 9;
 }
 
-message AuditEventsResponse {
+message ListAuditEventsResponse {
   repeated AuditEvent events = 1;
   string next_cursor = 2;
 }
 
-// --- User management ---
+message UpdateCurrentTenantRequest {
+  string name = 1;
+  uint64 revision = 2;
+}
 
-message ListUsersRequest {
+enum MembershipSort {
+  MEMBERSHIP_SORT_UNSPECIFIED = 0;
+  MEMBERSHIP_SORT_EMAIL = 1;
+  MEMBERSHIP_SORT_CREATED_AT = 2;
+}
+
+message ListMembershipsRequest {
   string search = 1;
-  string role = 2;
-  string cursor = 3;
-  uint32 page_size = 4;
+  string role_id = 2;
+  MembershipStatus status = 3;
+  MembershipSort sort = 4;
+  SortDirection direction = 5;
+  string cursor = 6;
+  uint32 page_size = 7;
 }
 
-message UserSummary {
-  string id = 1;
-  string email = 2;
-  string locale = 3;
-  bool is_super_admin = 4;
-  uint32 membership_count = 5;
-}
-
-message ListUsersResponse {
-  repeated UserSummary users = 1;
+message ListMembershipsResponse {
+  repeated Membership memberships = 1;
   string next_cursor = 2;
 }
 
-message GetUserRequest {
-  string user_id = 1;
+message UpdateMembershipRequest {
+  string membership_id = 1;
+  string role_id = 2;
+  MembershipStatus status = 3;
+  uint64 revision = 4;
 }
 
-message UserDetail {
-  UserSummary user = 1;
-  repeated Membership memberships = 2;
+enum RoleSort {
+  ROLE_SORT_UNSPECIFIED = 0;
+  ROLE_SORT_NAME = 1;
+  ROLE_SORT_CREATED_AT = 2;
 }
 
-// --- Invitation management ---
-
-message ListInvitationsRequest {
-  string tenant_id = 1;
-  string status = 2;
-  string search = 3;
-  string cursor = 4;
-  uint32 page_size = 5;
+message ListRolesRequest {
+  string search = 1;
+  RoleKind kind = 2;
+  RoleSort sort = 3;
+  SortDirection direction = 4;
+  string cursor = 5;
+  uint32 page_size = 6;
 }
 
-message ListInvitationsResponse {
-  repeated Invitation invitations = 1;
+message ListRolesResponse {
+  repeated Role roles = 1;
   string next_cursor = 2;
 }
 
-message RevokeInvitationRequest {
-  string invitation_id = 1;
+message CreateRoleRequest {
+  string name = 1;
+  repeated string permissions = 2;
 }
 
-// --- System overview ---
+message UpdateRoleRequest {
+  string role_id = 1;
+  string name = 2;
+  repeated string permissions = 3;
+  uint64 revision = 4;
+}
+
+message DeleteRoleRequest {
+  string role_id = 1;
+  uint64 revision = 2;
+}
 
 message SystemStats {
   uint32 user_count = 1;

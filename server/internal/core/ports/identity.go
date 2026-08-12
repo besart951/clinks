@@ -6,12 +6,14 @@ import (
 	"github.com/besartmorina/clinks/server/internal/core/domain"
 )
 
-type IdentityRepository interface {
+type BootstrapRepository interface {
 	EnsureSuperAdmin(
 		ctx context.Context,
 		bootstrap domain.SuperAdminBootstrap,
 	) error
+}
 
+type IdentityReader interface {
 	FindByEmail(
 		ctx context.Context,
 		email domain.Email,
@@ -21,11 +23,22 @@ type IdentityRepository interface {
 		ctx context.Context,
 		id domain.UserID,
 	) (domain.User, error)
+}
+
+type SessionIdentityRepository interface {
+	IdentityReader
 
 	InvalidateSession(
 		ctx context.Context,
 		userID domain.UserID,
 	) error
+
+	RotateTenantSession(
+		ctx context.Context,
+		userID domain.UserID,
+		tenantID domain.TenantID,
+		tenantName string,
+	) (int, error)
 }
 
 type ExternalIdentityRepository interface {
@@ -35,9 +48,10 @@ type ExternalIdentityRepository interface {
 		subject domain.ExternalSubject,
 	) (domain.User, error)
 
-	Link(
+	LinkWithAudit(
 		ctx context.Context,
 		userID domain.UserID,
 		identity domain.ExternalIdentity,
+		tenantID *domain.TenantID,
 	) error
 }

@@ -3,13 +3,10 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { AcceptInvitationRequest, AuditEventsResponse, CreateInvitationRequest, CreateTenantRequest, CredentialsRequest, Empty, GetTranslationsRequest, GetUserRequest, Invitation, Language, LanguagesResponse, ListAuditEventsRequest, ListInvitationsRequest, ListInvitationsResponse, ListUsersRequest, ListUsersResponse, RegisterRequest, RevokeInvitationRequest, ScopedTranslation, Session, SwitchTenantRequest, SystemStats, Tenant, TenantsResponse, TranslationsResponse, UserDetail } from "./clinks_pb.js";
+import { AcceptInvitationRequest, CreateInvitationRequest, CreateLanguageRequest, CreateRoleRequest, CreateTenantRequest, CredentialsRequest, DeleteRoleRequest, DeleteTranslationOverrideRequest, Empty, GetTranslationsRequest, GetUserRequest, Invitation, Language, LanguagesResponse, ListAuditEventsRequest, ListAuditEventsResponse, ListInvitationsRequest, ListInvitationsResponse, ListLanguagesRequest, ListLanguagesResponse, ListMembershipsRequest, ListMembershipsResponse, ListRolesRequest, ListRolesResponse, ListTenantInvitationsRequest, ListTenantsRequest, ListTenantsResponse, ListTranslationOverridesRequest, ListTranslationOverridesResponse, ListUsersRequest, ListUsersResponse, Membership, RegisterRequest, RevokeInvitationRequest, Role, Session, SwitchTenantRequest, SystemStats, Tenant, TranslationOverride, TranslationsResponse, UpdateCurrentTenantRequest, UpdateLanguageRequest, UpdateMembershipRequest, UpdateRoleRequest, UpdateTenantRequest, UpsertTranslationOverrideRequest, UserDetail } from "./clinks_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
- * ClinksService is the sole browser-facing application API. Health probes are
- * deliberately kept outside this contract as plain HTTP endpoints.
- *
  * @generated from service clinks.v1.ClinksService
  */
 export const ClinksService = {
@@ -70,15 +67,6 @@ export const ClinksService = {
       kind: MethodKind.Unary,
     },
     /**
-     * @generated from rpc clinks.v1.ClinksService.CreateInvitation
-     */
-    createInvitation: {
-      name: "CreateInvitation",
-      I: CreateInvitationRequest,
-      O: Invitation,
-      kind: MethodKind.Unary,
-    },
-    /**
      * @generated from rpc clinks.v1.ClinksService.AcceptInvitation
      */
     acceptInvitation: {
@@ -110,8 +98,8 @@ export const ClinksService = {
      */
     listTenants: {
       name: "ListTenants",
-      I: Empty,
-      O: TenantsResponse,
+      I: ListTenantsRequest,
+      O: ListTenantsResponse,
       kind: MethodKind.Unary,
     },
     /**
@@ -124,39 +112,12 @@ export const ClinksService = {
       kind: MethodKind.Unary,
     },
     /**
-     * @generated from rpc clinks.v1.ClinksService.ListManagedLanguages
+     * @generated from rpc clinks.v1.ClinksService.UpdateTenant
      */
-    listManagedLanguages: {
-      name: "ListManagedLanguages",
-      I: Empty,
-      O: LanguagesResponse,
-      kind: MethodKind.Unary,
-    },
-    /**
-     * @generated from rpc clinks.v1.ClinksService.SaveLanguage
-     */
-    saveLanguage: {
-      name: "SaveLanguage",
-      I: Language,
-      O: Empty,
-      kind: MethodKind.Unary,
-    },
-    /**
-     * @generated from rpc clinks.v1.ClinksService.SaveTranslation
-     */
-    saveTranslation: {
-      name: "SaveTranslation",
-      I: ScopedTranslation,
-      O: Empty,
-      kind: MethodKind.Unary,
-    },
-    /**
-     * @generated from rpc clinks.v1.ClinksService.ListAuditEvents
-     */
-    listAuditEvents: {
-      name: "ListAuditEvents",
-      I: ListAuditEventsRequest,
-      O: AuditEventsResponse,
+    updateTenant: {
+      name: "UpdateTenant",
+      I: UpdateTenantRequest,
+      O: Tenant,
       kind: MethodKind.Unary,
     },
     /**
@@ -196,12 +157,165 @@ export const ClinksService = {
       kind: MethodKind.Unary,
     },
     /**
+     * @generated from rpc clinks.v1.ClinksService.ListManagedLanguages
+     */
+    listManagedLanguages: {
+      name: "ListManagedLanguages",
+      I: ListLanguagesRequest,
+      O: ListLanguagesResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc clinks.v1.ClinksService.CreateLanguage
+     */
+    createLanguage: {
+      name: "CreateLanguage",
+      I: CreateLanguageRequest,
+      O: Language,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc clinks.v1.ClinksService.UpdateLanguage
+     */
+    updateLanguage: {
+      name: "UpdateLanguage",
+      I: UpdateLanguageRequest,
+      O: Language,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc clinks.v1.ClinksService.ListTranslationOverrides
+     */
+    listTranslationOverrides: {
+      name: "ListTranslationOverrides",
+      I: ListTranslationOverridesRequest,
+      O: ListTranslationOverridesResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc clinks.v1.ClinksService.UpsertTranslationOverride
+     */
+    upsertTranslationOverride: {
+      name: "UpsertTranslationOverride",
+      I: UpsertTranslationOverrideRequest,
+      O: TranslationOverride,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc clinks.v1.ClinksService.DeleteTranslationOverride
+     */
+    deleteTranslationOverride: {
+      name: "DeleteTranslationOverride",
+      I: DeleteTranslationOverrideRequest,
+      O: Empty,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc clinks.v1.ClinksService.ListAuditEvents
+     */
+    listAuditEvents: {
+      name: "ListAuditEvents",
+      I: ListAuditEventsRequest,
+      O: ListAuditEventsResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
      * @generated from rpc clinks.v1.ClinksService.GetSystemStats
      */
     getSystemStats: {
       name: "GetSystemStats",
       I: Empty,
       O: SystemStats,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc clinks.v1.ClinksService.UpdateCurrentTenant
+     */
+    updateCurrentTenant: {
+      name: "UpdateCurrentTenant",
+      I: UpdateCurrentTenantRequest,
+      O: Tenant,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc clinks.v1.ClinksService.ListMemberships
+     */
+    listMemberships: {
+      name: "ListMemberships",
+      I: ListMembershipsRequest,
+      O: ListMembershipsResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc clinks.v1.ClinksService.UpdateMembership
+     */
+    updateMembership: {
+      name: "UpdateMembership",
+      I: UpdateMembershipRequest,
+      O: Membership,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc clinks.v1.ClinksService.ListRoles
+     */
+    listRoles: {
+      name: "ListRoles",
+      I: ListRolesRequest,
+      O: ListRolesResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc clinks.v1.ClinksService.CreateRole
+     */
+    createRole: {
+      name: "CreateRole",
+      I: CreateRoleRequest,
+      O: Role,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc clinks.v1.ClinksService.UpdateRole
+     */
+    updateRole: {
+      name: "UpdateRole",
+      I: UpdateRoleRequest,
+      O: Role,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc clinks.v1.ClinksService.DeleteRole
+     */
+    deleteRole: {
+      name: "DeleteRole",
+      I: DeleteRoleRequest,
+      O: Empty,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc clinks.v1.ClinksService.ListTenantInvitations
+     */
+    listTenantInvitations: {
+      name: "ListTenantInvitations",
+      I: ListTenantInvitationsRequest,
+      O: ListInvitationsResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc clinks.v1.ClinksService.CreateInvitation
+     */
+    createInvitation: {
+      name: "CreateInvitation",
+      I: CreateInvitationRequest,
+      O: Invitation,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc clinks.v1.ClinksService.RevokeTenantInvitation
+     */
+    revokeTenantInvitation: {
+      name: "RevokeTenantInvitation",
+      I: RevokeInvitationRequest,
+      O: Empty,
       kind: MethodKind.Unary,
     },
   }

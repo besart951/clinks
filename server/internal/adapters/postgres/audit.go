@@ -2,33 +2,19 @@ package postgres
 
 import (
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/besartmorina/clinks/server/internal/core/domain"
 )
 
 const defaultAuditDays = 30
 
-type AuditRepository struct {
-	pool *pgxpool.Pool
-}
-
-func NewAuditRepository(
-	pool *pgxpool.Pool,
-) *AuditRepository {
-	return &AuditRepository{
-		pool: pool,
-	}
-}
-
-func (repository *AuditRepository) Append(
+func (repository *Store) Append(
 	ctx context.Context,
 	event domain.AuditEvent,
 ) error {
@@ -45,7 +31,7 @@ func (repository *AuditRepository) Append(
 	)
 }
 
-func (repository *AuditRepository) List(
+func (repository *Store) ListAuditEvents(
 	ctx context.Context,
 	filter domain.AuditFilter,
 ) (domain.AuditPage, error) {
@@ -91,12 +77,9 @@ func (repository *AuditRepository) List(
 	}
 
 	if len(page.Events) > filter.PageSize {
-		page.Events =
-			page.Events[:filter.PageSize]
+		page.Events = page.Events[:filter.PageSize]
 
-		page.NextCursor = auditCursor(
-			page.Events[len(page.Events)-1],
-		)
+		page.NextCursor = auditCursor(filter, page.Events[len(page.Events)-1])
 	}
 
 	return page, nil
@@ -169,11 +152,14 @@ func insertAuditEvent(
 func normalizeAuditFilter(
 	filter *domain.AuditFilter,
 ) {
-	filter.PageSize =
-		domain.EffectiveLimit(filter.PageSize)
+	filter.PageSize = domain.EffectiveLimit(filter.PageSize)
+	if !filter.Direction.IsValid() {
+		filter.Direction = domain.SortDescending
+	}
 
 	if filter.To.IsZero() {
-		filter.To = time.Now().UTC()
+		now := time.Now().UTC()
+		filter.To = time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, time.UTC)
 	}
 
 	if filter.From.IsZero() {
@@ -188,6 +174,7 @@ func normalizeAuditFilter(
 func auditQuery(
 	filter domain.AuditFilter,
 ) (string, pgx.StrictNamedArgs, error) {
+	fingerprint := auditFilterFingerprint(filter)
 	query := `
 		SELECT
 			event.id,
@@ -254,9 +241,9 @@ func auditQuery(
 		arguments["search"] = search
 	}
 
+	operator, order := keysetDirection(filter.Direction)
 	if filter.Cursor != "" {
-		occurredAt, id, err :=
-			parseAuditCursor(filter.Cursor)
+		cursor, err := decodeUUIDKeysetCursor(filter.Cursor, "audit", fingerprint)
 		if err != nil {
 			return "",
 				nil,
@@ -264,28 +251,18 @@ func auditQuery(
 					domain.ErrorValidation,
 				)
 		}
+		occurredAt, err := time.Parse(time.RFC3339Nano, cursor.SortValue)
+		if err != nil {
+			return "", nil, domain.NewError(domain.ErrorValidation)
+		}
 
-		query += `
-			AND (
-				event.occurred_at,
-				event.id
-			) < (
-				@cursor_occurred_at,
-				@cursor_id
-			)
-		`
+		query += fmt.Sprintf(" AND (event.occurred_at, event.id) %s (@cursor_occurred_at, @cursor_id)", operator)
 
-		arguments["cursor_occurred_at"] =
-			occurredAt
-		arguments["cursor_id"] = id
+		arguments["cursor_occurred_at"] = occurredAt
+		arguments["cursor_id"] = cursor.ID
 	}
 
-	query += `
-		ORDER BY
-			event.occurred_at DESC,
-			event.id DESC
-		LIMIT @limit
-	`
+	query += fmt.Sprintf(" ORDER BY event.occurred_at %s, event.id %s LIMIT @limit", order, order)
 
 	return query, arguments, nil
 }
@@ -327,57 +304,25 @@ func scanAuditEvent(
 	return event, nil
 }
 
-func auditCursor(
-	event domain.AuditEvent,
-) domain.Cursor {
-	value :=
-		event.OccurredAt.UTC().
-			Format(time.RFC3339Nano) +
-			"|" +
-			string(event.ID)
-
-	return domain.Cursor(
-		base64.RawURLEncoding.EncodeToString(
-			[]byte(value),
-		),
+func auditCursor(filter domain.AuditFilter, event domain.AuditEvent) domain.Cursor {
+	return encodeKeysetCursor(
+		"audit",
+		auditFilterFingerprint(filter),
+		event.OccurredAt.UTC().Format(time.RFC3339Nano),
+		string(event.ID),
 	)
 }
 
-func parseAuditCursor(
-	cursor domain.Cursor,
-) (time.Time, domain.AuditEventID, error) {
-	decoded, err :=
-		base64.RawURLEncoding.DecodeString(
-			string(cursor),
-		)
-	if err != nil {
-		return time.Time{}, "", err
-	}
-
-	occurredAtValue, idValue, found :=
-		strings.Cut(
-			string(decoded),
-			"|",
-		)
-	if !found ||
-		occurredAtValue == "" ||
-		idValue == "" {
-		return time.Time{},
-			"",
-			fmt.Errorf("invalid audit cursor")
-	}
-
-	occurredAt, err := time.Parse(
-		time.RFC3339Nano,
-		occurredAtValue,
+func auditFilterFingerprint(filter domain.AuditFilter) string {
+	return keysetFingerprint(
+		filter.From.UTC().Format(time.RFC3339Nano),
+		filter.To.UTC().Format(time.RFC3339Nano),
+		optionalString(filter.ActorID),
+		optionalString(filter.TenantID),
+		filter.Action,
+		strings.ToLower(strings.TrimSpace(filter.Search)),
+		filter.Direction,
 	)
-	if err != nil {
-		return time.Time{}, "", err
-	}
-
-	return occurredAt,
-		domain.AuditEventID(idValue),
-		nil
 }
 
 func nullableTime(

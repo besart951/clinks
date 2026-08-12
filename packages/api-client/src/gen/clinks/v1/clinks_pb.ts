@@ -2,15 +2,15 @@
 // @generated from file clinks/v1/clinks.proto (package clinks.v1, syntax proto3)
 /* eslint-disable */
 
-import type { GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
-import { fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
+import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
+import { enumDesc, fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file clinks/v1/clinks.proto.
  */
 export const file_clinks_v1_clinks: GenFile = /*@__PURE__*/
-  fileDesc("ChZjbGlua3MvdjEvY2xpbmtzLnByb3RvEgljbGlua3MudjEiBwoFRW1wdHkiNQoSQ3JlZGVudGlhbHNSZXF1ZXN0Eg0KBWVtYWlsGAEgASgJEhAKCHBhc3N3b3JkGAIgASgJIkcKD1JlZ2lzdGVyUmVxdWVzdBINCgVlbWFpbBgBIAEoCRIQCghwYXNzd29yZBgCIAEoCRITCgt0ZW5hbnRfbmFtZRgDIAEoCSIoChNTd2l0Y2hUZW5hbnRSZXF1ZXN0EhEKCXRlbmFudF9pZBgBIAEoCSJJCgRVc2VyEgoKAmlkGAEgASgJEg0KBWVtYWlsGAIgASgJEg4KBmxvY2FsZRgDIAEoCRIWCg5pc19zdXBlcl9hZG1pbhgEIAEoCCIiCgZUZW5hbnQSCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCSJZCgpNZW1iZXJzaGlwEgoKAmlkGAEgASgJEiEKBnRlbmFudBgCIAEoCzIRLmNsaW5rcy52MS5UZW5hbnQSDAoEcm9sZRgDIAEoCRIOCgZzdGF0dXMYBCABKAkifgoHU2Vzc2lvbhIdCgR1c2VyGAEgASgLMg8uY2xpbmtzLnYxLlVzZXISKAoNYWN0aXZlX3RlbmFudBgCIAEoCzIRLmNsaW5rcy52MS5UZW5hbnQSKgoLbWVtYmVyc2hpcHMYAyADKAsyFS5jbGlua3MudjEuTWVtYmVyc2hpcCI2ChdDcmVhdGVJbnZpdGF0aW9uUmVxdWVzdBINCgVlbWFpbBgBIAEoCRIMCgRyb2xlGAIgASgJIo0BCgpJbnZpdGF0aW9uEgoKAmlkGAEgASgJEhEKCXRlbmFudF9pZBgCIAEoCRINCgVlbWFpbBgDIAEoCRIMCgRyb2xlGAQgASgJEhIKCmV4cGlyZXNfYXQYBSABKAkSFgoOYWNjZXB0YW5jZV91cmwYBiABKAkSFwoPZGVsaXZlcnlfc3RhdHVzGAcgASgJIkkKF0FjY2VwdEludml0YXRpb25SZXF1ZXN0Eg0KBXRva2VuGAEgASgJEg0KBWVtYWlsGAIgASgJEhAKCHBhc3N3b3JkGAMgASgJIk0KCExhbmd1YWdlEgwKBGNvZGUYASABKAkSDAoEbmFtZRgCIAEoCRISCgppc19kZWZhdWx0GAMgASgIEhEKCWlzX2FjdGl2ZRgEIAEoCCI7ChFMYW5ndWFnZXNSZXNwb25zZRImCglsYW5ndWFnZXMYASADKAsyEy5jbGlua3MudjEuTGFuZ3VhZ2UiMwoWR2V0VHJhbnNsYXRpb25zUmVxdWVzdBIZChFhcHBsaWNhdGlvbl9zY29wZRgBIAEoCSJaChFTY29wZWRUcmFuc2xhdGlvbhIOCgZsb2NhbGUYASABKAkSGQoRYXBwbGljYXRpb25fc2NvcGUYAiABKAkSCwoDa2V5GAMgASgJEg0KBXZhbHVlGAQgASgJIloKFFRyYW5zbGF0aW9uc1Jlc3BvbnNlEg4KBmxvY2FsZRgBIAEoCRIyCgx0cmFuc2xhdGlvbnMYAiADKAsyHC5jbGlua3MudjEuU2NvcGVkVHJhbnNsYXRpb24iNQoPVGVuYW50c1Jlc3BvbnNlEiIKB3RlbmFudHMYASADKAsyES5jbGlua3MudjEuVGVuYW50IiMKE0NyZWF0ZVRlbmFudFJlcXVlc3QSDAoEbmFtZRgBIAEoCSKaAQoWTGlzdEF1ZGl0RXZlbnRzUmVxdWVzdBIMCgRmcm9tGAEgASgJEgoKAnRvGAIgASgJEhAKCGFjdG9yX2lkGAMgASgJEhEKCXRlbmFudF9pZBgEIAEoCRIOCgZhY3Rpb24YBSABKAkSDgoGc2VhcmNoGAggASgJEg4KBmN1cnNvchgGIAEoCRIRCglwYWdlX3NpemUYByABKA0isQEKCkF1ZGl0RXZlbnQSCgoCaWQYASABKAkSEwoLb2NjdXJyZWRfYXQYAiABKAkSEAoIYWN0b3JfaWQYAyABKAkSEwoLYWN0b3JfZW1haWwYBCABKAkSEQoJdGVuYW50X2lkGAUgASgJEhMKC3RlbmFudF9uYW1lGAYgASgJEg4KBmFjdGlvbhgHIAEoCRIOCgZ0YXJnZXQYCCABKAkSEwoLZGVzY3JpcHRpb24YCSABKAkiUQoTQXVkaXRFdmVudHNSZXNwb25zZRIlCgZldmVudHMYASADKAsyFS5jbGlua3MudjEuQXVkaXRFdmVudBITCgtuZXh0X2N1cnNvchgCIAEoCSJTChBMaXN0VXNlcnNSZXF1ZXN0Eg4KBnNlYXJjaBgBIAEoCRIMCgRyb2xlGAIgASgJEg4KBmN1cnNvchgDIAEoCRIRCglwYWdlX3NpemUYBCABKA0iagoLVXNlclN1bW1hcnkSCgoCaWQYASABKAkSDQoFZW1haWwYAiABKAkSDgoGbG9jYWxlGAMgASgJEhYKDmlzX3N1cGVyX2FkbWluGAQgASgIEhgKEG1lbWJlcnNoaXBfY291bnQYBSABKA0iTwoRTGlzdFVzZXJzUmVzcG9uc2USJQoFdXNlcnMYASADKAsyFi5jbGlua3MudjEuVXNlclN1bW1hcnkSEwoLbmV4dF9jdXJzb3IYAiABKAkiIQoOR2V0VXNlclJlcXVlc3QSDwoHdXNlcl9pZBgBIAEoCSJeCgpVc2VyRGV0YWlsEiQKBHVzZXIYASABKAsyFi5jbGlua3MudjEuVXNlclN1bW1hcnkSKgoLbWVtYmVyc2hpcHMYAiADKAsyFS5jbGlua3MudjEuTWVtYmVyc2hpcCJuChZMaXN0SW52aXRhdGlvbnNSZXF1ZXN0EhEKCXRlbmFudF9pZBgBIAEoCRIOCgZzdGF0dXMYAiABKAkSDgoGc2VhcmNoGAMgASgJEg4KBmN1cnNvchgEIAEoCRIRCglwYWdlX3NpemUYBSABKA0iWgoXTGlzdEludml0YXRpb25zUmVzcG9uc2USKgoLaW52aXRhdGlvbnMYASADKAsyFS5jbGlua3MudjEuSW52aXRhdGlvbhITCgtuZXh0X2N1cnNvchgCIAEoCSIwChdSZXZva2VJbnZpdGF0aW9uUmVxdWVzdBIVCg1pbnZpdGF0aW9uX2lkGAEgASgJIngKC1N5c3RlbVN0YXRzEhIKCnVzZXJfY291bnQYASABKA0SFAoMdGVuYW50X2NvdW50GAIgASgNEiAKGHBlbmRpbmdfaW52aXRhdGlvbl9jb3VudBgDIAEoDRIdChVhY3RpdmVfbGFuZ3VhZ2VfY291bnQYBCABKA0yogsKDUNsaW5rc1NlcnZpY2USOgoFTG9naW4SHS5jbGlua3MudjEuQ3JlZGVudGlhbHNSZXF1ZXN0GhIuY2xpbmtzLnYxLlNlc3Npb24SRAoPTG9naW5TdXBlckFkbWluEh0uY2xpbmtzLnYxLkNyZWRlbnRpYWxzUmVxdWVzdBoSLmNsaW5rcy52MS5TZXNzaW9uEjoKCFJlZ2lzdGVyEhouY2xpbmtzLnYxLlJlZ2lzdGVyUmVxdWVzdBoSLmNsaW5rcy52MS5TZXNzaW9uEiwKBkxvZ291dBIQLmNsaW5rcy52MS5FbXB0eRoQLmNsaW5rcy52MS5FbXB0eRIyCgpHZXRTZXNzaW9uEhAuY2xpbmtzLnYxLkVtcHR5GhIuY2xpbmtzLnYxLlNlc3Npb24SQgoMU3dpdGNoVGVuYW50Eh4uY2xpbmtzLnYxLlN3aXRjaFRlbmFudFJlcXVlc3QaEi5jbGlua3MudjEuU2Vzc2lvbhJNChBDcmVhdGVJbnZpdGF0aW9uEiIuY2xpbmtzLnYxLkNyZWF0ZUludml0YXRpb25SZXF1ZXN0GhUuY2xpbmtzLnYxLkludml0YXRpb24SSgoQQWNjZXB0SW52aXRhdGlvbhIiLmNsaW5rcy52MS5BY2NlcHRJbnZpdGF0aW9uUmVxdWVzdBoSLmNsaW5rcy52MS5TZXNzaW9uEj4KDEdldExhbmd1YWdlcxIQLmNsaW5rcy52MS5FbXB0eRocLmNsaW5rcy52MS5MYW5ndWFnZXNSZXNwb25zZRJVCg9HZXRUcmFuc2xhdGlvbnMSIS5jbGlua3MudjEuR2V0VHJhbnNsYXRpb25zUmVxdWVzdBofLmNsaW5rcy52MS5UcmFuc2xhdGlvbnNSZXNwb25zZRI7CgtMaXN0VGVuYW50cxIQLmNsaW5rcy52MS5FbXB0eRoaLmNsaW5rcy52MS5UZW5hbnRzUmVzcG9uc2USQQoMQ3JlYXRlVGVuYW50Eh4uY2xpbmtzLnYxLkNyZWF0ZVRlbmFudFJlcXVlc3QaES5jbGlua3MudjEuVGVuYW50EkYKFExpc3RNYW5hZ2VkTGFuZ3VhZ2VzEhAuY2xpbmtzLnYxLkVtcHR5GhwuY2xpbmtzLnYxLkxhbmd1YWdlc1Jlc3BvbnNlEjUKDFNhdmVMYW5ndWFnZRITLmNsaW5rcy52MS5MYW5ndWFnZRoQLmNsaW5rcy52MS5FbXB0eRJBCg9TYXZlVHJhbnNsYXRpb24SHC5jbGlua3MudjEuU2NvcGVkVHJhbnNsYXRpb24aEC5jbGlua3MudjEuRW1wdHkSVAoPTGlzdEF1ZGl0RXZlbnRzEiEuY2xpbmtzLnYxLkxpc3RBdWRpdEV2ZW50c1JlcXVlc3QaHi5jbGlua3MudjEuQXVkaXRFdmVudHNSZXNwb25zZRJGCglMaXN0VXNlcnMSGy5jbGlua3MudjEuTGlzdFVzZXJzUmVxdWVzdBocLmNsaW5rcy52MS5MaXN0VXNlcnNSZXNwb25zZRI7CgdHZXRVc2VyEhkuY2xpbmtzLnYxLkdldFVzZXJSZXF1ZXN0GhUuY2xpbmtzLnYxLlVzZXJEZXRhaWwSWAoPTGlzdEludml0YXRpb25zEiEuY2xpbmtzLnYxLkxpc3RJbnZpdGF0aW9uc1JlcXVlc3QaIi5jbGlua3MudjEuTGlzdEludml0YXRpb25zUmVzcG9uc2USSAoQUmV2b2tlSW52aXRhdGlvbhIiLmNsaW5rcy52MS5SZXZva2VJbnZpdGF0aW9uUmVxdWVzdBoQLmNsaW5rcy52MS5FbXB0eRI6Cg5HZXRTeXN0ZW1TdGF0cxIQLmNsaW5rcy52MS5FbXB0eRoWLmNsaW5rcy52MS5TeXN0ZW1TdGF0c0JAWj5naXRodWIuY29tL2Jlc2FydG1vcmluYS9jbGlua3Mvc2VydmVyL3Byb3RvL2NsaW5rcy92MTtjbGlua3N2MWIGcHJvdG8z");
+  fileDesc("ChZjbGlua3MvdjEvY2xpbmtzLnByb3RvEgljbGlua3MudjEiBwoFRW1wdHkiNQoSQ3JlZGVudGlhbHNSZXF1ZXN0Eg0KBWVtYWlsGAEgASgJEhAKCHBhc3N3b3JkGAIgASgJIlcKD1JlZ2lzdGVyUmVxdWVzdBINCgVlbWFpbBgBIAEoCRIQCghwYXNzd29yZBgCIAEoCRITCgt0ZW5hbnRfbmFtZRgDIAEoCRIOCgZsb2NhbGUYBCABKAkiKAoTU3dpdGNoVGVuYW50UmVxdWVzdBIRCgl0ZW5hbnRfaWQYASABKAkiXQoEVXNlchIKCgJpZBgBIAEoCRINCgVlbWFpbBgCIAEoCRIOCgZsb2NhbGUYAyABKAkSKgoLZ2xvYmFsX3JvbGUYBCABKA4yFS5jbGlua3MudjEuR2xvYmFsUm9sZSJ+CgtVc2VyU3VtbWFyeRIKCgJpZBgBIAEoCRINCgVlbWFpbBgCIAEoCRIOCgZsb2NhbGUYAyABKAkSKgoLZ2xvYmFsX3JvbGUYBCABKA4yFS5jbGlua3MudjEuR2xvYmFsUm9sZRIYChBtZW1iZXJzaGlwX2NvdW50GAUgASgNIjQKBlRlbmFudBIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEhAKCHJldmlzaW9uGAMgASgEInEKC1JvbGVTdW1tYXJ5EgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSIQoEa2luZBgDIAEoDjITLmNsaW5rcy52MS5Sb2xlS2luZBITCgtwZXJtaXNzaW9ucxgEIAMoCRIQCghyZXZpc2lvbhgFIAEoBCKlAQoEUm9sZRIKCgJpZBgBIAEoCRIRCgl0ZW5hbnRfaWQYAiABKAkSDAoEbmFtZRgDIAEoCRIhCgRraW5kGAQgASgOMhMuY2xpbmtzLnYxLlJvbGVLaW5kEhMKC3Blcm1pc3Npb25zGAUgAygJEhAKCHJldmlzaW9uGAYgASgEEhIKCmNyZWF0ZWRfYXQYByABKAkSEgoKdXBkYXRlZF9hdBgIIAEoCSLFAQoKTWVtYmVyc2hpcBIKCgJpZBgBIAEoCRIPCgd1c2VyX2lkGAIgASgJEhIKCnVzZXJfZW1haWwYAyABKAkSIQoGdGVuYW50GAQgASgLMhEuY2xpbmtzLnYxLlRlbmFudBIkCgRyb2xlGAUgASgLMhYuY2xpbmtzLnYxLlJvbGVTdW1tYXJ5EisKBnN0YXR1cxgGIAEoDjIbLmNsaW5rcy52MS5NZW1iZXJzaGlwU3RhdHVzEhAKCHJldmlzaW9uGAcgASgEIn4KB1Nlc3Npb24SHQoEdXNlchgBIAEoCzIPLmNsaW5rcy52MS5Vc2VyEigKDWFjdGl2ZV90ZW5hbnQYAiABKAsyES5jbGlua3MudjEuVGVuYW50EioKC21lbWJlcnNoaXBzGAMgAygLMhUuY2xpbmtzLnYxLk1lbWJlcnNoaXAiWQoXQWNjZXB0SW52aXRhdGlvblJlcXVlc3QSDQoFdG9rZW4YASABKAkSDQoFZW1haWwYAiABKAkSEAoIcGFzc3dvcmQYAyABKAkSDgoGbG9jYWxlGAQgASgJIjMKFkdldFRyYW5zbGF0aW9uc1JlcXVlc3QSGQoRYXBwbGljYXRpb25fc2NvcGUYASABKAkiWgoRU2NvcGVkVHJhbnNsYXRpb24SDgoGbG9jYWxlGAEgASgJEhkKEWFwcGxpY2F0aW9uX3Njb3BlGAIgASgJEgsKA2tleRgDIAEoCRINCgV2YWx1ZRgEIAEoCSJaChRUcmFuc2xhdGlvbnNSZXNwb25zZRIOCgZsb2NhbGUYASABKAkSMgoMdHJhbnNsYXRpb25zGAIgAygLMhwuY2xpbmtzLnYxLlNjb3BlZFRyYW5zbGF0aW9uIpkBChJMaXN0VGVuYW50c1JlcXVlc3QSDgoGc2VhcmNoGAEgASgJEiMKBHNvcnQYAiABKA4yFS5jbGlua3MudjEuVGVuYW50U29ydBIrCglkaXJlY3Rpb24YAyABKA4yGC5jbGlua3MudjEuU29ydERpcmVjdGlvbhIOCgZjdXJzb3IYBCABKAkSEQoJcGFnZV9zaXplGAUgASgNIk4KE0xpc3RUZW5hbnRzUmVzcG9uc2USIgoHdGVuYW50cxgBIAMoCzIRLmNsaW5rcy52MS5UZW5hbnQSEwoLbmV4dF9jdXJzb3IYAiABKAkiIwoTQ3JlYXRlVGVuYW50UmVxdWVzdBIMCgRuYW1lGAEgASgJIkgKE1VwZGF0ZVRlbmFudFJlcXVlc3QSEQoJdGVuYW50X2lkGAEgASgJEgwKBG5hbWUYAiABKAkSEAoIcmV2aXNpb24YAyABKAQiwQEKEExpc3RVc2Vyc1JlcXVlc3QSDgoGc2VhcmNoGAEgASgJEioKC2dsb2JhbF9yb2xlGAIgASgOMhUuY2xpbmtzLnYxLkdsb2JhbFJvbGUSIQoEc29ydBgDIAEoDjITLmNsaW5rcy52MS5Vc2VyU29ydBIrCglkaXJlY3Rpb24YBCABKA4yGC5jbGlua3MudjEuU29ydERpcmVjdGlvbhIOCgZjdXJzb3IYBSABKAkSEQoJcGFnZV9zaXplGAYgASgNIk8KEUxpc3RVc2Vyc1Jlc3BvbnNlEiUKBXVzZXJzGAEgAygLMhYuY2xpbmtzLnYxLlVzZXJTdW1tYXJ5EhMKC25leHRfY3Vyc29yGAIgASgJIiEKDkdldFVzZXJSZXF1ZXN0Eg8KB3VzZXJfaWQYASABKAkiXgoKVXNlckRldGFpbBIkCgR1c2VyGAEgASgLMhYuY2xpbmtzLnYxLlVzZXJTdW1tYXJ5EioKC21lbWJlcnNoaXBzGAIgAygLMhUuY2xpbmtzLnYxLk1lbWJlcnNoaXAi4QEKFkxpc3RJbnZpdGF0aW9uc1JlcXVlc3QSEQoJdGVuYW50X2lkGAEgASgJEisKBnN0YXR1cxgCIAEoDjIbLmNsaW5rcy52MS5JbnZpdGF0aW9uU3RhdHVzEg4KBnNlYXJjaBgDIAEoCRInCgRzb3J0GAQgASgOMhkuY2xpbmtzLnYxLkludml0YXRpb25Tb3J0EisKCWRpcmVjdGlvbhgFIAEoDjIYLmNsaW5rcy52MS5Tb3J0RGlyZWN0aW9uEg4KBmN1cnNvchgGIAEoCRIRCglwYWdlX3NpemUYByABKA0i1AEKHExpc3RUZW5hbnRJbnZpdGF0aW9uc1JlcXVlc3QSKwoGc3RhdHVzGAEgASgOMhsuY2xpbmtzLnYxLkludml0YXRpb25TdGF0dXMSDgoGc2VhcmNoGAIgASgJEicKBHNvcnQYAyABKA4yGS5jbGlua3MudjEuSW52aXRhdGlvblNvcnQSKwoJZGlyZWN0aW9uGAQgASgOMhguY2xpbmtzLnYxLlNvcnREaXJlY3Rpb24SDgoGY3Vyc29yGAUgASgJEhEKCXBhZ2Vfc2l6ZRgGIAEoDSL3AQoKSW52aXRhdGlvbhIKCgJpZBgBIAEoCRIRCgl0ZW5hbnRfaWQYAiABKAkSDQoFZW1haWwYAyABKAkSJAoEcm9sZRgEIAEoCzIWLmNsaW5rcy52MS5Sb2xlU3VtbWFyeRIrCgZzdGF0dXMYBSABKA4yGy5jbGlua3MudjEuSW52aXRhdGlvblN0YXR1cxISCgpleHBpcmVzX2F0GAYgASgJEg8KB3VzZWRfYXQYByABKAkSEgoKcmV2b2tlZF9hdBgIIAEoCRIWCg5hY2NlcHRhbmNlX3VybBgJIAEoCRIXCg9kZWxpdmVyeV9zdGF0dXMYCiABKAkiWgoXTGlzdEludml0YXRpb25zUmVzcG9uc2USKgoLaW52aXRhdGlvbnMYASADKAsyFS5jbGlua3MudjEuSW52aXRhdGlvbhITCgtuZXh0X2N1cnNvchgCIAEoCSIwChdSZXZva2VJbnZpdGF0aW9uUmVxdWVzdBIVCg1pbnZpdGF0aW9uX2lkGAEgASgJIjkKF0NyZWF0ZUludml0YXRpb25SZXF1ZXN0Eg0KBWVtYWlsGAEgASgJEg8KB3JvbGVfaWQYAiABKAkiXwoITGFuZ3VhZ2USDAoEY29kZRgBIAEoCRIMCgRuYW1lGAIgASgJEhIKCmlzX2RlZmF1bHQYAyABKAgSEQoJaXNfYWN0aXZlGAQgASgIEhAKCHJldmlzaW9uGAUgASgEIjsKEUxhbmd1YWdlc1Jlc3BvbnNlEiYKCWxhbmd1YWdlcxgBIAMoCzITLmNsaW5rcy52MS5MYW5ndWFnZSK9AQoUTGlzdExhbmd1YWdlc1JlcXVlc3QSDgoGc2VhcmNoGAEgASgJEhMKBmFjdGl2ZRgCIAEoCEgAiAEBEiUKBHNvcnQYAyABKA4yFy5jbGlua3MudjEuTGFuZ3VhZ2VTb3J0EisKCWRpcmVjdGlvbhgEIAEoDjIYLmNsaW5rcy52MS5Tb3J0RGlyZWN0aW9uEg4KBmN1cnNvchgFIAEoCRIRCglwYWdlX3NpemUYBiABKA1CCQoHX2FjdGl2ZSJUChVMaXN0TGFuZ3VhZ2VzUmVzcG9uc2USJgoJbGFuZ3VhZ2VzGAEgAygLMhMuY2xpbmtzLnYxLkxhbmd1YWdlEhMKC25leHRfY3Vyc29yGAIgASgJIkYKFUNyZWF0ZUxhbmd1YWdlUmVxdWVzdBIMCgRjb2RlGAEgASgJEgwKBG5hbWUYAiABKAkSEQoJaXNfYWN0aXZlGAMgASgIIlgKFVVwZGF0ZUxhbmd1YWdlUmVxdWVzdBIMCgRjb2RlGAEgASgJEgwKBG5hbWUYAiABKAkSEQoJaXNfYWN0aXZlGAMgASgIEhAKCHJldmlzaW9uGAQgASgEIm4KE1RyYW5zbGF0aW9uT3ZlcnJpZGUSDgoGbG9jYWxlGAEgASgJEhkKEWFwcGxpY2F0aW9uX3Njb3BlGAIgASgJEgsKA2tleRgDIAEoCRINCgV2YWx1ZRgEIAEoCRIQCghyZXZpc2lvbhgFIAEoBCLWAQofTGlzdFRyYW5zbGF0aW9uT3ZlcnJpZGVzUmVxdWVzdBIOCgZzZWFyY2gYASABKAkSDgoGbG9jYWxlGAIgASgJEhkKEWFwcGxpY2F0aW9uX3Njb3BlGAMgASgJEigKBHNvcnQYBCABKA4yGi5jbGlua3MudjEuVHJhbnNsYXRpb25Tb3J0EisKCWRpcmVjdGlvbhgFIAEoDjIYLmNsaW5rcy52MS5Tb3J0RGlyZWN0aW9uEg4KBmN1cnNvchgGIAEoCRIRCglwYWdlX3NpemUYByABKA0iagogTGlzdFRyYW5zbGF0aW9uT3ZlcnJpZGVzUmVzcG9uc2USMQoJb3ZlcnJpZGVzGAEgAygLMh4uY2xpbmtzLnYxLlRyYW5zbGF0aW9uT3ZlcnJpZGUSEwoLbmV4dF9jdXJzb3IYAiABKAkiVAogVXBzZXJ0VHJhbnNsYXRpb25PdmVycmlkZVJlcXVlc3QSMAoIb3ZlcnJpZGUYASABKAsyHi5jbGlua3MudjEuVHJhbnNsYXRpb25PdmVycmlkZSJsCiBEZWxldGVUcmFuc2xhdGlvbk92ZXJyaWRlUmVxdWVzdBIOCgZsb2NhbGUYASABKAkSGQoRYXBwbGljYXRpb25fc2NvcGUYAiABKAkSCwoDa2V5GAMgASgJEhAKCHJldmlzaW9uGAQgASgEIusBChZMaXN0QXVkaXRFdmVudHNSZXF1ZXN0EgwKBGZyb20YASABKAkSCgoCdG8YAiABKAkSEAoIYWN0b3JfaWQYAyABKAkSEQoJdGVuYW50X2lkGAQgASgJEg4KBmFjdGlvbhgFIAEoCRIOCgZzZWFyY2gYBiABKAkSIgoEc29ydBgHIAEoDjIULmNsaW5rcy52MS5BdWRpdFNvcnQSKwoJZGlyZWN0aW9uGAggASgOMhguY2xpbmtzLnYxLlNvcnREaXJlY3Rpb24SDgoGY3Vyc29yGAkgASgJEhEKCXBhZ2Vfc2l6ZRgKIAEoDSKxAQoKQXVkaXRFdmVudBIKCgJpZBgBIAEoCRITCgtvY2N1cnJlZF9hdBgCIAEoCRIQCghhY3Rvcl9pZBgDIAEoCRITCgthY3Rvcl9lbWFpbBgEIAEoCRIRCgl0ZW5hbnRfaWQYBSABKAkSEwoLdGVuYW50X25hbWUYBiABKAkSDgoGYWN0aW9uGAcgASgJEg4KBnRhcmdldBgIIAEoCRITCgtkZXNjcmlwdGlvbhgJIAEoCSJVChdMaXN0QXVkaXRFdmVudHNSZXNwb25zZRIlCgZldmVudHMYASADKAsyFS5jbGlua3MudjEuQXVkaXRFdmVudBITCgtuZXh0X2N1cnNvchgCIAEoCSI8ChpVcGRhdGVDdXJyZW50VGVuYW50UmVxdWVzdBIMCgRuYW1lGAEgASgJEhAKCHJldmlzaW9uGAIgASgEIt8BChZMaXN0TWVtYmVyc2hpcHNSZXF1ZXN0Eg4KBnNlYXJjaBgBIAEoCRIPCgdyb2xlX2lkGAIgASgJEisKBnN0YXR1cxgDIAEoDjIbLmNsaW5rcy52MS5NZW1iZXJzaGlwU3RhdHVzEicKBHNvcnQYBCABKA4yGS5jbGlua3MudjEuTWVtYmVyc2hpcFNvcnQSKwoJZGlyZWN0aW9uGAUgASgOMhguY2xpbmtzLnYxLlNvcnREaXJlY3Rpb24SDgoGY3Vyc29yGAYgASgJEhEKCXBhZ2Vfc2l6ZRgHIAEoDSJaChdMaXN0TWVtYmVyc2hpcHNSZXNwb25zZRIqCgttZW1iZXJzaGlwcxgBIAMoCzIVLmNsaW5rcy52MS5NZW1iZXJzaGlwEhMKC25leHRfY3Vyc29yGAIgASgJIoABChdVcGRhdGVNZW1iZXJzaGlwUmVxdWVzdBIVCg1tZW1iZXJzaGlwX2lkGAEgASgJEg8KB3JvbGVfaWQYAiABKAkSKwoGc3RhdHVzGAMgASgOMhsuY2xpbmtzLnYxLk1lbWJlcnNoaXBTdGF0dXMSEAoIcmV2aXNpb24YBCABKAQiuAEKEExpc3RSb2xlc1JlcXVlc3QSDgoGc2VhcmNoGAEgASgJEiEKBGtpbmQYAiABKA4yEy5jbGlua3MudjEuUm9sZUtpbmQSIQoEc29ydBgDIAEoDjITLmNsaW5rcy52MS5Sb2xlU29ydBIrCglkaXJlY3Rpb24YBCABKA4yGC5jbGlua3MudjEuU29ydERpcmVjdGlvbhIOCgZjdXJzb3IYBSABKAkSEQoJcGFnZV9zaXplGAYgASgNIkgKEUxpc3RSb2xlc1Jlc3BvbnNlEh4KBXJvbGVzGAEgAygLMg8uY2xpbmtzLnYxLlJvbGUSEwoLbmV4dF9jdXJzb3IYAiABKAkiNgoRQ3JlYXRlUm9sZVJlcXVlc3QSDAoEbmFtZRgBIAEoCRITCgtwZXJtaXNzaW9ucxgCIAMoCSJZChFVcGRhdGVSb2xlUmVxdWVzdBIPCgdyb2xlX2lkGAEgASgJEgwKBG5hbWUYAiABKAkSEwoLcGVybWlzc2lvbnMYAyADKAkSEAoIcmV2aXNpb24YBCABKAQiNgoRRGVsZXRlUm9sZVJlcXVlc3QSDwoHcm9sZV9pZBgBIAEoCRIQCghyZXZpc2lvbhgCIAEoBCJ4CgtTeXN0ZW1TdGF0cxISCgp1c2VyX2NvdW50GAEgASgNEhQKDHRlbmFudF9jb3VudBgCIAEoDRIgChhwZW5kaW5nX2ludml0YXRpb25fY291bnQYAyABKA0SHQoVYWN0aXZlX2xhbmd1YWdlX2NvdW50GAQgASgNKmwKDVNvcnREaXJlY3Rpb24SHgoaU09SVF9ESVJFQ1RJT05fVU5TUEVDSUZJRUQQABIcChhTT1JUX0RJUkVDVElPTl9BU0NFTkRJTkcQARIdChlTT1JUX0RJUkVDVElPTl9ERVNDRU5ESU5HEAIqZAoKR2xvYmFsUm9sZRIbChdHTE9CQUxfUk9MRV9VTlNQRUNJRklFRBAAEhQKEEdMT0JBTF9ST0xFX1VTRVIQARIjCh9HTE9CQUxfUk9MRV9TVVBFUl9BRE1JTklTVFJBVE9SEAIqbAoIUm9sZUtpbmQSGQoVUk9MRV9LSU5EX1VOU1BFQ0lGSUVEEAASGwoXUk9MRV9LSU5EX0FETUlOSVNUUkFUT1IQARISCg5ST0xFX0tJTkRfVVNFUhACEhQKEFJPTEVfS0lORF9DVVNUT00QAypzChBNZW1iZXJzaGlwU3RhdHVzEiEKHU1FTUJFUlNISVBfU1RBVFVTX1VOU1BFQ0lGSUVEEAASHAoYTUVNQkVSU0hJUF9TVEFUVVNfQUNUSVZFEAESHgoaTUVNQkVSU0hJUF9TVEFUVVNfSU5BQ1RJVkUQAiquAQoQSW52aXRhdGlvblN0YXR1cxIhCh1JTlZJVEFUSU9OX1NUQVRVU19VTlNQRUNJRklFRBAAEh0KGUlOVklUQVRJT05fU1RBVFVTX1BFTkRJTkcQARIaChZJTlZJVEFUSU9OX1NUQVRVU19VU0VEEAISHQoZSU5WSVRBVElPTl9TVEFUVVNfRVhQSVJFRBADEh0KGUlOVklUQVRJT05fU1RBVFVTX1JFVk9LRUQQBCpbCgpUZW5hbnRTb3J0EhsKF1RFTkFOVF9TT1JUX1VOU1BFQ0lGSUVEEAASFAoQVEVOQU5UX1NPUlRfTkFNRRABEhoKFlRFTkFOVF9TT1JUX0NSRUFURURfQVQQAipUCghVc2VyU29ydBIZChVVU0VSX1NPUlRfVU5TUEVDSUZJRUQQABITCg9VU0VSX1NPUlRfRU1BSUwQARIYChRVU0VSX1NPUlRfQ1JFQVRFRF9BVBACKowBCg5JbnZpdGF0aW9uU29ydBIfChtJTlZJVEFUSU9OX1NPUlRfVU5TUEVDSUZJRUQQABIeChpJTlZJVEFUSU9OX1NPUlRfQ1JFQVRFRF9BVBABEhkKFUlOVklUQVRJT05fU09SVF9FTUFJTBACEh4KGklOVklUQVRJT05fU09SVF9FWFBJUkVTX0FUEAMqXQoMTGFuZ3VhZ2VTb3J0Eh0KGUxBTkdVQUdFX1NPUlRfVU5TUEVDSUZJRUQQABIWChJMQU5HVUFHRV9TT1JUX05BTUUQARIWChJMQU5HVUFHRV9TT1JUX0NPREUQAipuCg9UcmFuc2xhdGlvblNvcnQSIAocVFJBTlNMQVRJT05fU09SVF9VTlNQRUNJRklFRBAAEhgKFFRSQU5TTEFUSU9OX1NPUlRfS0VZEAESHwobVFJBTlNMQVRJT05fU09SVF9VUERBVEVEX0FUEAIqQwoJQXVkaXRTb3J0EhoKFkFVRElUX1NPUlRfVU5TUEVDSUZJRUQQABIaChZBVURJVF9TT1JUX09DQ1VSUkVEX0FUEAEqbAoOTWVtYmVyc2hpcFNvcnQSHwobTUVNQkVSU0hJUF9TT1JUX1VOU1BFQ0lGSUVEEAASGQoVTUVNQkVSU0hJUF9TT1JUX0VNQUlMEAESHgoaTUVNQkVSU0hJUF9TT1JUX0NSRUFURURfQVQQAipTCghSb2xlU29ydBIZChVST0xFX1NPUlRfVU5TUEVDSUZJRUQQABISCg5ST0xFX1NPUlRfTkFNRRABEhgKFFJPTEVfU09SVF9DUkVBVEVEX0FUEAIykBQKDUNsaW5rc1NlcnZpY2USOgoFTG9naW4SHS5jbGlua3MudjEuQ3JlZGVudGlhbHNSZXF1ZXN0GhIuY2xpbmtzLnYxLlNlc3Npb24SRAoPTG9naW5TdXBlckFkbWluEh0uY2xpbmtzLnYxLkNyZWRlbnRpYWxzUmVxdWVzdBoSLmNsaW5rcy52MS5TZXNzaW9uEjoKCFJlZ2lzdGVyEhouY2xpbmtzLnYxLlJlZ2lzdGVyUmVxdWVzdBoSLmNsaW5rcy52MS5TZXNzaW9uEiwKBkxvZ291dBIQLmNsaW5rcy52MS5FbXB0eRoQLmNsaW5rcy52MS5FbXB0eRIyCgpHZXRTZXNzaW9uEhAuY2xpbmtzLnYxLkVtcHR5GhIuY2xpbmtzLnYxLlNlc3Npb24SQgoMU3dpdGNoVGVuYW50Eh4uY2xpbmtzLnYxLlN3aXRjaFRlbmFudFJlcXVlc3QaEi5jbGlua3MudjEuU2Vzc2lvbhJKChBBY2NlcHRJbnZpdGF0aW9uEiIuY2xpbmtzLnYxLkFjY2VwdEludml0YXRpb25SZXF1ZXN0GhIuY2xpbmtzLnYxLlNlc3Npb24SPgoMR2V0TGFuZ3VhZ2VzEhAuY2xpbmtzLnYxLkVtcHR5GhwuY2xpbmtzLnYxLkxhbmd1YWdlc1Jlc3BvbnNlElUKD0dldFRyYW5zbGF0aW9ucxIhLmNsaW5rcy52MS5HZXRUcmFuc2xhdGlvbnNSZXF1ZXN0Gh8uY2xpbmtzLnYxLlRyYW5zbGF0aW9uc1Jlc3BvbnNlEkwKC0xpc3RUZW5hbnRzEh0uY2xpbmtzLnYxLkxpc3RUZW5hbnRzUmVxdWVzdBoeLmNsaW5rcy52MS5MaXN0VGVuYW50c1Jlc3BvbnNlEkEKDENyZWF0ZVRlbmFudBIeLmNsaW5rcy52MS5DcmVhdGVUZW5hbnRSZXF1ZXN0GhEuY2xpbmtzLnYxLlRlbmFudBJBCgxVcGRhdGVUZW5hbnQSHi5jbGlua3MudjEuVXBkYXRlVGVuYW50UmVxdWVzdBoRLmNsaW5rcy52MS5UZW5hbnQSRgoJTGlzdFVzZXJzEhsuY2xpbmtzLnYxLkxpc3RVc2Vyc1JlcXVlc3QaHC5jbGlua3MudjEuTGlzdFVzZXJzUmVzcG9uc2USOwoHR2V0VXNlchIZLmNsaW5rcy52MS5HZXRVc2VyUmVxdWVzdBoVLmNsaW5rcy52MS5Vc2VyRGV0YWlsElgKD0xpc3RJbnZpdGF0aW9ucxIhLmNsaW5rcy52MS5MaXN0SW52aXRhdGlvbnNSZXF1ZXN0GiIuY2xpbmtzLnYxLkxpc3RJbnZpdGF0aW9uc1Jlc3BvbnNlEkgKEFJldm9rZUludml0YXRpb24SIi5jbGlua3MudjEuUmV2b2tlSW52aXRhdGlvblJlcXVlc3QaEC5jbGlua3MudjEuRW1wdHkSWQoUTGlzdE1hbmFnZWRMYW5ndWFnZXMSHy5jbGlua3MudjEuTGlzdExhbmd1YWdlc1JlcXVlc3QaIC5jbGlua3MudjEuTGlzdExhbmd1YWdlc1Jlc3BvbnNlEkcKDkNyZWF0ZUxhbmd1YWdlEiAuY2xpbmtzLnYxLkNyZWF0ZUxhbmd1YWdlUmVxdWVzdBoTLmNsaW5rcy52MS5MYW5ndWFnZRJHCg5VcGRhdGVMYW5ndWFnZRIgLmNsaW5rcy52MS5VcGRhdGVMYW5ndWFnZVJlcXVlc3QaEy5jbGlua3MudjEuTGFuZ3VhZ2UScwoYTGlzdFRyYW5zbGF0aW9uT3ZlcnJpZGVzEiouY2xpbmtzLnYxLkxpc3RUcmFuc2xhdGlvbk92ZXJyaWRlc1JlcXVlc3QaKy5jbGlua3MudjEuTGlzdFRyYW5zbGF0aW9uT3ZlcnJpZGVzUmVzcG9uc2USaAoZVXBzZXJ0VHJhbnNsYXRpb25PdmVycmlkZRIrLmNsaW5rcy52MS5VcHNlcnRUcmFuc2xhdGlvbk92ZXJyaWRlUmVxdWVzdBoeLmNsaW5rcy52MS5UcmFuc2xhdGlvbk92ZXJyaWRlEloKGURlbGV0ZVRyYW5zbGF0aW9uT3ZlcnJpZGUSKy5jbGlua3MudjEuRGVsZXRlVHJhbnNsYXRpb25PdmVycmlkZVJlcXVlc3QaEC5jbGlua3MudjEuRW1wdHkSWAoPTGlzdEF1ZGl0RXZlbnRzEiEuY2xpbmtzLnYxLkxpc3RBdWRpdEV2ZW50c1JlcXVlc3QaIi5jbGlua3MudjEuTGlzdEF1ZGl0RXZlbnRzUmVzcG9uc2USOgoOR2V0U3lzdGVtU3RhdHMSEC5jbGlua3MudjEuRW1wdHkaFi5jbGlua3MudjEuU3lzdGVtU3RhdHMSTwoTVXBkYXRlQ3VycmVudFRlbmFudBIlLmNsaW5rcy52MS5VcGRhdGVDdXJyZW50VGVuYW50UmVxdWVzdBoRLmNsaW5rcy52MS5UZW5hbnQSWAoPTGlzdE1lbWJlcnNoaXBzEiEuY2xpbmtzLnYxLkxpc3RNZW1iZXJzaGlwc1JlcXVlc3QaIi5jbGlua3MudjEuTGlzdE1lbWJlcnNoaXBzUmVzcG9uc2USTQoQVXBkYXRlTWVtYmVyc2hpcBIiLmNsaW5rcy52MS5VcGRhdGVNZW1iZXJzaGlwUmVxdWVzdBoVLmNsaW5rcy52MS5NZW1iZXJzaGlwEkYKCUxpc3RSb2xlcxIbLmNsaW5rcy52MS5MaXN0Um9sZXNSZXF1ZXN0GhwuY2xpbmtzLnYxLkxpc3RSb2xlc1Jlc3BvbnNlEjsKCkNyZWF0ZVJvbGUSHC5jbGlua3MudjEuQ3JlYXRlUm9sZVJlcXVlc3QaDy5jbGlua3MudjEuUm9sZRI7CgpVcGRhdGVSb2xlEhwuY2xpbmtzLnYxLlVwZGF0ZVJvbGVSZXF1ZXN0Gg8uY2xpbmtzLnYxLlJvbGUSPAoKRGVsZXRlUm9sZRIcLmNsaW5rcy52MS5EZWxldGVSb2xlUmVxdWVzdBoQLmNsaW5rcy52MS5FbXB0eRJkChVMaXN0VGVuYW50SW52aXRhdGlvbnMSJy5jbGlua3MudjEuTGlzdFRlbmFudEludml0YXRpb25zUmVxdWVzdBoiLmNsaW5rcy52MS5MaXN0SW52aXRhdGlvbnNSZXNwb25zZRJNChBDcmVhdGVJbnZpdGF0aW9uEiIuY2xpbmtzLnYxLkNyZWF0ZUludml0YXRpb25SZXF1ZXN0GhUuY2xpbmtzLnYxLkludml0YXRpb24STgoWUmV2b2tlVGVuYW50SW52aXRhdGlvbhIiLmNsaW5rcy52MS5SZXZva2VJbnZpdGF0aW9uUmVxdWVzdBoQLmNsaW5rcy52MS5FbXB0eUJAWj5naXRodWIuY29tL2Jlc2FydG1vcmluYS9jbGlua3Mvc2VydmVyL3Byb3RvL2NsaW5rcy92MTtjbGlua3N2MWIGcHJvdG8z");
 
 /**
  * @generated from message clinks.v1.Empty
@@ -65,6 +65,11 @@ export type RegisterRequest = Message<"clinks.v1.RegisterRequest"> & {
    * @generated from field: string tenant_name = 3;
    */
   tenantName: string;
+
+  /**
+   * @generated from field: string locale = 4;
+   */
+  locale: string;
 };
 
 /**
@@ -111,9 +116,9 @@ export type User = Message<"clinks.v1.User"> & {
   locale: string;
 
   /**
-   * @generated from field: bool is_super_admin = 4;
+   * @generated from field: clinks.v1.GlobalRole global_role = 4;
    */
-  isSuperAdmin: boolean;
+  globalRole: GlobalRole;
 };
 
 /**
@@ -122,6 +127,43 @@ export type User = Message<"clinks.v1.User"> & {
  */
 export const UserSchema: GenMessage<User> = /*@__PURE__*/
   messageDesc(file_clinks_v1_clinks, 4);
+
+/**
+ * @generated from message clinks.v1.UserSummary
+ */
+export type UserSummary = Message<"clinks.v1.UserSummary"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string email = 2;
+   */
+  email: string;
+
+  /**
+   * @generated from field: string locale = 3;
+   */
+  locale: string;
+
+  /**
+   * @generated from field: clinks.v1.GlobalRole global_role = 4;
+   */
+  globalRole: GlobalRole;
+
+  /**
+   * @generated from field: uint32 membership_count = 5;
+   */
+  membershipCount: number;
+};
+
+/**
+ * Describes the message clinks.v1.UserSummary.
+ * Use `create(UserSummarySchema)` to create a new message.
+ */
+export const UserSummarySchema: GenMessage<UserSummary> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 5);
 
 /**
  * @generated from message clinks.v1.Tenant
@@ -136,6 +178,11 @@ export type Tenant = Message<"clinks.v1.Tenant"> & {
    * @generated from field: string name = 2;
    */
   name: string;
+
+  /**
+   * @generated from field: uint64 revision = 3;
+   */
+  revision: bigint;
 };
 
 /**
@@ -143,7 +190,96 @@ export type Tenant = Message<"clinks.v1.Tenant"> & {
  * Use `create(TenantSchema)` to create a new message.
  */
 export const TenantSchema: GenMessage<Tenant> = /*@__PURE__*/
-  messageDesc(file_clinks_v1_clinks, 5);
+  messageDesc(file_clinks_v1_clinks, 6);
+
+/**
+ * @generated from message clinks.v1.RoleSummary
+ */
+export type RoleSummary = Message<"clinks.v1.RoleSummary"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name: string;
+
+  /**
+   * @generated from field: clinks.v1.RoleKind kind = 3;
+   */
+  kind: RoleKind;
+
+  /**
+   * @generated from field: repeated string permissions = 4;
+   */
+  permissions: string[];
+
+  /**
+   * @generated from field: uint64 revision = 5;
+   */
+  revision: bigint;
+};
+
+/**
+ * Describes the message clinks.v1.RoleSummary.
+ * Use `create(RoleSummarySchema)` to create a new message.
+ */
+export const RoleSummarySchema: GenMessage<RoleSummary> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 7);
+
+/**
+ * @generated from message clinks.v1.Role
+ */
+export type Role = Message<"clinks.v1.Role"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string tenant_id = 2;
+   */
+  tenantId: string;
+
+  /**
+   * @generated from field: string name = 3;
+   */
+  name: string;
+
+  /**
+   * @generated from field: clinks.v1.RoleKind kind = 4;
+   */
+  kind: RoleKind;
+
+  /**
+   * @generated from field: repeated string permissions = 5;
+   */
+  permissions: string[];
+
+  /**
+   * @generated from field: uint64 revision = 6;
+   */
+  revision: bigint;
+
+  /**
+   * @generated from field: string created_at = 7;
+   */
+  createdAt: string;
+
+  /**
+   * @generated from field: string updated_at = 8;
+   */
+  updatedAt: string;
+};
+
+/**
+ * Describes the message clinks.v1.Role.
+ * Use `create(RoleSchema)` to create a new message.
+ */
+export const RoleSchema: GenMessage<Role> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 8);
 
 /**
  * @generated from message clinks.v1.Membership
@@ -155,19 +291,34 @@ export type Membership = Message<"clinks.v1.Membership"> & {
   id: string;
 
   /**
-   * @generated from field: clinks.v1.Tenant tenant = 2;
+   * @generated from field: string user_id = 2;
+   */
+  userId: string;
+
+  /**
+   * @generated from field: string user_email = 3;
+   */
+  userEmail: string;
+
+  /**
+   * @generated from field: clinks.v1.Tenant tenant = 4;
    */
   tenant?: Tenant | undefined;
 
   /**
-   * @generated from field: string role = 3;
+   * @generated from field: clinks.v1.RoleSummary role = 5;
    */
-  role: string;
+  role?: RoleSummary | undefined;
 
   /**
-   * @generated from field: string status = 4;
+   * @generated from field: clinks.v1.MembershipStatus status = 6;
    */
-  status: string;
+  status: MembershipStatus;
+
+  /**
+   * @generated from field: uint64 revision = 7;
+   */
+  revision: bigint;
 };
 
 /**
@@ -175,7 +326,7 @@ export type Membership = Message<"clinks.v1.Membership"> & {
  * Use `create(MembershipSchema)` to create a new message.
  */
 export const MembershipSchema: GenMessage<Membership> = /*@__PURE__*/
-  messageDesc(file_clinks_v1_clinks, 6);
+  messageDesc(file_clinks_v1_clinks, 9);
 
 /**
  * @generated from message clinks.v1.Session
@@ -202,76 +353,7 @@ export type Session = Message<"clinks.v1.Session"> & {
  * Use `create(SessionSchema)` to create a new message.
  */
 export const SessionSchema: GenMessage<Session> = /*@__PURE__*/
-  messageDesc(file_clinks_v1_clinks, 7);
-
-/**
- * @generated from message clinks.v1.CreateInvitationRequest
- */
-export type CreateInvitationRequest = Message<"clinks.v1.CreateInvitationRequest"> & {
-  /**
-   * @generated from field: string email = 1;
-   */
-  email: string;
-
-  /**
-   * @generated from field: string role = 2;
-   */
-  role: string;
-};
-
-/**
- * Describes the message clinks.v1.CreateInvitationRequest.
- * Use `create(CreateInvitationRequestSchema)` to create a new message.
- */
-export const CreateInvitationRequestSchema: GenMessage<CreateInvitationRequest> = /*@__PURE__*/
-  messageDesc(file_clinks_v1_clinks, 8);
-
-/**
- * @generated from message clinks.v1.Invitation
- */
-export type Invitation = Message<"clinks.v1.Invitation"> & {
-  /**
-   * @generated from field: string id = 1;
-   */
-  id: string;
-
-  /**
-   * @generated from field: string tenant_id = 2;
-   */
-  tenantId: string;
-
-  /**
-   * @generated from field: string email = 3;
-   */
-  email: string;
-
-  /**
-   * @generated from field: string role = 4;
-   */
-  role: string;
-
-  /**
-   * @generated from field: string expires_at = 5;
-   */
-  expiresAt: string;
-
-  /**
-   * @generated from field: string acceptance_url = 6;
-   */
-  acceptanceUrl: string;
-
-  /**
-   * @generated from field: string delivery_status = 7;
-   */
-  deliveryStatus: string;
-};
-
-/**
- * Describes the message clinks.v1.Invitation.
- * Use `create(InvitationSchema)` to create a new message.
- */
-export const InvitationSchema: GenMessage<Invitation> = /*@__PURE__*/
-  messageDesc(file_clinks_v1_clinks, 9);
+  messageDesc(file_clinks_v1_clinks, 10);
 
 /**
  * @generated from message clinks.v1.AcceptInvitationRequest
@@ -291,6 +373,11 @@ export type AcceptInvitationRequest = Message<"clinks.v1.AcceptInvitationRequest
    * @generated from field: string password = 3;
    */
   password: string;
+
+  /**
+   * @generated from field: string locale = 4;
+   */
+  locale: string;
 };
 
 /**
@@ -298,56 +385,7 @@ export type AcceptInvitationRequest = Message<"clinks.v1.AcceptInvitationRequest
  * Use `create(AcceptInvitationRequestSchema)` to create a new message.
  */
 export const AcceptInvitationRequestSchema: GenMessage<AcceptInvitationRequest> = /*@__PURE__*/
-  messageDesc(file_clinks_v1_clinks, 10);
-
-/**
- * @generated from message clinks.v1.Language
- */
-export type Language = Message<"clinks.v1.Language"> & {
-  /**
-   * @generated from field: string code = 1;
-   */
-  code: string;
-
-  /**
-   * @generated from field: string name = 2;
-   */
-  name: string;
-
-  /**
-   * @generated from field: bool is_default = 3;
-   */
-  isDefault: boolean;
-
-  /**
-   * @generated from field: bool is_active = 4;
-   */
-  isActive: boolean;
-};
-
-/**
- * Describes the message clinks.v1.Language.
- * Use `create(LanguageSchema)` to create a new message.
- */
-export const LanguageSchema: GenMessage<Language> = /*@__PURE__*/
   messageDesc(file_clinks_v1_clinks, 11);
-
-/**
- * @generated from message clinks.v1.LanguagesResponse
- */
-export type LanguagesResponse = Message<"clinks.v1.LanguagesResponse"> & {
-  /**
-   * @generated from field: repeated clinks.v1.Language languages = 1;
-   */
-  languages: Language[];
-};
-
-/**
- * Describes the message clinks.v1.LanguagesResponse.
- * Use `create(LanguagesResponseSchema)` to create a new message.
- */
-export const LanguagesResponseSchema: GenMessage<LanguagesResponse> = /*@__PURE__*/
-  messageDesc(file_clinks_v1_clinks, 12);
 
 /**
  * @generated from message clinks.v1.GetTranslationsRequest
@@ -364,7 +402,7 @@ export type GetTranslationsRequest = Message<"clinks.v1.GetTranslationsRequest">
  * Use `create(GetTranslationsRequestSchema)` to create a new message.
  */
 export const GetTranslationsRequestSchema: GenMessage<GetTranslationsRequest> = /*@__PURE__*/
-  messageDesc(file_clinks_v1_clinks, 13);
+  messageDesc(file_clinks_v1_clinks, 12);
 
 /**
  * @generated from message clinks.v1.ScopedTranslation
@@ -396,7 +434,7 @@ export type ScopedTranslation = Message<"clinks.v1.ScopedTranslation"> & {
  * Use `create(ScopedTranslationSchema)` to create a new message.
  */
 export const ScopedTranslationSchema: GenMessage<ScopedTranslation> = /*@__PURE__*/
-  messageDesc(file_clinks_v1_clinks, 14);
+  messageDesc(file_clinks_v1_clinks, 13);
 
 /**
  * @generated from message clinks.v1.TranslationsResponse
@@ -418,23 +456,65 @@ export type TranslationsResponse = Message<"clinks.v1.TranslationsResponse"> & {
  * Use `create(TranslationsResponseSchema)` to create a new message.
  */
 export const TranslationsResponseSchema: GenMessage<TranslationsResponse> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 14);
+
+/**
+ * @generated from message clinks.v1.ListTenantsRequest
+ */
+export type ListTenantsRequest = Message<"clinks.v1.ListTenantsRequest"> & {
+  /**
+   * @generated from field: string search = 1;
+   */
+  search: string;
+
+  /**
+   * @generated from field: clinks.v1.TenantSort sort = 2;
+   */
+  sort: TenantSort;
+
+  /**
+   * @generated from field: clinks.v1.SortDirection direction = 3;
+   */
+  direction: SortDirection;
+
+  /**
+   * @generated from field: string cursor = 4;
+   */
+  cursor: string;
+
+  /**
+   * @generated from field: uint32 page_size = 5;
+   */
+  pageSize: number;
+};
+
+/**
+ * Describes the message clinks.v1.ListTenantsRequest.
+ * Use `create(ListTenantsRequestSchema)` to create a new message.
+ */
+export const ListTenantsRequestSchema: GenMessage<ListTenantsRequest> = /*@__PURE__*/
   messageDesc(file_clinks_v1_clinks, 15);
 
 /**
- * @generated from message clinks.v1.TenantsResponse
+ * @generated from message clinks.v1.ListTenantsResponse
  */
-export type TenantsResponse = Message<"clinks.v1.TenantsResponse"> & {
+export type ListTenantsResponse = Message<"clinks.v1.ListTenantsResponse"> & {
   /**
    * @generated from field: repeated clinks.v1.Tenant tenants = 1;
    */
   tenants: Tenant[];
+
+  /**
+   * @generated from field: string next_cursor = 2;
+   */
+  nextCursor: string;
 };
 
 /**
- * Describes the message clinks.v1.TenantsResponse.
- * Use `create(TenantsResponseSchema)` to create a new message.
+ * Describes the message clinks.v1.ListTenantsResponse.
+ * Use `create(ListTenantsResponseSchema)` to create a new message.
  */
-export const TenantsResponseSchema: GenMessage<TenantsResponse> = /*@__PURE__*/
+export const ListTenantsResponseSchema: GenMessage<ListTenantsResponse> = /*@__PURE__*/
   messageDesc(file_clinks_v1_clinks, 16);
 
 /**
@@ -453,6 +533,680 @@ export type CreateTenantRequest = Message<"clinks.v1.CreateTenantRequest"> & {
  */
 export const CreateTenantRequestSchema: GenMessage<CreateTenantRequest> = /*@__PURE__*/
   messageDesc(file_clinks_v1_clinks, 17);
+
+/**
+ * @generated from message clinks.v1.UpdateTenantRequest
+ */
+export type UpdateTenantRequest = Message<"clinks.v1.UpdateTenantRequest"> & {
+  /**
+   * @generated from field: string tenant_id = 1;
+   */
+  tenantId: string;
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name: string;
+
+  /**
+   * @generated from field: uint64 revision = 3;
+   */
+  revision: bigint;
+};
+
+/**
+ * Describes the message clinks.v1.UpdateTenantRequest.
+ * Use `create(UpdateTenantRequestSchema)` to create a new message.
+ */
+export const UpdateTenantRequestSchema: GenMessage<UpdateTenantRequest> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 18);
+
+/**
+ * @generated from message clinks.v1.ListUsersRequest
+ */
+export type ListUsersRequest = Message<"clinks.v1.ListUsersRequest"> & {
+  /**
+   * @generated from field: string search = 1;
+   */
+  search: string;
+
+  /**
+   * @generated from field: clinks.v1.GlobalRole global_role = 2;
+   */
+  globalRole: GlobalRole;
+
+  /**
+   * @generated from field: clinks.v1.UserSort sort = 3;
+   */
+  sort: UserSort;
+
+  /**
+   * @generated from field: clinks.v1.SortDirection direction = 4;
+   */
+  direction: SortDirection;
+
+  /**
+   * @generated from field: string cursor = 5;
+   */
+  cursor: string;
+
+  /**
+   * @generated from field: uint32 page_size = 6;
+   */
+  pageSize: number;
+};
+
+/**
+ * Describes the message clinks.v1.ListUsersRequest.
+ * Use `create(ListUsersRequestSchema)` to create a new message.
+ */
+export const ListUsersRequestSchema: GenMessage<ListUsersRequest> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 19);
+
+/**
+ * @generated from message clinks.v1.ListUsersResponse
+ */
+export type ListUsersResponse = Message<"clinks.v1.ListUsersResponse"> & {
+  /**
+   * @generated from field: repeated clinks.v1.UserSummary users = 1;
+   */
+  users: UserSummary[];
+
+  /**
+   * @generated from field: string next_cursor = 2;
+   */
+  nextCursor: string;
+};
+
+/**
+ * Describes the message clinks.v1.ListUsersResponse.
+ * Use `create(ListUsersResponseSchema)` to create a new message.
+ */
+export const ListUsersResponseSchema: GenMessage<ListUsersResponse> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 20);
+
+/**
+ * @generated from message clinks.v1.GetUserRequest
+ */
+export type GetUserRequest = Message<"clinks.v1.GetUserRequest"> & {
+  /**
+   * @generated from field: string user_id = 1;
+   */
+  userId: string;
+};
+
+/**
+ * Describes the message clinks.v1.GetUserRequest.
+ * Use `create(GetUserRequestSchema)` to create a new message.
+ */
+export const GetUserRequestSchema: GenMessage<GetUserRequest> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 21);
+
+/**
+ * @generated from message clinks.v1.UserDetail
+ */
+export type UserDetail = Message<"clinks.v1.UserDetail"> & {
+  /**
+   * @generated from field: clinks.v1.UserSummary user = 1;
+   */
+  user?: UserSummary | undefined;
+
+  /**
+   * @generated from field: repeated clinks.v1.Membership memberships = 2;
+   */
+  memberships: Membership[];
+};
+
+/**
+ * Describes the message clinks.v1.UserDetail.
+ * Use `create(UserDetailSchema)` to create a new message.
+ */
+export const UserDetailSchema: GenMessage<UserDetail> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 22);
+
+/**
+ * @generated from message clinks.v1.ListInvitationsRequest
+ */
+export type ListInvitationsRequest = Message<"clinks.v1.ListInvitationsRequest"> & {
+  /**
+   * @generated from field: string tenant_id = 1;
+   */
+  tenantId: string;
+
+  /**
+   * @generated from field: clinks.v1.InvitationStatus status = 2;
+   */
+  status: InvitationStatus;
+
+  /**
+   * @generated from field: string search = 3;
+   */
+  search: string;
+
+  /**
+   * @generated from field: clinks.v1.InvitationSort sort = 4;
+   */
+  sort: InvitationSort;
+
+  /**
+   * @generated from field: clinks.v1.SortDirection direction = 5;
+   */
+  direction: SortDirection;
+
+  /**
+   * @generated from field: string cursor = 6;
+   */
+  cursor: string;
+
+  /**
+   * @generated from field: uint32 page_size = 7;
+   */
+  pageSize: number;
+};
+
+/**
+ * Describes the message clinks.v1.ListInvitationsRequest.
+ * Use `create(ListInvitationsRequestSchema)` to create a new message.
+ */
+export const ListInvitationsRequestSchema: GenMessage<ListInvitationsRequest> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 23);
+
+/**
+ * @generated from message clinks.v1.ListTenantInvitationsRequest
+ */
+export type ListTenantInvitationsRequest = Message<"clinks.v1.ListTenantInvitationsRequest"> & {
+  /**
+   * @generated from field: clinks.v1.InvitationStatus status = 1;
+   */
+  status: InvitationStatus;
+
+  /**
+   * @generated from field: string search = 2;
+   */
+  search: string;
+
+  /**
+   * @generated from field: clinks.v1.InvitationSort sort = 3;
+   */
+  sort: InvitationSort;
+
+  /**
+   * @generated from field: clinks.v1.SortDirection direction = 4;
+   */
+  direction: SortDirection;
+
+  /**
+   * @generated from field: string cursor = 5;
+   */
+  cursor: string;
+
+  /**
+   * @generated from field: uint32 page_size = 6;
+   */
+  pageSize: number;
+};
+
+/**
+ * Describes the message clinks.v1.ListTenantInvitationsRequest.
+ * Use `create(ListTenantInvitationsRequestSchema)` to create a new message.
+ */
+export const ListTenantInvitationsRequestSchema: GenMessage<ListTenantInvitationsRequest> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 24);
+
+/**
+ * @generated from message clinks.v1.Invitation
+ */
+export type Invitation = Message<"clinks.v1.Invitation"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string tenant_id = 2;
+   */
+  tenantId: string;
+
+  /**
+   * @generated from field: string email = 3;
+   */
+  email: string;
+
+  /**
+   * @generated from field: clinks.v1.RoleSummary role = 4;
+   */
+  role?: RoleSummary | undefined;
+
+  /**
+   * @generated from field: clinks.v1.InvitationStatus status = 5;
+   */
+  status: InvitationStatus;
+
+  /**
+   * @generated from field: string expires_at = 6;
+   */
+  expiresAt: string;
+
+  /**
+   * @generated from field: string used_at = 7;
+   */
+  usedAt: string;
+
+  /**
+   * @generated from field: string revoked_at = 8;
+   */
+  revokedAt: string;
+
+  /**
+   * @generated from field: string acceptance_url = 9;
+   */
+  acceptanceUrl: string;
+
+  /**
+   * @generated from field: string delivery_status = 10;
+   */
+  deliveryStatus: string;
+};
+
+/**
+ * Describes the message clinks.v1.Invitation.
+ * Use `create(InvitationSchema)` to create a new message.
+ */
+export const InvitationSchema: GenMessage<Invitation> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 25);
+
+/**
+ * @generated from message clinks.v1.ListInvitationsResponse
+ */
+export type ListInvitationsResponse = Message<"clinks.v1.ListInvitationsResponse"> & {
+  /**
+   * @generated from field: repeated clinks.v1.Invitation invitations = 1;
+   */
+  invitations: Invitation[];
+
+  /**
+   * @generated from field: string next_cursor = 2;
+   */
+  nextCursor: string;
+};
+
+/**
+ * Describes the message clinks.v1.ListInvitationsResponse.
+ * Use `create(ListInvitationsResponseSchema)` to create a new message.
+ */
+export const ListInvitationsResponseSchema: GenMessage<ListInvitationsResponse> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 26);
+
+/**
+ * @generated from message clinks.v1.RevokeInvitationRequest
+ */
+export type RevokeInvitationRequest = Message<"clinks.v1.RevokeInvitationRequest"> & {
+  /**
+   * @generated from field: string invitation_id = 1;
+   */
+  invitationId: string;
+};
+
+/**
+ * Describes the message clinks.v1.RevokeInvitationRequest.
+ * Use `create(RevokeInvitationRequestSchema)` to create a new message.
+ */
+export const RevokeInvitationRequestSchema: GenMessage<RevokeInvitationRequest> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 27);
+
+/**
+ * @generated from message clinks.v1.CreateInvitationRequest
+ */
+export type CreateInvitationRequest = Message<"clinks.v1.CreateInvitationRequest"> & {
+  /**
+   * @generated from field: string email = 1;
+   */
+  email: string;
+
+  /**
+   * @generated from field: string role_id = 2;
+   */
+  roleId: string;
+};
+
+/**
+ * Describes the message clinks.v1.CreateInvitationRequest.
+ * Use `create(CreateInvitationRequestSchema)` to create a new message.
+ */
+export const CreateInvitationRequestSchema: GenMessage<CreateInvitationRequest> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 28);
+
+/**
+ * @generated from message clinks.v1.Language
+ */
+export type Language = Message<"clinks.v1.Language"> & {
+  /**
+   * @generated from field: string code = 1;
+   */
+  code: string;
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name: string;
+
+  /**
+   * @generated from field: bool is_default = 3;
+   */
+  isDefault: boolean;
+
+  /**
+   * @generated from field: bool is_active = 4;
+   */
+  isActive: boolean;
+
+  /**
+   * @generated from field: uint64 revision = 5;
+   */
+  revision: bigint;
+};
+
+/**
+ * Describes the message clinks.v1.Language.
+ * Use `create(LanguageSchema)` to create a new message.
+ */
+export const LanguageSchema: GenMessage<Language> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 29);
+
+/**
+ * @generated from message clinks.v1.LanguagesResponse
+ */
+export type LanguagesResponse = Message<"clinks.v1.LanguagesResponse"> & {
+  /**
+   * @generated from field: repeated clinks.v1.Language languages = 1;
+   */
+  languages: Language[];
+};
+
+/**
+ * Describes the message clinks.v1.LanguagesResponse.
+ * Use `create(LanguagesResponseSchema)` to create a new message.
+ */
+export const LanguagesResponseSchema: GenMessage<LanguagesResponse> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 30);
+
+/**
+ * @generated from message clinks.v1.ListLanguagesRequest
+ */
+export type ListLanguagesRequest = Message<"clinks.v1.ListLanguagesRequest"> & {
+  /**
+   * @generated from field: string search = 1;
+   */
+  search: string;
+
+  /**
+   * @generated from field: optional bool active = 2;
+   */
+  active?: boolean | undefined;
+
+  /**
+   * @generated from field: clinks.v1.LanguageSort sort = 3;
+   */
+  sort: LanguageSort;
+
+  /**
+   * @generated from field: clinks.v1.SortDirection direction = 4;
+   */
+  direction: SortDirection;
+
+  /**
+   * @generated from field: string cursor = 5;
+   */
+  cursor: string;
+
+  /**
+   * @generated from field: uint32 page_size = 6;
+   */
+  pageSize: number;
+};
+
+/**
+ * Describes the message clinks.v1.ListLanguagesRequest.
+ * Use `create(ListLanguagesRequestSchema)` to create a new message.
+ */
+export const ListLanguagesRequestSchema: GenMessage<ListLanguagesRequest> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 31);
+
+/**
+ * @generated from message clinks.v1.ListLanguagesResponse
+ */
+export type ListLanguagesResponse = Message<"clinks.v1.ListLanguagesResponse"> & {
+  /**
+   * @generated from field: repeated clinks.v1.Language languages = 1;
+   */
+  languages: Language[];
+
+  /**
+   * @generated from field: string next_cursor = 2;
+   */
+  nextCursor: string;
+};
+
+/**
+ * Describes the message clinks.v1.ListLanguagesResponse.
+ * Use `create(ListLanguagesResponseSchema)` to create a new message.
+ */
+export const ListLanguagesResponseSchema: GenMessage<ListLanguagesResponse> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 32);
+
+/**
+ * @generated from message clinks.v1.CreateLanguageRequest
+ */
+export type CreateLanguageRequest = Message<"clinks.v1.CreateLanguageRequest"> & {
+  /**
+   * @generated from field: string code = 1;
+   */
+  code: string;
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name: string;
+
+  /**
+   * @generated from field: bool is_active = 3;
+   */
+  isActive: boolean;
+};
+
+/**
+ * Describes the message clinks.v1.CreateLanguageRequest.
+ * Use `create(CreateLanguageRequestSchema)` to create a new message.
+ */
+export const CreateLanguageRequestSchema: GenMessage<CreateLanguageRequest> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 33);
+
+/**
+ * @generated from message clinks.v1.UpdateLanguageRequest
+ */
+export type UpdateLanguageRequest = Message<"clinks.v1.UpdateLanguageRequest"> & {
+  /**
+   * @generated from field: string code = 1;
+   */
+  code: string;
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name: string;
+
+  /**
+   * @generated from field: bool is_active = 3;
+   */
+  isActive: boolean;
+
+  /**
+   * @generated from field: uint64 revision = 4;
+   */
+  revision: bigint;
+};
+
+/**
+ * Describes the message clinks.v1.UpdateLanguageRequest.
+ * Use `create(UpdateLanguageRequestSchema)` to create a new message.
+ */
+export const UpdateLanguageRequestSchema: GenMessage<UpdateLanguageRequest> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 34);
+
+/**
+ * @generated from message clinks.v1.TranslationOverride
+ */
+export type TranslationOverride = Message<"clinks.v1.TranslationOverride"> & {
+  /**
+   * @generated from field: string locale = 1;
+   */
+  locale: string;
+
+  /**
+   * @generated from field: string application_scope = 2;
+   */
+  applicationScope: string;
+
+  /**
+   * @generated from field: string key = 3;
+   */
+  key: string;
+
+  /**
+   * @generated from field: string value = 4;
+   */
+  value: string;
+
+  /**
+   * @generated from field: uint64 revision = 5;
+   */
+  revision: bigint;
+};
+
+/**
+ * Describes the message clinks.v1.TranslationOverride.
+ * Use `create(TranslationOverrideSchema)` to create a new message.
+ */
+export const TranslationOverrideSchema: GenMessage<TranslationOverride> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 35);
+
+/**
+ * @generated from message clinks.v1.ListTranslationOverridesRequest
+ */
+export type ListTranslationOverridesRequest = Message<"clinks.v1.ListTranslationOverridesRequest"> & {
+  /**
+   * @generated from field: string search = 1;
+   */
+  search: string;
+
+  /**
+   * @generated from field: string locale = 2;
+   */
+  locale: string;
+
+  /**
+   * @generated from field: string application_scope = 3;
+   */
+  applicationScope: string;
+
+  /**
+   * @generated from field: clinks.v1.TranslationSort sort = 4;
+   */
+  sort: TranslationSort;
+
+  /**
+   * @generated from field: clinks.v1.SortDirection direction = 5;
+   */
+  direction: SortDirection;
+
+  /**
+   * @generated from field: string cursor = 6;
+   */
+  cursor: string;
+
+  /**
+   * @generated from field: uint32 page_size = 7;
+   */
+  pageSize: number;
+};
+
+/**
+ * Describes the message clinks.v1.ListTranslationOverridesRequest.
+ * Use `create(ListTranslationOverridesRequestSchema)` to create a new message.
+ */
+export const ListTranslationOverridesRequestSchema: GenMessage<ListTranslationOverridesRequest> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 36);
+
+/**
+ * @generated from message clinks.v1.ListTranslationOverridesResponse
+ */
+export type ListTranslationOverridesResponse = Message<"clinks.v1.ListTranslationOverridesResponse"> & {
+  /**
+   * @generated from field: repeated clinks.v1.TranslationOverride overrides = 1;
+   */
+  overrides: TranslationOverride[];
+
+  /**
+   * @generated from field: string next_cursor = 2;
+   */
+  nextCursor: string;
+};
+
+/**
+ * Describes the message clinks.v1.ListTranslationOverridesResponse.
+ * Use `create(ListTranslationOverridesResponseSchema)` to create a new message.
+ */
+export const ListTranslationOverridesResponseSchema: GenMessage<ListTranslationOverridesResponse> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 37);
+
+/**
+ * @generated from message clinks.v1.UpsertTranslationOverrideRequest
+ */
+export type UpsertTranslationOverrideRequest = Message<"clinks.v1.UpsertTranslationOverrideRequest"> & {
+  /**
+   * @generated from field: clinks.v1.TranslationOverride override = 1;
+   */
+  override?: TranslationOverride | undefined;
+};
+
+/**
+ * Describes the message clinks.v1.UpsertTranslationOverrideRequest.
+ * Use `create(UpsertTranslationOverrideRequestSchema)` to create a new message.
+ */
+export const UpsertTranslationOverrideRequestSchema: GenMessage<UpsertTranslationOverrideRequest> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 38);
+
+/**
+ * @generated from message clinks.v1.DeleteTranslationOverrideRequest
+ */
+export type DeleteTranslationOverrideRequest = Message<"clinks.v1.DeleteTranslationOverrideRequest"> & {
+  /**
+   * @generated from field: string locale = 1;
+   */
+  locale: string;
+
+  /**
+   * @generated from field: string application_scope = 2;
+   */
+  applicationScope: string;
+
+  /**
+   * @generated from field: string key = 3;
+   */
+  key: string;
+
+  /**
+   * @generated from field: uint64 revision = 4;
+   */
+  revision: bigint;
+};
+
+/**
+ * Describes the message clinks.v1.DeleteTranslationOverrideRequest.
+ * Use `create(DeleteTranslationOverrideRequestSchema)` to create a new message.
+ */
+export const DeleteTranslationOverrideRequestSchema: GenMessage<DeleteTranslationOverrideRequest> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 39);
 
 /**
  * @generated from message clinks.v1.ListAuditEventsRequest
@@ -484,17 +1238,27 @@ export type ListAuditEventsRequest = Message<"clinks.v1.ListAuditEventsRequest">
   action: string;
 
   /**
-   * @generated from field: string search = 8;
+   * @generated from field: string search = 6;
    */
   search: string;
 
   /**
-   * @generated from field: string cursor = 6;
+   * @generated from field: clinks.v1.AuditSort sort = 7;
+   */
+  sort: AuditSort;
+
+  /**
+   * @generated from field: clinks.v1.SortDirection direction = 8;
+   */
+  direction: SortDirection;
+
+  /**
+   * @generated from field: string cursor = 9;
    */
   cursor: string;
 
   /**
-   * @generated from field: uint32 page_size = 7;
+   * @generated from field: uint32 page_size = 10;
    */
   pageSize: number;
 };
@@ -504,7 +1268,7 @@ export type ListAuditEventsRequest = Message<"clinks.v1.ListAuditEventsRequest">
  * Use `create(ListAuditEventsRequestSchema)` to create a new message.
  */
 export const ListAuditEventsRequestSchema: GenMessage<ListAuditEventsRequest> = /*@__PURE__*/
-  messageDesc(file_clinks_v1_clinks, 18);
+  messageDesc(file_clinks_v1_clinks, 40);
 
 /**
  * @generated from message clinks.v1.AuditEvent
@@ -561,12 +1325,12 @@ export type AuditEvent = Message<"clinks.v1.AuditEvent"> & {
  * Use `create(AuditEventSchema)` to create a new message.
  */
 export const AuditEventSchema: GenMessage<AuditEvent> = /*@__PURE__*/
-  messageDesc(file_clinks_v1_clinks, 19);
+  messageDesc(file_clinks_v1_clinks, 41);
 
 /**
- * @generated from message clinks.v1.AuditEventsResponse
+ * @generated from message clinks.v1.ListAuditEventsResponse
  */
-export type AuditEventsResponse = Message<"clinks.v1.AuditEventsResponse"> & {
+export type ListAuditEventsResponse = Message<"clinks.v1.ListAuditEventsResponse"> & {
   /**
    * @generated from field: repeated clinks.v1.AuditEvent events = 1;
    */
@@ -579,89 +1343,89 @@ export type AuditEventsResponse = Message<"clinks.v1.AuditEventsResponse"> & {
 };
 
 /**
- * Describes the message clinks.v1.AuditEventsResponse.
- * Use `create(AuditEventsResponseSchema)` to create a new message.
+ * Describes the message clinks.v1.ListAuditEventsResponse.
+ * Use `create(ListAuditEventsResponseSchema)` to create a new message.
  */
-export const AuditEventsResponseSchema: GenMessage<AuditEventsResponse> = /*@__PURE__*/
-  messageDesc(file_clinks_v1_clinks, 20);
+export const ListAuditEventsResponseSchema: GenMessage<ListAuditEventsResponse> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 42);
 
 /**
- * @generated from message clinks.v1.ListUsersRequest
+ * @generated from message clinks.v1.UpdateCurrentTenantRequest
  */
-export type ListUsersRequest = Message<"clinks.v1.ListUsersRequest"> & {
+export type UpdateCurrentTenantRequest = Message<"clinks.v1.UpdateCurrentTenantRequest"> & {
+  /**
+   * @generated from field: string name = 1;
+   */
+  name: string;
+
+  /**
+   * @generated from field: uint64 revision = 2;
+   */
+  revision: bigint;
+};
+
+/**
+ * Describes the message clinks.v1.UpdateCurrentTenantRequest.
+ * Use `create(UpdateCurrentTenantRequestSchema)` to create a new message.
+ */
+export const UpdateCurrentTenantRequestSchema: GenMessage<UpdateCurrentTenantRequest> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 43);
+
+/**
+ * @generated from message clinks.v1.ListMembershipsRequest
+ */
+export type ListMembershipsRequest = Message<"clinks.v1.ListMembershipsRequest"> & {
   /**
    * @generated from field: string search = 1;
    */
   search: string;
 
   /**
-   * @generated from field: string role = 2;
+   * @generated from field: string role_id = 2;
    */
-  role: string;
+  roleId: string;
 
   /**
-   * @generated from field: string cursor = 3;
+   * @generated from field: clinks.v1.MembershipStatus status = 3;
+   */
+  status: MembershipStatus;
+
+  /**
+   * @generated from field: clinks.v1.MembershipSort sort = 4;
+   */
+  sort: MembershipSort;
+
+  /**
+   * @generated from field: clinks.v1.SortDirection direction = 5;
+   */
+  direction: SortDirection;
+
+  /**
+   * @generated from field: string cursor = 6;
    */
   cursor: string;
 
   /**
-   * @generated from field: uint32 page_size = 4;
+   * @generated from field: uint32 page_size = 7;
    */
   pageSize: number;
 };
 
 /**
- * Describes the message clinks.v1.ListUsersRequest.
- * Use `create(ListUsersRequestSchema)` to create a new message.
+ * Describes the message clinks.v1.ListMembershipsRequest.
+ * Use `create(ListMembershipsRequestSchema)` to create a new message.
  */
-export const ListUsersRequestSchema: GenMessage<ListUsersRequest> = /*@__PURE__*/
-  messageDesc(file_clinks_v1_clinks, 21);
+export const ListMembershipsRequestSchema: GenMessage<ListMembershipsRequest> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 44);
 
 /**
- * @generated from message clinks.v1.UserSummary
+ * @generated from message clinks.v1.ListMembershipsResponse
  */
-export type UserSummary = Message<"clinks.v1.UserSummary"> & {
+export type ListMembershipsResponse = Message<"clinks.v1.ListMembershipsResponse"> & {
   /**
-   * @generated from field: string id = 1;
+   * @generated from field: repeated clinks.v1.Membership memberships = 1;
    */
-  id: string;
-
-  /**
-   * @generated from field: string email = 2;
-   */
-  email: string;
-
-  /**
-   * @generated from field: string locale = 3;
-   */
-  locale: string;
-
-  /**
-   * @generated from field: bool is_super_admin = 4;
-   */
-  isSuperAdmin: boolean;
-
-  /**
-   * @generated from field: uint32 membership_count = 5;
-   */
-  membershipCount: number;
-};
-
-/**
- * Describes the message clinks.v1.UserSummary.
- * Use `create(UserSummarySchema)` to create a new message.
- */
-export const UserSummarySchema: GenMessage<UserSummary> = /*@__PURE__*/
-  messageDesc(file_clinks_v1_clinks, 22);
-
-/**
- * @generated from message clinks.v1.ListUsersResponse
- */
-export type ListUsersResponse = Message<"clinks.v1.ListUsersResponse"> & {
-  /**
-   * @generated from field: repeated clinks.v1.UserSummary users = 1;
-   */
-  users: UserSummary[];
+  memberships: Membership[];
 
   /**
    * @generated from field: string next_cursor = 2;
@@ -670,96 +1434,94 @@ export type ListUsersResponse = Message<"clinks.v1.ListUsersResponse"> & {
 };
 
 /**
- * Describes the message clinks.v1.ListUsersResponse.
- * Use `create(ListUsersResponseSchema)` to create a new message.
+ * Describes the message clinks.v1.ListMembershipsResponse.
+ * Use `create(ListMembershipsResponseSchema)` to create a new message.
  */
-export const ListUsersResponseSchema: GenMessage<ListUsersResponse> = /*@__PURE__*/
-  messageDesc(file_clinks_v1_clinks, 23);
+export const ListMembershipsResponseSchema: GenMessage<ListMembershipsResponse> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 45);
 
 /**
- * @generated from message clinks.v1.GetUserRequest
+ * @generated from message clinks.v1.UpdateMembershipRequest
  */
-export type GetUserRequest = Message<"clinks.v1.GetUserRequest"> & {
+export type UpdateMembershipRequest = Message<"clinks.v1.UpdateMembershipRequest"> & {
   /**
-   * @generated from field: string user_id = 1;
+   * @generated from field: string membership_id = 1;
    */
-  userId: string;
+  membershipId: string;
+
+  /**
+   * @generated from field: string role_id = 2;
+   */
+  roleId: string;
+
+  /**
+   * @generated from field: clinks.v1.MembershipStatus status = 3;
+   */
+  status: MembershipStatus;
+
+  /**
+   * @generated from field: uint64 revision = 4;
+   */
+  revision: bigint;
 };
 
 /**
- * Describes the message clinks.v1.GetUserRequest.
- * Use `create(GetUserRequestSchema)` to create a new message.
+ * Describes the message clinks.v1.UpdateMembershipRequest.
+ * Use `create(UpdateMembershipRequestSchema)` to create a new message.
  */
-export const GetUserRequestSchema: GenMessage<GetUserRequest> = /*@__PURE__*/
-  messageDesc(file_clinks_v1_clinks, 24);
+export const UpdateMembershipRequestSchema: GenMessage<UpdateMembershipRequest> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 46);
 
 /**
- * @generated from message clinks.v1.UserDetail
+ * @generated from message clinks.v1.ListRolesRequest
  */
-export type UserDetail = Message<"clinks.v1.UserDetail"> & {
+export type ListRolesRequest = Message<"clinks.v1.ListRolesRequest"> & {
   /**
-   * @generated from field: clinks.v1.UserSummary user = 1;
-   */
-  user?: UserSummary | undefined;
-
-  /**
-   * @generated from field: repeated clinks.v1.Membership memberships = 2;
-   */
-  memberships: Membership[];
-};
-
-/**
- * Describes the message clinks.v1.UserDetail.
- * Use `create(UserDetailSchema)` to create a new message.
- */
-export const UserDetailSchema: GenMessage<UserDetail> = /*@__PURE__*/
-  messageDesc(file_clinks_v1_clinks, 25);
-
-/**
- * @generated from message clinks.v1.ListInvitationsRequest
- */
-export type ListInvitationsRequest = Message<"clinks.v1.ListInvitationsRequest"> & {
-  /**
-   * @generated from field: string tenant_id = 1;
-   */
-  tenantId: string;
-
-  /**
-   * @generated from field: string status = 2;
-   */
-  status: string;
-
-  /**
-   * @generated from field: string search = 3;
+   * @generated from field: string search = 1;
    */
   search: string;
 
   /**
-   * @generated from field: string cursor = 4;
+   * @generated from field: clinks.v1.RoleKind kind = 2;
+   */
+  kind: RoleKind;
+
+  /**
+   * @generated from field: clinks.v1.RoleSort sort = 3;
+   */
+  sort: RoleSort;
+
+  /**
+   * @generated from field: clinks.v1.SortDirection direction = 4;
+   */
+  direction: SortDirection;
+
+  /**
+   * @generated from field: string cursor = 5;
    */
   cursor: string;
 
   /**
-   * @generated from field: uint32 page_size = 5;
+   * @generated from field: uint32 page_size = 6;
    */
   pageSize: number;
 };
 
 /**
- * Describes the message clinks.v1.ListInvitationsRequest.
- * Use `create(ListInvitationsRequestSchema)` to create a new message.
+ * Describes the message clinks.v1.ListRolesRequest.
+ * Use `create(ListRolesRequestSchema)` to create a new message.
  */
-export const ListInvitationsRequestSchema: GenMessage<ListInvitationsRequest> = /*@__PURE__*/
-  messageDesc(file_clinks_v1_clinks, 26);
+export const ListRolesRequestSchema: GenMessage<ListRolesRequest> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 47);
 
 /**
- * @generated from message clinks.v1.ListInvitationsResponse
+ * @generated from message clinks.v1.ListRolesResponse
  */
-export type ListInvitationsResponse = Message<"clinks.v1.ListInvitationsResponse"> & {
+export type ListRolesResponse = Message<"clinks.v1.ListRolesResponse"> & {
   /**
-   * @generated from field: repeated clinks.v1.Invitation invitations = 1;
+   * @generated from field: repeated clinks.v1.Role roles = 1;
    */
-  invitations: Invitation[];
+  roles: Role[];
 
   /**
    * @generated from field: string next_cursor = 2;
@@ -768,28 +1530,87 @@ export type ListInvitationsResponse = Message<"clinks.v1.ListInvitationsResponse
 };
 
 /**
- * Describes the message clinks.v1.ListInvitationsResponse.
- * Use `create(ListInvitationsResponseSchema)` to create a new message.
+ * Describes the message clinks.v1.ListRolesResponse.
+ * Use `create(ListRolesResponseSchema)` to create a new message.
  */
-export const ListInvitationsResponseSchema: GenMessage<ListInvitationsResponse> = /*@__PURE__*/
-  messageDesc(file_clinks_v1_clinks, 27);
+export const ListRolesResponseSchema: GenMessage<ListRolesResponse> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 48);
 
 /**
- * @generated from message clinks.v1.RevokeInvitationRequest
+ * @generated from message clinks.v1.CreateRoleRequest
  */
-export type RevokeInvitationRequest = Message<"clinks.v1.RevokeInvitationRequest"> & {
+export type CreateRoleRequest = Message<"clinks.v1.CreateRoleRequest"> & {
   /**
-   * @generated from field: string invitation_id = 1;
+   * @generated from field: string name = 1;
    */
-  invitationId: string;
+  name: string;
+
+  /**
+   * @generated from field: repeated string permissions = 2;
+   */
+  permissions: string[];
 };
 
 /**
- * Describes the message clinks.v1.RevokeInvitationRequest.
- * Use `create(RevokeInvitationRequestSchema)` to create a new message.
+ * Describes the message clinks.v1.CreateRoleRequest.
+ * Use `create(CreateRoleRequestSchema)` to create a new message.
  */
-export const RevokeInvitationRequestSchema: GenMessage<RevokeInvitationRequest> = /*@__PURE__*/
-  messageDesc(file_clinks_v1_clinks, 28);
+export const CreateRoleRequestSchema: GenMessage<CreateRoleRequest> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 49);
+
+/**
+ * @generated from message clinks.v1.UpdateRoleRequest
+ */
+export type UpdateRoleRequest = Message<"clinks.v1.UpdateRoleRequest"> & {
+  /**
+   * @generated from field: string role_id = 1;
+   */
+  roleId: string;
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name: string;
+
+  /**
+   * @generated from field: repeated string permissions = 3;
+   */
+  permissions: string[];
+
+  /**
+   * @generated from field: uint64 revision = 4;
+   */
+  revision: bigint;
+};
+
+/**
+ * Describes the message clinks.v1.UpdateRoleRequest.
+ * Use `create(UpdateRoleRequestSchema)` to create a new message.
+ */
+export const UpdateRoleRequestSchema: GenMessage<UpdateRoleRequest> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 50);
+
+/**
+ * @generated from message clinks.v1.DeleteRoleRequest
+ */
+export type DeleteRoleRequest = Message<"clinks.v1.DeleteRoleRequest"> & {
+  /**
+   * @generated from field: string role_id = 1;
+   */
+  roleId: string;
+
+  /**
+   * @generated from field: uint64 revision = 2;
+   */
+  revision: bigint;
+};
+
+/**
+ * Describes the message clinks.v1.DeleteRoleRequest.
+ * Use `create(DeleteRoleRequestSchema)` to create a new message.
+ */
+export const DeleteRoleRequestSchema: GenMessage<DeleteRoleRequest> = /*@__PURE__*/
+  messageDesc(file_clinks_v1_clinks, 51);
 
 /**
  * @generated from message clinks.v1.SystemStats
@@ -821,12 +1642,362 @@ export type SystemStats = Message<"clinks.v1.SystemStats"> & {
  * Use `create(SystemStatsSchema)` to create a new message.
  */
 export const SystemStatsSchema: GenMessage<SystemStats> = /*@__PURE__*/
-  messageDesc(file_clinks_v1_clinks, 29);
+  messageDesc(file_clinks_v1_clinks, 52);
 
 /**
- * ClinksService is the sole browser-facing application API. Health probes are
- * deliberately kept outside this contract as plain HTTP endpoints.
- *
+ * @generated from enum clinks.v1.SortDirection
+ */
+export enum SortDirection {
+  /**
+   * @generated from enum value: SORT_DIRECTION_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: SORT_DIRECTION_ASCENDING = 1;
+   */
+  ASCENDING = 1,
+
+  /**
+   * @generated from enum value: SORT_DIRECTION_DESCENDING = 2;
+   */
+  DESCENDING = 2,
+}
+
+/**
+ * Describes the enum clinks.v1.SortDirection.
+ */
+export const SortDirectionSchema: GenEnum<SortDirection> = /*@__PURE__*/
+  enumDesc(file_clinks_v1_clinks, 0);
+
+/**
+ * @generated from enum clinks.v1.GlobalRole
+ */
+export enum GlobalRole {
+  /**
+   * @generated from enum value: GLOBAL_ROLE_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: GLOBAL_ROLE_USER = 1;
+   */
+  USER = 1,
+
+  /**
+   * @generated from enum value: GLOBAL_ROLE_SUPER_ADMINISTRATOR = 2;
+   */
+  SUPER_ADMINISTRATOR = 2,
+}
+
+/**
+ * Describes the enum clinks.v1.GlobalRole.
+ */
+export const GlobalRoleSchema: GenEnum<GlobalRole> = /*@__PURE__*/
+  enumDesc(file_clinks_v1_clinks, 1);
+
+/**
+ * @generated from enum clinks.v1.RoleKind
+ */
+export enum RoleKind {
+  /**
+   * @generated from enum value: ROLE_KIND_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: ROLE_KIND_ADMINISTRATOR = 1;
+   */
+  ADMINISTRATOR = 1,
+
+  /**
+   * @generated from enum value: ROLE_KIND_USER = 2;
+   */
+  USER = 2,
+
+  /**
+   * @generated from enum value: ROLE_KIND_CUSTOM = 3;
+   */
+  CUSTOM = 3,
+}
+
+/**
+ * Describes the enum clinks.v1.RoleKind.
+ */
+export const RoleKindSchema: GenEnum<RoleKind> = /*@__PURE__*/
+  enumDesc(file_clinks_v1_clinks, 2);
+
+/**
+ * @generated from enum clinks.v1.MembershipStatus
+ */
+export enum MembershipStatus {
+  /**
+   * @generated from enum value: MEMBERSHIP_STATUS_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: MEMBERSHIP_STATUS_ACTIVE = 1;
+   */
+  ACTIVE = 1,
+
+  /**
+   * @generated from enum value: MEMBERSHIP_STATUS_INACTIVE = 2;
+   */
+  INACTIVE = 2,
+}
+
+/**
+ * Describes the enum clinks.v1.MembershipStatus.
+ */
+export const MembershipStatusSchema: GenEnum<MembershipStatus> = /*@__PURE__*/
+  enumDesc(file_clinks_v1_clinks, 3);
+
+/**
+ * @generated from enum clinks.v1.InvitationStatus
+ */
+export enum InvitationStatus {
+  /**
+   * @generated from enum value: INVITATION_STATUS_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: INVITATION_STATUS_PENDING = 1;
+   */
+  PENDING = 1,
+
+  /**
+   * @generated from enum value: INVITATION_STATUS_USED = 2;
+   */
+  USED = 2,
+
+  /**
+   * @generated from enum value: INVITATION_STATUS_EXPIRED = 3;
+   */
+  EXPIRED = 3,
+
+  /**
+   * @generated from enum value: INVITATION_STATUS_REVOKED = 4;
+   */
+  REVOKED = 4,
+}
+
+/**
+ * Describes the enum clinks.v1.InvitationStatus.
+ */
+export const InvitationStatusSchema: GenEnum<InvitationStatus> = /*@__PURE__*/
+  enumDesc(file_clinks_v1_clinks, 4);
+
+/**
+ * @generated from enum clinks.v1.TenantSort
+ */
+export enum TenantSort {
+  /**
+   * @generated from enum value: TENANT_SORT_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: TENANT_SORT_NAME = 1;
+   */
+  NAME = 1,
+
+  /**
+   * @generated from enum value: TENANT_SORT_CREATED_AT = 2;
+   */
+  CREATED_AT = 2,
+}
+
+/**
+ * Describes the enum clinks.v1.TenantSort.
+ */
+export const TenantSortSchema: GenEnum<TenantSort> = /*@__PURE__*/
+  enumDesc(file_clinks_v1_clinks, 5);
+
+/**
+ * @generated from enum clinks.v1.UserSort
+ */
+export enum UserSort {
+  /**
+   * @generated from enum value: USER_SORT_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: USER_SORT_EMAIL = 1;
+   */
+  EMAIL = 1,
+
+  /**
+   * @generated from enum value: USER_SORT_CREATED_AT = 2;
+   */
+  CREATED_AT = 2,
+}
+
+/**
+ * Describes the enum clinks.v1.UserSort.
+ */
+export const UserSortSchema: GenEnum<UserSort> = /*@__PURE__*/
+  enumDesc(file_clinks_v1_clinks, 6);
+
+/**
+ * @generated from enum clinks.v1.InvitationSort
+ */
+export enum InvitationSort {
+  /**
+   * @generated from enum value: INVITATION_SORT_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: INVITATION_SORT_CREATED_AT = 1;
+   */
+  CREATED_AT = 1,
+
+  /**
+   * @generated from enum value: INVITATION_SORT_EMAIL = 2;
+   */
+  EMAIL = 2,
+
+  /**
+   * @generated from enum value: INVITATION_SORT_EXPIRES_AT = 3;
+   */
+  EXPIRES_AT = 3,
+}
+
+/**
+ * Describes the enum clinks.v1.InvitationSort.
+ */
+export const InvitationSortSchema: GenEnum<InvitationSort> = /*@__PURE__*/
+  enumDesc(file_clinks_v1_clinks, 7);
+
+/**
+ * @generated from enum clinks.v1.LanguageSort
+ */
+export enum LanguageSort {
+  /**
+   * @generated from enum value: LANGUAGE_SORT_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: LANGUAGE_SORT_NAME = 1;
+   */
+  NAME = 1,
+
+  /**
+   * @generated from enum value: LANGUAGE_SORT_CODE = 2;
+   */
+  CODE = 2,
+}
+
+/**
+ * Describes the enum clinks.v1.LanguageSort.
+ */
+export const LanguageSortSchema: GenEnum<LanguageSort> = /*@__PURE__*/
+  enumDesc(file_clinks_v1_clinks, 8);
+
+/**
+ * @generated from enum clinks.v1.TranslationSort
+ */
+export enum TranslationSort {
+  /**
+   * @generated from enum value: TRANSLATION_SORT_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: TRANSLATION_SORT_KEY = 1;
+   */
+  KEY = 1,
+
+  /**
+   * @generated from enum value: TRANSLATION_SORT_UPDATED_AT = 2;
+   */
+  UPDATED_AT = 2,
+}
+
+/**
+ * Describes the enum clinks.v1.TranslationSort.
+ */
+export const TranslationSortSchema: GenEnum<TranslationSort> = /*@__PURE__*/
+  enumDesc(file_clinks_v1_clinks, 9);
+
+/**
+ * @generated from enum clinks.v1.AuditSort
+ */
+export enum AuditSort {
+  /**
+   * @generated from enum value: AUDIT_SORT_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: AUDIT_SORT_OCCURRED_AT = 1;
+   */
+  OCCURRED_AT = 1,
+}
+
+/**
+ * Describes the enum clinks.v1.AuditSort.
+ */
+export const AuditSortSchema: GenEnum<AuditSort> = /*@__PURE__*/
+  enumDesc(file_clinks_v1_clinks, 10);
+
+/**
+ * @generated from enum clinks.v1.MembershipSort
+ */
+export enum MembershipSort {
+  /**
+   * @generated from enum value: MEMBERSHIP_SORT_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: MEMBERSHIP_SORT_EMAIL = 1;
+   */
+  EMAIL = 1,
+
+  /**
+   * @generated from enum value: MEMBERSHIP_SORT_CREATED_AT = 2;
+   */
+  CREATED_AT = 2,
+}
+
+/**
+ * Describes the enum clinks.v1.MembershipSort.
+ */
+export const MembershipSortSchema: GenEnum<MembershipSort> = /*@__PURE__*/
+  enumDesc(file_clinks_v1_clinks, 11);
+
+/**
+ * @generated from enum clinks.v1.RoleSort
+ */
+export enum RoleSort {
+  /**
+   * @generated from enum value: ROLE_SORT_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: ROLE_SORT_NAME = 1;
+   */
+  NAME = 1,
+
+  /**
+   * @generated from enum value: ROLE_SORT_CREATED_AT = 2;
+   */
+  CREATED_AT = 2,
+}
+
+/**
+ * Describes the enum clinks.v1.RoleSort.
+ */
+export const RoleSortSchema: GenEnum<RoleSort> = /*@__PURE__*/
+  enumDesc(file_clinks_v1_clinks, 12);
+
+/**
  * @generated from service clinks.v1.ClinksService
  */
 export const ClinksService: GenService<{
@@ -879,14 +2050,6 @@ export const ClinksService: GenService<{
     output: typeof SessionSchema;
   },
   /**
-   * @generated from rpc clinks.v1.ClinksService.CreateInvitation
-   */
-  createInvitation: {
-    methodKind: "unary";
-    input: typeof CreateInvitationRequestSchema;
-    output: typeof InvitationSchema;
-  },
-  /**
    * @generated from rpc clinks.v1.ClinksService.AcceptInvitation
    */
   acceptInvitation: {
@@ -915,8 +2078,8 @@ export const ClinksService: GenService<{
    */
   listTenants: {
     methodKind: "unary";
-    input: typeof EmptySchema;
-    output: typeof TenantsResponseSchema;
+    input: typeof ListTenantsRequestSchema;
+    output: typeof ListTenantsResponseSchema;
   },
   /**
    * @generated from rpc clinks.v1.ClinksService.CreateTenant
@@ -927,36 +2090,12 @@ export const ClinksService: GenService<{
     output: typeof TenantSchema;
   },
   /**
-   * @generated from rpc clinks.v1.ClinksService.ListManagedLanguages
+   * @generated from rpc clinks.v1.ClinksService.UpdateTenant
    */
-  listManagedLanguages: {
+  updateTenant: {
     methodKind: "unary";
-    input: typeof EmptySchema;
-    output: typeof LanguagesResponseSchema;
-  },
-  /**
-   * @generated from rpc clinks.v1.ClinksService.SaveLanguage
-   */
-  saveLanguage: {
-    methodKind: "unary";
-    input: typeof LanguageSchema;
-    output: typeof EmptySchema;
-  },
-  /**
-   * @generated from rpc clinks.v1.ClinksService.SaveTranslation
-   */
-  saveTranslation: {
-    methodKind: "unary";
-    input: typeof ScopedTranslationSchema;
-    output: typeof EmptySchema;
-  },
-  /**
-   * @generated from rpc clinks.v1.ClinksService.ListAuditEvents
-   */
-  listAuditEvents: {
-    methodKind: "unary";
-    input: typeof ListAuditEventsRequestSchema;
-    output: typeof AuditEventsResponseSchema;
+    input: typeof UpdateTenantRequestSchema;
+    output: typeof TenantSchema;
   },
   /**
    * @generated from rpc clinks.v1.ClinksService.ListUsers
@@ -991,12 +2130,148 @@ export const ClinksService: GenService<{
     output: typeof EmptySchema;
   },
   /**
+   * @generated from rpc clinks.v1.ClinksService.ListManagedLanguages
+   */
+  listManagedLanguages: {
+    methodKind: "unary";
+    input: typeof ListLanguagesRequestSchema;
+    output: typeof ListLanguagesResponseSchema;
+  },
+  /**
+   * @generated from rpc clinks.v1.ClinksService.CreateLanguage
+   */
+  createLanguage: {
+    methodKind: "unary";
+    input: typeof CreateLanguageRequestSchema;
+    output: typeof LanguageSchema;
+  },
+  /**
+   * @generated from rpc clinks.v1.ClinksService.UpdateLanguage
+   */
+  updateLanguage: {
+    methodKind: "unary";
+    input: typeof UpdateLanguageRequestSchema;
+    output: typeof LanguageSchema;
+  },
+  /**
+   * @generated from rpc clinks.v1.ClinksService.ListTranslationOverrides
+   */
+  listTranslationOverrides: {
+    methodKind: "unary";
+    input: typeof ListTranslationOverridesRequestSchema;
+    output: typeof ListTranslationOverridesResponseSchema;
+  },
+  /**
+   * @generated from rpc clinks.v1.ClinksService.UpsertTranslationOverride
+   */
+  upsertTranslationOverride: {
+    methodKind: "unary";
+    input: typeof UpsertTranslationOverrideRequestSchema;
+    output: typeof TranslationOverrideSchema;
+  },
+  /**
+   * @generated from rpc clinks.v1.ClinksService.DeleteTranslationOverride
+   */
+  deleteTranslationOverride: {
+    methodKind: "unary";
+    input: typeof DeleteTranslationOverrideRequestSchema;
+    output: typeof EmptySchema;
+  },
+  /**
+   * @generated from rpc clinks.v1.ClinksService.ListAuditEvents
+   */
+  listAuditEvents: {
+    methodKind: "unary";
+    input: typeof ListAuditEventsRequestSchema;
+    output: typeof ListAuditEventsResponseSchema;
+  },
+  /**
    * @generated from rpc clinks.v1.ClinksService.GetSystemStats
    */
   getSystemStats: {
     methodKind: "unary";
     input: typeof EmptySchema;
     output: typeof SystemStatsSchema;
+  },
+  /**
+   * @generated from rpc clinks.v1.ClinksService.UpdateCurrentTenant
+   */
+  updateCurrentTenant: {
+    methodKind: "unary";
+    input: typeof UpdateCurrentTenantRequestSchema;
+    output: typeof TenantSchema;
+  },
+  /**
+   * @generated from rpc clinks.v1.ClinksService.ListMemberships
+   */
+  listMemberships: {
+    methodKind: "unary";
+    input: typeof ListMembershipsRequestSchema;
+    output: typeof ListMembershipsResponseSchema;
+  },
+  /**
+   * @generated from rpc clinks.v1.ClinksService.UpdateMembership
+   */
+  updateMembership: {
+    methodKind: "unary";
+    input: typeof UpdateMembershipRequestSchema;
+    output: typeof MembershipSchema;
+  },
+  /**
+   * @generated from rpc clinks.v1.ClinksService.ListRoles
+   */
+  listRoles: {
+    methodKind: "unary";
+    input: typeof ListRolesRequestSchema;
+    output: typeof ListRolesResponseSchema;
+  },
+  /**
+   * @generated from rpc clinks.v1.ClinksService.CreateRole
+   */
+  createRole: {
+    methodKind: "unary";
+    input: typeof CreateRoleRequestSchema;
+    output: typeof RoleSchema;
+  },
+  /**
+   * @generated from rpc clinks.v1.ClinksService.UpdateRole
+   */
+  updateRole: {
+    methodKind: "unary";
+    input: typeof UpdateRoleRequestSchema;
+    output: typeof RoleSchema;
+  },
+  /**
+   * @generated from rpc clinks.v1.ClinksService.DeleteRole
+   */
+  deleteRole: {
+    methodKind: "unary";
+    input: typeof DeleteRoleRequestSchema;
+    output: typeof EmptySchema;
+  },
+  /**
+   * @generated from rpc clinks.v1.ClinksService.ListTenantInvitations
+   */
+  listTenantInvitations: {
+    methodKind: "unary";
+    input: typeof ListTenantInvitationsRequestSchema;
+    output: typeof ListInvitationsResponseSchema;
+  },
+  /**
+   * @generated from rpc clinks.v1.ClinksService.CreateInvitation
+   */
+  createInvitation: {
+    methodKind: "unary";
+    input: typeof CreateInvitationRequestSchema;
+    output: typeof InvitationSchema;
+  },
+  /**
+   * @generated from rpc clinks.v1.ClinksService.RevokeTenantInvitation
+   */
+  revokeTenantInvitation: {
+    methodKind: "unary";
+    input: typeof RevokeInvitationRequestSchema;
+    output: typeof EmptySchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_clinks_v1_clinks, 0);

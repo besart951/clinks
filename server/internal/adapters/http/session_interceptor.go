@@ -47,7 +47,7 @@ func requireSuperAdmin(ctx context.Context) (domain.User, error) {
 	if err != nil {
 		return domain.User{}, err
 	}
-	if !session.User.Role.IsSuperAdmin() {
+	if !session.User.GlobalRole.IsSuperAdministrator() {
 		return domain.User{}, domain.NewError(domain.ErrorUnauthorized)
 	}
 

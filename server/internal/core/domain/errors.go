@@ -9,10 +9,15 @@ const (
 	ErrorEmailTaken          ErrorKind = "email_taken"
 	ErrorTenantNotFound      ErrorKind = "tenant_not_found"
 	ErrorMembershipNotFound  ErrorKind = "membership_not_found"
+	ErrorRoleNotFound        ErrorKind = "role_not_found"
+	ErrorUserNotFound        ErrorKind = "user_not_found"
+	ErrorConflict            ErrorKind = "conflict"
 	ErrorInvitationInvalid   ErrorKind = "invitation_invalid"
 	ErrorInvitationExpired   ErrorKind = "invitation_expired"
 	ErrorInvitationUsed      ErrorKind = "invitation_used"
 	ErrorInviteEmailMismatch ErrorKind = "invite_email_mismatch"
+	ErrorLeaseLost           ErrorKind = "lease_lost"
+	ErrorRateLimited         ErrorKind = "rate_limited"
 	ErrorInternal            ErrorKind = "internal"
 )
 
@@ -51,10 +56,15 @@ func (kind ErrorKind) IsValid() bool {
 		ErrorEmailTaken,
 		ErrorTenantNotFound,
 		ErrorMembershipNotFound,
+		ErrorRoleNotFound,
+		ErrorUserNotFound,
+		ErrorConflict,
 		ErrorInvitationInvalid,
 		ErrorInvitationExpired,
 		ErrorInvitationUsed,
 		ErrorInviteEmailMismatch,
+		ErrorLeaseLost,
+		ErrorRateLimited,
 		ErrorInternal:
 		return true
 

@@ -3,7 +3,6 @@ package http
 import (
 	"context"
 	"errors"
-	"log/slog"
 	stdhttp "net/http"
 	"strconv"
 	"strings"
@@ -34,11 +33,11 @@ func (server *Server) sessionResponse(
 
 func (server *Server) localizedError(ctx context.Context, header stdhttp.Header, err error) error {
 	code := connectCode(err)
-	locale := requestLocale(header)
+	locale := server.requestLocale(header)
 	message := server.translator.ErrorMessage(ctx, locale, err)
 
 	if code == connect.CodeInternal {
-		slog.ErrorContext(ctx, "RPC request failed", "error", err)
+		server.logger.ErrorContext(ctx, "RPC request failed", "error", err)
 	}
 
 	response := connect.NewError(code, errors.New(message))
@@ -53,13 +52,23 @@ func (server *Server) localizedError(ctx context.Context, header stdhttp.Header,
 	return response
 }
 
-func rateLimitError(header stdhttp.Header, retryAfter time.Duration) error {
+func (server *Server) rateLimitError(
+	ctx context.Context,
+	header stdhttp.Header,
+	retryAfter time.Duration,
+) error {
+	locale := server.requestLocale(header)
+	message := server.translator.ErrorMessage(
+		ctx,
+		locale,
+		domain.NewError(domain.ErrorRateLimited),
+	)
 	response := connect.NewError(
 		connect.CodeResourceExhausted,
-		errors.New("too many authentication attempts"),
+		errors.New(message),
 	)
 	response.Meta().Set("Clinks-Error-Kind", transportErrorRateLimited)
-	response.Meta().Set("Clinks-Locale", string(requestLocale(header)))
+	response.Meta().Set("Clinks-Locale", string(locale))
 	if retryAfter > 0 {
 		seconds := int64((retryAfter + time.Second - 1) / time.Second)
 		response.Meta().Set("Retry-After", strconv.FormatInt(seconds, 10))
@@ -82,10 +91,15 @@ func connectCode(err error) connect.Code {
 		return connect.CodeInvalidArgument
 	case domain.ErrorEmailTaken:
 		return connect.CodeAlreadyExists
-	case domain.ErrorTenantNotFound, domain.ErrorInvitationInvalid:
+	case domain.ErrorTenantNotFound, domain.ErrorInvitationInvalid,
+		domain.ErrorRoleNotFound, domain.ErrorUserNotFound:
 		return connect.CodeNotFound
 	case domain.ErrorInvitationExpired, domain.ErrorInvitationUsed:
 		return connect.CodeFailedPrecondition
+	case domain.ErrorConflict:
+		return connect.CodeAborted
+	case domain.ErrorRateLimited:
+		return connect.CodeResourceExhausted
 	default:
 		return connect.CodeInternal
 	}
@@ -127,17 +141,21 @@ func (server *Server) sessionCookie(token string) *stdhttp.Cookie {
 	return cookie
 }
 
-func requestLocale(header stdhttp.Header) domain.Locale {
+func (server *Server) requestLocale(header stdhttp.Header) domain.Locale {
 	rawHeader := header.Get("Accept-Language")
 	if rawHeader == "" {
-		return defaultLocale
+		return server.defaultLocale
 	}
 
 	primaryTag := strings.Split(rawHeader, ",")[0]
 	cleanTag := strings.TrimSpace(strings.Split(primaryTag, ";")[0])
 	if cleanTag == "" {
-		return defaultLocale
+		return server.defaultLocale
 	}
 
-	return domain.NewLocale(cleanTag)
+	locale, err := domain.ParseLocale(cleanTag)
+	if err != nil {
+		return server.defaultLocale
+	}
+	return locale
 }

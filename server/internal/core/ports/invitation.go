@@ -20,21 +20,20 @@ type InvitationRepository interface {
 
 	AcceptInvitation(
 		ctx context.Context,
-		acceptance domain.InvitationAcceptance,
+		acceptance domain.PasswordInvitationAcceptance,
 	) (domain.User, domain.Membership, error)
 
 	AcceptExternalInvitation(
 		ctx context.Context,
-		acceptance domain.InvitationAcceptance,
-		identity domain.ExternalIdentity,
+		acceptance domain.ExternalInvitationAcceptance,
 	) (domain.User, domain.Membership, error)
 }
 
 type InvitationMailer interface {
 	Send(
 		ctx context.Context,
-		invitation domain.Invitation,
-	) (string, error)
+		message domain.InvitationMessage,
+	) error
 }
 
 type InvitationIDGenerator interface {
@@ -57,13 +56,12 @@ type OutboxRepository interface {
 
 	Complete(
 		ctx context.Context,
-		jobID domain.OutboxJobID,
+		job domain.OutboxJob,
 	) error
 
 	Retry(
 		ctx context.Context,
-		jobID domain.OutboxJobID,
-		attempts int,
+		job domain.OutboxJob,
 		cause error,
 	) error
 

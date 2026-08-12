@@ -6,10 +6,13 @@ import (
 	"github.com/besartmorina/clinks/server/internal/core/domain"
 )
 
-func (service *AuthService) LoginExternal(
+func (service *authService) LoginExternal(
 	ctx context.Context,
 	identity domain.ExternalIdentity,
 ) (domain.Session, error) {
+	if err := identity.Validate(); err != nil {
+		return domain.Session{}, err
+	}
 	user, err := service.federation.FindUser(
 		ctx,
 		identity.Issuer,
@@ -24,7 +27,7 @@ func (service *AuthService) LoginExternal(
 		return domain.Session{}, err
 	}
 
-	if user.IsSuperAdmin {
+	if user.GlobalRole.IsSuperAdministrator() {
 		return domain.Session{},
 			domain.NewError(domain.ErrorUnauthorized)
 	}
@@ -56,44 +59,45 @@ func (service *AuthService) LoginExternal(
 	return session, nil
 }
 
-func (service *AuthService) LinkExternalIdentity(
+func (service *authService) LinkExternalIdentity(
 	ctx context.Context,
 	token string,
 	identity domain.ExternalIdentity,
 ) error {
+	if err := identity.Validate(); err != nil {
+		return err
+	}
 	session, err := service.CurrentSession(ctx, token)
 	if err != nil {
 		return err
 	}
 
-	if session.User.IsSuperAdmin ||
+	if session.User.GlobalRole.IsSuperAdministrator() ||
 		session.User.Email != identity.Email {
 		return domain.NewError(domain.ErrorUnauthorized)
 	}
 
-	if err := service.federation.Link(
+	if err := service.federation.LinkWithAudit(
 		ctx,
 		session.User.ID,
 		identity,
+		tenantID(session.ActiveTenant),
 	); err != nil {
 		return err
 	}
 
-	return service.appendAudit(
-		ctx,
-		session.User.ID,
-		tenantID(session.ActiveTenant),
-		"identity.oidc_linked",
-		string(identity.Issuer),
-	)
+	return nil
 }
 
-func (service *AuthService) AcceptExternalInvitation(
+func (service *authService) AcceptExternalInvitation(
 	ctx context.Context,
 	token string,
 	identity domain.ExternalIdentity,
 	locale domain.Locale,
 ) (domain.Session, error) {
+	if err := identity.Validate(); err != nil {
+		return domain.Session{}, err
+	}
 	locale = domain.NewLocale(string(locale))
 
 	if !locale.IsValid() {
@@ -114,36 +118,38 @@ func (service *AuthService) AcceptExternalInvitation(
 			domain.NewError(domain.ErrorInviteEmailMismatch)
 	}
 
-	_, _, err = service.identities.FindByEmail(
+	user, _, findErr := service.identities.FindByEmail(
 		ctx,
 		identity.Email,
 	)
-
-	switch {
-	case err == nil:
-		return domain.Session{},
-			domain.NewError(domain.ErrorUnauthorized)
-
-	case !isInvalidCredentials(err):
-		return domain.Session{}, err
+	existingUser := findErr == nil
+	if existingUser && user.GlobalRole.IsSuperAdministrator() {
+		return domain.Session{}, domain.NewError(domain.ErrorUnauthorized)
+	}
+	if findErr != nil && !isInvalidCredentials(findErr) {
+		return domain.Session{}, findErr
 	}
 
-	acceptance := domain.InvitationAcceptance{
-		Invitation: invitation,
-		User: domain.User{
+	if !existingUser {
+		user = domain.User{
 			Email:          identity.Email,
-			IsSuperAdmin:   false,
+			GlobalRole:     domain.GlobalRoleUser,
 			Locale:         locale,
 			SessionVersion: 1,
-		},
+		}
 	}
 
-	user, membership, err :=
-		service.invitations.AcceptExternalInvitation(
-			ctx,
-			acceptance,
-			identity,
-		)
+	acceptance := domain.ExternalInvitationAcceptance{
+		Invitation:   invitation,
+		User:         user,
+		Identity:     identity,
+		ExistingUser: existingUser,
+	}
+
+	user, membership, err := service.invitations.AcceptExternalInvitation(
+		ctx,
+		acceptance,
+	)
 	if err != nil {
 		return domain.Session{}, err
 	}
@@ -158,16 +164,6 @@ func (service *AuthService) AcceptExternalInvitation(
 		},
 	)
 	if err != nil {
-		return domain.Session{}, err
-	}
-
-	if err := service.appendAudit(
-		ctx,
-		user.ID,
-		new(membership.Tenant.ID),
-		"invitation.accepted_oidc",
-		string(invitation.ID),
-	); err != nil {
 		return domain.Session{}, err
 	}
 

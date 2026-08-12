@@ -1,12 +1,18 @@
 package domain
 
-import "strings"
+import (
+	"strings"
+	"time"
+)
 
 type TenantID string
 
 type Tenant struct {
-	ID   TenantID
-	Name string
+	ID        TenantID
+	Name      string
+	Revision  uint64
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 type TenantOwnerRegistration struct {
@@ -23,9 +29,7 @@ func NewTenantID(value string) TenantID {
 }
 
 func (tenantID TenantID) IsValid() bool {
-	return strings.TrimSpace(
-		string(tenantID),
-	) != ""
+	return validUUID(string(tenantID))
 }
 
 func (tenantID TenantID) Validate() error {

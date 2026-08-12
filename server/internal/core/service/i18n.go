@@ -8,21 +8,24 @@ import (
 )
 
 type I18nService struct {
-	catalog ports.LocalizationCatalog
+	languages ports.LanguageCatalog
+	catalog   ports.TranslationCatalog
 }
 
 func NewI18nService(
-	catalog ports.LocalizationCatalog,
+	languages ports.LanguageCatalog,
+	catalog ports.TranslationCatalog,
 ) *I18nService {
 	return &I18nService{
-		catalog: catalog,
+		languages: languages,
+		catalog:   catalog,
 	}
 }
 
 func (service *I18nService) ActiveLanguages(
 	ctx context.Context,
 ) ([]domain.Language, error) {
-	return service.catalog.ActiveLanguages(ctx)
+	return service.languages.ActiveLanguages(ctx)
 }
 
 func (service *I18nService) TranslationBundle(
@@ -63,12 +66,11 @@ func (service *I18nService) TranslationBundle(
 		}, nil
 	}
 
-	fallbackTranslations, err :=
-		service.catalog.Translations(
-			ctx,
-			defaultLocale,
-			scope,
-		)
+	fallbackTranslations, err := service.catalog.Translations(
+		ctx,
+		defaultLocale,
+		scope,
+	)
 	if err != nil {
 		return domain.TranslationBundle{}, err
 	}

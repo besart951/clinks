@@ -7,13 +7,14 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/besartmorina/clinks/server/internal/core/domain"
 )
 
-type outboxJobKind string
-type outboxStatus string
+type (
+	outboxJobKind string
+	outboxStatus  string
+)
 
 const (
 	outboxJobInvitationEmail outboxJobKind = "invitation.email"
@@ -27,19 +28,7 @@ const (
 	outboxLockSeconds     = 10 * 60
 )
 
-type OutboxRepository struct {
-	pool *pgxpool.Pool
-}
-
-func NewOutboxRepository(
-	pool *pgxpool.Pool,
-) *OutboxRepository {
-	return &OutboxRepository{
-		pool: pool,
-	}
-}
-
-func (repository *OutboxRepository) ClaimInvitationEmail(
+func (repository *Store) ClaimInvitationEmail(
 	ctx context.Context,
 ) (domain.OutboxJob, domain.Invitation, error) {
 	var job domain.OutboxJob
@@ -49,7 +38,12 @@ func (repository *OutboxRepository) ClaimInvitationEmail(
 		ctx,
 		repository.pool,
 		func(tx pgx.Tx) error {
-			err := tx.QueryRow(
+			leaseToken, err := newUUID()
+			if err != nil {
+				return err
+			}
+
+			err = tx.QueryRow(
 				ctx,
 				`
 					WITH candidate AS (
@@ -80,24 +74,29 @@ func (repository *OutboxRepository) ClaimInvitationEmail(
 					SET
 						status = $3,
 						attempts = attempts + 1,
-						locked_at = now()
+						locked_at = now(),
+						lease_token = $5,
+						updated_at = now()
 					FROM candidate
 					WHERE job.id = candidate.id
 					RETURNING
 						job.id,
 						job.tenant_id,
 						job.invitation_id,
-						job.attempts
+						job.attempts,
+						job.lease_token
 				`,
 				outboxJobInvitationEmail,
 				outboxStatusPending,
 				outboxStatusProcessing,
 				outboxLockSeconds,
+				leaseToken,
 			).Scan(
 				&job.ID,
 				&job.TenantID,
 				&job.InvitationID,
 				&job.Attempts,
+				&job.LeaseToken,
 			)
 			if err != nil {
 				return err
@@ -135,10 +134,14 @@ func (repository *OutboxRepository) ClaimInvitationEmail(
 	return job, invitation, nil
 }
 
-func (repository *OutboxRepository) Complete(
+func (repository *Store) Complete(
 	ctx context.Context,
-	jobID domain.OutboxJobID,
+	job domain.OutboxJob,
 ) error {
+	if !job.ID.IsValid() || !job.LeaseToken.IsValid() {
+		return domain.NewError(domain.ErrorValidation)
+	}
+
 	return withSystemTx(
 		ctx,
 		repository.pool,
@@ -153,13 +156,20 @@ func (repository *OutboxRepository) Complete(
 						status = $2,
 						completed_at = now(),
 						locked_at = NULL,
-						last_error = NULL
-					WHERE id = $1
+						lease_token = NULL,
+						last_error = NULL,
+						updated_at = now()
+					WHERE id = $1 AND lease_token = $3 AND status = $4
 					RETURNING invitation_id
 				`,
-				jobID,
+				job.ID,
 				outboxStatusCompleted,
+				job.LeaseToken,
+				outboxStatusProcessing,
 			).Scan(&invitationID)
+			if errors.Is(err, pgx.ErrNoRows) {
+				return domain.NewError(domain.ErrorLeaseLost)
+			}
 			if err != nil {
 				return fmt.Errorf(
 					"complete outbox job: %w",
@@ -183,10 +193,9 @@ func (repository *OutboxRepository) Complete(
 	)
 }
 
-func (repository *OutboxRepository) Retry(
+func (repository *Store) Retry(
 	ctx context.Context,
-	jobID domain.OutboxJobID,
-	attempts int,
+	job domain.OutboxJob,
 	jobErr error,
 ) error {
 	if jobErr == nil {
@@ -195,16 +204,20 @@ func (repository *OutboxRepository) Retry(
 		)
 	}
 
-	if attempts >= outboxMaximumAttempts {
+	if !job.ID.IsValid() || !job.LeaseToken.IsValid() {
+		return domain.NewError(domain.ErrorValidation)
+	}
+
+	if job.Attempts >= outboxMaximumAttempts {
 		return repository.deadLetter(
 			ctx,
-			jobID,
+			job,
 			jobErr,
 		)
 	}
 
 	availableAt := time.Now().Add(
-		retryDelay(attempts),
+		retryDelay(job.Attempts),
 	)
 
 	return withSystemTx(
@@ -221,15 +234,22 @@ func (repository *OutboxRepository) Retry(
 						status = $2,
 						available_at = $3,
 						locked_at = NULL,
-						last_error = $4
-					WHERE id = $1
+						lease_token = NULL,
+						last_error = $4,
+						updated_at = now()
+					WHERE id = $1 AND lease_token = $5 AND status = $6
 					RETURNING invitation_id
 				`,
-				jobID,
+				job.ID,
 				outboxStatusPending,
 				availableAt,
 				jobErr.Error(),
+				job.LeaseToken,
+				outboxStatusProcessing,
 			).Scan(&invitationID)
+			if errors.Is(err, pgx.ErrNoRows) {
+				return domain.NewError(domain.ErrorLeaseLost)
+			}
 			if err != nil {
 				return fmt.Errorf(
 					"schedule outbox retry: %w",
@@ -253,9 +273,9 @@ func (repository *OutboxRepository) Retry(
 	)
 }
 
-func (repository *OutboxRepository) deadLetter(
+func (repository *Store) deadLetter(
 	ctx context.Context,
-	jobID domain.OutboxJobID,
+	job domain.OutboxJob,
 	jobErr error,
 ) error {
 	return withSystemTx(
@@ -275,19 +295,26 @@ func (repository *OutboxRepository) deadLetter(
 						status = $2,
 						dead_lettered_at = now(),
 						locked_at = NULL,
-						last_error = $3
-					WHERE id = $1
+						lease_token = NULL,
+						last_error = $3,
+						updated_at = now()
+					WHERE id = $1 AND lease_token = $4 AND status = $5
 					RETURNING
 						tenant_id,
 						invitation_id
 				`,
-				jobID,
+				job.ID,
 				outboxStatusDeadLetter,
 				jobErr.Error(),
+				job.LeaseToken,
+				outboxStatusProcessing,
 			).Scan(
 				&tenantID,
 				&invitationID,
 			)
+			if errors.Is(err, pgx.ErrNoRows) {
+				return domain.NewError(domain.ErrorLeaseLost)
+			}
 			if err != nil {
 				return fmt.Errorf(
 					"dead-letter outbox job: %w",
@@ -317,14 +344,14 @@ func (repository *OutboxRepository) deadLetter(
 				domain.AuditEvent{
 					TenantID: new(tenantID),
 					Action:   "outbox.dead_letter",
-					Target:   string(jobID),
+					Target:   string(job.ID),
 				},
 			)
 		},
 	)
 }
 
-func (repository *OutboxRepository) AnonymizeExpiredInvitations(
+func (repository *Store) AnonymizeExpiredInvitations(
 	ctx context.Context,
 	before time.Time,
 ) (int, error) {
@@ -340,7 +367,7 @@ func (repository *OutboxRepository) AnonymizeExpiredInvitations(
 					UPDATE invitations
 					SET
 						email = '',
-						token_hash = '',
+						token_hash = NULL,
 						anonymized_at = now()
 					WHERE
 						anonymized_at IS NULL

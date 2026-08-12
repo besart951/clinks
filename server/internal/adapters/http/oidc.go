@@ -107,13 +107,19 @@ func (server *Server) googleOIDCStart(client oidcClient, config OIDCConfig) stdh
 			return
 		}
 
-		attempt := newOIDCAttempt(mode)
+		attempt, err := newOIDCAttempt(mode)
+		if err != nil {
+			server.logger.Error("create OIDC attempt", "err", err)
+			server.oidcFailure(w, r, config)
+			return
+		}
 		if mode == "invite" {
 			attempt.InvitationToken = r.URL.Query().Get("token")
 		}
 
 		sealedValue, err := sealOIDCAttempt(config.StateSecret, attempt)
 		if err != nil {
+			server.logger.Error("seal OIDC attempt", "err", err)
 			server.oidcFailure(w, r, config)
 			return
 		}
@@ -154,14 +160,11 @@ func (server *Server) googleOIDCCallback(client oidcClient, config OIDCConfig) s
 			return
 		}
 
-		auth, ok := server.sessions.(oidcSessionService)
-		if !ok {
-			server.oidcFailure(w, r, config)
-			return
-		}
+		auth := server.oidcSessions
 
 		identity, err := client.Exchange(r.Context(), code, attempt.Verifier, attempt.Nonce)
 		if err != nil {
+			server.logger.Warn("OIDC exchange failed", "err", err)
 			server.oidcFailure(w, r, config)
 			return
 		}
@@ -183,7 +186,7 @@ func (server *Server) googleOIDCCallback(client oidcClient, config OIDCConfig) s
 				r.Context(),
 				attempt.InvitationToken,
 				identity,
-				requestLocale(r.Header),
+				server.requestLocale(r.Header),
 			)
 			if err == nil {
 				stdhttp.SetCookie(w, server.sessionCookie(session.Token))
@@ -201,6 +204,7 @@ func (server *Server) googleOIDCCallback(client oidcClient, config OIDCConfig) s
 		}
 
 		if err != nil {
+			server.logger.Warn("OIDC authentication failed", "mode", attempt.Mode, "err", err)
 			server.oidcFailure(w, r, config)
 			return
 		}
@@ -223,20 +227,35 @@ func (server *Server) oidcFailure(w stdhttp.ResponseWriter, r *stdhttp.Request, 
 	stdhttp.Redirect(w, r, target.String(), stdhttp.StatusFound)
 }
 
-func newOIDCAttempt(mode string) oidcAttempt {
+func newOIDCAttempt(mode string) (oidcAttempt, error) {
+	state, err := randomOIDCValue(32)
+	if err != nil {
+		return oidcAttempt{}, err
+	}
+	nonce, err := randomOIDCValue(32)
+	if err != nil {
+		return oidcAttempt{}, err
+	}
+	verifier, err := randomOIDCValue(48)
+	if err != nil {
+		return oidcAttempt{}, err
+	}
+
 	return oidcAttempt{
-		State:     randomOIDCValue(32),
-		Nonce:     randomOIDCValue(32),
-		Verifier:  randomOIDCValue(48),
+		State:     state,
+		Nonce:     nonce,
+		Verifier:  verifier,
 		Mode:      mode,
 		ExpiresAt: time.Now().Add(oidcAttemptTTL).Unix(),
-	}
+	}, nil
 }
 
-func randomOIDCValue(size int) string {
+func randomOIDCValue(size int) (string, error) {
 	value := make([]byte, size)
-	rand.Read(value)
-	return base64.RawURLEncoding.EncodeToString(value)
+	if _, err := rand.Read(value); err != nil {
+		return "", fmt.Errorf("read OIDC randomness: %w", err)
+	}
+	return base64.RawURLEncoding.EncodeToString(value), nil
 }
 
 func sealOIDCAttempt(secret string, attempt oidcAttempt) (string, error) {
@@ -256,7 +275,9 @@ func sealOIDCAttempt(secret string, attempt oidcAttempt) (string, error) {
 	}
 
 	nonce := make([]byte, gcm.NonceSize())
-	rand.Read(nonce)
+	if _, err := rand.Read(nonce); err != nil {
+		return "", fmt.Errorf("read OIDC sealing nonce: %w", err)
+	}
 
 	payload, err := json.Marshal(attempt)
 	if err != nil {

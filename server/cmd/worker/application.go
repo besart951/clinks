@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -85,14 +86,15 @@ func workerPoolConfig(
 
 func workerSMTPConfig(
 	settings *appconfig.Config,
-) *mailadapter.SMTPConfig {
-	return &mailadapter.SMTPConfig{
+) mailadapter.SMTPConfig {
+	return mailadapter.SMTPConfig{
 		Host:       settings.SMTP.Host,
 		Port:       settings.SMTP.Port,
 		Username:   settings.SMTP.Username,
 		Password:   settings.SMTP.Password,
 		From:       settings.SMTP.From,
 		RequireTLS: settings.SMTP.RequireTLS,
+		Logger:     slog.Default(),
 	}
 }
 
@@ -114,12 +116,14 @@ func newInvitationWorker(
 	outbox ports.OutboxRepository,
 	mailer ports.InvitationMailer,
 	tokens ports.InvitationTokenSigner,
+	messages ports.MessageCatalog,
 	inviteBaseURL string,
-) *service.InvitationWorker {
+) (*service.InvitationWorker, error) {
 	return service.NewInvitationWorker(
 		outbox,
 		mailer,
 		tokens,
+		messages,
 		inviteBaseURL,
 	)
 }

@@ -21,7 +21,22 @@ services:
     image: ${API_IMAGE}
     command: ["server"]
     restart: unless-stopped
-    env_file: ${ENV_FILE:-.env}
+    environment:
+      DATABASE_URL: "postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_TTL: ${JWT_TTL:-15m}
+      INVITATION_TOKEN_SECRET: ${INVITATION_TOKEN_SECRET}
+      INVITE_PUBLIC_BASE_URL: ${INVITE_PUBLIC_BASE_URL}
+      INVITE_TTL: ${INVITE_TTL:-168h}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME:-clinks_session}
+      SESSION_COOKIE_SECURE: "true"
+      SESSION_COOKIE_DOMAIN: ${SESSION_COOKIE_DOMAIN:-}
+      GOOGLE_OIDC_CLIENT_ID: ${GOOGLE_OIDC_CLIENT_ID:-}
+      GOOGLE_OIDC_CLIENT_SECRET: ${GOOGLE_OIDC_CLIENT_SECRET:-}
+      GOOGLE_OIDC_CALLBACK_URL: ${GOOGLE_OIDC_CALLBACK_URL:-}
+      OIDC_STATE_SECRET: ${OIDC_STATE_SECRET:-}
+      OIDC_SUCCESS_URL: ${OIDC_SUCCESS_URL:-}
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -38,7 +53,17 @@ services:
     image: ${API_IMAGE}
     entrypoint: ["/app/clinks-worker"]
     restart: unless-stopped
-    env_file: ${ENV_FILE:-.env}
+    environment:
+      DATABASE_URL: "postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
+      INVITATION_TOKEN_SECRET: ${INVITATION_TOKEN_SECRET}
+      INVITE_PUBLIC_BASE_URL: ${INVITE_PUBLIC_BASE_URL}
+      INVITE_TTL: ${INVITE_TTL:-168h}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM}
+      SMTP_REQUIRE_TLS: ${SMTP_REQUIRE_TLS:-true}
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -54,7 +79,11 @@ services:
   migrate:
     image: ${API_IMAGE}
     command: ["migrate"]
-    env_file: ${ENV_FILE:-.env}
+    environment:
+      DATABASE_URL: "postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      ADMIN_LOCALE: ${ADMIN_LOCALE:-de-CH}
     depends_on:
       postgres:
         condition: service_healthy
@@ -82,6 +111,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
@@ -89,6 +120,7 @@ services:
       retries: 20
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d:ro
     networks: [internal]
 
 networks:

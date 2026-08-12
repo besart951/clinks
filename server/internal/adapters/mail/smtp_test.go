@@ -2,6 +2,8 @@ package mail_test
 
 import (
 	"context"
+	"io"
+	"log/slog"
 	"strings"
 	"testing"
 
@@ -12,77 +14,64 @@ import (
 func TestSMTPMailer_NotConfigured(t *testing.T) {
 	t.Parallel()
 
-	mailer := mail.NewSMTPMailer(&mail.SMTPConfig{
-		Host: "",
+	_, err := mail.NewSMTPMailer(mail.SMTPConfig{
+		Host:   "",
+		Logger: testLogger(),
 	})
-
-	invitation := &domain.Invitation{
-		ID:         "inv-123",
-		Email:      "invited@example.com",
-		Acceptance: "http://localhost/accept?token=abc",
-	}
-
-	status, err := mailer.Send(context.Background(), invitation)
-	if err != nil {
-		t.Fatalf("expected no error when unconfigured, got: %v", err)
-	}
-	if status != "not_configured" {
-		t.Errorf("expected status 'not_configured', got %q", status)
+	if err == nil {
+		t.Fatal("expected configuration error")
 	}
 }
 
 func TestSMTPMailer_CanceledContext(t *testing.T) {
 	t.Parallel()
 
-	mailer := mail.NewSMTPMailer(&mail.SMTPConfig{
-		Host: "localhost",
-		Port: "1025",
-		From: "no-reply@clinks.test",
+	mailer, err := mail.NewSMTPMailer(mail.SMTPConfig{
+		Host:   "localhost",
+		Port:   "1025",
+		From:   "no-reply@clinks.test",
+		Logger: testLogger(),
 	})
-
-	invitation := &domain.Invitation{
-		ID:         "inv-123",
-		Email:      "user@example.com",
-		Acceptance: "http://localhost/accept?token=123",
+	if err != nil {
+		t.Fatal(err)
 	}
+	message := domain.InvitationMessage{Recipient: "user@example.com", Subject: "Invite", Body: "Accept"}
 
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // cancel context immediately
 
-	status, err := mailer.Send(ctx, invitation)
+	err = mailer.Send(ctx, message)
 	if err == nil {
 		t.Fatal("expected error for canceled context, got nil")
-	}
-	if status != "failed" {
-		t.Errorf("expected status 'failed', got %q", status)
 	}
 }
 
 func TestSMTPMailer_MessageFormat(t *testing.T) {
 	t.Parallel()
 
-	invitation := &domain.Invitation{
-		ID:         "inv-999",
-		Email:      "target@domain.org",
-		Acceptance: "https://clinks.app/accept?t=xyz",
-	}
+	message := domain.InvitationMessage{Recipient: "target@domain.org", Subject: "Invite", Body: "Accept"}
 
 	// Send to a non-existent localhost port to verify connection failure error wrapping
 	ctx := context.Background()
-	mailer := mail.NewSMTPMailer(&mail.SMTPConfig{
-		Host: "127.0.0.1",
-		Port: "59999",
-		From: "sender@clinks.app",
+	mailer, constructorErr := mail.NewSMTPMailer(mail.SMTPConfig{
+		Host:   "127.0.0.1",
+		Port:   "59999",
+		From:   "sender@clinks.app",
+		Logger: testLogger(),
 	})
+	if constructorErr != nil {
+		t.Fatal(constructorErr)
+	}
 
-	status, err := mailer.Send(ctx, invitation)
+	err := mailer.Send(ctx, message)
 	if err == nil {
 		t.Fatal("expected connection failure error, got nil")
 	}
-	if status != "failed" {
-		t.Errorf("expected status 'failed', got %q", status)
+	if !strings.Contains(err.Error(), "connect to") {
+		t.Errorf("expected error message to mention connection, got: %v", err)
 	}
-	if !strings.Contains(err.Error(), "connection failed") {
-		t.Errorf("expected error message to mention connection failed, got: %v", err)
-	}
+}
+
+func testLogger() *slog.Logger {
+	return slog.New(slog.NewTextHandler(io.Discard, nil))
 }

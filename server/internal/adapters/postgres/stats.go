@@ -5,24 +5,11 @@ import (
 	"fmt"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/besartmorina/clinks/server/internal/core/domain"
 )
 
-type SystemStatsRepository struct {
-	pool *pgxpool.Pool
-}
-
-func NewSystemStatsRepository(
-	pool *pgxpool.Pool,
-) *SystemStatsRepository {
-	return &SystemStatsRepository{
-		pool: pool,
-	}
-}
-
-func (repository *SystemStatsRepository) Stats(
+func (repository *Store) Stats(
 	ctx context.Context,
 ) (domain.SystemStats, error) {
 	var (

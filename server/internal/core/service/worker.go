@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/besartmorina/clinks/server/internal/core/domain"
@@ -14,35 +15,46 @@ const (
 	invitationPollInterval    = 2 * time.Second
 	invitationCleanupInterval = 24 * time.Hour
 	invitationRetentionDays   = 30
-
-	invitationDeliverySent = "sent"
 )
 
 type InvitationWorker struct {
-	outbox ports.OutboxRepository
-	mailer ports.InvitationMailer
-	tokens ports.InvitationTokenSigner
-	links  invitationLinkBuilder
-	now    func() time.Time
+	outbox   ports.OutboxRepository
+	mailer   ports.InvitationMailer
+	tokens   ports.InvitationTokenSigner
+	links    invitationLinkBuilder
+	messages ports.MessageCatalog
+	now      func() time.Time
 }
 
 func NewInvitationWorker(
 	outbox ports.OutboxRepository,
 	mailer ports.InvitationMailer,
 	tokens ports.InvitationTokenSigner,
+	messages ports.MessageCatalog,
 	inviteBaseURL string,
 ) (*InvitationWorker, error) {
+	switch {
+	case outbox == nil:
+		return nil, errors.New("invitation worker: outbox dependency is required")
+	case mailer == nil:
+		return nil, errors.New("invitation worker: mailer dependency is required")
+	case tokens == nil:
+		return nil, errors.New("invitation worker: token dependency is required")
+	case messages == nil:
+		return nil, errors.New("invitation worker: message catalog dependency is required")
+	}
 	links, err := newInvitationLinkBuilder(inviteBaseURL)
 	if err != nil {
 		return nil, err
 	}
 
 	return &InvitationWorker{
-		outbox: outbox,
-		mailer: mailer,
-		tokens: tokens,
-		links:  links,
-		now:    time.Now,
+		outbox:   outbox,
+		mailer:   mailer,
+		tokens:   tokens,
+		links:    links,
+		messages: messages,
+		now:      time.Now,
 	}, nil
 }
 
@@ -88,8 +100,7 @@ func (worker *InvitationWorker) Run(
 func (worker *InvitationWorker) RunOnce(
 	ctx context.Context,
 ) (bool, error) {
-	job, invitation, err :=
-		worker.outbox.ClaimInvitationEmail(ctx)
+	job, invitation, err := worker.outbox.ClaimInvitationEmail(ctx)
 	if err != nil {
 		return false,
 			fmt.Errorf(
@@ -116,9 +127,14 @@ func (worker *InvitationWorker) RunOnce(
 
 	invitation.Acceptance = worker.links.URL(token)
 
-	status, err := worker.mailer.Send(
+	message, err := worker.invitationMessage(ctx, invitation)
+	if err != nil {
+		return true, worker.retry(ctx, job, err)
+	}
+
+	err = worker.mailer.Send(
 		ctx,
-		invitation,
+		message,
 	)
 	if err != nil {
 		return true, worker.retry(
@@ -131,21 +147,13 @@ func (worker *InvitationWorker) RunOnce(
 		)
 	}
 
-	if status != invitationDeliverySent {
-		return true, worker.retry(
-			ctx,
-			job,
-			fmt.Errorf(
-				"unexpected invitation delivery status %q",
-				status,
-			),
-		)
-	}
-
 	if err := worker.outbox.Complete(
 		ctx,
-		job.ID,
+		job,
 	); err != nil {
+		if errors.Is(err, domain.NewError(domain.ErrorLeaseLost)) {
+			return true, nil
+		}
 		return true,
 			fmt.Errorf(
 				"complete invitation job %s: %w",
@@ -155,6 +163,57 @@ func (worker *InvitationWorker) RunOnce(
 	}
 
 	return true, nil
+}
+
+func (worker *InvitationWorker) invitationMessage(
+	ctx context.Context,
+	invitation domain.Invitation,
+) (domain.InvitationMessage, error) {
+	locale := invitation.Locale
+	if !locale.IsValid() {
+		var err error
+		locale, err = worker.messages.DefaultLocale(ctx)
+		if err != nil {
+			return domain.InvitationMessage{}, fmt.Errorf("load invitation default locale: %w", err)
+		}
+	}
+
+	subject, err := worker.localizedMessage(ctx, locale, "mail.invitation.subject")
+	if err != nil {
+		return domain.InvitationMessage{}, err
+	}
+	body, err := worker.localizedMessage(ctx, locale, "mail.invitation.body")
+	if err != nil {
+		return domain.InvitationMessage{}, err
+	}
+	body = strings.ReplaceAll(body, "{url}", strings.TrimSpace(invitation.Acceptance))
+
+	return domain.InvitationMessage{
+		Recipient: invitation.Email,
+		Subject:   subject,
+		Body:      body,
+	}, nil
+}
+
+func (worker *InvitationWorker) localizedMessage(
+	ctx context.Context,
+	locale domain.Locale,
+	key string,
+) (string, error) {
+	message, err := worker.messages.Message(ctx, locale, key)
+	if err == nil {
+		return message, nil
+	}
+
+	defaultLocale, defaultErr := worker.messages.DefaultLocale(ctx)
+	if defaultErr != nil {
+		return "", errors.Join(err, defaultErr)
+	}
+	message, defaultErr = worker.messages.Message(ctx, defaultLocale, key)
+	if defaultErr != nil {
+		return "", errors.Join(err, defaultErr)
+	}
+	return message, nil
 }
 
 func (worker *InvitationWorker) drain(
@@ -183,10 +242,12 @@ func (worker *InvitationWorker) retry(
 ) error {
 	if err := worker.outbox.Retry(
 		ctx,
-		job.ID,
-		job.Attempts,
+		job,
 		cause,
 	); err != nil {
+		if errors.Is(err, domain.NewError(domain.ErrorLeaseLost)) {
+			return nil
+		}
 		return errors.Join(
 			cause,
 			fmt.Errorf(
@@ -210,11 +271,10 @@ func (worker *InvitationWorker) cleanupExpired(
 			-invitationRetentionDays,
 		)
 
-	if _, err :=
-		worker.outbox.AnonymizeExpiredInvitations(
-			ctx,
-			cutoff,
-		); err != nil {
+	if _, err := worker.outbox.AnonymizeExpiredInvitations(
+		ctx,
+		cutoff,
+	); err != nil {
 		return fmt.Errorf(
 			"anonymize expired invitations: %w",
 			err,

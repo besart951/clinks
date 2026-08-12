@@ -23,6 +23,16 @@ type Config struct {
 	Bootstrap BootstrapConfig
 }
 
+type Profile string
+
+const (
+	ProfileAPI               Profile = "api"
+	ProfileMigration         Profile = "migration"
+	ProfileHealthcheck       Profile = "healthcheck"
+	ProfileWorker            Profile = "worker"
+	ProfileWorkerHealthcheck Profile = "worker-healthcheck"
+)
+
 type HTTPConfig struct {
 	Port                string   `env:"SERVER_PORT" envDefault:"8080"`
 	CORSOrigins         []string `env:"CORS_ORIGINS" envDefault:"http://localhost:5173,http://localhost:5174,http://localhost:5175" envSeparator:","`
@@ -36,7 +46,7 @@ func (config *HTTPConfig) Address() string {
 }
 
 type DatabaseConfig struct {
-	URL             string        `env:"DATABASE_URL,required"`
+	URL             string        `env:"DATABASE_URL"`
 	MaxConns        int32         `env:"DATABASE_MAX_CONNS" envDefault:"20"`
 	MinConns        int32         `env:"DATABASE_MIN_CONNS" envDefault:"2"`
 	ConnMaxLifetime time.Duration `env:"DATABASE_CONN_MAX_LIFETIME" envDefault:"1h"`
@@ -45,7 +55,7 @@ type DatabaseConfig struct {
 }
 
 type AuthConfig struct {
-	JWTSecret   string        `env:"JWT_SECRET,required"`
+	JWTSecret   string        `env:"JWT_SECRET"`
 	JWTIssuer   string        `env:"JWT_ISSUER" envDefault:"clinks"`
 	JWTAudience string        `env:"JWT_AUDIENCE" envDefault:"clinks-web"`
 	JWTTTL      time.Duration `env:"JWT_TTL" envDefault:"15m"`
@@ -54,7 +64,7 @@ type AuthConfig struct {
 type InviteConfig struct {
 	PublicBaseURL string        `env:"INVITE_PUBLIC_BASE_URL" envDefault:"http://localhost:5174"`
 	TTL           time.Duration `env:"INVITE_TTL" envDefault:"168h"`
-	TokenSecret   string        `env:"INVITATION_TOKEN_SECRET,required"`
+	TokenSecret   string        `env:"INVITATION_TOKEN_SECRET"`
 }
 
 type SMTPConfig struct {
@@ -79,12 +89,12 @@ func (config *OIDCConfig) Enabled() bool {
 }
 
 type BootstrapConfig struct {
-	Email    string `env:"ADMIN_EMAIL,required"`
-	Password string `env:"ADMIN_PASSWORD,required"`
+	Email    string `env:"ADMIN_EMAIL"`
+	Password string `env:"ADMIN_PASSWORD"`
 	Locale   string `env:"ADMIN_LOCALE" envDefault:"en-US"`
 }
 
-func Load() (Config, error) {
+func Load(profile Profile) (Config, error) {
 	if err := loadDotEnv(); err != nil {
 		return Config{}, err
 	}
@@ -94,17 +104,19 @@ func Load() (Config, error) {
 		return Config{}, fmt.Errorf("parse environment configuration: %w", err)
 	}
 
-	if err := config.validate(); err != nil {
+	if err := config.validate(profile); err != nil {
 		return Config{}, fmt.Errorf("validate configuration: %w", err)
 	}
 
 	return config, nil
 }
 
-func (config *Config) validate() error {
+func (config *Config) validate(profile Profile) error {
 	var errs []error
 
-	// Database validations
+	if strings.TrimSpace(config.Database.URL) == "" {
+		errs = append(errs, errors.New("DATABASE_URL is required"))
+	}
 	if config.Database.MaxConns <= 0 {
 		errs = append(errs, errors.New("DATABASE_MAX_CONNS must be greater than 0"))
 	}
@@ -115,42 +127,77 @@ func (config *Config) validate() error {
 		errs = append(errs, errors.New("DATABASE_MIN_CONNS must not exceed DATABASE_MAX_CONNS"))
 	}
 
-	// Secret validations
-	if len(config.Auth.JWTSecret) < 32 || placeholder(config.Auth.JWTSecret) {
-		errs = append(errs, errors.New("JWT_SECRET must contain at least 32 non-placeholder characters"))
-	}
-	if len(config.Invites.TokenSecret) < 32 || placeholder(config.Invites.TokenSecret) {
-		errs = append(errs, errors.New("INVITATION_TOKEN_SECRET must contain at least 32 non-placeholder characters"))
-	}
-	if len(config.Bootstrap.Password) < 12 || placeholder(config.Bootstrap.Password) {
-		errs = append(errs, errors.New("ADMIN_PASSWORD must contain at least 12 non-placeholder characters"))
+	switch profile {
+	case ProfileAPI:
+		errs = append(errs, config.validateAuth(), config.validateInvites(), config.validateOIDC())
+	case ProfileMigration:
+		errs = append(errs, config.validateBootstrap())
+	case ProfileWorker:
+		errs = append(errs, config.validateInvites(), config.validateSMTP())
+	case ProfileHealthcheck, ProfileWorkerHealthcheck:
+	case "":
+		errs = append(errs, errors.New("configuration profile is required"))
+	default:
+		errs = append(errs, fmt.Errorf("unknown configuration profile %q", profile))
 	}
 
-	// TTL validations
-	if config.Invites.TTL < 0 {
-		errs = append(errs, errors.New("INVITE_TTL must not be negative"))
+	return errors.Join(errs...)
+}
+
+func (config *Config) validateAuth() error {
+	var errs []error
+	if len(config.Auth.JWTSecret) < 32 || placeholder(config.Auth.JWTSecret) {
+		errs = append(errs, errors.New("JWT_SECRET must contain at least 32 non-placeholder characters"))
 	}
 	if config.Auth.JWTTTL <= 0 {
 		errs = append(errs, errors.New("JWT_TTL must be greater than 0"))
 	}
-
-	// SMTP conditional validation
-	if config.SMTP.Host != "" && (config.SMTP.From == "" || config.SMTP.Port == "") {
-		errs = append(errs, errors.New("SMTP_FROM and SMTP_PORT are required when SMTP_HOST is configured"))
-	}
-
-	// OIDC conditional validation
-	if config.OIDC.Enabled() {
-		if config.OIDC.GoogleClientSecret == "" ||
-			config.OIDC.GoogleCallbackURL == "" ||
-			config.OIDC.SuccessURL == "" ||
-			len(config.OIDC.StateSecret) < 32 ||
-			placeholder(config.OIDC.StateSecret) {
-			errs = append(errs, errors.New("GOOGLE_OIDC_CLIENT_SECRET, GOOGLE_OIDC_CALLBACK_URL, OIDC_SUCCESS_URL, and OIDC_STATE_SECRET (min 32 chars) are required when GOOGLE_OIDC_CLIENT_ID is configured"))
-		}
-	}
-
 	return errors.Join(errs...)
+}
+
+func (config *Config) validateInvites() error {
+	var errs []error
+	if len(config.Invites.TokenSecret) < 32 || placeholder(config.Invites.TokenSecret) {
+		errs = append(errs, errors.New("INVITATION_TOKEN_SECRET must contain at least 32 non-placeholder characters"))
+	}
+	if config.Invites.TTL <= 0 {
+		errs = append(errs, errors.New("INVITE_TTL must be greater than 0"))
+	}
+	return errors.Join(errs...)
+}
+
+func (config *Config) validateBootstrap() error {
+	var errs []error
+	if strings.TrimSpace(config.Bootstrap.Email) == "" {
+		errs = append(errs, errors.New("ADMIN_EMAIL is required"))
+	}
+	if len(config.Bootstrap.Password) < 12 || placeholder(config.Bootstrap.Password) {
+		errs = append(errs, errors.New("ADMIN_PASSWORD must contain at least 12 non-placeholder characters"))
+	}
+	return errors.Join(errs...)
+}
+
+func (config *Config) validateSMTP() error {
+	if strings.TrimSpace(config.SMTP.Host) == "" ||
+		strings.TrimSpace(config.SMTP.From) == "" ||
+		strings.TrimSpace(config.SMTP.Port) == "" {
+		return errors.New("SMTP_HOST, SMTP_FROM, and SMTP_PORT are required for the worker")
+	}
+	return nil
+}
+
+func (config *Config) validateOIDC() error {
+	if !config.OIDC.Enabled() {
+		return nil
+	}
+	if config.OIDC.GoogleClientSecret == "" ||
+		config.OIDC.GoogleCallbackURL == "" ||
+		config.OIDC.SuccessURL == "" ||
+		len(config.OIDC.StateSecret) < 32 ||
+		placeholder(config.OIDC.StateSecret) {
+		return errors.New("GOOGLE_OIDC_CLIENT_SECRET, GOOGLE_OIDC_CALLBACK_URL, OIDC_SUCCESS_URL, and OIDC_STATE_SECRET (min 32 chars) are required when GOOGLE_OIDC_CLIENT_ID is configured")
+	}
+	return nil
 }
 
 func loadDotEnv() error {

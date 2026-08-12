@@ -16,14 +16,14 @@ func (server *Server) Login(
 	ctx context.Context,
 	request *connect.Request[clinksv1.CredentialsRequest],
 ) (*connect.Response[clinksv1.Session], error) {
-	return server.loginWithCredentials(ctx, request, "user", server.sessions.Login, true)
+	return server.loginWithCredentials(ctx, request, "user", server.credentials.Login, true)
 }
 
 func (server *Server) LoginSuperAdmin(
 	ctx context.Context,
 	request *connect.Request[clinksv1.CredentialsRequest],
 ) (*connect.Response[clinksv1.Session], error) {
-	return server.loginWithCredentials(ctx, request, "superadmin", server.sessions.LoginSuperAdmin, false)
+	return server.loginWithCredentials(ctx, request, "superadmin", server.credentials.LoginSuperAdmin, false)
 }
 
 func (server *Server) Register(
@@ -35,7 +35,7 @@ func (server *Server) Register(
 		request.Msg.GetEmail(),
 		request.Msg.GetPassword(),
 		request.Msg.GetTenantName(),
-		requestLocale(request.Header()),
+		server.requestMessageLocale(request.Msg.GetLocale(), request.Header()),
 	)
 
 	return server.sessionResponse(ctx, request.Header(), session, err)
@@ -105,13 +105,13 @@ func (server *Server) CreateInvitation(
 		ctx,
 		session.Token,
 		request.Msg.GetEmail(),
-		domain.Role(request.Msg.GetRole()),
+		domain.RoleID(request.Msg.GetRoleId()),
 	)
 	if err != nil {
 		return nil, server.localizedError(ctx, request.Header(), err)
 	}
 
-	return connect.NewResponse(invitationMessage(&invitation)), nil
+	return connect.NewResponse(invitationMessage(invitation)), nil
 }
 
 func (server *Server) AcceptInvitation(
@@ -123,7 +123,7 @@ func (server *Server) AcceptInvitation(
 		request.Msg.GetToken(),
 		request.Msg.GetEmail(),
 		request.Msg.GetPassword(),
-		requestLocale(request.Header()),
+		server.requestMessageLocale(request.Msg.GetLocale(), request.Header()),
 	)
 
 	return server.sessionResponse(ctx, request.Header(), session, err)
@@ -143,7 +143,7 @@ func (server *Server) loginWithCredentials(
 
 	allowed, retryAfter := server.authLimiter.allow(limiterKey)
 	if !allowed {
-		return nil, rateLimitError(request.Header(), retryAfter)
+		return nil, server.rateLimitError(ctx, request.Header(), retryAfter)
 	}
 
 	session, err := login(ctx, email, request.Msg.GetPassword())
@@ -189,4 +189,11 @@ func isSessionInvalid(err error) bool {
 
 	return domainError.Kind == domain.ErrorUnauthorized ||
 		domainError.Kind == domain.ErrorInvalidCredentials
+}
+
+func (server *Server) requestMessageLocale(value string, header stdhttp.Header) domain.Locale {
+	if locale := domain.NewLocale(value); locale.IsValid() {
+		return locale
+	}
+	return server.requestLocale(header)
 }

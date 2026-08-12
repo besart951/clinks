@@ -12,11 +12,11 @@ import (
 )
 
 type AuthDependencies struct {
-	Identities    ports.IdentityRepository
+	Identities    ports.SessionIdentityRepository
 	Federation    ports.ExternalIdentityRepository
 	Provisioner   ports.TenantProvisioner
-	Memberships   ports.MembershipRepository
-	Roles         ports.RoleReader
+	Memberships   ports.MembershipSessionReader
+	Roles         ports.RoleLookup
 	Invitations   ports.InvitationRepository
 	Passwords     ports.PasswordHasher
 	Sessions      ports.SessionIssuer
@@ -31,12 +31,12 @@ type AuthDependencies struct {
 	Now func() time.Time
 }
 
-type AuthService struct {
-	identities    ports.IdentityRepository
+type authService struct {
+	identities    ports.SessionIdentityRepository
 	federation    ports.ExternalIdentityRepository
 	provisioner   ports.TenantProvisioner
-	memberships   ports.MembershipRepository
-	roles         ports.RoleReader
+	memberships   ports.MembershipSessionReader
+	roles         ports.RoleLookup
 	invitations   ports.InvitationRepository
 	passwords     ports.PasswordHasher
 	sessions      ports.SessionIssuer
@@ -49,9 +49,33 @@ type AuthService struct {
 	now       func() time.Time
 }
 
-func NewAuthService(
+func newAuthService(
 	dependencies AuthDependencies,
-) (*AuthService, error) {
+) (*authService, error) {
+	switch {
+	case dependencies.Identities == nil:
+		return nil, errors.New("auth service: identities dependency is required")
+	case dependencies.Federation == nil:
+		return nil, errors.New("auth service: federation dependency is required")
+	case dependencies.Provisioner == nil:
+		return nil, errors.New("auth service: provisioner dependency is required")
+	case dependencies.Memberships == nil:
+		return nil, errors.New("auth service: memberships dependency is required")
+	case dependencies.Roles == nil:
+		return nil, errors.New("auth service: roles dependency is required")
+	case dependencies.Invitations == nil:
+		return nil, errors.New("auth service: invitations dependency is required")
+	case dependencies.Passwords == nil:
+		return nil, errors.New("auth service: passwords dependency is required")
+	case dependencies.Sessions == nil:
+		return nil, errors.New("auth service: sessions dependency is required")
+	case dependencies.Audit == nil:
+		return nil, errors.New("auth service: audit dependency is required")
+	case dependencies.InvitationIDs == nil:
+		return nil, errors.New("auth service: invitation ID dependency is required")
+	case dependencies.Tokens == nil:
+		return nil, errors.New("auth service: invitation token dependency is required")
+	}
 	if dependencies.InviteTTL <= 0 {
 		return nil, errors.New(
 			"auth service: invitation TTL must be positive",
@@ -70,7 +94,7 @@ func NewAuthService(
 		now = time.Now
 	}
 
-	return &AuthService{
+	return &authService{
 		identities:    dependencies.Identities,
 		federation:    dependencies.Federation,
 		provisioner:   dependencies.Provisioner,
@@ -88,7 +112,7 @@ func NewAuthService(
 	}, nil
 }
 
-func (service *AuthService) sessionForUser(
+func (service *authService) sessionForUser(
 	ctx context.Context,
 	user domain.User,
 	activeTenantID *domain.TenantID,
@@ -98,7 +122,7 @@ func (service *AuthService) sessionForUser(
 		Memberships: make([]domain.Membership, 0),
 	}
 
-	if user.IsSuperAdmin {
+	if user.GlobalRole.IsSuperAdministrator() {
 		return session, nil
 	}
 
@@ -154,7 +178,7 @@ func (service *AuthService) sessionForUser(
 		domain.NewError(domain.ErrorUnauthorized)
 }
 
-func (service *AuthService) issue(
+func (service *authService) issue(
 	session domain.Session,
 ) (domain.Session, error) {
 	claim := domain.SessionClaim{
@@ -179,7 +203,7 @@ func (service *AuthService) issue(
 	return session, nil
 }
 
-func (service *AuthService) requireTenantPermission(
+func (service *authService) requireTenantPermission(
 	ctx context.Context,
 	userID domain.UserID,
 	tenantID domain.TenantID,
@@ -211,7 +235,7 @@ func (service *AuthService) requireTenantPermission(
 	return membership, nil
 }
 
-func (service *AuthService) appendAudit(
+func (service *authService) appendAudit(
 	ctx context.Context,
 	actorID domain.UserID,
 	tenantID *domain.TenantID,

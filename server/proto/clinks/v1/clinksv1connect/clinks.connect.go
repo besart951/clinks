@@ -48,9 +48,6 @@ const (
 	// ClinksServiceSwitchTenantProcedure is the fully-qualified name of the ClinksService's
 	// SwitchTenant RPC.
 	ClinksServiceSwitchTenantProcedure = "/clinks.v1.ClinksService/SwitchTenant"
-	// ClinksServiceCreateInvitationProcedure is the fully-qualified name of the ClinksService's
-	// CreateInvitation RPC.
-	ClinksServiceCreateInvitationProcedure = "/clinks.v1.ClinksService/CreateInvitation"
 	// ClinksServiceAcceptInvitationProcedure is the fully-qualified name of the ClinksService's
 	// AcceptInvitation RPC.
 	ClinksServiceAcceptInvitationProcedure = "/clinks.v1.ClinksService/AcceptInvitation"
@@ -66,18 +63,9 @@ const (
 	// ClinksServiceCreateTenantProcedure is the fully-qualified name of the ClinksService's
 	// CreateTenant RPC.
 	ClinksServiceCreateTenantProcedure = "/clinks.v1.ClinksService/CreateTenant"
-	// ClinksServiceListManagedLanguagesProcedure is the fully-qualified name of the ClinksService's
-	// ListManagedLanguages RPC.
-	ClinksServiceListManagedLanguagesProcedure = "/clinks.v1.ClinksService/ListManagedLanguages"
-	// ClinksServiceSaveLanguageProcedure is the fully-qualified name of the ClinksService's
-	// SaveLanguage RPC.
-	ClinksServiceSaveLanguageProcedure = "/clinks.v1.ClinksService/SaveLanguage"
-	// ClinksServiceSaveTranslationProcedure is the fully-qualified name of the ClinksService's
-	// SaveTranslation RPC.
-	ClinksServiceSaveTranslationProcedure = "/clinks.v1.ClinksService/SaveTranslation"
-	// ClinksServiceListAuditEventsProcedure is the fully-qualified name of the ClinksService's
-	// ListAuditEvents RPC.
-	ClinksServiceListAuditEventsProcedure = "/clinks.v1.ClinksService/ListAuditEvents"
+	// ClinksServiceUpdateTenantProcedure is the fully-qualified name of the ClinksService's
+	// UpdateTenant RPC.
+	ClinksServiceUpdateTenantProcedure = "/clinks.v1.ClinksService/UpdateTenant"
 	// ClinksServiceListUsersProcedure is the fully-qualified name of the ClinksService's ListUsers RPC.
 	ClinksServiceListUsersProcedure = "/clinks.v1.ClinksService/ListUsers"
 	// ClinksServiceGetUserProcedure is the fully-qualified name of the ClinksService's GetUser RPC.
@@ -88,9 +76,59 @@ const (
 	// ClinksServiceRevokeInvitationProcedure is the fully-qualified name of the ClinksService's
 	// RevokeInvitation RPC.
 	ClinksServiceRevokeInvitationProcedure = "/clinks.v1.ClinksService/RevokeInvitation"
+	// ClinksServiceListManagedLanguagesProcedure is the fully-qualified name of the ClinksService's
+	// ListManagedLanguages RPC.
+	ClinksServiceListManagedLanguagesProcedure = "/clinks.v1.ClinksService/ListManagedLanguages"
+	// ClinksServiceCreateLanguageProcedure is the fully-qualified name of the ClinksService's
+	// CreateLanguage RPC.
+	ClinksServiceCreateLanguageProcedure = "/clinks.v1.ClinksService/CreateLanguage"
+	// ClinksServiceUpdateLanguageProcedure is the fully-qualified name of the ClinksService's
+	// UpdateLanguage RPC.
+	ClinksServiceUpdateLanguageProcedure = "/clinks.v1.ClinksService/UpdateLanguage"
+	// ClinksServiceListTranslationOverridesProcedure is the fully-qualified name of the ClinksService's
+	// ListTranslationOverrides RPC.
+	ClinksServiceListTranslationOverridesProcedure = "/clinks.v1.ClinksService/ListTranslationOverrides"
+	// ClinksServiceUpsertTranslationOverrideProcedure is the fully-qualified name of the
+	// ClinksService's UpsertTranslationOverride RPC.
+	ClinksServiceUpsertTranslationOverrideProcedure = "/clinks.v1.ClinksService/UpsertTranslationOverride"
+	// ClinksServiceDeleteTranslationOverrideProcedure is the fully-qualified name of the
+	// ClinksService's DeleteTranslationOverride RPC.
+	ClinksServiceDeleteTranslationOverrideProcedure = "/clinks.v1.ClinksService/DeleteTranslationOverride"
+	// ClinksServiceListAuditEventsProcedure is the fully-qualified name of the ClinksService's
+	// ListAuditEvents RPC.
+	ClinksServiceListAuditEventsProcedure = "/clinks.v1.ClinksService/ListAuditEvents"
 	// ClinksServiceGetSystemStatsProcedure is the fully-qualified name of the ClinksService's
 	// GetSystemStats RPC.
 	ClinksServiceGetSystemStatsProcedure = "/clinks.v1.ClinksService/GetSystemStats"
+	// ClinksServiceUpdateCurrentTenantProcedure is the fully-qualified name of the ClinksService's
+	// UpdateCurrentTenant RPC.
+	ClinksServiceUpdateCurrentTenantProcedure = "/clinks.v1.ClinksService/UpdateCurrentTenant"
+	// ClinksServiceListMembershipsProcedure is the fully-qualified name of the ClinksService's
+	// ListMemberships RPC.
+	ClinksServiceListMembershipsProcedure = "/clinks.v1.ClinksService/ListMemberships"
+	// ClinksServiceUpdateMembershipProcedure is the fully-qualified name of the ClinksService's
+	// UpdateMembership RPC.
+	ClinksServiceUpdateMembershipProcedure = "/clinks.v1.ClinksService/UpdateMembership"
+	// ClinksServiceListRolesProcedure is the fully-qualified name of the ClinksService's ListRoles RPC.
+	ClinksServiceListRolesProcedure = "/clinks.v1.ClinksService/ListRoles"
+	// ClinksServiceCreateRoleProcedure is the fully-qualified name of the ClinksService's CreateRole
+	// RPC.
+	ClinksServiceCreateRoleProcedure = "/clinks.v1.ClinksService/CreateRole"
+	// ClinksServiceUpdateRoleProcedure is the fully-qualified name of the ClinksService's UpdateRole
+	// RPC.
+	ClinksServiceUpdateRoleProcedure = "/clinks.v1.ClinksService/UpdateRole"
+	// ClinksServiceDeleteRoleProcedure is the fully-qualified name of the ClinksService's DeleteRole
+	// RPC.
+	ClinksServiceDeleteRoleProcedure = "/clinks.v1.ClinksService/DeleteRole"
+	// ClinksServiceListTenantInvitationsProcedure is the fully-qualified name of the ClinksService's
+	// ListTenantInvitations RPC.
+	ClinksServiceListTenantInvitationsProcedure = "/clinks.v1.ClinksService/ListTenantInvitations"
+	// ClinksServiceCreateInvitationProcedure is the fully-qualified name of the ClinksService's
+	// CreateInvitation RPC.
+	ClinksServiceCreateInvitationProcedure = "/clinks.v1.ClinksService/CreateInvitation"
+	// ClinksServiceRevokeTenantInvitationProcedure is the fully-qualified name of the ClinksService's
+	// RevokeTenantInvitation RPC.
+	ClinksServiceRevokeTenantInvitationProcedure = "/clinks.v1.ClinksService/RevokeTenantInvitation"
 )
 
 // ClinksServiceClient is a client for the clinks.v1.ClinksService service.
@@ -101,21 +139,34 @@ type ClinksServiceClient interface {
 	Logout(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.Empty], error)
 	GetSession(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.Session], error)
 	SwitchTenant(context.Context, *connect.Request[v1.SwitchTenantRequest]) (*connect.Response[v1.Session], error)
-	CreateInvitation(context.Context, *connect.Request[v1.CreateInvitationRequest]) (*connect.Response[v1.Invitation], error)
 	AcceptInvitation(context.Context, *connect.Request[v1.AcceptInvitationRequest]) (*connect.Response[v1.Session], error)
 	GetLanguages(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.LanguagesResponse], error)
 	GetTranslations(context.Context, *connect.Request[v1.GetTranslationsRequest]) (*connect.Response[v1.TranslationsResponse], error)
-	ListTenants(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.TenantsResponse], error)
+	ListTenants(context.Context, *connect.Request[v1.ListTenantsRequest]) (*connect.Response[v1.ListTenantsResponse], error)
 	CreateTenant(context.Context, *connect.Request[v1.CreateTenantRequest]) (*connect.Response[v1.Tenant], error)
-	ListManagedLanguages(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.LanguagesResponse], error)
-	SaveLanguage(context.Context, *connect.Request[v1.Language]) (*connect.Response[v1.Empty], error)
-	SaveTranslation(context.Context, *connect.Request[v1.ScopedTranslation]) (*connect.Response[v1.Empty], error)
-	ListAuditEvents(context.Context, *connect.Request[v1.ListAuditEventsRequest]) (*connect.Response[v1.AuditEventsResponse], error)
+	UpdateTenant(context.Context, *connect.Request[v1.UpdateTenantRequest]) (*connect.Response[v1.Tenant], error)
 	ListUsers(context.Context, *connect.Request[v1.ListUsersRequest]) (*connect.Response[v1.ListUsersResponse], error)
 	GetUser(context.Context, *connect.Request[v1.GetUserRequest]) (*connect.Response[v1.UserDetail], error)
 	ListInvitations(context.Context, *connect.Request[v1.ListInvitationsRequest]) (*connect.Response[v1.ListInvitationsResponse], error)
 	RevokeInvitation(context.Context, *connect.Request[v1.RevokeInvitationRequest]) (*connect.Response[v1.Empty], error)
+	ListManagedLanguages(context.Context, *connect.Request[v1.ListLanguagesRequest]) (*connect.Response[v1.ListLanguagesResponse], error)
+	CreateLanguage(context.Context, *connect.Request[v1.CreateLanguageRequest]) (*connect.Response[v1.Language], error)
+	UpdateLanguage(context.Context, *connect.Request[v1.UpdateLanguageRequest]) (*connect.Response[v1.Language], error)
+	ListTranslationOverrides(context.Context, *connect.Request[v1.ListTranslationOverridesRequest]) (*connect.Response[v1.ListTranslationOverridesResponse], error)
+	UpsertTranslationOverride(context.Context, *connect.Request[v1.UpsertTranslationOverrideRequest]) (*connect.Response[v1.TranslationOverride], error)
+	DeleteTranslationOverride(context.Context, *connect.Request[v1.DeleteTranslationOverrideRequest]) (*connect.Response[v1.Empty], error)
+	ListAuditEvents(context.Context, *connect.Request[v1.ListAuditEventsRequest]) (*connect.Response[v1.ListAuditEventsResponse], error)
 	GetSystemStats(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.SystemStats], error)
+	UpdateCurrentTenant(context.Context, *connect.Request[v1.UpdateCurrentTenantRequest]) (*connect.Response[v1.Tenant], error)
+	ListMemberships(context.Context, *connect.Request[v1.ListMembershipsRequest]) (*connect.Response[v1.ListMembershipsResponse], error)
+	UpdateMembership(context.Context, *connect.Request[v1.UpdateMembershipRequest]) (*connect.Response[v1.Membership], error)
+	ListRoles(context.Context, *connect.Request[v1.ListRolesRequest]) (*connect.Response[v1.ListRolesResponse], error)
+	CreateRole(context.Context, *connect.Request[v1.CreateRoleRequest]) (*connect.Response[v1.Role], error)
+	UpdateRole(context.Context, *connect.Request[v1.UpdateRoleRequest]) (*connect.Response[v1.Role], error)
+	DeleteRole(context.Context, *connect.Request[v1.DeleteRoleRequest]) (*connect.Response[v1.Empty], error)
+	ListTenantInvitations(context.Context, *connect.Request[v1.ListTenantInvitationsRequest]) (*connect.Response[v1.ListInvitationsResponse], error)
+	CreateInvitation(context.Context, *connect.Request[v1.CreateInvitationRequest]) (*connect.Response[v1.Invitation], error)
+	RevokeTenantInvitation(context.Context, *connect.Request[v1.RevokeInvitationRequest]) (*connect.Response[v1.Empty], error)
 }
 
 // NewClinksServiceClient constructs a client for the clinks.v1.ClinksService service. By default,
@@ -165,12 +216,6 @@ func NewClinksServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(clinksServiceMethods.ByName("SwitchTenant")),
 			connect.WithClientOptions(opts...),
 		),
-		createInvitation: connect.NewClient[v1.CreateInvitationRequest, v1.Invitation](
-			httpClient,
-			baseURL+ClinksServiceCreateInvitationProcedure,
-			connect.WithSchema(clinksServiceMethods.ByName("CreateInvitation")),
-			connect.WithClientOptions(opts...),
-		),
 		acceptInvitation: connect.NewClient[v1.AcceptInvitationRequest, v1.Session](
 			httpClient,
 			baseURL+ClinksServiceAcceptInvitationProcedure,
@@ -189,7 +234,7 @@ func NewClinksServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(clinksServiceMethods.ByName("GetTranslations")),
 			connect.WithClientOptions(opts...),
 		),
-		listTenants: connect.NewClient[v1.Empty, v1.TenantsResponse](
+		listTenants: connect.NewClient[v1.ListTenantsRequest, v1.ListTenantsResponse](
 			httpClient,
 			baseURL+ClinksServiceListTenantsProcedure,
 			connect.WithSchema(clinksServiceMethods.ByName("ListTenants")),
@@ -201,28 +246,10 @@ func NewClinksServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(clinksServiceMethods.ByName("CreateTenant")),
 			connect.WithClientOptions(opts...),
 		),
-		listManagedLanguages: connect.NewClient[v1.Empty, v1.LanguagesResponse](
+		updateTenant: connect.NewClient[v1.UpdateTenantRequest, v1.Tenant](
 			httpClient,
-			baseURL+ClinksServiceListManagedLanguagesProcedure,
-			connect.WithSchema(clinksServiceMethods.ByName("ListManagedLanguages")),
-			connect.WithClientOptions(opts...),
-		),
-		saveLanguage: connect.NewClient[v1.Language, v1.Empty](
-			httpClient,
-			baseURL+ClinksServiceSaveLanguageProcedure,
-			connect.WithSchema(clinksServiceMethods.ByName("SaveLanguage")),
-			connect.WithClientOptions(opts...),
-		),
-		saveTranslation: connect.NewClient[v1.ScopedTranslation, v1.Empty](
-			httpClient,
-			baseURL+ClinksServiceSaveTranslationProcedure,
-			connect.WithSchema(clinksServiceMethods.ByName("SaveTranslation")),
-			connect.WithClientOptions(opts...),
-		),
-		listAuditEvents: connect.NewClient[v1.ListAuditEventsRequest, v1.AuditEventsResponse](
-			httpClient,
-			baseURL+ClinksServiceListAuditEventsProcedure,
-			connect.WithSchema(clinksServiceMethods.ByName("ListAuditEvents")),
+			baseURL+ClinksServiceUpdateTenantProcedure,
+			connect.WithSchema(clinksServiceMethods.ByName("UpdateTenant")),
 			connect.WithClientOptions(opts...),
 		),
 		listUsers: connect.NewClient[v1.ListUsersRequest, v1.ListUsersResponse](
@@ -249,10 +276,112 @@ func NewClinksServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(clinksServiceMethods.ByName("RevokeInvitation")),
 			connect.WithClientOptions(opts...),
 		),
+		listManagedLanguages: connect.NewClient[v1.ListLanguagesRequest, v1.ListLanguagesResponse](
+			httpClient,
+			baseURL+ClinksServiceListManagedLanguagesProcedure,
+			connect.WithSchema(clinksServiceMethods.ByName("ListManagedLanguages")),
+			connect.WithClientOptions(opts...),
+		),
+		createLanguage: connect.NewClient[v1.CreateLanguageRequest, v1.Language](
+			httpClient,
+			baseURL+ClinksServiceCreateLanguageProcedure,
+			connect.WithSchema(clinksServiceMethods.ByName("CreateLanguage")),
+			connect.WithClientOptions(opts...),
+		),
+		updateLanguage: connect.NewClient[v1.UpdateLanguageRequest, v1.Language](
+			httpClient,
+			baseURL+ClinksServiceUpdateLanguageProcedure,
+			connect.WithSchema(clinksServiceMethods.ByName("UpdateLanguage")),
+			connect.WithClientOptions(opts...),
+		),
+		listTranslationOverrides: connect.NewClient[v1.ListTranslationOverridesRequest, v1.ListTranslationOverridesResponse](
+			httpClient,
+			baseURL+ClinksServiceListTranslationOverridesProcedure,
+			connect.WithSchema(clinksServiceMethods.ByName("ListTranslationOverrides")),
+			connect.WithClientOptions(opts...),
+		),
+		upsertTranslationOverride: connect.NewClient[v1.UpsertTranslationOverrideRequest, v1.TranslationOverride](
+			httpClient,
+			baseURL+ClinksServiceUpsertTranslationOverrideProcedure,
+			connect.WithSchema(clinksServiceMethods.ByName("UpsertTranslationOverride")),
+			connect.WithClientOptions(opts...),
+		),
+		deleteTranslationOverride: connect.NewClient[v1.DeleteTranslationOverrideRequest, v1.Empty](
+			httpClient,
+			baseURL+ClinksServiceDeleteTranslationOverrideProcedure,
+			connect.WithSchema(clinksServiceMethods.ByName("DeleteTranslationOverride")),
+			connect.WithClientOptions(opts...),
+		),
+		listAuditEvents: connect.NewClient[v1.ListAuditEventsRequest, v1.ListAuditEventsResponse](
+			httpClient,
+			baseURL+ClinksServiceListAuditEventsProcedure,
+			connect.WithSchema(clinksServiceMethods.ByName("ListAuditEvents")),
+			connect.WithClientOptions(opts...),
+		),
 		getSystemStats: connect.NewClient[v1.Empty, v1.SystemStats](
 			httpClient,
 			baseURL+ClinksServiceGetSystemStatsProcedure,
 			connect.WithSchema(clinksServiceMethods.ByName("GetSystemStats")),
+			connect.WithClientOptions(opts...),
+		),
+		updateCurrentTenant: connect.NewClient[v1.UpdateCurrentTenantRequest, v1.Tenant](
+			httpClient,
+			baseURL+ClinksServiceUpdateCurrentTenantProcedure,
+			connect.WithSchema(clinksServiceMethods.ByName("UpdateCurrentTenant")),
+			connect.WithClientOptions(opts...),
+		),
+		listMemberships: connect.NewClient[v1.ListMembershipsRequest, v1.ListMembershipsResponse](
+			httpClient,
+			baseURL+ClinksServiceListMembershipsProcedure,
+			connect.WithSchema(clinksServiceMethods.ByName("ListMemberships")),
+			connect.WithClientOptions(opts...),
+		),
+		updateMembership: connect.NewClient[v1.UpdateMembershipRequest, v1.Membership](
+			httpClient,
+			baseURL+ClinksServiceUpdateMembershipProcedure,
+			connect.WithSchema(clinksServiceMethods.ByName("UpdateMembership")),
+			connect.WithClientOptions(opts...),
+		),
+		listRoles: connect.NewClient[v1.ListRolesRequest, v1.ListRolesResponse](
+			httpClient,
+			baseURL+ClinksServiceListRolesProcedure,
+			connect.WithSchema(clinksServiceMethods.ByName("ListRoles")),
+			connect.WithClientOptions(opts...),
+		),
+		createRole: connect.NewClient[v1.CreateRoleRequest, v1.Role](
+			httpClient,
+			baseURL+ClinksServiceCreateRoleProcedure,
+			connect.WithSchema(clinksServiceMethods.ByName("CreateRole")),
+			connect.WithClientOptions(opts...),
+		),
+		updateRole: connect.NewClient[v1.UpdateRoleRequest, v1.Role](
+			httpClient,
+			baseURL+ClinksServiceUpdateRoleProcedure,
+			connect.WithSchema(clinksServiceMethods.ByName("UpdateRole")),
+			connect.WithClientOptions(opts...),
+		),
+		deleteRole: connect.NewClient[v1.DeleteRoleRequest, v1.Empty](
+			httpClient,
+			baseURL+ClinksServiceDeleteRoleProcedure,
+			connect.WithSchema(clinksServiceMethods.ByName("DeleteRole")),
+			connect.WithClientOptions(opts...),
+		),
+		listTenantInvitations: connect.NewClient[v1.ListTenantInvitationsRequest, v1.ListInvitationsResponse](
+			httpClient,
+			baseURL+ClinksServiceListTenantInvitationsProcedure,
+			connect.WithSchema(clinksServiceMethods.ByName("ListTenantInvitations")),
+			connect.WithClientOptions(opts...),
+		),
+		createInvitation: connect.NewClient[v1.CreateInvitationRequest, v1.Invitation](
+			httpClient,
+			baseURL+ClinksServiceCreateInvitationProcedure,
+			connect.WithSchema(clinksServiceMethods.ByName("CreateInvitation")),
+			connect.WithClientOptions(opts...),
+		),
+		revokeTenantInvitation: connect.NewClient[v1.RevokeInvitationRequest, v1.Empty](
+			httpClient,
+			baseURL+ClinksServiceRevokeTenantInvitationProcedure,
+			connect.WithSchema(clinksServiceMethods.ByName("RevokeTenantInvitation")),
 			connect.WithClientOptions(opts...),
 		),
 	}
@@ -260,27 +389,40 @@ func NewClinksServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 
 // clinksServiceClient implements ClinksServiceClient.
 type clinksServiceClient struct {
-	login                *connect.Client[v1.CredentialsRequest, v1.Session]
-	loginSuperAdmin      *connect.Client[v1.CredentialsRequest, v1.Session]
-	register             *connect.Client[v1.RegisterRequest, v1.Session]
-	logout               *connect.Client[v1.Empty, v1.Empty]
-	getSession           *connect.Client[v1.Empty, v1.Session]
-	switchTenant         *connect.Client[v1.SwitchTenantRequest, v1.Session]
-	createInvitation     *connect.Client[v1.CreateInvitationRequest, v1.Invitation]
-	acceptInvitation     *connect.Client[v1.AcceptInvitationRequest, v1.Session]
-	getLanguages         *connect.Client[v1.Empty, v1.LanguagesResponse]
-	getTranslations      *connect.Client[v1.GetTranslationsRequest, v1.TranslationsResponse]
-	listTenants          *connect.Client[v1.Empty, v1.TenantsResponse]
-	createTenant         *connect.Client[v1.CreateTenantRequest, v1.Tenant]
-	listManagedLanguages *connect.Client[v1.Empty, v1.LanguagesResponse]
-	saveLanguage         *connect.Client[v1.Language, v1.Empty]
-	saveTranslation      *connect.Client[v1.ScopedTranslation, v1.Empty]
-	listAuditEvents      *connect.Client[v1.ListAuditEventsRequest, v1.AuditEventsResponse]
-	listUsers            *connect.Client[v1.ListUsersRequest, v1.ListUsersResponse]
-	getUser              *connect.Client[v1.GetUserRequest, v1.UserDetail]
-	listInvitations      *connect.Client[v1.ListInvitationsRequest, v1.ListInvitationsResponse]
-	revokeInvitation     *connect.Client[v1.RevokeInvitationRequest, v1.Empty]
-	getSystemStats       *connect.Client[v1.Empty, v1.SystemStats]
+	login                     *connect.Client[v1.CredentialsRequest, v1.Session]
+	loginSuperAdmin           *connect.Client[v1.CredentialsRequest, v1.Session]
+	register                  *connect.Client[v1.RegisterRequest, v1.Session]
+	logout                    *connect.Client[v1.Empty, v1.Empty]
+	getSession                *connect.Client[v1.Empty, v1.Session]
+	switchTenant              *connect.Client[v1.SwitchTenantRequest, v1.Session]
+	acceptInvitation          *connect.Client[v1.AcceptInvitationRequest, v1.Session]
+	getLanguages              *connect.Client[v1.Empty, v1.LanguagesResponse]
+	getTranslations           *connect.Client[v1.GetTranslationsRequest, v1.TranslationsResponse]
+	listTenants               *connect.Client[v1.ListTenantsRequest, v1.ListTenantsResponse]
+	createTenant              *connect.Client[v1.CreateTenantRequest, v1.Tenant]
+	updateTenant              *connect.Client[v1.UpdateTenantRequest, v1.Tenant]
+	listUsers                 *connect.Client[v1.ListUsersRequest, v1.ListUsersResponse]
+	getUser                   *connect.Client[v1.GetUserRequest, v1.UserDetail]
+	listInvitations           *connect.Client[v1.ListInvitationsRequest, v1.ListInvitationsResponse]
+	revokeInvitation          *connect.Client[v1.RevokeInvitationRequest, v1.Empty]
+	listManagedLanguages      *connect.Client[v1.ListLanguagesRequest, v1.ListLanguagesResponse]
+	createLanguage            *connect.Client[v1.CreateLanguageRequest, v1.Language]
+	updateLanguage            *connect.Client[v1.UpdateLanguageRequest, v1.Language]
+	listTranslationOverrides  *connect.Client[v1.ListTranslationOverridesRequest, v1.ListTranslationOverridesResponse]
+	upsertTranslationOverride *connect.Client[v1.UpsertTranslationOverrideRequest, v1.TranslationOverride]
+	deleteTranslationOverride *connect.Client[v1.DeleteTranslationOverrideRequest, v1.Empty]
+	listAuditEvents           *connect.Client[v1.ListAuditEventsRequest, v1.ListAuditEventsResponse]
+	getSystemStats            *connect.Client[v1.Empty, v1.SystemStats]
+	updateCurrentTenant       *connect.Client[v1.UpdateCurrentTenantRequest, v1.Tenant]
+	listMemberships           *connect.Client[v1.ListMembershipsRequest, v1.ListMembershipsResponse]
+	updateMembership          *connect.Client[v1.UpdateMembershipRequest, v1.Membership]
+	listRoles                 *connect.Client[v1.ListRolesRequest, v1.ListRolesResponse]
+	createRole                *connect.Client[v1.CreateRoleRequest, v1.Role]
+	updateRole                *connect.Client[v1.UpdateRoleRequest, v1.Role]
+	deleteRole                *connect.Client[v1.DeleteRoleRequest, v1.Empty]
+	listTenantInvitations     *connect.Client[v1.ListTenantInvitationsRequest, v1.ListInvitationsResponse]
+	createInvitation          *connect.Client[v1.CreateInvitationRequest, v1.Invitation]
+	revokeTenantInvitation    *connect.Client[v1.RevokeInvitationRequest, v1.Empty]
 }
 
 // Login calls clinks.v1.ClinksService.Login.
@@ -313,11 +455,6 @@ func (c *clinksServiceClient) SwitchTenant(ctx context.Context, req *connect.Req
 	return c.switchTenant.CallUnary(ctx, req)
 }
 
-// CreateInvitation calls clinks.v1.ClinksService.CreateInvitation.
-func (c *clinksServiceClient) CreateInvitation(ctx context.Context, req *connect.Request[v1.CreateInvitationRequest]) (*connect.Response[v1.Invitation], error) {
-	return c.createInvitation.CallUnary(ctx, req)
-}
-
 // AcceptInvitation calls clinks.v1.ClinksService.AcceptInvitation.
 func (c *clinksServiceClient) AcceptInvitation(ctx context.Context, req *connect.Request[v1.AcceptInvitationRequest]) (*connect.Response[v1.Session], error) {
 	return c.acceptInvitation.CallUnary(ctx, req)
@@ -334,7 +471,7 @@ func (c *clinksServiceClient) GetTranslations(ctx context.Context, req *connect.
 }
 
 // ListTenants calls clinks.v1.ClinksService.ListTenants.
-func (c *clinksServiceClient) ListTenants(ctx context.Context, req *connect.Request[v1.Empty]) (*connect.Response[v1.TenantsResponse], error) {
+func (c *clinksServiceClient) ListTenants(ctx context.Context, req *connect.Request[v1.ListTenantsRequest]) (*connect.Response[v1.ListTenantsResponse], error) {
 	return c.listTenants.CallUnary(ctx, req)
 }
 
@@ -343,24 +480,9 @@ func (c *clinksServiceClient) CreateTenant(ctx context.Context, req *connect.Req
 	return c.createTenant.CallUnary(ctx, req)
 }
 
-// ListManagedLanguages calls clinks.v1.ClinksService.ListManagedLanguages.
-func (c *clinksServiceClient) ListManagedLanguages(ctx context.Context, req *connect.Request[v1.Empty]) (*connect.Response[v1.LanguagesResponse], error) {
-	return c.listManagedLanguages.CallUnary(ctx, req)
-}
-
-// SaveLanguage calls clinks.v1.ClinksService.SaveLanguage.
-func (c *clinksServiceClient) SaveLanguage(ctx context.Context, req *connect.Request[v1.Language]) (*connect.Response[v1.Empty], error) {
-	return c.saveLanguage.CallUnary(ctx, req)
-}
-
-// SaveTranslation calls clinks.v1.ClinksService.SaveTranslation.
-func (c *clinksServiceClient) SaveTranslation(ctx context.Context, req *connect.Request[v1.ScopedTranslation]) (*connect.Response[v1.Empty], error) {
-	return c.saveTranslation.CallUnary(ctx, req)
-}
-
-// ListAuditEvents calls clinks.v1.ClinksService.ListAuditEvents.
-func (c *clinksServiceClient) ListAuditEvents(ctx context.Context, req *connect.Request[v1.ListAuditEventsRequest]) (*connect.Response[v1.AuditEventsResponse], error) {
-	return c.listAuditEvents.CallUnary(ctx, req)
+// UpdateTenant calls clinks.v1.ClinksService.UpdateTenant.
+func (c *clinksServiceClient) UpdateTenant(ctx context.Context, req *connect.Request[v1.UpdateTenantRequest]) (*connect.Response[v1.Tenant], error) {
+	return c.updateTenant.CallUnary(ctx, req)
 }
 
 // ListUsers calls clinks.v1.ClinksService.ListUsers.
@@ -383,9 +505,94 @@ func (c *clinksServiceClient) RevokeInvitation(ctx context.Context, req *connect
 	return c.revokeInvitation.CallUnary(ctx, req)
 }
 
+// ListManagedLanguages calls clinks.v1.ClinksService.ListManagedLanguages.
+func (c *clinksServiceClient) ListManagedLanguages(ctx context.Context, req *connect.Request[v1.ListLanguagesRequest]) (*connect.Response[v1.ListLanguagesResponse], error) {
+	return c.listManagedLanguages.CallUnary(ctx, req)
+}
+
+// CreateLanguage calls clinks.v1.ClinksService.CreateLanguage.
+func (c *clinksServiceClient) CreateLanguage(ctx context.Context, req *connect.Request[v1.CreateLanguageRequest]) (*connect.Response[v1.Language], error) {
+	return c.createLanguage.CallUnary(ctx, req)
+}
+
+// UpdateLanguage calls clinks.v1.ClinksService.UpdateLanguage.
+func (c *clinksServiceClient) UpdateLanguage(ctx context.Context, req *connect.Request[v1.UpdateLanguageRequest]) (*connect.Response[v1.Language], error) {
+	return c.updateLanguage.CallUnary(ctx, req)
+}
+
+// ListTranslationOverrides calls clinks.v1.ClinksService.ListTranslationOverrides.
+func (c *clinksServiceClient) ListTranslationOverrides(ctx context.Context, req *connect.Request[v1.ListTranslationOverridesRequest]) (*connect.Response[v1.ListTranslationOverridesResponse], error) {
+	return c.listTranslationOverrides.CallUnary(ctx, req)
+}
+
+// UpsertTranslationOverride calls clinks.v1.ClinksService.UpsertTranslationOverride.
+func (c *clinksServiceClient) UpsertTranslationOverride(ctx context.Context, req *connect.Request[v1.UpsertTranslationOverrideRequest]) (*connect.Response[v1.TranslationOverride], error) {
+	return c.upsertTranslationOverride.CallUnary(ctx, req)
+}
+
+// DeleteTranslationOverride calls clinks.v1.ClinksService.DeleteTranslationOverride.
+func (c *clinksServiceClient) DeleteTranslationOverride(ctx context.Context, req *connect.Request[v1.DeleteTranslationOverrideRequest]) (*connect.Response[v1.Empty], error) {
+	return c.deleteTranslationOverride.CallUnary(ctx, req)
+}
+
+// ListAuditEvents calls clinks.v1.ClinksService.ListAuditEvents.
+func (c *clinksServiceClient) ListAuditEvents(ctx context.Context, req *connect.Request[v1.ListAuditEventsRequest]) (*connect.Response[v1.ListAuditEventsResponse], error) {
+	return c.listAuditEvents.CallUnary(ctx, req)
+}
+
 // GetSystemStats calls clinks.v1.ClinksService.GetSystemStats.
 func (c *clinksServiceClient) GetSystemStats(ctx context.Context, req *connect.Request[v1.Empty]) (*connect.Response[v1.SystemStats], error) {
 	return c.getSystemStats.CallUnary(ctx, req)
+}
+
+// UpdateCurrentTenant calls clinks.v1.ClinksService.UpdateCurrentTenant.
+func (c *clinksServiceClient) UpdateCurrentTenant(ctx context.Context, req *connect.Request[v1.UpdateCurrentTenantRequest]) (*connect.Response[v1.Tenant], error) {
+	return c.updateCurrentTenant.CallUnary(ctx, req)
+}
+
+// ListMemberships calls clinks.v1.ClinksService.ListMemberships.
+func (c *clinksServiceClient) ListMemberships(ctx context.Context, req *connect.Request[v1.ListMembershipsRequest]) (*connect.Response[v1.ListMembershipsResponse], error) {
+	return c.listMemberships.CallUnary(ctx, req)
+}
+
+// UpdateMembership calls clinks.v1.ClinksService.UpdateMembership.
+func (c *clinksServiceClient) UpdateMembership(ctx context.Context, req *connect.Request[v1.UpdateMembershipRequest]) (*connect.Response[v1.Membership], error) {
+	return c.updateMembership.CallUnary(ctx, req)
+}
+
+// ListRoles calls clinks.v1.ClinksService.ListRoles.
+func (c *clinksServiceClient) ListRoles(ctx context.Context, req *connect.Request[v1.ListRolesRequest]) (*connect.Response[v1.ListRolesResponse], error) {
+	return c.listRoles.CallUnary(ctx, req)
+}
+
+// CreateRole calls clinks.v1.ClinksService.CreateRole.
+func (c *clinksServiceClient) CreateRole(ctx context.Context, req *connect.Request[v1.CreateRoleRequest]) (*connect.Response[v1.Role], error) {
+	return c.createRole.CallUnary(ctx, req)
+}
+
+// UpdateRole calls clinks.v1.ClinksService.UpdateRole.
+func (c *clinksServiceClient) UpdateRole(ctx context.Context, req *connect.Request[v1.UpdateRoleRequest]) (*connect.Response[v1.Role], error) {
+	return c.updateRole.CallUnary(ctx, req)
+}
+
+// DeleteRole calls clinks.v1.ClinksService.DeleteRole.
+func (c *clinksServiceClient) DeleteRole(ctx context.Context, req *connect.Request[v1.DeleteRoleRequest]) (*connect.Response[v1.Empty], error) {
+	return c.deleteRole.CallUnary(ctx, req)
+}
+
+// ListTenantInvitations calls clinks.v1.ClinksService.ListTenantInvitations.
+func (c *clinksServiceClient) ListTenantInvitations(ctx context.Context, req *connect.Request[v1.ListTenantInvitationsRequest]) (*connect.Response[v1.ListInvitationsResponse], error) {
+	return c.listTenantInvitations.CallUnary(ctx, req)
+}
+
+// CreateInvitation calls clinks.v1.ClinksService.CreateInvitation.
+func (c *clinksServiceClient) CreateInvitation(ctx context.Context, req *connect.Request[v1.CreateInvitationRequest]) (*connect.Response[v1.Invitation], error) {
+	return c.createInvitation.CallUnary(ctx, req)
+}
+
+// RevokeTenantInvitation calls clinks.v1.ClinksService.RevokeTenantInvitation.
+func (c *clinksServiceClient) RevokeTenantInvitation(ctx context.Context, req *connect.Request[v1.RevokeInvitationRequest]) (*connect.Response[v1.Empty], error) {
+	return c.revokeTenantInvitation.CallUnary(ctx, req)
 }
 
 // ClinksServiceHandler is an implementation of the clinks.v1.ClinksService service.
@@ -396,21 +603,34 @@ type ClinksServiceHandler interface {
 	Logout(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.Empty], error)
 	GetSession(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.Session], error)
 	SwitchTenant(context.Context, *connect.Request[v1.SwitchTenantRequest]) (*connect.Response[v1.Session], error)
-	CreateInvitation(context.Context, *connect.Request[v1.CreateInvitationRequest]) (*connect.Response[v1.Invitation], error)
 	AcceptInvitation(context.Context, *connect.Request[v1.AcceptInvitationRequest]) (*connect.Response[v1.Session], error)
 	GetLanguages(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.LanguagesResponse], error)
 	GetTranslations(context.Context, *connect.Request[v1.GetTranslationsRequest]) (*connect.Response[v1.TranslationsResponse], error)
-	ListTenants(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.TenantsResponse], error)
+	ListTenants(context.Context, *connect.Request[v1.ListTenantsRequest]) (*connect.Response[v1.ListTenantsResponse], error)
 	CreateTenant(context.Context, *connect.Request[v1.CreateTenantRequest]) (*connect.Response[v1.Tenant], error)
-	ListManagedLanguages(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.LanguagesResponse], error)
-	SaveLanguage(context.Context, *connect.Request[v1.Language]) (*connect.Response[v1.Empty], error)
-	SaveTranslation(context.Context, *connect.Request[v1.ScopedTranslation]) (*connect.Response[v1.Empty], error)
-	ListAuditEvents(context.Context, *connect.Request[v1.ListAuditEventsRequest]) (*connect.Response[v1.AuditEventsResponse], error)
+	UpdateTenant(context.Context, *connect.Request[v1.UpdateTenantRequest]) (*connect.Response[v1.Tenant], error)
 	ListUsers(context.Context, *connect.Request[v1.ListUsersRequest]) (*connect.Response[v1.ListUsersResponse], error)
 	GetUser(context.Context, *connect.Request[v1.GetUserRequest]) (*connect.Response[v1.UserDetail], error)
 	ListInvitations(context.Context, *connect.Request[v1.ListInvitationsRequest]) (*connect.Response[v1.ListInvitationsResponse], error)
 	RevokeInvitation(context.Context, *connect.Request[v1.RevokeInvitationRequest]) (*connect.Response[v1.Empty], error)
+	ListManagedLanguages(context.Context, *connect.Request[v1.ListLanguagesRequest]) (*connect.Response[v1.ListLanguagesResponse], error)
+	CreateLanguage(context.Context, *connect.Request[v1.CreateLanguageRequest]) (*connect.Response[v1.Language], error)
+	UpdateLanguage(context.Context, *connect.Request[v1.UpdateLanguageRequest]) (*connect.Response[v1.Language], error)
+	ListTranslationOverrides(context.Context, *connect.Request[v1.ListTranslationOverridesRequest]) (*connect.Response[v1.ListTranslationOverridesResponse], error)
+	UpsertTranslationOverride(context.Context, *connect.Request[v1.UpsertTranslationOverrideRequest]) (*connect.Response[v1.TranslationOverride], error)
+	DeleteTranslationOverride(context.Context, *connect.Request[v1.DeleteTranslationOverrideRequest]) (*connect.Response[v1.Empty], error)
+	ListAuditEvents(context.Context, *connect.Request[v1.ListAuditEventsRequest]) (*connect.Response[v1.ListAuditEventsResponse], error)
 	GetSystemStats(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.SystemStats], error)
+	UpdateCurrentTenant(context.Context, *connect.Request[v1.UpdateCurrentTenantRequest]) (*connect.Response[v1.Tenant], error)
+	ListMemberships(context.Context, *connect.Request[v1.ListMembershipsRequest]) (*connect.Response[v1.ListMembershipsResponse], error)
+	UpdateMembership(context.Context, *connect.Request[v1.UpdateMembershipRequest]) (*connect.Response[v1.Membership], error)
+	ListRoles(context.Context, *connect.Request[v1.ListRolesRequest]) (*connect.Response[v1.ListRolesResponse], error)
+	CreateRole(context.Context, *connect.Request[v1.CreateRoleRequest]) (*connect.Response[v1.Role], error)
+	UpdateRole(context.Context, *connect.Request[v1.UpdateRoleRequest]) (*connect.Response[v1.Role], error)
+	DeleteRole(context.Context, *connect.Request[v1.DeleteRoleRequest]) (*connect.Response[v1.Empty], error)
+	ListTenantInvitations(context.Context, *connect.Request[v1.ListTenantInvitationsRequest]) (*connect.Response[v1.ListInvitationsResponse], error)
+	CreateInvitation(context.Context, *connect.Request[v1.CreateInvitationRequest]) (*connect.Response[v1.Invitation], error)
+	RevokeTenantInvitation(context.Context, *connect.Request[v1.RevokeInvitationRequest]) (*connect.Response[v1.Empty], error)
 }
 
 // NewClinksServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -456,12 +676,6 @@ func NewClinksServiceHandler(svc ClinksServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(clinksServiceMethods.ByName("SwitchTenant")),
 		connect.WithHandlerOptions(opts...),
 	)
-	clinksServiceCreateInvitationHandler := connect.NewUnaryHandler(
-		ClinksServiceCreateInvitationProcedure,
-		svc.CreateInvitation,
-		connect.WithSchema(clinksServiceMethods.ByName("CreateInvitation")),
-		connect.WithHandlerOptions(opts...),
-	)
 	clinksServiceAcceptInvitationHandler := connect.NewUnaryHandler(
 		ClinksServiceAcceptInvitationProcedure,
 		svc.AcceptInvitation,
@@ -492,28 +706,10 @@ func NewClinksServiceHandler(svc ClinksServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(clinksServiceMethods.ByName("CreateTenant")),
 		connect.WithHandlerOptions(opts...),
 	)
-	clinksServiceListManagedLanguagesHandler := connect.NewUnaryHandler(
-		ClinksServiceListManagedLanguagesProcedure,
-		svc.ListManagedLanguages,
-		connect.WithSchema(clinksServiceMethods.ByName("ListManagedLanguages")),
-		connect.WithHandlerOptions(opts...),
-	)
-	clinksServiceSaveLanguageHandler := connect.NewUnaryHandler(
-		ClinksServiceSaveLanguageProcedure,
-		svc.SaveLanguage,
-		connect.WithSchema(clinksServiceMethods.ByName("SaveLanguage")),
-		connect.WithHandlerOptions(opts...),
-	)
-	clinksServiceSaveTranslationHandler := connect.NewUnaryHandler(
-		ClinksServiceSaveTranslationProcedure,
-		svc.SaveTranslation,
-		connect.WithSchema(clinksServiceMethods.ByName("SaveTranslation")),
-		connect.WithHandlerOptions(opts...),
-	)
-	clinksServiceListAuditEventsHandler := connect.NewUnaryHandler(
-		ClinksServiceListAuditEventsProcedure,
-		svc.ListAuditEvents,
-		connect.WithSchema(clinksServiceMethods.ByName("ListAuditEvents")),
+	clinksServiceUpdateTenantHandler := connect.NewUnaryHandler(
+		ClinksServiceUpdateTenantProcedure,
+		svc.UpdateTenant,
+		connect.WithSchema(clinksServiceMethods.ByName("UpdateTenant")),
 		connect.WithHandlerOptions(opts...),
 	)
 	clinksServiceListUsersHandler := connect.NewUnaryHandler(
@@ -540,10 +736,112 @@ func NewClinksServiceHandler(svc ClinksServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(clinksServiceMethods.ByName("RevokeInvitation")),
 		connect.WithHandlerOptions(opts...),
 	)
+	clinksServiceListManagedLanguagesHandler := connect.NewUnaryHandler(
+		ClinksServiceListManagedLanguagesProcedure,
+		svc.ListManagedLanguages,
+		connect.WithSchema(clinksServiceMethods.ByName("ListManagedLanguages")),
+		connect.WithHandlerOptions(opts...),
+	)
+	clinksServiceCreateLanguageHandler := connect.NewUnaryHandler(
+		ClinksServiceCreateLanguageProcedure,
+		svc.CreateLanguage,
+		connect.WithSchema(clinksServiceMethods.ByName("CreateLanguage")),
+		connect.WithHandlerOptions(opts...),
+	)
+	clinksServiceUpdateLanguageHandler := connect.NewUnaryHandler(
+		ClinksServiceUpdateLanguageProcedure,
+		svc.UpdateLanguage,
+		connect.WithSchema(clinksServiceMethods.ByName("UpdateLanguage")),
+		connect.WithHandlerOptions(opts...),
+	)
+	clinksServiceListTranslationOverridesHandler := connect.NewUnaryHandler(
+		ClinksServiceListTranslationOverridesProcedure,
+		svc.ListTranslationOverrides,
+		connect.WithSchema(clinksServiceMethods.ByName("ListTranslationOverrides")),
+		connect.WithHandlerOptions(opts...),
+	)
+	clinksServiceUpsertTranslationOverrideHandler := connect.NewUnaryHandler(
+		ClinksServiceUpsertTranslationOverrideProcedure,
+		svc.UpsertTranslationOverride,
+		connect.WithSchema(clinksServiceMethods.ByName("UpsertTranslationOverride")),
+		connect.WithHandlerOptions(opts...),
+	)
+	clinksServiceDeleteTranslationOverrideHandler := connect.NewUnaryHandler(
+		ClinksServiceDeleteTranslationOverrideProcedure,
+		svc.DeleteTranslationOverride,
+		connect.WithSchema(clinksServiceMethods.ByName("DeleteTranslationOverride")),
+		connect.WithHandlerOptions(opts...),
+	)
+	clinksServiceListAuditEventsHandler := connect.NewUnaryHandler(
+		ClinksServiceListAuditEventsProcedure,
+		svc.ListAuditEvents,
+		connect.WithSchema(clinksServiceMethods.ByName("ListAuditEvents")),
+		connect.WithHandlerOptions(opts...),
+	)
 	clinksServiceGetSystemStatsHandler := connect.NewUnaryHandler(
 		ClinksServiceGetSystemStatsProcedure,
 		svc.GetSystemStats,
 		connect.WithSchema(clinksServiceMethods.ByName("GetSystemStats")),
+		connect.WithHandlerOptions(opts...),
+	)
+	clinksServiceUpdateCurrentTenantHandler := connect.NewUnaryHandler(
+		ClinksServiceUpdateCurrentTenantProcedure,
+		svc.UpdateCurrentTenant,
+		connect.WithSchema(clinksServiceMethods.ByName("UpdateCurrentTenant")),
+		connect.WithHandlerOptions(opts...),
+	)
+	clinksServiceListMembershipsHandler := connect.NewUnaryHandler(
+		ClinksServiceListMembershipsProcedure,
+		svc.ListMemberships,
+		connect.WithSchema(clinksServiceMethods.ByName("ListMemberships")),
+		connect.WithHandlerOptions(opts...),
+	)
+	clinksServiceUpdateMembershipHandler := connect.NewUnaryHandler(
+		ClinksServiceUpdateMembershipProcedure,
+		svc.UpdateMembership,
+		connect.WithSchema(clinksServiceMethods.ByName("UpdateMembership")),
+		connect.WithHandlerOptions(opts...),
+	)
+	clinksServiceListRolesHandler := connect.NewUnaryHandler(
+		ClinksServiceListRolesProcedure,
+		svc.ListRoles,
+		connect.WithSchema(clinksServiceMethods.ByName("ListRoles")),
+		connect.WithHandlerOptions(opts...),
+	)
+	clinksServiceCreateRoleHandler := connect.NewUnaryHandler(
+		ClinksServiceCreateRoleProcedure,
+		svc.CreateRole,
+		connect.WithSchema(clinksServiceMethods.ByName("CreateRole")),
+		connect.WithHandlerOptions(opts...),
+	)
+	clinksServiceUpdateRoleHandler := connect.NewUnaryHandler(
+		ClinksServiceUpdateRoleProcedure,
+		svc.UpdateRole,
+		connect.WithSchema(clinksServiceMethods.ByName("UpdateRole")),
+		connect.WithHandlerOptions(opts...),
+	)
+	clinksServiceDeleteRoleHandler := connect.NewUnaryHandler(
+		ClinksServiceDeleteRoleProcedure,
+		svc.DeleteRole,
+		connect.WithSchema(clinksServiceMethods.ByName("DeleteRole")),
+		connect.WithHandlerOptions(opts...),
+	)
+	clinksServiceListTenantInvitationsHandler := connect.NewUnaryHandler(
+		ClinksServiceListTenantInvitationsProcedure,
+		svc.ListTenantInvitations,
+		connect.WithSchema(clinksServiceMethods.ByName("ListTenantInvitations")),
+		connect.WithHandlerOptions(opts...),
+	)
+	clinksServiceCreateInvitationHandler := connect.NewUnaryHandler(
+		ClinksServiceCreateInvitationProcedure,
+		svc.CreateInvitation,
+		connect.WithSchema(clinksServiceMethods.ByName("CreateInvitation")),
+		connect.WithHandlerOptions(opts...),
+	)
+	clinksServiceRevokeTenantInvitationHandler := connect.NewUnaryHandler(
+		ClinksServiceRevokeTenantInvitationProcedure,
+		svc.RevokeTenantInvitation,
+		connect.WithSchema(clinksServiceMethods.ByName("RevokeTenantInvitation")),
 		connect.WithHandlerOptions(opts...),
 	)
 	return "/clinks.v1.ClinksService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -560,8 +858,6 @@ func NewClinksServiceHandler(svc ClinksServiceHandler, opts ...connect.HandlerOp
 			clinksServiceGetSessionHandler.ServeHTTP(w, r)
 		case ClinksServiceSwitchTenantProcedure:
 			clinksServiceSwitchTenantHandler.ServeHTTP(w, r)
-		case ClinksServiceCreateInvitationProcedure:
-			clinksServiceCreateInvitationHandler.ServeHTTP(w, r)
 		case ClinksServiceAcceptInvitationProcedure:
 			clinksServiceAcceptInvitationHandler.ServeHTTP(w, r)
 		case ClinksServiceGetLanguagesProcedure:
@@ -572,14 +868,8 @@ func NewClinksServiceHandler(svc ClinksServiceHandler, opts ...connect.HandlerOp
 			clinksServiceListTenantsHandler.ServeHTTP(w, r)
 		case ClinksServiceCreateTenantProcedure:
 			clinksServiceCreateTenantHandler.ServeHTTP(w, r)
-		case ClinksServiceListManagedLanguagesProcedure:
-			clinksServiceListManagedLanguagesHandler.ServeHTTP(w, r)
-		case ClinksServiceSaveLanguageProcedure:
-			clinksServiceSaveLanguageHandler.ServeHTTP(w, r)
-		case ClinksServiceSaveTranslationProcedure:
-			clinksServiceSaveTranslationHandler.ServeHTTP(w, r)
-		case ClinksServiceListAuditEventsProcedure:
-			clinksServiceListAuditEventsHandler.ServeHTTP(w, r)
+		case ClinksServiceUpdateTenantProcedure:
+			clinksServiceUpdateTenantHandler.ServeHTTP(w, r)
 		case ClinksServiceListUsersProcedure:
 			clinksServiceListUsersHandler.ServeHTTP(w, r)
 		case ClinksServiceGetUserProcedure:
@@ -588,8 +878,42 @@ func NewClinksServiceHandler(svc ClinksServiceHandler, opts ...connect.HandlerOp
 			clinksServiceListInvitationsHandler.ServeHTTP(w, r)
 		case ClinksServiceRevokeInvitationProcedure:
 			clinksServiceRevokeInvitationHandler.ServeHTTP(w, r)
+		case ClinksServiceListManagedLanguagesProcedure:
+			clinksServiceListManagedLanguagesHandler.ServeHTTP(w, r)
+		case ClinksServiceCreateLanguageProcedure:
+			clinksServiceCreateLanguageHandler.ServeHTTP(w, r)
+		case ClinksServiceUpdateLanguageProcedure:
+			clinksServiceUpdateLanguageHandler.ServeHTTP(w, r)
+		case ClinksServiceListTranslationOverridesProcedure:
+			clinksServiceListTranslationOverridesHandler.ServeHTTP(w, r)
+		case ClinksServiceUpsertTranslationOverrideProcedure:
+			clinksServiceUpsertTranslationOverrideHandler.ServeHTTP(w, r)
+		case ClinksServiceDeleteTranslationOverrideProcedure:
+			clinksServiceDeleteTranslationOverrideHandler.ServeHTTP(w, r)
+		case ClinksServiceListAuditEventsProcedure:
+			clinksServiceListAuditEventsHandler.ServeHTTP(w, r)
 		case ClinksServiceGetSystemStatsProcedure:
 			clinksServiceGetSystemStatsHandler.ServeHTTP(w, r)
+		case ClinksServiceUpdateCurrentTenantProcedure:
+			clinksServiceUpdateCurrentTenantHandler.ServeHTTP(w, r)
+		case ClinksServiceListMembershipsProcedure:
+			clinksServiceListMembershipsHandler.ServeHTTP(w, r)
+		case ClinksServiceUpdateMembershipProcedure:
+			clinksServiceUpdateMembershipHandler.ServeHTTP(w, r)
+		case ClinksServiceListRolesProcedure:
+			clinksServiceListRolesHandler.ServeHTTP(w, r)
+		case ClinksServiceCreateRoleProcedure:
+			clinksServiceCreateRoleHandler.ServeHTTP(w, r)
+		case ClinksServiceUpdateRoleProcedure:
+			clinksServiceUpdateRoleHandler.ServeHTTP(w, r)
+		case ClinksServiceDeleteRoleProcedure:
+			clinksServiceDeleteRoleHandler.ServeHTTP(w, r)
+		case ClinksServiceListTenantInvitationsProcedure:
+			clinksServiceListTenantInvitationsHandler.ServeHTTP(w, r)
+		case ClinksServiceCreateInvitationProcedure:
+			clinksServiceCreateInvitationHandler.ServeHTTP(w, r)
+		case ClinksServiceRevokeTenantInvitationProcedure:
+			clinksServiceRevokeTenantInvitationHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -623,10 +947,6 @@ func (UnimplementedClinksServiceHandler) SwitchTenant(context.Context, *connect.
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.SwitchTenant is not implemented"))
 }
 
-func (UnimplementedClinksServiceHandler) CreateInvitation(context.Context, *connect.Request[v1.CreateInvitationRequest]) (*connect.Response[v1.Invitation], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.CreateInvitation is not implemented"))
-}
-
 func (UnimplementedClinksServiceHandler) AcceptInvitation(context.Context, *connect.Request[v1.AcceptInvitationRequest]) (*connect.Response[v1.Session], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.AcceptInvitation is not implemented"))
 }
@@ -639,7 +959,7 @@ func (UnimplementedClinksServiceHandler) GetTranslations(context.Context, *conne
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.GetTranslations is not implemented"))
 }
 
-func (UnimplementedClinksServiceHandler) ListTenants(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.TenantsResponse], error) {
+func (UnimplementedClinksServiceHandler) ListTenants(context.Context, *connect.Request[v1.ListTenantsRequest]) (*connect.Response[v1.ListTenantsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.ListTenants is not implemented"))
 }
 
@@ -647,20 +967,8 @@ func (UnimplementedClinksServiceHandler) CreateTenant(context.Context, *connect.
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.CreateTenant is not implemented"))
 }
 
-func (UnimplementedClinksServiceHandler) ListManagedLanguages(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.LanguagesResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.ListManagedLanguages is not implemented"))
-}
-
-func (UnimplementedClinksServiceHandler) SaveLanguage(context.Context, *connect.Request[v1.Language]) (*connect.Response[v1.Empty], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.SaveLanguage is not implemented"))
-}
-
-func (UnimplementedClinksServiceHandler) SaveTranslation(context.Context, *connect.Request[v1.ScopedTranslation]) (*connect.Response[v1.Empty], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.SaveTranslation is not implemented"))
-}
-
-func (UnimplementedClinksServiceHandler) ListAuditEvents(context.Context, *connect.Request[v1.ListAuditEventsRequest]) (*connect.Response[v1.AuditEventsResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.ListAuditEvents is not implemented"))
+func (UnimplementedClinksServiceHandler) UpdateTenant(context.Context, *connect.Request[v1.UpdateTenantRequest]) (*connect.Response[v1.Tenant], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.UpdateTenant is not implemented"))
 }
 
 func (UnimplementedClinksServiceHandler) ListUsers(context.Context, *connect.Request[v1.ListUsersRequest]) (*connect.Response[v1.ListUsersResponse], error) {
@@ -679,6 +987,74 @@ func (UnimplementedClinksServiceHandler) RevokeInvitation(context.Context, *conn
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.RevokeInvitation is not implemented"))
 }
 
+func (UnimplementedClinksServiceHandler) ListManagedLanguages(context.Context, *connect.Request[v1.ListLanguagesRequest]) (*connect.Response[v1.ListLanguagesResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.ListManagedLanguages is not implemented"))
+}
+
+func (UnimplementedClinksServiceHandler) CreateLanguage(context.Context, *connect.Request[v1.CreateLanguageRequest]) (*connect.Response[v1.Language], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.CreateLanguage is not implemented"))
+}
+
+func (UnimplementedClinksServiceHandler) UpdateLanguage(context.Context, *connect.Request[v1.UpdateLanguageRequest]) (*connect.Response[v1.Language], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.UpdateLanguage is not implemented"))
+}
+
+func (UnimplementedClinksServiceHandler) ListTranslationOverrides(context.Context, *connect.Request[v1.ListTranslationOverridesRequest]) (*connect.Response[v1.ListTranslationOverridesResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.ListTranslationOverrides is not implemented"))
+}
+
+func (UnimplementedClinksServiceHandler) UpsertTranslationOverride(context.Context, *connect.Request[v1.UpsertTranslationOverrideRequest]) (*connect.Response[v1.TranslationOverride], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.UpsertTranslationOverride is not implemented"))
+}
+
+func (UnimplementedClinksServiceHandler) DeleteTranslationOverride(context.Context, *connect.Request[v1.DeleteTranslationOverrideRequest]) (*connect.Response[v1.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.DeleteTranslationOverride is not implemented"))
+}
+
+func (UnimplementedClinksServiceHandler) ListAuditEvents(context.Context, *connect.Request[v1.ListAuditEventsRequest]) (*connect.Response[v1.ListAuditEventsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.ListAuditEvents is not implemented"))
+}
+
 func (UnimplementedClinksServiceHandler) GetSystemStats(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.SystemStats], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.GetSystemStats is not implemented"))
+}
+
+func (UnimplementedClinksServiceHandler) UpdateCurrentTenant(context.Context, *connect.Request[v1.UpdateCurrentTenantRequest]) (*connect.Response[v1.Tenant], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.UpdateCurrentTenant is not implemented"))
+}
+
+func (UnimplementedClinksServiceHandler) ListMemberships(context.Context, *connect.Request[v1.ListMembershipsRequest]) (*connect.Response[v1.ListMembershipsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.ListMemberships is not implemented"))
+}
+
+func (UnimplementedClinksServiceHandler) UpdateMembership(context.Context, *connect.Request[v1.UpdateMembershipRequest]) (*connect.Response[v1.Membership], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.UpdateMembership is not implemented"))
+}
+
+func (UnimplementedClinksServiceHandler) ListRoles(context.Context, *connect.Request[v1.ListRolesRequest]) (*connect.Response[v1.ListRolesResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.ListRoles is not implemented"))
+}
+
+func (UnimplementedClinksServiceHandler) CreateRole(context.Context, *connect.Request[v1.CreateRoleRequest]) (*connect.Response[v1.Role], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.CreateRole is not implemented"))
+}
+
+func (UnimplementedClinksServiceHandler) UpdateRole(context.Context, *connect.Request[v1.UpdateRoleRequest]) (*connect.Response[v1.Role], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.UpdateRole is not implemented"))
+}
+
+func (UnimplementedClinksServiceHandler) DeleteRole(context.Context, *connect.Request[v1.DeleteRoleRequest]) (*connect.Response[v1.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.DeleteRole is not implemented"))
+}
+
+func (UnimplementedClinksServiceHandler) ListTenantInvitations(context.Context, *connect.Request[v1.ListTenantInvitationsRequest]) (*connect.Response[v1.ListInvitationsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.ListTenantInvitations is not implemented"))
+}
+
+func (UnimplementedClinksServiceHandler) CreateInvitation(context.Context, *connect.Request[v1.CreateInvitationRequest]) (*connect.Response[v1.Invitation], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.CreateInvitation is not implemented"))
+}
+
+func (UnimplementedClinksServiceHandler) RevokeTenantInvitation(context.Context, *connect.Request[v1.RevokeInvitationRequest]) (*connect.Response[v1.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.RevokeTenantInvitation is not implemented"))
 }

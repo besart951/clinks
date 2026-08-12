@@ -39,7 +39,7 @@ func (localizationCatalogStub) Message(context.Context, domain.Locale, string) (
 func (localizationCatalogStub) FallbackMessage() string { return "error.internal" }
 
 func TestTranslationBundleUsesDefaultLanguageForMissingKeys(t *testing.T) {
-	service := NewI18nService(localizationCatalogStub{
+	catalog := localizationCatalogStub{
 		defaultLocale: "de-CH",
 		translations: map[domain.Locale][]domain.Translation{
 			"de-CH": {
@@ -50,7 +50,8 @@ func TestTranslationBundleUsesDefaultLanguageForMissingKeys(t *testing.T) {
 				{Locale: "fr-CH", ApplicationScope: domain.ScopeShared, Key: "ui.sign_in", Value: "Se connecter"},
 			},
 		},
-	})
+	}
+	service := NewI18nService(catalog, catalog)
 
 	bundle, err := service.TranslationBundle(context.Background(), "fr-CH", domain.ScopePlanerLink)
 	if err != nil {
@@ -72,12 +73,13 @@ func TestTranslationBundleUsesDefaultLanguageForMissingKeys(t *testing.T) {
 }
 
 func TestTranslationBundleFallsBackToDefaultLanguageWhenRequestedLanguageIsEmpty(t *testing.T) {
-	service := NewI18nService(localizationCatalogStub{
+	catalog := localizationCatalogStub{
 		defaultLocale: "de-CH",
 		translations: map[domain.Locale][]domain.Translation{
 			"de-CH": {{Locale: "de-CH", ApplicationScope: domain.ScopeShared, Key: "ui.sign_in", Value: "Anmelden"}},
 		},
-	})
+	}
+	service := NewI18nService(catalog, catalog)
 
 	bundle, err := service.TranslationBundle(context.Background(), "fr-CH", domain.ScopePlanerLink)
 	if err != nil {

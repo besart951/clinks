@@ -23,10 +23,17 @@ linters:
         - diagnostic
         - performance
         - style
+      disabled-checks:
+        # Domain/application values are deliberately non-nullable. Passing
+        # pointers solely to avoid copies would blur ownership and absence.
+        - hugeParam
+        - rangeValCopy
     govet:
       enable-all: true
       disable:
         - fieldalignment
+        # Local err shadowing keeps transactional branches small and explicit.
+        - shadow
     staticcheck:
       checks:
         - all

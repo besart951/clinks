@@ -20,18 +20,26 @@ func (server *Server) authorizeSuperAdmin(ctx context.Context, header stdhttp.He
 	return user, nil
 }
 
-func (server *Server) ListTenants(ctx context.Context, request *connect.Request[clinksv1.Empty]) (*connect.Response[clinksv1.TenantsResponse], error) {
+func (server *Server) ListTenants(ctx context.Context, request *connect.Request[clinksv1.ListTenantsRequest]) (*connect.Response[clinksv1.ListTenantsResponse], error) {
 	if _, err := server.authorizeSuperAdmin(ctx, request.Header()); err != nil {
 		return nil, err
 	}
 
-	tenants, err := server.tenants.Tenants(ctx)
+	sort, validSort := tenantSort(request.Msg.GetSort())
+	direction, validDirection := sortDirection(request.Msg.GetDirection(), domain.SortAscending)
+	if !validSort || !validDirection {
+		return nil, server.localizedError(ctx, request.Header(), domain.NewError(domain.ErrorValidation))
+	}
+	page, err := server.tenants.Tenants(ctx, domain.TenantFilter{
+		Search: request.Msg.GetSearch(), Sort: sort, Direction: direction,
+		Cursor: domain.Cursor(request.Msg.GetCursor()), Limit: int(request.Msg.GetPageSize()),
+	})
 	if err != nil {
 		return nil, server.localizedError(ctx, request.Header(), err)
 	}
 
-	return connect.NewResponse(&clinksv1.TenantsResponse{
-		Tenants: tenantMessages(tenants),
+	return connect.NewResponse(&clinksv1.ListTenantsResponse{
+		Tenants: tenantMessages(page.Items), NextCursor: string(page.NextCursor),
 	}), nil
 }
 
@@ -49,82 +57,139 @@ func (server *Server) CreateTenant(ctx context.Context, request *connect.Request
 	return connect.NewResponse(tenantMessage(tenant)), nil
 }
 
-func (server *Server) ListManagedLanguages(ctx context.Context, request *connect.Request[clinksv1.Empty]) (*connect.Response[clinksv1.LanguagesResponse], error) {
+func (server *Server) UpdateTenant(ctx context.Context, request *connect.Request[clinksv1.UpdateTenantRequest]) (*connect.Response[clinksv1.Tenant], error) {
+	user, err := server.authorizeSuperAdmin(ctx, request.Header())
+	if err != nil {
+		return nil, err
+	}
+	tenant, err := server.tenants.UpdateTenant(ctx, domain.Tenant{
+		ID:       domain.TenantID(request.Msg.GetTenantId()),
+		Name:     request.Msg.GetName(),
+		Revision: request.Msg.GetRevision(),
+	}, user.ID)
+	if err != nil {
+		return nil, server.localizedError(ctx, request.Header(), err)
+	}
+	return connect.NewResponse(tenantMessage(tenant)), nil
+}
+
+func (server *Server) ListManagedLanguages(ctx context.Context, request *connect.Request[clinksv1.ListLanguagesRequest]) (*connect.Response[clinksv1.ListLanguagesResponse], error) {
 	if _, err := server.authorizeSuperAdmin(ctx, request.Header()); err != nil {
 		return nil, err
 	}
 
-	languages, err := server.localizationEdit.Languages(ctx)
+	sort, validSort := languageSort(request.Msg.GetSort())
+	direction, validDirection := sortDirection(request.Msg.GetDirection(), domain.SortAscending)
+	if !validSort || !validDirection {
+		return nil, server.localizedError(ctx, request.Header(), domain.NewError(domain.ErrorValidation))
+	}
+	filter := domain.LanguageFilter{
+		Search: request.Msg.GetSearch(), Sort: sort, Direction: direction,
+		Cursor: domain.Cursor(request.Msg.GetCursor()), Limit: int(request.Msg.GetPageSize()),
+	}
+	if request.Msg.Active != nil {
+		filter.Active = new(request.Msg.GetActive())
+	}
+	page, err := server.localizationEdit.Languages(ctx, filter)
 	if err != nil {
 		return nil, server.localizedError(ctx, request.Header(), err)
 	}
 
-	return connect.NewResponse(&clinksv1.LanguagesResponse{
-		Languages: languageMessages(languages),
+	return connect.NewResponse(&clinksv1.ListLanguagesResponse{
+		Languages: languageMessages(page.Items), NextCursor: string(page.NextCursor),
 	}), nil
 }
 
-func (server *Server) SaveLanguage(ctx context.Context, request *connect.Request[clinksv1.Language]) (*connect.Response[clinksv1.Empty], error) {
+func (server *Server) CreateLanguage(ctx context.Context, request *connect.Request[clinksv1.CreateLanguageRequest]) (*connect.Response[clinksv1.Language], error) {
 	user, err := server.authorizeSuperAdmin(ctx, request.Header())
 	if err != nil {
 		return nil, err
 	}
 
 	language := domain.Language{
-		Code:      domain.NewLocale(request.Msg.GetCode()),
-		Name:      request.Msg.GetName(),
-		IsDefault: request.Msg.GetIsDefault(),
-		IsActive:  request.Msg.GetIsActive(),
+		Code:     domain.NewLocale(request.Msg.GetCode()),
+		Name:     request.Msg.GetName(),
+		IsActive: request.Msg.GetIsActive(),
 	}
 
-	if err := server.localizationEdit.SaveLanguage(ctx, language, user.ID); err != nil {
+	language, err = server.localizationEdit.SaveLanguage(ctx, language, user.ID)
+	if err != nil {
 		return nil, server.localizedError(ctx, request.Header(), err)
 	}
 
-	return connect.NewResponse(&clinksv1.Empty{}), nil
+	return connect.NewResponse(languageMessages([]domain.Language{language})[0]), nil
 }
 
-func (server *Server) SaveTranslation(ctx context.Context, request *connect.Request[clinksv1.ScopedTranslation]) (*connect.Response[clinksv1.Empty], error) {
+func (server *Server) UpdateLanguage(ctx context.Context, request *connect.Request[clinksv1.UpdateLanguageRequest]) (*connect.Response[clinksv1.Language], error) {
 	user, err := server.authorizeSuperAdmin(ctx, request.Header())
 	if err != nil {
 		return nil, err
 	}
+	language := domain.Language{
+		Code:     domain.NewLocale(request.Msg.GetCode()),
+		Name:     request.Msg.GetName(),
+		IsActive: request.Msg.GetIsActive(),
+		Revision: request.Msg.GetRevision(),
+	}
+	language, err = server.localizationEdit.SaveLanguage(ctx, language, user.ID)
+	if err != nil {
+		return nil, server.localizedError(ctx, request.Header(), err)
+	}
+	return connect.NewResponse(languageMessages([]domain.Language{language})[0]), nil
+}
 
-	scope, err := domain.ParseApplicationScope(request.Msg.GetApplicationScope())
+func (server *Server) UpsertTranslationOverride(ctx context.Context, request *connect.Request[clinksv1.UpsertTranslationOverrideRequest]) (*connect.Response[clinksv1.TranslationOverride], error) {
+	user, err := server.authorizeSuperAdmin(ctx, request.Header())
+	if err != nil {
+		return nil, err
+	}
+	override := request.Msg.GetOverride()
+	if override == nil {
+		return nil, server.localizedError(ctx, request.Header(), domain.NewError(domain.ErrorValidation))
+	}
+
+	scope, err := domain.ParseApplicationScope(override.GetApplicationScope())
 	if err != nil {
 		return nil, server.localizedError(ctx, request.Header(), err)
 	}
 
 	translation := domain.Translation{
-		Locale:           domain.NewLocale(request.Msg.GetLocale()),
+		Locale:           domain.NewLocale(override.GetLocale()),
 		ApplicationScope: scope,
-		Key:              request.Msg.GetKey(),
-		Value:            request.Msg.GetValue(),
+		Key:              override.GetKey(),
+		Value:            override.GetValue(),
+		Revision:         override.GetRevision(),
 	}
 
-	if err := server.localizationEdit.SaveTranslationOverride(ctx, translation, user.ID); err != nil {
+	translation, err = server.localizationEdit.SaveTranslationOverride(ctx, translation, user.ID)
+	if err != nil {
 		return nil, server.localizedError(ctx, request.Header(), err)
 	}
 
-	return connect.NewResponse(&clinksv1.Empty{}), nil
+	return connect.NewResponse(translationOverrideMessage(translation)), nil
 }
 
-func (server *Server) ListAuditEvents(ctx context.Context, request *connect.Request[clinksv1.ListAuditEventsRequest]) (*connect.Response[clinksv1.AuditEventsResponse], error) {
+func (server *Server) ListAuditEvents(ctx context.Context, request *connect.Request[clinksv1.ListAuditEventsRequest]) (*connect.Response[clinksv1.ListAuditEventsResponse], error) {
 	if _, err := server.authorizeSuperAdmin(ctx, request.Header()); err != nil {
 		return nil, err
+	}
+	direction, validDirection := sortDirection(request.Msg.GetDirection(), domain.SortDescending)
+	if (request.Msg.GetSort() != clinksv1.AuditSort_AUDIT_SORT_UNSPECIFIED && request.Msg.GetSort() != clinksv1.AuditSort_AUDIT_SORT_OCCURRED_AT) || !validDirection {
+		return nil, server.localizedError(ctx, request.Header(), domain.NewError(domain.ErrorValidation))
 	}
 
 	filter, err := auditFilter(request.Msg)
 	if err != nil {
 		return nil, server.localizedError(ctx, request.Header(), err)
 	}
+	filter.Direction = direction
 
 	page, err := server.audit.AuditEvents(ctx, &filter)
 	if err != nil {
 		return nil, server.localizedError(ctx, request.Header(), err)
 	}
 
-	return connect.NewResponse(&clinksv1.AuditEventsResponse{
+	return connect.NewResponse(&clinksv1.ListAuditEventsResponse{
 		Events:     server.auditMessages(ctx, request.Header(), page.Events),
 		NextCursor: string(page.NextCursor),
 	}), nil
@@ -134,14 +199,21 @@ func (server *Server) ListUsers(ctx context.Context, request *connect.Request[cl
 	if _, err := server.authorizeSuperAdmin(ctx, request.Header()); err != nil {
 		return nil, err
 	}
+	sort, validSort := userSort(request.Msg.GetSort())
+	direction, validDirection := sortDirection(request.Msg.GetDirection(), domain.SortAscending)
+	if !validSort || !validDirection {
+		return nil, server.localizedError(ctx, request.Header(), domain.NewError(domain.ErrorValidation))
+	}
 
 	filter := domain.UserFilter{
 		Search: request.Msg.GetSearch(),
+		Sort:   sort, Direction: direction,
 		Cursor: domain.Cursor(request.Msg.GetCursor()),
 		Limit:  int(request.Msg.GetPageSize()),
 	}
-	if role := request.Msg.GetRole(); role != "" {
-		filter.Role = new(domain.Role(role))
+	if role := request.Msg.GetGlobalRole(); role != clinksv1.GlobalRole_GLOBAL_ROLE_UNSPECIFIED {
+		globalRole := domainGlobalRole(role)
+		filter.GlobalRole = new(globalRole)
 	}
 
 	page, err := server.users.ListUsers(ctx, filter)
@@ -165,17 +237,23 @@ func (server *Server) GetUser(ctx context.Context, request *connect.Request[clin
 		return nil, server.localizedError(ctx, request.Header(), err)
 	}
 
-	return connect.NewResponse(userDetailMessage(&detail)), nil
+	return connect.NewResponse(userDetailMessage(detail)), nil
 }
 
 func (server *Server) ListInvitations(ctx context.Context, request *connect.Request[clinksv1.ListInvitationsRequest]) (*connect.Response[clinksv1.ListInvitationsResponse], error) {
 	if _, err := server.authorizeSuperAdmin(ctx, request.Header()); err != nil {
 		return nil, err
 	}
+	sort, validSort := invitationSort(request.Msg.GetSort())
+	direction, validDirection := sortDirection(request.Msg.GetDirection(), domain.SortDescending)
+	if !validSort || !validDirection {
+		return nil, server.localizedError(ctx, request.Header(), domain.NewError(domain.ErrorValidation))
+	}
 
 	filter := domain.InvitationFilter{
 		Search: request.Msg.GetSearch(),
-		Status: request.Msg.GetStatus(),
+		Status: domainInvitationStatus(request.Msg.GetStatus()),
+		Sort:   sort, Direction: direction,
 		Cursor: domain.Cursor(request.Msg.GetCursor()),
 		Limit:  int(request.Msg.GetPageSize()),
 	}
@@ -190,7 +268,7 @@ func (server *Server) ListInvitations(ctx context.Context, request *connect.Requ
 
 	messages := make([]*clinksv1.Invitation, len(page.Items))
 	for i := range page.Items {
-		messages[i] = invitationMessage(&page.Items[i])
+		messages[i] = invitationMessage(page.Items[i])
 	}
 
 	return connect.NewResponse(&clinksv1.ListInvitationsResponse{
@@ -200,11 +278,12 @@ func (server *Server) ListInvitations(ctx context.Context, request *connect.Requ
 }
 
 func (server *Server) RevokeInvitation(ctx context.Context, request *connect.Request[clinksv1.RevokeInvitationRequest]) (*connect.Response[clinksv1.Empty], error) {
-	if _, err := server.authorizeSuperAdmin(ctx, request.Header()); err != nil {
+	user, err := server.authorizeSuperAdmin(ctx, request.Header())
+	if err != nil {
 		return nil, err
 	}
 
-	if err := server.inviteAdmin.RevokeInvitation(ctx, domain.InvitationID(request.Msg.GetInvitationId())); err != nil {
+	if err := server.inviteAdmin.RevokeInvitation(ctx, domain.InvitationID(request.Msg.GetInvitationId()), user.ID); err != nil {
 		return nil, server.localizedError(ctx, request.Header(), err)
 	}
 

@@ -52,10 +52,7 @@ func (limiter *rateLimiter) allow(key string) (bool, time.Duration) {
 	entries := trimExpired(limiter.entries[key], cutoff)
 	if len(entries) >= limiter.limit {
 		limiter.entries[key] = entries
-		retryAfter := entries[0].Add(limiter.window).Sub(now)
-		if retryAfter < 0 {
-			retryAfter = 0
-		}
+		retryAfter := max(entries[0].Add(limiter.window).Sub(now), 0)
 		return false, retryAfter
 	}
 

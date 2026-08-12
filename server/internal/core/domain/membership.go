@@ -1,56 +1,41 @@
 package domain
 
+import "time"
+
 type (
 	MembershipID     string
-	RoleID           string
 	MembershipStatus string
 )
 
 const (
-	MembershipActive MembershipStatus = "ACTIVE"
+	MembershipActive   MembershipStatus = "active"
+	MembershipInactive MembershipStatus = "inactive"
 )
 
 type Membership struct {
-	ID       MembershipID
-	UserID   UserID
-	Tenant   Tenant
-	RoleID   RoleID
-	RoleName string
-	Status   MembershipStatus
+	ID        MembershipID
+	UserID    UserID
+	UserEmail Email
+	Tenant    Tenant
+	RoleID    RoleID
+	Role      Role
+	Status    MembershipStatus
+	Revision  uint64
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
-func (role Role) IsValid() bool {
-	switch role {
-	case RoleSuperAdmin,
-		RoleTenantAdmin,
-		RoleUser:
-		return true
+func (membershipID MembershipID) IsValid() bool {
+	return validUUID(string(membershipID))
+}
 
-	default:
-		return false
+func (membershipID MembershipID) Validate() error {
+	if !membershipID.IsValid() {
+		return NewError(ErrorValidation)
 	}
-}
-
-func (role Role) IsSuperAdmin() bool {
-	return role == RoleSuperAdmin
-}
-
-func (role Role) IsTenantRole() bool {
-	switch role {
-	case RoleTenantAdmin,
-		RoleUser:
-		return true
-
-	default:
-		return false
-	}
+	return nil
 }
 
 func (status MembershipStatus) IsValid() bool {
-	return status == MembershipActive
-}
-
-func (membership Membership) CanAdminister() bool {
-	return membership.Status == MembershipActive &&
-		membership.Role == RoleTenantAdmin
+	return status == MembershipActive || status == MembershipInactive
 }

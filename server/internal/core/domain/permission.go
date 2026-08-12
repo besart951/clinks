@@ -36,3 +36,40 @@ func (permission Permission) IsValid() bool {
 		return false
 	}
 }
+
+func AllPermissions() []Permission {
+	return []Permission{
+		PermissionTenantRead,
+		PermissionTenantManage,
+		PermissionUserRead,
+		PermissionUserManage,
+		PermissionProjectRead,
+		PermissionProjectCreate,
+		PermissionProjectEdit,
+		PermissionProjectDelete,
+		PermissionRoleRead,
+		PermissionRoleManage,
+	}
+}
+
+func DefaultUserPermissions() []Permission {
+	return []Permission{
+		PermissionTenantRead,
+		PermissionUserRead,
+		PermissionProjectRead,
+	}
+}
+
+func ValidPermissions(permissions []Permission) bool {
+	seen := make(map[Permission]struct{}, len(permissions))
+	for _, permission := range permissions {
+		if !permission.IsValid() {
+			return false
+		}
+		if _, duplicate := seen[permission]; duplicate {
+			return false
+		}
+		seen[permission] = struct{}{}
+	}
+	return true
+}

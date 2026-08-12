@@ -52,7 +52,7 @@ function validateCatalog(value) {
 		if (!validScopes.has(scope)) fail(`Unsupported application scope: ${scope}`);
 		if (!scopedTranslations || typeof scopedTranslations !== "object") fail(`Translations for ${scope} must be an object.`);
 		for (const [key, localizedValues] of Object.entries(scopedTranslations)) {
-			if (!/^(audit|error|ui)\.[a-z_]+(?:\.[a-z_]+)*$/.test(key)) fail(`Invalid translation key: ${key}`);
+			if (!/^(audit|error|mail|ui)\.[a-z_]+(?:\.[a-z_]+)*$/.test(key)) fail(`Invalid translation key: ${key}`);
 			const identity = `${scope}:${key}`;
 			if (seen.has(identity)) fail(`Duplicate translation key: ${identity}`);
 			seen.add(identity);

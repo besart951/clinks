@@ -5,24 +5,11 @@ import (
 	"fmt"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/besartmorina/clinks/server/internal/core/domain"
 )
 
-type ExternalIdentityRepository struct {
-	pool *pgxpool.Pool
-}
-
-func NewExternalIdentityRepository(
-	pool *pgxpool.Pool,
-) *ExternalIdentityRepository {
-	return &ExternalIdentityRepository{
-		pool: pool,
-	}
-}
-
-func (repository *ExternalIdentityRepository) FindUser(
+func (repository *Store) FindUser(
 	ctx context.Context,
 	issuer domain.ExternalIssuer,
 	subject domain.ExternalSubject,
@@ -39,7 +26,7 @@ func (repository *ExternalIdentityRepository) FindUser(
 					SELECT
 						user_row.id,
 						user_row.email,
-						user_row.is_super_admin,
+						user_row.global_role,
 						user_row.locale,
 						user_row.session_version
 					FROM external_identities identity
@@ -54,7 +41,7 @@ func (repository *ExternalIdentityRepository) FindUser(
 			).Scan(
 				&user.ID,
 				&user.Email,
-				&user.IsSuperAdmin,
+				&user.GlobalRole,
 				&user.Locale,
 				&user.SessionVersion,
 			)
@@ -79,10 +66,11 @@ func (repository *ExternalIdentityRepository) FindUser(
 	return user, err
 }
 
-func (repository *ExternalIdentityRepository) Link(
+func (repository *Store) LinkWithAudit(
 	ctx context.Context,
 	userID domain.UserID,
 	identity domain.ExternalIdentity,
+	tenantID *domain.TenantID,
 ) error {
 	return withSystemTx(
 		ctx,
@@ -104,15 +92,19 @@ func (repository *ExternalIdentityRepository) Link(
 				userID,
 				identity.Email,
 			)
-
 			if err != nil {
-				return fmt.Errorf(
+				return constraintConflict(fmt.Errorf(
 					"link external identity: %w",
 					err,
-				)
+				))
 			}
 
-			return nil
+			return insertAuditEvent(ctx, tx, domain.AuditEvent{
+				ActorID:  new(userID),
+				TenantID: tenantID,
+				Action:   "identity.oidc_linked",
+				Target:   string(identity.Issuer),
+			})
 		},
 	)
 }

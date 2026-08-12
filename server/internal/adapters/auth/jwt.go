@@ -37,9 +37,6 @@ type SessionIssuer struct {
 
 type sessionClaims struct {
 	TenantID string `json:"tenant_id,omitempty"`
-	Email    string `json:"email"`
-	Role     string `json:"role"`
-	Locale   string `json:"locale"`
 	Version  int    `json:"version"`
 
 	jwt.RegisteredClaims
@@ -89,7 +86,7 @@ func NewSessionIssuer(
 }
 
 func (issuer *SessionIssuer) Issue(
-	claim *domain.SessionClaim,
+	claim domain.SessionClaim,
 ) (string, error) {
 	if err := validateSessionClaim(claim); err != nil {
 		return "", err
@@ -106,13 +103,10 @@ func (issuer *SessionIssuer) Issue(
 	}
 
 	claims := sessionClaims{
-		Email:   string(claim.User.Email),
-		Role:    string(claim.User.Role),
-		Locale:  string(claim.User.Locale),
-		Version: claim.User.SessionVersion,
+		Version: claim.SessionVersion,
 
 		RegisteredClaims: jwt.RegisteredClaims{
-			Subject:   string(claim.User.ID),
+			Subject:   string(claim.UserID),
 			Issuer:    issuer.issuer,
 			Audience:  jwt.ClaimStrings{issuer.audience},
 			ExpiresAt: jwt.NewNumericDate(now.Add(issuer.ttl)),
@@ -174,21 +168,9 @@ func (issuer *SessionIssuer) Verify(
 		return invalidSessionClaim()
 	}
 
-	email, err := domain.ParseEmail(claims.Email)
-	if err != nil {
-		return invalidSessionClaim()
-	}
-
-	user := domain.User{
-		ID:             domain.UserID(claims.Subject),
-		Email:          email,
-		Role:           domain.Role(claims.Role),
-		Locale:         domain.NewLocale(claims.Locale),
-		SessionVersion: claims.Version,
-	}
-
 	claim := domain.SessionClaim{
-		User: user,
+		UserID:         domain.UserID(claims.Subject),
+		SessionVersion: claims.Version,
 	}
 
 	if claims.TenantID != "" {
@@ -201,39 +183,18 @@ func (issuer *SessionIssuer) Verify(
 }
 
 func validateSessionClaim(
-	claim *domain.SessionClaim,
+	claim domain.SessionClaim,
 ) error {
-	if claim == nil {
-		return errors.New(
-			"issue session token: claim cannot be nil",
-		)
-	}
-
-	if claim.User.ID == "" {
+	if !claim.UserID.IsValid() {
 		return errors.New(
 			"issue session token: user id is required",
 		)
 	}
-
-	if claim.User.Email == "" {
-		return errors.New(
-			"issue session token: user email is required",
-		)
+	if claim.ActiveTenantID != nil && !claim.ActiveTenantID.IsValid() {
+		return errors.New("issue session token: active tenant id is invalid")
 	}
 
-	if claim.User.Role == "" {
-		return errors.New(
-			"issue session token: user role is required",
-		)
-	}
-
-	if claim.User.Locale == "" {
-		return errors.New(
-			"issue session token: user locale is required",
-		)
-	}
-
-	if claim.User.SessionVersion < 1 {
+	if claim.SessionVersion < 1 {
 		return errors.New(
 			"issue session token: session version must be positive",
 		)
@@ -242,15 +203,15 @@ func validateSessionClaim(
 	return nil
 }
 
-func validSessionClaims(
-	claims *sessionClaims,
-) bool {
-	return claims != nil &&
-		claims.Subject != "" &&
+func validSessionClaims(claims *sessionClaims) bool {
+	if claims == nil ||
+		uuid.Validate(claims.Subject) != nil ||
+		uuid.Validate(claims.ID) != nil ||
+		claims.TenantID != "" && uuid.Validate(claims.TenantID) != nil {
+		return false
+	}
+	return claims.Subject != "" &&
 		claims.ID != "" &&
-		claims.Email != "" &&
-		claims.Role != "" &&
-		claims.Locale != "" &&
 		claims.Version > 0 &&
 		claims.IssuedAt != nil &&
 		claims.ExpiresAt != nil

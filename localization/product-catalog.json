@@ -46,6 +46,10 @@
         "de-CH": "Diese E-Mail-Adresse wird bereits verwendet.",
         "en-US": "This email address is already in use."
       },
+      "error.conflict": {
+        "de-CH": "Die Daten wurden zwischenzeitlich geändert. Bitte lade sie neu und versuche es erneut.",
+        "en-US": "The data changed in the meantime. Reload it and try again."
+      },
       "error.internal": {
         "de-CH": "Ein interner Fehler ist aufgetreten. Bitte versuche es erneut.",
         "en-US": "An internal error occurred. Please try again."
@@ -74,9 +78,21 @@
         "de-CH": "Die Mitgliedschaft wurde nicht gefunden.",
         "en-US": "The membership was not found."
       },
+      "error.rate_limited": {
+        "de-CH": "Zu viele Anmeldeversuche. Bitte versuche es später erneut.",
+        "en-US": "Too many authentication attempts. Please try again later."
+      },
+      "error.role_not_found": {
+        "de-CH": "Die Rolle wurde nicht gefunden.",
+        "en-US": "The role was not found."
+      },
       "error.tenant_not_found": {
         "de-CH": "Der Mandant wurde nicht gefunden.",
         "en-US": "The tenant was not found."
+      },
+      "error.user_not_found": {
+        "de-CH": "Der Benutzer wurde nicht gefunden.",
+        "en-US": "The user was not found."
       },
       "error.unauthorized": {
         "de-CH": "Für diese Aktion fehlen die erforderlichen Rechte.",
@@ -89,6 +105,14 @@
       "ui.action": {
         "de-CH": "Aktion",
         "en-US": "Action"
+      },
+      "mail.invitation.body": {
+        "de-CH": "Du wurdest zu einem Clinks-Mandanten eingeladen.\n\nEinladung annehmen: {url}",
+        "en-US": "You have been invited to a Clinks tenant.\n\nAccept the invitation: {url}"
+      },
+      "mail.invitation.subject": {
+        "de-CH": "Clinks-Einladung",
+        "en-US": "Clinks invitation"
       },
       "ui.active_tenant": {
         "de-CH": "Aktiver Mandant",

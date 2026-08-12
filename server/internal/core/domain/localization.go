@@ -1,6 +1,9 @@
 package domain
 
-import "strings"
+import (
+	"strings"
+	"time"
+)
 
 type (
 	Locale           string
@@ -19,6 +22,9 @@ type Language struct {
 	Name      string
 	IsDefault bool
 	IsActive  bool
+	Revision  uint64
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 type Translation struct {
@@ -26,6 +32,9 @@ type Translation struct {
 	ApplicationScope ApplicationScope
 	Key              string
 	Value            string
+	Revision         uint64
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
 }
 
 type TranslationBundle struct {

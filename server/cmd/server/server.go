@@ -23,11 +23,13 @@ const (
 type HTTPServer struct {
 	server          *http.Server
 	shutdownTimeout time.Duration
+	logger          *slog.Logger
 }
 
 func NewHTTPServer(
 	config appconfig.HTTPConfig,
 	handler http.Handler,
+	logger *slog.Logger,
 ) *HTTPServer {
 	return &HTTPServer{
 		server: &http.Server{
@@ -39,6 +41,7 @@ func NewHTTPServer(
 			IdleTimeout:       defaultIdleTimeout,
 		},
 		shutdownTimeout: defaultShutdownTimeout,
+		logger:          logger,
 	}
 }
 
@@ -61,7 +64,7 @@ func (server *HTTPServer) Run(ctx context.Context) error {
 	serverErr := make(chan error, 1)
 
 	go func() {
-		slog.Info(
+		server.logger.Info(
 			"clinks server starting",
 			"address",
 			listener.Addr().String(),
@@ -84,7 +87,7 @@ func (server *HTTPServer) Run(ctx context.Context) error {
 		)
 
 	case <-ctx.Done():
-		slog.Info(
+		server.logger.Info(
 			"shutdown signal received",
 			"timeout",
 			server.shutdownTimeout,
@@ -109,7 +112,7 @@ func (server *HTTPServer) Run(ctx context.Context) error {
 		return shutdownErr
 	}
 
-	slog.Info("clinks server exited cleanly")
+	server.logger.Info("clinks server exited cleanly")
 
 	return nil
 }
@@ -124,7 +127,7 @@ func (server *HTTPServer) shutdown(
 	defer cancel()
 
 	if err := server.server.Shutdown(shutdownCtx); err != nil {
-		slog.Warn(
+		server.logger.Warn(
 			"graceful shutdown failed, forcing close",
 			"error",
 			err,

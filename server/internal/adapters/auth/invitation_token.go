@@ -51,15 +51,9 @@ func (signer *InvitationTokenSigner) NewInvitationID() (
 }
 
 func (signer *InvitationTokenSigner) Token(
-	invitation *domain.Invitation,
+	invitation domain.Invitation,
 ) (string, error) {
-	if invitation == nil {
-		return "", errors.New(
-			"sign invitation token: invitation cannot be nil",
-		)
-	}
-
-	if invitation.ID == "" {
+	if !invitation.ID.IsValid() {
 		return "", errors.New(
 			"sign invitation token: invitation id is required",
 		)

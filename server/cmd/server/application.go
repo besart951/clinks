@@ -3,14 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"time"
-
-	"github.com/jackc/pgx/v5/pgxpool"
 
 	authadapter "github.com/besartmorina/clinks/server/internal/adapters/auth"
 	httpadapter "github.com/besartmorina/clinks/server/internal/adapters/http"
 	"github.com/besartmorina/clinks/server/internal/adapters/i18n"
-	mailadapter "github.com/besartmorina/clinks/server/internal/adapters/mail"
 	"github.com/besartmorina/clinks/server/internal/adapters/postgres"
 	appconfig "github.com/besartmorina/clinks/server/internal/config"
 	"github.com/besartmorina/clinks/server/internal/core/domain"
@@ -25,25 +23,22 @@ const (
 
 type Application struct {
 	api        *httpadapter.Server
-	pool       *pgxpool.Pool
-	auth       *service.AuthService
 	oidc       *authadapter.GoogleOIDC
 	oidcConfig httpadapter.OIDCConfig
+	logger     *slog.Logger
 }
 
 func NewApplication(
 	api *httpadapter.Server,
-	pool *pgxpool.Pool,
-	auth *service.AuthService,
 	oidc *authadapter.GoogleOIDC,
 	oidcConfig httpadapter.OIDCConfig,
+	logger *slog.Logger,
 ) *Application {
 	return &Application{
 		api:        api,
-		pool:       pool,
-		auth:       auth,
 		oidc:       oidc,
 		oidcConfig: oidcConfig,
+		logger:     logger,
 	}
 }
 
@@ -59,41 +54,7 @@ func (app *Application) Run(
 		return fmt.Errorf("build HTTP handler: %w", err)
 	}
 
-	return NewHTTPServer(config, handler).Run(ctx)
-}
-
-func (app *Application) MigrateAndBootstrap(
-	ctx context.Context,
-	bootstrap appconfig.BootstrapConfig,
-) error {
-	if err := postgres.Migrate(ctx, app.pool); err != nil {
-		return fmt.Errorf("apply migrations: %w", err)
-	}
-
-	if err := app.auth.EnsureSuperAdmin(
-		ctx,
-		bootstrap.Email,
-		bootstrap.Password,
-		domain.NewLocale(bootstrap.Locale),
-	); err != nil {
-		return fmt.Errorf("bootstrap administrator: %w", err)
-	}
-
-	return nil
-}
-
-func (app *Application) Healthcheck(ctx context.Context) error {
-	ctx, cancel := context.WithTimeout(
-		ctx,
-		defaultHealthcheckTimeout,
-	)
-	defer cancel()
-
-	if err := app.pool.Ping(ctx); err != nil {
-		return fmt.Errorf("ping database: %w", err)
-	}
-
-	return nil
+	return NewHTTPServer(config, handler, app.logger).Run(ctx)
 }
 
 func poolConfig(
@@ -111,10 +72,12 @@ func poolConfig(
 
 func httpServerConfig(
 	settings *appconfig.Config,
+	defaultLocale domain.Locale,
 ) httpadapter.ServerConfig {
 	return httpadapter.ServerConfig{
 		CORSOrigins:      settings.HTTP.CORSOrigins,
 		ReadinessTimeout: defaultReadinessTimeout,
+		DefaultLocale:    defaultLocale,
 		Cookie: httpadapter.CookieConfig{
 			Name:   settings.HTTP.SessionCookieName,
 			Secure: settings.HTTP.SessionCookieSecure,
@@ -159,19 +122,6 @@ func httpOIDCConfig(
 	}
 }
 
-func smtpConfig(
-	settings *appconfig.Config,
-) *mailadapter.SMTPConfig {
-	return &mailadapter.SMTPConfig{
-		Host:       settings.SMTP.Host,
-		Port:       settings.SMTP.Port,
-		Username:   settings.SMTP.Username,
-		Password:   settings.SMTP.Password,
-		From:       settings.SMTP.From,
-		RequireTLS: settings.SMTP.RequireTLS,
-	}
-}
-
 func sessionConfig(
 	settings *appconfig.Config,
 ) authadapter.SessionConfig {
@@ -183,12 +133,12 @@ func sessionConfig(
 	}
 }
 
-func newAuthService(
-	identities ports.IdentityRepository,
+func newAuthServices(
+	identities ports.SessionIdentityRepository,
 	federation ports.ExternalIdentityRepository,
 	provisioner ports.TenantProvisioner,
-	memberships ports.MembershipRepository,
-	roles ports.RoleReader,
+	memberships ports.MembershipSessionReader,
+	roles ports.RoleLookup,
 	invitations ports.InvitationRepository,
 	passwords ports.PasswordHasher,
 	sessions ports.SessionIssuer,
@@ -197,8 +147,8 @@ func newAuthService(
 	tokens ports.InvitationTokenSigner,
 	inviteBaseURL string,
 	inviteTTL time.Duration,
-) (*service.AuthService, error) {
-	return service.NewAuthService(
+) (service.AuthServices, error) {
+	return service.NewAuthServices(
 		service.AuthDependencies{
 			Identities:    identities,
 			Federation:    federation,
@@ -218,8 +168,17 @@ func newAuthService(
 }
 
 func newHTTPAdapter(
-	auth *service.AuthService,
-	admin *service.AdminService,
+	credentials *service.CredentialService,
+	sessions *service.SessionService,
+	invitations *service.InvitationService,
+	externalIdentities *service.ExternalIdentityService,
+	tenants *service.TenantAdministration,
+	localizationEdit *service.LocalizationAdministration,
+	audit *service.AuditAdministration,
+	users *service.UserAdministration,
+	inviteAdmin *service.InvitationAdministration,
+	overview *service.SystemOverview,
+	tenantManagement *service.TenantManagement,
 	localization *service.I18nService,
 	translator *i18n.Translator,
 	readiness ports.ReadinessChecker,
@@ -227,18 +186,22 @@ func newHTTPAdapter(
 ) (*httpadapter.Server, error) {
 	return httpadapter.NewServer(
 		httpadapter.ServerDeps{
-			Sessions:         auth,
-			Registration:     auth,
-			Invitations:      auth,
-			Tenants:          admin,
-			LocalizationEdit: admin,
-			Audit:            admin,
+			Sessions:         sessions,
+			Credentials:      credentials,
+			OIDCSessions:     externalIdentities,
+			Registration:     credentials,
+			Invitations:      invitations,
+			Tenants:          tenants,
+			LocalizationEdit: localizationEdit,
+			Audit:            audit,
 			Localization:     localization,
 			Translator:       translator,
 			Readiness:        readiness,
-			Users:            admin,
-			InviteAdmin:      admin,
-			Overview:         admin,
+			Users:            users,
+			InviteAdmin:      inviteAdmin,
+			Overview:         overview,
+			TenantManagement: tenantManagement,
+			Logger:           slog.Default(),
 		},
 		config,
 	)

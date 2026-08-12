@@ -18,7 +18,10 @@ func (stub overrideStub) Translations(context.Context, domain.Locale, domain.App
 }
 
 func TestProductCatalogUsesGermanSourceTextByDefault(t *testing.T) {
-	catalog := NewProductCatalog(overrideStub{})
+	catalog, err := NewProductCatalog(overrideStub{})
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	translations, err := catalog.Translations(context.Background(), "de-CH", domain.ScopeShared)
 	if err != nil {
@@ -37,9 +40,12 @@ func TestProductCatalogUsesGermanSourceTextByDefault(t *testing.T) {
 }
 
 func TestProductCatalogLetsAnAdministratorOverrideSourceText(t *testing.T) {
-	catalog := NewProductCatalog(overrideStub{translations: []domain.Translation{
+	catalog, err := NewProductCatalog(overrideStub{translations: []domain.Translation{
 		{Locale: "de-CH", ApplicationScope: domain.ScopeShared, Key: "ui.sign_in", Value: "Einloggen"},
 	}})
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	translations, err := catalog.Translations(context.Background(), "de-CH", domain.ScopeShared)
 	if err != nil {

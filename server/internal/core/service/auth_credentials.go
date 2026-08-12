@@ -2,18 +2,11 @@ package service
 
 import (
 	"context"
-	"strings"
-	"unicode/utf8"
 
 	"github.com/besartmorina/clinks/server/internal/core/domain"
 )
 
-const (
-	minimumPasswordCharacters = 12
-	maximumPasswordBytes      = 72
-)
-
-func (service *AuthService) Login(
+func (service *authService) Login(
 	ctx context.Context,
 	email,
 	password string,
@@ -26,7 +19,7 @@ func (service *AuthService) Login(
 	)
 }
 
-func (service *AuthService) LoginSuperAdmin(
+func (service *authService) LoginSuperAdmin(
 	ctx context.Context,
 	email,
 	password string,
@@ -39,7 +32,7 @@ func (service *AuthService) LoginSuperAdmin(
 	)
 }
 
-func (service *AuthService) Register(
+func (service *authService) Register(
 	ctx context.Context,
 	rawEmail,
 	password,
@@ -53,11 +46,11 @@ func (service *AuthService) Register(
 	}
 
 	locale = domain.NewLocale(string(locale))
-	tenantName = strings.TrimSpace(tenantName)
+	tenantName, tenantNameErr := domain.NormalizeTenantName(tenantName)
 
 	if !validPassword(password) ||
 		!locale.IsValid() ||
-		utf8.RuneCountInString(tenantName) < 2 {
+		tenantNameErr != nil {
 		return domain.Session{},
 			domain.NewError(domain.ErrorValidation)
 	}
@@ -84,40 +77,7 @@ func (service *AuthService) Register(
 	return service.issue(session)
 }
 
-func (service *AuthService) EnsureSuperAdmin(
-	ctx context.Context,
-	rawEmail,
-	password string,
-	locale domain.Locale,
-) error {
-	email, err := domain.ParseEmail(rawEmail)
-	if err != nil {
-		return domain.NewError(domain.ErrorValidation)
-	}
-
-	locale = domain.NewLocale(string(locale))
-
-	if !validPassword(password) ||
-		!locale.IsValid() {
-		return domain.NewError(domain.ErrorValidation)
-	}
-
-	passwordHash, err := service.passwords.Hash(password)
-	if err != nil {
-		return domain.NewError(domain.ErrorInternal)
-	}
-
-	return service.identities.EnsureSuperAdmin(
-		ctx,
-		domain.SuperAdminBootstrap{
-			Email:        email,
-			PasswordHash: passwordHash,
-			Locale:       locale,
-		},
-	)
-}
-
-func (service *AuthService) CurrentSession(
+func (service *authService) CurrentSession(
 	ctx context.Context,
 	token string,
 ) (domain.Session, error) {
@@ -137,14 +97,20 @@ func (service *AuthService) CurrentSession(
 			domain.NewError(domain.ErrorInvalidCredentials)
 	}
 
-	return service.sessionForUser(
+	session, err := service.sessionForUser(
 		ctx,
 		user,
 		claim.ActiveTenantID,
 	)
+	if err != nil {
+		return domain.Session{}, err
+	}
+
+	session.Token = token
+	return session, nil
 }
 
-func (service *AuthService) Logout(
+func (service *authService) Logout(
 	ctx context.Context,
 	token string,
 ) error {
@@ -159,7 +125,7 @@ func (service *AuthService) Logout(
 	)
 }
 
-func (service *AuthService) SwitchTenant(
+func (service *authService) SwitchTenant(
 	ctx context.Context,
 	token string,
 	requestedTenantID domain.TenantID,
@@ -173,7 +139,7 @@ func (service *AuthService) SwitchTenant(
 		return domain.Session{}, err
 	}
 
-	if session.User.IsSuperAdmin {
+	if session.User.GlobalRole.IsSuperAdministrator() {
 		return domain.Session{},
 			domain.NewError(domain.ErrorUnauthorized)
 	}
@@ -188,26 +154,26 @@ func (service *AuthService) SwitchTenant(
 	}
 
 	session.ActiveTenant = new(membership.Tenant)
+	sessionVersion, err := service.identities.RotateTenantSession(
+		ctx,
+		session.User.ID,
+		requestedTenantID,
+		membership.Tenant.Name,
+	)
+	if err != nil {
+		return domain.Session{}, err
+	}
+	session.User.SessionVersion = sessionVersion
 
 	session, err = service.issue(session)
 	if err != nil {
 		return domain.Session{}, err
 	}
 
-	if err := service.appendAudit(
-		ctx,
-		session.User.ID,
-		new(requestedTenantID),
-		"tenant.switch",
-		membership.Tenant.Name,
-	); err != nil {
-		return domain.Session{}, err
-	}
-
 	return session, nil
 }
 
-func (service *AuthService) login(
+func (service *authService) login(
 	ctx context.Context,
 	rawEmail,
 	password string,
@@ -224,11 +190,10 @@ func (service *AuthService) login(
 			domain.NewError(domain.ErrorInvalidCredentials)
 	}
 
-	user, passwordHash, findErr :=
-		service.identities.FindByEmail(
-			ctx,
-			email,
-		)
+	user, passwordHash, findErr := service.identities.FindByEmail(
+		ctx,
+		email,
+	)
 
 	passwordValid := service.passwords.Verify(
 		password,
@@ -240,7 +205,7 @@ func (service *AuthService) login(
 			domain.NewError(domain.ErrorInvalidCredentials)
 	}
 
-	if requireSuperAdmin != user.IsSuperAdmin {
+	if requireSuperAdmin != user.GlobalRole.IsSuperAdministrator() {
 		return domain.Session{},
 			domain.NewError(domain.ErrorInvalidCredentials)
 	}
@@ -273,8 +238,5 @@ func (service *AuthService) login(
 }
 
 func validPassword(password string) bool {
-	return utf8.ValidString(password) &&
-		utf8.RuneCountInString(password) >=
-			minimumPasswordCharacters &&
-		len(password) <= maximumPasswordBytes
+	return domain.ValidatePassword(password) == nil
 }

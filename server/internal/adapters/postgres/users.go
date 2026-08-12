@@ -7,26 +7,13 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/besartmorina/clinks/server/internal/core/domain"
 )
 
 const usersEmailUniqueConstraint = "users_email_unique"
 
-type UserRepository struct {
-	pool *pgxpool.Pool
-}
-
-func NewUserRepository(
-	pool *pgxpool.Pool,
-) *UserRepository {
-	return &UserRepository{
-		pool: pool,
-	}
-}
-
-func (repository *UserRepository) EnsureSuperAdmin(
+func (repository *Store) EnsureSuperAdmin(
 	ctx context.Context,
 	bootstrap domain.SuperAdminBootstrap,
 ) error {
@@ -34,20 +21,20 @@ func (repository *UserRepository) EnsureSuperAdmin(
 		ctx,
 		repository.pool,
 		func(tx pgx.Tx) error {
-			var isSuperAdmin bool
+			var globalRole domain.GlobalRole
 
 			err := tx.QueryRow(
 				ctx,
 				`
-					SELECT is_super_admin
+					SELECT global_role
 					FROM users
 					WHERE email = $1
 				`,
 				bootstrap.Email,
-			).Scan(&isSuperAdmin)
+			).Scan(&globalRole)
 
 			switch {
-			case err == nil && isSuperAdmin:
+			case err == nil && globalRole.IsSuperAdministrator():
 				return nil
 
 			case err == nil:
@@ -74,15 +61,16 @@ func (repository *UserRepository) EnsureSuperAdmin(
 						id,
 						email,
 						password_hash,
-						is_super_admin,
+						global_role,
 						locale,
 						session_version
 					)
-					VALUES ($1, $2, $3, TRUE, $4, 1)
+					VALUES ($1, $2, $3, $4, $5, 1)
 				`,
 				id,
 				bootstrap.Email,
 				bootstrap.PasswordHash,
+				domain.GlobalRoleSuperAdministrator,
 				bootstrap.Locale,
 			)
 
@@ -91,7 +79,7 @@ func (repository *UserRepository) EnsureSuperAdmin(
 	)
 }
 
-func (repository *UserRepository) FindByEmail(
+func (repository *Store) FindByEmail(
 	ctx context.Context,
 	email domain.Email,
 ) (domain.User, domain.PasswordHash, error) {
@@ -109,7 +97,7 @@ func (repository *UserRepository) FindByEmail(
 						id,
 						email,
 						password_hash,
-						is_super_admin,
+						global_role,
 						locale,
 						session_version
 					FROM users
@@ -120,7 +108,7 @@ func (repository *UserRepository) FindByEmail(
 				&user.ID,
 				&user.Email,
 				&passwordHash,
-				&user.IsSuperAdmin,
+				&user.GlobalRole,
 				&user.Locale,
 				&user.SessionVersion,
 			)
@@ -145,7 +133,7 @@ func (repository *UserRepository) FindByEmail(
 	return user, passwordHash, err
 }
 
-func (repository *UserRepository) FindByID(
+func (repository *Store) FindByID(
 	ctx context.Context,
 	userID domain.UserID,
 ) (domain.User, error) {
@@ -161,7 +149,7 @@ func (repository *UserRepository) FindByID(
 					SELECT
 						id,
 						email,
-						is_super_admin,
+						global_role,
 						locale,
 						session_version
 					FROM users
@@ -171,7 +159,7 @@ func (repository *UserRepository) FindByID(
 			).Scan(
 				&user.ID,
 				&user.Email,
-				&user.IsSuperAdmin,
+				&user.GlobalRole,
 				&user.Locale,
 				&user.SessionVersion,
 			)
@@ -196,7 +184,7 @@ func (repository *UserRepository) FindByID(
 	return user, err
 }
 
-func (repository *UserRepository) InvalidateSession(
+func (repository *Store) InvalidateSession(
 	ctx context.Context,
 	userID domain.UserID,
 ) error {
@@ -245,6 +233,39 @@ func (repository *UserRepository) InvalidateSession(
 	)
 }
 
+func (repository *Store) RotateTenantSession(
+	ctx context.Context,
+	userID domain.UserID,
+	tenantID domain.TenantID,
+	tenantName string,
+) (int, error) {
+	var sessionVersion int
+
+	err := withSystemTx(ctx, repository.pool, func(tx pgx.Tx) error {
+		err := tx.QueryRow(ctx, `
+			UPDATE users
+			SET session_version = session_version + 1, updated_at = now()
+			WHERE id = $1
+			RETURNING session_version
+		`, userID).Scan(&sessionVersion)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return domain.NewError(domain.ErrorInvalidCredentials)
+		}
+		if err != nil {
+			return fmt.Errorf("rotate tenant session: %w", err)
+		}
+
+		return insertAuditEvent(ctx, tx, domain.AuditEvent{
+			ActorID:  new(userID),
+			TenantID: new(tenantID),
+			Action:   "tenant.switch",
+			Target:   tenantName,
+		})
+	})
+
+	return sessionVersion, err
+}
+
 func mapIdentityDatabaseError(
 	err error,
 ) error {
@@ -252,8 +273,7 @@ func mapIdentityDatabaseError(
 		return nil
 	}
 
-	databaseError, ok :=
-		errors.AsType[*pgconn.PgError](err)
+	databaseError, ok := errors.AsType[*pgconn.PgError](err)
 
 	if ok &&
 		databaseError.ConstraintName ==

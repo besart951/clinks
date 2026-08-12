@@ -11,8 +11,6 @@ import (
 	appconfig "github.com/besartmorina/clinks/server/internal/config"
 )
 
-//go:generate go tool wire
-
 type command string
 
 const (
@@ -47,7 +45,7 @@ func run(args []string) error {
 		return err
 	}
 
-	config, err := appconfig.Load()
+	config, err := appconfig.Load(configProfile(cmd))
 	if err != nil {
 		return fmt.Errorf(
 			"load configuration: %w",
@@ -62,18 +60,6 @@ func run(args []string) error {
 	)
 	defer stop()
 
-	app, cleanup, err := InitializeApplication(
-		ctx,
-		&config,
-	)
-	if err != nil {
-		return fmt.Errorf(
-			"build application: %w",
-			err,
-		)
-	}
-	defer cleanup()
-
 	slog.Info(
 		"executing command",
 		"command",
@@ -82,17 +68,27 @@ func run(args []string) error {
 
 	switch cmd {
 	case commandServer:
-		return app.Run(ctx, config.HTTP)
+		return runServer(ctx, &config)
 
 	case commandMigrate:
-		return app.MigrateAndBootstrap(
-			ctx,
-			config.Bootstrap,
-		)
+		return runMigration(ctx, &config)
 
 	case commandHealthcheck:
-		return app.Healthcheck(ctx)
+		return runHealthcheck(ctx, &config)
 
+	default:
+		panic("unreachable command")
+	}
+}
+
+func configProfile(cmd command) appconfig.Profile {
+	switch cmd {
+	case commandServer:
+		return appconfig.ProfileAPI
+	case commandMigrate:
+		return appconfig.ProfileMigration
+	case commandHealthcheck:
+		return appconfig.ProfileHealthcheck
 	default:
 		panic("unreachable command")
 	}

@@ -1,5 +1,10 @@
 package domain
 
+import (
+	"strings"
+	"unicode/utf8"
+)
+
 type (
 	PasswordHash    string
 	ExternalIssuer  string
@@ -24,4 +29,15 @@ type ExternalIdentity struct {
 	Subject ExternalSubject
 	Email   Email
 	UserID  UserID
+}
+
+func (identity ExternalIdentity) Validate() error {
+	issuer := strings.TrimSpace(string(identity.Issuer))
+	subject := strings.TrimSpace(string(identity.Subject))
+	if issuer == "" || subject == "" ||
+		!utf8.ValidString(issuer) || !utf8.ValidString(subject) ||
+		identity.Email.Validate() != nil {
+		return NewError(ErrorValidation)
+	}
+	return nil
 }

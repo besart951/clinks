@@ -14,15 +14,8 @@ type AuditAppender interface {
 }
 
 type AuditReader interface {
-	List(
+	ListAuditEvents(
 		ctx context.Context,
 		filter domain.AuditFilter,
 	) (domain.AuditPage, error)
-}
-
-// AuditLog combines audit writing and querying for consumers that
-// genuinely require both capabilities.
-type AuditLog interface {
-	AuditAppender
-	AuditReader
 }

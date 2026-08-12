@@ -25,7 +25,7 @@ func (server *Server) GetTranslations(ctx context.Context, request *connect.Requ
 	if err != nil {
 		return nil, server.localizedError(ctx, request.Header(), err)
 	}
-	bundle, err := server.localization.TranslationBundle(ctx, requestLocale(request.Header()), scope)
+	bundle, err := server.localization.TranslationBundle(ctx, server.requestLocale(request.Header()), scope)
 	if err != nil {
 		return nil, server.localizedError(ctx, request.Header(), err)
 	}

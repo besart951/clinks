@@ -13,14 +13,29 @@ type TenantProvisioner interface {
 	) (domain.Session, error)
 }
 
-type TenantRepository interface {
+type TenantAdministrationRepository interface {
 	Create(
 		ctx context.Context,
 		name string,
 		createdBy domain.UserID,
 	) (domain.Tenant, error)
 
-	List(
+	ListTenants(
 		ctx context.Context,
-	) ([]domain.Tenant, error)
+		filter domain.TenantFilter,
+	) (domain.Page[domain.Tenant], error)
+
+	UpdateSystem(
+		ctx context.Context,
+		tenant domain.Tenant,
+		actorID domain.UserID,
+	) (domain.Tenant, error)
+}
+
+type TenantEditor interface {
+	UpdateTenant(
+		ctx context.Context,
+		tenant domain.Tenant,
+		actorID domain.UserID,
+	) (domain.Tenant, error)
 }

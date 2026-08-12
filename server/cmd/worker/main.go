@@ -11,8 +11,6 @@ import (
 	appconfig "github.com/besartmorina/clinks/server/internal/config"
 )
 
-//go:generate go tool wire
-
 type workerCommand string
 
 const (
@@ -46,7 +44,11 @@ func run(args []string) error {
 		return err
 	}
 
-	settings, err := appconfig.Load()
+	profile := appconfig.ProfileWorker
+	if command == commandHealthcheck {
+		profile = appconfig.ProfileWorkerHealthcheck
+	}
+	settings, err := appconfig.Load(profile)
 	if err != nil {
 		return fmt.Errorf(
 			"load configuration: %w",

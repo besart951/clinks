@@ -3,6 +3,7 @@ package postgres
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -50,18 +51,15 @@ func NewPool(
 	}
 
 	if poolConfig.MaxConnLifetime > 0 {
-		config.MaxConnLifetime =
-			poolConfig.MaxConnLifetime
+		config.MaxConnLifetime = poolConfig.MaxConnLifetime
 	}
 
 	if poolConfig.MaxConnIdleTime > 0 {
-		config.MaxConnIdleTime =
-			poolConfig.MaxConnIdleTime
+		config.MaxConnIdleTime = poolConfig.MaxConnIdleTime
 	}
 
 	if poolConfig.HealthCheckPeriod > 0 {
-		config.HealthCheckPeriod =
-			poolConfig.HealthCheckPeriod
+		config.HealthCheckPeriod = poolConfig.HealthCheckPeriod
 	}
 
 	config.PingTimeout = poolConfig.PingTimeout
@@ -85,6 +83,22 @@ func NewPool(
 			fmt.Errorf("ping postgres: %w", err)
 	}
 
+	var isSuperuser, bypassesRLS bool
+	if err := pool.QueryRow(ctx, `
+		SELECT rolsuper, rolbypassrls
+		FROM pg_roles
+		WHERE rolname = current_user
+	`).Scan(&isSuperuser, &bypassesRLS); err != nil {
+		pool.Close()
+		return nil, nil, fmt.Errorf("inspect postgres runtime role: %w", err)
+	}
+	if isSuperuser || bypassesRLS {
+		pool.Close()
+		return nil, nil, fmt.Errorf(
+			"postgres runtime role must not be superuser or BYPASSRLS",
+		)
+	}
+
 	return pool, pool.Close, nil
 }
 
@@ -94,13 +108,21 @@ func WithTenantTx(
 	tenantID domain.TenantID,
 	operation func(pgx.Tx) error,
 ) error {
-	return withSettingTx(
-		ctx,
-		pool,
-		tenantSettingKey,
-		string(tenantID),
-		operation,
-	)
+	if err := tenantID.Validate(); err != nil {
+		return err
+	}
+	if pool == nil || operation == nil {
+		return errors.New("tenant transaction requires a pool and operation")
+	}
+	return pgx.BeginFunc(ctx, pool, func(tx pgx.Tx) error {
+		if _, err := tx.Exec(ctx, "SELECT set_config($1, $2, true)", systemSettingKey, "false"); err != nil {
+			return fmt.Errorf("disable system transaction context: %w", err)
+		}
+		if _, err := tx.Exec(ctx, "SELECT set_config($1, $2, true)", tenantSettingKey, string(tenantID)); err != nil {
+			return fmt.Errorf("set tenant transaction context: %w", err)
+		}
+		return operation(tx)
+	})
 }
 
 func withSystemTx(
@@ -108,6 +130,9 @@ func withSystemTx(
 	pool *pgxpool.Pool,
 	operation func(pgx.Tx) error,
 ) error {
+	if pool == nil || operation == nil {
+		return errors.New("system transaction requires a pool and operation")
+	}
 	return withSettingTx(
 		ctx,
 		pool,
@@ -145,22 +170,10 @@ func withSettingTx(
 	)
 }
 
-type Readiness struct {
-	pool *pgxpool.Pool
-}
-
-func NewReadiness(
-	pool *pgxpool.Pool,
-) *Readiness {
-	return &Readiness{
-		pool: pool,
-	}
-}
-
-func (readiness *Readiness) Ready(
+func (repository *Store) Ready(
 	ctx context.Context,
 ) error {
-	if err := readiness.pool.Ping(ctx); err != nil {
+	if err := repository.pool.Ping(ctx); err != nil {
 		return fmt.Errorf(
 			"ping postgres: %w",
 			err,

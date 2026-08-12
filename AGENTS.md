@@ -2,6 +2,12 @@
 
 Before changing this repository, read [docs/security.md](docs/security.md), [docs/architecture.md](docs/architecture.md), and [codestyle.md](codestyle.md).
 
+## Go skills
+
+- For any Go code, `go.mod`, or Go design/review/debugging work, use the installed [`spf13/go-skills`](https://github.com/spf13/go-skills) `go` skill.
+- Also use the collection's specialized skill when the task concerns Cobra/Viper, specification review, release engineering, Wails, or fileflow/pathologize.
+- This repository's instructions and linked architecture, security, and code-style documents take precedence over general skill guidance. In particular, preserve the established `server/internal` hexagonal architecture and its domain/port boundaries.
+
 ## Non-negotiable rules
 
 - Domain entities in server/internal/core/domain are pure Go and have no infrastructure imports.

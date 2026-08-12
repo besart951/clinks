@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"golang.org/x/oauth2"
@@ -15,7 +16,10 @@ import (
 	"github.com/besartmorina/clinks/server/internal/core/domain"
 )
 
-const googleIssuer = "https://accounts.google.com"
+const (
+	googleIssuer       = "https://accounts.google.com"
+	defaultOIDCTimeout = 15 * time.Second
+)
 
 var (
 	ErrOIDCDisabled       = errors.New("google oidc client is not enabled")
@@ -27,11 +31,13 @@ type GoogleOIDCConfig struct {
 	ClientID     string
 	ClientSecret string
 	CallbackURL  string
+	Timeout      time.Duration
 }
 
 type GoogleOIDC struct {
 	clientID string
 	oauth    oauth2.Config
+	timeout  time.Duration
 
 	mu       sync.RWMutex
 	verifier *oidc.IDTokenVerifier
@@ -52,8 +58,14 @@ func NewGoogleOIDC(config GoogleOIDCConfig) (*GoogleOIDC, error) {
 		return &GoogleOIDC{}, nil
 	}
 
+	timeout := config.Timeout
+	if timeout <= 0 {
+		timeout = defaultOIDCTimeout
+	}
+
 	return &GoogleOIDC{
 		clientID: clientID,
+		timeout:  timeout,
 		oauth: oauth2.Config{
 			ClientID:     clientID,
 			ClientSecret: config.ClientSecret,
@@ -96,6 +108,9 @@ func (client *GoogleOIDC) Exchange(
 	if !client.Enabled() {
 		return domain.ExternalIdentity{}, ErrOIDCDisabled
 	}
+
+	ctx, cancel := context.WithTimeout(ctx, client.timeout)
+	defer cancel()
 
 	oauthToken, err := client.oauth.Exchange(
 		ctx,

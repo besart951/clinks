@@ -4,26 +4,14 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/besartmorina/clinks/server/internal/core/domain"
 )
 
-type AdminUserRepository struct {
-	pool *pgxpool.Pool
-}
-
-func NewAdminUserRepository(
-	pool *pgxpool.Pool,
-) *AdminUserRepository {
-	return &AdminUserRepository{
-		pool: pool,
-	}
-}
-
-func (repository *AdminUserRepository) ListUsers(
+func (repository *Store) ListUsers(
 	ctx context.Context,
 	filter domain.UserFilter,
 ) (domain.Page[domain.UserSummary], error) {
@@ -47,7 +35,7 @@ func (repository *AdminUserRepository) ListUsers(
 	return page, err
 }
 
-func (repository *AdminUserRepository) GetUser(
+func (repository *Store) GetUser(
 	ctx context.Context,
 	userID domain.UserID,
 ) (domain.UserDetail, error) {
@@ -100,7 +88,7 @@ func listUsersTx(
 			users.id,
 			users.email,
 			users.locale,
-			users.is_super_admin,
+			users.global_role,
 			(
 				SELECT COUNT(*)
 				FROM tenant_memberships membership
@@ -108,6 +96,7 @@ func listUsersTx(
 					membership.user_id = users.id
 					AND membership.status = @active_status
 			) AS membership_count
+			, users.created_at
 		FROM users
 		WHERE TRUE
 	`
@@ -118,6 +107,7 @@ func listUsersTx(
 	}
 
 	search := strings.TrimSpace(filter.Search)
+	fingerprint := keysetFingerprint(strings.ToLower(search), optionalString(filter.GlobalRole), filter.Sort, filter.Direction)
 	if search != "" {
 		query += `
 			AND users.email ILIKE '%' || @search || '%'
@@ -125,25 +115,37 @@ func listUsersTx(
 		arguments["search"] = search
 	}
 
-	if filter.IsSuperAdmin != nil {
+	if filter.GlobalRole != nil {
 		query += `
-			AND users.is_super_admin = @is_super_admin
+			AND users.global_role = @global_role
 		`
-		arguments["is_super_admin"] =
-			*filter.IsSuperAdmin
+		arguments["global_role"] = *filter.GlobalRole
 	}
 
+	sortExpression := "users.email"
+	if filter.Sort == domain.UserSortCreatedAt {
+		sortExpression = "users.created_at"
+	}
+	operator, order := keysetDirection(filter.Direction)
 	if filter.Cursor != "" {
-		query += `
-			AND users.email > @cursor
-		`
-		arguments["cursor"] = string(filter.Cursor)
+		cursor, err := decodeUUIDKeysetCursor(filter.Cursor, "users", fingerprint)
+		if err != nil {
+			return domain.Page[domain.UserSummary]{}, domain.NewError(domain.ErrorValidation)
+		}
+		query += fmt.Sprintf(" AND (%s, users.id) %s (@cursor_sort, @cursor_id)", sortExpression, operator)
+		if filter.Sort == domain.UserSortCreatedAt {
+			value, err := time.Parse(time.RFC3339Nano, cursor.SortValue)
+			if err != nil {
+				return domain.Page[domain.UserSummary]{}, domain.NewError(domain.ErrorValidation)
+			}
+			arguments["cursor_sort"] = value
+		} else {
+			arguments["cursor_sort"] = cursor.SortValue
+		}
+		arguments["cursor_id"] = cursor.ID
 	}
 
-	query += `
-		ORDER BY users.email
-		LIMIT @limit
-	`
+	query += fmt.Sprintf(" ORDER BY %s %s, users.id %s LIMIT @limit", sortExpression, order, order)
 
 	rows, err := tx.Query(
 		ctx,
@@ -174,9 +176,12 @@ func listUsersTx(
 	if len(page.Items) > pageSize {
 		page.Items = page.Items[:pageSize]
 
-		page.NextCursor = domain.Cursor(
-			page.Items[len(page.Items)-1].Email,
-		)
+		last := page.Items[len(page.Items)-1]
+		sortValue := string(last.Email)
+		if filter.Sort == domain.UserSortCreatedAt {
+			sortValue = last.CreatedAt.UTC().Format(time.RFC3339Nano)
+		}
+		page.NextCursor = encodeKeysetCursor("users", fingerprint, sortValue, string(last.ID))
 	}
 
 	return page, nil
@@ -192,8 +197,9 @@ func scanUserSummary(
 		&summary.ID,
 		&summary.Email,
 		&summary.Locale,
-		&summary.IsSuperAdmin,
+		&summary.GlobalRole,
 		&membershipCount,
+		&summary.CreatedAt,
 	)
 	if err != nil {
 		return domain.UserSummary{}, err
@@ -217,7 +223,7 @@ func scanUser(
 			SELECT
 				id,
 				email,
-				is_super_admin,
+				global_role,
 				locale,
 				session_version
 			FROM users
@@ -227,7 +233,7 @@ func scanUser(
 	).Scan(
 		&user.ID,
 		&user.Email,
-		&user.IsSuperAdmin,
+		&user.GlobalRole,
 		&user.Locale,
 		&user.SessionVersion,
 	)
