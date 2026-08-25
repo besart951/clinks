@@ -1,5 +1,5 @@
 import type { ClinksClient, Session } from '@clinks/api-client';
-import type { ErrorMessageFormatter } from './auth-portal-view-model.svelte.ts';
+import type { ErrorMessageFormatter } from './error-handler.ts';
 import { InvitationViewModel } from './invitation-view-model.svelte.ts';
 import { LocalizationViewModel } from './localization-view-model.svelte.ts';
 import { SystemStatsViewModel } from './system-stats-view-model.svelte.ts';
@@ -35,9 +35,9 @@ export class AdminDashboardViewModel {
 		this.tenantModel = new TenantViewModel(client, messages);
 		this.localizationModel = new LocalizationViewModel(client, messages, refreshTranslations, locale);
 		this.auditLogModel = new AuditLogViewModel(client, messages);
-		this.userModel = new UserManagementViewModel(client);
-		this.invitationModel = new InvitationViewModel(client);
-		this.statsModel = new SystemStatsViewModel(client);
+		this.userModel = new UserManagementViewModel(client, messages);
+		this.invitationModel = new InvitationViewModel(client, messages);
+		this.statsModel = new SystemStatsViewModel(client, messages);
 	}
 
 	async loadSection(section: string) {

@@ -1,5 +1,5 @@
 import type { AuditEvent, AuditService } from '@clinks/api-client';
-import type { ErrorMessageFormatter } from './auth-portal-view-model.svelte';
+import type { ErrorMessageFormatter } from './error-handler.ts';
 
 export class AuditLogViewModel {
 	auditEvents = $state<AuditEvent[]>([]);

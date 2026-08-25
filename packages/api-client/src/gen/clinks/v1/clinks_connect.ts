@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { AcceptInvitationRequest, CreateInvitationRequest, CreateLanguageRequest, CreateRoleRequest, CreateTenantRequest, CredentialsRequest, DeleteRoleRequest, DeleteTranslationOverrideRequest, Empty, GetTranslationsRequest, GetUserRequest, Invitation, Language, LanguagesResponse, ListAuditEventsRequest, ListAuditEventsResponse, ListInvitationsRequest, ListInvitationsResponse, ListLanguagesRequest, ListLanguagesResponse, ListMembershipsRequest, ListMembershipsResponse, ListRolesRequest, ListRolesResponse, ListTenantInvitationsRequest, ListTenantsRequest, ListTenantsResponse, ListTranslationOverridesRequest, ListTranslationOverridesResponse, ListUsersRequest, ListUsersResponse, Membership, RegisterRequest, RevokeInvitationRequest, Role, Session, SwitchTenantRequest, SystemStats, Tenant, TranslationOverride, TranslationsResponse, UpdateCurrentTenantRequest, UpdateLanguageRequest, UpdateMembershipRequest, UpdateRoleRequest, UpdateTenantRequest, UpsertTranslationOverrideRequest, UserDetail } from "./clinks_pb.js";
+import { AcceptInvitationRequest, AuthCapabilities, CreateInvitationRequest, CreateLanguageRequest, CreateRoleRequest, CreateTenantRequest, CredentialsRequest, DeleteRoleRequest, DeleteTranslationOverrideRequest, Empty, GetTranslationsRequest, GetUserRequest, Invitation, Language, LanguagesResponse, ListAuditEventsRequest, ListAuditEventsResponse, ListInvitationsRequest, ListInvitationsResponse, ListLanguagesRequest, ListLanguagesResponse, ListMembershipsRequest, ListMembershipsResponse, ListRolesRequest, ListRolesResponse, ListTenantInvitationsRequest, ListTenantsRequest, ListTenantsResponse, ListTranslationOverridesRequest, ListTranslationOverridesResponse, ListUsersRequest, ListUsersResponse, Membership, RegisterRequest, RevokeInvitationRequest, Role, Session, SwitchTenantRequest, SystemStats, Tenant, TranslationOverride, TranslationsResponse, UpdateCurrentTenantRequest, UpdateLanguageRequest, UpdateMembershipRequest, UpdateRoleRequest, UpdateTenantRequest, UpsertTranslationOverrideRequest, UserDetail } from "./clinks_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -55,6 +55,15 @@ export const ClinksService = {
       name: "GetSession",
       I: Empty,
       O: Session,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc clinks.v1.ClinksService.GetAuthCapabilities
+     */
+    getAuthCapabilities: {
+      name: "GetAuthCapabilities",
+      I: Empty,
+      O: AuthCapabilities,
       kind: MethodKind.Unary,
     },
     /**

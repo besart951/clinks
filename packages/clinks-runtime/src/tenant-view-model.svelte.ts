@@ -1,10 +1,10 @@
 import type { TenantService } from '@clinks/api-client';
 import type { Tenant } from '@clinks/api-client';
-import type { ErrorMessageFormatter } from './auth-portal-view-model.svelte.ts';
+import type { ErrorMessageFormatter } from './error-handler.ts';
 import { QueryState } from './query-state.svelte.ts';
 
 export class TenantViewModel {
-	tenants = new QueryState<Tenant[]>();
+	tenants: QueryState<Tenant[]>;
 	tenantName = $state('');
 	error = $state('');
 	busy = $state(false);
@@ -15,10 +15,11 @@ export class TenantViewModel {
 	constructor(service: TenantService, messages: ErrorMessageFormatter) {
 		this.#service = service;
 		this.#messages = messages;
+		this.tenants = new QueryState<Tenant[]>(messages);
 	}
 
 	async load() {
-		await this.tenants.execute(() => this.#service.tenants());
+		await this.tenants.execute('tenants', () => this.#service.tenants({ pageSize: 100 }).then((page) => page.tenants));
 	}
 
 	async createTenant() {

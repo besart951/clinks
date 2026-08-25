@@ -1,14 +1,20 @@
 import type { InvitationService, Invitation } from '@clinks/api-client';
 import { SearchableViewModel } from './searchable-view-model.svelte.ts';
+import type { ErrorMessageFormatter } from './error-handler.ts';
 
 export class InvitationViewModel {
 	list: SearchableViewModel<Invitation, { tenantId: string; status: string }>;
 	errorMessage = $state('');
 
 	#service: Pick<InvitationService, 'listInvitations' | 'revokeInvitation'>;
+	#messages: ErrorMessageFormatter;
 
-	constructor(service: Pick<InvitationService, 'listInvitations' | 'revokeInvitation'>) {
+	constructor(
+		service: Pick<InvitationService, 'listInvitations' | 'revokeInvitation'>,
+		messages: ErrorMessageFormatter,
+	) {
 		this.#service = service;
+		this.#messages = messages;
 		this.list = new SearchableViewModel<Invitation, { tenantId: string; status: string }>(
 			(params) =>
 				this.#service
@@ -21,6 +27,7 @@ export class InvitationViewModel {
 					})
 					.then((page) => ({ items: page.invitations, nextCursor: page.nextCursor })),
 			{ tenantId: '', status: '' },
+			messages,
 		);
 	}
 
@@ -38,9 +45,9 @@ export class InvitationViewModel {
 		this.list.items = this.list.items.filter((i) => i.id !== invitationId);
 		try {
 			await this.#service.revokeInvitation(invitationId);
-		} catch {
+		} catch (error) {
 			this.list.items = snapshot;
-			this.errorMessage = 'Failed to revoke';
+			this.errorMessage = this.#messages.message(error);
 		}
 	}
 

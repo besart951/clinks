@@ -194,6 +194,9 @@ importers:
 
   packages/clinks-views:
     dependencies:
+      '@clinks/api-client':
+        specifier: workspace:*
+        version: link:../api-client
       '@clinks/auth':
         specifier: workspace:*
         version: link:../auth
@@ -226,9 +229,6 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
-      svelte:
-        specifier: ^5.56.4
-        version: 5.56.8
       svelte-sonner:
         specifier: ^1.1.1
         version: 1.1.1(svelte@5.56.8)
@@ -241,6 +241,13 @@ importers:
       tw-animate-css:
         specifier: ^1.4.0
         version: 1.4.0
+    devDependencies:
+      svelte:
+        specifier: ^5.56.4
+        version: 5.56.8
+      tailwindcss:
+        specifier: ^4.3.3
+        version: 4.3.3
 
 packages:
 

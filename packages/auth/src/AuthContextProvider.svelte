@@ -18,6 +18,17 @@
 	onDestroy(() => {
 		runtime.client.setUnauthenticatedHandler();
 	});
+
+	function revalidate() {
+		void auth.revalidateIfStale();
+	}
+
+	function revalidateVisibleDocument() {
+		if (document.visibilityState === 'visible') revalidate();
+	}
 </script>
+
+<svelte:window onfocus={revalidate} />
+<svelte:document onvisibilitychange={revalidateVisibleDocument} />
 
 {@render children()}

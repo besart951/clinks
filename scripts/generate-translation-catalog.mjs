@@ -88,7 +88,8 @@ function samePlaceholders(left, right) {
 
 function renderTypeScript(defaultLocale, entries) {
 	const keys = [...new Set(entries.map((entry) => entry.key))].sort();
-	return `// Generated from localization/product-catalog.json. DO NOT EDIT.\n\nexport const productDefaultLocale = ${JSON.stringify(defaultLocale)} as const;\n\nexport const productTranslationKeys = [\n${keys.map((key) => `\t${JSON.stringify(key)},`).join("\n")}\n] as const;\n\nexport type ProductTranslationKey = (typeof productTranslationKeys)[number];\n`;
+	const defaults = entries.filter((entry) => entry.locale === defaultLocale && entry.scope === "shared");
+	return `// Generated from localization/product-catalog.json. DO NOT EDIT.\n\nexport const productDefaultLocale = ${JSON.stringify(defaultLocale)} as const;\n\nexport const productDefaultTranslations = {\n${defaults.map((entry) => `\t${JSON.stringify(entry.key)}: ${JSON.stringify(entry.value)},`).join("\n")}\n} as const;\n\nexport const productTranslationKeys = [\n${keys.map((key) => `\t${JSON.stringify(key)},`).join("\n")}\n] as const;\n\nexport type ProductTranslationKey = (typeof productTranslationKeys)[number];\n`;
 }
 
 function renderGo(defaultLocale, entries) {

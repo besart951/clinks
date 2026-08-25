@@ -1,10 +1,10 @@
 import type { LocalizationAdminService, TranslationInput } from '@clinks/api-client';
 import type { Language } from '@clinks/i18n-types';
-import type { ErrorMessageFormatter } from './auth-portal-view-model.svelte.ts';
+import type { ErrorMessageFormatter } from './error-handler.ts';
 import { QueryState } from './query-state.svelte.ts';
 
 export class LocalizationViewModel {
-	languages = new QueryState<Language[]>();
+	languages: QueryState<Language[]>;
 	translationKey = $state('');
 	translationValue = $state('');
 	translationScope = $state<TranslationInput['applicationScope']>('shared');
@@ -24,12 +24,15 @@ export class LocalizationViewModel {
 	) {
 		this.#service = service;
 		this.#messages = messages;
+		this.languages = new QueryState<Language[]>(messages);
 		this.#refreshTranslations = refreshTranslations;
 		this.#locale = locale;
 	}
 
 	async load() {
-		await this.languages.execute(() => this.#service.adminLanguages());
+		await this.languages.execute('languages', () =>
+			this.#service.adminLanguages({ pageSize: 100 }).then((page) => page.languages),
+		);
 	}
 
 	async saveTranslationOverride() {

@@ -1,24 +1,17 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { page } from '$app/state';
-	import { useAuth } from '@clinks/auth';
-	import { AuthPortalViewModel, BrowserClipboard, useClinksRuntime } from '@clinks/clinks-runtime';
-	import AuthPortal from '@clinks/clinks-views/auth-portal';
+	import { oidcInvitationReturnPath } from '@clinks/auth';
+	import InvitationPage from '@clinks/clinks-views/invitation';
 
-	const runtime = useClinksRuntime();
-	const auth = useAuth();
-	const model = new AuthPortalViewModel(
-		'infra_link',
-		runtime.client,
-		auth,
-		runtime.translations,
-		new BrowserClipboard(),
-	);
-	const invitationToken = page.url.searchParams.get('token') ?? '';
-
-	onMount(() => {
-		void model.initialize(invitationToken);
+	const token = $derived(page.url.searchParams.get('token') ?? '');
+	const completed = $derived(page.url.searchParams.get('completed') === '1');
+	const authenticationFailed = $derived(page.url.searchParams.get('error') === 'authentication_failed');
+	const flow = $derived({
+		token,
+		completed,
+		authenticationFailed,
+		returnPath: oidcInvitationReturnPath(token),
 	});
 </script>
 
-<AuthPortal {model} />
+<InvitationPage application="infra_link" {flow} />

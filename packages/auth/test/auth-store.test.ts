@@ -17,14 +17,19 @@ const session = {
 describe('AuthStore', () => {
 	it('deduplicates initial session hydration', async () => {
 		let calls = 0;
+		const hydration = deferred<typeof session>();
 		const service = sessionService({
 			async getSession() {
 				calls += 1;
-				return session;
+				return hydration.promise;
 			},
 		});
 		const auth = new AuthStore(service, async () => undefined);
-		await Promise.all([auth.initialize(), auth.initialize()]);
+		const first = auth.initialize();
+		const second = auth.initialize();
+		assert.equal(first, second);
+		hydration.resolve(session);
+		await Promise.all([first, second]);
 		assert.equal(calls, 1);
 		assert.equal(auth.status, 'authenticated');
 	});
@@ -73,7 +78,7 @@ describe('AuthStore', () => {
 		);
 
 		await assert.rejects(auth.login({ email: 'user@clinks.test', password: 'secret' }), failure);
-		assert.equal(auth.status, 'error');
+		assert.equal(auth.status, 'anonymous');
 		assert.equal(auth.error, failure);
 	});
 
@@ -91,7 +96,7 @@ describe('AuthStore', () => {
 
 		await assert.rejects(auth.logout(), failure);
 		assert.equal(auth.current, session);
-		assert.equal(auth.status, 'error');
+		assert.equal(auth.status, 'authenticated');
 		assert.equal(auth.error, failure);
 	});
 
@@ -132,6 +137,97 @@ describe('AuthStore', () => {
 		assert.equal(auth.current, newerSession);
 		assert.equal(auth.status, 'authenticated');
 	});
+
+	it('revalidates only after the bounded session freshness window', async () => {
+		let calls = 0;
+		const auth = new AuthStore(
+			sessionService({
+				async getSession() {
+					calls += 1;
+					return session;
+				},
+			}),
+			async () => undefined,
+		);
+		await auth.initialize();
+		await auth.revalidateIfStale(Date.now());
+		assert.equal(calls, 1);
+		await auth.revalidateIfStale(Date.now() + 5 * 60 * 1000 + 1);
+		assert.equal(calls, 2);
+	});
+
+	it('keeps an authenticated screen available when background revalidation is offline', async () => {
+		let offline = false;
+		const auth = new AuthStore(
+			sessionService({
+				async getSession() {
+					if (offline) throw new Error('offline');
+					return session;
+				},
+			}),
+			async () => undefined,
+		);
+		await auth.initialize();
+		offline = true;
+
+		await auth.revalidateIfStale(Date.now() + 5 * 60 * 1000 + 1);
+
+		assert.equal(auth.status, 'authenticated');
+		assert.equal(auth.current, session);
+		assert.equal((auth.error as Error).message, 'offline');
+	});
+
+	it('discovers Google capability and redirects only to a safe internal return target', async () => {
+		const redirects: string[] = [];
+		const previousLocation = Object.getOwnPropertyDescriptor(globalThis, 'location');
+		Object.defineProperty(globalThis, 'location', {
+			configurable: true,
+			value: { origin: 'https://planer.clinks.test' },
+		});
+		try {
+			const auth = new AuthStore(
+				sessionService({
+					async authCapabilities() {
+						return { googleOIDCEnabled: true };
+					},
+					googleOIDCStartURL(_mode: string, returnTo: string) {
+						return `https://api.clinks.test/start?return_to=${encodeURIComponent(returnTo)}`;
+					},
+				}),
+				async () => undefined,
+				(target) => redirects.push(target),
+			);
+			await auth.initialize();
+			auth.startGoogle({ mode: 'login', returnTo: '/login?completed=1' });
+			auth.startGoogle({ mode: 'login', returnTo: 'https://evil.test' });
+
+			assert.equal(redirects.length, 1);
+			assert.match(redirects[0], /planer\.clinks\.test/);
+		} finally {
+			if (previousLocation) Object.defineProperty(globalThis, 'location', previousLocation);
+			else delete (globalThis as any).location;
+		}
+	});
+
+	it('recovers capability discovery on an explicit refresh', async () => {
+		let calls = 0;
+		const auth = new AuthStore(
+			sessionService({
+				async authCapabilities() {
+					calls += 1;
+					if (calls === 1) throw new Error('offline');
+					return { googleOIDCEnabled: true };
+				},
+			}),
+			async () => undefined,
+		);
+
+		await auth.initialize();
+		assert.equal(auth.capabilities.googleOIDCEnabled, false);
+		await auth.refresh();
+		assert.equal(auth.capabilities.googleOIDCEnabled, true);
+		assert.equal(calls, 2);
+	});
 });
 
 function deferred<T>() {
@@ -144,6 +240,8 @@ function deferred<T>() {
 
 function sessionService(overrides: Record<string, unknown> = {}) {
 	return {
+		authCapabilities: async () => ({ googleOIDCEnabled: false }),
+		googleOIDCStartURL: () => 'https://api.clinks.test/auth/oidc/google/start',
 		getSession: async () => session,
 		login: async () => session,
 		adminLogin: async () => session,

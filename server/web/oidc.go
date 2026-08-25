@@ -53,23 +53,17 @@ type oidcAttempt struct {
 	Verifier        string `json:"verifier"`
 	Mode            string `json:"mode"`
 	InvitationToken string `json:"invitation_token,omitempty"`
+	SuccessURL      string `json:"success_url"`
 	ExpiresAt       int64  `json:"expires_at"`
 }
 
-func validateOIDCConfig(config OIDCConfig) error {
+func validateOIDCConfig(config OIDCConfig, policy browserPolicy) error {
 	if len(config.StateSecret) < 32 {
 		return errors.New("http: OIDC state secret must contain at least 32 bytes")
 	}
 
-	target, err := url.Parse(config.SuccessURL)
-	if err != nil {
+	if _, err := policy.redirectURL(config.SuccessURL); err != nil {
 		return fmt.Errorf("http: invalid OIDC success URL: %w", err)
-	}
-	if target.Scheme != "http" && target.Scheme != "https" {
-		return fmt.Errorf("http: OIDC success URL uses unsupported scheme %q", target.Scheme)
-	}
-	if target.Host == "" {
-		return errors.New("http: OIDC success URL requires a host")
 	}
 
 	return nil
@@ -77,26 +71,32 @@ func validateOIDCConfig(config OIDCConfig) error {
 
 func (server *Server) googleOIDCStart(client oidcClient, config OIDCConfig) stdhttp.HandlerFunc {
 	return func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
+		successURL, err := server.oidcSuccessURL(r.URL.Query().Get("return_to"), config.SuccessURL)
+		if err != nil {
+			server.oidcFailure(w, r, config.SuccessURL)
+			return
+		}
+
 		mode := r.URL.Query().Get("mode")
 		switch mode {
 		case "link":
 			token := server.cookieToken(r.Header)
 			if token == "" {
-				server.oidcFailure(w, r, config)
+				server.oidcFailure(w, r, successURL)
 				return
 			}
 			if _, err := server.auth.sessions.CurrentSession(r.Context(), token); err != nil {
-				server.oidcFailure(w, r, config)
+				server.oidcFailure(w, r, successURL)
 				return
 			}
 			if !server.hasPasswordVerified(r) {
-				server.oidcFailure(w, r, config)
+				server.oidcFailure(w, r, successURL)
 				return
 			}
 
 		case "invite":
 			if strings.TrimSpace(r.URL.Query().Get("token")) == "" {
-				server.oidcFailure(w, r, config)
+				server.oidcFailure(w, r, successURL)
 				return
 			}
 
@@ -104,14 +104,14 @@ func (server *Server) googleOIDCStart(client oidcClient, config OIDCConfig) stdh
 			mode = "login"
 
 		default:
-			server.oidcFailure(w, r, config)
+			server.oidcFailure(w, r, successURL)
 			return
 		}
 
-		attempt, err := newOIDCAttempt(mode)
+		attempt, err := newOIDCAttempt(mode, successURL)
 		if err != nil {
 			server.logger.Error("create OIDC attempt", "err", err)
-			server.oidcFailure(w, r, config)
+			server.oidcFailure(w, r, successURL)
 			return
 		}
 		if mode == "invite" {
@@ -121,7 +121,7 @@ func (server *Server) googleOIDCStart(client oidcClient, config OIDCConfig) stdh
 		sealedValue, err := sealOIDCAttempt(config.StateSecret, attempt)
 		if err != nil {
 			server.logger.Error("seal OIDC attempt", "err", err)
-			server.oidcFailure(w, r, config)
+			server.oidcFailure(w, r, successURL)
 			return
 		}
 
@@ -139,25 +139,28 @@ func (server *Server) googleOIDCCallback(client oidcClient, config OIDCConfig) s
 	return func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
 		cookie, err := r.Cookie(oidcCookieName)
 		if err != nil {
-			server.oidcFailure(w, r, config)
+			server.oidcFailure(w, r, config.SuccessURL)
 			return
 		}
 		stdhttp.SetCookie(w, server.clearOIDCAttemptCookie())
 
-		if r.URL.Query().Get("error") != "" {
-			server.oidcFailure(w, r, config)
-			return
-		}
-
 		attempt, err := openOIDCAttempt(config.StateSecret, cookie.Value)
 		if err != nil || !constantTimeEqual(attempt.State, r.URL.Query().Get("state")) {
-			server.oidcFailure(w, r, config)
+			server.oidcFailure(w, r, config.SuccessURL)
+			return
+		}
+		if r.URL.Query().Get("error") != "" {
+			server.oidcFailure(w, r, attempt.SuccessURL)
+			return
+		}
+		if _, err := server.oidcSuccessURL(attempt.SuccessURL, config.SuccessURL); err != nil {
+			server.oidcFailure(w, r, config.SuccessURL)
 			return
 		}
 
 		code := strings.TrimSpace(r.URL.Query().Get("code"))
 		if code == "" {
-			server.oidcFailure(w, r, config)
+			server.oidcFailure(w, r, attempt.SuccessURL)
 			return
 		}
 
@@ -166,7 +169,7 @@ func (server *Server) googleOIDCCallback(client oidcClient, config OIDCConfig) s
 		identity, err := client.Exchange(r.Context(), code, attempt.Verifier, attempt.Nonce)
 		if err != nil {
 			server.logger.Warn("OIDC exchange failed", "err", err)
-			server.oidcFailure(w, r, config)
+			server.oidcFailure(w, r, attempt.SuccessURL)
 			return
 		}
 
@@ -206,16 +209,16 @@ func (server *Server) googleOIDCCallback(client oidcClient, config OIDCConfig) s
 
 		if err != nil {
 			server.logger.Warn("OIDC authentication failed", "mode", attempt.Mode, "err", err)
-			server.oidcFailure(w, r, config)
+			server.oidcFailure(w, r, attempt.SuccessURL)
 			return
 		}
 
-		stdhttp.Redirect(w, r, config.SuccessURL, stdhttp.StatusFound)
+		stdhttp.Redirect(w, r, attempt.SuccessURL, stdhttp.StatusFound)
 	}
 }
 
-func (server *Server) oidcFailure(w stdhttp.ResponseWriter, r *stdhttp.Request, config OIDCConfig) {
-	target, err := url.Parse(config.SuccessURL)
+func (server *Server) oidcFailure(w stdhttp.ResponseWriter, r *stdhttp.Request, successURL string) {
+	target, err := url.Parse(successURL)
 	if err != nil || target.Scheme == "" || target.Host == "" {
 		stdhttp.Error(w, "authentication failed", stdhttp.StatusUnauthorized)
 		return
@@ -225,10 +228,11 @@ func (server *Server) oidcFailure(w stdhttp.ResponseWriter, r *stdhttp.Request, 
 	query.Set("error", "authentication_failed")
 	target.RawQuery = query.Encode()
 
+	//nolint:gosec // Callers pass only the configured fallback or a URL validated against the trusted CORS origins.
 	stdhttp.Redirect(w, r, target.String(), stdhttp.StatusFound)
 }
 
-func newOIDCAttempt(mode string) (oidcAttempt, error) {
+func newOIDCAttempt(mode, successURL string) (oidcAttempt, error) {
 	state, err := randomOIDCValue(32)
 	if err != nil {
 		return oidcAttempt{}, err
@@ -243,11 +247,12 @@ func newOIDCAttempt(mode string) (oidcAttempt, error) {
 	}
 
 	return oidcAttempt{
-		State:     state,
-		Nonce:     nonce,
-		Verifier:  verifier,
-		Mode:      mode,
-		ExpiresAt: time.Now().Add(oidcAttemptTTL).Unix(),
+		State:      state,
+		Nonce:      nonce,
+		Verifier:   verifier,
+		Mode:       mode,
+		SuccessURL: successURL,
+		ExpiresAt:  time.Now().Add(oidcAttemptTTL).Unix(),
 	}, nil
 }
 
@@ -334,7 +339,7 @@ func openOIDCAttempt(secret, value string) (oidcAttempt, error) {
 }
 
 func validOIDCAttempt(attempt oidcAttempt, now time.Time) bool {
-	if attempt.State == "" || attempt.Nonce == "" || attempt.Verifier == "" {
+	if attempt.State == "" || attempt.Nonce == "" || attempt.Verifier == "" || attempt.SuccessURL == "" {
 		return false
 	}
 	if attempt.ExpiresAt <= now.Unix() {
@@ -349,6 +354,13 @@ func validOIDCAttempt(attempt oidcAttempt, now time.Time) bool {
 	default:
 		return false
 	}
+}
+
+func (server *Server) oidcSuccessURL(requested, fallback string) (string, error) {
+	if strings.TrimSpace(requested) == "" {
+		requested = fallback
+	}
+	return server.browserPolicy.redirectURL(requested)
 }
 
 func oidcAttemptEncryptionKey(secret string) [sha256.Size]byte {

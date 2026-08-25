@@ -9,7 +9,10 @@ import { LocalizationViewModel } from '../src/localization-view-model.svelte.ts'
 describe('LocalizationViewModel', () => {
 	it('loads managed languages', async () => {
 		const mockService = {
-			adminLanguages: async () => [{ code: 'de-CH', name: 'German (Swiss)', isDefault: true }],
+			adminLanguages: async () => ({
+				languages: [{ code: 'de-CH', name: 'German (Swiss)', isDefault: true }],
+				nextCursor: '',
+			}),
 			saveTranslation: async () => undefined,
 		};
 		let refreshed = false;
@@ -31,7 +34,7 @@ describe('LocalizationViewModel', () => {
 		let savedInput: unknown = null;
 		let refreshed = false;
 		const mockService = {
-			adminLanguages: async () => [],
+			adminLanguages: async () => ({ languages: [], nextCursor: '' }),
 			saveTranslation: async (input: unknown) => {
 				savedInput = input;
 			},

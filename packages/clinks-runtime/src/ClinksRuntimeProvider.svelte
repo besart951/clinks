@@ -22,6 +22,7 @@
 		applicationScope: () => applicationScope,
 	});
 	translations = new TranslationBundleViewModel(client, preferences);
+	translations.prepare();
 	const theme = new ThemeViewModel(preferences);
 	setClinksRuntime({ client, theme, translations });
 

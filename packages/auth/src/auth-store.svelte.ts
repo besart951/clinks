@@ -1,10 +1,13 @@
-import type { Permission, Session, SessionService } from '@clinks/api-client';
+import type { AuthCapabilities, Permission, Session, SessionService } from '@clinks/api-client';
 import { isUnauthenticatedError } from '@clinks/api-client/errors';
 import { allowsAccess, hasPermission, isTenantAdministrator, type AccessPolicy } from './access.ts';
-import { returnToFromSearch } from './navigation.ts';
+import { isSafeInternalPath, returnToFromSearch } from './navigation.ts';
 
 export type AuthStatus = 'loading' | 'authenticated' | 'anonymous' | 'error';
 export type Navigate = (target: string) => void | Promise<void>;
+export type ExternalRedirect = (target: string) => void;
+
+const sessionStaleAfterMs = 5 * 60 * 1000;
 
 export interface Credentials {
 	email: string;
@@ -19,33 +22,61 @@ export interface InvitationAcceptance extends Credentials {
 	token: string;
 }
 
+export interface GoogleAuthentication {
+	mode: 'login' | 'invite';
+	returnTo: string;
+	invitationToken?: string;
+}
+
 export class AuthStore {
 	current = $state.raw<Session | null>(null);
+	capabilities = $state.raw<AuthCapabilities>({ googleOIDCEnabled: false });
+	capabilitiesLoaded = $state(false);
 	status = $state<AuthStatus>('loading');
+	refreshing = $state(false);
 	error = $state.raw<unknown>(null);
 
 	#service: SessionService;
 	#navigate: Navigate;
-	#initialization: Promise<void> | null = null;
+	#externalRedirect: ExternalRedirect;
+	#loading: Promise<void> | null = null;
+	#initialized = false;
+	#capabilitiesAvailable = false;
+	#lastValidatedAt = 0;
 	#request = 0;
 
-	constructor(service: SessionService, navigate: Navigate) {
+	constructor(service: SessionService, navigate: Navigate, externalRedirect: ExternalRedirect = browserRedirect) {
 		this.#service = service;
 		this.#navigate = navigate;
+		this.#externalRedirect = externalRedirect;
 	}
 
 	initialize(): Promise<void> {
-		if (this.status !== 'loading') return Promise.resolve();
-		if (this.#initialization) return this.#initialization;
-		this.#initialization = this.#load().finally(() => {
-			this.#initialization = null;
-		});
-		return this.#initialization;
+		if (this.#loading) return this.#loading;
+		if (this.#initialized) return Promise.resolve();
+		this.#initialized = true;
+		this.#loading = Promise.all([this.#load(true), this.#loadCapabilities()])
+			.then(() => undefined)
+			.finally(() => {
+				this.#loading = null;
+			});
+		return this.#loading;
 	}
 
 	async refresh() {
-		if (this.#initialization) return this.#initialization;
-		await this.#load();
+		if (this.#loading) return this.#loading;
+		const capabilities = this.#capabilitiesAvailable ? Promise.resolve() : this.#loadCapabilities();
+		this.#loading = Promise.all([this.#load(this.current === null), capabilities])
+			.then(() => undefined)
+			.finally(() => {
+				this.#loading = null;
+			});
+		return this.#loading;
+	}
+
+	async revalidateIfStale(now = Date.now()) {
+		if (now - this.#lastValidatedAt < sessionStaleAfterMs) return;
+		await this.refresh();
 	}
 
 	async login(credentials: Credentials) {
@@ -79,9 +110,18 @@ export class AuthStore {
 			await this.#service.logout();
 			if (request === this.#request) this.invalidate();
 		} catch (error) {
-			this.#reject(request, error);
+			this.#rejectAction(request, error);
 			throw error;
 		}
+	}
+
+	startGoogle(authentication: GoogleAuthentication) {
+		if (!this.capabilities.googleOIDCEnabled) return;
+		if (!isSafeInternalPath(authentication.returnTo) || typeof location === 'undefined') return;
+		const returnTo = new URL(authentication.returnTo, location.origin).toString();
+		this.#externalRedirect(
+			this.#service.googleOIDCStartURL(authentication.mode, returnTo, authentication.invitationToken),
+		);
 	}
 
 	async continueAfterLogin(defaultTarget: string) {
@@ -98,6 +138,7 @@ export class AuthStore {
 		this.current = null;
 		this.error = null;
 		this.status = 'anonymous';
+		this.#lastValidatedAt = Date.now();
 	}
 
 	allows(policy: AccessPolicy) {
@@ -136,15 +177,30 @@ export class AuthStore {
 		return this.current?.memberships ?? [];
 	}
 
-	async #load() {
+	async #load(showLoading: boolean) {
 		const request = ++this.#request;
 		this.error = null;
-		this.status = 'loading';
+		if (showLoading) this.status = 'loading';
+		else this.refreshing = true;
 		try {
 			const session = await this.#service.getSession();
 			this.#accept(request, session);
 		} catch (error) {
-			this.#reject(request, error);
+			this.#rejectLoad(request, error, !showLoading);
+		} finally {
+			if (request === this.#request) this.refreshing = false;
+		}
+	}
+
+	async #loadCapabilities() {
+		try {
+			this.capabilities = await this.#service.authCapabilities();
+			this.#capabilitiesAvailable = true;
+		} catch {
+			this.capabilities = { googleOIDCEnabled: false };
+			this.#capabilitiesAvailable = false;
+		} finally {
+			this.capabilitiesLoaded = true;
 		}
 	}
 
@@ -154,7 +210,7 @@ export class AuthStore {
 		try {
 			this.#accept(request, await action());
 		} catch (error) {
-			this.#reject(request, error);
+			this.#rejectAction(request, error);
 			throw error;
 		}
 	}
@@ -164,10 +220,12 @@ export class AuthStore {
 		this.current = session;
 		this.error = null;
 		this.status = 'authenticated';
+		this.#lastValidatedAt = Date.now();
 	}
 
-	#reject(request: number, error: unknown) {
+	#rejectLoad(request: number, error: unknown, preserveCurrent: boolean) {
 		if (request !== this.#request) return;
+		this.#lastValidatedAt = Date.now();
 		if (isUnauthenticatedError(error)) {
 			this.current = null;
 			this.error = null;
@@ -175,6 +233,20 @@ export class AuthStore {
 			return;
 		}
 		this.error = error;
-		this.status = 'error';
+		this.status = preserveCurrent && this.current ? 'authenticated' : 'error';
 	}
+
+	#rejectAction(request: number, error: unknown) {
+		if (request !== this.#request) return;
+		if (isUnauthenticatedError(error)) {
+			this.invalidate();
+			return;
+		}
+		this.error = error;
+		this.status = this.current ? 'authenticated' : 'anonymous';
+	}
+}
+
+function browserRedirect(target: string) {
+	if (typeof location !== 'undefined') location.assign(target);
 }

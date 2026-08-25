@@ -45,6 +45,9 @@ const (
 	// ClinksServiceGetSessionProcedure is the fully-qualified name of the ClinksService's GetSession
 	// RPC.
 	ClinksServiceGetSessionProcedure = "/clinks.v1.ClinksService/GetSession"
+	// ClinksServiceGetAuthCapabilitiesProcedure is the fully-qualified name of the ClinksService's
+	// GetAuthCapabilities RPC.
+	ClinksServiceGetAuthCapabilitiesProcedure = "/clinks.v1.ClinksService/GetAuthCapabilities"
 	// ClinksServiceSwitchTenantProcedure is the fully-qualified name of the ClinksService's
 	// SwitchTenant RPC.
 	ClinksServiceSwitchTenantProcedure = "/clinks.v1.ClinksService/SwitchTenant"
@@ -138,6 +141,7 @@ type ClinksServiceClient interface {
 	Register(context.Context, *connect.Request[v1.RegisterRequest]) (*connect.Response[v1.Session], error)
 	Logout(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.Empty], error)
 	GetSession(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.Session], error)
+	GetAuthCapabilities(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.AuthCapabilities], error)
 	SwitchTenant(context.Context, *connect.Request[v1.SwitchTenantRequest]) (*connect.Response[v1.Session], error)
 	AcceptInvitation(context.Context, *connect.Request[v1.AcceptInvitationRequest]) (*connect.Response[v1.Session], error)
 	GetLanguages(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.LanguagesResponse], error)
@@ -208,6 +212,12 @@ func NewClinksServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			httpClient,
 			baseURL+ClinksServiceGetSessionProcedure,
 			connect.WithSchema(clinksServiceMethods.ByName("GetSession")),
+			connect.WithClientOptions(opts...),
+		),
+		getAuthCapabilities: connect.NewClient[v1.Empty, v1.AuthCapabilities](
+			httpClient,
+			baseURL+ClinksServiceGetAuthCapabilitiesProcedure,
+			connect.WithSchema(clinksServiceMethods.ByName("GetAuthCapabilities")),
 			connect.WithClientOptions(opts...),
 		),
 		switchTenant: connect.NewClient[v1.SwitchTenantRequest, v1.Session](
@@ -394,6 +404,7 @@ type clinksServiceClient struct {
 	register                  *connect.Client[v1.RegisterRequest, v1.Session]
 	logout                    *connect.Client[v1.Empty, v1.Empty]
 	getSession                *connect.Client[v1.Empty, v1.Session]
+	getAuthCapabilities       *connect.Client[v1.Empty, v1.AuthCapabilities]
 	switchTenant              *connect.Client[v1.SwitchTenantRequest, v1.Session]
 	acceptInvitation          *connect.Client[v1.AcceptInvitationRequest, v1.Session]
 	getLanguages              *connect.Client[v1.Empty, v1.LanguagesResponse]
@@ -448,6 +459,11 @@ func (c *clinksServiceClient) Logout(ctx context.Context, req *connect.Request[v
 // GetSession calls clinks.v1.ClinksService.GetSession.
 func (c *clinksServiceClient) GetSession(ctx context.Context, req *connect.Request[v1.Empty]) (*connect.Response[v1.Session], error) {
 	return c.getSession.CallUnary(ctx, req)
+}
+
+// GetAuthCapabilities calls clinks.v1.ClinksService.GetAuthCapabilities.
+func (c *clinksServiceClient) GetAuthCapabilities(ctx context.Context, req *connect.Request[v1.Empty]) (*connect.Response[v1.AuthCapabilities], error) {
+	return c.getAuthCapabilities.CallUnary(ctx, req)
 }
 
 // SwitchTenant calls clinks.v1.ClinksService.SwitchTenant.
@@ -602,6 +618,7 @@ type ClinksServiceHandler interface {
 	Register(context.Context, *connect.Request[v1.RegisterRequest]) (*connect.Response[v1.Session], error)
 	Logout(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.Empty], error)
 	GetSession(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.Session], error)
+	GetAuthCapabilities(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.AuthCapabilities], error)
 	SwitchTenant(context.Context, *connect.Request[v1.SwitchTenantRequest]) (*connect.Response[v1.Session], error)
 	AcceptInvitation(context.Context, *connect.Request[v1.AcceptInvitationRequest]) (*connect.Response[v1.Session], error)
 	GetLanguages(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.LanguagesResponse], error)
@@ -668,6 +685,12 @@ func NewClinksServiceHandler(svc ClinksServiceHandler, opts ...connect.HandlerOp
 		ClinksServiceGetSessionProcedure,
 		svc.GetSession,
 		connect.WithSchema(clinksServiceMethods.ByName("GetSession")),
+		connect.WithHandlerOptions(opts...),
+	)
+	clinksServiceGetAuthCapabilitiesHandler := connect.NewUnaryHandler(
+		ClinksServiceGetAuthCapabilitiesProcedure,
+		svc.GetAuthCapabilities,
+		connect.WithSchema(clinksServiceMethods.ByName("GetAuthCapabilities")),
 		connect.WithHandlerOptions(opts...),
 	)
 	clinksServiceSwitchTenantHandler := connect.NewUnaryHandler(
@@ -856,6 +879,8 @@ func NewClinksServiceHandler(svc ClinksServiceHandler, opts ...connect.HandlerOp
 			clinksServiceLogoutHandler.ServeHTTP(w, r)
 		case ClinksServiceGetSessionProcedure:
 			clinksServiceGetSessionHandler.ServeHTTP(w, r)
+		case ClinksServiceGetAuthCapabilitiesProcedure:
+			clinksServiceGetAuthCapabilitiesHandler.ServeHTTP(w, r)
 		case ClinksServiceSwitchTenantProcedure:
 			clinksServiceSwitchTenantHandler.ServeHTTP(w, r)
 		case ClinksServiceAcceptInvitationProcedure:
@@ -941,6 +966,10 @@ func (UnimplementedClinksServiceHandler) Logout(context.Context, *connect.Reques
 
 func (UnimplementedClinksServiceHandler) GetSession(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.Session], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.GetSession is not implemented"))
+}
+
+func (UnimplementedClinksServiceHandler) GetAuthCapabilities(context.Context, *connect.Request[v1.Empty]) (*connect.Response[v1.AuthCapabilities], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clinks.v1.ClinksService.GetAuthCapabilities is not implemented"))
 }
 
 func (UnimplementedClinksServiceHandler) SwitchTenant(context.Context, *connect.Request[v1.SwitchTenantRequest]) (*connect.Response[v1.Session], error) {

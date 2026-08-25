@@ -5,7 +5,7 @@
   "type": "module",
   "types": "./src/index.ts",
   "scripts": {
-    "test": "node --test test/admin-dashboard-view-model.test.ts test/audit-log-view-model.test.ts test/auth-portal-view-model.test.ts test/browser-preferences.test.ts test/error-handler.test.ts test/localization-view-model.test.ts test/tenant-view-model.test.ts test/translation-bundle-view-model.test.ts"
+    "test": "node --test test/admin-dashboard-view-model.test.ts test/audit-log-view-model.test.ts test/auth-access-view-model.test.ts test/browser-preferences.test.ts test/error-handler.test.ts test/fetch-strategy.test.ts test/localization-view-model.test.ts test/tenant-view-model.test.ts test/translation-bundle-view-model.test.ts"
   },
   "exports": {
     ".": {

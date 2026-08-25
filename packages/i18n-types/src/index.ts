@@ -1,4 +1,8 @@
-export { productDefaultLocale, productTranslationKeys } from './product-translation-key.generated.ts';
+export {
+	productDefaultLocale,
+	productDefaultTranslations,
+	productTranslationKeys,
+} from './product-translation-key.generated.ts';
 export type { ProductTranslationKey } from './product-translation-key.generated.ts';
 
 export type Locale = string;

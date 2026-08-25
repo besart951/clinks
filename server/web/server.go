@@ -37,13 +37,14 @@ type Server struct {
 }
 
 type authEndpoints struct {
-	sessions     sessionService
-	credentials  credentialService
-	oidcSessions oidcSessionService
-	registration registrationService
-	invitations  invitationService
-	limiter      *rateLimiter
-	oidcSecret   string
+	sessions          sessionService
+	credentials       credentialService
+	oidcSessions      oidcSessionService
+	registration      registrationService
+	invitations       invitationService
+	limiter           *rateLimiter
+	oidcSecret        string
+	googleOIDCEnabled bool
 }
 
 type adminEndpoints struct {
@@ -281,12 +282,13 @@ func (server *Server) HandlerWithOIDC(client oidcClient, config OIDCConfig) (std
 	if client == nil || !client.Enabled() {
 		return server.Handler(), nil
 	}
-	if err := validateOIDCConfig(config); err != nil {
+	if err := validateOIDCConfig(config, server.browserPolicy); err != nil {
 		return nil, err
 	}
 	// Build an immutable configured handler without mutating the base Server.
 	configured := *server
 	configured.auth.oidcSecret = config.StateSecret
+	configured.auth.googleOIDCEnabled = true
 	return configured.handler(client, config), nil
 }
 

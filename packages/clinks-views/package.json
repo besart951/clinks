@@ -4,10 +4,40 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./auth-portal": {
-      "types": "./src/lib/AuthPortal.svelte",
-      "svelte": "./src/lib/AuthPortal.svelte",
-      "default": "./src/lib/AuthPortal.svelte"
+    "./landing": {
+      "types": "./src/lib/ProductLanding.svelte",
+      "svelte": "./src/lib/ProductLanding.svelte",
+      "default": "./src/lib/ProductLanding.svelte"
+    },
+    "./login": {
+      "types": "./src/lib/LoginPage.svelte",
+      "svelte": "./src/lib/LoginPage.svelte",
+      "default": "./src/lib/LoginPage.svelte"
+    },
+    "./signup": {
+      "types": "./src/lib/SignupPage.svelte",
+      "svelte": "./src/lib/SignupPage.svelte",
+      "default": "./src/lib/SignupPage.svelte"
+    },
+    "./login-form": {
+      "types": "./src/lib/LoginForm.svelte",
+      "svelte": "./src/lib/LoginForm.svelte",
+      "default": "./src/lib/LoginForm.svelte"
+    },
+    "./signup-form": {
+      "types": "./src/lib/SignupForm.svelte",
+      "svelte": "./src/lib/SignupForm.svelte",
+      "default": "./src/lib/SignupForm.svelte"
+    },
+    "./invitation": {
+      "types": "./src/lib/InvitationPage.svelte",
+      "svelte": "./src/lib/InvitationPage.svelte",
+      "default": "./src/lib/InvitationPage.svelte"
+    },
+    "./dashboard": {
+      "types": "./src/lib/DashboardPage.svelte",
+      "svelte": "./src/lib/DashboardPage.svelte",
+      "default": "./src/lib/DashboardPage.svelte"
     },
     "./error-page": {
       "types": "./src/lib/ErrorPage.svelte",
@@ -24,6 +54,7 @@
     "svelte": "^5.56.4"
   },
   "dependencies": {
+    "@clinks/api-client": "workspace:*",
     "@clinks/auth": "workspace:*",
     "@clinks/clinks-runtime": "workspace:*",
     "@clinks/ui-shared": "workspace:*",

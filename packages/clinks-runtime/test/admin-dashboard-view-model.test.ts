@@ -9,8 +9,8 @@ import { AdminDashboardViewModel } from '../src/admin-dashboard-view-model.svelt
 describe('AdminDashboardViewModel', () => {
 	it('loads overview section and detects super admin', async () => {
 		const mockClient = {
-			adminLanguages: async () => [{ code: 'de-CH', name: 'German', isDefault: true }],
-			tenants: async () => [{ id: 't1', name: 'Tenant Alpha' }],
+			adminLanguages: async () => ({ languages: [{ code: 'de-CH', name: 'German', isDefault: true }], nextCursor: '' }),
+			tenants: async () => ({ tenants: [{ id: 't1', name: 'Tenant Alpha' }], nextCursor: '' }),
 			auditEvents: async () => ({ events: [], nextCursor: '' }),
 			createTenant: async () => {
 				throw new Error('Not used');
@@ -55,8 +55,8 @@ describe('AdminDashboardViewModel', () => {
 
 	it('lazy-loads tenant section only when navigated', async () => {
 		const mockClient = {
-			adminLanguages: async () => [],
-			tenants: async () => [{ id: 't1', name: 'Tenant Alpha' }],
+			adminLanguages: async () => ({ languages: [], nextCursor: '' }),
+			tenants: async () => ({ tenants: [{ id: 't1', name: 'Tenant Alpha' }], nextCursor: '' }),
 			auditEvents: async () => ({ events: [], nextCursor: '' }),
 			createTenant: async () => {
 				throw new Error('Not used');

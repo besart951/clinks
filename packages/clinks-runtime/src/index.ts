@@ -1,6 +1,5 @@
 export { default as ClinksRuntimeProvider } from './ClinksRuntimeProvider.svelte';
 export { useClinksRuntime } from './context.svelte';
-export { AuthPortalViewModel } from './auth-portal-view-model.svelte';
 export { AuthAccessViewModel } from './auth-access-view-model.svelte';
 export { AuthDashboardViewModel } from './auth-dashboard-view-model.svelte';
 export { AdminDashboardViewModel } from './admin-dashboard-view-model.svelte';
@@ -18,4 +17,4 @@ export { ThemeViewModel } from './theme-view-model.svelte';
 export { TranslationBundleViewModel } from './translation-bundle-view-model.svelte';
 export type { ClinksRuntime } from './context.svelte';
 export { CentralErrorHandler, centralErrorHandler } from './error-handler.ts';
-export type { AppErrorDetail, ErrorTranslator } from './error-handler.ts';
+export type { AppErrorDetail, ErrorMessageFormatter, ErrorTranslator } from './error-handler.ts';

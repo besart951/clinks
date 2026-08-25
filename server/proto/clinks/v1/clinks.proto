@@ -10,6 +10,7 @@ service ClinksService {
   rpc Register(RegisterRequest) returns (Session);
   rpc Logout(Empty) returns (Empty);
   rpc GetSession(Empty) returns (Session);
+  rpc GetAuthCapabilities(Empty) returns (AuthCapabilities);
   rpc SwitchTenant(SwitchTenantRequest) returns (Session);
   rpc AcceptInvitation(AcceptInvitationRequest) returns (Session);
 
@@ -45,6 +46,10 @@ service ClinksService {
 }
 
 message Empty {}
+
+message AuthCapabilities {
+  bool google_oidc_enabled = 1;
+}
 
 enum SortDirection {
   SORT_DIRECTION_UNSPECIFIED = 0;

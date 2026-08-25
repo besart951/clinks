@@ -703,6 +703,50 @@ func (*Empty) Descriptor() ([]byte, []int) {
 	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{0}
 }
 
+type AuthCapabilities struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	GoogleOidcEnabled bool                   `protobuf:"varint,1,opt,name=google_oidc_enabled,json=googleOidcEnabled,proto3" json:"google_oidc_enabled,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *AuthCapabilities) Reset() {
+	*x = AuthCapabilities{}
+	mi := &file_clinks_v1_clinks_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AuthCapabilities) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AuthCapabilities) ProtoMessage() {}
+
+func (x *AuthCapabilities) ProtoReflect() protoreflect.Message {
+	mi := &file_clinks_v1_clinks_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AuthCapabilities.ProtoReflect.Descriptor instead.
+func (*AuthCapabilities) Descriptor() ([]byte, []int) {
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *AuthCapabilities) GetGoogleOidcEnabled() bool {
+	if x != nil {
+		return x.GoogleOidcEnabled
+	}
+	return false
+}
+
 type CredentialsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
@@ -713,7 +757,7 @@ type CredentialsRequest struct {
 
 func (x *CredentialsRequest) Reset() {
 	*x = CredentialsRequest{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[1]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -725,7 +769,7 @@ func (x *CredentialsRequest) String() string {
 func (*CredentialsRequest) ProtoMessage() {}
 
 func (x *CredentialsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[1]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -738,7 +782,7 @@ func (x *CredentialsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CredentialsRequest.ProtoReflect.Descriptor instead.
 func (*CredentialsRequest) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{1}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *CredentialsRequest) GetEmail() string {
@@ -767,7 +811,7 @@ type RegisterRequest struct {
 
 func (x *RegisterRequest) Reset() {
 	*x = RegisterRequest{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[2]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -779,7 +823,7 @@ func (x *RegisterRequest) String() string {
 func (*RegisterRequest) ProtoMessage() {}
 
 func (x *RegisterRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[2]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -792,7 +836,7 @@ func (x *RegisterRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RegisterRequest.ProtoReflect.Descriptor instead.
 func (*RegisterRequest) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{2}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *RegisterRequest) GetEmail() string {
@@ -832,7 +876,7 @@ type SwitchTenantRequest struct {
 
 func (x *SwitchTenantRequest) Reset() {
 	*x = SwitchTenantRequest{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[3]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -844,7 +888,7 @@ func (x *SwitchTenantRequest) String() string {
 func (*SwitchTenantRequest) ProtoMessage() {}
 
 func (x *SwitchTenantRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[3]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -857,7 +901,7 @@ func (x *SwitchTenantRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SwitchTenantRequest.ProtoReflect.Descriptor instead.
 func (*SwitchTenantRequest) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{3}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *SwitchTenantRequest) GetTenantId() string {
@@ -879,7 +923,7 @@ type User struct {
 
 func (x *User) Reset() {
 	*x = User{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[4]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -891,7 +935,7 @@ func (x *User) String() string {
 func (*User) ProtoMessage() {}
 
 func (x *User) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[4]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -904,7 +948,7 @@ func (x *User) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use User.ProtoReflect.Descriptor instead.
 func (*User) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{4}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *User) GetId() string {
@@ -948,7 +992,7 @@ type UserSummary struct {
 
 func (x *UserSummary) Reset() {
 	*x = UserSummary{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[5]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -960,7 +1004,7 @@ func (x *UserSummary) String() string {
 func (*UserSummary) ProtoMessage() {}
 
 func (x *UserSummary) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[5]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -973,7 +1017,7 @@ func (x *UserSummary) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserSummary.ProtoReflect.Descriptor instead.
 func (*UserSummary) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{5}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *UserSummary) GetId() string {
@@ -1022,7 +1066,7 @@ type Tenant struct {
 
 func (x *Tenant) Reset() {
 	*x = Tenant{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[6]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1034,7 +1078,7 @@ func (x *Tenant) String() string {
 func (*Tenant) ProtoMessage() {}
 
 func (x *Tenant) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[6]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1047,7 +1091,7 @@ func (x *Tenant) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Tenant.ProtoReflect.Descriptor instead.
 func (*Tenant) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{6}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *Tenant) GetId() string {
@@ -1084,7 +1128,7 @@ type RoleSummary struct {
 
 func (x *RoleSummary) Reset() {
 	*x = RoleSummary{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[7]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1096,7 +1140,7 @@ func (x *RoleSummary) String() string {
 func (*RoleSummary) ProtoMessage() {}
 
 func (x *RoleSummary) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[7]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1109,7 +1153,7 @@ func (x *RoleSummary) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleSummary.ProtoReflect.Descriptor instead.
 func (*RoleSummary) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{7}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *RoleSummary) GetId() string {
@@ -1163,7 +1207,7 @@ type Role struct {
 
 func (x *Role) Reset() {
 	*x = Role{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[8]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1175,7 +1219,7 @@ func (x *Role) String() string {
 func (*Role) ProtoMessage() {}
 
 func (x *Role) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[8]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1188,7 +1232,7 @@ func (x *Role) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Role.ProtoReflect.Descriptor instead.
 func (*Role) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{8}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *Role) GetId() string {
@@ -1262,7 +1306,7 @@ type Membership struct {
 
 func (x *Membership) Reset() {
 	*x = Membership{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[9]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1274,7 +1318,7 @@ func (x *Membership) String() string {
 func (*Membership) ProtoMessage() {}
 
 func (x *Membership) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[9]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1287,7 +1331,7 @@ func (x *Membership) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Membership.ProtoReflect.Descriptor instead.
 func (*Membership) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{9}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *Membership) GetId() string {
@@ -1350,7 +1394,7 @@ type Session struct {
 
 func (x *Session) Reset() {
 	*x = Session{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[10]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1362,7 +1406,7 @@ func (x *Session) String() string {
 func (*Session) ProtoMessage() {}
 
 func (x *Session) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[10]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1375,7 +1419,7 @@ func (x *Session) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Session.ProtoReflect.Descriptor instead.
 func (*Session) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{10}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *Session) GetUser() *User {
@@ -1411,7 +1455,7 @@ type AcceptInvitationRequest struct {
 
 func (x *AcceptInvitationRequest) Reset() {
 	*x = AcceptInvitationRequest{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[11]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1423,7 +1467,7 @@ func (x *AcceptInvitationRequest) String() string {
 func (*AcceptInvitationRequest) ProtoMessage() {}
 
 func (x *AcceptInvitationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[11]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1436,7 +1480,7 @@ func (x *AcceptInvitationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AcceptInvitationRequest.ProtoReflect.Descriptor instead.
 func (*AcceptInvitationRequest) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{11}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *AcceptInvitationRequest) GetToken() string {
@@ -1476,7 +1520,7 @@ type GetTranslationsRequest struct {
 
 func (x *GetTranslationsRequest) Reset() {
 	*x = GetTranslationsRequest{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[12]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1488,7 +1532,7 @@ func (x *GetTranslationsRequest) String() string {
 func (*GetTranslationsRequest) ProtoMessage() {}
 
 func (x *GetTranslationsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[12]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1501,7 +1545,7 @@ func (x *GetTranslationsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetTranslationsRequest.ProtoReflect.Descriptor instead.
 func (*GetTranslationsRequest) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{12}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *GetTranslationsRequest) GetApplicationScope() string {
@@ -1523,7 +1567,7 @@ type ScopedTranslation struct {
 
 func (x *ScopedTranslation) Reset() {
 	*x = ScopedTranslation{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[13]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1535,7 +1579,7 @@ func (x *ScopedTranslation) String() string {
 func (*ScopedTranslation) ProtoMessage() {}
 
 func (x *ScopedTranslation) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[13]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1548,7 +1592,7 @@ func (x *ScopedTranslation) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ScopedTranslation.ProtoReflect.Descriptor instead.
 func (*ScopedTranslation) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{13}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *ScopedTranslation) GetLocale() string {
@@ -1589,7 +1633,7 @@ type TranslationsResponse struct {
 
 func (x *TranslationsResponse) Reset() {
 	*x = TranslationsResponse{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[14]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1601,7 +1645,7 @@ func (x *TranslationsResponse) String() string {
 func (*TranslationsResponse) ProtoMessage() {}
 
 func (x *TranslationsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[14]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1614,7 +1658,7 @@ func (x *TranslationsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TranslationsResponse.ProtoReflect.Descriptor instead.
 func (*TranslationsResponse) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{14}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *TranslationsResponse) GetLocale() string {
@@ -1644,7 +1688,7 @@ type ListTenantsRequest struct {
 
 func (x *ListTenantsRequest) Reset() {
 	*x = ListTenantsRequest{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[15]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1656,7 +1700,7 @@ func (x *ListTenantsRequest) String() string {
 func (*ListTenantsRequest) ProtoMessage() {}
 
 func (x *ListTenantsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[15]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1669,7 +1713,7 @@ func (x *ListTenantsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTenantsRequest.ProtoReflect.Descriptor instead.
 func (*ListTenantsRequest) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{15}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *ListTenantsRequest) GetSearch() string {
@@ -1717,7 +1761,7 @@ type ListTenantsResponse struct {
 
 func (x *ListTenantsResponse) Reset() {
 	*x = ListTenantsResponse{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[16]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1729,7 +1773,7 @@ func (x *ListTenantsResponse) String() string {
 func (*ListTenantsResponse) ProtoMessage() {}
 
 func (x *ListTenantsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[16]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1742,7 +1786,7 @@ func (x *ListTenantsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTenantsResponse.ProtoReflect.Descriptor instead.
 func (*ListTenantsResponse) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{16}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *ListTenantsResponse) GetTenants() []*Tenant {
@@ -1768,7 +1812,7 @@ type CreateTenantRequest struct {
 
 func (x *CreateTenantRequest) Reset() {
 	*x = CreateTenantRequest{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[17]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1780,7 +1824,7 @@ func (x *CreateTenantRequest) String() string {
 func (*CreateTenantRequest) ProtoMessage() {}
 
 func (x *CreateTenantRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[17]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1793,7 +1837,7 @@ func (x *CreateTenantRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateTenantRequest.ProtoReflect.Descriptor instead.
 func (*CreateTenantRequest) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{17}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *CreateTenantRequest) GetName() string {
@@ -1814,7 +1858,7 @@ type UpdateTenantRequest struct {
 
 func (x *UpdateTenantRequest) Reset() {
 	*x = UpdateTenantRequest{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[18]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1826,7 +1870,7 @@ func (x *UpdateTenantRequest) String() string {
 func (*UpdateTenantRequest) ProtoMessage() {}
 
 func (x *UpdateTenantRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[18]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1839,7 +1883,7 @@ func (x *UpdateTenantRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateTenantRequest.ProtoReflect.Descriptor instead.
 func (*UpdateTenantRequest) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{18}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *UpdateTenantRequest) GetTenantId() string {
@@ -1877,7 +1921,7 @@ type ListUsersRequest struct {
 
 func (x *ListUsersRequest) Reset() {
 	*x = ListUsersRequest{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[19]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1889,7 +1933,7 @@ func (x *ListUsersRequest) String() string {
 func (*ListUsersRequest) ProtoMessage() {}
 
 func (x *ListUsersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[19]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1902,7 +1946,7 @@ func (x *ListUsersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListUsersRequest.ProtoReflect.Descriptor instead.
 func (*ListUsersRequest) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{19}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *ListUsersRequest) GetSearch() string {
@@ -1957,7 +2001,7 @@ type ListUsersResponse struct {
 
 func (x *ListUsersResponse) Reset() {
 	*x = ListUsersResponse{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[20]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1969,7 +2013,7 @@ func (x *ListUsersResponse) String() string {
 func (*ListUsersResponse) ProtoMessage() {}
 
 func (x *ListUsersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[20]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1982,7 +2026,7 @@ func (x *ListUsersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListUsersResponse.ProtoReflect.Descriptor instead.
 func (*ListUsersResponse) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{20}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *ListUsersResponse) GetUsers() []*UserSummary {
@@ -2008,7 +2052,7 @@ type GetUserRequest struct {
 
 func (x *GetUserRequest) Reset() {
 	*x = GetUserRequest{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[21]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2020,7 +2064,7 @@ func (x *GetUserRequest) String() string {
 func (*GetUserRequest) ProtoMessage() {}
 
 func (x *GetUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[21]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2033,7 +2077,7 @@ func (x *GetUserRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserRequest.ProtoReflect.Descriptor instead.
 func (*GetUserRequest) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{21}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *GetUserRequest) GetUserId() string {
@@ -2053,7 +2097,7 @@ type UserDetail struct {
 
 func (x *UserDetail) Reset() {
 	*x = UserDetail{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[22]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2065,7 +2109,7 @@ func (x *UserDetail) String() string {
 func (*UserDetail) ProtoMessage() {}
 
 func (x *UserDetail) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[22]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2078,7 +2122,7 @@ func (x *UserDetail) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserDetail.ProtoReflect.Descriptor instead.
 func (*UserDetail) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{22}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *UserDetail) GetUser() *UserSummary {
@@ -2110,7 +2154,7 @@ type ListInvitationsRequest struct {
 
 func (x *ListInvitationsRequest) Reset() {
 	*x = ListInvitationsRequest{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[23]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2122,7 +2166,7 @@ func (x *ListInvitationsRequest) String() string {
 func (*ListInvitationsRequest) ProtoMessage() {}
 
 func (x *ListInvitationsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[23]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2135,7 +2179,7 @@ func (x *ListInvitationsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListInvitationsRequest.ProtoReflect.Descriptor instead.
 func (*ListInvitationsRequest) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{23}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *ListInvitationsRequest) GetTenantId() string {
@@ -2201,7 +2245,7 @@ type ListTenantInvitationsRequest struct {
 
 func (x *ListTenantInvitationsRequest) Reset() {
 	*x = ListTenantInvitationsRequest{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[24]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2213,7 +2257,7 @@ func (x *ListTenantInvitationsRequest) String() string {
 func (*ListTenantInvitationsRequest) ProtoMessage() {}
 
 func (x *ListTenantInvitationsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[24]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2226,7 +2270,7 @@ func (x *ListTenantInvitationsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTenantInvitationsRequest.ProtoReflect.Descriptor instead.
 func (*ListTenantInvitationsRequest) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{24}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *ListTenantInvitationsRequest) GetStatus() InvitationStatus {
@@ -2289,7 +2333,7 @@ type Invitation struct {
 
 func (x *Invitation) Reset() {
 	*x = Invitation{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[25]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2301,7 +2345,7 @@ func (x *Invitation) String() string {
 func (*Invitation) ProtoMessage() {}
 
 func (x *Invitation) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[25]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2314,7 +2358,7 @@ func (x *Invitation) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Invitation.ProtoReflect.Descriptor instead.
 func (*Invitation) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{25}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *Invitation) GetId() string {
@@ -2397,7 +2441,7 @@ type ListInvitationsResponse struct {
 
 func (x *ListInvitationsResponse) Reset() {
 	*x = ListInvitationsResponse{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[26]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2409,7 +2453,7 @@ func (x *ListInvitationsResponse) String() string {
 func (*ListInvitationsResponse) ProtoMessage() {}
 
 func (x *ListInvitationsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[26]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2422,7 +2466,7 @@ func (x *ListInvitationsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListInvitationsResponse.ProtoReflect.Descriptor instead.
 func (*ListInvitationsResponse) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{26}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *ListInvitationsResponse) GetInvitations() []*Invitation {
@@ -2448,7 +2492,7 @@ type RevokeInvitationRequest struct {
 
 func (x *RevokeInvitationRequest) Reset() {
 	*x = RevokeInvitationRequest{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[27]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2460,7 +2504,7 @@ func (x *RevokeInvitationRequest) String() string {
 func (*RevokeInvitationRequest) ProtoMessage() {}
 
 func (x *RevokeInvitationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[27]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2473,7 +2517,7 @@ func (x *RevokeInvitationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RevokeInvitationRequest.ProtoReflect.Descriptor instead.
 func (*RevokeInvitationRequest) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{27}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *RevokeInvitationRequest) GetInvitationId() string {
@@ -2493,7 +2537,7 @@ type CreateInvitationRequest struct {
 
 func (x *CreateInvitationRequest) Reset() {
 	*x = CreateInvitationRequest{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[28]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2505,7 +2549,7 @@ func (x *CreateInvitationRequest) String() string {
 func (*CreateInvitationRequest) ProtoMessage() {}
 
 func (x *CreateInvitationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[28]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2518,7 +2562,7 @@ func (x *CreateInvitationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateInvitationRequest.ProtoReflect.Descriptor instead.
 func (*CreateInvitationRequest) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{28}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *CreateInvitationRequest) GetEmail() string {
@@ -2548,7 +2592,7 @@ type Language struct {
 
 func (x *Language) Reset() {
 	*x = Language{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[29]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2560,7 +2604,7 @@ func (x *Language) String() string {
 func (*Language) ProtoMessage() {}
 
 func (x *Language) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[29]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2573,7 +2617,7 @@ func (x *Language) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Language.ProtoReflect.Descriptor instead.
 func (*Language) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{29}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *Language) GetCode() string {
@@ -2620,7 +2664,7 @@ type LanguagesResponse struct {
 
 func (x *LanguagesResponse) Reset() {
 	*x = LanguagesResponse{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[30]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2632,7 +2676,7 @@ func (x *LanguagesResponse) String() string {
 func (*LanguagesResponse) ProtoMessage() {}
 
 func (x *LanguagesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[30]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2645,7 +2689,7 @@ func (x *LanguagesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LanguagesResponse.ProtoReflect.Descriptor instead.
 func (*LanguagesResponse) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{30}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *LanguagesResponse) GetLanguages() []*Language {
@@ -2669,7 +2713,7 @@ type ListLanguagesRequest struct {
 
 func (x *ListLanguagesRequest) Reset() {
 	*x = ListLanguagesRequest{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[31]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2681,7 +2725,7 @@ func (x *ListLanguagesRequest) String() string {
 func (*ListLanguagesRequest) ProtoMessage() {}
 
 func (x *ListLanguagesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[31]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2694,7 +2738,7 @@ func (x *ListLanguagesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListLanguagesRequest.ProtoReflect.Descriptor instead.
 func (*ListLanguagesRequest) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{31}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *ListLanguagesRequest) GetSearch() string {
@@ -2749,7 +2793,7 @@ type ListLanguagesResponse struct {
 
 func (x *ListLanguagesResponse) Reset() {
 	*x = ListLanguagesResponse{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[32]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2761,7 +2805,7 @@ func (x *ListLanguagesResponse) String() string {
 func (*ListLanguagesResponse) ProtoMessage() {}
 
 func (x *ListLanguagesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[32]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2774,7 +2818,7 @@ func (x *ListLanguagesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListLanguagesResponse.ProtoReflect.Descriptor instead.
 func (*ListLanguagesResponse) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{32}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *ListLanguagesResponse) GetLanguages() []*Language {
@@ -2802,7 +2846,7 @@ type CreateLanguageRequest struct {
 
 func (x *CreateLanguageRequest) Reset() {
 	*x = CreateLanguageRequest{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[33]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2814,7 +2858,7 @@ func (x *CreateLanguageRequest) String() string {
 func (*CreateLanguageRequest) ProtoMessage() {}
 
 func (x *CreateLanguageRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[33]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2827,7 +2871,7 @@ func (x *CreateLanguageRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateLanguageRequest.ProtoReflect.Descriptor instead.
 func (*CreateLanguageRequest) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{33}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *CreateLanguageRequest) GetCode() string {
@@ -2863,7 +2907,7 @@ type UpdateLanguageRequest struct {
 
 func (x *UpdateLanguageRequest) Reset() {
 	*x = UpdateLanguageRequest{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[34]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2875,7 +2919,7 @@ func (x *UpdateLanguageRequest) String() string {
 func (*UpdateLanguageRequest) ProtoMessage() {}
 
 func (x *UpdateLanguageRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[34]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2888,7 +2932,7 @@ func (x *UpdateLanguageRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateLanguageRequest.ProtoReflect.Descriptor instead.
 func (*UpdateLanguageRequest) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{34}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *UpdateLanguageRequest) GetCode() string {
@@ -2932,7 +2976,7 @@ type TranslationOverride struct {
 
 func (x *TranslationOverride) Reset() {
 	*x = TranslationOverride{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[35]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2944,7 +2988,7 @@ func (x *TranslationOverride) String() string {
 func (*TranslationOverride) ProtoMessage() {}
 
 func (x *TranslationOverride) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[35]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2957,7 +3001,7 @@ func (x *TranslationOverride) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TranslationOverride.ProtoReflect.Descriptor instead.
 func (*TranslationOverride) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{35}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *TranslationOverride) GetLocale() string {
@@ -3010,7 +3054,7 @@ type ListTranslationOverridesRequest struct {
 
 func (x *ListTranslationOverridesRequest) Reset() {
 	*x = ListTranslationOverridesRequest{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[36]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3022,7 +3066,7 @@ func (x *ListTranslationOverridesRequest) String() string {
 func (*ListTranslationOverridesRequest) ProtoMessage() {}
 
 func (x *ListTranslationOverridesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[36]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3035,7 +3079,7 @@ func (x *ListTranslationOverridesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTranslationOverridesRequest.ProtoReflect.Descriptor instead.
 func (*ListTranslationOverridesRequest) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{36}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *ListTranslationOverridesRequest) GetSearch() string {
@@ -3097,7 +3141,7 @@ type ListTranslationOverridesResponse struct {
 
 func (x *ListTranslationOverridesResponse) Reset() {
 	*x = ListTranslationOverridesResponse{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[37]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3109,7 +3153,7 @@ func (x *ListTranslationOverridesResponse) String() string {
 func (*ListTranslationOverridesResponse) ProtoMessage() {}
 
 func (x *ListTranslationOverridesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[37]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3122,7 +3166,7 @@ func (x *ListTranslationOverridesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTranslationOverridesResponse.ProtoReflect.Descriptor instead.
 func (*ListTranslationOverridesResponse) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{37}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *ListTranslationOverridesResponse) GetOverrides() []*TranslationOverride {
@@ -3148,7 +3192,7 @@ type UpsertTranslationOverrideRequest struct {
 
 func (x *UpsertTranslationOverrideRequest) Reset() {
 	*x = UpsertTranslationOverrideRequest{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[38]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3160,7 +3204,7 @@ func (x *UpsertTranslationOverrideRequest) String() string {
 func (*UpsertTranslationOverrideRequest) ProtoMessage() {}
 
 func (x *UpsertTranslationOverrideRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[38]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3173,7 +3217,7 @@ func (x *UpsertTranslationOverrideRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpsertTranslationOverrideRequest.ProtoReflect.Descriptor instead.
 func (*UpsertTranslationOverrideRequest) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{38}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *UpsertTranslationOverrideRequest) GetOverride() *TranslationOverride {
@@ -3195,7 +3239,7 @@ type DeleteTranslationOverrideRequest struct {
 
 func (x *DeleteTranslationOverrideRequest) Reset() {
 	*x = DeleteTranslationOverrideRequest{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[39]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3207,7 +3251,7 @@ func (x *DeleteTranslationOverrideRequest) String() string {
 func (*DeleteTranslationOverrideRequest) ProtoMessage() {}
 
 func (x *DeleteTranslationOverrideRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[39]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3220,7 +3264,7 @@ func (x *DeleteTranslationOverrideRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteTranslationOverrideRequest.ProtoReflect.Descriptor instead.
 func (*DeleteTranslationOverrideRequest) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{39}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{40}
 }
 
 func (x *DeleteTranslationOverrideRequest) GetLocale() string {
@@ -3269,7 +3313,7 @@ type ListAuditEventsRequest struct {
 
 func (x *ListAuditEventsRequest) Reset() {
 	*x = ListAuditEventsRequest{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[40]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3281,7 +3325,7 @@ func (x *ListAuditEventsRequest) String() string {
 func (*ListAuditEventsRequest) ProtoMessage() {}
 
 func (x *ListAuditEventsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[40]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3294,7 +3338,7 @@ func (x *ListAuditEventsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAuditEventsRequest.ProtoReflect.Descriptor instead.
 func (*ListAuditEventsRequest) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{40}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{41}
 }
 
 func (x *ListAuditEventsRequest) GetFrom() string {
@@ -3384,7 +3428,7 @@ type AuditEvent struct {
 
 func (x *AuditEvent) Reset() {
 	*x = AuditEvent{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[41]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3396,7 +3440,7 @@ func (x *AuditEvent) String() string {
 func (*AuditEvent) ProtoMessage() {}
 
 func (x *AuditEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[41]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3409,7 +3453,7 @@ func (x *AuditEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AuditEvent.ProtoReflect.Descriptor instead.
 func (*AuditEvent) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{41}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{42}
 }
 
 func (x *AuditEvent) GetId() string {
@@ -3485,7 +3529,7 @@ type ListAuditEventsResponse struct {
 
 func (x *ListAuditEventsResponse) Reset() {
 	*x = ListAuditEventsResponse{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[42]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3497,7 +3541,7 @@ func (x *ListAuditEventsResponse) String() string {
 func (*ListAuditEventsResponse) ProtoMessage() {}
 
 func (x *ListAuditEventsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[42]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3510,7 +3554,7 @@ func (x *ListAuditEventsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAuditEventsResponse.ProtoReflect.Descriptor instead.
 func (*ListAuditEventsResponse) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{42}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{43}
 }
 
 func (x *ListAuditEventsResponse) GetEvents() []*AuditEvent {
@@ -3537,7 +3581,7 @@ type UpdateCurrentTenantRequest struct {
 
 func (x *UpdateCurrentTenantRequest) Reset() {
 	*x = UpdateCurrentTenantRequest{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[43]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3549,7 +3593,7 @@ func (x *UpdateCurrentTenantRequest) String() string {
 func (*UpdateCurrentTenantRequest) ProtoMessage() {}
 
 func (x *UpdateCurrentTenantRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[43]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3562,7 +3606,7 @@ func (x *UpdateCurrentTenantRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateCurrentTenantRequest.ProtoReflect.Descriptor instead.
 func (*UpdateCurrentTenantRequest) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{43}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{44}
 }
 
 func (x *UpdateCurrentTenantRequest) GetName() string {
@@ -3594,7 +3638,7 @@ type ListMembershipsRequest struct {
 
 func (x *ListMembershipsRequest) Reset() {
 	*x = ListMembershipsRequest{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[44]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3606,7 +3650,7 @@ func (x *ListMembershipsRequest) String() string {
 func (*ListMembershipsRequest) ProtoMessage() {}
 
 func (x *ListMembershipsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[44]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3619,7 +3663,7 @@ func (x *ListMembershipsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListMembershipsRequest.ProtoReflect.Descriptor instead.
 func (*ListMembershipsRequest) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{44}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{45}
 }
 
 func (x *ListMembershipsRequest) GetSearch() string {
@@ -3681,7 +3725,7 @@ type ListMembershipsResponse struct {
 
 func (x *ListMembershipsResponse) Reset() {
 	*x = ListMembershipsResponse{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[45]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[46]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3693,7 +3737,7 @@ func (x *ListMembershipsResponse) String() string {
 func (*ListMembershipsResponse) ProtoMessage() {}
 
 func (x *ListMembershipsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[45]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[46]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3706,7 +3750,7 @@ func (x *ListMembershipsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListMembershipsResponse.ProtoReflect.Descriptor instead.
 func (*ListMembershipsResponse) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{45}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{46}
 }
 
 func (x *ListMembershipsResponse) GetMemberships() []*Membership {
@@ -3735,7 +3779,7 @@ type UpdateMembershipRequest struct {
 
 func (x *UpdateMembershipRequest) Reset() {
 	*x = UpdateMembershipRequest{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[46]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[47]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3747,7 +3791,7 @@ func (x *UpdateMembershipRequest) String() string {
 func (*UpdateMembershipRequest) ProtoMessage() {}
 
 func (x *UpdateMembershipRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[46]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[47]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3760,7 +3804,7 @@ func (x *UpdateMembershipRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateMembershipRequest.ProtoReflect.Descriptor instead.
 func (*UpdateMembershipRequest) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{46}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{47}
 }
 
 func (x *UpdateMembershipRequest) GetMembershipId() string {
@@ -3805,7 +3849,7 @@ type ListRolesRequest struct {
 
 func (x *ListRolesRequest) Reset() {
 	*x = ListRolesRequest{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[47]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3817,7 +3861,7 @@ func (x *ListRolesRequest) String() string {
 func (*ListRolesRequest) ProtoMessage() {}
 
 func (x *ListRolesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[47]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3830,7 +3874,7 @@ func (x *ListRolesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListRolesRequest.ProtoReflect.Descriptor instead.
 func (*ListRolesRequest) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{47}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{48}
 }
 
 func (x *ListRolesRequest) GetSearch() string {
@@ -3885,7 +3929,7 @@ type ListRolesResponse struct {
 
 func (x *ListRolesResponse) Reset() {
 	*x = ListRolesResponse{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[48]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[49]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3897,7 +3941,7 @@ func (x *ListRolesResponse) String() string {
 func (*ListRolesResponse) ProtoMessage() {}
 
 func (x *ListRolesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[48]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[49]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3910,7 +3954,7 @@ func (x *ListRolesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListRolesResponse.ProtoReflect.Descriptor instead.
 func (*ListRolesResponse) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{48}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{49}
 }
 
 func (x *ListRolesResponse) GetRoles() []*Role {
@@ -3937,7 +3981,7 @@ type CreateRoleRequest struct {
 
 func (x *CreateRoleRequest) Reset() {
 	*x = CreateRoleRequest{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[49]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[50]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3949,7 +3993,7 @@ func (x *CreateRoleRequest) String() string {
 func (*CreateRoleRequest) ProtoMessage() {}
 
 func (x *CreateRoleRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[49]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[50]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3962,7 +4006,7 @@ func (x *CreateRoleRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateRoleRequest.ProtoReflect.Descriptor instead.
 func (*CreateRoleRequest) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{49}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{50}
 }
 
 func (x *CreateRoleRequest) GetName() string {
@@ -3991,7 +4035,7 @@ type UpdateRoleRequest struct {
 
 func (x *UpdateRoleRequest) Reset() {
 	*x = UpdateRoleRequest{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[50]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[51]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4003,7 +4047,7 @@ func (x *UpdateRoleRequest) String() string {
 func (*UpdateRoleRequest) ProtoMessage() {}
 
 func (x *UpdateRoleRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[50]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[51]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4016,7 +4060,7 @@ func (x *UpdateRoleRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateRoleRequest.ProtoReflect.Descriptor instead.
 func (*UpdateRoleRequest) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{50}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{51}
 }
 
 func (x *UpdateRoleRequest) GetRoleId() string {
@@ -4057,7 +4101,7 @@ type DeleteRoleRequest struct {
 
 func (x *DeleteRoleRequest) Reset() {
 	*x = DeleteRoleRequest{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[51]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[52]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4069,7 +4113,7 @@ func (x *DeleteRoleRequest) String() string {
 func (*DeleteRoleRequest) ProtoMessage() {}
 
 func (x *DeleteRoleRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[51]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[52]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4082,7 +4126,7 @@ func (x *DeleteRoleRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteRoleRequest.ProtoReflect.Descriptor instead.
 func (*DeleteRoleRequest) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{51}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{52}
 }
 
 func (x *DeleteRoleRequest) GetRoleId() string {
@@ -4111,7 +4155,7 @@ type SystemStats struct {
 
 func (x *SystemStats) Reset() {
 	*x = SystemStats{}
-	mi := &file_clinks_v1_clinks_proto_msgTypes[52]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[53]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4123,7 +4167,7 @@ func (x *SystemStats) String() string {
 func (*SystemStats) ProtoMessage() {}
 
 func (x *SystemStats) ProtoReflect() protoreflect.Message {
-	mi := &file_clinks_v1_clinks_proto_msgTypes[52]
+	mi := &file_clinks_v1_clinks_proto_msgTypes[53]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4136,7 +4180,7 @@ func (x *SystemStats) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SystemStats.ProtoReflect.Descriptor instead.
 func (*SystemStats) Descriptor() ([]byte, []int) {
-	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{52}
+	return file_clinks_v1_clinks_proto_rawDescGZIP(), []int{53}
 }
 
 func (x *SystemStats) GetUserCount() uint32 {
@@ -4172,7 +4216,9 @@ var File_clinks_v1_clinks_proto protoreflect.FileDescriptor
 const file_clinks_v1_clinks_proto_rawDesc = "" +
 	"\n" +
 	"\x16clinks/v1/clinks.proto\x12\tclinks.v1\"\a\n" +
-	"\x05Empty\"F\n" +
+	"\x05Empty\"B\n" +
+	"\x10AuthCapabilities\x12.\n" +
+	"\x13google_oidc_enabled\x18\x01 \x01(\bR\x11googleOidcEnabled\"F\n" +
 	"\x12CredentialsRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\"|\n" +
@@ -4509,14 +4555,15 @@ const file_clinks_v1_clinks_proto_rawDesc = "" +
 	"\bRoleSort\x12\x19\n" +
 	"\x15ROLE_SORT_UNSPECIFIED\x10\x00\x12\x12\n" +
 	"\x0eROLE_SORT_NAME\x10\x01\x12\x18\n" +
-	"\x14ROLE_SORT_CREATED_AT\x10\x022\x90\x14\n" +
+	"\x14ROLE_SORT_CREATED_AT\x10\x022\xd6\x14\n" +
 	"\rClinksService\x12:\n" +
 	"\x05Login\x12\x1d.clinks.v1.CredentialsRequest\x1a\x12.clinks.v1.Session\x12D\n" +
 	"\x0fLoginSuperAdmin\x12\x1d.clinks.v1.CredentialsRequest\x1a\x12.clinks.v1.Session\x12:\n" +
 	"\bRegister\x12\x1a.clinks.v1.RegisterRequest\x1a\x12.clinks.v1.Session\x12,\n" +
 	"\x06Logout\x12\x10.clinks.v1.Empty\x1a\x10.clinks.v1.Empty\x122\n" +
 	"\n" +
-	"GetSession\x12\x10.clinks.v1.Empty\x1a\x12.clinks.v1.Session\x12B\n" +
+	"GetSession\x12\x10.clinks.v1.Empty\x1a\x12.clinks.v1.Session\x12D\n" +
+	"\x13GetAuthCapabilities\x12\x10.clinks.v1.Empty\x1a\x1b.clinks.v1.AuthCapabilities\x12B\n" +
 	"\fSwitchTenant\x12\x1e.clinks.v1.SwitchTenantRequest\x1a\x12.clinks.v1.Session\x12J\n" +
 	"\x10AcceptInvitation\x12\".clinks.v1.AcceptInvitationRequest\x1a\x12.clinks.v1.Session\x12>\n" +
 	"\fGetLanguages\x12\x10.clinks.v1.Empty\x1a\x1c.clinks.v1.LanguagesResponse\x12U\n" +
@@ -4563,7 +4610,7 @@ func file_clinks_v1_clinks_proto_rawDescGZIP() []byte {
 }
 
 var file_clinks_v1_clinks_proto_enumTypes = make([]protoimpl.EnumInfo, 13)
-var file_clinks_v1_clinks_proto_msgTypes = make([]protoimpl.MessageInfo, 53)
+var file_clinks_v1_clinks_proto_msgTypes = make([]protoimpl.MessageInfo, 54)
 var file_clinks_v1_clinks_proto_goTypes = []any{
 	(SortDirection)(0),                       // 0: clinks.v1.SortDirection
 	(GlobalRole)(0),                          // 1: clinks.v1.GlobalRole
@@ -4579,179 +4626,182 @@ var file_clinks_v1_clinks_proto_goTypes = []any{
 	(MembershipSort)(0),                      // 11: clinks.v1.MembershipSort
 	(RoleSort)(0),                            // 12: clinks.v1.RoleSort
 	(*Empty)(nil),                            // 13: clinks.v1.Empty
-	(*CredentialsRequest)(nil),               // 14: clinks.v1.CredentialsRequest
-	(*RegisterRequest)(nil),                  // 15: clinks.v1.RegisterRequest
-	(*SwitchTenantRequest)(nil),              // 16: clinks.v1.SwitchTenantRequest
-	(*User)(nil),                             // 17: clinks.v1.User
-	(*UserSummary)(nil),                      // 18: clinks.v1.UserSummary
-	(*Tenant)(nil),                           // 19: clinks.v1.Tenant
-	(*RoleSummary)(nil),                      // 20: clinks.v1.RoleSummary
-	(*Role)(nil),                             // 21: clinks.v1.Role
-	(*Membership)(nil),                       // 22: clinks.v1.Membership
-	(*Session)(nil),                          // 23: clinks.v1.Session
-	(*AcceptInvitationRequest)(nil),          // 24: clinks.v1.AcceptInvitationRequest
-	(*GetTranslationsRequest)(nil),           // 25: clinks.v1.GetTranslationsRequest
-	(*ScopedTranslation)(nil),                // 26: clinks.v1.ScopedTranslation
-	(*TranslationsResponse)(nil),             // 27: clinks.v1.TranslationsResponse
-	(*ListTenantsRequest)(nil),               // 28: clinks.v1.ListTenantsRequest
-	(*ListTenantsResponse)(nil),              // 29: clinks.v1.ListTenantsResponse
-	(*CreateTenantRequest)(nil),              // 30: clinks.v1.CreateTenantRequest
-	(*UpdateTenantRequest)(nil),              // 31: clinks.v1.UpdateTenantRequest
-	(*ListUsersRequest)(nil),                 // 32: clinks.v1.ListUsersRequest
-	(*ListUsersResponse)(nil),                // 33: clinks.v1.ListUsersResponse
-	(*GetUserRequest)(nil),                   // 34: clinks.v1.GetUserRequest
-	(*UserDetail)(nil),                       // 35: clinks.v1.UserDetail
-	(*ListInvitationsRequest)(nil),           // 36: clinks.v1.ListInvitationsRequest
-	(*ListTenantInvitationsRequest)(nil),     // 37: clinks.v1.ListTenantInvitationsRequest
-	(*Invitation)(nil),                       // 38: clinks.v1.Invitation
-	(*ListInvitationsResponse)(nil),          // 39: clinks.v1.ListInvitationsResponse
-	(*RevokeInvitationRequest)(nil),          // 40: clinks.v1.RevokeInvitationRequest
-	(*CreateInvitationRequest)(nil),          // 41: clinks.v1.CreateInvitationRequest
-	(*Language)(nil),                         // 42: clinks.v1.Language
-	(*LanguagesResponse)(nil),                // 43: clinks.v1.LanguagesResponse
-	(*ListLanguagesRequest)(nil),             // 44: clinks.v1.ListLanguagesRequest
-	(*ListLanguagesResponse)(nil),            // 45: clinks.v1.ListLanguagesResponse
-	(*CreateLanguageRequest)(nil),            // 46: clinks.v1.CreateLanguageRequest
-	(*UpdateLanguageRequest)(nil),            // 47: clinks.v1.UpdateLanguageRequest
-	(*TranslationOverride)(nil),              // 48: clinks.v1.TranslationOverride
-	(*ListTranslationOverridesRequest)(nil),  // 49: clinks.v1.ListTranslationOverridesRequest
-	(*ListTranslationOverridesResponse)(nil), // 50: clinks.v1.ListTranslationOverridesResponse
-	(*UpsertTranslationOverrideRequest)(nil), // 51: clinks.v1.UpsertTranslationOverrideRequest
-	(*DeleteTranslationOverrideRequest)(nil), // 52: clinks.v1.DeleteTranslationOverrideRequest
-	(*ListAuditEventsRequest)(nil),           // 53: clinks.v1.ListAuditEventsRequest
-	(*AuditEvent)(nil),                       // 54: clinks.v1.AuditEvent
-	(*ListAuditEventsResponse)(nil),          // 55: clinks.v1.ListAuditEventsResponse
-	(*UpdateCurrentTenantRequest)(nil),       // 56: clinks.v1.UpdateCurrentTenantRequest
-	(*ListMembershipsRequest)(nil),           // 57: clinks.v1.ListMembershipsRequest
-	(*ListMembershipsResponse)(nil),          // 58: clinks.v1.ListMembershipsResponse
-	(*UpdateMembershipRequest)(nil),          // 59: clinks.v1.UpdateMembershipRequest
-	(*ListRolesRequest)(nil),                 // 60: clinks.v1.ListRolesRequest
-	(*ListRolesResponse)(nil),                // 61: clinks.v1.ListRolesResponse
-	(*CreateRoleRequest)(nil),                // 62: clinks.v1.CreateRoleRequest
-	(*UpdateRoleRequest)(nil),                // 63: clinks.v1.UpdateRoleRequest
-	(*DeleteRoleRequest)(nil),                // 64: clinks.v1.DeleteRoleRequest
-	(*SystemStats)(nil),                      // 65: clinks.v1.SystemStats
+	(*AuthCapabilities)(nil),                 // 14: clinks.v1.AuthCapabilities
+	(*CredentialsRequest)(nil),               // 15: clinks.v1.CredentialsRequest
+	(*RegisterRequest)(nil),                  // 16: clinks.v1.RegisterRequest
+	(*SwitchTenantRequest)(nil),              // 17: clinks.v1.SwitchTenantRequest
+	(*User)(nil),                             // 18: clinks.v1.User
+	(*UserSummary)(nil),                      // 19: clinks.v1.UserSummary
+	(*Tenant)(nil),                           // 20: clinks.v1.Tenant
+	(*RoleSummary)(nil),                      // 21: clinks.v1.RoleSummary
+	(*Role)(nil),                             // 22: clinks.v1.Role
+	(*Membership)(nil),                       // 23: clinks.v1.Membership
+	(*Session)(nil),                          // 24: clinks.v1.Session
+	(*AcceptInvitationRequest)(nil),          // 25: clinks.v1.AcceptInvitationRequest
+	(*GetTranslationsRequest)(nil),           // 26: clinks.v1.GetTranslationsRequest
+	(*ScopedTranslation)(nil),                // 27: clinks.v1.ScopedTranslation
+	(*TranslationsResponse)(nil),             // 28: clinks.v1.TranslationsResponse
+	(*ListTenantsRequest)(nil),               // 29: clinks.v1.ListTenantsRequest
+	(*ListTenantsResponse)(nil),              // 30: clinks.v1.ListTenantsResponse
+	(*CreateTenantRequest)(nil),              // 31: clinks.v1.CreateTenantRequest
+	(*UpdateTenantRequest)(nil),              // 32: clinks.v1.UpdateTenantRequest
+	(*ListUsersRequest)(nil),                 // 33: clinks.v1.ListUsersRequest
+	(*ListUsersResponse)(nil),                // 34: clinks.v1.ListUsersResponse
+	(*GetUserRequest)(nil),                   // 35: clinks.v1.GetUserRequest
+	(*UserDetail)(nil),                       // 36: clinks.v1.UserDetail
+	(*ListInvitationsRequest)(nil),           // 37: clinks.v1.ListInvitationsRequest
+	(*ListTenantInvitationsRequest)(nil),     // 38: clinks.v1.ListTenantInvitationsRequest
+	(*Invitation)(nil),                       // 39: clinks.v1.Invitation
+	(*ListInvitationsResponse)(nil),          // 40: clinks.v1.ListInvitationsResponse
+	(*RevokeInvitationRequest)(nil),          // 41: clinks.v1.RevokeInvitationRequest
+	(*CreateInvitationRequest)(nil),          // 42: clinks.v1.CreateInvitationRequest
+	(*Language)(nil),                         // 43: clinks.v1.Language
+	(*LanguagesResponse)(nil),                // 44: clinks.v1.LanguagesResponse
+	(*ListLanguagesRequest)(nil),             // 45: clinks.v1.ListLanguagesRequest
+	(*ListLanguagesResponse)(nil),            // 46: clinks.v1.ListLanguagesResponse
+	(*CreateLanguageRequest)(nil),            // 47: clinks.v1.CreateLanguageRequest
+	(*UpdateLanguageRequest)(nil),            // 48: clinks.v1.UpdateLanguageRequest
+	(*TranslationOverride)(nil),              // 49: clinks.v1.TranslationOverride
+	(*ListTranslationOverridesRequest)(nil),  // 50: clinks.v1.ListTranslationOverridesRequest
+	(*ListTranslationOverridesResponse)(nil), // 51: clinks.v1.ListTranslationOverridesResponse
+	(*UpsertTranslationOverrideRequest)(nil), // 52: clinks.v1.UpsertTranslationOverrideRequest
+	(*DeleteTranslationOverrideRequest)(nil), // 53: clinks.v1.DeleteTranslationOverrideRequest
+	(*ListAuditEventsRequest)(nil),           // 54: clinks.v1.ListAuditEventsRequest
+	(*AuditEvent)(nil),                       // 55: clinks.v1.AuditEvent
+	(*ListAuditEventsResponse)(nil),          // 56: clinks.v1.ListAuditEventsResponse
+	(*UpdateCurrentTenantRequest)(nil),       // 57: clinks.v1.UpdateCurrentTenantRequest
+	(*ListMembershipsRequest)(nil),           // 58: clinks.v1.ListMembershipsRequest
+	(*ListMembershipsResponse)(nil),          // 59: clinks.v1.ListMembershipsResponse
+	(*UpdateMembershipRequest)(nil),          // 60: clinks.v1.UpdateMembershipRequest
+	(*ListRolesRequest)(nil),                 // 61: clinks.v1.ListRolesRequest
+	(*ListRolesResponse)(nil),                // 62: clinks.v1.ListRolesResponse
+	(*CreateRoleRequest)(nil),                // 63: clinks.v1.CreateRoleRequest
+	(*UpdateRoleRequest)(nil),                // 64: clinks.v1.UpdateRoleRequest
+	(*DeleteRoleRequest)(nil),                // 65: clinks.v1.DeleteRoleRequest
+	(*SystemStats)(nil),                      // 66: clinks.v1.SystemStats
 }
 var file_clinks_v1_clinks_proto_depIdxs = []int32{
 	1,  // 0: clinks.v1.User.global_role:type_name -> clinks.v1.GlobalRole
 	1,  // 1: clinks.v1.UserSummary.global_role:type_name -> clinks.v1.GlobalRole
 	2,  // 2: clinks.v1.RoleSummary.kind:type_name -> clinks.v1.RoleKind
 	2,  // 3: clinks.v1.Role.kind:type_name -> clinks.v1.RoleKind
-	19, // 4: clinks.v1.Membership.tenant:type_name -> clinks.v1.Tenant
-	20, // 5: clinks.v1.Membership.role:type_name -> clinks.v1.RoleSummary
+	20, // 4: clinks.v1.Membership.tenant:type_name -> clinks.v1.Tenant
+	21, // 5: clinks.v1.Membership.role:type_name -> clinks.v1.RoleSummary
 	3,  // 6: clinks.v1.Membership.status:type_name -> clinks.v1.MembershipStatus
-	17, // 7: clinks.v1.Session.user:type_name -> clinks.v1.User
-	19, // 8: clinks.v1.Session.active_tenant:type_name -> clinks.v1.Tenant
-	22, // 9: clinks.v1.Session.memberships:type_name -> clinks.v1.Membership
-	26, // 10: clinks.v1.TranslationsResponse.translations:type_name -> clinks.v1.ScopedTranslation
+	18, // 7: clinks.v1.Session.user:type_name -> clinks.v1.User
+	20, // 8: clinks.v1.Session.active_tenant:type_name -> clinks.v1.Tenant
+	23, // 9: clinks.v1.Session.memberships:type_name -> clinks.v1.Membership
+	27, // 10: clinks.v1.TranslationsResponse.translations:type_name -> clinks.v1.ScopedTranslation
 	5,  // 11: clinks.v1.ListTenantsRequest.sort:type_name -> clinks.v1.TenantSort
 	0,  // 12: clinks.v1.ListTenantsRequest.direction:type_name -> clinks.v1.SortDirection
-	19, // 13: clinks.v1.ListTenantsResponse.tenants:type_name -> clinks.v1.Tenant
+	20, // 13: clinks.v1.ListTenantsResponse.tenants:type_name -> clinks.v1.Tenant
 	1,  // 14: clinks.v1.ListUsersRequest.global_role:type_name -> clinks.v1.GlobalRole
 	6,  // 15: clinks.v1.ListUsersRequest.sort:type_name -> clinks.v1.UserSort
 	0,  // 16: clinks.v1.ListUsersRequest.direction:type_name -> clinks.v1.SortDirection
-	18, // 17: clinks.v1.ListUsersResponse.users:type_name -> clinks.v1.UserSummary
-	18, // 18: clinks.v1.UserDetail.user:type_name -> clinks.v1.UserSummary
-	22, // 19: clinks.v1.UserDetail.memberships:type_name -> clinks.v1.Membership
+	19, // 17: clinks.v1.ListUsersResponse.users:type_name -> clinks.v1.UserSummary
+	19, // 18: clinks.v1.UserDetail.user:type_name -> clinks.v1.UserSummary
+	23, // 19: clinks.v1.UserDetail.memberships:type_name -> clinks.v1.Membership
 	4,  // 20: clinks.v1.ListInvitationsRequest.status:type_name -> clinks.v1.InvitationStatus
 	7,  // 21: clinks.v1.ListInvitationsRequest.sort:type_name -> clinks.v1.InvitationSort
 	0,  // 22: clinks.v1.ListInvitationsRequest.direction:type_name -> clinks.v1.SortDirection
 	4,  // 23: clinks.v1.ListTenantInvitationsRequest.status:type_name -> clinks.v1.InvitationStatus
 	7,  // 24: clinks.v1.ListTenantInvitationsRequest.sort:type_name -> clinks.v1.InvitationSort
 	0,  // 25: clinks.v1.ListTenantInvitationsRequest.direction:type_name -> clinks.v1.SortDirection
-	20, // 26: clinks.v1.Invitation.role:type_name -> clinks.v1.RoleSummary
+	21, // 26: clinks.v1.Invitation.role:type_name -> clinks.v1.RoleSummary
 	4,  // 27: clinks.v1.Invitation.status:type_name -> clinks.v1.InvitationStatus
-	38, // 28: clinks.v1.ListInvitationsResponse.invitations:type_name -> clinks.v1.Invitation
-	42, // 29: clinks.v1.LanguagesResponse.languages:type_name -> clinks.v1.Language
+	39, // 28: clinks.v1.ListInvitationsResponse.invitations:type_name -> clinks.v1.Invitation
+	43, // 29: clinks.v1.LanguagesResponse.languages:type_name -> clinks.v1.Language
 	8,  // 30: clinks.v1.ListLanguagesRequest.sort:type_name -> clinks.v1.LanguageSort
 	0,  // 31: clinks.v1.ListLanguagesRequest.direction:type_name -> clinks.v1.SortDirection
-	42, // 32: clinks.v1.ListLanguagesResponse.languages:type_name -> clinks.v1.Language
+	43, // 32: clinks.v1.ListLanguagesResponse.languages:type_name -> clinks.v1.Language
 	9,  // 33: clinks.v1.ListTranslationOverridesRequest.sort:type_name -> clinks.v1.TranslationSort
 	0,  // 34: clinks.v1.ListTranslationOverridesRequest.direction:type_name -> clinks.v1.SortDirection
-	48, // 35: clinks.v1.ListTranslationOverridesResponse.overrides:type_name -> clinks.v1.TranslationOverride
-	48, // 36: clinks.v1.UpsertTranslationOverrideRequest.override:type_name -> clinks.v1.TranslationOverride
+	49, // 35: clinks.v1.ListTranslationOverridesResponse.overrides:type_name -> clinks.v1.TranslationOverride
+	49, // 36: clinks.v1.UpsertTranslationOverrideRequest.override:type_name -> clinks.v1.TranslationOverride
 	10, // 37: clinks.v1.ListAuditEventsRequest.sort:type_name -> clinks.v1.AuditSort
 	0,  // 38: clinks.v1.ListAuditEventsRequest.direction:type_name -> clinks.v1.SortDirection
-	54, // 39: clinks.v1.ListAuditEventsResponse.events:type_name -> clinks.v1.AuditEvent
+	55, // 39: clinks.v1.ListAuditEventsResponse.events:type_name -> clinks.v1.AuditEvent
 	3,  // 40: clinks.v1.ListMembershipsRequest.status:type_name -> clinks.v1.MembershipStatus
 	11, // 41: clinks.v1.ListMembershipsRequest.sort:type_name -> clinks.v1.MembershipSort
 	0,  // 42: clinks.v1.ListMembershipsRequest.direction:type_name -> clinks.v1.SortDirection
-	22, // 43: clinks.v1.ListMembershipsResponse.memberships:type_name -> clinks.v1.Membership
+	23, // 43: clinks.v1.ListMembershipsResponse.memberships:type_name -> clinks.v1.Membership
 	3,  // 44: clinks.v1.UpdateMembershipRequest.status:type_name -> clinks.v1.MembershipStatus
 	2,  // 45: clinks.v1.ListRolesRequest.kind:type_name -> clinks.v1.RoleKind
 	12, // 46: clinks.v1.ListRolesRequest.sort:type_name -> clinks.v1.RoleSort
 	0,  // 47: clinks.v1.ListRolesRequest.direction:type_name -> clinks.v1.SortDirection
-	21, // 48: clinks.v1.ListRolesResponse.roles:type_name -> clinks.v1.Role
-	14, // 49: clinks.v1.ClinksService.Login:input_type -> clinks.v1.CredentialsRequest
-	14, // 50: clinks.v1.ClinksService.LoginSuperAdmin:input_type -> clinks.v1.CredentialsRequest
-	15, // 51: clinks.v1.ClinksService.Register:input_type -> clinks.v1.RegisterRequest
+	22, // 48: clinks.v1.ListRolesResponse.roles:type_name -> clinks.v1.Role
+	15, // 49: clinks.v1.ClinksService.Login:input_type -> clinks.v1.CredentialsRequest
+	15, // 50: clinks.v1.ClinksService.LoginSuperAdmin:input_type -> clinks.v1.CredentialsRequest
+	16, // 51: clinks.v1.ClinksService.Register:input_type -> clinks.v1.RegisterRequest
 	13, // 52: clinks.v1.ClinksService.Logout:input_type -> clinks.v1.Empty
 	13, // 53: clinks.v1.ClinksService.GetSession:input_type -> clinks.v1.Empty
-	16, // 54: clinks.v1.ClinksService.SwitchTenant:input_type -> clinks.v1.SwitchTenantRequest
-	24, // 55: clinks.v1.ClinksService.AcceptInvitation:input_type -> clinks.v1.AcceptInvitationRequest
-	13, // 56: clinks.v1.ClinksService.GetLanguages:input_type -> clinks.v1.Empty
-	25, // 57: clinks.v1.ClinksService.GetTranslations:input_type -> clinks.v1.GetTranslationsRequest
-	28, // 58: clinks.v1.ClinksService.ListTenants:input_type -> clinks.v1.ListTenantsRequest
-	30, // 59: clinks.v1.ClinksService.CreateTenant:input_type -> clinks.v1.CreateTenantRequest
-	31, // 60: clinks.v1.ClinksService.UpdateTenant:input_type -> clinks.v1.UpdateTenantRequest
-	32, // 61: clinks.v1.ClinksService.ListUsers:input_type -> clinks.v1.ListUsersRequest
-	34, // 62: clinks.v1.ClinksService.GetUser:input_type -> clinks.v1.GetUserRequest
-	36, // 63: clinks.v1.ClinksService.ListInvitations:input_type -> clinks.v1.ListInvitationsRequest
-	40, // 64: clinks.v1.ClinksService.RevokeInvitation:input_type -> clinks.v1.RevokeInvitationRequest
-	44, // 65: clinks.v1.ClinksService.ListManagedLanguages:input_type -> clinks.v1.ListLanguagesRequest
-	46, // 66: clinks.v1.ClinksService.CreateLanguage:input_type -> clinks.v1.CreateLanguageRequest
-	47, // 67: clinks.v1.ClinksService.UpdateLanguage:input_type -> clinks.v1.UpdateLanguageRequest
-	49, // 68: clinks.v1.ClinksService.ListTranslationOverrides:input_type -> clinks.v1.ListTranslationOverridesRequest
-	51, // 69: clinks.v1.ClinksService.UpsertTranslationOverride:input_type -> clinks.v1.UpsertTranslationOverrideRequest
-	52, // 70: clinks.v1.ClinksService.DeleteTranslationOverride:input_type -> clinks.v1.DeleteTranslationOverrideRequest
-	53, // 71: clinks.v1.ClinksService.ListAuditEvents:input_type -> clinks.v1.ListAuditEventsRequest
-	13, // 72: clinks.v1.ClinksService.GetSystemStats:input_type -> clinks.v1.Empty
-	56, // 73: clinks.v1.ClinksService.UpdateCurrentTenant:input_type -> clinks.v1.UpdateCurrentTenantRequest
-	57, // 74: clinks.v1.ClinksService.ListMemberships:input_type -> clinks.v1.ListMembershipsRequest
-	59, // 75: clinks.v1.ClinksService.UpdateMembership:input_type -> clinks.v1.UpdateMembershipRequest
-	60, // 76: clinks.v1.ClinksService.ListRoles:input_type -> clinks.v1.ListRolesRequest
-	62, // 77: clinks.v1.ClinksService.CreateRole:input_type -> clinks.v1.CreateRoleRequest
-	63, // 78: clinks.v1.ClinksService.UpdateRole:input_type -> clinks.v1.UpdateRoleRequest
-	64, // 79: clinks.v1.ClinksService.DeleteRole:input_type -> clinks.v1.DeleteRoleRequest
-	37, // 80: clinks.v1.ClinksService.ListTenantInvitations:input_type -> clinks.v1.ListTenantInvitationsRequest
-	41, // 81: clinks.v1.ClinksService.CreateInvitation:input_type -> clinks.v1.CreateInvitationRequest
-	40, // 82: clinks.v1.ClinksService.RevokeTenantInvitation:input_type -> clinks.v1.RevokeInvitationRequest
-	23, // 83: clinks.v1.ClinksService.Login:output_type -> clinks.v1.Session
-	23, // 84: clinks.v1.ClinksService.LoginSuperAdmin:output_type -> clinks.v1.Session
-	23, // 85: clinks.v1.ClinksService.Register:output_type -> clinks.v1.Session
-	13, // 86: clinks.v1.ClinksService.Logout:output_type -> clinks.v1.Empty
-	23, // 87: clinks.v1.ClinksService.GetSession:output_type -> clinks.v1.Session
-	23, // 88: clinks.v1.ClinksService.SwitchTenant:output_type -> clinks.v1.Session
-	23, // 89: clinks.v1.ClinksService.AcceptInvitation:output_type -> clinks.v1.Session
-	43, // 90: clinks.v1.ClinksService.GetLanguages:output_type -> clinks.v1.LanguagesResponse
-	27, // 91: clinks.v1.ClinksService.GetTranslations:output_type -> clinks.v1.TranslationsResponse
-	29, // 92: clinks.v1.ClinksService.ListTenants:output_type -> clinks.v1.ListTenantsResponse
-	19, // 93: clinks.v1.ClinksService.CreateTenant:output_type -> clinks.v1.Tenant
-	19, // 94: clinks.v1.ClinksService.UpdateTenant:output_type -> clinks.v1.Tenant
-	33, // 95: clinks.v1.ClinksService.ListUsers:output_type -> clinks.v1.ListUsersResponse
-	35, // 96: clinks.v1.ClinksService.GetUser:output_type -> clinks.v1.UserDetail
-	39, // 97: clinks.v1.ClinksService.ListInvitations:output_type -> clinks.v1.ListInvitationsResponse
-	13, // 98: clinks.v1.ClinksService.RevokeInvitation:output_type -> clinks.v1.Empty
-	45, // 99: clinks.v1.ClinksService.ListManagedLanguages:output_type -> clinks.v1.ListLanguagesResponse
-	42, // 100: clinks.v1.ClinksService.CreateLanguage:output_type -> clinks.v1.Language
-	42, // 101: clinks.v1.ClinksService.UpdateLanguage:output_type -> clinks.v1.Language
-	50, // 102: clinks.v1.ClinksService.ListTranslationOverrides:output_type -> clinks.v1.ListTranslationOverridesResponse
-	48, // 103: clinks.v1.ClinksService.UpsertTranslationOverride:output_type -> clinks.v1.TranslationOverride
-	13, // 104: clinks.v1.ClinksService.DeleteTranslationOverride:output_type -> clinks.v1.Empty
-	55, // 105: clinks.v1.ClinksService.ListAuditEvents:output_type -> clinks.v1.ListAuditEventsResponse
-	65, // 106: clinks.v1.ClinksService.GetSystemStats:output_type -> clinks.v1.SystemStats
-	19, // 107: clinks.v1.ClinksService.UpdateCurrentTenant:output_type -> clinks.v1.Tenant
-	58, // 108: clinks.v1.ClinksService.ListMemberships:output_type -> clinks.v1.ListMembershipsResponse
-	22, // 109: clinks.v1.ClinksService.UpdateMembership:output_type -> clinks.v1.Membership
-	61, // 110: clinks.v1.ClinksService.ListRoles:output_type -> clinks.v1.ListRolesResponse
-	21, // 111: clinks.v1.ClinksService.CreateRole:output_type -> clinks.v1.Role
-	21, // 112: clinks.v1.ClinksService.UpdateRole:output_type -> clinks.v1.Role
-	13, // 113: clinks.v1.ClinksService.DeleteRole:output_type -> clinks.v1.Empty
-	39, // 114: clinks.v1.ClinksService.ListTenantInvitations:output_type -> clinks.v1.ListInvitationsResponse
-	38, // 115: clinks.v1.ClinksService.CreateInvitation:output_type -> clinks.v1.Invitation
-	13, // 116: clinks.v1.ClinksService.RevokeTenantInvitation:output_type -> clinks.v1.Empty
-	83, // [83:117] is the sub-list for method output_type
-	49, // [49:83] is the sub-list for method input_type
+	13, // 54: clinks.v1.ClinksService.GetAuthCapabilities:input_type -> clinks.v1.Empty
+	17, // 55: clinks.v1.ClinksService.SwitchTenant:input_type -> clinks.v1.SwitchTenantRequest
+	25, // 56: clinks.v1.ClinksService.AcceptInvitation:input_type -> clinks.v1.AcceptInvitationRequest
+	13, // 57: clinks.v1.ClinksService.GetLanguages:input_type -> clinks.v1.Empty
+	26, // 58: clinks.v1.ClinksService.GetTranslations:input_type -> clinks.v1.GetTranslationsRequest
+	29, // 59: clinks.v1.ClinksService.ListTenants:input_type -> clinks.v1.ListTenantsRequest
+	31, // 60: clinks.v1.ClinksService.CreateTenant:input_type -> clinks.v1.CreateTenantRequest
+	32, // 61: clinks.v1.ClinksService.UpdateTenant:input_type -> clinks.v1.UpdateTenantRequest
+	33, // 62: clinks.v1.ClinksService.ListUsers:input_type -> clinks.v1.ListUsersRequest
+	35, // 63: clinks.v1.ClinksService.GetUser:input_type -> clinks.v1.GetUserRequest
+	37, // 64: clinks.v1.ClinksService.ListInvitations:input_type -> clinks.v1.ListInvitationsRequest
+	41, // 65: clinks.v1.ClinksService.RevokeInvitation:input_type -> clinks.v1.RevokeInvitationRequest
+	45, // 66: clinks.v1.ClinksService.ListManagedLanguages:input_type -> clinks.v1.ListLanguagesRequest
+	47, // 67: clinks.v1.ClinksService.CreateLanguage:input_type -> clinks.v1.CreateLanguageRequest
+	48, // 68: clinks.v1.ClinksService.UpdateLanguage:input_type -> clinks.v1.UpdateLanguageRequest
+	50, // 69: clinks.v1.ClinksService.ListTranslationOverrides:input_type -> clinks.v1.ListTranslationOverridesRequest
+	52, // 70: clinks.v1.ClinksService.UpsertTranslationOverride:input_type -> clinks.v1.UpsertTranslationOverrideRequest
+	53, // 71: clinks.v1.ClinksService.DeleteTranslationOverride:input_type -> clinks.v1.DeleteTranslationOverrideRequest
+	54, // 72: clinks.v1.ClinksService.ListAuditEvents:input_type -> clinks.v1.ListAuditEventsRequest
+	13, // 73: clinks.v1.ClinksService.GetSystemStats:input_type -> clinks.v1.Empty
+	57, // 74: clinks.v1.ClinksService.UpdateCurrentTenant:input_type -> clinks.v1.UpdateCurrentTenantRequest
+	58, // 75: clinks.v1.ClinksService.ListMemberships:input_type -> clinks.v1.ListMembershipsRequest
+	60, // 76: clinks.v1.ClinksService.UpdateMembership:input_type -> clinks.v1.UpdateMembershipRequest
+	61, // 77: clinks.v1.ClinksService.ListRoles:input_type -> clinks.v1.ListRolesRequest
+	63, // 78: clinks.v1.ClinksService.CreateRole:input_type -> clinks.v1.CreateRoleRequest
+	64, // 79: clinks.v1.ClinksService.UpdateRole:input_type -> clinks.v1.UpdateRoleRequest
+	65, // 80: clinks.v1.ClinksService.DeleteRole:input_type -> clinks.v1.DeleteRoleRequest
+	38, // 81: clinks.v1.ClinksService.ListTenantInvitations:input_type -> clinks.v1.ListTenantInvitationsRequest
+	42, // 82: clinks.v1.ClinksService.CreateInvitation:input_type -> clinks.v1.CreateInvitationRequest
+	41, // 83: clinks.v1.ClinksService.RevokeTenantInvitation:input_type -> clinks.v1.RevokeInvitationRequest
+	24, // 84: clinks.v1.ClinksService.Login:output_type -> clinks.v1.Session
+	24, // 85: clinks.v1.ClinksService.LoginSuperAdmin:output_type -> clinks.v1.Session
+	24, // 86: clinks.v1.ClinksService.Register:output_type -> clinks.v1.Session
+	13, // 87: clinks.v1.ClinksService.Logout:output_type -> clinks.v1.Empty
+	24, // 88: clinks.v1.ClinksService.GetSession:output_type -> clinks.v1.Session
+	14, // 89: clinks.v1.ClinksService.GetAuthCapabilities:output_type -> clinks.v1.AuthCapabilities
+	24, // 90: clinks.v1.ClinksService.SwitchTenant:output_type -> clinks.v1.Session
+	24, // 91: clinks.v1.ClinksService.AcceptInvitation:output_type -> clinks.v1.Session
+	44, // 92: clinks.v1.ClinksService.GetLanguages:output_type -> clinks.v1.LanguagesResponse
+	28, // 93: clinks.v1.ClinksService.GetTranslations:output_type -> clinks.v1.TranslationsResponse
+	30, // 94: clinks.v1.ClinksService.ListTenants:output_type -> clinks.v1.ListTenantsResponse
+	20, // 95: clinks.v1.ClinksService.CreateTenant:output_type -> clinks.v1.Tenant
+	20, // 96: clinks.v1.ClinksService.UpdateTenant:output_type -> clinks.v1.Tenant
+	34, // 97: clinks.v1.ClinksService.ListUsers:output_type -> clinks.v1.ListUsersResponse
+	36, // 98: clinks.v1.ClinksService.GetUser:output_type -> clinks.v1.UserDetail
+	40, // 99: clinks.v1.ClinksService.ListInvitations:output_type -> clinks.v1.ListInvitationsResponse
+	13, // 100: clinks.v1.ClinksService.RevokeInvitation:output_type -> clinks.v1.Empty
+	46, // 101: clinks.v1.ClinksService.ListManagedLanguages:output_type -> clinks.v1.ListLanguagesResponse
+	43, // 102: clinks.v1.ClinksService.CreateLanguage:output_type -> clinks.v1.Language
+	43, // 103: clinks.v1.ClinksService.UpdateLanguage:output_type -> clinks.v1.Language
+	51, // 104: clinks.v1.ClinksService.ListTranslationOverrides:output_type -> clinks.v1.ListTranslationOverridesResponse
+	49, // 105: clinks.v1.ClinksService.UpsertTranslationOverride:output_type -> clinks.v1.TranslationOverride
+	13, // 106: clinks.v1.ClinksService.DeleteTranslationOverride:output_type -> clinks.v1.Empty
+	56, // 107: clinks.v1.ClinksService.ListAuditEvents:output_type -> clinks.v1.ListAuditEventsResponse
+	66, // 108: clinks.v1.ClinksService.GetSystemStats:output_type -> clinks.v1.SystemStats
+	20, // 109: clinks.v1.ClinksService.UpdateCurrentTenant:output_type -> clinks.v1.Tenant
+	59, // 110: clinks.v1.ClinksService.ListMemberships:output_type -> clinks.v1.ListMembershipsResponse
+	23, // 111: clinks.v1.ClinksService.UpdateMembership:output_type -> clinks.v1.Membership
+	62, // 112: clinks.v1.ClinksService.ListRoles:output_type -> clinks.v1.ListRolesResponse
+	22, // 113: clinks.v1.ClinksService.CreateRole:output_type -> clinks.v1.Role
+	22, // 114: clinks.v1.ClinksService.UpdateRole:output_type -> clinks.v1.Role
+	13, // 115: clinks.v1.ClinksService.DeleteRole:output_type -> clinks.v1.Empty
+	40, // 116: clinks.v1.ClinksService.ListTenantInvitations:output_type -> clinks.v1.ListInvitationsResponse
+	39, // 117: clinks.v1.ClinksService.CreateInvitation:output_type -> clinks.v1.Invitation
+	13, // 118: clinks.v1.ClinksService.RevokeTenantInvitation:output_type -> clinks.v1.Empty
+	84, // [84:119] is the sub-list for method output_type
+	49, // [49:84] is the sub-list for method input_type
 	49, // [49:49] is the sub-list for extension type_name
 	49, // [49:49] is the sub-list for extension extendee
 	0,  // [0:49] is the sub-list for field type_name
@@ -4762,14 +4812,14 @@ func file_clinks_v1_clinks_proto_init() {
 	if File_clinks_v1_clinks_proto != nil {
 		return
 	}
-	file_clinks_v1_clinks_proto_msgTypes[31].OneofWrappers = []any{}
+	file_clinks_v1_clinks_proto_msgTypes[32].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_clinks_v1_clinks_proto_rawDesc), len(file_clinks_v1_clinks_proto_rawDesc)),
 			NumEnums:      13,
-			NumMessages:   53,
+			NumMessages:   54,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

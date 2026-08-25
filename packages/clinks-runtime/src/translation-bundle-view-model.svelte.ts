@@ -1,6 +1,12 @@
 import type { ClinksClient } from '@clinks/api-client';
 import { APIError } from '@clinks/api-client/errors';
-import { productDefaultLocale, type Language, type Locale, type ProductTranslationKey } from '@clinks/i18n-types';
+import {
+	productDefaultLocale,
+	productDefaultTranslations,
+	type Language,
+	type Locale,
+	type ProductTranslationKey,
+} from '@clinks/i18n-types';
 import { BrowserPreferences } from './browser-preferences.ts';
 
 export type TranslationKey = ProductTranslationKey | (string & {});
@@ -9,8 +15,10 @@ export class TranslationBundleViewModel {
 	locale = $state<Locale>(productDefaultLocale);
 	languages = $state<Language[]>([]);
 	isLoading = $state(false);
-	translations = $state<Record<string, string>>({});
+	translations = $state.raw<Record<string, string>>({ ...productDefaultTranslations });
 	#request = 0;
+	#prepared = false;
+	#initialization: Promise<void> | null = null;
 
 	#client: Pick<ClinksClient, 'languages' | 'translations'>;
 	#preferences: BrowserPreferences;
@@ -20,9 +28,17 @@ export class TranslationBundleViewModel {
 		this.#preferences = preferences;
 	}
 
-	async initialize() {
+	prepare() {
+		if (this.#prepared) return;
+		this.#prepared = true;
 		this.locale = this.#preferences.loadLocale() ?? productDefaultLocale;
-		await Promise.all([this.loadLanguages(), this.refresh()]);
+	}
+
+	initialize() {
+		this.prepare();
+		if (this.#initialization) return this.#initialization;
+		this.#initialization = Promise.all([this.loadLanguages(), this.refresh()]).then(() => undefined);
+		return this.#initialization;
 	}
 
 	async setLocale(locale: Locale) {
@@ -38,6 +54,8 @@ export class TranslationBundleViewModel {
 		try {
 			const bundle = await this.#client.translations();
 			if (request === this.#request) this.translations = bundle.translations;
+		} catch {
+			// Keep the source-controlled default catalog so public pages remain usable offline.
 		} finally {
 			if (request === this.#request) this.isLoading = false;
 		}

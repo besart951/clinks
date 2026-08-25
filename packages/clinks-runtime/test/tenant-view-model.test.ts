@@ -9,7 +9,7 @@ import { TenantViewModel } from '../src/tenant-view-model.svelte.ts';
 describe('TenantViewModel', () => {
 	it('loads tenants from client', async () => {
 		const mockService = {
-			tenants: async () => [{ id: 't1', name: 'Tenant 1' }],
+			tenants: async () => ({ tenants: [{ id: 't1', name: 'Tenant 1' }], nextCursor: '' }),
 			createTenant: async () => ({ id: 't2', name: 'Tenant 2' }),
 		};
 		const model = new TenantViewModel(mockService, { message: (e) => String(e) });
@@ -22,7 +22,7 @@ describe('TenantViewModel', () => {
 	it('creates tenant and resets tenantName', async () => {
 		let created = false;
 		const mockService = {
-			tenants: async () => (created ? [{ id: 't1', name: 'New Tenant' }] : []),
+			tenants: async () => ({ tenants: created ? [{ id: 't1', name: 'New Tenant' }] : [], nextCursor: '' }),
 			createTenant: async () => {
 				created = true;
 				return { id: 't1', name: 'New Tenant' };
@@ -39,7 +39,7 @@ describe('TenantViewModel', () => {
 
 	it('reverts on create failure', async () => {
 		const mockService = {
-			tenants: async () => [{ id: 't1', name: 'Existing' }],
+			tenants: async () => ({ tenants: [{ id: 't1', name: 'Existing' }], nextCursor: '' }),
 			createTenant: async () => {
 				throw new Error('fail');
 			},
@@ -56,7 +56,7 @@ describe('TenantViewModel', () => {
 
 	it('clears state on clear()', () => {
 		const model = new TenantViewModel(
-			{ tenants: async () => [], createTenant: async () => ({ id: '', name: '' }) },
+			{ tenants: async () => ({ tenants: [], nextCursor: '' }), createTenant: async () => ({ id: '', name: '' }) },
 			{ message: (e) => String(e) },
 		);
 

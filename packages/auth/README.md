@@ -18,6 +18,7 @@ Wrap the application once and inject the router navigation function:
 ```
 
 The provider hydrates the HttpOnly-cookie session and exposes `loading`, `authenticated`, `anonymous`, and `error` states through `useAuth()`.
+It initializes once, revalidates a stale Session when the document becomes active again, and keeps an authenticated screen available during a transient background failure. Any API `Unauthenticated` response invalidates the shared Session immediately.
 
 ## Guards
 
@@ -40,3 +41,14 @@ Permissions are read from the active tenant membership. Super-administrator and 
 ## Session actions
 
 `useAuth()` provides `login`, `loginSuperAdministrator`, `register`, `acceptInvitation`, `logout`, `switchTenant`, `refresh`, and `continueAfterLogin`.
+
+Registration and invitation acceptance automatically send the selected runtime locale. When `capabilities.googleOIDCEnabled` is true, call `startGoogle` with a safe internal return path:
+
+```ts
+auth.startGoogle({
+	mode: 'login',
+	returnTo: '/login?returnTo=/dashboard&completed=1',
+});
+```
+
+The client converts that path into an absolute URL on the current trusted application origin. The backend validates the origin before sealing it into the OIDC attempt.

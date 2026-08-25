@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { isSafeInternalPath, returnToFromSearch, withReturnTo } from '../src/navigation.ts';
+import {
+	isSafeInternalPath,
+	oidcInvitationReturnPath,
+	oidcLoginReturnPath,
+	returnToFromSearch,
+	withReturnTo,
+} from '../src/navigation.ts';
 
 describe('auth navigation', () => {
 	it('preserves a safe internal destination', () => {
@@ -12,5 +18,14 @@ describe('auth navigation', () => {
 		assert.equal(isSafeInternalPath('https://example.com'), false);
 		assert.equal(isSafeInternalPath('//example.com'), false);
 		assert.equal(returnToFromSearch('?returnTo=https%3A%2F%2Fexample.com', '/dashboard'), '/dashboard');
+	});
+
+	it('builds safe app-local OIDC return paths', () => {
+		assert.equal(
+			oidcLoginReturnPath(new URLSearchParams({ returnTo: '/projects/42?tab=plan' })),
+			'/login?returnTo=%2Fprojects%2F42%3Ftab%3Dplan&completed=1',
+		);
+		assert.equal(oidcLoginReturnPath(new URLSearchParams({ returnTo: 'https://evil.test' })), '/login?completed=1');
+		assert.equal(oidcInvitationReturnPath('opaque token'), '/invite?token=opaque+token&completed=1');
 	});
 });

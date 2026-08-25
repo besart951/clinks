@@ -74,6 +74,15 @@ func (server *Server) GetSession(
 	return connect.NewResponse(sessionMessage(session)), nil
 }
 
+func (server *Server) GetAuthCapabilities(
+	context.Context,
+	*connect.Request[clinksv1.Empty],
+) (*connect.Response[clinksv1.AuthCapabilities], error) {
+	return connect.NewResponse(&clinksv1.AuthCapabilities{
+		GoogleOidcEnabled: server.auth.googleOIDCEnabled,
+	}), nil
+}
+
 func (server *Server) SwitchTenant(
 	ctx context.Context,
 	request *connect.Request[clinksv1.SwitchTenantRequest],

@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-(globalThis as any).$state ??= (v: any) => v;
+const state = (value: unknown) => value;
+state.raw = state;
+(globalThis as any).$state ??= state;
 (globalThis as any).$derived ??= (v: any) => (typeof v === 'function' ? v() : v);
 
 import { TranslationBundleViewModel } from '../src/translation-bundle-view-model.svelte.ts';

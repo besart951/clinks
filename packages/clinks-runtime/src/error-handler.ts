@@ -8,6 +8,10 @@ export interface ErrorTranslator {
 	t(key: string, fallback?: string): string;
 }
 
+export interface ErrorMessageFormatter {
+	message(error: unknown): string;
+}
+
 export type NotificationHandler = (message: string) => void;
 
 export class CentralErrorHandler {

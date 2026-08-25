@@ -94,6 +94,25 @@ func (policy browserPolicy) allows(origin string) bool {
 	return ok
 }
 
+func (policy browserPolicy) redirectURL(raw string) (string, error) {
+	target, err := url.Parse(strings.TrimSpace(raw))
+	if err != nil {
+		return "", err
+	}
+	if target.Scheme == "" || target.Host == "" {
+		return "", fmt.Errorf("redirect URL must be absolute")
+	}
+	if target.User != nil || target.Fragment != "" {
+		return "", fmt.Errorf("redirect URL must not contain user information or a fragment")
+	}
+
+	origin, err := canonicalOrigin(target.Scheme + "://" + target.Host)
+	if err != nil || !policy.allows(origin) {
+		return "", fmt.Errorf("redirect origin is not trusted")
+	}
+	return target.String(), nil
+}
+
 func canonicalOrigin(raw string) (string, error) {
 	raw = strings.TrimSpace(raw)
 	raw = strings.TrimSuffix(raw, "/")
