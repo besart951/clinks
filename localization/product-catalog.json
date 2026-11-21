@@ -629,6 +629,2070 @@
       "ui.workspace_description": {
         "de-CH": "Wähle den Mandanten, in dem du arbeiten möchtest.",
         "en-US": "Choose the tenant you want to work in."
+      },
+      "error.ws.offline": {
+        "de-CH": "Keine Verbindung. Die Änderung wurde nicht gespeichert.",
+        "en-US": "You are offline. The change was not saved."
+      },
+      "error.ws.storage_full": {
+        "de-CH": "Der Browserspeicher ist voll. Die Änderung wurde nicht gespeichert.",
+        "en-US": "Browser storage is full. The change was not saved."
+      },
+      "error.ws.not_found": {
+        "de-CH": "Der Eintrag wurde nicht gefunden.",
+        "en-US": "The record was not found."
+      },
+      "error.ws.required": {
+        "de-CH": "Dieses Feld ist erforderlich.",
+        "en-US": "This field is required."
+      },
+      "error.ws.invalid_email": {
+        "de-CH": "Bitte gib eine gültige E-Mail-Adresse ein.",
+        "en-US": "Please enter a valid email address."
+      },
+      "error.ws.invalid_phone": {
+        "de-CH": "Bitte gib eine gültige Telefonnummer ein.",
+        "en-US": "Please enter a valid phone number."
+      },
+      "error.ws.invalid_zip": {
+        "de-CH": "Die Postleitzahl hat 4 oder 5 Ziffern.",
+        "en-US": "The postcode has 4 or 5 digits."
+      },
+      "error.ws.invalid_date": {
+        "de-CH": "Bitte gib ein gültiges Datum ein.",
+        "en-US": "Please enter a valid date."
+      },
+      "error.ws.end_before_start": {
+        "de-CH": "Das Ende muss nach dem Beginn liegen.",
+        "en-US": "The end must be after the start."
+      },
+      "error.ws.positive_number": {
+        "de-CH": "Bitte gib eine positive Zahl ein.",
+        "en-US": "Please enter a positive number."
+      },
+      "error.ws.invoice_lines_required": {
+        "de-CH": "Eine Rechnung braucht mindestens eine Position.",
+        "en-US": "An invoice needs at least one line."
+      },
+      "error.ws.recipient_required": {
+        "de-CH": "Bitte gib mindestens eine Empfängerin oder einen Empfänger an.",
+        "en-US": "Please add at least one recipient."
+      },
+      "error.ws.too_many_sessions": {
+        "de-CH": "Eine Verordnung umfasst höchstens 36 Sitzungen.",
+        "en-US": "A prescription covers at most 36 sessions."
+      },
+      "error.ws.invalid_code": {
+        "de-CH": "Der Code ist ungültig.",
+        "en-US": "The code is invalid."
+      },
+      "error.ws.password_too_short": {
+        "de-CH": "Das Passwort braucht mindestens 8 Zeichen.",
+        "en-US": "The password needs at least 8 characters."
+      },
+      "error.ws.wrong_password": {
+        "de-CH": "Das Passwort ist falsch.",
+        "en-US": "The password is incorrect."
+      },
+      "error.ws.already_member": {
+        "de-CH": "Diese Person ist bereits Mitglied.",
+        "en-US": "This person is already a member."
+      },
+      "error.ws.protected_role": {
+        "de-CH": "Die Rollen Administrator und Benutzer sind geschützt.",
+        "en-US": "The Administrator and User roles are protected."
+      },
+      "error.ws.role_in_use": {
+        "de-CH": "Die Rolle ist noch Mitgliedern zugewiesen.",
+        "en-US": "The role is still assigned to members."
+      },
+      "error.ws.last_administrator": {
+        "de-CH": "Der letzte aktive Administrator kann nicht entfernt oder herabgestuft werden.",
+        "en-US": "The last active administrator cannot be removed or demoted."
+      },
+      "error.ws.invalid_card": {
+        "de-CH": "Die Kartennummer ist ungültig.",
+        "en-US": "The card number is invalid."
+      },
+      "error.ws.invalid_expiry": {
+        "de-CH": "Bitte im Format MM/JJ eingeben.",
+        "en-US": "Please use the format MM/YY."
+      },
+      "error.ws.file_too_large": {
+        "de-CH": "Die Datei ist grösser als 1 MB.",
+        "en-US": "The file is larger than 1 MB."
+      },
+      "ui.ws.undo": {
+        "de-CH": "Rückgängig",
+        "en-US": "Undo"
+      },
+      "ui.ws.undone": {
+        "de-CH": "Rückgängig gemacht",
+        "en-US": "Undone"
+      },
+      "ui.ws.state.error_title": {
+        "de-CH": "Daten konnten nicht geladen werden",
+        "en-US": "Data could not be loaded"
+      },
+      "ui.ws.state.forbidden_title": {
+        "de-CH": "Kein Zugriff",
+        "en-US": "No access"
+      },
+      "ui.ws.state.forbidden_text": {
+        "de-CH": "Deine Rolle erlaubt diesen Bereich nicht. Frage eine Administratorin oder einen Administrator.",
+        "en-US": "Your role does not allow this area. Ask an administrator."
+      },
+      "ui.ws.cancel": {
+        "de-CH": "Abbrechen",
+        "en-US": "Cancel"
+      },
+      "ui.ws.unsaved.title": {
+        "de-CH": "Änderungen verwerfen?",
+        "en-US": "Discard changes?"
+      },
+      "ui.ws.unsaved.text": {
+        "de-CH": "Was du hier geändert hast, ist noch nicht gespeichert und geht verloren.",
+        "en-US": "What you changed here is not saved yet and will be lost."
+      },
+      "ui.ws.unsaved.discard": {
+        "de-CH": "Verwerfen",
+        "en-US": "Discard"
+      },
+      "ui.ws.auth.claim": {
+        "de-CH": "Praxis, Pflege und Büro in einem Arbeitsbereich.",
+        "en-US": "Practice, care and office in one workspace."
+      },
+      "ui.ws.auth.claim_text": {
+        "de-CH": "Kontakte, Termine, Rechnungen, Aufgaben und Mail teilen eine Kundenbasis – für Teams in der Schweiz.",
+        "en-US": "Contacts, appointments, invoices, tasks and mail share one customer base – for teams in Switzerland."
+      },
+      "ui.ws.module.contacts": {
+        "de-CH": "Kontakte",
+        "en-US": "Contacts"
+      },
+      "ui.ws.module.calendar": {
+        "de-CH": "Kalender",
+        "en-US": "Calendar"
+      },
+      "ui.ws.module.documents": {
+        "de-CH": "Dokumente",
+        "en-US": "Documents"
+      },
+      "ui.ws.module.mail": {
+        "de-CH": "Mail",
+        "en-US": "Mail"
+      },
+      "ui.ws.module.finance": {
+        "de-CH": "Finanzen",
+        "en-US": "Finance"
+      },
+      "ui.ws.module.planner": {
+        "de-CH": "Aufgaben",
+        "en-US": "Tasks"
+      },
+      "ui.ws.module.physio": {
+        "de-CH": "Physio",
+        "en-US": "Physio"
+      },
+      "ui.ws.module.spitex": {
+        "de-CH": "Spitex",
+        "en-US": "Home care"
+      },
+      "ui.ws.auth.demo_title": {
+        "de-CH": "Demo-Zugänge",
+        "en-US": "Demo accounts"
+      },
+      "ui.ws.auth.demo_text": {
+        "de-CH": "Prototyp mit erfundenen Daten. Passwort für alle: {password}",
+        "en-US": "Prototype with fictional data. Password for all: {password}"
+      },
+      "ui.ws.auth.demo_admin": {
+        "de-CH": "Administrator",
+        "en-US": "Administrator"
+      },
+      "ui.ws.auth.demo_user": {
+        "de-CH": "Therapeutin",
+        "en-US": "Therapist"
+      },
+      "ui.ws.auth.demo_accounting": {
+        "de-CH": "Buchhaltung",
+        "en-US": "Accounting"
+      },
+      "ui.ws.auth.demo_platform": {
+        "de-CH": "Plattform-Admin",
+        "en-US": "Platform admin"
+      },
+      "ui.ws.auth.login_text": {
+        "de-CH": "Melde dich mit deinem CLinks-Konto an.",
+        "en-US": "Sign in with your CLinks account."
+      },
+      "ui.ws.auth.forgot_link": {
+        "de-CH": "Passwort vergessen?",
+        "en-US": "Forgot password?"
+      },
+      "ui.ws.auth.signup_text": {
+        "de-CH": "14 Tage kostenlos testen, keine Kreditkarte nötig.",
+        "en-US": "Free for 14 days, no credit card needed."
+      },
+      "ui.ws.field.first_name": {
+        "de-CH": "Vorname",
+        "en-US": "First name"
+      },
+      "ui.ws.field.last_name": {
+        "de-CH": "Nachname",
+        "en-US": "Last name"
+      },
+      "ui.ws.auth.accept_terms": {
+        "de-CH": "Ich akzeptiere die AGB und die Datenschutzerklärung.",
+        "en-US": "I accept the terms and the privacy policy."
+      },
+      "ui.ws.auth.accept_terms_required": {
+        "de-CH": "Bitte akzeptiere die AGB und die Datenschutzerklärung.",
+        "en-US": "Please accept the terms and the privacy policy."
+      },
+      "ui.ws.auth.verify_title": {
+        "de-CH": "E-Mail bestätigen",
+        "en-US": "Confirm your email"
+      },
+      "ui.ws.auth.verify_text": {
+        "de-CH": "Wir haben einen 6-stelligen Code an {email} geschickt.",
+        "en-US": "We sent a 6-digit code to {email}."
+      },
+      "ui.ws.auth.code": {
+        "de-CH": "Code",
+        "en-US": "Code"
+      },
+      "ui.ws.auth.verify_demo_hint": {
+        "de-CH": "Im Prototyp lautet der Code 000000.",
+        "en-US": "In the prototype the code is 000000."
+      },
+      "ui.ws.auth.verify_submit": {
+        "de-CH": "Bestätigen",
+        "en-US": "Confirm"
+      },
+      "ui.ws.auth.resend_code": {
+        "de-CH": "Code erneut senden",
+        "en-US": "Resend code"
+      },
+      "ui.ws.auth.code_resent": {
+        "de-CH": "Ein neuer Code ist unterwegs.",
+        "en-US": "A new code is on its way."
+      },
+      "ui.ws.auth.two_factor_title": {
+        "de-CH": "Zwei-Faktor-Bestätigung",
+        "en-US": "Two-factor confirmation"
+      },
+      "ui.ws.auth.two_factor_text": {
+        "de-CH": "Gib den Code aus deiner Authenticator-App ein.",
+        "en-US": "Enter the code from your authenticator app."
+      },
+      "ui.ws.auth.two_factor_demo_hint": {
+        "de-CH": "Im Prototyp lautet der Code 123456.",
+        "en-US": "In the prototype the code is 123456."
+      },
+      "ui.ws.auth.forgot_title": {
+        "de-CH": "Passwort zurücksetzen",
+        "en-US": "Reset password"
+      },
+      "ui.ws.auth.forgot_text": {
+        "de-CH": "Wir schicken dir einen Code, mit dem du ein neues Passwort setzt.",
+        "en-US": "We send you a code to set a new password."
+      },
+      "ui.ws.auth.send_reset": {
+        "de-CH": "Code senden",
+        "en-US": "Send code"
+      },
+      "ui.ws.auth.reset_sent": {
+        "de-CH": "Falls ein Konto für {email} existiert, ist ein Code unterwegs.",
+        "en-US": "If an account exists for {email}, a code is on its way."
+      },
+      "ui.ws.auth.new_password": {
+        "de-CH": "Neues Passwort",
+        "en-US": "New password"
+      },
+      "ui.ws.auth.set_password": {
+        "de-CH": "Passwort setzen",
+        "en-US": "Set password"
+      },
+      "ui.ws.auth.password_changed": {
+        "de-CH": "Dein Passwort wurde geändert. Du kannst dich jetzt anmelden.",
+        "en-US": "Your password was changed. You can sign in now."
+      },
+      "ui.ws.auth.back_to_login": {
+        "de-CH": "Zurück zur Anmeldung",
+        "en-US": "Back to sign-in"
+      },
+      "ui.ws.nav.overview": {
+        "de-CH": "Übersicht",
+        "en-US": "Overview"
+      },
+      "ui.ws.nav.dashboard": {
+        "de-CH": "Start",
+        "en-US": "Home"
+      },
+      "ui.ws.nav.work": {
+        "de-CH": "Arbeit",
+        "en-US": "Work"
+      },
+      "ui.ws.nav.industry": {
+        "de-CH": "Branche",
+        "en-US": "Industry"
+      },
+      "ui.ws.nav.administration": {
+        "de-CH": "Verwaltung",
+        "en-US": "Administration"
+      },
+      "ui.ws.nav.activity": {
+        "de-CH": "Aktivität",
+        "en-US": "Activity"
+      },
+      "ui.ws.nav.settings": {
+        "de-CH": "Einstellungen",
+        "en-US": "Settings"
+      },
+      "ui.ws.shell.close_menu": {
+        "de-CH": "Menü schliessen",
+        "en-US": "Close menu"
+      },
+      "ui.ws.shell.main_navigation": {
+        "de-CH": "Hauptnavigation",
+        "en-US": "Main navigation"
+      },
+      "ui.ws.shell.not_booked": {
+        "de-CH": "Nicht gebucht",
+        "en-US": "Not booked"
+      },
+      "ui.ws.shell.switched_tenant": {
+        "de-CH": "Du arbeitest jetzt in {name}.",
+        "en-US": "You are now working in {name}."
+      },
+      "ui.ws.shell.new_tenant": {
+        "de-CH": "Neuen Arbeitsbereich anlegen",
+        "en-US": "Create new workspace"
+      },
+      "ui.ws.notifications.title": {
+        "de-CH": "Benachrichtigungen",
+        "en-US": "Notifications"
+      },
+      "ui.ws.notifications.button": {
+        "de-CH": "Benachrichtigungen, {count} ungelesen",
+        "en-US": "Notifications, {count} unread"
+      },
+      "ui.ws.notifications.mark_all": {
+        "de-CH": "Alle gelesen",
+        "en-US": "Mark all read"
+      },
+      "ui.ws.notifications.all_read": {
+        "de-CH": "Alle Benachrichtigungen sind gelesen.",
+        "en-US": "All notifications are read."
+      },
+      "ui.ws.notifications.empty": {
+        "de-CH": "Keine Benachrichtigungen.",
+        "en-US": "No notifications."
+      },
+      "ui.ws.notifications.show_all": {
+        "de-CH": "Alle anzeigen",
+        "en-US": "Show all"
+      },
+      "ui.ws.notification.mentioned": {
+        "de-CH": "{name} hat dich in «{target}» erwähnt.",
+        "en-US": "{name} mentioned you in “{target}”."
+      },
+      "ui.ws.notification.assigned": {
+        "de-CH": "Dir wurde «{target}» zugewiesen.",
+        "en-US": "You were assigned “{target}”."
+      },
+      "ui.ws.notification.invoice_overdue": {
+        "de-CH": "Rechnung {number} ist überfällig.",
+        "en-US": "Invoice {number} is overdue."
+      },
+      "ui.ws.notification.trial_ending": {
+        "de-CH": "Deine Testphase endet in {days} Tagen.",
+        "en-US": "Your trial ends in {days} days."
+      },
+      "ui.ws.notification.appointment_assigned": {
+        "de-CH": "Neuer Termin für dich: {target}",
+        "en-US": "New appointment for you: {target}"
+      },
+      "ui.ws.notification.campaign_review": {
+        "de-CH": "«{target}» wartet auf deine Freigabe.",
+        "en-US": "“{target}” is waiting for your approval."
+      },
+      "ui.ws.shell.account_menu": {
+        "de-CH": "Kontomenü",
+        "en-US": "Account menu"
+      },
+      "ui.ws.shell.toggle_theme": {
+        "de-CH": "Hell/Dunkel wechseln",
+        "en-US": "Toggle light/dark"
+      },
+      "ui.ws.shell.mobile_navigation": {
+        "de-CH": "Schnellnavigation",
+        "en-US": "Quick navigation"
+      },
+      "ui.ws.shell.more": {
+        "de-CH": "Mehr",
+        "en-US": "More"
+      },
+      "ui.ws.settings.profile": {
+        "de-CH": "Profil",
+        "en-US": "Profile"
+      },
+      "ui.ws.shortcuts.title": {
+        "de-CH": "Tastenkürzel",
+        "en-US": "Keyboard shortcuts"
+      },
+      "ui.ws.sync.offline": {
+        "de-CH": "Offline",
+        "en-US": "Offline"
+      },
+      "ui.ws.sync.syncing": {
+        "de-CH": "Wird gespeichert …",
+        "en-US": "Saving …"
+      },
+      "ui.ws.sync.saved": {
+        "de-CH": "Alles gespeichert",
+        "en-US": "All saved"
+      },
+      "ui.ws.banner.impersonating": {
+        "de-CH": "Du siehst den Arbeitsbereich als {name}.",
+        "en-US": "You are viewing the workspace as {name}."
+      },
+      "ui.ws.banner.stop_impersonating": {
+        "de-CH": "Zurück zur Plattform",
+        "en-US": "Back to platform"
+      },
+      "ui.ws.banner.offline": {
+        "de-CH": "Keine Verbindung. Änderungen werden erst gespeichert, wenn du wieder online bist.",
+        "en-US": "No connection. Changes are saved once you are back online."
+      },
+      "ui.ws.banner.trial": {
+        "de-CH": "Deine Testphase endet in {days} Tagen.",
+        "en-US": "Your trial ends in {days} days."
+      },
+      "ui.ws.banner.choose_plan": {
+        "de-CH": "Abo wählen",
+        "en-US": "Choose a plan"
+      },
+      "ui.ws.banner.hide": {
+        "de-CH": "Ausblenden",
+        "en-US": "Hide"
+      },
+      "ui.ws.banner.cancelled": {
+        "de-CH": "Das Abo ist gekündigt und endet am Ende der Periode.",
+        "en-US": "The subscription is cancelled and ends at the end of the period."
+      },
+      "ui.ws.billing.resume": {
+        "de-CH": "Abo fortsetzen",
+        "en-US": "Resume subscription"
+      },
+      "ui.ws.command.title": {
+        "de-CH": "Befehle und Suche",
+        "en-US": "Commands and search"
+      },
+      "ui.ws.command.description": {
+        "de-CH": "Suche Kontakte, Termine, Rechnungen, Aufgaben und Mails oder führe einen Befehl aus.",
+        "en-US": "Search contacts, appointments, invoices, tasks and mail, or run a command."
+      },
+      "ui.ws.command.placeholder": {
+        "de-CH": "Suchen oder Befehl eingeben …",
+        "en-US": "Search or type a command …"
+      },
+      "ui.ws.command.empty": {
+        "de-CH": "Keine Treffer.",
+        "en-US": "No results."
+      },
+      "ui.ws.command.group_actions": {
+        "de-CH": "Aktionen",
+        "en-US": "Actions"
+      },
+      "ui.ws.command.group_pages": {
+        "de-CH": "Seiten",
+        "en-US": "Pages"
+      },
+      "ui.ws.command.group_contacts": {
+        "de-CH": "Kontakte",
+        "en-US": "Contacts"
+      },
+      "ui.ws.command.group_appointments": {
+        "de-CH": "Termine",
+        "en-US": "Appointments"
+      },
+      "ui.ws.command.group_invoices": {
+        "de-CH": "Rechnungen",
+        "en-US": "Invoices"
+      },
+      "ui.ws.command.group_tasks": {
+        "de-CH": "Aufgaben",
+        "en-US": "Tasks"
+      },
+      "ui.ws.command.group_mails": {
+        "de-CH": "Mails",
+        "en-US": "Mail"
+      },
+      "ui.ws.command.new_contact": {
+        "de-CH": "Neuer Kontakt",
+        "en-US": "New contact"
+      },
+      "ui.ws.command.new_appointment": {
+        "de-CH": "Neuer Termin",
+        "en-US": "New appointment"
+      },
+      "ui.ws.command.new_task": {
+        "de-CH": "Neue Aufgabe",
+        "en-US": "New task"
+      },
+      "ui.ws.command.new_mail": {
+        "de-CH": "Neue Mail",
+        "en-US": "New email"
+      },
+      "ui.ws.command.new_invoice": {
+        "de-CH": "Neue Rechnung",
+        "en-US": "New invoice"
+      },
+      "ui.ws.shortcuts.text": {
+        "de-CH": "Drücke G und danach den Buchstaben, um einen Bereich zu öffnen.",
+        "en-US": "Press G and then the letter to open an area."
+      },
+      "ui.ws.shortcuts.palette": {
+        "de-CH": "Befehle und Suche",
+        "en-US": "Commands and search"
+      },
+      "ui.ws.shortcuts.help": {
+        "de-CH": "Diese Übersicht",
+        "en-US": "This overview"
+      },
+      "ui.ws.shortcuts.new": {
+        "de-CH": "Neuer Eintrag auf der aktuellen Seite",
+        "en-US": "New entry on the current page"
+      },
+      "ui.ws.shortcuts.close": {
+        "de-CH": "Dialog schliessen",
+        "en-US": "Close dialog"
+      },
+      "ui.ws.dev.title": {
+        "de-CH": "Entwicklermenü",
+        "en-US": "Developer menu"
+      },
+      "ui.ws.dev.text": {
+        "de-CH": "Simuliert das Backend: Antwortzeit, Fehler und Verbindung.",
+        "en-US": "Simulates the backend: response time, errors and connectivity."
+      },
+      "ui.ws.dev.latency": {
+        "de-CH": "Antwortzeit",
+        "en-US": "Response time"
+      },
+      "ui.ws.dev.latency_none": {
+        "de-CH": "Sofort",
+        "en-US": "Instant"
+      },
+      "ui.ws.dev.latency_normal": {
+        "de-CH": "Normal",
+        "en-US": "Normal"
+      },
+      "ui.ws.dev.latency_slow": {
+        "de-CH": "Langsam",
+        "en-US": "Slow"
+      },
+      "ui.ws.dev.failure_rate": {
+        "de-CH": "Fehlerquote",
+        "en-US": "Failure rate"
+      },
+      "ui.ws.dev.offline": {
+        "de-CH": "Offline simulieren",
+        "en-US": "Simulate offline"
+      },
+      "ui.ws.dev.not_persistent": {
+        "de-CH": "Der Browserspeicher ist nicht verfügbar. Änderungen gehen beim Neuladen verloren.",
+        "en-US": "Browser storage is unavailable. Changes are lost on reload."
+      },
+      "ui.ws.dev.reset": {
+        "de-CH": "Demo-Daten zurücksetzen",
+        "en-US": "Reset demo data"
+      },
+      "ui.ws.dev.reset_title": {
+        "de-CH": "Demo-Daten zurücksetzen?",
+        "en-US": "Reset demo data?"
+      },
+      "ui.ws.dev.reset_text": {
+        "de-CH": "Alle Änderungen gehen verloren und die Beispieldaten werden neu angelegt.",
+        "en-US": "All changes are lost and the sample data is created again."
+      },
+      "ui.ws.shell.search": {
+        "de-CH": "Suchen",
+        "en-US": "Search"
+      },
+      "ui.ws.gate.not_booked_title": {
+        "de-CH": "{module} ist nicht gebucht",
+        "en-US": "{module} is not booked"
+      },
+      "ui.ws.gate.not_booked_text": {
+        "de-CH": "Schalte das Modul in deinem Abo frei, um es zu nutzen.",
+        "en-US": "Enable the module in your subscription to use it."
+      },
+      "ui.ws.gate.upgrade": {
+        "de-CH": "Abo anpassen",
+        "en-US": "Change subscription"
+      },
+      "ui.ws.gate.ask_admin": {
+        "de-CH": "Bitte eine Administratorin oder einen Administrator, das Modul freizuschalten.",
+        "en-US": "Ask an administrator to enable the module."
+      },
+      "ui.ws.audit.contact.created": {
+        "de-CH": "hat Kontakt «{target}» erstellt",
+        "en-US": "created contact “{target}”"
+      },
+      "ui.ws.audit.contact.updated": {
+        "de-CH": "hat Kontakt «{target}» geändert",
+        "en-US": "updated contact “{target}”"
+      },
+      "ui.ws.audit.contact.deleted": {
+        "de-CH": "hat Kontakt «{target}» gelöscht",
+        "en-US": "deleted contact “{target}”"
+      },
+      "ui.ws.audit.contact.restored": {
+        "de-CH": "hat Kontakt «{target}» wiederhergestellt",
+        "en-US": "restored contact “{target}”"
+      },
+      "ui.ws.audit.appointment.created": {
+        "de-CH": "hat Termin «{target}» erstellt",
+        "en-US": "created appointment “{target}”"
+      },
+      "ui.ws.audit.appointment.updated": {
+        "de-CH": "hat Termin «{target}» geändert",
+        "en-US": "updated appointment “{target}”"
+      },
+      "ui.ws.audit.appointment.deleted": {
+        "de-CH": "hat Termin «{target}» gelöscht",
+        "en-US": "deleted appointment “{target}”"
+      },
+      "ui.ws.audit.appointment.restored": {
+        "de-CH": "hat Termin «{target}» wiederhergestellt",
+        "en-US": "restored appointment “{target}”"
+      },
+      "ui.ws.audit.invoice.created": {
+        "de-CH": "hat Rechnung «{target}» erstellt",
+        "en-US": "created invoice “{target}”"
+      },
+      "ui.ws.audit.invoice.updated": {
+        "de-CH": "hat Rechnung «{target}» geändert",
+        "en-US": "updated invoice “{target}”"
+      },
+      "ui.ws.audit.invoice.deleted": {
+        "de-CH": "hat Rechnung «{target}» gelöscht",
+        "en-US": "deleted invoice “{target}”"
+      },
+      "ui.ws.audit.invoice.restored": {
+        "de-CH": "hat Rechnung «{target}» wiederhergestellt",
+        "en-US": "restored invoice “{target}”"
+      },
+      "ui.ws.audit.expense.created": {
+        "de-CH": "hat Ausgabe «{target}» erstellt",
+        "en-US": "created expense “{target}”"
+      },
+      "ui.ws.audit.expense.updated": {
+        "de-CH": "hat Ausgabe «{target}» geändert",
+        "en-US": "updated expense “{target}”"
+      },
+      "ui.ws.audit.expense.deleted": {
+        "de-CH": "hat Ausgabe «{target}» gelöscht",
+        "en-US": "deleted expense “{target}”"
+      },
+      "ui.ws.audit.expense.restored": {
+        "de-CH": "hat Ausgabe «{target}» wiederhergestellt",
+        "en-US": "restored expense “{target}”"
+      },
+      "ui.ws.audit.task.created": {
+        "de-CH": "hat Aufgabe «{target}» erstellt",
+        "en-US": "created task “{target}”"
+      },
+      "ui.ws.audit.task.updated": {
+        "de-CH": "hat Aufgabe «{target}» geändert",
+        "en-US": "updated task “{target}”"
+      },
+      "ui.ws.audit.task.deleted": {
+        "de-CH": "hat Aufgabe «{target}» gelöscht",
+        "en-US": "deleted task “{target}”"
+      },
+      "ui.ws.audit.task.restored": {
+        "de-CH": "hat Aufgabe «{target}» wiederhergestellt",
+        "en-US": "restored task “{target}”"
+      },
+      "ui.ws.audit.document.created": {
+        "de-CH": "hat Dokument «{target}» erstellt",
+        "en-US": "created document “{target}”"
+      },
+      "ui.ws.audit.document.updated": {
+        "de-CH": "hat Dokument «{target}» geändert",
+        "en-US": "updated document “{target}”"
+      },
+      "ui.ws.audit.document.deleted": {
+        "de-CH": "hat Dokument «{target}» gelöscht",
+        "en-US": "deleted document “{target}”"
+      },
+      "ui.ws.audit.document.restored": {
+        "de-CH": "hat Dokument «{target}» wiederhergestellt",
+        "en-US": "restored document “{target}”"
+      },
+      "ui.ws.audit.mail.created": {
+        "de-CH": "hat Mail «{target}» erstellt",
+        "en-US": "created email “{target}”"
+      },
+      "ui.ws.audit.mail.updated": {
+        "de-CH": "hat Mail «{target}» geändert",
+        "en-US": "updated email “{target}”"
+      },
+      "ui.ws.audit.mail.deleted": {
+        "de-CH": "hat Mail «{target}» gelöscht",
+        "en-US": "deleted email “{target}”"
+      },
+      "ui.ws.audit.mail.restored": {
+        "de-CH": "hat Mail «{target}» wiederhergestellt",
+        "en-US": "restored email “{target}”"
+      },
+      "ui.ws.audit.campaign.created": {
+        "de-CH": "hat Kampagne «{target}» erstellt",
+        "en-US": "created campaign “{target}”"
+      },
+      "ui.ws.audit.campaign.updated": {
+        "de-CH": "hat Kampagne «{target}» geändert",
+        "en-US": "updated campaign “{target}”"
+      },
+      "ui.ws.audit.campaign.deleted": {
+        "de-CH": "hat Kampagne «{target}» gelöscht",
+        "en-US": "deleted campaign “{target}”"
+      },
+      "ui.ws.audit.campaign.restored": {
+        "de-CH": "hat Kampagne «{target}» wiederhergestellt",
+        "en-US": "restored campaign “{target}”"
+      },
+      "ui.ws.audit.note.created": {
+        "de-CH": "hat Verlaufsnotiz «{target}» erstellt",
+        "en-US": "created progress note “{target}”"
+      },
+      "ui.ws.audit.note.updated": {
+        "de-CH": "hat Verlaufsnotiz «{target}» geändert",
+        "en-US": "updated progress note “{target}”"
+      },
+      "ui.ws.audit.note.deleted": {
+        "de-CH": "hat Verlaufsnotiz «{target}» gelöscht",
+        "en-US": "deleted progress note “{target}”"
+      },
+      "ui.ws.audit.note.restored": {
+        "de-CH": "hat Verlaufsnotiz «{target}» wiederhergestellt",
+        "en-US": "restored progress note “{target}”"
+      },
+      "ui.ws.audit.prescription.created": {
+        "de-CH": "hat Verordnung «{target}» erstellt",
+        "en-US": "created prescription “{target}”"
+      },
+      "ui.ws.audit.prescription.updated": {
+        "de-CH": "hat Verordnung «{target}» geändert",
+        "en-US": "updated prescription “{target}”"
+      },
+      "ui.ws.audit.prescription.deleted": {
+        "de-CH": "hat Verordnung «{target}» gelöscht",
+        "en-US": "deleted prescription “{target}”"
+      },
+      "ui.ws.audit.prescription.restored": {
+        "de-CH": "hat Verordnung «{target}» wiederhergestellt",
+        "en-US": "restored prescription “{target}”"
+      },
+      "ui.ws.audit.role.created": {
+        "de-CH": "hat Rolle «{target}» erstellt",
+        "en-US": "created role “{target}”"
+      },
+      "ui.ws.audit.role.updated": {
+        "de-CH": "hat Rolle «{target}» geändert",
+        "en-US": "updated role “{target}”"
+      },
+      "ui.ws.audit.role.deleted": {
+        "de-CH": "hat Rolle «{target}» gelöscht",
+        "en-US": "deleted role “{target}”"
+      },
+      "ui.ws.audit.role.restored": {
+        "de-CH": "hat Rolle «{target}» wiederhergestellt",
+        "en-US": "restored role “{target}”"
+      },
+      "ui.ws.audit.invitation.created": {
+        "de-CH": "hat {target} eingeladen",
+        "en-US": "invited {target}"
+      },
+      "ui.ws.audit.invitation.revoked": {
+        "de-CH": "hat die Einladung an {target} zurückgezogen",
+        "en-US": "revoked the invitation to {target}"
+      },
+      "ui.ws.audit.invitation.accepted": {
+        "de-CH": "– die Einladung an {target} wurde angenommen",
+        "en-US": "– the invitation to {target} was accepted"
+      },
+      "ui.ws.audit.membership.updated": {
+        "de-CH": "hat die Mitgliedschaft von {target} geändert",
+        "en-US": "changed the membership of {target}"
+      },
+      "ui.ws.audit.tenant.created": {
+        "de-CH": "hat den Arbeitsbereich «{target}» angelegt",
+        "en-US": "created the workspace “{target}”"
+      },
+      "ui.ws.audit.tenant.updated": {
+        "de-CH": "hat die Einstellungen geändert",
+        "en-US": "changed the settings"
+      },
+      "ui.ws.audit.tenant.plan_changed": {
+        "de-CH": "hat das Abo geändert",
+        "en-US": "changed the subscription"
+      },
+      "ui.ws.audit.tenant.cancelled": {
+        "de-CH": "hat das Abo gekündigt",
+        "en-US": "cancelled the subscription"
+      },
+      "ui.ws.audit.tenant.resumed": {
+        "de-CH": "hat das Abo fortgesetzt",
+        "en-US": "resumed the subscription"
+      },
+      "ui.ws.audit.tenant.payment_method_changed": {
+        "de-CH": "hat die Zahlungsmethode geändert",
+        "en-US": "changed the payment method"
+      },
+      "ui.ws.audit.generic": {
+        "de-CH": "{action}: {target}",
+        "en-US": "{action}: {target}"
+      },
+      "ui.ws.activity.open": {
+        "de-CH": "Öffnen",
+        "en-US": "Open"
+      },
+      "ui.ws.dashboard.good_morning": {
+        "de-CH": "Guten Morgen, {name}",
+        "en-US": "Good morning, {name}"
+      },
+      "ui.ws.dashboard.good_day": {
+        "de-CH": "Guten Tag, {name}",
+        "en-US": "Good afternoon, {name}"
+      },
+      "ui.ws.dashboard.good_evening": {
+        "de-CH": "Guten Abend, {name}",
+        "en-US": "Good evening, {name}"
+      },
+      "ui.ws.dashboard.appointments_today": {
+        "de-CH": "Termine heute",
+        "en-US": "Appointments today"
+      },
+      "ui.ws.dashboard.next_at": {
+        "de-CH": "Als Nächstes {time}: {title}",
+        "en-US": "Next at {time}: {title}"
+      },
+      "ui.ws.dashboard.day_done": {
+        "de-CH": "Für heute ist alles erledigt.",
+        "en-US": "Everything is done for today."
+      },
+      "ui.ws.dashboard.open_tasks": {
+        "de-CH": "Offene Aufgaben",
+        "en-US": "Open tasks"
+      },
+      "ui.ws.dashboard.mine": {
+        "de-CH": "{count} davon bei dir",
+        "en-US": "{count} assigned to you"
+      },
+      "ui.ws.dashboard.unread_mails": {
+        "de-CH": "Ungelesene Mails",
+        "en-US": "Unread emails"
+      },
+      "ui.ws.dashboard.in_inbox": {
+        "de-CH": "im Posteingang",
+        "en-US": "in the inbox"
+      },
+      "ui.ws.dashboard.open_invoices": {
+        "de-CH": "Offene Rechnungen",
+        "en-US": "Open invoices"
+      },
+      "ui.ws.dashboard.invoice_count": {
+        "de-CH": "{count} Rechnungen",
+        "en-US": "{count} invoices"
+      },
+      "ui.ws.dashboard.overdue_count": {
+        "de-CH": "{count} überfällig",
+        "en-US": "{count} overdue"
+      },
+      "ui.ws.dashboard.agenda": {
+        "de-CH": "Heute",
+        "en-US": "Today"
+      },
+      "ui.ws.dashboard.no_appointments": {
+        "de-CH": "Heute keine Termine.",
+        "en-US": "No appointments today."
+      },
+      "ui.ws.dashboard.my_tasks": {
+        "de-CH": "Meine Aufgaben",
+        "en-US": "My tasks"
+      },
+      "ui.ws.dashboard.no_tasks": {
+        "de-CH": "Keine offenen Aufgaben.",
+        "en-US": "No open tasks."
+      },
+      "ui.ws.dashboard.recent_activity": {
+        "de-CH": "Letzte Aktivität",
+        "en-US": "Recent activity"
+      },
+      "ui.ws.setup.title": {
+        "de-CH": "Einrichtung abschliessen",
+        "en-US": "Finish setup"
+      },
+      "ui.ws.setup.progress": {
+        "de-CH": "{done} von {total} Schritten erledigt",
+        "en-US": "{done} of {total} steps done"
+      },
+      "ui.ws.setup.logo": {
+        "de-CH": "Logo hochladen",
+        "en-US": "Upload logo"
+      },
+      "ui.ws.setup.contact": {
+        "de-CH": "Ersten Kontakt anlegen",
+        "en-US": "Add first contact"
+      },
+      "ui.ws.setup.appointment": {
+        "de-CH": "Ersten Termin planen",
+        "en-US": "Plan first appointment"
+      },
+      "ui.ws.setup.invoice": {
+        "de-CH": "Erste Rechnung stellen",
+        "en-US": "Create first invoice"
+      },
+      "ui.ws.setup.team": {
+        "de-CH": "Team einladen",
+        "en-US": "Invite your team"
+      },
+      "ui.ws.setup.payment": {
+        "de-CH": "Zahlungsmethode hinterlegen",
+        "en-US": "Add payment method"
+      },
+      "ui.ws.appointment.status.planned": {
+        "de-CH": "Geplant",
+        "en-US": "Planned"
+      },
+      "ui.ws.appointment.status.confirmed": {
+        "de-CH": "Bestätigt",
+        "en-US": "Confirmed"
+      },
+      "ui.ws.appointment.status.done": {
+        "de-CH": "Erledigt",
+        "en-US": "Done"
+      },
+      "ui.ws.appointment.status.cancelled": {
+        "de-CH": "Abgesagt",
+        "en-US": "Cancelled"
+      },
+      "ui.ws.contacts.edit": {
+        "de-CH": "Kontakt bearbeiten",
+        "en-US": "Edit contact"
+      },
+      "ui.ws.contacts.form_text": {
+        "de-CH": "Pflichtfelder sind Nachname bzw. Firmenname.",
+        "en-US": "Required: last name or company name."
+      },
+      "ui.ws.contacts.kind_person": {
+        "de-CH": "Person",
+        "en-US": "Person"
+      },
+      "ui.ws.contacts.kind_company": {
+        "de-CH": "Firma",
+        "en-US": "Company"
+      },
+      "ui.ws.field.birth_date": {
+        "de-CH": "Geburtsdatum",
+        "en-US": "Date of birth"
+      },
+      "ui.ws.field.insurer": {
+        "de-CH": "Versicherung",
+        "en-US": "Insurer"
+      },
+      "ui.ws.field.company": {
+        "de-CH": "Firmenname",
+        "en-US": "Company name"
+      },
+      "ui.ws.field.phone": {
+        "de-CH": "Telefon",
+        "en-US": "Phone"
+      },
+      "ui.ws.field.street": {
+        "de-CH": "Strasse und Nr.",
+        "en-US": "Street and number"
+      },
+      "ui.ws.field.zip": {
+        "de-CH": "PLZ",
+        "en-US": "Postcode"
+      },
+      "ui.ws.field.city": {
+        "de-CH": "Ort",
+        "en-US": "City"
+      },
+      "ui.ws.field.tags": {
+        "de-CH": "Schlagwörter",
+        "en-US": "Tags"
+      },
+      "ui.ws.contacts.tags_hint": {
+        "de-CH": "Mit Enter oder Komma hinzufügen.",
+        "en-US": "Add with Enter or comma."
+      },
+      "ui.ws.contacts.remove_tag": {
+        "de-CH": "Schlagwort {tag} entfernen",
+        "en-US": "Remove tag {tag}"
+      },
+      "ui.ws.field.notes": {
+        "de-CH": "Notizen",
+        "en-US": "Notes"
+      },
+      "ui.ws.contacts.archived": {
+        "de-CH": "{count} Kontakte archiviert",
+        "en-US": "{count} contacts archived"
+      },
+      "ui.ws.contacts.unarchived": {
+        "de-CH": "{count} Kontakte wiederhergestellt",
+        "en-US": "{count} contacts restored"
+      },
+      "ui.ws.contacts.deleted": {
+        "de-CH": "{count} Kontakte gelöscht",
+        "en-US": "{count} contacts deleted"
+      },
+      "ui.ws.contacts.imported": {
+        "de-CH": "{count} Kontakte importiert",
+        "en-US": "{count} contacts imported"
+      },
+      "ui.ws.contacts.merged": {
+        "de-CH": "{count} Kontakte zusammengeführt",
+        "en-US": "{count} contacts merged"
+      },
+      "ui.ws.contacts.import_title": {
+        "de-CH": "Kontakte importieren",
+        "en-US": "Import contacts"
+      },
+      "ui.ws.contacts.import_text": {
+        "de-CH": "CSV-Datei mit Kopfzeile, getrennt durch Komma oder Semikolon. Erkannt werden Vorname, Nachname, Firma, E-Mail, Telefon, Strasse, PLZ und Ort.",
+        "en-US": "CSV file with a header row, separated by comma or semicolon. Recognised: first name, last name, company, email, phone, street, postcode and city."
+      },
+      "ui.ws.contacts.choose_file": {
+        "de-CH": "Datei wählen",
+        "en-US": "Choose file"
+      },
+      "ui.ws.contacts.use_sample": {
+        "de-CH": "Beispiel einfügen",
+        "en-US": "Insert sample"
+      },
+      "ui.ws.contacts.csv_content": {
+        "de-CH": "CSV-Inhalt",
+        "en-US": "CSV content"
+      },
+      "ui.ws.contacts.import_preview": {
+        "de-CH": "{valid} von {total} Zeilen können importiert werden.",
+        "en-US": "{valid} of {total} rows can be imported."
+      },
+      "ui.ws.contacts.missing_name": {
+        "de-CH": "Name fehlt",
+        "en-US": "Name missing"
+      },
+      "ui.ws.contacts.import_submit": {
+        "de-CH": "{count} importieren",
+        "en-US": "Import {count}"
+      },
+      "ui.ws.contacts.merge_title": {
+        "de-CH": "Kontakte zusammenführen",
+        "en-US": "Merge contacts"
+      },
+      "ui.ws.contacts.merge_text": {
+        "de-CH": "Wähle den Kontakt, der bleibt. Leere Felder werden ergänzt, Termine, Rechnungen, Aufgaben und Mails werden umgehängt.",
+        "en-US": "Choose the contact to keep. Empty fields are filled in; appointments, invoices, tasks and emails are moved to it."
+      },
+      "ui.ws.contacts.merge_keep": {
+        "de-CH": "Diesen Kontakt behalten",
+        "en-US": "Keep this contact"
+      },
+      "ui.ws.contacts.merge_submit": {
+        "de-CH": "Zusammenführen",
+        "en-US": "Merge"
+      },
+      "ui.ws.contacts.description": {
+        "de-CH": "Eine Kundenbasis für alle Module: Patientinnen, Klienten, Firmen und Kostenträger.",
+        "en-US": "One customer base for all modules: patients, clients, companies and payers."
+      },
+      "ui.ws.contacts.import": {
+        "de-CH": "Importieren",
+        "en-US": "Import"
+      },
+      "ui.ws.contacts.search": {
+        "de-CH": "Name, E-Mail, Telefon, Ort …",
+        "en-US": "Name, email, phone, city …"
+      },
+      "ui.ws.contacts.kind": {
+        "de-CH": "Art",
+        "en-US": "Type"
+      },
+      "ui.ws.contacts.kind_all": {
+        "de-CH": "Alle",
+        "en-US": "All"
+      },
+      "ui.ws.contacts.all_tags": {
+        "de-CH": "Alle Schlagwörter",
+        "en-US": "All tags"
+      },
+      "ui.ws.sort": {
+        "de-CH": "Sortierung",
+        "en-US": "Sort order"
+      },
+      "ui.ws.contacts.sort_name": {
+        "de-CH": "Nach Name",
+        "en-US": "By name"
+      },
+      "ui.ws.contacts.sort_city": {
+        "de-CH": "Nach Ort",
+        "en-US": "By city"
+      },
+      "ui.ws.contacts.sort_created": {
+        "de-CH": "Neueste zuerst",
+        "en-US": "Newest first"
+      },
+      "ui.ws.contacts.show_archived": {
+        "de-CH": "Archiv",
+        "en-US": "Archive"
+      },
+      "ui.ws.contacts.duplicates": {
+        "de-CH": "{count} mögliche Duplikate",
+        "en-US": "{count} possible duplicates"
+      },
+      "ui.ws.selection": {
+        "de-CH": "Auswahl",
+        "en-US": "Selection"
+      },
+      "ui.ws.selected": {
+        "de-CH": "{count} ausgewählt",
+        "en-US": "{count} selected"
+      },
+      "ui.ws.contacts.archive": {
+        "de-CH": "Archivieren",
+        "en-US": "Archive"
+      },
+      "ui.ws.contacts.unarchive": {
+        "de-CH": "Wiederherstellen",
+        "en-US": "Restore"
+      },
+      "ui.ws.delete": {
+        "de-CH": "Löschen",
+        "en-US": "Delete"
+      },
+      "ui.ws.contacts.delete_title": {
+        "de-CH": "{count} Kontakte löschen?",
+        "en-US": "Delete {count} contacts?"
+      },
+      "ui.ws.contacts.delete_text": {
+        "de-CH": "Du kannst das Löschen kurz danach noch rückgängig machen.",
+        "en-US": "You can undo the deletion shortly afterwards."
+      },
+      "ui.ws.contacts.empty_title": {
+        "de-CH": "Keine Kontakte gefunden",
+        "en-US": "No contacts found"
+      },
+      "ui.ws.contacts.empty_text": {
+        "de-CH": "Lege einen Kontakt an oder importiere eine CSV-Datei.",
+        "en-US": "Add a contact or import a CSV file."
+      },
+      "ui.ws.select_all": {
+        "de-CH": "Alle auswählen",
+        "en-US": "Select all"
+      },
+      "ui.ws.select": {
+        "de-CH": "{name} auswählen",
+        "en-US": "Select {name}"
+      },
+      "ui.ws.contacts.name": {
+        "de-CH": "Name",
+        "en-US": "Name"
+      },
+      "ui.ws.contacts.count": {
+        "de-CH": "{count} Kontakte",
+        "en-US": "{count} contacts"
+      },
+      "ui.ws.comments.title": {
+        "de-CH": "Kommentare",
+        "en-US": "Comments"
+      },
+      "ui.ws.comments.delete": {
+        "de-CH": "Kommentar löschen",
+        "en-US": "Delete comment"
+      },
+      "ui.ws.comments.deleted": {
+        "de-CH": "Kommentar gelöscht",
+        "en-US": "Comment deleted"
+      },
+      "ui.ws.comments.empty": {
+        "de-CH": "Noch keine Kommentare.",
+        "en-US": "No comments yet."
+      },
+      "ui.ws.comments.placeholder": {
+        "de-CH": "Kommentar schreiben … Mit @ erwähnst du jemanden.",
+        "en-US": "Write a comment … Use @ to mention someone."
+      },
+      "ui.ws.comments.new": {
+        "de-CH": "Neuer Kommentar",
+        "en-US": "New comment"
+      },
+      "ui.ws.comments.mention": {
+        "de-CH": "Person erwähnen",
+        "en-US": "Mention someone"
+      },
+      "ui.ws.comments.hint": {
+        "de-CH": "⌘ + Enter zum Senden",
+        "en-US": "⌘ + Enter to send"
+      },
+      "ui.ws.comments.post": {
+        "de-CH": "Kommentieren",
+        "en-US": "Comment"
+      },
+      "ui.ws.documents.attachments": {
+        "de-CH": "Anhänge",
+        "en-US": "Attachments"
+      },
+      "ui.ws.documents.uploaded": {
+        "de-CH": "«{name}» hochgeladen",
+        "en-US": "“{name}” uploaded"
+      },
+      "ui.ws.documents.detached": {
+        "de-CH": "«{name}» entfernt",
+        "en-US": "“{name}” removed"
+      },
+      "ui.ws.documents.detach": {
+        "de-CH": "{name} entfernen",
+        "en-US": "Remove {name}"
+      },
+      "ui.ws.documents.no_attachments": {
+        "de-CH": "Keine Anhänge.",
+        "en-US": "No attachments."
+      },
+      "ui.ws.documents.drop_hint": {
+        "de-CH": "Dateien hierher ziehen oder klicken (max. 1 MB)",
+        "en-US": "Drop files here or click (max. 1 MB)"
+      },
+      "ui.ws.activity.empty": {
+        "de-CH": "Noch keine Aktivität.",
+        "en-US": "No activity yet."
+      },
+      "ui.ws.physio.open_record": {
+        "de-CH": "Patientenakte",
+        "en-US": "Patient record"
+      },
+      "ui.ws.spitex.open_client": {
+        "de-CH": "Klientendossier",
+        "en-US": "Client file"
+      },
+      "ui.ws.edit": {
+        "de-CH": "Bearbeiten",
+        "en-US": "Edit"
+      },
+      "ui.ws.more_actions": {
+        "de-CH": "Weitere Aktionen",
+        "en-US": "More actions"
+      },
+      "ui.ws.contacts.is_archived": {
+        "de-CH": "Dieser Kontakt ist archiviert.",
+        "en-US": "This contact is archived."
+      },
+      "ui.ws.contacts.tab_overview": {
+        "de-CH": "Übersicht",
+        "en-US": "Overview"
+      },
+      "ui.ws.contacts.master_data": {
+        "de-CH": "Stammdaten",
+        "en-US": "Master data"
+      },
+      "ui.ws.contacts.address": {
+        "de-CH": "Adresse",
+        "en-US": "Address"
+      },
+      "ui.ws.contacts.no_notes": {
+        "de-CH": "Keine Notizen.",
+        "en-US": "No notes."
+      },
+      "ui.ws.contacts.no_appointments": {
+        "de-CH": "Keine Termine.",
+        "en-US": "No appointments."
+      },
+      "ui.ws.contacts.no_invoices": {
+        "de-CH": "Keine Rechnungen.",
+        "en-US": "No invoices."
+      },
+      "ui.ws.contacts.no_mails": {
+        "de-CH": "Keine Mails.",
+        "en-US": "No emails."
+      },
+      "ui.ws.contacts.no_tasks": {
+        "de-CH": "Keine Aufgaben.",
+        "en-US": "No tasks."
+      },
+      "ui.ws.invoice.status.draft": {
+        "de-CH": "Entwurf",
+        "en-US": "Draft"
+      },
+      "ui.ws.invoice.status.open": {
+        "de-CH": "Offen",
+        "en-US": "Open"
+      },
+      "ui.ws.invoice.status.partially_paid": {
+        "de-CH": "Teilbezahlt",
+        "en-US": "Partially paid"
+      },
+      "ui.ws.invoice.status.paid": {
+        "de-CH": "Bezahlt",
+        "en-US": "Paid"
+      },
+      "ui.ws.invoice.status.overdue": {
+        "de-CH": "Überfällig",
+        "en-US": "Overdue"
+      },
+      "ui.ws.invoice.status.reminded": {
+        "de-CH": "Gemahnt",
+        "en-US": "Reminded"
+      },
+      "ui.ws.invoice.status.cancelled": {
+        "de-CH": "Storniert",
+        "en-US": "Cancelled"
+      },
+      "ui.ws.mail.no_subject": {
+        "de-CH": "(kein Betreff)",
+        "en-US": "(no subject)"
+      },
+      "ui.ws.mail.folder.inbox": {
+        "de-CH": "Posteingang",
+        "en-US": "Inbox"
+      },
+      "ui.ws.mail.folder.sent": {
+        "de-CH": "Gesendet",
+        "en-US": "Sent"
+      },
+      "ui.ws.mail.folder.drafts": {
+        "de-CH": "Entwürfe",
+        "en-US": "Drafts"
+      },
+      "ui.ws.mail.folder.archive": {
+        "de-CH": "Archiv",
+        "en-US": "Archive"
+      },
+      "ui.ws.task.status.backlog": {
+        "de-CH": "Ideen",
+        "en-US": "Backlog"
+      },
+      "ui.ws.task.status.todo": {
+        "de-CH": "Zu erledigen",
+        "en-US": "To do"
+      },
+      "ui.ws.task.status.in_progress": {
+        "de-CH": "In Arbeit",
+        "en-US": "In progress"
+      },
+      "ui.ws.task.status.review": {
+        "de-CH": "Prüfen",
+        "en-US": "Review"
+      },
+      "ui.ws.task.status.done": {
+        "de-CH": "Erledigt",
+        "en-US": "Done"
+      },
+      "ui.ws.task.priority.low": {
+        "de-CH": "Niedrig",
+        "en-US": "Low"
+      },
+      "ui.ws.task.priority.medium": {
+        "de-CH": "Mittel",
+        "en-US": "Medium"
+      },
+      "ui.ws.task.priority.high": {
+        "de-CH": "Hoch",
+        "en-US": "High"
+      },
+      "ui.ws.task.priority.urgent": {
+        "de-CH": "Dringend",
+        "en-US": "Urgent"
+      },
+      "ui.ws.contact_picker.placeholder": {
+        "de-CH": "Kontakt wählen",
+        "en-US": "Choose contact"
+      },
+      "ui.ws.contact_picker.search": {
+        "de-CH": "Kontakt suchen …",
+        "en-US": "Search contact …"
+      },
+      "ui.ws.contact_picker.none": {
+        "de-CH": "Kein Kontakt",
+        "en-US": "No contact"
+      },
+      "ui.ws.calendar.moved": {
+        "de-CH": "«{title}» verschoben",
+        "en-US": "“{title}” moved"
+      },
+      "ui.ws.calendar.saved": {
+        "de-CH": "Termin gespeichert",
+        "en-US": "Appointment saved"
+      },
+      "ui.ws.calendar.deleted": {
+        "de-CH": "Termin gelöscht",
+        "en-US": "Appointment deleted"
+      },
+      "ui.ws.calendar.delete_title": {
+        "de-CH": "Termin löschen?",
+        "en-US": "Delete appointment?"
+      },
+      "ui.ws.calendar.delete_text": {
+        "de-CH": "Du kannst das Löschen kurz danach noch rückgängig machen.",
+        "en-US": "You can undo the deletion shortly afterwards."
+      },
+      "ui.ws.calendar.edit": {
+        "de-CH": "Termin bearbeiten",
+        "en-US": "Edit appointment"
+      },
+      "ui.ws.calendar.form_text": {
+        "de-CH": "Konflikte mit anderen Terminen werden sofort angezeigt.",
+        "en-US": "Conflicts with other appointments are shown right away."
+      },
+      "ui.ws.calendar.title": {
+        "de-CH": "Titel",
+        "en-US": "Title"
+      },
+      "ui.ws.calendar.kind": {
+        "de-CH": "Art",
+        "en-US": "Type"
+      },
+      "ui.ws.calendar.kind_meeting": {
+        "de-CH": "Besprechung",
+        "en-US": "Meeting"
+      },
+      "ui.ws.calendar.kind_physio": {
+        "de-CH": "Behandlung",
+        "en-US": "Treatment"
+      },
+      "ui.ws.calendar.kind_spitex": {
+        "de-CH": "Einsatz",
+        "en-US": "Visit"
+      },
+      "ui.ws.calendar.kind_other": {
+        "de-CH": "Andere",
+        "en-US": "Other"
+      },
+      "ui.ws.status": {
+        "de-CH": "Status",
+        "en-US": "Status"
+      },
+      "ui.ws.calendar.service": {
+        "de-CH": "Leistung",
+        "en-US": "Service"
+      },
+      "ui.ws.calendar.choose_service": {
+        "de-CH": "Leistung wählen",
+        "en-US": "Choose service"
+      },
+      "ui.ws.calendar.contact": {
+        "de-CH": "Kontakt",
+        "en-US": "Contact"
+      },
+      "ui.ws.calendar.assignee": {
+        "de-CH": "Zuständig",
+        "en-US": "Assigned to"
+      },
+      "ui.ws.calendar.unassigned": {
+        "de-CH": "Offen (niemand zugewiesen)",
+        "en-US": "Open (nobody assigned)"
+      },
+      "ui.ws.calendar.date": {
+        "de-CH": "Datum",
+        "en-US": "Date"
+      },
+      "ui.ws.spitex.window_from": {
+        "de-CH": "Ankunft frühestens",
+        "en-US": "Earliest arrival"
+      },
+      "ui.ws.spitex.window_to": {
+        "de-CH": "Ankunft spätestens",
+        "en-US": "Latest arrival"
+      },
+      "ui.ws.calendar.conflict": {
+        "de-CH": "Überschneidung mit «{title}» ({from}–{to})",
+        "en-US": "Overlaps with “{title}” ({from}–{to})"
+      },
+      "ui.ws.spitex.outside_window": {
+        "de-CH": "Der Beginn liegt ausserhalb des Ankunftsfensters.",
+        "en-US": "The start is outside the arrival window."
+      },
+      "ui.ws.calendar.location": {
+        "de-CH": "Ort",
+        "en-US": "Location"
+      },
+      "ui.ws.calendar.bill": {
+        "de-CH": "Rechnung erstellen",
+        "en-US": "Create invoice"
+      },
+      "ui.ws.calendar.billed": {
+        "de-CH": "Verrechnet",
+        "en-US": "Billed"
+      },
+      "ui.ws.close": {
+        "de-CH": "Schliessen",
+        "en-US": "Close"
+      },
+      "ui.ws.physio.service.general": {
+        "de-CH": "Allgemeine Physiotherapie",
+        "en-US": "General physiotherapy"
+      },
+      "ui.ws.physio.service.complex": {
+        "de-CH": "Aufwändige Physiotherapie",
+        "en-US": "Complex physiotherapy"
+      },
+      "ui.ws.physio.service.home": {
+        "de-CH": "Domizilbehandlung",
+        "en-US": "Home treatment"
+      },
+      "ui.ws.physio.service.initial": {
+        "de-CH": "Erstbefund",
+        "en-US": "Initial assessment"
+      },
+      "ui.ws.spitex.service.assessment": {
+        "de-CH": "Abklärung",
+        "en-US": "Assessment"
+      },
+      "ui.ws.spitex.service.treatment_care": {
+        "de-CH": "Behandlungspflege",
+        "en-US": "Treatment care"
+      },
+      "ui.ws.spitex.service.basic_care": {
+        "de-CH": "Grundpflege",
+        "en-US": "Basic care"
+      },
+      "ui.ws.spitex.service.housekeeping": {
+        "de-CH": "Hauswirtschaft",
+        "en-US": "Housekeeping"
+      },
+      "ui.ws.spitex.service.support": {
+        "de-CH": "Begleitung",
+        "en-US": "Support"
+      },
+      "ui.ws.calendar.column": {
+        "de-CH": "Termine {label}",
+        "en-US": "Appointments {label}"
+      },
+      "ui.ws.calendar.more": {
+        "de-CH": "+{count} weitere",
+        "en-US": "+{count} more"
+      },
+      "ui.ws.calendar.open": {
+        "de-CH": "Offen",
+        "en-US": "Open"
+      },
+      "ui.ws.calendar.today": {
+        "de-CH": "Heute",
+        "en-US": "Today"
+      },
+      "ui.ws.calendar.previous": {
+        "de-CH": "Zurück",
+        "en-US": "Previous"
+      },
+      "ui.ws.calendar.next": {
+        "de-CH": "Weiter",
+        "en-US": "Next"
+      },
+      "ui.ws.calendar.people": {
+        "de-CH": "Personen",
+        "en-US": "People"
+      },
+      "ui.ws.calendar.view_day": {
+        "de-CH": "Tag",
+        "en-US": "Day"
+      },
+      "ui.ws.calendar.view_week": {
+        "de-CH": "Woche",
+        "en-US": "Week"
+      },
+      "ui.ws.calendar.view_month": {
+        "de-CH": "Monat",
+        "en-US": "Month"
+      },
+      "ui.ws.calendar.view_resources": {
+        "de-CH": "Team",
+        "en-US": "Team"
+      },
+      "ui.ws.calendar.hint": {
+        "de-CH": "Klicke in eine freie Zeit für einen neuen Termin. Ziehe Termine, um sie zu verschieben.",
+        "en-US": "Click a free slot for a new appointment. Drag appointments to move them."
+      },
+      "ui.ws.planner.completed": {
+        "de-CH": "«{title}» erledigt",
+        "en-US": "“{title}” completed"
+      },
+      "ui.ws.planner.reopened": {
+        "de-CH": "«{title}» wieder geöffnet",
+        "en-US": "“{title}” reopened"
+      },
+      "ui.ws.planner.saved": {
+        "de-CH": "Aufgabe gespeichert",
+        "en-US": "Task saved"
+      },
+      "ui.ws.planner.deleted": {
+        "de-CH": "Aufgabe gelöscht",
+        "en-US": "Task deleted"
+      },
+      "ui.ws.planner.updated": {
+        "de-CH": "Zuletzt geändert {time}",
+        "en-US": "Last changed {time}"
+      },
+      "ui.ws.planner.form_text": {
+        "de-CH": "Neue Aufgaben landen in «Zu erledigen».",
+        "en-US": "New tasks go to “To do”."
+      },
+      "ui.ws.planner.details": {
+        "de-CH": "Details",
+        "en-US": "Details"
+      },
+      "ui.ws.planner.description": {
+        "de-CH": "Beschreibung",
+        "en-US": "Description"
+      },
+      "ui.ws.planner.priority": {
+        "de-CH": "Priorität",
+        "en-US": "Priority"
+      },
+      "ui.ws.planner.due": {
+        "de-CH": "Fällig am",
+        "en-US": "Due on"
+      },
+      "ui.ws.planner.assignees": {
+        "de-CH": "Zuständig",
+        "en-US": "Assignees"
+      },
+      "ui.ws.planner.labels": {
+        "de-CH": "Labels",
+        "en-US": "Labels"
+      },
+      "ui.ws.planner.checklist": {
+        "de-CH": "Checkliste",
+        "en-US": "Checklist"
+      },
+      "ui.ws.planner.add_item": {
+        "de-CH": "Punkt hinzufügen und Enter drücken",
+        "en-US": "Add an item and press Enter"
+      },
+      "ui.ws.planner.delete_title": {
+        "de-CH": "Aufgabe löschen?",
+        "en-US": "Delete task?"
+      },
+      "ui.ws.planner.add_in": {
+        "de-CH": "Aufgabe in «{column}» hinzufügen",
+        "en-US": "Add task to “{column}”"
+      },
+      "ui.ws.planner.quick_add": {
+        "de-CH": "Titel eingeben und Enter drücken",
+        "en-US": "Type a title and press Enter"
+      },
+      "ui.ws.planner.keyboard_hint": {
+        "de-CH": "Karten ziehen oder mit Alt + Pfeiltasten verschieben.",
+        "en-US": "Drag cards or move them with Alt + arrow keys."
+      },
+      "ui.ws.planner.page_text": {
+        "de-CH": "Aufgaben fürs ganze Team, mit Zuständigen, Fälligkeiten und Checklisten.",
+        "en-US": "Tasks for the whole team, with assignees, due dates and checklists."
+      },
+      "ui.ws.planner.search": {
+        "de-CH": "Aufgaben durchsuchen",
+        "en-US": "Search tasks"
+      },
+      "ui.ws.planner.all_priorities": {
+        "de-CH": "Alle Prioritäten",
+        "en-US": "All priorities"
+      },
+      "ui.ws.planner.all_labels": {
+        "de-CH": "Alle Labels",
+        "en-US": "All labels"
+      },
+      "ui.ws.planner.only_mine": {
+        "de-CH": "Nur meine",
+        "en-US": "Only mine"
+      },
+      "ui.ws.planner.view_board": {
+        "de-CH": "Board",
+        "en-US": "Board"
+      },
+      "ui.ws.planner.view_list": {
+        "de-CH": "Liste",
+        "en-US": "List"
+      },
+      "ui.ws.planner.view_calendar": {
+        "de-CH": "Kalender",
+        "en-US": "Calendar"
+      },
+      "ui.ws.planner.mark_done": {
+        "de-CH": "«{title}» als erledigt markieren",
+        "en-US": "Mark “{title}” as done"
+      },
+      "ui.ws.mail.moved": {
+        "de-CH": "Verschoben nach {folder}",
+        "en-US": "Moved to {folder}"
+      },
+      "ui.ws.mail.deleted": {
+        "de-CH": "Mail gelöscht",
+        "en-US": "Email deleted"
+      },
+      "ui.ws.mail.task_created": {
+        "de-CH": "Aufgabe aus Mail erstellt",
+        "en-US": "Task created from email"
+      },
+      "ui.ws.mail.quote_header": {
+        "de-CH": "Am {date} schrieb {name}:",
+        "en-US": "On {date}, {name} wrote:"
+      },
+      "ui.ws.mail.sent": {
+        "de-CH": "Mail gesendet",
+        "en-US": "Email sent"
+      },
+      "ui.ws.mail.draft_saved": {
+        "de-CH": "Entwurf gespeichert",
+        "en-US": "Draft saved"
+      },
+      "ui.ws.mail.discard_title": {
+        "de-CH": "Entwurf speichern?",
+        "en-US": "Save draft?"
+      },
+      "ui.ws.mail.discard_text": {
+        "de-CH": "Die Nachricht ist noch nicht gesendet. Soll sie als Entwurf gespeichert werden?",
+        "en-US": "The message is not sent yet. Save it as a draft?"
+      },
+      "ui.ws.mail.save_draft": {
+        "de-CH": "Als Entwurf speichern",
+        "en-US": "Save as draft"
+      },
+      "ui.ws.mail.reply": {
+        "de-CH": "Antworten",
+        "en-US": "Reply"
+      },
+      "ui.ws.mail.compose_text": {
+        "de-CH": "Gesendet von {email}. Im Prototyp verlässt keine Mail den Browser.",
+        "en-US": "Sent from {email}. In the prototype no email leaves the browser."
+      },
+      "ui.ws.mail.to": {
+        "de-CH": "An",
+        "en-US": "To"
+      },
+      "ui.ws.mail.subject": {
+        "de-CH": "Betreff",
+        "en-US": "Subject"
+      },
+      "ui.ws.mail.message": {
+        "de-CH": "Nachricht",
+        "en-US": "Message"
+      },
+      "ui.ws.mail.templates": {
+        "de-CH": "Vorlagen",
+        "en-US": "Templates"
+      },
+      "ui.ws.mail.send": {
+        "de-CH": "Senden",
+        "en-US": "Send"
+      },
+      "ui.ws.mail.mailbox": {
+        "de-CH": "Postfach",
+        "en-US": "Mailbox"
+      },
+      "ui.ws.campaign.title": {
+        "de-CH": "Kampagnen",
+        "en-US": "Campaigns"
+      },
+      "ui.ws.mail.folders": {
+        "de-CH": "Ordner",
+        "en-US": "Folders"
+      },
+      "ui.ws.mail.search": {
+        "de-CH": "Mails durchsuchen",
+        "en-US": "Search emails"
+      },
+      "ui.ws.mail.unread": {
+        "de-CH": "Ungelesen",
+        "en-US": "Unread"
+      },
+      "ui.ws.mail.no_recipient": {
+        "de-CH": "(keine Empfänger)",
+        "en-US": "(no recipients)"
+      },
+      "ui.ws.mail.empty_folder": {
+        "de-CH": "Dieser Ordner ist leer.",
+        "en-US": "This folder is empty."
+      },
+      "ui.ws.mail.star": {
+        "de-CH": "Markieren",
+        "en-US": "Star"
+      },
+      "ui.ws.mail.mark_unread": {
+        "de-CH": "Als ungelesen markieren",
+        "en-US": "Mark as unread"
+      },
+      "ui.ws.mail.to_task": {
+        "de-CH": "Als Aufgabe",
+        "en-US": "As task"
+      },
+      "ui.ws.mail.to_appointment": {
+        "de-CH": "Termin planen",
+        "en-US": "Plan appointment"
+      },
+      "ui.ws.mail.nothing_selected": {
+        "de-CH": "Wähle eine Nachricht aus.",
+        "en-US": "Select a message."
+      },
+      "ui.ws.campaign.saved": {
+        "de-CH": "Kampagne gespeichert",
+        "en-US": "Campaign saved"
+      },
+      "ui.ws.campaign.fix_errors": {
+        "de-CH": "Bitte zuerst die rot markierten Punkte beheben.",
+        "en-US": "Please fix the items marked in red first."
+      },
+      "ui.ws.campaign.transition_draft": {
+        "de-CH": "Zurück zum Entwurf",
+        "en-US": "Back to draft"
+      },
+      "ui.ws.campaign.transition_review": {
+        "de-CH": "Zur Prüfung eingereicht",
+        "en-US": "Submitted for review"
+      },
+      "ui.ws.campaign.transition_approved": {
+        "de-CH": "Kampagne freigegeben",
+        "en-US": "Campaign approved"
+      },
+      "ui.ws.campaign.transition_scheduled": {
+        "de-CH": "Versand geplant",
+        "en-US": "Sending scheduled"
+      },
+      "ui.ws.campaign.transition_sent": {
+        "de-CH": "Kampagne versendet",
+        "en-US": "Campaign sent"
+      },
+      "ui.ws.campaign.untitled": {
+        "de-CH": "Neue Kampagne",
+        "en-US": "New campaign"
+      },
+      "ui.ws.campaign.default_body": {
+        "de-CH": "Guten Tag {vorname}\n\n\n\nFreundliche Grüsse\n{firma}",
+        "en-US": "Hello {vorname}\n\n\n\nKind regards\n{firma}"
+      },
+      "ui.ws.campaign.copy_of": {
+        "de-CH": "Kopie von {name}",
+        "en-US": "Copy of {name}"
+      },
+      "ui.ws.campaign.duplicated": {
+        "de-CH": "Kampagne dupliziert",
+        "en-US": "Campaign duplicated"
+      },
+      "ui.ws.campaign.deleted": {
+        "de-CH": "Kampagne gelöscht",
+        "en-US": "Campaign deleted"
+      },
+      "ui.ws.campaign.new": {
+        "de-CH": "Neue Kampagne",
+        "en-US": "New campaign"
+      },
+      "ui.ws.campaign.empty_title": {
+        "de-CH": "Noch keine Kampagnen",
+        "en-US": "No campaigns yet"
+      },
+      "ui.ws.campaign.empty_text": {
+        "de-CH": "Erreiche deine Kontakte mit einem Newsletter.",
+        "en-US": "Reach your contacts with a newsletter."
+      },
+      "ui.ws.campaign.status.draft": {
+        "de-CH": "Entwurf",
+        "en-US": "Draft"
+      },
+      "ui.ws.campaign.status.review": {
+        "de-CH": "In Prüfung",
+        "en-US": "In review"
+      },
+      "ui.ws.campaign.status.approved": {
+        "de-CH": "Freigegeben",
+        "en-US": "Approved"
+      },
+      "ui.ws.campaign.status.scheduled": {
+        "de-CH": "Geplant",
+        "en-US": "Scheduled"
+      },
+      "ui.ws.campaign.status.sent": {
+        "de-CH": "Versendet",
+        "en-US": "Sent"
+      },
+      "ui.ws.campaign.recipients": {
+        "de-CH": "Empfänger",
+        "en-US": "Recipients"
+      },
+      "ui.ws.campaign.opens": {
+        "de-CH": "Öffnungen",
+        "en-US": "Opens"
+      },
+      "ui.ws.campaign.clicks": {
+        "de-CH": "Klicks",
+        "en-US": "Clicks"
+      },
+      "ui.ws.campaign.sent_at": {
+        "de-CH": "Versendet am {date}",
+        "en-US": "Sent on {date}"
+      },
+      "ui.ws.campaign.scheduled_for": {
+        "de-CH": "Versand am {date}",
+        "en-US": "Sending on {date}"
+      },
+      "ui.ws.campaign.audience_label": {
+        "de-CH": "Zielgruppe: {tag}",
+        "en-US": "Audience: {tag}"
+      },
+      "ui.ws.campaign.duplicate": {
+        "de-CH": "Duplizieren",
+        "en-US": "Duplicate"
+      },
+      "ui.ws.campaign.submit_review": {
+        "de-CH": "Zur Prüfung einreichen",
+        "en-US": "Submit for review"
+      },
+      "ui.ws.campaign.back_to_draft": {
+        "de-CH": "Zurück zum Entwurf",
+        "en-US": "Back to draft"
+      },
+      "ui.ws.campaign.approve": {
+        "de-CH": "Freigeben",
+        "en-US": "Approve"
+      },
+      "ui.ws.campaign.name": {
+        "de-CH": "Interner Name",
+        "en-US": "Internal name"
+      },
+      "ui.ws.campaign.audience": {
+        "de-CH": "Zielgruppe (Schlagwort)",
+        "en-US": "Audience (tag)"
+      },
+      "ui.ws.campaign.choose_audience": {
+        "de-CH": "Zielgruppe wählen",
+        "en-US": "Choose audience"
+      },
+      "ui.ws.campaign.audience_option": {
+        "de-CH": "{tag} · {count} Kontakte",
+        "en-US": "{tag} · {count} contacts"
+      },
+      "ui.ws.campaign.length": {
+        "de-CH": "{count} Zeichen",
+        "en-US": "{count} characters"
+      },
+      "ui.ws.campaign.preview_text": {
+        "de-CH": "Vorschautext",
+        "en-US": "Preview text"
+      },
+      "ui.ws.campaign.preview_hint": {
+        "de-CH": "Erscheint im Postfach neben dem Betreff.",
+        "en-US": "Shown in the inbox next to the subject."
+      },
+      "ui.ws.campaign.checks": {
+        "de-CH": "Prüfung vor dem Versand",
+        "en-US": "Pre-send checks"
+      },
+      "ui.ws.campaign.sending": {
+        "de-CH": "Versand",
+        "en-US": "Sending"
+      },
+      "ui.ws.campaign.schedule_at": {
+        "de-CH": "Zeitpunkt",
+        "en-US": "Date and time"
+      },
+      "ui.ws.campaign.schedule": {
+        "de-CH": "Planen",
+        "en-US": "Schedule"
+      },
+      "ui.ws.campaign.send_now": {
+        "de-CH": "Jetzt an {count} senden",
+        "en-US": "Send to {count} now"
+      },
+      "ui.ws.campaign.preview": {
+        "de-CH": "Vorschau",
+        "en-US": "Preview"
+      },
+      "ui.ws.campaign.preview_for": {
+        "de-CH": "So sieht es für {email} aus.",
+        "en-US": "This is how it looks for {email}."
+      },
+      "ui.ws.campaign.preview_sample": {
+        "de-CH": "Wähle eine Zielgruppe für eine persönliche Vorschau.",
+        "en-US": "Choose an audience for a personal preview."
+      },
+      "ui.ws.campaign.footer": {
+        "de-CH": "Du erhältst diese Mail von {company}. Abmelden · Einstellungen",
+        "en-US": "You receive this email from {company}. Unsubscribe · Preferences"
+      },
+      "ui.ws.campaign.check_subject_missing": {
+        "de-CH": "Der Betreff fehlt.",
+        "en-US": "The subject is missing."
+      },
+      "ui.ws.campaign.check_subject_short": {
+        "de-CH": "Sehr kurzer Betreff – sagt er genug?",
+        "en-US": "Very short subject – does it say enough?"
+      },
+      "ui.ws.campaign.check_subject_long": {
+        "de-CH": "Langer Betreff wird im Postfach abgeschnitten.",
+        "en-US": "A long subject gets cut off in the inbox."
+      },
+      "ui.ws.campaign.check_subject_ok": {
+        "de-CH": "Betreff hat eine gute Länge.",
+        "en-US": "The subject has a good length."
+      },
+      "ui.ws.campaign.check_caps": {
+        "de-CH": "Nur Grossbuchstaben wirken wie Spam.",
+        "en-US": "All caps look like spam."
+      },
+      "ui.ws.campaign.check_spam": {
+        "de-CH": "«{word}» landet oft im Spam.",
+        "en-US": "“{word}” often ends up in spam."
+      },
+      "ui.ws.campaign.check_preview_missing": {
+        "de-CH": "Ohne Vorschautext zeigt das Postfach den Anfang der Nachricht.",
+        "en-US": "Without preview text the inbox shows the start of the message."
+      },
+      "ui.ws.campaign.check_personal": {
+        "de-CH": "Persönliche Anrede mit Platzhalter.",
+        "en-US": "Personal greeting with a placeholder."
+      },
+      "ui.ws.campaign.check_not_personal": {
+        "de-CH": "Tipp: {vorname} macht die Mail persönlicher.",
+        "en-US": "Tip: {vorname} makes the email more personal."
+      },
+      "ui.ws.campaign.check_no_recipients": {
+        "de-CH": "Keine Empfänger in der gewählten Zielgruppe.",
+        "en-US": "No recipients in the chosen audience."
+      },
+      "ui.ws.campaign.check_recipients": {
+        "de-CH": "{count} Empfänger mit E-Mail-Adresse.",
+        "en-US": "{count} recipients with an email address."
+      },
+      "ui.ws.campaign.check_unsubscribe": {
+        "de-CH": "Abmeldelink wird automatisch eingefügt.",
+        "en-US": "The unsubscribe link is added automatically."
+      },
+      "ui.ws.mail.template_saved": {
+        "de-CH": "Vorlage gespeichert",
+        "en-US": "Template saved"
+      },
+      "ui.ws.mail.template_deleted": {
+        "de-CH": "Vorlage gelöscht",
+        "en-US": "Template deleted"
+      },
+      "ui.ws.mail.new_template": {
+        "de-CH": "Neue Vorlage",
+        "en-US": "New template"
+      },
+      "ui.ws.mail.edit_template": {
+        "de-CH": "Vorlage bearbeiten",
+        "en-US": "Edit template"
+      },
+      "ui.ws.mail.no_templates": {
+        "de-CH": "Noch keine Vorlagen.",
+        "en-US": "No templates yet."
+      },
+      "ui.ws.mail.template_hint": {
+        "de-CH": "Platzhalter: {placeholders}",
+        "en-US": "Placeholders: {placeholders}"
       }
     }
   }
