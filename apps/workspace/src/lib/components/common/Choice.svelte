@@ -8,7 +8,6 @@
 <script lang="ts">
 	import * as Select from '@clinks/ui-shared/components/ui/select';
 
-
 	let {
 		id,
 		value = $bindable(''),

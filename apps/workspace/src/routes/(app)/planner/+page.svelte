@@ -65,17 +65,48 @@
 <ModuleGate module="planner" permission="planner.read">
 	<PageHeader title={workspace.t('ui.ws.module.planner')} description={workspace.t('ui.ws.planner.page_text')}>
 		{#snippet actions()}
-			{#if canWrite}<Button onclick={() => sheet.show(null)} aria-keyshortcuts="N"><Plus class="size-4" />{workspace.t('ui.ws.command.new_task')}</Button>{/if}
+			{#if canWrite}<Button onclick={() => sheet.show(null)} aria-keyshortcuts="N"
+					><Plus class="size-4" />{workspace.t('ui.ws.command.new_task')}</Button
+				>{/if}
 		{/snippet}
 	</PageHeader>
 
 	<div class="mb-4 flex flex-wrap items-center gap-2">
 		<SearchInput bind:value={model.search} label={workspace.t('ui.ws.planner.search')} class="w-full sm:w-64" />
-		<Choice bind:value={model.priority} class="w-40" label={workspace.t('ui.ws.planner.priority')} options={[{ value: '', label: workspace.t('ui.ws.planner.all_priorities') }, ...(['urgent', 'high', 'medium', 'low'] as const).map((priority) => ({ value: priority, label: workspace.t(`ui.ws.task.priority.${priority}`) }))]} />
-		<Choice bind:value={model.label} class="w-40" label={workspace.t('ui.ws.planner.labels')} options={[{ value: '', label: workspace.t('ui.ws.planner.all_labels') }, ...model.labels.map((label) => ({ value: label, label }))]} />
-		<div class="flex items-center gap-2"><Switch id="only-mine" bind:checked={model.onlyMine} /><Label for="only-mine">{workspace.t('ui.ws.planner.only_mine')}</Label></div>
+		<Choice
+			bind:value={model.priority}
+			class="w-40"
+			label={workspace.t('ui.ws.planner.priority')}
+			options={[
+				{ value: '', label: workspace.t('ui.ws.planner.all_priorities') },
+				...(['urgent', 'high', 'medium', 'low'] as const).map((priority) => ({
+					value: priority,
+					label: workspace.t(`ui.ws.task.priority.${priority}`),
+				})),
+			]}
+		/>
+		<Choice
+			bind:value={model.label}
+			class="w-40"
+			label={workspace.t('ui.ws.planner.labels')}
+			options={[
+				{ value: '', label: workspace.t('ui.ws.planner.all_labels') },
+				...model.labels.map((label) => ({ value: label, label })),
+			]}
+		/>
+		<div class="flex items-center gap-2">
+			<Switch id="only-mine" bind:checked={model.onlyMine} /><Label for="only-mine"
+				>{workspace.t('ui.ws.planner.only_mine')}</Label
+			>
+		</div>
 		<div class="flex-1"></div>
-		<Tabs.Root value={model.view} onValueChange={(view) => { model.view = view as PlannerView; void setQuery(page.url, { view }); }}>
+		<Tabs.Root
+			value={model.view}
+			onValueChange={(view) => {
+				model.view = view as PlannerView;
+				void setQuery(page.url, { view });
+			}}
+		>
 			<Tabs.List>
 				<Tabs.Trigger value="board">{workspace.t('ui.ws.planner.view_board')}</Tabs.Trigger>
 				<Tabs.Trigger value="list">{workspace.t('ui.ws.planner.view_list')}</Tabs.Trigger>
@@ -93,7 +124,9 @@
 					<Table.Root>
 						<Table.Header>
 							<Table.Row>
-								<Table.Head class="w-10"><span class="sr-only">{workspace.t('ui.ws.task.status.done')}</span></Table.Head>
+								<Table.Head class="w-10"
+									><span class="sr-only">{workspace.t('ui.ws.task.status.done')}</span></Table.Head
+								>
 								<Table.Head>{workspace.t('ui.ws.calendar.title')}</Table.Head>
 								<Table.Head class="hidden md:table-cell">{workspace.t('ui.ws.status')}</Table.Head>
 								<Table.Head>{workspace.t('ui.ws.planner.priority')}</Table.Head>
@@ -102,14 +135,44 @@
 							</Table.Row>
 						</Table.Header>
 						<Table.Body>
-							{#each [...model.filtered].sort((left, right) => (left.dueDate ?? '9999').localeCompare(right.dueDate ?? '9999')) as task (task.id)}
+							{#each [...model.filtered].sort( (left, right) => (left.dueDate ?? '9999').localeCompare(right.dueDate ?? '9999') ) as task (task.id)}
 								<Table.Row>
-									<Table.Cell><Checkbox checked={task.status === 'done'} disabled={!canWrite} onCheckedChange={() => model.toggleDone(task)} aria-label={workspace.t('ui.ws.planner.mark_done', { title: task.title })} /></Table.Cell>
-									<Table.Cell><button class="text-left font-medium hover:underline {task.status === 'done' ? 'text-muted-foreground line-through' : ''}" onclick={() => open(task)}>{task.title}</button></Table.Cell>
-									<Table.Cell class="hidden md:table-cell">{workspace.t(`ui.ws.task.status.${task.status}`)}</Table.Cell>
-									<Table.Cell><StatusBadge tone={priorityTone[task.priority]} label={workspace.t(`ui.ws.task.priority.${task.priority}`)} /></Table.Cell>
-									<Table.Cell class="hidden sm:table-cell {task.dueDate && task.dueDate < today() && task.status !== 'done' ? 'text-destructive' : ''}">{task.dueDate ? workspace.i18n.date(task.dueDate) : '—'}</Table.Cell>
-									<Table.Cell class="hidden lg:table-cell"><div class="flex -space-x-1.5">{#each task.assigneeIds as id (id)}{@const person = people.get(id)}{#if person}<span class="ring-background rounded-full ring-2"><PersonAvatar {person} size="xs" /></span>{/if}{/each}</div></Table.Cell>
+									<Table.Cell
+										><Checkbox
+											checked={task.status === 'done'}
+											disabled={!canWrite}
+											onCheckedChange={() => model.toggleDone(task)}
+											aria-label={workspace.t('ui.ws.planner.mark_done', { title: task.title })}
+										/></Table.Cell
+									>
+									<Table.Cell
+										><button
+											class="text-left font-medium hover:underline {task.status === 'done'
+												? 'text-muted-foreground line-through'
+												: ''}"
+											onclick={() => open(task)}>{task.title}</button
+										></Table.Cell
+									>
+									<Table.Cell class="hidden md:table-cell">{workspace.t(`ui.ws.task.status.${task.status}`)}</Table.Cell
+									>
+									<Table.Cell
+										><StatusBadge
+											tone={priorityTone[task.priority]}
+											label={workspace.t(`ui.ws.task.priority.${task.priority}`)}
+										/></Table.Cell
+									>
+									<Table.Cell
+										class="hidden sm:table-cell {task.dueDate && task.dueDate < today() && task.status !== 'done'
+											? 'text-destructive'
+											: ''}">{task.dueDate ? workspace.i18n.date(task.dueDate) : '—'}</Table.Cell
+									>
+									<Table.Cell class="hidden lg:table-cell"
+										><div class="flex -space-x-1.5">
+											{#each task.assigneeIds as id (id)}{@const person = people.get(id)}{#if person}<span
+														class="ring-background rounded-full ring-2"><PersonAvatar {person} size="xs" /></span
+													>{/if}{/each}
+										</div></Table.Cell
+									>
 								</Table.Row>
 							{/each}
 						</Table.Body>
@@ -122,4 +185,9 @@
 	</AsyncView>
 </ModuleGate>
 
-<TaskSheet bind:this={sheet} contacts={model.resource.data?.contacts ?? []} {people} onClose={() => setQuery(page.url, { task: null, new: null })} />
+<TaskSheet
+	bind:this={sheet}
+	contacts={model.resource.data?.contacts ?? []}
+	{people}
+	onClose={() => setQuery(page.url, { task: null, new: null })}
+/>

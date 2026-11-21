@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { cn, type WithElementRef } from "@clinks/ui-shared/utils.js";
-	import type { HTMLAttributes } from "svelte/elements";
+	import { cn, type WithElementRef } from '@clinks/ui-shared/utils.js';
+	import type { HTMLAttributes } from 'svelte/elements';
 
 	let {
 		ref = $bindable(null),
@@ -14,8 +14,8 @@
 	bind:this={ref}
 	data-slot="avatar-group"
 	class={cn(
-		"group/avatar-group flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background",
-		className
+		'group/avatar-group flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background',
+		className,
 	)}
 	{...restProps}
 >

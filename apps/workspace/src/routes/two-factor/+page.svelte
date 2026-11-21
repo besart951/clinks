@@ -23,8 +23,20 @@
 
 <AuthShell title={workspace.t('ui.ws.auth.two_factor_title')} description={workspace.t('ui.ws.auth.two_factor_text')}>
 	<form class="space-y-4" onsubmit={submit} novalidate>
-		<FormField id="code" label={workspace.t('ui.ws.auth.code')} error={form.error} hint={workspace.t('ui.ws.auth.two_factor_demo_hint')}>
-			<Input id="code" inputmode="numeric" autocomplete="one-time-code" maxlength={6} bind:value={form.code} aria-invalid={!!form.error} />
+		<FormField
+			id="code"
+			label={workspace.t('ui.ws.auth.code')}
+			error={form.error}
+			hint={workspace.t('ui.ws.auth.two_factor_demo_hint')}
+		>
+			<Input
+				id="code"
+				inputmode="numeric"
+				autocomplete="one-time-code"
+				maxlength={6}
+				bind:value={form.code}
+				aria-invalid={!!form.error}
+			/>
 		</FormField>
 		<Button type="submit" class="w-full" disabled={form.busy}>{workspace.t('ui.ws.auth.verify_submit')}</Button>
 		<Button type="button" variant="ghost" class="w-full" onclick={cancel}>{workspace.t('ui.ws.cancel')}</Button>

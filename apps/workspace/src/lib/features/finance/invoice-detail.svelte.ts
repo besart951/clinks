@@ -38,7 +38,9 @@ export class InvoiceDetailModel {
 
 	sendReminder() {
 		const invoice = this.resource.data!.invoice;
-		return this.#patch({ reminderLevel: invoice.reminderLevel + 1 }, 'ui.ws.invoice.reminder_sent', { level: invoice.reminderLevel + 1 });
+		return this.#patch({ reminderLevel: invoice.reminderLevel + 1 }, 'ui.ws.invoice.reminder_sent', {
+			level: invoice.reminderLevel + 1,
+		});
 	}
 
 	cancel() {
@@ -48,16 +50,33 @@ export class InvoiceDetailModel {
 	async duplicate(): Promise<Invoice | null> {
 		const invoice = this.resource.data!.invoice;
 		const api = this.#workspace.api.invoices;
-		return this.#workspace.run(async () => {
-			const all = await api.list();
-			return api.create({ ...invoice, number: nextInvoiceNumber(all, new Date().getFullYear()), status: 'draft', issueDate: today(), dueDate: invoice.dueDate, payments: [], reminderLevel: 0, appointmentIds: [] });
-		}, { success: 'ui.ws.invoice.duplicated' });
+		return this.#workspace.run(
+			async () => {
+				const all = await api.list();
+				return api.create({
+					...invoice,
+					number: nextInvoiceNumber(all, new Date().getFullYear()),
+					status: 'draft',
+					issueDate: today(),
+					dueDate: invoice.dueDate,
+					payments: [],
+					reminderLevel: 0,
+					appointmentIds: [],
+				});
+			},
+			{ success: 'ui.ws.invoice.duplicated' },
+		);
 	}
 
 	async remove(): Promise<boolean> {
 		const invoice = this.resource.data!.invoice;
 		const api = this.#workspace.api.invoices;
-		return (await this.#workspace.run(() => api.remove(invoice.id), { success: 'ui.ws.invoice.deleted', undo: () => api.restore(invoice) })) !== null;
+		return (
+			(await this.#workspace.run(() => api.remove(invoice.id), {
+				success: 'ui.ws.invoice.deleted',
+				undo: () => api.restore(invoice),
+			})) !== null
+		);
 	}
 
 	#patch(patch: Partial<Invoice>, success: string, params: { [name: string]: string | number } = {}) {
@@ -76,7 +95,10 @@ export class InvoiceListModel {
 
 	constructor(workspace: Workspace) {
 		this.resource = new Resource(workspace.db, ['invoices', 'contacts'], async () => {
-			const [invoices, contacts] = await Promise.all([workspace.api.invoices.list(), workspace.api.contacts.list().catch(() => [])]);
+			const [invoices, contacts] = await Promise.all([
+				workspace.api.invoices.list(),
+				workspace.api.contacts.list().catch(() => []),
+			]);
 			return { invoices, contacts: new Map(contacts.map((contact) => [contact.id, contact])) };
 		});
 	}
@@ -87,8 +109,20 @@ export class InvoiceListModel {
 		const query = this.search.trim().toLowerCase();
 		const day = today();
 		return data.invoices
-			.map((invoice) => ({ invoice, contact: data.contacts.get(invoice.contactId) ?? null, status: effectiveStatus(invoice, day), totals: invoiceTotals(invoice) }))
-			.filter((row) => (!this.status || row.status === this.status) && (!query || `${row.invoice.number} ${row.contact?.firstName ?? ''} ${row.contact?.lastName ?? ''} ${row.contact?.companyName ?? ''}`.toLowerCase().includes(query)))
+			.map((invoice) => ({
+				invoice,
+				contact: data.contacts.get(invoice.contactId) ?? null,
+				status: effectiveStatus(invoice, day),
+				totals: invoiceTotals(invoice),
+			}))
+			.filter(
+				(row) =>
+					(!this.status || row.status === this.status) &&
+					(!query ||
+						`${row.invoice.number} ${row.contact?.firstName ?? ''} ${row.contact?.lastName ?? ''} ${row.contact?.companyName ?? ''}`
+							.toLowerCase()
+							.includes(query)),
+			)
 			.sort((left, right) => right.invoice.number.localeCompare(left.invoice.number));
 	}
 
@@ -96,11 +130,15 @@ export class InvoiceListModel {
 		const rows = this.resource.data ? this.rows : [];
 		const all = this.resource.data?.invoices ?? [];
 		const day = today();
-		const open = all.filter((invoice) => ['open', 'partially_paid', 'overdue', 'reminded'].includes(effectiveStatus(invoice, day)));
+		const open = all.filter((invoice) =>
+			['open', 'partially_paid', 'overdue', 'reminded'].includes(effectiveStatus(invoice, day)),
+		);
 		return {
 			count: rows.length,
 			open: open.reduce((sum, invoice) => sum + invoiceTotals(invoice).balance, 0),
-			overdue: open.filter((invoice) => ['overdue', 'reminded'].includes(effectiveStatus(invoice, day))).reduce((sum, invoice) => sum + invoiceTotals(invoice).balance, 0),
+			overdue: open
+				.filter((invoice) => ['overdue', 'reminded'].includes(effectiveStatus(invoice, day)))
+				.reduce((sum, invoice) => sum + invoiceTotals(invoice).balance, 0),
 			drafts: all.filter((invoice) => invoice.status === 'draft').length,
 		};
 	}

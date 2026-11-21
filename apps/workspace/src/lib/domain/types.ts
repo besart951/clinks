@@ -42,7 +42,16 @@ export interface TenantRecord<Key extends string = string> extends BaseRecord<Ke
 	tenantId: TenantId;
 }
 
-export const moduleKeys = ['contacts', 'calendar', 'documents', 'mail', 'finance', 'planner', 'physio', 'spitex'] as const;
+export const moduleKeys = [
+	'contacts',
+	'calendar',
+	'documents',
+	'mail',
+	'finance',
+	'planner',
+	'physio',
+	'spitex',
+] as const;
 export type ModuleKey = (typeof moduleKeys)[number];
 export const coreModules: readonly ModuleKey[] = ['contacts', 'calendar', 'documents'];
 
@@ -256,7 +265,16 @@ export interface Invoice extends TenantRecord<InvoiceId> {
 	appointmentIds: AppointmentId[];
 }
 
-export const expenseCategories = ['material', 'rent', 'vehicle', 'insurance', 'it', 'advertising', 'travel', 'other'] as const;
+export const expenseCategories = [
+	'material',
+	'rent',
+	'vehicle',
+	'insurance',
+	'it',
+	'advertising',
+	'travel',
+	'other',
+] as const;
 export type ExpenseCategory = (typeof expenseCategories)[number];
 
 export interface Expense extends TenantRecord<ExpenseId> {
@@ -288,9 +306,7 @@ export interface Task extends TenantRecord<TaskId> {
 }
 
 export type CommentTarget =
-	| { kind: 'task'; id: TaskId }
-	| { kind: 'contact'; id: ContactId }
-	| { kind: 'invoice'; id: InvoiceId };
+	{ kind: 'task'; id: TaskId } | { kind: 'contact'; id: ContactId } | { kind: 'invoice'; id: InvoiceId };
 
 export interface Comment extends TenantRecord<CommentId> {
 	target: CommentTarget;

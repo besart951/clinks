@@ -34,7 +34,12 @@ export class NetworkSimulator {
 	}
 
 	conditions(): NetworkConditions {
-		return { minLatency: this.minLatency, maxLatency: this.maxLatency, failureRate: this.failureRate, offline: this.offline };
+		return {
+			minLatency: this.minLatency,
+			maxLatency: this.maxLatency,
+			failureRate: this.failureRate,
+			offline: this.offline,
+		};
 	}
 
 	update(changes: Partial<StoredConditions>) {

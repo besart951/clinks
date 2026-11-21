@@ -15,7 +15,11 @@ export function readAsDataUrl(file: File): Promise<string> {
 }
 
 /** Uploads one browser file into the mock document store. */
-export async function uploadDocument(workspace: Workspace, file: File, options: { folderId?: StoredDocument['folderId']; target?: AttachmentTarget }) {
+export async function uploadDocument(
+	workspace: Workspace,
+	file: File,
+	options: { folderId?: StoredDocument['folderId']; target?: AttachmentTarget },
+) {
 	if (file.size > maxUploadBytes) throw new MockApiError('validation', workspace.t('error.ws.file_too_large'));
 	const dataUrl = await readAsDataUrl(file);
 	return workspace.api.documents.create({
@@ -46,7 +50,9 @@ export class AttachmentsModel {
 		this.#workspace = workspace;
 		this.#target = target;
 		this.resource = new Resource(workspace.db, ['documents'], () =>
-			workspace.api.documents.list((row) => row.targets.some((candidate) => candidate.kind === target.kind && candidate.id === target.id)),
+			workspace.api.documents.list((row) =>
+				row.targets.some((candidate) => candidate.kind === target.kind && candidate.id === target.id),
+			),
 		);
 	}
 
@@ -63,7 +69,9 @@ export class AttachmentsModel {
 	}
 
 	async detach(document: StoredDocument) {
-		const targets = document.targets.filter((candidate) => !(candidate.kind === this.#target.kind && candidate.id === this.#target.id));
+		const targets = document.targets.filter(
+			(candidate) => !(candidate.kind === this.#target.kind && candidate.id === this.#target.id),
+		);
 		await this.#workspace.run(() => this.#workspace.api.documents.update(document.id, document.revision, { targets }), {
 			success: 'ui.ws.documents.detached',
 			successParams: { name: document.name },

@@ -39,7 +39,9 @@
 	<PageHeader title={workspace.t('ui.ws.physio.patients')} description={workspace.t('ui.ws.physio.patients_text')}>
 		{#snippet actions()}
 			<Button variant="outline" href={href('/calendar?view=resources')}>{workspace.t('ui.ws.physio.agenda')}</Button>
-			{#if canWrite}<Button onclick={() => sheet.show(null, { tags: [patientTag] })} aria-keyshortcuts="N"><Plus class="size-4" />{workspace.t('ui.ws.physio.new_patient')}</Button>{/if}
+			{#if canWrite}<Button onclick={() => sheet.show(null, { tags: [patientTag] })} aria-keyshortcuts="N"
+					><Plus class="size-4" />{workspace.t('ui.ws.physio.new_patient')}</Button
+				>{/if}
 		{/snippet}
 	</PageHeader>
 	<div class="mb-4 flex flex-wrap items-center gap-2">
@@ -57,26 +59,50 @@
 		{#snippet children()}
 			<div class="rounded-xl border">
 				<Table.Root>
-					<Table.Header><Table.Row>
-						<Table.Head>{workspace.t('ui.ws.physio.patient')}</Table.Head>
-						<Table.Head class="hidden md:table-cell">{workspace.t('ui.ws.field.insurer')}</Table.Head>
-						<Table.Head>{workspace.t('ui.ws.physio.next_appointment')}</Table.Head>
-						<Table.Head class="hidden lg:table-cell">{workspace.t('ui.ws.physio.prescription')}</Table.Head>
-						<Table.Head class="hidden sm:table-cell">{workspace.t('ui.ws.physio.alerts')}</Table.Head>
-					</Table.Row></Table.Header>
+					<Table.Header
+						><Table.Row>
+							<Table.Head>{workspace.t('ui.ws.physio.patient')}</Table.Head>
+							<Table.Head class="hidden md:table-cell">{workspace.t('ui.ws.field.insurer')}</Table.Head>
+							<Table.Head>{workspace.t('ui.ws.physio.next_appointment')}</Table.Head>
+							<Table.Head class="hidden lg:table-cell">{workspace.t('ui.ws.physio.prescription')}</Table.Head>
+							<Table.Head class="hidden sm:table-cell">{workspace.t('ui.ws.physio.alerts')}</Table.Head>
+						</Table.Row></Table.Header
+					>
 					<Table.Body>
 						{#each model.rows as row (row.patient.id)}
 							<Table.Row class="cursor-pointer" onclick={() => navigate(`/physio/${row.patient.id}`)}>
-								<Table.Cell><a class="font-medium hover:underline" href={href(`/physio/${row.patient.id}`)} onclick={(event) => event.stopPropagation()}>{contactName(row.patient)}</a>{#if row.patient.birthDate}<span class="text-muted-foreground block text-xs">{workspace.i18n.date(row.patient.birthDate)}</span>{/if}</Table.Cell>
+								<Table.Cell
+									><a
+										class="font-medium hover:underline"
+										href={href(`/physio/${row.patient.id}`)}
+										onclick={(event) => event.stopPropagation()}>{contactName(row.patient)}</a
+									>{#if row.patient.birthDate}<span class="text-muted-foreground block text-xs"
+											>{workspace.i18n.date(row.patient.birthDate)}</span
+										>{/if}</Table.Cell
+								>
 								<Table.Cell class="hidden md:table-cell">{row.patient.insurer || '—'}</Table.Cell>
 								<Table.Cell>{row.next ? workspace.i18n.dateTime(row.next.start) : '—'}</Table.Cell>
 								<Table.Cell class="hidden lg:table-cell">
 									{#if row.progress}
-										<div class="flex items-center gap-2"><Progress value={(row.progress.used / row.progress.prescription.sessionsPrescribed) * 100} class="w-24" aria-label={workspace.t('ui.ws.physio.sessions_used', { used: row.progress.used, total: row.progress.prescription.sessionsPrescribed })} /><span class="text-xs tabular-nums">{row.progress.used}/{row.progress.prescription.sessionsPrescribed}</span></div>
+										<div class="flex items-center gap-2">
+											<Progress
+												value={(row.progress.used / row.progress.prescription.sessionsPrescribed) * 100}
+												class="w-24"
+												aria-label={workspace.t('ui.ws.physio.sessions_used', {
+													used: row.progress.used,
+													total: row.progress.prescription.sessionsPrescribed,
+												})}
+											/><span class="text-xs tabular-nums"
+												>{row.progress.used}/{row.progress.prescription.sessionsPrescribed}</span
+											>
+										</div>
 									{:else}—{/if}
 								</Table.Cell>
 								<Table.Cell class="hidden sm:table-cell">
-									{#if row.alert}<StatusBadge tone={row.alert === 'expiring' ? 'warning' : 'danger'} label={workspace.t(`ui.ws.physio.alert_${row.alert}`)} />{/if}
+									{#if row.alert}<StatusBadge
+											tone={row.alert === 'expiring' ? 'warning' : 'danger'}
+											label={workspace.t(`ui.ws.physio.alert_${row.alert}`)}
+										/>{/if}
 								</Table.Cell>
 							</Table.Row>
 						{/each}
@@ -84,7 +110,9 @@
 				</Table.Root>
 			</div>
 			{@const alerts = (model.resource.data ?? []).filter((row) => row.alert && row.next).length}
-			{#if alerts > 0}<p class="mt-3 flex items-center gap-2 text-sm text-amber-700 dark:text-amber-400"><TriangleAlert class="size-4" />{workspace.t('ui.ws.physio.alerts_hint', { count: alerts })}</p>{/if}
+			{#if alerts > 0}<p class="mt-3 flex items-center gap-2 text-sm text-amber-700 dark:text-amber-400">
+					<TriangleAlert class="size-4" />{workspace.t('ui.ws.physio.alerts_hint', { count: alerts })}
+				</p>{/if}
 		{/snippet}
 	</AsyncView>
 </ModuleGate>

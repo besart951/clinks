@@ -20,7 +20,9 @@
 
 	const workspace = useWorkspace();
 	const api = workspace.api.templates;
-	const resource = new Resource(workspace.db, ['templates'], async () => (await api.list()).sort((left, right) => left.name.localeCompare(right.name)));
+	const resource = new Resource(workspace.db, ['templates'], async () =>
+		(await api.list()).sort((left, right) => left.name.localeCompare(right.name)),
+	);
 	const canWrite = $derived(workspace.session.can('mail.write'));
 	let editing = $state<MailTemplate | null>(null);
 	let open = $state(false);
@@ -30,7 +32,9 @@
 
 	function edit(template: MailTemplate | null) {
 		editing = template;
-		value = template ? { name: template.name, subject: template.subject, body: template.body } : { name: '', subject: '', body: '' };
+		value = template
+			? { name: template.name, subject: template.subject, body: template.body }
+			: { name: '', subject: '', body: '' };
 		fields = {};
 		open = true;
 	}
@@ -49,7 +53,10 @@
 	}
 
 	async function remove(template: MailTemplate) {
-		await workspace.run(() => api.remove(template.id), { success: 'ui.ws.mail.template_deleted', undo: () => api.restore(template) });
+		await workspace.run(() => api.remove(template.id), {
+			success: 'ui.ws.mail.template_deleted',
+			undo: () => api.restore(template),
+		});
 	}
 </script>
 
@@ -57,7 +64,9 @@
 
 <ModuleGate module="mail" permission="mail.read">
 	<PageHeader title={workspace.t('ui.ws.module.mail')}>
-		{#snippet actions()}{#if canWrite}<Button onclick={() => edit(null)}><Plus class="size-4" />{workspace.t('ui.ws.mail.new_template')}</Button>{/if}{/snippet}
+		{#snippet actions()}{#if canWrite}<Button onclick={() => edit(null)}
+					><Plus class="size-4" />{workspace.t('ui.ws.mail.new_template')}</Button
+				>{/if}{/snippet}
 	</PageHeader>
 	<MailNav />
 	<AsyncView {resource} isEmpty={(rows) => rows.length === 0}>
@@ -67,10 +76,15 @@
 				{#each templates as template (template.id)}
 					<li class="flex items-center gap-3 px-4 py-3 text-sm">
 						<FileText class="text-muted-foreground size-4" />
-						<div class="min-w-0 flex-1"><p class="font-medium">{template.name}</p><p class="text-muted-foreground truncate">{template.subject}</p></div>
+						<div class="min-w-0 flex-1">
+							<p class="font-medium">{template.name}</p>
+							<p class="text-muted-foreground truncate">{template.subject}</p>
+						</div>
 						{#if canWrite}
 							<Button variant="ghost" size="sm" onclick={() => edit(template)}>{workspace.t('ui.ws.edit')}</Button>
-							<Button variant="ghost" size="sm" class="text-destructive" onclick={() => remove(template)}>{workspace.t('ui.ws.delete')}</Button>
+							<Button variant="ghost" size="sm" class="text-destructive" onclick={() => remove(template)}
+								>{workspace.t('ui.ws.delete')}</Button
+							>
 						{/if}
 					</li>
 				{/each}
@@ -80,15 +94,27 @@
 </ModuleGate>
 
 <Dialog.Root bind:open>
-	<Dialog.Content class="sm:max-w-xl">
+	<Dialog.Content closeLabel={workspace.t('ui.ws.close')} class="sm:max-w-xl">
 		<Dialog.Header>
-			<Dialog.Title>{editing ? workspace.t('ui.ws.mail.edit_template') : workspace.t('ui.ws.mail.new_template')}</Dialog.Title>
-			<Dialog.Description>{workspace.t('ui.ws.mail.template_hint', { placeholders: placeholders.map((placeholder) => `{${placeholder}}`).join(' ') })}</Dialog.Description>
+			<Dialog.Title
+				>{editing ? workspace.t('ui.ws.mail.edit_template') : workspace.t('ui.ws.mail.new_template')}</Dialog.Title
+			>
+			<Dialog.Description
+				>{workspace.t('ui.ws.mail.template_hint', {
+					placeholders: placeholders.map((placeholder) => `{${placeholder}}`).join(' '),
+				})}</Dialog.Description
+			>
 		</Dialog.Header>
 		<form id="template-form" class="space-y-3" onsubmit={save} novalidate>
-			<FormField id="tp-name" label={workspace.t('ui.ws.contacts.name')} error={fields.name}><Input id="tp-name" bind:value={value.name} aria-invalid={!!fields.name} /></FormField>
-			<FormField id="tp-subject" label={workspace.t('ui.ws.mail.subject')} error={fields.subject}><Input id="tp-subject" bind:value={value.subject} aria-invalid={!!fields.subject} /></FormField>
-			<FormField id="tp-body" label={workspace.t('ui.ws.mail.message')}><Textarea id="tp-body" rows={8} bind:value={value.body} /></FormField>
+			<FormField id="tp-name" label={workspace.t('ui.ws.contacts.name')} error={fields.name}
+				><Input id="tp-name" bind:value={value.name} aria-invalid={!!fields.name} /></FormField
+			>
+			<FormField id="tp-subject" label={workspace.t('ui.ws.mail.subject')} error={fields.subject}
+				><Input id="tp-subject" bind:value={value.subject} aria-invalid={!!fields.subject} /></FormField
+			>
+			<FormField id="tp-body" label={workspace.t('ui.ws.mail.message')}
+				><Textarea id="tp-body" rows={8} bind:value={value.body} /></FormField
+			>
 		</form>
 		<Dialog.Footer>
 			<Button variant="outline" onclick={() => (open = false)}>{workspace.t('ui.ws.cancel')}</Button>

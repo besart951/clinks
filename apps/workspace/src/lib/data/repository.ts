@@ -28,7 +28,11 @@ export interface RepositoryConfig<T> {
 }
 
 /** Localizes the first issue per field of a failed schema check. */
-export function validationError(schema: ZodType, value: unknown, localize: (key: string) => string): MockApiError | null {
+export function validationError(
+	schema: ZodType,
+	value: unknown,
+	localize: (key: string) => string,
+): MockApiError | null {
 	const result = schema.safeParse(value);
 	if (result.success) return null;
 	const fields: { [field: string]: string } = {};
@@ -106,7 +110,8 @@ export class TenantRepository<Name extends TenantTable> {
 	restore(record: Row<Name>): Promise<Row<Name>> {
 		return this.#db.request(() => {
 			const tenantId = this.#authorize(this.#config.write);
-			if (record.tenantId !== tenantId) throw new MockApiError('unauthorized', this.#context.localize('error.unauthorized'));
+			if (record.tenantId !== tenantId)
+				throw new MockApiError('unauthorized', this.#context.localize('error.unauthorized'));
 			this.#rows().push(record);
 			this.#record('restored', record);
 			return record;

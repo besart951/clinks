@@ -2,6 +2,7 @@ import type { TenantId, UserId } from '../domain/ids.ts';
 import { moduleBooked, roleGrants } from '../domain/permissions.ts';
 import type { Membership, ModuleKey, Permission, Role, Tenant, User } from '../domain/types.ts';
 import type { AccountApi } from '../data/account-api.ts';
+import { MockApiError } from '../data/database.ts';
 
 export type SessionStatus = 'loading' | 'anonymous' | 'two_factor' | 'verify_email' | 'authenticated';
 
@@ -13,6 +14,18 @@ interface StoredSession {
 }
 
 const storageKey = 'clinks.workspace.session';
+const cacheKey = 'clinks.workspace.session.cache';
+
+type SessionSnapshot = Awaited<ReturnType<AccountApi['snapshotFor']>>;
+
+function readCache(userId: UserId): SessionSnapshot | null {
+	try {
+		const cached = JSON.parse(localStorage.getItem(cacheKey) ?? 'null') as SessionSnapshot | null;
+		return cached?.user.id === userId ? cached : null;
+	} catch {
+		return null;
+	}
+}
 
 function readStored(): StoredSession | null {
 	try {
@@ -80,8 +93,14 @@ export class Session {
 		try {
 			await this.#load(stored.userId, stored.tenantId);
 			this.impersonatorId = stored.impersonatorId;
-		} catch {
-			this.#clear();
+		} catch (error) {
+			const cached = error instanceof MockApiError && error.code !== 'unauthorized' ? readCache(stored.userId) : null;
+			if (!cached) {
+				this.#clear();
+				return;
+			}
+			this.#apply(cached, stored.tenantId);
+			this.impersonatorId = stored.impersonatorId;
 		}
 	}
 
@@ -162,6 +181,16 @@ export class Session {
 
 	async #load(userId: UserId, preferredTenant: TenantId | null) {
 		const snapshot = await this.#account.snapshotFor(userId);
+		try {
+			localStorage.setItem(cacheKey, JSON.stringify(snapshot));
+		} catch {
+			// Without the cache an offline reload asks to sign in again.
+		}
+		this.#apply(snapshot, preferredTenant);
+	}
+
+	/** Uses a session snapshot, from the API or from the offline cache. */
+	#apply(snapshot: SessionSnapshot, preferredTenant: TenantId | null) {
 		this.user = snapshot.user;
 		this.memberships = snapshot.memberships;
 		this.tenants = snapshot.tenants;
@@ -172,7 +201,12 @@ export class Session {
 
 	#persist(verified: boolean) {
 		if (!this.user) return;
-		const value: StoredSession = { userId: this.user.id, tenantId: this.tenantId, impersonatorId: this.impersonatorId, verified };
+		const value: StoredSession = {
+			userId: this.user.id,
+			tenantId: this.tenantId,
+			impersonatorId: this.impersonatorId,
+			verified,
+		};
 		try {
 			localStorage.setItem(storageKey, JSON.stringify(value));
 		} catch {
@@ -190,6 +224,7 @@ export class Session {
 		this.impersonatorId = null;
 		try {
 			localStorage.removeItem(storageKey);
+			localStorage.removeItem(cacheKey);
 		} catch {
 			// Nothing to clean up.
 		}

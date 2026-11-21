@@ -28,7 +28,11 @@
 <div class="grid gap-6 lg:grid-cols-[13rem_1fr]">
 	<nav class="flex gap-1 overflow-x-auto lg:flex-col" aria-label={workspace.t('ui.ws.nav.settings')}>
 		{#each visible as item (item.path)}
-			<a href={href(item.path)} class="hover:bg-muted flex shrink-0 items-center gap-2 rounded-md px-2.5 py-1.5 text-sm aria-[current=page]:bg-muted aria-[current=page]:font-medium" aria-current={current === item.path ? 'page' : undefined}>
+			<a
+				href={href(item.path)}
+				class="hover:bg-muted flex shrink-0 items-center gap-2 rounded-md px-2.5 py-1.5 text-sm aria-[current=page]:bg-muted aria-[current=page]:font-medium"
+				aria-current={current === item.path ? 'page' : undefined}
+			>
 				<item.icon class="size-4" />{workspace.t(item.label)}
 			</a>
 		{/each}

@@ -63,7 +63,9 @@ export interface OnboardingInput {
 
 export function roleFor(db: MockDatabase, userId: UserId | null, tenantId: TenantId | null): Role | null {
 	if (!userId || !tenantId) return null;
-	const membership = db.table('memberships').find((row) => row.userId === userId && row.tenantId === tenantId && row.status === 'active');
+	const membership = db
+		.table('memberships')
+		.find((row) => row.userId === userId && row.tenantId === tenantId && row.status === 'active');
 	return membership ? (db.table('roles').find((role) => role.id === membership.roleId) ?? null) : null;
 }
 
@@ -80,7 +82,8 @@ export class AccountApi {
 	signIn(email: string, password: string): Promise<User> {
 		return this.#db.request(() => {
 			const user = this.#db.table('users').find((row) => row.email.toLowerCase() === email.trim().toLowerCase());
-			if (!user || user.password !== password) throw new MockApiError('unauthorized', this.#localize('error.invalid_credentials'));
+			if (!user || user.password !== password)
+				throw new MockApiError('unauthorized', this.#localize('error.invalid_credentials'));
 			return user;
 		});
 	}
@@ -99,8 +102,10 @@ export class AccountApi {
 			if (!input.lastName.trim()) fields.lastName = this.#localize('error.ws.required');
 			if (!/^\S+@\S+\.\S+$/.test(email)) fields.email = this.#localize('error.ws.invalid_email');
 			if (input.password.length < 8) fields.password = this.#localize('error.ws.password_too_short');
-			if (this.#db.table('users').some((row) => row.email === email)) fields.email = this.#localize('error.email_taken');
-			if (Object.keys(fields).length > 0) throw new MockApiError('validation', this.#localize('error.validation'), fields);
+			if (this.#db.table('users').some((row) => row.email === email))
+				fields.email = this.#localize('error.email_taken');
+			if (Object.keys(fields).length > 0)
+				throw new MockApiError('validation', this.#localize('error.validation'), fields);
 			const user = stamp<User>({
 				id: newId(),
 				email,
@@ -134,7 +139,9 @@ export class AccountApi {
 	resetPassword(email: string, password: string): Promise<void> {
 		return this.#db.request(() => {
 			if (password.length < 8) {
-				throw new MockApiError('validation', this.#localize('error.validation'), { password: this.#localize('error.ws.password_too_short') });
+				throw new MockApiError('validation', this.#localize('error.validation'), {
+					password: this.#localize('error.ws.password_too_short'),
+				});
 			}
 			const user = this.#db.table('users').find((row) => row.email === email.trim().toLowerCase());
 			if (user) this.#patchUser(user.id, { password });
@@ -145,7 +152,9 @@ export class AccountApi {
 		return this.#db.request(() => {
 			const user = this.#db.table('users').find((row) => row.id === userId);
 			if (!user) throw new MockApiError('unauthorized', this.#localize('error.unauthorized'));
-			const memberships = this.#db.table('memberships').filter((row) => row.userId === userId && row.status === 'active');
+			const memberships = this.#db
+				.table('memberships')
+				.filter((row) => row.userId === userId && row.status === 'active');
 			const tenantIds = new Set(memberships.map((row) => row.tenantId));
 			return {
 				user,
@@ -160,7 +169,9 @@ export class AccountApi {
 		return this.#db.request(() => {
 			const userId = this.#requireUser();
 			if (!input.companyName.trim()) {
-				throw new MockApiError('validation', this.#localize('error.validation'), { companyName: this.#localize('error.ws.required') });
+				throw new MockApiError('validation', this.#localize('error.validation'), {
+					companyName: this.#localize('error.ws.required'),
+				});
 			}
 			const tenant = stamp<Tenant>({
 				id: newId(),
@@ -186,32 +197,59 @@ export class AccountApi {
 			const administrator = this.#insertRole(tenant.id, 'Administrator', 'administrator', administratorPermissions);
 			const user = this.#insertRole(tenant.id, 'Benutzer', 'user', userPermissions);
 			this.#db.table('memberships').push(
-				stamp<Membership>({ id: newId(), tenantId: tenant.id, userId, roleId: administrator.id, status: 'active', jobTitle: '' }),
+				stamp<Membership>({
+					id: newId(),
+					tenantId: tenant.id,
+					userId,
+					roleId: administrator.id,
+					status: 'active',
+					jobTitle: '',
+				}),
 			);
 			for (const email of input.invites.map((value) => value.trim().toLowerCase()).filter(Boolean)) {
 				this.#insertInvitation(tenant.id, email, user.id, userId);
 			}
 			if (input.demoData) {
 				const rows = seedDemo(tenant.id);
-				for (const [name, values] of Object.entries(rows)) this.#db.table(name as TableName).push(...(values as never[]));
+				for (const [name, values] of Object.entries(rows))
+					this.#db.table(name as TableName).push(...(values as never[]));
 			}
-			appendAudit(this.#db, { tenantId: tenant.id, actorId: userId, action: 'tenant.created', target: { kind: 'tenant', id: tenant.id, label: tenant.name } });
+			appendAudit(this.#db, {
+				tenantId: tenant.id,
+				actorId: userId,
+				action: 'tenant.created',
+				target: { kind: 'tenant', id: tenant.id, label: tenant.name },
+			});
 			return tenant;
 		}, ['tenants', 'roles', 'memberships', 'invitations', 'contacts', 'appointments', 'tasks', 'audit']);
 	}
 
 	updateTenant(changes: Partial<Omit<Tenant, 'id' | 'revision' | 'createdAt' | 'updatedAt'>>): Promise<Tenant> {
-		return this.#db.request(() => this.#mutateTenant('settings.manage', 'tenant.updated', changes), ['tenants', 'audit']);
+		return this.#db.request(
+			() => this.#mutateTenant('settings.manage', 'tenant.updated', changes),
+			['tenants', 'audit'],
+		);
 	}
 
-	updateProfile(changes: { firstName?: string; lastName?: string; email?: string; locale?: string; avatarDataUrl?: string | null; notificationPreferences?: NotificationPreferences }): Promise<User> {
+	updateProfile(changes: {
+		firstName?: string;
+		lastName?: string;
+		email?: string;
+		locale?: string;
+		avatarDataUrl?: string | null;
+		notificationPreferences?: NotificationPreferences;
+	}): Promise<User> {
 		return this.#db.request(() => {
 			const userId = this.#requireUser();
 			if (changes.firstName !== undefined && !changes.firstName.trim()) {
-				throw new MockApiError('validation', this.#localize('error.validation'), { firstName: this.#localize('error.ws.required') });
+				throw new MockApiError('validation', this.#localize('error.validation'), {
+					firstName: this.#localize('error.ws.required'),
+				});
 			}
 			if (changes.email !== undefined && !/^\S+@\S+\.\S+$/.test(changes.email)) {
-				throw new MockApiError('validation', this.#localize('error.validation'), { email: this.#localize('error.ws.invalid_email') });
+				throw new MockApiError('validation', this.#localize('error.validation'), {
+					email: this.#localize('error.ws.invalid_email'),
+				});
 			}
 			return this.#patchUser(userId, changes);
 		}, ['users']);
@@ -222,10 +260,14 @@ export class AccountApi {
 			const userId = this.#requireUser();
 			const user = this.#db.table('users').find((row) => row.id === userId);
 			if (!user || user.password !== current) {
-				throw new MockApiError('validation', this.#localize('error.validation'), { current: this.#localize('error.ws.wrong_password') });
+				throw new MockApiError('validation', this.#localize('error.validation'), {
+					current: this.#localize('error.ws.wrong_password'),
+				});
 			}
 			if (next.length < 8) {
-				throw new MockApiError('validation', this.#localize('error.validation'), { next: this.#localize('error.ws.password_too_short') });
+				throw new MockApiError('validation', this.#localize('error.validation'), {
+					next: this.#localize('error.ws.password_too_short'),
+				});
 			}
 			this.#patchUser(userId, { password: next });
 		}, ['users']);
@@ -234,7 +276,9 @@ export class AccountApi {
 	setTwoFactor(enabled: boolean, code: string): Promise<User> {
 		return this.#db.request(() => {
 			if (enabled && code.trim() !== '123456') {
-				throw new MockApiError('validation', this.#localize('error.validation'), { code: this.#localize('error.ws.invalid_code') });
+				throw new MockApiError('validation', this.#localize('error.validation'), {
+					code: this.#localize('error.ws.invalid_code'),
+				});
 			}
 			return this.#patchUser(this.#requireUser(), { twoFactorEnabled: enabled });
 		}, ['users']);
@@ -247,7 +291,10 @@ export class AccountApi {
 	revokeSession(id: SessionId): Promise<void> {
 		return this.#db.request(() => {
 			const userId = this.#requireUser();
-			this.#db.replace('sessions', this.#db.table('sessions').filter((row) => !(row.id === id && row.userId === userId)));
+			this.#db.replace(
+				'sessions',
+				this.#db.table('sessions').filter((row) => !(row.id === id && row.userId === userId)),
+			);
 		}, ['sessions']);
 	}
 
@@ -263,7 +310,9 @@ export class AccountApi {
 					const role = roles.find((row) => row.id === membership.roleId);
 					return user && role ? [{ membership, user, role }] : [];
 				});
-			const invitations = this.#db.table('invitations').filter((row) => row.tenantId === tenantId && row.status === 'pending');
+			const invitations = this.#db
+				.table('invitations')
+				.filter((row) => row.tenantId === tenantId && row.status === 'pending');
 			return { members, invitations, roles };
 		});
 	}
@@ -274,9 +323,14 @@ export class AccountApi {
 			const error = validationError(invitationSchema, { email }, (key) => this.#localize(key));
 			if (error) throw error;
 			const normalized = email.trim().toLowerCase();
-			const memberIds = this.#db.table('memberships').filter((row) => row.tenantId === tenantId && row.status === 'active').map((row) => row.userId);
+			const memberIds = this.#db
+				.table('memberships')
+				.filter((row) => row.tenantId === tenantId && row.status === 'active')
+				.map((row) => row.userId);
 			if (this.#db.table('users').some((row) => memberIds.includes(row.id) && row.email === normalized)) {
-				throw new MockApiError('validation', this.#localize('error.validation'), { email: this.#localize('error.ws.already_member') });
+				throw new MockApiError('validation', this.#localize('error.validation'), {
+					email: this.#localize('error.ws.already_member'),
+				});
 			}
 			const invitation = this.#insertInvitation(tenantId, normalized, roleId, this.#requireUser());
 			this.#audit(tenantId, 'invitation.created', 'invitation', invitation.id, normalized);
@@ -289,9 +343,13 @@ export class AccountApi {
 			const tenantId = this.#authorize('team.manage');
 			this.#db.replace(
 				'invitations',
-				this.#db.table('invitations').map((row) =>
-					row.id === id && row.tenantId === tenantId ? { ...row, expiresAt: new Date(Date.now() + 7 * 86_400_000).toISOString(), revision: row.revision + 1 } : row,
-				),
+				this.#db
+					.table('invitations')
+					.map((row) =>
+						row.id === id && row.tenantId === tenantId
+							? { ...row, expiresAt: new Date(Date.now() + 7 * 86_400_000).toISOString(), revision: row.revision + 1 }
+							: row,
+					),
 			);
 		}, ['invitations']);
 	}
@@ -301,17 +359,24 @@ export class AccountApi {
 			const tenantId = this.#authorize('team.manage');
 			const invitation = this.#db.table('invitations').find((row) => row.id === id && row.tenantId === tenantId);
 			if (!invitation) throw new MockApiError('not_found', this.#localize('error.invitation_invalid'));
-			this.#db.replace('invitations', this.#db.table('invitations').map((row) => (row.id === id ? { ...row, status: 'revoked' as const } : row)));
+			this.#db.replace(
+				'invitations',
+				this.#db.table('invitations').map((row) => (row.id === id ? { ...row, status: 'revoked' as const } : row)),
+			);
 			this.#audit(tenantId, 'invitation.revoked', 'invitation', id, invitation.email);
 		}, ['invitations', 'audit']);
 	}
 
 	/** Public view of an invitation link: which workspace, which role, for which address. */
-	invitationDetails(id: InvitationId): Promise<{ invitation: Invitation; tenantName: string; roleName: string; existingUser: boolean }> {
+	invitationDetails(
+		id: InvitationId,
+	): Promise<{ invitation: Invitation; tenantName: string; roleName: string; existingUser: boolean }> {
 		return this.#db.request(() => {
 			const invitation = this.#db.table('invitations').find((row) => row.id === id);
-			if (!invitation || invitation.status !== 'pending') throw new MockApiError('not_found', this.#localize('error.invitation_invalid'));
-			if (new Date(invitation.expiresAt) < new Date()) throw new MockApiError('validation', this.#localize('error.invitation_expired'));
+			if (!invitation || invitation.status !== 'pending')
+				throw new MockApiError('not_found', this.#localize('error.invitation_invalid'));
+			if (new Date(invitation.expiresAt) < new Date())
+				throw new MockApiError('validation', this.#localize('error.invitation_expired'));
 			return {
 				invitation,
 				tenantName: this.#db.table('tenants').find((row) => row.id === invitation.tenantId)?.name ?? '',
@@ -326,32 +391,63 @@ export class AccountApi {
 		return this.#db.request(() => {
 			const invitation = this.#db.table('invitations').find((row) => row.id === id && row.status === 'pending');
 			if (!invitation) throw new MockApiError('not_found', this.#localize('error.invitation_invalid'));
-			if (new Date(invitation.expiresAt) < new Date()) throw new MockApiError('validation', this.#localize('error.invitation_expired'));
+			if (new Date(invitation.expiresAt) < new Date())
+				throw new MockApiError('validation', this.#localize('error.invitation_expired'));
 			let user = this.#db.table('users').find((row) => row.email === invitation.email);
 			if (!user) {
 				user = stamp<User>({
-					id: newId(), email: invitation.email, firstName: name.firstName || invitation.email.split('@')[0], lastName: name.lastName,
-					avatarColor: '#1d4ed8', avatarDataUrl: null, password: 'demo1234', emailVerified: true, twoFactorEnabled: false,
-					locale: 'de-CH', globalRole: null, notificationPreferences: { inApp: true, email: true, push: false, digest: 'daily' },
+					id: newId(),
+					email: invitation.email,
+					firstName: name.firstName || invitation.email.split('@')[0],
+					lastName: name.lastName,
+					avatarColor: '#1d4ed8',
+					avatarDataUrl: null,
+					password: 'demo1234',
+					emailVerified: true,
+					twoFactorEnabled: false,
+					locale: 'de-CH',
+					globalRole: null,
+					notificationPreferences: { inApp: true, email: true, push: false, digest: 'daily' },
 				});
 				this.#db.table('users').push(user);
 			}
-			const membership = stamp<Membership>({ id: newId(), tenantId: invitation.tenantId, userId: user.id, roleId: invitation.roleId, status: 'active', jobTitle: '' });
+			const membership = stamp<Membership>({
+				id: newId(),
+				tenantId: invitation.tenantId,
+				userId: user.id,
+				roleId: invitation.roleId,
+				status: 'active',
+				jobTitle: '',
+			});
 			this.#db.table('memberships').push(membership);
-			this.#db.replace('invitations', this.#db.table('invitations').map((row) => (row.id === id ? { ...row, status: 'accepted' as const } : row)));
+			this.#db.replace(
+				'invitations',
+				this.#db.table('invitations').map((row) => (row.id === id ? { ...row, status: 'accepted' as const } : row)),
+			);
 			this.#audit(invitation.tenantId, 'invitation.accepted', 'invitation', id, invitation.email, invitation.invitedBy);
 			return membership;
 		}, ['users', 'memberships', 'invitations', 'audit']);
 	}
 
-	changeMember(id: MembershipId, changes: { roleId?: RoleId; status?: 'active' | 'inactive'; jobTitle?: string }): Promise<Membership> {
+	changeMember(
+		id: MembershipId,
+		changes: { roleId?: RoleId; status?: 'active' | 'inactive'; jobTitle?: string },
+	): Promise<Membership> {
 		return this.#db.request(() => {
 			const tenantId = this.#authorize('team.manage');
 			const membership = this.#db.table('memberships').find((row) => row.id === id && row.tenantId === tenantId);
 			if (!membership) throw new MockApiError('not_found', this.#localize('error.membership_not_found'));
-			const next = { ...membership, ...changes, revision: membership.revision + 1, updatedAt: new Date().toISOString() };
+			const next = {
+				...membership,
+				...changes,
+				revision: membership.revision + 1,
+				updatedAt: new Date().toISOString(),
+			};
 			this.#protectFinalAdministrator(tenantId, membership, next);
-			this.#db.replace('memberships', this.#db.table('memberships').map((row) => (row.id === id ? next : row)));
+			this.#db.replace(
+				'memberships',
+				this.#db.table('memberships').map((row) => (row.id === id ? next : row)),
+			);
 			const user = this.#db.table('users').find((row) => row.id === membership.userId);
 			this.#audit(tenantId, 'membership.updated', 'membership', id, user?.email ?? '');
 			return next;
@@ -371,8 +467,16 @@ export class AccountApi {
 			const current = this.#db.table('roles').find((row) => row.id === role.id && row.tenantId === tenantId);
 			if (!current) throw new MockApiError('not_found', this.#localize('error.role_not_found'));
 			if (current.kind !== 'custom') throw new MockApiError('validation', this.#localize('error.ws.protected_role'));
-			const next = { ...current, name: role.name.trim(), permissions: role.permissions, revision: current.revision + 1 };
-			this.#db.replace('roles', this.#db.table('roles').map((row) => (row.id === role.id ? next : row)));
+			const next = {
+				...current,
+				name: role.name.trim(),
+				permissions: role.permissions,
+				revision: current.revision + 1,
+			};
+			this.#db.replace(
+				'roles',
+				this.#db.table('roles').map((row) => (row.id === role.id ? next : row)),
+			);
 			this.#audit(tenantId, 'role.updated', 'role', next.id, next.name);
 			return next;
 		}, ['roles', 'audit']);
@@ -387,25 +491,40 @@ export class AccountApi {
 			if (this.#db.table('memberships').some((row) => row.roleId === id && row.status === 'active')) {
 				throw new MockApiError('validation', this.#localize('error.ws.role_in_use'));
 			}
-			this.#db.replace('roles', this.#db.table('roles').filter((row) => row.id !== id));
+			this.#db.replace(
+				'roles',
+				this.#db.table('roles').filter((row) => row.id !== id),
+			);
 			this.#audit(tenantId, 'role.deleted', 'role', id, role.name);
 		}, ['roles', 'audit']);
 	}
 
 	changePlan(plan: PlanCode, cycle: 'monthly' | 'yearly'): Promise<Tenant> {
 		return this.#db.request(() => {
-			const tenant = this.#mutateTenant('billing.manage', 'tenant.plan_changed', { plan, billingCycle: cycle, cancelledAt: null });
+			const tenant = this.#mutateTenant('billing.manage', 'tenant.plan_changed', {
+				plan,
+				billingCycle: cycle,
+				cancelledAt: null,
+			});
 			const allowed = planFor(plan).modules;
-			return this.#mutateTenant('billing.manage', 'tenant.updated', { enabledModules: tenant.enabledModules.filter((module) => allowed.includes(module)) });
+			return this.#mutateTenant('billing.manage', 'tenant.updated', {
+				enabledModules: tenant.enabledModules.filter((module) => allowed.includes(module)),
+			});
 		}, ['tenants', 'audit']);
 	}
 
 	cancelSubscription(): Promise<Tenant> {
-		return this.#db.request(() => this.#mutateTenant('billing.manage', 'tenant.cancelled', { cancelledAt: new Date().toISOString() }), ['tenants', 'audit']);
+		return this.#db.request(
+			() => this.#mutateTenant('billing.manage', 'tenant.cancelled', { cancelledAt: new Date().toISOString() }),
+			['tenants', 'audit'],
+		);
 	}
 
 	resumeSubscription(): Promise<Tenant> {
-		return this.#db.request(() => this.#mutateTenant('billing.manage', 'tenant.resumed', { cancelledAt: null }), ['tenants', 'audit']);
+		return this.#db.request(
+			() => this.#mutateTenant('billing.manage', 'tenant.resumed', { cancelledAt: null }),
+			['tenants', 'audit'],
+		);
 	}
 
 	updatePaymentMethod(card: { number: string; expires: string }): Promise<Tenant> {
@@ -414,9 +533,12 @@ export class AccountApi {
 			const fields: { [field: string]: string } = {};
 			if (digits.length < 13 || digits.length > 19) fields.number = this.#localize('error.ws.invalid_card');
 			if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(card.expires)) fields.expires = this.#localize('error.ws.invalid_expiry');
-			if (Object.keys(fields).length > 0) throw new MockApiError('validation', this.#localize('error.validation'), fields);
+			if (Object.keys(fields).length > 0)
+				throw new MockApiError('validation', this.#localize('error.validation'), fields);
 			const brand = digits.startsWith('4') ? 'Visa' : digits.startsWith('5') ? 'Mastercard' : 'Karte';
-			return this.#mutateTenant('billing.manage', 'tenant.payment_method_changed', { paymentMethod: { brand, last4: digits.slice(-4), expires: card.expires } });
+			return this.#mutateTenant('billing.manage', 'tenant.payment_method_changed', {
+				paymentMethod: { brand, last4: digits.slice(-4), expires: card.expires },
+			});
 		}, ['tenants', 'audit']);
 	}
 
@@ -424,13 +546,20 @@ export class AccountApi {
 		return this.#db.request(() => {
 			const tenantId = this.#authorize('billing.manage');
 			const tenant = this.#db.table('tenants').find((row) => row.id === tenantId)!;
-			const seats = this.#db.table('memberships').filter((row) => row.tenantId === tenantId && row.status === 'active').length;
+			const seats = this.#db
+				.table('memberships')
+				.filter((row) => row.tenantId === tenantId && row.status === 'active').length;
 			const amount = priceFor(planFor(tenant.plan), seats, 'monthly');
 			return Array.from({ length: 6 }, (_, index) => {
 				const date = new Date();
 				date.setDate(1);
 				date.setMonth(date.getMonth() - index);
-				return { number: `CL-${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}-${tenantId.slice(-4)}`, date: toCalendarDate(date), amount, status: index === 0 ? 'open' : 'paid' } as PlatformInvoice;
+				return {
+					number: `CL-${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}-${tenantId.slice(-4)}`,
+					date: toCalendarDate(date),
+					amount,
+					status: index === 0 ? 'open' : 'paid',
+				} as PlatformInvoice;
 			});
 		});
 	}
@@ -454,14 +583,26 @@ export class AccountApi {
 			const userId = this.#requireUser();
 			const user = this.#db.table('users').find((row) => row.id === userId);
 			if (!user || user.password !== password) {
-				throw new MockApiError('validation', this.#localize('error.validation'), { password: this.#localize('error.ws.wrong_password') });
+				throw new MockApiError('validation', this.#localize('error.validation'), {
+					password: this.#localize('error.ws.wrong_password'),
+				});
 			}
-			for (const membership of this.#db.table('memberships').filter((row) => row.userId === userId && row.status === 'active')) {
+			for (const membership of this.#db
+				.table('memberships')
+				.filter((row) => row.userId === userId && row.status === 'active')) {
 				const next = { ...membership, status: 'inactive' as const };
 				this.#protectFinalAdministrator(membership.tenantId, membership, next);
 			}
-			this.#db.replace('memberships', this.#db.table('memberships').map((row) => (row.userId === userId ? { ...row, status: 'inactive' as const } : row)));
-			this.#db.replace('users', this.#db.table('users').filter((row) => row.id !== userId));
+			this.#db.replace(
+				'memberships',
+				this.#db
+					.table('memberships')
+					.map((row) => (row.userId === userId ? { ...row, status: 'inactive' as const } : row)),
+			);
+			this.#db.replace(
+				'users',
+				this.#db.table('users').filter((row) => row.id !== userId),
+			);
 		}, ['users', 'memberships']);
 	}
 
@@ -470,7 +611,8 @@ export class AccountApi {
 			this.#requireSuperAdministrator();
 			return this.#db.table('tenants').map((tenant) => ({
 				tenant,
-				members: this.#db.table('memberships').filter((row) => row.tenantId === tenant.id && row.status === 'active').length,
+				members: this.#db.table('memberships').filter((row) => row.tenantId === tenant.id && row.status === 'active')
+					.length,
 				contacts: this.#db.table('contacts').filter((row) => row.tenantId === tenant.id).length,
 				invoices: this.#db.table('invoices').filter((row) => row.tenantId === tenant.id).length,
 			}));
@@ -500,7 +642,10 @@ export class AccountApi {
 			if (enabled) flags.add(flag);
 			else flags.delete(flag);
 			const next = { ...tenant, featureFlags: [...flags], revision: tenant.revision + 1 };
-			this.#db.replace('tenants', this.#db.table('tenants').map((row) => (row.id === tenantId ? next : row)));
+			this.#db.replace(
+				'tenants',
+				this.#db.table('tenants').map((row) => (row.id === tenantId ? next : row)),
+			);
 			return next;
 		}, ['tenants']);
 	}
@@ -523,7 +668,8 @@ export class AccountApi {
 
 	#requireSuperAdministrator() {
 		const user = this.#db.table('users').find((row) => row.id === this.#caller.userId());
-		if (user?.globalRole !== 'super_administrator') throw new MockApiError('unauthorized', this.#localize('error.unauthorized'));
+		if (user?.globalRole !== 'super_administrator')
+			throw new MockApiError('unauthorized', this.#localize('error.unauthorized'));
 	}
 
 	#authorize(permission: Permission): TenantId {
@@ -538,7 +684,10 @@ export class AccountApi {
 		const user = this.#db.table('users').find((row) => row.id === userId);
 		if (!user) throw new MockApiError('not_found', this.#localize('error.user_not_found'));
 		const next = { ...user, ...changes, id: user.id, revision: user.revision + 1, updatedAt: new Date().toISOString() };
-		this.#db.replace('users', this.#db.table('users').map((row) => (row.id === userId ? next : row)));
+		this.#db.replace(
+			'users',
+			this.#db.table('users').map((row) => (row.id === userId ? next : row)),
+		);
 		return next;
 	}
 
@@ -546,8 +695,17 @@ export class AccountApi {
 		const tenantId = this.#authorize(permission);
 		const tenant = this.#db.table('tenants').find((row) => row.id === tenantId);
 		if (!tenant) throw new MockApiError('not_found', this.#localize('error.tenant_not_found'));
-		const next = { ...tenant, ...changes, id: tenant.id, revision: tenant.revision + 1, updatedAt: new Date().toISOString() };
-		this.#db.replace('tenants', this.#db.table('tenants').map((row) => (row.id === tenantId ? next : row)));
+		const next = {
+			...tenant,
+			...changes,
+			id: tenant.id,
+			revision: tenant.revision + 1,
+			updatedAt: new Date().toISOString(),
+		};
+		this.#db.replace(
+			'tenants',
+			this.#db.table('tenants').map((row) => (row.id === tenantId ? next : row)),
+		);
 		this.#audit(tenantId, action, 'tenant', tenantId, next.name);
 		return next;
 	}
@@ -560,7 +718,12 @@ export class AccountApi {
 
 	#insertInvitation(tenantId: TenantId, email: string, roleId: RoleId, invitedBy: UserId): Invitation {
 		const invitation = stamp<Invitation>({
-			id: newId(), tenantId, email, roleId, status: 'pending', invitedBy,
+			id: newId(),
+			tenantId,
+			email,
+			roleId,
+			status: 'pending',
+			invitedBy,
 			expiresAt: new Date(`${addDays(toCalendarDate(new Date()), 7)}T23:59:59`).toISOString(),
 		});
 		this.#db.table('invitations').push(invitation);
@@ -573,11 +736,20 @@ export class AccountApi {
 		const isAdministrator = (membership: Membership) =>
 			membership.status === 'active' && roles.find((role) => role.id === membership.roleId)?.kind === 'administrator';
 		if (!isAdministrator(current) || isAdministrator(next)) return;
-		const others = this.#db.table('memberships').filter((row) => row.tenantId === tenantId && row.id !== current.id && isAdministrator(row));
+		const others = this.#db
+			.table('memberships')
+			.filter((row) => row.tenantId === tenantId && row.id !== current.id && isAdministrator(row));
 		if (others.length === 0) throw new MockApiError('validation', this.#localize('error.ws.last_administrator'));
 	}
 
-	#audit(tenantId: TenantId, action: string, kind: 'invitation' | 'membership' | 'role' | 'tenant', id: string, label: string, actor?: UserId) {
+	#audit(
+		tenantId: TenantId,
+		action: string,
+		kind: 'invitation' | 'membership' | 'role' | 'tenant',
+		id: string,
+		label: string,
+		actor?: UserId,
+	) {
 		const actorId = actor ?? this.#caller.userId();
 		if (actorId) appendAudit(this.#db, { tenantId, actorId, action, target: { kind, id, label } });
 	}

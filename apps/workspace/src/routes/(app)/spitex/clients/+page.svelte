@@ -25,7 +25,9 @@
 
 <ModuleGate module="spitex" permission="spitex.read">
 	<PageHeader title={workspace.t('ui.ws.module.spitex')}>
-		{#snippet actions()}{#if canWrite}<Button onclick={() => sheet.show(null, { tags: [clientTag] })}><Plus class="size-4" />{workspace.t('ui.ws.spitex.new_client')}</Button>{/if}{/snippet}
+		{#snippet actions()}{#if canWrite}<Button onclick={() => sheet.show(null, { tags: [clientTag] })}
+					><Plus class="size-4" />{workspace.t('ui.ws.spitex.new_client')}</Button
+				>{/if}{/snippet}
 	</PageHeader>
 	<SpitexNav />
 	<SearchInput bind:value={model.search} label={workspace.t('ui.ws.contacts.search')} class="mb-4 w-full sm:w-72" />
@@ -33,14 +35,34 @@
 		{#snippet children()}
 			<div class="rounded-xl border">
 				<Table.Root>
-					<Table.Header><Table.Row><Table.Head>{workspace.t('ui.ws.contacts.name')}</Table.Head><Table.Head class="hidden md:table-cell">{workspace.t('ui.ws.contacts.address')}</Table.Head><Table.Head>{workspace.t('ui.ws.spitex.next_visit')}</Table.Head><Table.Head class="hidden sm:table-cell">{workspace.t('ui.ws.spitex.last_week')}</Table.Head></Table.Row></Table.Header>
+					<Table.Header
+						><Table.Row
+							><Table.Head>{workspace.t('ui.ws.contacts.name')}</Table.Head><Table.Head class="hidden md:table-cell"
+								>{workspace.t('ui.ws.contacts.address')}</Table.Head
+							><Table.Head>{workspace.t('ui.ws.spitex.next_visit')}</Table.Head><Table.Head class="hidden sm:table-cell"
+								>{workspace.t('ui.ws.spitex.last_week')}</Table.Head
+							></Table.Row
+						></Table.Header
+					>
 					<Table.Body>
 						{#each model.rows as row (row.client.id)}
 							<Table.Row class="cursor-pointer" onclick={() => navigate(`/spitex/clients/${row.client.id}`)}>
-								<Table.Cell><a class="font-medium hover:underline" href={href(`/spitex/clients/${row.client.id}`)} onclick={(event) => event.stopPropagation()}>{contactName(row.client)}</a>{#if row.client.notes}<span class="text-muted-foreground block max-w-64 truncate text-xs">{row.client.notes}</span>{/if}</Table.Cell>
-								<Table.Cell class="hidden md:table-cell">{row.client.address.street}, {row.client.address.city}</Table.Cell>
+								<Table.Cell
+									><a
+										class="font-medium hover:underline"
+										href={href(`/spitex/clients/${row.client.id}`)}
+										onclick={(event) => event.stopPropagation()}>{contactName(row.client)}</a
+									>{#if row.client.notes}<span class="text-muted-foreground block max-w-64 truncate text-xs"
+											>{row.client.notes}</span
+										>{/if}</Table.Cell
+								>
+								<Table.Cell class="hidden md:table-cell"
+									>{row.client.address.street}, {row.client.address.city}</Table.Cell
+								>
 								<Table.Cell>{row.next ? workspace.i18n.dateTime(row.next.start) : '—'}</Table.Cell>
-								<Table.Cell class="hidden sm:table-cell">{workspace.t('ui.ws.spitex.count', { count: row.perWeek })}</Table.Cell>
+								<Table.Cell class="hidden sm:table-cell"
+									>{workspace.t('ui.ws.spitex.count', { count: row.perWeek })}</Table.Cell
+								>
 							</Table.Row>
 						{/each}
 					</Table.Body>

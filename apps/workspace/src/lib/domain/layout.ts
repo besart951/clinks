@@ -13,8 +13,14 @@ export interface PositionedAppointment {
  * Places a day's appointments in side-by-side lanes so overlapping ones stay readable.
  * `top` and `height` are in minutes from `dayStart`.
  */
-export function layoutDay(appointments: readonly Appointment[], dayStart: number, dayEnd: number): PositionedAppointment[] {
-	const sorted = [...appointments].sort((left, right) => left.start.localeCompare(right.start) || right.end.localeCompare(left.end));
+export function layoutDay(
+	appointments: readonly Appointment[],
+	dayStart: number,
+	dayEnd: number,
+): PositionedAppointment[] {
+	const sorted = [...appointments].sort(
+		(left, right) => left.start.localeCompare(right.start) || right.end.localeCompare(left.end),
+	);
 	const result: PositionedAppointment[] = [];
 	let cluster: PositionedAppointment[] = [];
 	let laneEnds: number[] = [];

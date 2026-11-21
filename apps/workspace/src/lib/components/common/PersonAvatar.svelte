@@ -7,7 +7,6 @@
 </script>
 
 <script lang="ts">
-
 	let { person, size = 'md' }: { person: AvatarPerson; size?: 'xs' | 'sm' | 'md' | 'lg' } = $props();
 
 	const initials = $derived(

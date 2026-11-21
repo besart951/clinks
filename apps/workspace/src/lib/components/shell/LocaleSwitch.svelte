@@ -19,7 +19,10 @@
 		{/snippet}
 	</DropdownMenu.Trigger>
 	<DropdownMenu.Content align="end">
-		<DropdownMenu.RadioGroup value={workspace.i18n.locale} onValueChange={(value) => workspace.i18n.setLocale(value as Locale)}>
+		<DropdownMenu.RadioGroup
+			value={workspace.i18n.locale}
+			onValueChange={(value) => workspace.i18n.setLocale(value as Locale)}
+		>
 			{#each locales as locale (locale)}
 				<DropdownMenu.RadioItem value={locale}>{names[locale]}</DropdownMenu.RadioItem>
 			{/each}

@@ -1,7 +1,16 @@
 import type { AuditEntry } from '../../domain/types.ts';
 
 const knownActions = new Set([
-	'created', 'updated', 'deleted', 'restored', 'revoked', 'accepted', 'plan_changed', 'cancelled', 'resumed', 'payment_method_changed',
+	'created',
+	'updated',
+	'deleted',
+	'restored',
+	'revoked',
+	'accepted',
+	'plan_changed',
+	'cancelled',
+	'resumed',
+	'payment_method_changed',
 ]);
 
 /** Translation key for an audit action such as `invoice.created`. */

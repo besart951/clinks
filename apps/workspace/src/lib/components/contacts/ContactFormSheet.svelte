@@ -59,9 +59,11 @@
 </script>
 
 <Sheet.Root {open} onOpenChange={requestClose}>
-	<Sheet.Content class="w-full overflow-y-auto sm:max-w-lg">
+	<Sheet.Content closeLabel={workspace.t('ui.ws.close')} class="w-full overflow-y-auto sm:max-w-lg">
 		<Sheet.Header>
-			<Sheet.Title>{form.editing ? workspace.t('ui.ws.contacts.edit') : workspace.t('ui.ws.command.new_contact')}</Sheet.Title>
+			<Sheet.Title
+				>{form.editing ? workspace.t('ui.ws.contacts.edit') : workspace.t('ui.ws.command.new_contact')}</Sheet.Title
+			>
 			<Sheet.Description>{workspace.t('ui.ws.contacts.form_text')}</Sheet.Description>
 		</Sheet.Header>
 		<form id="contact-form" class="space-y-4 px-4" onsubmit={submit} novalidate>
@@ -77,12 +79,22 @@
 						<Input id="c-first" bind:value={form.value.firstName} autocomplete="off" />
 					</FormField>
 					<FormField id="c-last" label={workspace.t('ui.ws.field.last_name')} error={form.fields.lastName}>
-						<Input id="c-last" bind:value={form.value.lastName} aria-invalid={!!form.fields.lastName} autocomplete="off" />
+						<Input
+							id="c-last"
+							bind:value={form.value.lastName}
+							aria-invalid={!!form.fields.lastName}
+							autocomplete="off"
+						/>
 					</FormField>
 				</div>
 				<div class="grid grid-cols-2 gap-3">
 					<FormField id="c-birth" label={workspace.t('ui.ws.field.birth_date')}>
-						<Input id="c-birth" type="date" value={form.value.birthDate ?? ''} oninput={(event) => (form.value.birthDate = event.currentTarget.value || null)} />
+						<Input
+							id="c-birth"
+							type="date"
+							value={form.value.birthDate ?? ''}
+							oninput={(event) => (form.value.birthDate = event.currentTarget.value || null)}
+						/>
 					</FormField>
 					<FormField id="c-insurer" label={workspace.t('ui.ws.field.insurer')}>
 						<Input id="c-insurer" bind:value={form.value.insurer} />
@@ -106,7 +118,12 @@
 			</FormField>
 			<div class="grid grid-cols-[7rem_1fr] gap-3">
 				<FormField id="c-zip" label={workspace.t('ui.ws.field.zip')} error={form.fields['address.zip']}>
-					<Input id="c-zip" bind:value={form.value.address.zip} inputmode="numeric" aria-invalid={!!form.fields['address.zip']} />
+					<Input
+						id="c-zip"
+						bind:value={form.value.address.zip}
+						inputmode="numeric"
+						aria-invalid={!!form.fields['address.zip']}
+					/>
 				</FormField>
 				<FormField id="c-city" label={workspace.t('ui.ws.field.city')}>
 					<Input id="c-city" bind:value={form.value.address.city} />
@@ -119,7 +136,12 @@
 							{#each form.value.tags as tag (tag)}
 								<span class="bg-muted inline-flex items-center gap-1 rounded-full py-0.5 pr-1 pl-2 text-xs">
 									{tag}
-									<button type="button" class="hover:bg-background rounded-full p-0.5" onclick={() => form.removeTag(tag)} aria-label={workspace.t('ui.ws.contacts.remove_tag', { tag })}><X class="size-3" /></button>
+									<button
+										type="button"
+										class="hover:bg-background rounded-full p-0.5"
+										onclick={() => form.removeTag(tag)}
+										aria-label={workspace.t('ui.ws.contacts.remove_tag', { tag })}><X class="size-3" /></button
+									>
 								</span>
 							{/each}
 						</div>

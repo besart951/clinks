@@ -1,24 +1,8 @@
 import { toast } from 'svelte-sonner';
-import type { Contact, ContactKind } from '../../domain/types.ts';
+import type { Contact } from '../../domain/types.ts';
+import { emptyContact } from './empty-contact.ts';
 import type { Draft } from '../../data/repository.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
-
-export function emptyContact(kind: ContactKind = 'person'): Draft<Contact> {
-	return {
-		kind,
-		firstName: '',
-		lastName: '',
-		companyName: '',
-		email: '',
-		phone: '',
-		address: { street: '', zip: '', city: '' },
-		birthDate: null,
-		insurer: '',
-		tags: [],
-		notes: '',
-		archived: false,
-	};
-}
 
 /** Create or edit one contact; field errors come back localized from the mock API. */
 export class ContactFormModel {
@@ -64,7 +48,9 @@ export class ContactFormModel {
 		try {
 			const api = this.#workspace.api.contacts;
 			const draft = $state.snapshot(this.value) as Draft<Contact>;
-			const saved = this.#original ? await api.update(this.#original.id, this.#original.revision, draft) : await api.create(draft);
+			const saved = this.#original
+				? await api.update(this.#original.id, this.#original.revision, draft)
+				: await api.create(draft);
 			this.#initial = JSON.stringify(this.value);
 			return saved;
 		} catch (error) {

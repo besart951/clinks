@@ -25,8 +25,8 @@ export class CommentThreadModel {
 		this.#label = context.label;
 		this.#path = context.path;
 		this.resource = new Resource(workspace.db, ['comments'], async () =>
-			(await workspace.api.comments.list((row) => row.target.kind === target.kind && row.target.id === target.id)).sort((left, right) =>
-				left.createdAt.localeCompare(right.createdAt),
+			(await workspace.api.comments.list((row) => row.target.kind === target.kind && row.target.id === target.id)).sort(
+				(left, right) => left.createdAt.localeCompare(right.createdAt),
 			),
 		);
 	}
@@ -38,12 +38,20 @@ export class CommentThreadModel {
 		const mentions = mentionedPeople(body, people);
 		const author = this.#workspace.session.user!;
 		const created = await this.#workspace.run(async () => {
-			const comment = await this.#workspace.api.comments.create({ target: this.#target, authorId: author.id, body, mentions });
+			const comment = await this.#workspace.api.comments.create({
+				target: this.#target,
+				authorId: author.id,
+				body,
+				mentions,
+			});
 			if (mentions.length > 0) {
 				await this.#workspace.api.notify(
 					mentions,
 					'mention',
-					{ key: 'ui.ws.notification.mentioned', params: { name: `${author.firstName} ${author.lastName}`, target: this.#label } },
+					{
+						key: 'ui.ws.notification.mentioned',
+						params: { name: `${author.firstName} ${author.lastName}`, target: this.#label },
+					},
 					this.#path,
 				);
 			}
@@ -55,6 +63,9 @@ export class CommentThreadModel {
 
 	async remove(comment: Comment) {
 		const api = this.#workspace.api.comments;
-		await this.#workspace.run(() => api.remove(comment.id), { success: 'ui.ws.comments.deleted', undo: () => api.restore(comment) });
+		await this.#workspace.run(() => api.remove(comment.id), {
+			success: 'ui.ws.comments.deleted',
+			undo: () => api.restore(comment),
+		});
 	}
 }

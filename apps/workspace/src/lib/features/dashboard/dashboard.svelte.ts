@@ -45,12 +45,20 @@ export class DashboardModel {
 		} catch {
 			this.setupDismissed = false;
 		}
-		this.resource = new Resource(workspace.db, ['appointments', 'tasks', 'mails', 'invoices', 'audit', 'contacts', 'tenants', 'invitations'], () => this.#load());
+		this.resource = new Resource(
+			workspace.db,
+			['appointments', 'tasks', 'mails', 'invoices', 'audit', 'contacts', 'tenants', 'invitations'],
+			() => this.#load(),
+		);
 	}
 
 	greeting(now: Date = new Date()): string {
 		const hour = now.getHours();
-		return hour < 11 ? 'ui.ws.dashboard.good_morning' : hour < 17 ? 'ui.ws.dashboard.good_day' : 'ui.ws.dashboard.good_evening';
+		return hour < 11
+			? 'ui.ws.dashboard.good_morning'
+			: hour < 17
+				? 'ui.ws.dashboard.good_day'
+				: 'ui.ws.dashboard.good_evening';
 	}
 
 	dismissSetup() {
@@ -69,7 +77,14 @@ export class DashboardModel {
 		const can = (module: Parameters<typeof session.hasModule>[0], permission: Parameters<typeof session.can>[0]) =>
 			session.hasModule(module) && session.can(permission);
 		const [appointments, tasks, mails, invoices, activity, contacts, members] = await Promise.all([
-			optional(can('calendar', 'calendar.read'), () => api.appointments.list((row) => row.start.slice(0, 10) >= addDays(day, -1) && row.start.slice(0, 10) <= addDays(day, 1)), []),
+			optional(
+				can('calendar', 'calendar.read'),
+				() =>
+					api.appointments.list(
+						(row) => row.start.slice(0, 10) >= addDays(day, -1) && row.start.slice(0, 10) <= addDays(day, 1),
+					),
+				[],
+			),
 			optional(can('planner', 'planner.read'), () => api.tasks.list(), []),
 			optional(can('mail', 'mail.read'), () => api.mails.list((row) => row.folder === 'inbox'), []),
 			optional(can('finance', 'finance.read'), () => api.invoices.list(), []),
@@ -82,10 +97,15 @@ export class DashboardModel {
 			.filter((row) => row.assigneeId === me || session.can('calendar.write'))
 			.sort((left, right) => left.start.localeCompare(right.start));
 		const open = tasks.filter((task) => task.status !== 'done');
-		const unpaid = invoices.filter((invoice) => ['open', 'partially_paid', 'overdue', 'reminded'].includes(effectiveStatus(invoice, day)));
+		const unpaid = invoices.filter((invoice) =>
+			['open', 'partially_paid', 'overdue', 'reminded'].includes(effectiveStatus(invoice, day)),
+		);
 		const tenant = session.tenant!;
 		return {
-			appointmentsToday: appointmentsToday.filter((row) => row.assigneeId === me).length > 0 ? appointmentsToday.filter((row) => row.assigneeId === me) : appointmentsToday.slice(0, 8),
+			appointmentsToday:
+				appointmentsToday.filter((row) => row.assigneeId === me).length > 0
+					? appointmentsToday.filter((row) => row.assigneeId === me)
+					: appointmentsToday.slice(0, 8),
 			myTasks: open
 				.filter((task) => task.assigneeIds.includes(me))
 				.sort((left, right) => (left.dueDate ?? '9999').localeCompare(right.dueDate ?? '9999'))
@@ -104,7 +124,11 @@ export class DashboardModel {
 				{ key: 'contact', done: contacts.length > 0, path: '/contacts?new=1' },
 				{ key: 'appointment', done: appointments.length > 0, path: '/calendar?new=1' },
 				{ key: 'invoice', done: invoices.length > 0, path: '/finance/invoices/new' },
-				{ key: 'team', done: members === null || members.members.length > 1 || members.invitations.length > 0, path: '/settings/team' },
+				{
+					key: 'team',
+					done: members === null || members.members.length > 1 || members.invitations.length > 0,
+					path: '/settings/team',
+				},
 				{ key: 'payment', done: tenant.paymentMethod !== null, path: '/settings/billing' },
 			],
 		};

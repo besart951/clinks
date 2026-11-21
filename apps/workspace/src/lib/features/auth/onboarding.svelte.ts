@@ -35,7 +35,10 @@ export class OnboardingModel {
 	}
 
 	get inviteList(): string[] {
-		return this.invites.split(/[\s,;]+/).map((email) => email.trim()).filter(Boolean);
+		return this.invites
+			.split(/[\s,;]+/)
+			.map((email) => email.trim())
+			.filter(Boolean);
 	}
 
 	get canContinue(): boolean {
@@ -50,7 +53,9 @@ export class OnboardingModel {
 	}
 
 	toggleModule(module: ModuleKey) {
-		this.modules = this.modules.includes(module) ? this.modules.filter((candidate) => candidate !== module) : [...this.modules, module];
+		this.modules = this.modules.includes(module)
+			? this.modules.filter((candidate) => candidate !== module)
+			: [...this.modules, module];
 	}
 
 	next() {
@@ -66,7 +71,13 @@ export class OnboardingModel {
 		this.error = '';
 		try {
 			const tenant = await this.#workspace.account.completeOnboarding(
-				{ companyName: this.companyName, industry: this.industry, modules: this.modules, invites: this.inviteList, demoData: this.demoData },
+				{
+					companyName: this.companyName,
+					industry: this.industry,
+					modules: this.modules,
+					invites: this.inviteList,
+					demoData: this.demoData,
+				},
 				(tenantId) => this.#workspace.seedDemo(tenantId),
 			);
 			await this.#workspace.session.refresh();

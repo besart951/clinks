@@ -7,7 +7,16 @@ import type { Workspace } from '../../workspace.svelte.ts';
 import { uploadDocument } from '../collaboration/attachments.svelte.ts';
 
 function emptyExpense(): Draft<Expense> {
-	return { date: today(), description: '', supplier: '', category: 'material', amount: 0, vatRate: 810, receiptId: null, status: 'open' };
+	return {
+		date: today(),
+		description: '',
+		supplier: '',
+		category: 'material',
+		amount: 0,
+		vatRate: 810,
+		receiptId: null,
+		status: 'open',
+	};
 }
 
 /** Expenses with receipts: capture, edit, book. */
@@ -31,7 +40,10 @@ export class ExpensesModel {
 	}
 
 	get rows(): Expense[] {
-		return (this.resource.data ?? []).filter((expense) => (!this.status || expense.status === this.status) && (!this.category || expense.category === this.category));
+		return (this.resource.data ?? []).filter(
+			(expense) =>
+				(!this.status || expense.status === this.status) && (!this.category || expense.category === this.category),
+		);
 	}
 
 	get total() {
@@ -55,9 +67,14 @@ export class ExpensesModel {
 		this.fields = {};
 		const api = this.#workspace.api;
 		try {
-			const draft = { ...$state.snapshot(this.value), amount: Math.round(Number(this.amountInput.replace(',', '.')) * 100) || 0 } as Draft<Expense>;
+			const draft = {
+				...$state.snapshot(this.value),
+				amount: Math.round(Number(this.amountInput.replace(',', '.')) * 100) || 0,
+			} as Draft<Expense>;
 			if (this.receipt) draft.receiptId = (await uploadDocument(this.#workspace, this.receipt, {})).id;
-			const saved = this.editing ? await api.expenses.update(this.editing.id, this.editing.revision, draft) : await api.expenses.create(draft);
+			const saved = this.editing
+				? await api.expenses.update(this.editing.id, this.editing.revision, draft)
+				: await api.expenses.create(draft);
 			if (this.receipt && draft.receiptId) {
 				const document = await api.documents.get(draft.receiptId);
 				await api.documents.update(document.id, document.revision, { targets: [{ kind: 'expense', id: saved.id }] });
@@ -74,12 +91,18 @@ export class ExpensesModel {
 	}
 
 	async book(expense: Expense) {
-		await this.#workspace.run(() => this.#workspace.api.expenses.update(expense.id, expense.revision, { status: 'booked' }), { success: 'ui.ws.expense.booked' });
+		await this.#workspace.run(
+			() => this.#workspace.api.expenses.update(expense.id, expense.revision, { status: 'booked' }),
+			{ success: 'ui.ws.expense.booked' },
+		);
 	}
 
 	async remove(expense: Expense) {
 		const api = this.#workspace.api.expenses;
-		await this.#workspace.run(() => api.remove(expense.id), { success: 'ui.ws.expense.deleted', undo: () => api.restore(expense) });
+		await this.#workspace.run(() => api.remove(expense.id), {
+			success: 'ui.ws.expense.deleted',
+			undo: () => api.restore(expense),
+		});
 	}
 
 	async receiptUrl(expense: Expense): Promise<string | null> {

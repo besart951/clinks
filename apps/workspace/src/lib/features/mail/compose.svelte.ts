@@ -22,7 +22,15 @@ export class ComposeModel {
 		this.#workspace = workspace;
 	}
 
-	start(options: { to?: string[]; subject?: string; body?: string; draft?: MailMessage | null; replyTo?: MailMessage | null } = {}) {
+	start(
+		options: {
+			to?: string[];
+			subject?: string;
+			body?: string;
+			draft?: MailMessage | null;
+			replyTo?: MailMessage | null;
+		} = {},
+	) {
 		const reply = options.replyTo ?? null;
 		this.draft = options.draft ?? null;
 		this.replyTo = reply;
@@ -31,14 +39,19 @@ export class ComposeModel {
 		this.body =
 			options.draft?.body ??
 			options.body ??
-			(reply ? `\n\n${this.#workspace.t('ui.ws.mail.quote_header', { name: reply.fromName, date: this.#workspace.i18n.dateTime(reply.sentAt) })}\n> ${reply.body.split('\n').join('\n> ')}` : '');
+			(reply
+				? `\n\n${this.#workspace.t('ui.ws.mail.quote_header', { name: reply.fromName, date: this.#workspace.i18n.dateTime(reply.sentAt) })}\n> ${reply.body.split('\n').join('\n> ')}`
+				: '');
 		this.recipientInput = '';
 		this.fields = {};
 		this.#initial = JSON.stringify([this.to, this.subject, this.body]);
 	}
 
 	addRecipient(value = this.recipientInput) {
-		const emails = value.split(/[,;\s]+/).map((email) => email.trim()).filter(Boolean);
+		const emails = value
+			.split(/[,;\s]+/)
+			.map((email) => email.trim())
+			.filter(Boolean);
 		this.to = [...new Set([...this.to, ...emails])];
 		this.recipientInput = '';
 	}

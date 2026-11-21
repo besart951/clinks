@@ -25,7 +25,9 @@ export function isValidSwissIban(iban: string): boolean {
 }
 
 export function formatIban(iban: string): string {
-	return compactIban(iban).replace(/(.{4})/g, '$1 ').trim();
+	return compactIban(iban)
+		.replace(/(.{4})/g, '$1 ')
+		.trim();
 }
 
 function addressLines(party: { name: string; address: Address }) {

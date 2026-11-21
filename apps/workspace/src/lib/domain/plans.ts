@@ -8,7 +8,12 @@ export interface Plan {
 }
 
 export const plans: readonly Plan[] = [
-	{ code: 'starter', monthlyPricePerSeat: 1900, includedSeats: 3, modules: ['contacts', 'calendar', 'documents', 'planner', 'mail'] },
+	{
+		code: 'starter',
+		monthlyPricePerSeat: 1900,
+		includedSeats: 3,
+		modules: ['contacts', 'calendar', 'documents', 'planner', 'mail'],
+	},
 	{
 		code: 'team',
 		monthlyPricePerSeat: 3900,

@@ -11,10 +11,11 @@
 	import ConfirmDialog, { type ConfirmRequest } from '$lib/components/common/ConfirmDialog.svelte';
 	import { ComposeModel } from '$lib/features/mail/compose.svelte';
 	import { contactName } from '$lib/data/workspace-api';
-	import type { Contact, MailMessage, MailTemplate } from '$lib/domain/types';
+	import type { Contact, MailTemplate } from '$lib/domain/types';
 	import { useWorkspace } from '$lib/workspace.svelte';
 
-	let { contacts, templates, onClose }: { contacts: Contact[]; templates: MailTemplate[]; onClose?: () => void } = $props();
+	let { contacts, templates, onClose }: { contacts: Contact[]; templates: MailTemplate[]; onClose?: () => void } =
+		$props();
 	const workspace = useWorkspace();
 	const form = new ComposeModel(workspace);
 	let open = $state(false);
@@ -23,7 +24,12 @@
 		form.recipientInput.length < 2
 			? []
 			: contacts
-					.filter((contact) => contact.email && !form.to.includes(contact.email) && `${contactName(contact)} ${contact.email}`.toLowerCase().includes(form.recipientInput.toLowerCase()))
+					.filter(
+						(contact) =>
+							contact.email &&
+							!form.to.includes(contact.email) &&
+							`${contactName(contact)} ${contact.email}`.toLowerCase().includes(form.recipientInput.toLowerCase()),
+					)
 					.slice(0, 6),
 	);
 
@@ -66,24 +72,58 @@
 </script>
 
 <Sheet.Root {open} onOpenChange={close}>
-	<Sheet.Content class="w-full overflow-y-auto sm:max-w-2xl">
+	<Sheet.Content closeLabel={workspace.t('ui.ws.close')} class="w-full overflow-y-auto sm:max-w-2xl">
 		<Sheet.Header>
-			<Sheet.Title>{form.replyTo ? workspace.t('ui.ws.mail.reply') : workspace.t('ui.ws.command.new_mail')}</Sheet.Title>
-			<Sheet.Description>{workspace.t('ui.ws.mail.compose_text', { email: workspace.session.user?.email ?? '' })}</Sheet.Description>
+			<Sheet.Title>{form.replyTo ? workspace.t('ui.ws.mail.reply') : workspace.t('ui.ws.command.new_mail')}</Sheet.Title
+			>
+			<Sheet.Description
+				>{workspace.t('ui.ws.mail.compose_text', { email: workspace.session.user?.email ?? '' })}</Sheet.Description
+			>
 		</Sheet.Header>
 		<form id="compose-form" class="space-y-4 px-4" onsubmit={send} novalidate>
-			<FormField id="m-to" label={workspace.t('ui.ws.mail.to')} error={form.fields.to ?? Object.entries(form.fields).find(([key]) => key.startsWith('to.'))?.[1]}>
+			<FormField
+				id="m-to"
+				label={workspace.t('ui.ws.mail.to')}
+				error={form.fields.to ?? Object.entries(form.fields).find(([key]) => key.startsWith('to.'))?.[1]}
+			>
 				<div class="relative">
-					<div class="border-input focus-within:ring-ring/50 flex min-h-8 flex-wrap items-center gap-1 rounded-lg border px-1.5 py-1 focus-within:ring-3">
+					<div
+						class="border-input focus-within:ring-ring/50 flex min-h-8 flex-wrap items-center gap-1 rounded-lg border px-1.5 py-1 focus-within:ring-3"
+					>
 						{#each form.to as email (email)}
-							<span class="bg-muted inline-flex items-center gap-1 rounded-full py-0.5 pr-1 pl-2 text-xs">{email}<button type="button" class="rounded-full p-0.5 hover:bg-background" onclick={() => form.removeRecipient(email)} aria-label={workspace.t('ui.ws.contacts.remove_tag', { tag: email })}><X class="size-3" /></button></span>
+							<span class="bg-muted inline-flex items-center gap-1 rounded-full py-0.5 pr-1 pl-2 text-xs"
+								>{email}<button
+									type="button"
+									class="rounded-full p-0.5 hover:bg-background"
+									onclick={() => form.removeRecipient(email)}
+									aria-label={workspace.t('ui.ws.contacts.remove_tag', { tag: email })}><X class="size-3" /></button
+								></span
+							>
 						{/each}
-						<input id="m-to" class="min-w-32 flex-1 bg-transparent text-sm outline-none" bind:value={form.recipientInput} onkeydown={onRecipientKey} onblur={() => form.recipientInput.includes('@') && form.addRecipient()} autocomplete="off" />
+						<input
+							id="m-to"
+							class="min-w-32 flex-1 bg-transparent text-sm outline-none"
+							bind:value={form.recipientInput}
+							onkeydown={onRecipientKey}
+							onblur={() => form.recipientInput.includes('@') && form.addRecipient()}
+							autocomplete="off"
+						/>
 					</div>
 					{#if suggestions.length > 0}
 						<ul class="bg-popover absolute top-full z-10 mt-1 w-full rounded-lg border p-1 shadow-md">
 							{#each suggestions as contact (contact.id)}
-								<li><button type="button" class="hover:bg-muted flex w-full justify-between gap-2 rounded-md px-2 py-1 text-left text-sm" onmousedown={(event) => { event.preventDefault(); form.addRecipient(contact.email); }}><span>{contactName(contact)}</span><span class="text-muted-foreground">{contact.email}</span></button></li>
+								<li>
+									<button
+										type="button"
+										class="hover:bg-muted flex w-full justify-between gap-2 rounded-md px-2 py-1 text-left text-sm"
+										onmousedown={(event) => {
+											event.preventDefault();
+											form.addRecipient(contact.email);
+										}}
+										><span>{contactName(contact)}</span><span class="text-muted-foreground">{contact.email}</span
+										></button
+									>
+								</li>
 							{/each}
 						</ul>
 					{/if}
@@ -99,14 +139,24 @@
 		<Sheet.Footer class="flex-row items-center">
 			{#if templates.length > 0}
 				<DropdownMenu.Root>
-					<DropdownMenu.Trigger>{#snippet child({ props })}<Button {...props} variant="ghost" class="mr-auto"><FileText class="size-4" />{workspace.t('ui.ws.mail.templates')}</Button>{/snippet}</DropdownMenu.Trigger>
+					<DropdownMenu.Trigger
+						>{#snippet child({ props })}<Button {...props} variant="ghost" class="mr-auto"
+								><FileText class="size-4" />{workspace.t('ui.ws.mail.templates')}</Button
+							>{/snippet}</DropdownMenu.Trigger
+					>
 					<DropdownMenu.Content align="start">
-						{#each templates as template (template.id)}<DropdownMenu.Item onclick={() => form.applyTemplate(template, contacts)}>{template.name}</DropdownMenu.Item>{/each}
+						{#each templates as template (template.id)}<DropdownMenu.Item
+								onclick={() => form.applyTemplate(template, contacts)}>{template.name}</DropdownMenu.Item
+							>{/each}
 					</DropdownMenu.Content>
 				</DropdownMenu.Root>
 			{/if}
-			<Button variant="outline" disabled={form.busy} onclick={async () => (await form.saveDraft(contacts)) && finish()}>{workspace.t('ui.ws.mail.save_draft')}</Button>
-			<Button type="submit" form="compose-form" disabled={form.busy}><Send class="size-4" />{workspace.t('ui.ws.mail.send')}</Button>
+			<Button variant="outline" disabled={form.busy} onclick={async () => (await form.saveDraft(contacts)) && finish()}
+				>{workspace.t('ui.ws.mail.save_draft')}</Button
+			>
+			<Button type="submit" form="compose-form" disabled={form.busy}
+				><Send class="size-4" />{workspace.t('ui.ws.mail.send')}</Button
+			>
 		</Sheet.Footer>
 	</Sheet.Content>
 </Sheet.Root>

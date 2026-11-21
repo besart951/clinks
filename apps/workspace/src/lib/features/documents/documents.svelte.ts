@@ -72,11 +72,16 @@ export class DocumentsModel {
 	}
 
 	async createFolder(name: string) {
-		return this.#workspace.run(() => this.#workspace.api.folders.create({ name: name.trim(), parentId: this.folderId }), { success: 'ui.ws.documents.folder_created' });
+		return this.#workspace.run(
+			() => this.#workspace.api.folders.create({ name: name.trim(), parentId: this.folderId }),
+			{ success: 'ui.ws.documents.folder_created' },
+		);
 	}
 
 	async renameFolder(folder: Folder, name: string) {
-		return this.#workspace.run(() => this.#workspace.api.folders.update(folder.id, folder.revision, { name: name.trim() }));
+		return this.#workspace.run(() =>
+			this.#workspace.api.folders.update(folder.id, folder.revision, { name: name.trim() }),
+		);
 	}
 
 	async deleteFolder(folder: Folder) {
@@ -84,7 +89,8 @@ export class DocumentsModel {
 		const contained = (this.resource.data?.documents ?? []).filter((document) => document.folderId === folder.id);
 		const result = await this.#workspace.run(
 			async () => {
-				for (const document of contained) await api.documents.update(document.id, document.revision, { folderId: folder.parentId });
+				for (const document of contained)
+					await api.documents.update(document.id, document.revision, { folderId: folder.parentId });
 				await api.folders.remove(folder.id);
 			},
 			{ success: 'ui.ws.documents.folder_deleted', successParams: { name: folder.name } },
@@ -93,23 +99,36 @@ export class DocumentsModel {
 	}
 
 	async rename(document: StoredDocument, name: string) {
-		return this.#workspace.run(() => this.#workspace.api.documents.update(document.id, document.revision, { name: name.trim() }), { success: 'ui.ws.documents.renamed' });
+		return this.#workspace.run(
+			() => this.#workspace.api.documents.update(document.id, document.revision, { name: name.trim() }),
+			{ success: 'ui.ws.documents.renamed' },
+		);
 	}
 
 	async move(document: StoredDocument, folderId: FolderId | null) {
-		return this.#workspace.run(() => this.#workspace.api.documents.update(document.id, document.revision, { folderId }), { success: 'ui.ws.documents.moved' });
+		return this.#workspace.run(
+			() => this.#workspace.api.documents.update(document.id, document.revision, { folderId }),
+			{ success: 'ui.ws.documents.moved' },
+		);
 	}
 
 	async link(document: StoredDocument, contact: Contact) {
 		if (document.targets.some((target) => target.kind === 'contact' && target.id === contact.id)) return;
 		return this.#workspace.run(
-			() => this.#workspace.api.documents.update(document.id, document.revision, { targets: [...document.targets, { kind: 'contact', id: contact.id }] }),
+			() =>
+				this.#workspace.api.documents.update(document.id, document.revision, {
+					targets: [...document.targets, { kind: 'contact', id: contact.id }],
+				}),
 			{ success: 'ui.ws.documents.linked' },
 		);
 	}
 
 	async remove(document: StoredDocument) {
 		const api = this.#workspace.api.documents;
-		await this.#workspace.run(() => api.remove(document.id), { success: 'ui.ws.documents.deleted', successParams: { name: document.name }, undo: () => api.restore(document) });
+		await this.#workspace.run(() => api.remove(document.id), {
+			success: 'ui.ws.documents.deleted',
+			successParams: { name: document.name },
+			undo: () => api.restore(document),
+		});
 	}
 }

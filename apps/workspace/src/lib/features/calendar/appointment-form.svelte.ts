@@ -2,7 +2,14 @@ import { toast } from 'svelte-sonner';
 import { atTime, timeOfDay, toCalendarDate } from '../../domain/dates.ts';
 import type { ContactId, UserId } from '../../domain/ids.ts';
 import { conflictsFor, withinArrivalWindow } from '../../domain/scheduling.ts';
-import type { Appointment, AppointmentKind, AppointmentStatus, CalendarDate, PhysioService, SpitexService } from '../../domain/types.ts';
+import type {
+	Appointment,
+	AppointmentKind,
+	AppointmentStatus,
+	CalendarDate,
+	PhysioService,
+	SpitexService,
+} from '../../domain/types.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 
 export interface AppointmentFields {
@@ -74,7 +81,11 @@ export class AppointmentFormModel {
 
 	start(appointment: Appointment | null, preset: Partial<AppointmentFields> = {}) {
 		this.original = appointment;
-		const defaults: AppointmentFields = { ...blankFields(), kind: this.#defaultKind(), assigneeId: this.#workspace.session.user?.id ?? null };
+		const defaults: AppointmentFields = {
+			...blankFields(),
+			kind: this.#defaultKind(),
+			assigneeId: this.#workspace.session.user?.id ?? null,
+		};
 		this.value = appointment ? fieldsFrom(appointment) : { ...defaults, ...preset };
 		this.#initial = JSON.stringify(this.value);
 		this.fields = {};
@@ -127,7 +138,15 @@ export class AppointmentFormModel {
 				? await api.appointments.update(this.original.id, this.original.revision, draft)
 				: await api.appointments.create({ ...draft, seriesId: null, billedInvoiceId: null });
 			if (saved.assigneeId && saved.assigneeId !== this.original?.assigneeId) {
-				await api.notify([saved.assigneeId], 'appointment', { key: 'ui.ws.notification.appointment_assigned', params: { target: `${saved.title} (${this.#workspace.i18n.dateTime(saved.start)})` } }, `/calendar?date=${toCalendarDate(saved.start)}&appointment=${saved.id}`);
+				await api.notify(
+					[saved.assigneeId],
+					'appointment',
+					{
+						key: 'ui.ws.notification.appointment_assigned',
+						params: { target: `${saved.title} (${this.#workspace.i18n.dateTime(saved.start)})` },
+					},
+					`/calendar?date=${toCalendarDate(saved.start)}&appointment=${saved.id}`,
+				);
 			}
 			this.#initial = JSON.stringify(this.value);
 			toast.success(this.#workspace.t('ui.ws.calendar.saved'));

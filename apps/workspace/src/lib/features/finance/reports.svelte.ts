@@ -22,7 +22,11 @@ export interface FinanceReport {
 /** Pure calculation of the finance report, so it can be tested without the UI. */
 export function buildReport(invoices: Invoice[], expenses: Expense[], on: string = today()): FinanceReport {
 	const first = addMonths(startOfMonth(on), -11);
-	const months: MonthFigures[] = Array.from({ length: 12 }, (_, index) => ({ month: addMonths(first, index).slice(0, 7), revenue: 0, expenses: 0 }));
+	const months: MonthFigures[] = Array.from({ length: 12 }, (_, index) => ({
+		month: addMonths(first, index).slice(0, 7),
+		revenue: 0,
+		expenses: 0,
+	}));
 	for (const invoice of invoices) {
 		for (const payment of invoice.payments) {
 			const month = months.find((entry) => entry.month === payment.date.slice(0, 7));
@@ -53,20 +57,35 @@ export function buildReport(invoices: Invoice[], expenses: Expense[], on: string
 	const quarterEnd = addMonths(quarterStart, 3);
 	const inQuarter = (date: string) => date >= quarterStart && date < quarterEnd;
 	const output = new Map<VatRate, Rappen>();
-	for (const invoice of invoices.filter((row) => row.status !== 'draft' && row.status !== 'cancelled' && inQuarter(row.issueDate))) {
-		for (const share of invoiceTotals(invoice).shares) if (share.rate > 0) output.set(share.rate, (output.get(share.rate) ?? 0) + share.vat);
+	for (const invoice of invoices.filter(
+		(row) => row.status !== 'draft' && row.status !== 'cancelled' && inQuarter(row.issueDate),
+	)) {
+		for (const share of invoiceTotals(invoice).shares)
+			if (share.rate > 0) output.set(share.rate, (output.get(share.rate) ?? 0) + share.vat);
 	}
-	const input = expenses.filter((expense) => inQuarter(expense.date)).reduce((sum, expense) => sum + vatFromGross(expense.amount, expense.vatRate), 0);
+	const input = expenses
+		.filter((expense) => inQuarter(expense.date))
+		.reduce((sum, expense) => sum + vatFromGross(expense.amount, expense.vatRate), 0);
 	const outputTotal = [...output.values()].reduce((sum, value) => sum + value, 0);
 	const categories = new Map<ExpenseCategory, Rappen>();
-	for (const expense of expenses.filter((row) => row.date.startsWith(year))) categories.set(expense.category, (categories.get(expense.category) ?? 0) + expense.amount);
+	for (const expense of expenses.filter((row) => row.date.startsWith(year)))
+		categories.set(expense.category, (categories.get(expense.category) ?? 0) + expense.amount);
 	return {
 		months,
 		yearRevenue: months.filter((entry) => entry.month.startsWith(year)).reduce((sum, entry) => sum + entry.revenue, 0),
-		yearExpenses: months.filter((entry) => entry.month.startsWith(year)).reduce((sum, entry) => sum + entry.expenses, 0),
+		yearExpenses: months
+			.filter((entry) => entry.month.startsWith(year))
+			.reduce((sum, entry) => sum + entry.expenses, 0),
 		aging,
-		quarter: { label: `Q${(quarterStartMonth + 2) / 3} ${year}`, output: [...output.entries()].map(([rate, vat]) => ({ rate, vat })), input, payable: outputTotal - input },
-		categories: [...categories.entries()].map(([category, amount]) => ({ category, amount })).sort((left, right) => right.amount - left.amount),
+		quarter: {
+			label: `Q${(quarterStartMonth + 2) / 3} ${year}`,
+			output: [...output.entries()].map(([rate, vat]) => ({ rate, vat })),
+			input,
+			payable: outputTotal - input,
+		},
+		categories: [...categories.entries()]
+			.map(([category, amount]) => ({ category, amount }))
+			.sort((left, right) => right.amount - left.amount),
 	};
 }
 

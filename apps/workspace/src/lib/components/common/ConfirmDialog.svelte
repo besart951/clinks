@@ -13,7 +13,6 @@
 	import { Button } from '@clinks/ui-shared/components/ui/button';
 	import { useWorkspace } from '$lib/workspace.svelte';
 
-
 	let { request = $bindable(null) }: { request: ConfirmRequest | null } = $props();
 	const workspace = useWorkspace();
 	let busy = $state(false);
@@ -31,7 +30,7 @@
 </script>
 
 <Dialog.Root open={request !== null} onOpenChange={(open) => !open && (request = null)}>
-	<Dialog.Content showCloseButton={false} class="sm:max-w-md">
+	<Dialog.Content closeLabel={workspace.t('ui.ws.close')} showCloseButton={false} class="sm:max-w-md">
 		{#if request}
 			<Dialog.Header>
 				<Dialog.Title>{request.title}</Dialog.Title>
@@ -39,7 +38,9 @@
 			</Dialog.Header>
 			<Dialog.Footer>
 				<Button variant="outline" onclick={() => (request = null)}>{workspace.t('ui.ws.cancel')}</Button>
-				<Button variant={request.destructive ? 'destructive' : 'default'} disabled={busy} onclick={confirm}>{request.confirmLabel}</Button>
+				<Button variant={request.destructive ? 'destructive' : 'default'} disabled={busy} onclick={confirm}
+					>{request.confirmLabel}</Button
+				>
 			</Dialog.Footer>
 		{/if}
 	</Dialog.Content>

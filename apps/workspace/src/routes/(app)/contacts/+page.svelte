@@ -37,7 +37,9 @@
 	let importOpen = $state(false);
 	let mergeSet = $state<Contact[]>([]);
 	let confirm = $state<ConfirmRequest | null>(null);
-	const selectedContacts = $derived((model.resource.data ?? []).filter((contact) => model.selected.includes(contact.id)));
+	const selectedContacts = $derived(
+		(model.resource.data ?? []).filter((contact) => model.selected.includes(contact.id)),
+	);
 
 	onMount(() => {
 		const stop = model.resource.connect();
@@ -72,8 +74,12 @@
 	<PageHeader title={workspace.t('ui.ws.module.contacts')} description={workspace.t('ui.ws.contacts.description')}>
 		{#snippet actions()}
 			{#if canWrite}
-				<Button variant="outline" onclick={() => (importOpen = true)}><Upload class="size-4" />{workspace.t('ui.ws.contacts.import')}</Button>
-				<Button onclick={() => sheet.show(null)} aria-keyshortcuts="N"><Plus class="size-4" />{workspace.t('ui.ws.command.new_contact')}</Button>
+				<Button variant="outline" onclick={() => (importOpen = true)}
+					><Upload class="size-4" />{workspace.t('ui.ws.contacts.import')}</Button
+				>
+				<Button onclick={() => sheet.show(null)} aria-keyshortcuts="N"
+					><Plus class="size-4" />{workspace.t('ui.ws.command.new_contact')}</Button
+				>
 			{/if}
 		{/snippet}
 	</PageHeader>
@@ -95,7 +101,10 @@
 			class="w-44"
 			label={workspace.t('ui.ws.field.tags')}
 			placeholder={workspace.t('ui.ws.contacts.all_tags')}
-			options={[{ value: '', label: workspace.t('ui.ws.contacts.all_tags') }, ...model.tags.map((tag) => ({ value: tag, label: tag }))]}
+			options={[
+				{ value: '', label: workspace.t('ui.ws.contacts.all_tags') },
+				...model.tags.map((tag) => ({ value: tag, label: tag })),
+			]}
 		/>
 		<Choice
 			bind:value={model.sort}
@@ -112,31 +121,52 @@
 			<Label for="show-archived">{workspace.t('ui.ws.contacts.show_archived')}</Label>
 		</div>
 		{#if model.duplicates.length > 0 && canWrite}
-			<Button variant="ghost" size="sm" class="ml-auto text-amber-700 dark:text-amber-400" onclick={() => openMerge(model.duplicates[0])}>
+			<Button
+				variant="ghost"
+				size="sm"
+				class="ml-auto text-amber-700 dark:text-amber-400"
+				onclick={() => openMerge(model.duplicates[0])}
+			>
 				<Merge class="size-4" />{workspace.t('ui.ws.contacts.duplicates', { count: model.duplicates.length })}
 			</Button>
 		{/if}
 	</div>
 
 	{#if model.selected.length > 0 && canWrite}
-		<div class="bg-muted mb-3 flex flex-wrap items-center gap-2 rounded-lg px-3 py-2 text-sm" role="region" aria-label={workspace.t('ui.ws.selection')}>
+		<div
+			class="bg-muted mb-3 flex flex-wrap items-center gap-2 rounded-lg px-3 py-2 text-sm"
+			role="region"
+			aria-label={workspace.t('ui.ws.selection')}
+		>
 			<span class="font-medium">{workspace.t('ui.ws.selected', { count: model.selected.length })}</span>
 			<div class="flex-1"></div>
 			{#if model.selected.length >= 2}
-				<Button size="sm" variant="outline" onclick={() => openMerge(selectedContacts)}><Merge class="size-4" />{workspace.t('ui.ws.contacts.merge_submit')}</Button>
+				<Button size="sm" variant="outline" onclick={() => openMerge(selectedContacts)}
+					><Merge class="size-4" />{workspace.t('ui.ws.contacts.merge_submit')}</Button
+				>
 			{/if}
 			<Button size="sm" variant="outline" onclick={() => model.archive(selectedContacts, !model.showArchived)}>
-				<Archive class="size-4" />{model.showArchived ? workspace.t('ui.ws.contacts.unarchive') : workspace.t('ui.ws.contacts.archive')}
+				<Archive class="size-4" />{model.showArchived
+					? workspace.t('ui.ws.contacts.unarchive')
+					: workspace.t('ui.ws.contacts.archive')}
 			</Button>
-			<Button size="sm" variant="destructive" onclick={askDelete}><Trash2 class="size-4" />{workspace.t('ui.ws.delete')}</Button>
+			<Button size="sm" variant="destructive" onclick={askDelete}
+				><Trash2 class="size-4" />{workspace.t('ui.ws.delete')}</Button
+			>
 		</div>
 	{/if}
 
 	<AsyncView resource={model.resource} isEmpty={() => model.visible.length === 0}>
 		{#snippet empty()}
-			<EmptyState icon={Users} title={workspace.t('ui.ws.contacts.empty_title')} description={workspace.t('ui.ws.contacts.empty_text')}>
+			<EmptyState
+				icon={Users}
+				title={workspace.t('ui.ws.contacts.empty_title')}
+				description={workspace.t('ui.ws.contacts.empty_text')}
+			>
 				{#snippet action()}
-					{#if canWrite && !model.search}<Button onclick={() => sheet.show(null)}><Plus class="size-4" />{workspace.t('ui.ws.command.new_contact')}</Button>{/if}
+					{#if canWrite && !model.search}<Button onclick={() => sheet.show(null)}
+							><Plus class="size-4" />{workspace.t('ui.ws.command.new_contact')}</Button
+						>{/if}
 				{/snippet}
 			</EmptyState>
 		{/snippet}
@@ -148,7 +178,8 @@
 							{#if canWrite}
 								<Table.Head class="w-10">
 									<Checkbox
-										checked={model.visible.length > 0 && model.visible.every((contact) => model.selected.includes(contact.id))}
+										checked={model.visible.length > 0 &&
+											model.visible.every((contact) => model.selected.includes(contact.id))}
 										onCheckedChange={() => model.toggleAll()}
 										aria-label={workspace.t('ui.ws.select_all')}
 									/>
@@ -166,12 +197,22 @@
 							<Table.Row class="cursor-pointer" onclick={() => navigate(`/contacts/${contact.id}`)}>
 								{#if canWrite}
 									<Table.Cell onclick={(event: MouseEvent) => event.stopPropagation()}>
-										<Checkbox checked={model.selected.includes(contact.id)} onCheckedChange={() => model.toggle(contact.id)} aria-label={workspace.t('ui.ws.select', { name: contactName(contact) })} />
+										<Checkbox
+											checked={model.selected.includes(contact.id)}
+											onCheckedChange={() => model.toggle(contact.id)}
+											aria-label={workspace.t('ui.ws.select', { name: contactName(contact) })}
+										/>
 									</Table.Cell>
 								{/if}
 								<Table.Cell>
-									<a href={href(`/contacts/${contact.id}`)} class="flex items-center gap-2 font-medium" onclick={(event) => event.stopPropagation()}>
-										{#if contact.kind === 'company'}<Building2 class="text-muted-foreground size-4" />{:else}<Users class="text-muted-foreground size-4" />{/if}
+									<a
+										href={href(`/contacts/${contact.id}`)}
+										class="flex items-center gap-2 font-medium"
+										onclick={(event) => event.stopPropagation()}
+									>
+										{#if contact.kind === 'company'}<Building2 class="text-muted-foreground size-4" />{:else}<Users
+												class="text-muted-foreground size-4"
+											/>{/if}
 										{contactName(contact)}
 									</a>
 								</Table.Cell>
@@ -179,19 +220,28 @@
 								<Table.Cell class="text-muted-foreground hidden lg:table-cell">{contact.phone}</Table.Cell>
 								<Table.Cell class="hidden sm:table-cell">{contact.address.city}</Table.Cell>
 								<Table.Cell class="hidden xl:table-cell">
-									<div class="flex flex-wrap gap-1">{#each contact.tags as tag (tag)}<span class="bg-muted rounded-full px-2 py-0.5 text-xs">{tag}</span>{/each}</div>
+									<div class="flex flex-wrap gap-1">
+										{#each contact.tags as tag (tag)}<span class="bg-muted rounded-full px-2 py-0.5 text-xs">{tag}</span
+											>{/each}
+									</div>
 								</Table.Cell>
 							</Table.Row>
 						{/each}
 					</Table.Body>
 				</Table.Root>
 			</div>
-			<p class="text-muted-foreground mt-2 text-xs">{workspace.t('ui.ws.contacts.count', { count: model.visible.length })}</p>
+			<p class="text-muted-foreground mt-2 text-xs">
+				{workspace.t('ui.ws.contacts.count', { count: model.visible.length })}
+			</p>
 		{/snippet}
 	</AsyncView>
 </ModuleGate>
 
 <ContactFormSheet bind:this={sheet} onSaved={(contact) => navigate(`/contacts/${contact.id}`)} />
 <ImportContactsDialog bind:open={importOpen} onImport={(drafts) => model.importContacts(drafts)} />
-<MergeContactsDialog bind:this={mergeDialog} contacts={mergeSet} onMerge={(primary, others) => model.merge(primary, others)} />
+<MergeContactsDialog
+	bind:this={mergeDialog}
+	contacts={mergeSet}
+	onMerge={(primary, others) => model.merge(primary, others)}
+/>
 <ConfirmDialog bind:request={confirm} />

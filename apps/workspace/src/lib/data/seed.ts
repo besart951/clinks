@@ -34,10 +34,87 @@ export function mulberry32(seed: number) {
 
 export const demoPassword = 'demo1234';
 
-const firstNames = ['Anna', 'Hans', 'Elisabeth', 'Peter', 'Margrit', 'Walter', 'Rosa', 'Kurt', 'Heidi', 'Bruno', 'Verena', 'Giuseppe', 'Ursula', 'Fritz', 'Lea', 'Noah', 'Mia', 'Luca', 'Sophie', 'Leon', 'Elena', 'David', 'Laura', 'Simon', 'Nina'];
-const lastNames = ['Meier', 'Brunner', 'Zaugg', 'Kunz', 'Häfliger', 'Imhof', 'Bühler', 'Lüthi', 'Marti', 'Steiner', 'Jost', 'Rossi', 'Schär', 'Fischer', 'Huber', 'Baumann', 'Frei', 'Gerber', 'Widmer', 'Graf', 'Wyss', 'Hofer', 'Egli', 'Suter', 'Kaufmann'];
-const streets = ['Bahnhofstrasse', 'Hauptstrasse', 'Kirchenfeldstrasse', 'Beundenweg', 'Zentralstrasse', 'Seevorstadt', 'Mettlenweg', 'Dufourstrasse', 'Bözingenstrasse', 'Schlossstrasse', 'Dorfstrasse', 'Bielstrasse', 'Schulweg', 'Bernstrasse', 'Schützenweg'];
-const places: [string, string][] = [['2502', 'Biel/Bienne'], ['3250', 'Lyss'], ['2560', 'Nidau'], ['3270', 'Aarberg'], ['3252', 'Worben'], ['2555', 'Brügg'], ['3255', 'Rapperswil BE'], ['3267', 'Seedorf BE']];
+const firstNames = [
+	'Anna',
+	'Hans',
+	'Elisabeth',
+	'Peter',
+	'Margrit',
+	'Walter',
+	'Rosa',
+	'Kurt',
+	'Heidi',
+	'Bruno',
+	'Verena',
+	'Giuseppe',
+	'Ursula',
+	'Fritz',
+	'Lea',
+	'Noah',
+	'Mia',
+	'Luca',
+	'Sophie',
+	'Leon',
+	'Elena',
+	'David',
+	'Laura',
+	'Simon',
+	'Nina',
+];
+const lastNames = [
+	'Meier',
+	'Brunner',
+	'Zaugg',
+	'Kunz',
+	'Häfliger',
+	'Imhof',
+	'Bühler',
+	'Lüthi',
+	'Marti',
+	'Steiner',
+	'Jost',
+	'Rossi',
+	'Schär',
+	'Fischer',
+	'Huber',
+	'Baumann',
+	'Frei',
+	'Gerber',
+	'Widmer',
+	'Graf',
+	'Wyss',
+	'Hofer',
+	'Egli',
+	'Suter',
+	'Kaufmann',
+];
+const streets = [
+	'Bahnhofstrasse',
+	'Hauptstrasse',
+	'Kirchenfeldstrasse',
+	'Beundenweg',
+	'Zentralstrasse',
+	'Seevorstadt',
+	'Mettlenweg',
+	'Dufourstrasse',
+	'Bözingenstrasse',
+	'Schlossstrasse',
+	'Dorfstrasse',
+	'Bielstrasse',
+	'Schulweg',
+	'Bernstrasse',
+	'Schützenweg',
+];
+const places: [string, string][] = [
+	['2502', 'Biel/Bienne'],
+	['3250', 'Lyss'],
+	['2560', 'Nidau'],
+	['3270', 'Aarberg'],
+	['3252', 'Worben'],
+	['2555', 'Brügg'],
+	['3255', 'Rapperswil BE'],
+	['3267', 'Seedorf BE'],
+];
 const insurers = ['Helsana', 'Visana', 'Concordia', 'Sanitas', 'CSS', 'SWICA'];
 
 interface SeedContext {
@@ -56,7 +133,10 @@ function between(context: SeedContext, min: number, max: number): number {
 }
 
 function id<T extends string>(context: SeedContext): T {
-	return newId<T>(context.now.getTime() - 86_400_000 * 30 + Math.floor(context.random() * 86_400_000 * 30), context.random);
+	return newId<T>(
+		context.now.getTime() - 86_400_000 * 30 + Math.floor(context.random() * 86_400_000 * 30),
+		context.random,
+	);
 }
 
 function add<Name extends TableName>(
@@ -72,9 +152,28 @@ function add<Name extends TableName>(
 
 function emptySnapshot(): Snapshot {
 	return {
-		tenants: [], users: [], roles: [], memberships: [], invitations: [], sessions: [], contacts: [], appointments: [],
-		folders: [], documents: [], invoices: [], expenses: [], tasks: [], comments: [], mails: [], templates: [],
-		campaigns: [], prescriptions: [], notes: [], timeEntries: [], notifications: [], audit: [],
+		tenants: [],
+		users: [],
+		roles: [],
+		memberships: [],
+		invitations: [],
+		sessions: [],
+		contacts: [],
+		appointments: [],
+		folders: [],
+		documents: [],
+		invoices: [],
+		expenses: [],
+		tasks: [],
+		comments: [],
+		mails: [],
+		templates: [],
+		campaigns: [],
+		prescriptions: [],
+		notes: [],
+		timeEntries: [],
+		notifications: [],
+		audit: [],
 	};
 }
 
@@ -119,9 +218,8 @@ function tenant(context: SeedContext, seed: TenantSeed): { tenant: Tenant; roles
 		billingCycle: 'monthly',
 		trialEndsAt: new Date(context.now.getTime() + 9 * 86_400_000).toISOString(),
 		cancelledAt: null,
-		enabledModules: seed.industry === 'physio'
-			? ['mail', 'finance', 'planner', 'physio']
-			: ['mail', 'finance', 'planner', 'spitex'],
+		enabledModules:
+			seed.industry === 'physio' ? ['mail', 'finance', 'planner', 'physio'] : ['mail', 'finance', 'planner', 'spitex'],
 		paymentMethod: { brand: 'Visa', last4: '4417', expires: '08/28' },
 		featureFlags: ['command_palette'],
 		onboardingCompleted: true,
@@ -141,11 +239,35 @@ function tenant(context: SeedContext, seed: TenantSeed): { tenant: Tenant; roles
 			'spitex.write',
 			'mail.write',
 		]),
-		reception: role('Empfang', 'custom', ['contacts.read', 'contacts.write', 'calendar.read', 'calendar.write', 'mail.read', 'mail.write', 'documents.read', 'planner.read', 'physio.read', 'spitex.read']),
-		accounting: role('Buchhaltung', 'custom', ['contacts.read', 'finance.read', 'finance.write', 'documents.read', 'documents.write', 'audit.read']),
+		reception: role('Empfang', 'custom', [
+			'contacts.read',
+			'contacts.write',
+			'calendar.read',
+			'calendar.write',
+			'mail.read',
+			'mail.write',
+			'documents.read',
+			'planner.read',
+			'physio.read',
+			'spitex.read',
+		]),
+		accounting: role('Buchhaltung', 'custom', [
+			'contacts.read',
+			'finance.read',
+			'finance.write',
+			'documents.read',
+			'documents.write',
+			'audit.read',
+		]),
 	};
 	for (const member of seed.staff) {
-		add(context, 'memberships', { tenantId, userId: member.user.id, roleId: roles[member.role], status: 'active', jobTitle: member.title });
+		add(context, 'memberships', {
+			tenantId,
+			userId: member.user.id,
+			roleId: roles[member.role],
+			status: 'active',
+			jobTitle: member.title,
+		});
 	}
 	return { tenant: created, roles };
 }
@@ -161,7 +283,10 @@ function person(context: SeedContext, tenantId: TenantId, tags: string[], extra:
 		firstName,
 		lastName,
 		companyName: '',
-		email: `${firstName}.${lastName}`.toLowerCase().replace(/[äöü]/g, (letter) => ({ ä: 'ae', ö: 'oe', ü: 'ue' })[letter] ?? letter) + '@example.ch',
+		email:
+			`${firstName}.${lastName}`
+				.toLowerCase()
+				.replace(/[äöü]/g, (letter) => ({ ä: 'ae', ö: 'oe', ü: 'ue' })[letter] ?? letter) + '@example.ch',
 		phone: `+41 32 ${between(context, 300, 399)} ${between(context, 10, 99)} ${between(context, 10, 99)}`,
 		address: { street: `${pick(context, streets)} ${between(context, 1, 80)}`, zip, city },
 		birthDate: `${year}-${String(between(context, 1, 12)).padStart(2, '0')}-${String(between(context, 1, 28)).padStart(2, '0')}`,
@@ -236,8 +361,22 @@ function invoiceFor(
 }
 
 const physioServicesByWeight: PhysioService[] = ['general', 'general', 'general', 'complex', 'home', 'initial'];
-const spitexServicesByWeight: SpitexService[] = ['basic_care', 'basic_care', 'treatment_care', 'treatment_care', 'housekeeping', 'assessment', 'support'];
-const spitexDurations: { [service in SpitexService]: number } = { assessment: 60, treatment_care: 30, basic_care: 45, housekeeping: 90, support: 60 };
+const spitexServicesByWeight: SpitexService[] = [
+	'basic_care',
+	'basic_care',
+	'treatment_care',
+	'treatment_care',
+	'housekeeping',
+	'assessment',
+	'support',
+];
+const spitexDurations: { [service in SpitexService]: number } = {
+	assessment: 60,
+	treatment_care: 30,
+	basic_care: 45,
+	housekeeping: 90,
+	support: 60,
+};
 
 function seedCalendar(context: SeedContext, tenantId: TenantId, industry: Industry, staff: User[], clients: Contact[]) {
 	const workers = staff.slice(1);
@@ -250,8 +389,10 @@ function seedCalendar(context: SeedContext, tenantId: TenantId, industry: Indust
 			const count = between(context, 3, 6);
 			for (let index = 0; index < count; index++) {
 				const client = pick(context, clients);
-				const service = industry === 'physio' ? pick(context, physioServicesByWeight) : pick(context, spitexServicesByWeight);
-				const duration = industry === 'physio' ? (service === 'initial' ? 45 : 30) : spitexDurations[service as SpitexService];
+				const service =
+					industry === 'physio' ? pick(context, physioServicesByWeight) : pick(context, spitexServicesByWeight);
+				const duration =
+					industry === 'physio' ? (service === 'initial' ? 45 : 30) : spitexDurations[service as SpitexService];
 				const time = `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
 				const start = atTime(date, time);
 				const end = new Date(new Date(start).getTime() + duration * 60_000).toISOString();
@@ -261,7 +402,13 @@ function seedCalendar(context: SeedContext, tenantId: TenantId, industry: Indust
 					tenantId,
 					title: displayName(client),
 					kind: industry === 'physio' ? 'physio' : 'spitex',
-					status: past ? (context.random() < 0.05 ? 'cancelled' : 'done') : context.random() < 0.5 ? 'confirmed' : 'planned',
+					status: past
+						? context.random() < 0.05
+							? 'cancelled'
+							: 'done'
+						: context.random() < 0.5
+							? 'confirmed'
+							: 'planned',
 					contactId: client.id,
 					assigneeId: open ? null : worker.id,
 					start,
@@ -270,7 +417,13 @@ function seedCalendar(context: SeedContext, tenantId: TenantId, industry: Indust
 					notes: '',
 					seriesId: null,
 					service,
-					arrivalWindow: industry === 'spitex' ? { from: time, to: `${String(Math.floor((minutes + 30) / 60)).padStart(2, '0')}:${String((minutes + 30) % 60).padStart(2, '0')}` } : null,
+					arrivalWindow:
+						industry === 'spitex'
+							? {
+									from: time,
+									to: `${String(Math.floor((minutes + 30) / 60)).padStart(2, '0')}:${String((minutes + 30) % 60).padStart(2, '0')}`,
+								}
+							: null,
 					billedInvoiceId: null,
 				});
 				minutes += duration + between(context, 1, 4) * 15;
@@ -279,9 +432,20 @@ function seedCalendar(context: SeedContext, tenantId: TenantId, industry: Indust
 		}
 		if (offset % 7 === 1) {
 			appointment(context, {
-				tenantId, title: 'Teamsitzung', kind: 'meeting', status: 'confirmed', contactId: null, assigneeId: staff[0].id,
-				start: atTime(date, '12:15'), end: atTime(date, '13:00'), location: 'Sitzungszimmer', notes: 'Fallbesprechung und Wochenplanung',
-				seriesId: null, service: null, arrivalWindow: null, billedInvoiceId: null,
+				tenantId,
+				title: 'Teamsitzung',
+				kind: 'meeting',
+				status: 'confirmed',
+				contactId: null,
+				assigneeId: staff[0].id,
+				start: atTime(date, '12:15'),
+				end: atTime(date, '13:00'),
+				location: 'Sitzungszimmer',
+				notes: 'Fallbesprechung und Wochenplanung',
+				seriesId: null,
+				service: null,
+				arrivalWindow: null,
+				billedInvoiceId: null,
 			});
 		}
 	}
@@ -326,10 +490,21 @@ function seedTasks(context: SeedContext, tenantId: TenantId, staff: User[], cont
 }
 
 function seedMail(context: SeedContext, tenantId: TenantId, tenantName: string, me: User, contacts: Contact[]) {
-	const subjects = ['Terminanfrage', 'Frage zur Rechnung', 'Verschiebung nächste Woche', 'Kostengutsprache', 'Danke für die Behandlung', 'Neue Adresse', 'Rückruf erbeten', 'Unterlagen Versicherung'];
+	const subjects = [
+		'Terminanfrage',
+		'Frage zur Rechnung',
+		'Verschiebung nächste Woche',
+		'Kostengutsprache',
+		'Danke für die Behandlung',
+		'Neue Adresse',
+		'Rückruf erbeten',
+		'Unterlagen Versicherung',
+	];
 	for (let index = 0; index < 16; index++) {
 		const contact = contacts[index % contacts.length];
-		const sentAt = new Date(context.now.getTime() - index * 5 * 3_600_000 - between(context, 0, 120) * 60_000).toISOString();
+		const sentAt = new Date(
+			context.now.getTime() - index * 5 * 3_600_000 - between(context, 0, 120) * 60_000,
+		).toISOString();
 		add(context, 'mails', {
 			tenantId,
 			folder: index < 12 ? 'inbox' : index < 14 ? 'sent' : 'archive',
@@ -345,30 +520,55 @@ function seedMail(context: SeedContext, tenantId: TenantId, tenantName: string, 
 		});
 	}
 	add(context, 'mails', {
-		tenantId, folder: 'drafts', from: me.email, fromName: `${me.firstName} ${me.lastName}`, to: [], subject: 'Infoabend Januar',
-		body: 'Liebe Kundinnen und Kunden\n\n', sentAt: context.now.toISOString(), read: true, starred: false, contactId: null,
+		tenantId,
+		folder: 'drafts',
+		from: me.email,
+		fromName: `${me.firstName} ${me.lastName}`,
+		to: [],
+		subject: 'Infoabend Januar',
+		body: 'Liebe Kundinnen und Kunden\n\n',
+		sentAt: context.now.toISOString(),
+		read: true,
+		starred: false,
+		contactId: null,
 	});
 	add(context, 'templates', {
-		tenantId, name: 'Terminbestätigung', subject: 'Ihr Termin bei {firma}',
+		tenantId,
+		name: 'Terminbestätigung',
+		subject: 'Ihr Termin bei {firma}',
 		body: 'Guten Tag {vorname} {nachname}\n\nWir bestätigen Ihren Termin. Bitte melden Sie sich bei Verhinderung 24 Stunden vorher.\n\nFreundliche Grüsse\n{firma}',
 	});
 	add(context, 'templates', {
-		tenantId, name: 'Zahlungserinnerung', subject: 'Erinnerung: offene Rechnung',
+		tenantId,
+		name: 'Zahlungserinnerung',
+		subject: 'Erinnerung: offene Rechnung',
 		body: 'Guten Tag {vorname} {nachname}\n\nIn unserer Buchhaltung ist eine Rechnung noch offen. Falls Sie bereits bezahlt haben, betrachten Sie diese Nachricht als gegenstandslos.\n\nFreundliche Grüsse\n{firma}',
 	});
 	const campaigns: [string, 'draft' | 'review' | 'scheduled' | 'sent'][] = [
-		['Winterprogramm', 'sent'], ['Infoabend Januar', 'review'], ['Neue Öffnungszeiten', 'scheduled'], ['Rückenkurs Frühling', 'draft'],
+		['Winterprogramm', 'sent'],
+		['Infoabend Januar', 'review'],
+		['Neue Öffnungszeiten', 'scheduled'],
+		['Rückenkurs Frühling', 'draft'],
 	];
 	for (const [name, status] of campaigns) {
 		const recipients = status === 'sent' ? between(context, 180, 420) : 0;
 		add(context, 'campaigns', {
-			tenantId, name, subject: `${name} bei ${tenantName}`, previewText: 'Alles Wichtige auf einen Blick',
+			tenantId,
+			name,
+			subject: `${name} bei ${tenantName}`,
+			previewText: 'Alles Wichtige auf einen Blick',
 			body: `Guten Tag {vorname}\n\n${name}: Hier finden Sie alle Informationen.\n\nFreundliche Grüsse\n${tenantName}`,
-			audienceTag: 'Newsletter', status,
+			audienceTag: 'Newsletter',
+			status,
 			scheduledAt: status === 'scheduled' ? new Date(context.now.getTime() + 3 * 86_400_000).toISOString() : null,
 			sentAt: status === 'sent' ? new Date(context.now.getTime() - 12 * 86_400_000).toISOString() : null,
 			approvedBy: status === 'scheduled' || status === 'sent' ? me.id : null,
-			stats: { recipients, opens: Math.round(recipients * 0.46), clicks: Math.round(recipients * 0.12), unsubscribes: Math.round(recipients * 0.01) },
+			stats: {
+				recipients,
+				opens: Math.round(recipients * 0.46),
+				clicks: Math.round(recipients * 0.12),
+				unsubscribes: Math.round(recipients * 0.01),
+			},
 		});
 	}
 }
@@ -387,12 +587,22 @@ function seedFinance(context: SeedContext, tenantId: TenantId, industry: Industr
 			industry === 'physio'
 				? [{ ...physioLines[pick(context, physioServicesByWeight)], quantity: between(context, 3, 9) }]
 				: [
-						{ description: 'Pflegeleistungen KLV Art. 7 lit. b', quantity: between(context, 4, 20), unitPrice: 7680, vatRate: 0 },
+						{
+							description: 'Pflegeleistungen KLV Art. 7 lit. b',
+							quantity: between(context, 4, 20),
+							unitPrice: 7680,
+							vatRate: 0,
+						},
 						{ description: 'Hauswirtschaft', quantity: between(context, 2, 8), unitPrice: 4500, vatRate: 810 },
 					];
 		invoiceFor(context, tenantId, payer, lines, index, (40 - index) * 8 + between(context, 0, 3));
 	}
-	const expenses: [string, string, 'material' | 'rent' | 'vehicle' | 'insurance' | 'it' | 'advertising' | 'travel' | 'other', number][] = [
+	const expenses: [
+		string,
+		string,
+		'material' | 'rent' | 'vehicle' | 'insurance' | 'it' | 'advertising' | 'travel' | 'other',
+		number,
+	][] = [
 		['Miete Praxisräume', 'Immobilien Seeland AG', 'rent', 280000],
 		['Therapiematerial', 'Medshop AG', 'material', 34850],
 		['Softwareabo', 'CLinks', 'it', 11700],
@@ -420,16 +630,32 @@ function seedFinance(context: SeedContext, tenantId: TenantId, industry: Industr
 
 function seedPhysio(context: SeedContext, tenantId: TenantId, staff: User[], patients: Contact[]) {
 	const doctors = ['Dr. med. Ruth Keller', 'Dr. med. Thomas Gerber', 'Dr. med. Aylin Demir'];
-	const diagnoses = ['Lumbalgie', 'Status nach Knie-TEP rechts', 'Schulterimpingement links', 'Zervikalsyndrom', 'Sprunggelenksdistorsion'];
+	const diagnoses = [
+		'Lumbalgie',
+		'Status nach Knie-TEP rechts',
+		'Schulterimpingement links',
+		'Zervikalsyndrom',
+		'Sprunggelenksdistorsion',
+	];
 	for (const patient of patients.slice(0, 18)) {
 		const issuedOn = addDays(context.today, -between(context, 5, 60));
 		add(context, 'prescriptions', {
-			tenantId, contactId: patient.id, doctor: pick(context, doctors), diagnosis: pick(context, diagnoses),
-			tariff: pick(context, ['7301', '7301', '7311', '7350'] as const), sessionsPrescribed: 9, issuedOn, validUntil: addDays(issuedOn, 70),
+			tenantId,
+			contactId: patient.id,
+			doctor: pick(context, doctors),
+			diagnosis: pick(context, diagnoses),
+			tariff: pick(context, ['7301', '7301', '7311', '7350'] as const),
+			sessionsPrescribed: 9,
+			issuedOn,
+			validUntil: addDays(issuedOn, 70),
 		});
 		for (let session = 0; session < between(context, 1, 4); session++) {
 			add(context, 'notes', {
-				tenantId, kind: 'physio', contactId: patient.id, appointmentId: null, date: addDays(context.today, -session * 7 - between(context, 1, 4)),
+				tenantId,
+				kind: 'physio',
+				contactId: patient.id,
+				appointmentId: null,
+				date: addDays(context.today, -session * 7 - between(context, 1, 4)),
 				authorId: pick(context, staff.slice(1)).id,
 				subjective: `Schmerz NRS ${between(context, 2, 6)}/10, Alltag ${context.random() < 0.5 ? 'besser' : 'unverändert'}.`,
 				objective: `Beweglichkeit verbessert, Kraft M${between(context, 3, 5)}.`,
@@ -443,7 +669,11 @@ function seedPhysio(context: SeedContext, tenantId: TenantId, staff: User[], pat
 function seedSpitex(context: SeedContext, tenantId: TenantId, staff: User[], clients: Contact[]) {
 	for (const client of clients.slice(0, 14)) {
 		add(context, 'notes', {
-			tenantId, kind: 'spitex', contactId: client.id, appointmentId: null, date: addDays(context.today, -between(context, 0, 6)),
+			tenantId,
+			kind: 'spitex',
+			contactId: client.id,
+			appointmentId: null,
+			date: addDays(context.today, -between(context, 0, 6)),
 			authorId: pick(context, staff.slice(1)).id,
 			subjective: 'Fühlt sich wohl, hat gut geschlafen.',
 			objective: `Blutdruck ${between(context, 115, 150)}/${between(context, 70, 95)}, Gewicht stabil.`,
@@ -454,25 +684,39 @@ function seedSpitex(context: SeedContext, tenantId: TenantId, staff: User[], cli
 	for (let offset = -7; offset < 0; offset++) {
 		for (const worker of staff.slice(1)) {
 			add(context, 'timeEntries', {
-				tenantId, userId: worker.id, appointmentId: null, date: addDays(context.today, offset),
-				minutes: between(context, 300, 510), description: 'Einsätze und Wegzeit',
+				tenantId,
+				userId: worker.id,
+				appointmentId: null,
+				date: addDays(context.today, offset),
+				minutes: between(context, 300, 510),
+				description: 'Einsätze und Wegzeit',
 			});
 		}
 	}
 }
 
 function seedDocuments(context: SeedContext, tenantId: TenantId, me: User, contacts: Contact[]) {
-	const folder = (name: string, parentId: FolderId | null = null) => add(context, 'folders', { tenantId, name, parentId }).id;
+	const folder = (name: string, parentId: FolderId | null = null) =>
+		add(context, 'folders', { tenantId, name, parentId }).id;
 	const contracts = folder('Verträge');
 	const forms = folder('Formulare');
 	folder('Belege');
 	const file = (name: string, folderId: FolderId | null, text: string, contactId?: ContactId) =>
 		add(context, 'documents', {
-			tenantId, name, folderId, mimeType: 'text/plain', size: text.length,
+			tenantId,
+			name,
+			folderId,
+			mimeType: 'text/plain',
+			size: text.length,
 			dataUrl: `data:text/plain;charset=utf-8,${encodeURIComponent(text)}`,
-			targets: contactId ? [{ kind: 'contact', id: contactId }] : [], uploadedBy: me.id,
+			targets: contactId ? [{ kind: 'contact', id: contactId }] : [],
+			uploadedBy: me.id,
 		});
-	file('Mietvertrag Praxis.txt', contracts, 'Mietvertrag zwischen Immobilien Seeland AG und der Praxis. Laufzeit bis 2029.');
+	file(
+		'Mietvertrag Praxis.txt',
+		contracts,
+		'Mietvertrag zwischen Immobilien Seeland AG und der Praxis. Laufzeit bis 2029.',
+	);
 	file('Anmeldeformular.txt', forms, 'Name, Vorname, Geburtsdatum, Versicherung, Hausarzt');
 	file('Kostengutsprache.txt', null, 'Kostengutsprache der Versicherung für 9 Sitzungen.', contacts[0].id);
 }
@@ -488,21 +732,54 @@ function seedActivity(context: SeedContext, tenantId: TenantId, staff: User[], c
 	];
 	actions.forEach(([action, kind, label], index) => {
 		const row = add(context, 'audit', {
-			tenantId, actorId: staff[index % staff.length].id, action, target: { kind, id: contacts[index].id, label },
+			tenantId,
+			actorId: staff[index % staff.length].id,
+			action,
+			target: { kind, id: contacts[index].id, label },
 		});
 		row.createdAt = new Date(context.now.getTime() - (index + 1) * 2.5 * 3_600_000).toISOString();
 	});
 	const me = staff[0];
-	const notify = (message: string, params: { [name: string]: string }, href: string, kind: 'mention' | 'assignment' | 'invoice' | 'appointment' | 'system', read: boolean) =>
-		add(context, 'notifications', { tenantId, userId: me.id, kind, message: { key: message, params }, href, read });
-	notify('ui.ws.notification.mentioned', { name: `${staff[1].firstName} ${staff[1].lastName}`, target: tasks[1].title }, `/planner?task=${tasks[1].id}`, 'mention', false);
-	notify('ui.ws.notification.assigned', { target: tasks[3].title }, `/planner?task=${tasks[3].id}`, 'assignment', false);
-	notify('ui.ws.notification.invoice_overdue', { number: `${context.now.getFullYear()}-0003` }, '/finance', 'invoice', false);
+	const notify = (
+		message: string,
+		params: { [name: string]: string },
+		href: string,
+		kind: 'mention' | 'assignment' | 'invoice' | 'appointment' | 'system',
+		read: boolean,
+	) => add(context, 'notifications', { tenantId, userId: me.id, kind, message: { key: message, params }, href, read });
+	notify(
+		'ui.ws.notification.mentioned',
+		{ name: `${staff[1].firstName} ${staff[1].lastName}`, target: tasks[1].title },
+		`/planner?task=${tasks[1].id}`,
+		'mention',
+		false,
+	);
+	notify(
+		'ui.ws.notification.assigned',
+		{ target: tasks[3].title },
+		`/planner?task=${tasks[3].id}`,
+		'assignment',
+		false,
+	);
+	notify(
+		'ui.ws.notification.invoice_overdue',
+		{ number: `${context.now.getFullYear()}-0003` },
+		'/finance',
+		'invoice',
+		false,
+	);
 	notify('ui.ws.notification.trial_ending', { days: '9' }, '/settings/billing', 'system', true);
 }
 
-function staffSeed(context: SeedContext, people: [string, string, string, TenantSeed['staff'][number]['role'], string][]) {
-	return people.map(([first, last, email, role, title]) => ({ user: user(context, { first, last, email }), role, title }));
+function staffSeed(
+	context: SeedContext,
+	people: [string, string, string, TenantSeed['staff'][number]['role'], string][],
+) {
+	return people.map(([first, last, email, role, title]) => ({
+		user: user(context, { first, last, email }),
+		role,
+		title,
+	}));
 }
 
 /** Builds the full demo data set for two tenants and one platform super administrator. */
@@ -520,22 +797,45 @@ export function createSeed(now: Date = new Date(), seed = 20261121): Snapshot {
 			['Jonas', 'Keller', 'jonas.keller@stille.ch', 'accounting', 'Buchhaltung'],
 		]),
 	];
-	const physio = tenant(context, { name: 'Stille Physio', industry: 'physio', brandColor: '#0f766e', city: ['2502', 'Biel/Bienne'], staff: physioStaff });
+	const physio = tenant(context, {
+		name: 'Stille Physio',
+		industry: 'physio',
+		brandColor: '#0f766e',
+		city: ['2502', 'Biel/Bienne'],
+		staff: physioStaff,
+	});
 	const physioId = physio.tenant.id;
 	const patients = Array.from({ length: 34 }, () => person(context, physioId, ['Patient:in']));
-	const physioCompanies = ['Helsana', 'Visana', 'Suva', 'Hausarztpraxis Seeland'].map((name) => company(context, physioId, name, ['Kostenträger']));
+	const physioCompanies = ['Helsana', 'Visana', 'Suva', 'Hausarztpraxis Seeland'].map((name) =>
+		company(context, physioId, name, ['Kostenträger']),
+	);
 	for (const patient of patients.slice(0, 20)) patient.tags.push('Newsletter');
 	const physioTherapists = physioStaff.filter((member) => member.role === 'user').map((member) => member.user);
 	seedCalendar(context, physioId, 'physio', [besi, ...physioTherapists], patients);
 	seedFinance(context, physioId, 'physio', [...patients.slice(0, 14), ...physioCompanies]);
 	seedPhysio(context, physioId, [besi, ...physioTherapists], patients);
-	const physioTasks = seedTasks(context, physioId, physioStaff.map((member) => member.user), patients);
+	const physioTasks = seedTasks(
+		context,
+		physioId,
+		physioStaff.map((member) => member.user),
+		patients,
+	);
 	seedMail(context, physioId, 'Stille Physio', besi, patients);
 	seedDocuments(context, physioId, besi, patients);
-	seedActivity(context, physioId, physioStaff.map((member) => member.user), patients, physioTasks);
+	seedActivity(
+		context,
+		physioId,
+		physioStaff.map((member) => member.user),
+		patients,
+		physioTasks,
+	);
 	add(context, 'invitations', {
-		tenantId: physioId, email: 'lea.graf@stille.ch', roleId: physio.roles.user, status: 'pending',
-		expiresAt: new Date(now.getTime() + 5 * 86_400_000).toISOString(), invitedBy: besi.id,
+		tenantId: physioId,
+		email: 'lea.graf@stille.ch',
+		roleId: physio.roles.user,
+		status: 'pending',
+		expiresAt: new Date(now.getTime() + 5 * 86_400_000).toISOString(),
+		invitedBy: besi.id,
 	});
 
 	const spitexStaff = [
@@ -547,10 +847,18 @@ export function createSeed(now: Date = new Date(), seed = 20261121): Snapshot {
 			['Luca', 'Meier', 'luca.meier@spitex-seeland.ch', 'user', 'Haushelfer'],
 		]),
 	];
-	const spitex = tenant(context, { name: 'Stille Spitex Seeland', industry: 'spitex', brandColor: '#7c3aed', city: ['3250', 'Lyss'], staff: spitexStaff });
+	const spitex = tenant(context, {
+		name: 'Stille Spitex Seeland',
+		industry: 'spitex',
+		brandColor: '#7c3aed',
+		city: ['3250', 'Lyss'],
+		staff: spitexStaff,
+	});
 	const spitexId = spitex.tenant.id;
 	const clients = Array.from({ length: 26 }, () =>
-		person(context, spitexId, ['Klient:in'], { birthDate: `19${between(context, 28, 50)}-0${between(context, 1, 9)}-1${between(context, 0, 9)}` }),
+		person(context, spitexId, ['Klient:in'], {
+			birthDate: `19${between(context, 28, 50)}-0${between(context, 1, 9)}-1${between(context, 0, 9)}`,
+		}),
 	);
 	clients[0].notes = 'Schlüsselbox beim Hauseingang, Code bei der Leitung';
 	clients[1].notes = 'Möchte nicht vor 08:15 geweckt werden';
@@ -558,16 +866,36 @@ export function createSeed(now: Date = new Date(), seed = 20261121): Snapshot {
 	seedCalendar(context, spitexId, 'spitex', [besi, ...spitexWorkers], clients);
 	seedFinance(context, spitexId, 'spitex', clients.slice(0, 16));
 	seedSpitex(context, spitexId, [besi, ...spitexWorkers], clients);
-	const spitexTasks = seedTasks(context, spitexId, spitexStaff.map((member) => member.user), clients);
+	const spitexTasks = seedTasks(
+		context,
+		spitexId,
+		spitexStaff.map((member) => member.user),
+		clients,
+	);
 	seedMail(context, spitexId, 'Stille Spitex Seeland', besi, clients);
 	seedDocuments(context, spitexId, besi, clients);
-	seedActivity(context, spitexId, spitexStaff.map((member) => member.user), clients, spitexTasks);
+	seedActivity(
+		context,
+		spitexId,
+		spitexStaff.map((member) => member.user),
+		clients,
+		spitexTasks,
+	);
 
-	add(context, 'sessions', { userId: besi.id, device: 'Chrome auf macOS', location: 'Biel/Bienne', lastActiveAt: now.toISOString() });
-	add(context, 'sessions', { userId: besi.id, device: 'Safari auf iPhone', location: 'Lyss', lastActiveAt: new Date(now.getTime() - 26 * 3_600_000).toISOString() });
+	add(context, 'sessions', {
+		userId: besi.id,
+		device: 'Chrome auf macOS',
+		location: 'Biel/Bienne',
+		lastActiveAt: now.toISOString(),
+	});
+	add(context, 'sessions', {
+		userId: besi.id,
+		device: 'Safari auf iPhone',
+		location: 'Lyss',
+		lastActiveAt: new Date(now.getTime() - 26 * 3_600_000).toISOString(),
+	});
 	return context.snapshot;
 }
-
 
 /** A small starter set for a tenant created in onboarding with "add demo data". */
 export function demoRowsFor(tenantId: TenantId, now: Date = new Date()): Partial<Snapshot> {
@@ -577,10 +905,25 @@ export function demoRowsFor(tenantId: TenantId, now: Date = new Date()): Partial
 	for (let index = 0; index < 5; index++) {
 		const date = addDays(context.today, index + 1);
 		appointment(context, {
-			tenantId, title: `Erstgespräch ${displayName(contacts[index])}`, kind: 'meeting', status: 'planned', contactId: contacts[index].id,
-			assigneeId: null, start: atTime(date, '09:00'), end: atTime(date, '10:00'), location: '', notes: '', seriesId: null,
-			service: null, arrivalWindow: null, billedInvoiceId: null,
+			tenantId,
+			title: `Erstgespräch ${displayName(contacts[index])}`,
+			kind: 'meeting',
+			status: 'planned',
+			contactId: contacts[index].id,
+			assigneeId: null,
+			start: atTime(date, '09:00'),
+			end: atTime(date, '10:00'),
+			location: '',
+			notes: '',
+			seriesId: null,
+			service: null,
+			arrivalWindow: null,
+			billedInvoiceId: null,
 		});
 	}
-	return { contacts: context.snapshot.contacts, tasks: context.snapshot.tasks, appointments: context.snapshot.appointments };
+	return {
+		contacts: context.snapshot.contacts,
+		tasks: context.snapshot.tasks,
+		appointments: context.snapshot.appointments,
+	};
 }

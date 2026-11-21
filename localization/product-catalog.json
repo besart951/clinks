@@ -1063,8 +1063,8 @@
         "en-US": "Back to platform"
       },
       "ui.ws.banner.offline": {
-        "de-CH": "Keine Verbindung. Änderungen werden erst gespeichert, wenn du wieder online bist.",
-        "en-US": "No connection. Changes are saved once you are back online."
+        "de-CH": "Keine Verbindung. Änderungen können gerade nicht gespeichert werden.",
+        "en-US": "No connection. Changes cannot be saved right now."
       },
       "ui.ws.banner.trial": {
         "de-CH": "Deine Testphase endet in {days} Tagen.",
@@ -4331,8 +4331,8 @@
         "en-US": "Does CLinks work without internet?"
       },
       "ui.ws.help.a_offline": {
-        "de-CH": "Gelesene Daten bleiben sichtbar. Änderungen werden gespeichert, sobald die Verbindung zurück ist; der Status oben rechts zeigt es an.",
-        "en-US": "Data you have loaded stays visible. Changes are saved once the connection is back; the status at the top right shows it."
+        "de-CH": "Bereits geladene Daten bleiben sichtbar und die Sitzung bleibt erhalten. Änderungen brauchen eine Verbindung; der Status oben rechts zeigt sie an.",
+        "en-US": "Data you have already loaded stays visible and you stay signed in. Changes need a connection; the status at the top right shows it."
       },
       "ui.ws.help.q_export": {
         "de-CH": "Kann ich meine Daten mitnehmen?",

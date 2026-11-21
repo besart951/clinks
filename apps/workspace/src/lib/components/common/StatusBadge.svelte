@@ -3,7 +3,6 @@
 </script>
 
 <script lang="ts">
-
 	let { tone = 'neutral', label }: { tone?: Tone; label: string } = $props();
 
 	const tones: { [key in Tone]: string } = {
@@ -16,4 +15,7 @@
 	};
 </script>
 
-<span class="inline-flex h-5 shrink-0 items-center rounded-full px-2 text-xs font-medium whitespace-nowrap {tones[tone]}">{label}</span>
+<span
+	class="inline-flex h-5 shrink-0 items-center rounded-full px-2 text-xs font-medium whitespace-nowrap {tones[tone]}"
+	>{label}</span
+>

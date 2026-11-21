@@ -45,7 +45,12 @@ export class Workspace {
 		const storage = browserStorage();
 		this.persistent = storage !== null;
 		const localize = (key: string) => this.i18n.t(key);
-		this.db = new MockDatabase({ storage, seed: () => createSeed(new Date()), conditions: () => this.network.conditions(), localize });
+		this.db = new MockDatabase({
+			storage,
+			seed: () => createSeed(new Date()),
+			conditions: () => this.network.conditions(),
+			localize,
+		});
 		this.account = new AccountApi(this.db, {
 			userId: () => this.session.callerId(),
 			tenantId: () => this.session.tenantId,
@@ -81,7 +86,9 @@ export class Workspace {
 			if (options.success) {
 				const undo = options.undo;
 				toast.success(this.t(options.success, options.successParams), {
-					action: undo ? { label: this.t('ui.ws.undo'), onClick: () => void this.run(undo, { success: 'ui.ws.undone' }) } : undefined,
+					action: undo
+						? { label: this.t('ui.ws.undo'), onClick: () => void this.run(undo, { success: 'ui.ws.undone' }) }
+						: undefined,
 				});
 			}
 			return result;

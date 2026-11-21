@@ -32,7 +32,8 @@
 			>
 				<Bell class="size-4" />
 				{#if model.unread > 0}
-					<span class="bg-destructive absolute top-1 right-1 grid min-w-4 place-items-center rounded-full px-1 text-[10px] leading-4 font-semibold text-white"
+					<span
+						class="bg-destructive absolute top-1 right-1 grid min-w-4 place-items-center rounded-full px-1 text-[10px] leading-4 font-semibold text-white"
 						>{model.unread}</span
 					>
 				{/if}
@@ -42,13 +43,19 @@
 	<Popover.Content align="end" class="w-80 p-0">
 		<div class="flex items-center justify-between border-b px-3 py-2">
 			<p class="text-sm font-medium">{workspace.t('ui.ws.notifications.title')}</p>
-			<Button variant="ghost" size="xs" disabled={model.unread === 0} onclick={() => model.markAllRead()}>{workspace.t('ui.ws.notifications.mark_all')}</Button>
+			<Button variant="ghost" size="xs" disabled={model.unread === 0} onclick={() => model.markAllRead()}
+				>{workspace.t('ui.ws.notifications.mark_all')}</Button
+			>
 		</div>
 		<ul class="max-h-80 overflow-y-auto" aria-live="polite">
 			{#each (model.resource.data ?? []).slice(0, 8) as notification (notification.id)}
 				<li>
-					<button class="hover:bg-muted flex w-full gap-2 px-3 py-2 text-left text-sm" onclick={() => openNotification(notification)}>
-						<span class="mt-1.5 size-2 shrink-0 rounded-full {notification.read ? 'bg-transparent' : 'bg-sky-500'}"></span>
+					<button
+						class="hover:bg-muted flex w-full gap-2 px-3 py-2 text-left text-sm"
+						onclick={() => openNotification(notification)}
+					>
+						<span class="mt-1.5 size-2 shrink-0 rounded-full {notification.read ? 'bg-transparent' : 'bg-sky-500'}"
+						></span>
 						<span class="min-w-0 flex-1">
 							<span class="block">{model.text(notification)}</span>
 							<span class="text-muted-foreground text-xs">{workspace.i18n.relative(notification.createdAt)}</span>
@@ -59,8 +66,10 @@
 				<li class="text-muted-foreground px-3 py-6 text-center text-sm">{workspace.t('ui.ws.notifications.empty')}</li>
 			{/each}
 		</ul>
-		<a class="hover:bg-muted block border-t px-3 py-2 text-center text-sm" href={href('/notifications')} onclick={() => (open = false)}
-			>{workspace.t('ui.ws.notifications.show_all')}</a
+		<a
+			class="hover:bg-muted block border-t px-3 py-2 text-center text-sm"
+			href={href('/notifications')}
+			onclick={() => (open = false)}>{workspace.t('ui.ws.notifications.show_all')}</a
 		>
 	</Popover.Content>
 </Popover.Root>

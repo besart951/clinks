@@ -10,4 +10,7 @@
 </script>
 
 <svelte:head><title>{workspace.t('ui.ws.command.new_invoice')} · CLinks</title></svelte:head>
-<InvoiceEditorPage contactId={query.get('contact') as ContactId | null} appointmentId={query.get('appointment') as AppointmentId | null} />
+<InvoiceEditorPage
+	contactId={query.get('contact') as ContactId | null}
+	appointmentId={query.get('appointment') as AppointmentId | null}
+/>

@@ -84,7 +84,9 @@
 
 	function linkedContacts(document: StoredDocument) {
 		const contacts = model.resource.data?.contacts ?? [];
-		return document.targets.flatMap((target) => (target.kind === 'contact' ? contacts.filter((contact) => contact.id === target.id) : []));
+		return document.targets.flatMap((target) =>
+			target.kind === 'contact' ? contacts.filter((contact) => contact.id === target.id) : [],
+		);
 	}
 </script>
 
@@ -94,9 +96,21 @@
 	<PageHeader title={workspace.t('ui.ws.module.documents')} description={workspace.t('ui.ws.documents.description')}>
 		{#snippet actions()}
 			{#if canWrite}
-				<Button variant="outline" onclick={() => ask(workspace.t('ui.ws.documents.new_folder'), '', (name) => model.createFolder(name))}><FolderPlus class="size-4" />{workspace.t('ui.ws.documents.new_folder')}</Button>
-				<Button onclick={() => fileInput?.click()} disabled={model.uploading}><Upload class="size-4" />{workspace.t('ui.ws.documents.upload')}</Button>
-				<input bind:this={fileInput} type="file" multiple class="sr-only" onchange={(event) => model.upload(event.currentTarget.files)} />
+				<Button
+					variant="outline"
+					onclick={() => ask(workspace.t('ui.ws.documents.new_folder'), '', (name) => model.createFolder(name))}
+					><FolderPlus class="size-4" />{workspace.t('ui.ws.documents.new_folder')}</Button
+				>
+				<Button onclick={() => fileInput?.click()} disabled={model.uploading}
+					><Upload class="size-4" />{workspace.t('ui.ws.documents.upload')}</Button
+				>
+				<input
+					bind:this={fileInput}
+					type="file"
+					multiple
+					class="sr-only"
+					onchange={(event) => model.upload(event.currentTarget.files)}
+				/>
 			{/if}
 		{/snippet}
 	</PageHeader>
@@ -105,10 +119,16 @@
 		{#snippet children()}
 			<div class="mb-4 flex flex-wrap items-center gap-2">
 				<nav aria-label={workspace.t('ui.ws.documents.path')} class="flex flex-wrap items-center gap-1 text-sm">
-					<button class="hover:underline {model.folderId === null ? 'font-semibold' : ''}" onclick={() => (model.folderId = null)}>{workspace.t('ui.ws.documents.all_files')}</button>
+					<button
+						class="hover:underline {model.folderId === null ? 'font-semibold' : ''}"
+						onclick={() => (model.folderId = null)}>{workspace.t('ui.ws.documents.all_files')}</button
+					>
 					{#each model.path as folder (folder.id)}
 						<ChevronRight class="text-muted-foreground size-3.5" />
-						<button class="hover:underline {folder.id === model.folderId ? 'font-semibold' : ''}" onclick={() => (model.folderId = folder.id)}>{folder.name}</button>
+						<button
+							class="hover:underline {folder.id === model.folderId ? 'font-semibold' : ''}"
+							onclick={() => (model.folderId = folder.id)}>{folder.name}</button
+						>
 					{/each}
 				</nav>
 				<div class="flex-1"></div>
@@ -133,14 +153,30 @@
 								<Folder class="size-5 text-amber-500" />
 								<button class="min-w-0 flex-1 text-left" onclick={() => (model.folderId = folder.id)}>
 									<span class="block truncate text-sm font-medium">{folder.name}</span>
-									<span class="text-muted-foreground text-xs">{workspace.t('ui.ws.documents.file_count', { count: model.count(folder.id) })}</span>
+									<span class="text-muted-foreground text-xs"
+										>{workspace.t('ui.ws.documents.file_count', { count: model.count(folder.id) })}</span
+									>
 								</button>
 								{#if canWrite}
 									<DropdownMenu.Root>
-										<DropdownMenu.Trigger>{#snippet child({ props })}<Button {...props} variant="ghost" size="icon-xs" aria-label={workspace.t('ui.ws.more_actions')}><Ellipsis class="size-4" /></Button>{/snippet}</DropdownMenu.Trigger>
+										<DropdownMenu.Trigger
+											>{#snippet child({ props })}<Button
+													{...props}
+													variant="ghost"
+													size="icon-xs"
+													aria-label={workspace.t('ui.ws.more_actions')}><Ellipsis class="size-4" /></Button
+												>{/snippet}</DropdownMenu.Trigger
+										>
 										<DropdownMenu.Content align="end">
-											<DropdownMenu.Item onclick={() => ask(workspace.t('ui.ws.documents.rename'), folder.name, (name) => model.renameFolder(folder, name))}>{workspace.t('ui.ws.documents.rename')}</DropdownMenu.Item>
-											<DropdownMenu.Item variant="destructive" onclick={() => deleteFolder(folder)}>{workspace.t('ui.ws.delete')}</DropdownMenu.Item>
+											<DropdownMenu.Item
+												onclick={() =>
+													ask(workspace.t('ui.ws.documents.rename'), folder.name, (name) =>
+														model.renameFolder(folder, name),
+													)}>{workspace.t('ui.ws.documents.rename')}</DropdownMenu.Item
+											>
+											<DropdownMenu.Item variant="destructive" onclick={() => deleteFolder(folder)}
+												>{workspace.t('ui.ws.delete')}</DropdownMenu.Item
+											>
 										</DropdownMenu.Content>
 									</DropdownMenu.Root>
 								{/if}
@@ -150,7 +186,11 @@
 				{/if}
 
 				{#if model.files.length === 0}
-					<EmptyState icon={FileText} title={workspace.t('ui.ws.documents.empty_title')} description={canWrite ? workspace.t('ui.ws.documents.empty_text') : undefined} />
+					<EmptyState
+						icon={FileText}
+						title={workspace.t('ui.ws.documents.empty_title')}
+						description={canWrite ? workspace.t('ui.ws.documents.empty_text') : undefined}
+					/>
 				{:else}
 					<div class="rounded-xl border">
 						<Table.Root>
@@ -167,34 +207,73 @@
 								{#each model.files as document (document.id)}
 									<Table.Row>
 										<Table.Cell>
-											<button class="flex items-center gap-2 text-left font-medium hover:underline" onclick={() => (preview = document)}>
-												{#if document.mimeType.startsWith('image/')}<FileImage class="text-muted-foreground size-4" />{:else}<FileText class="text-muted-foreground size-4" />{/if}
+											<button
+												class="flex items-center gap-2 text-left font-medium hover:underline"
+												onclick={() => (preview = document)}
+											>
+												{#if document.mimeType.startsWith('image/')}<FileImage
+														class="text-muted-foreground size-4"
+													/>{:else}<FileText class="text-muted-foreground size-4" />{/if}
 												{document.name}
 											</button>
 										</Table.Cell>
 										<Table.Cell class="hidden md:table-cell">
-											<div class="flex flex-wrap gap-1">{#each linkedContacts(document) as contact (contact.id)}<a class="bg-muted rounded-full px-2 py-0.5 text-xs hover:underline" href={href(`/contacts/${contact.id}`)}>{contactName(contact)}</a>{/each}</div>
+											<div class="flex flex-wrap gap-1">
+												{#each linkedContacts(document) as contact (contact.id)}<a
+														class="bg-muted rounded-full px-2 py-0.5 text-xs hover:underline"
+														href={href(`/contacts/${contact.id}`)}>{contactName(contact)}</a
+													>{/each}
+											</div>
 										</Table.Cell>
-										<Table.Cell class="text-muted-foreground hidden sm:table-cell">{formatBytes(document.size, (value) => workspace.i18n.number(value))}</Table.Cell>
-										<Table.Cell class="text-muted-foreground hidden lg:table-cell">{workspace.i18n.date(document.createdAt)}</Table.Cell>
+										<Table.Cell class="text-muted-foreground hidden sm:table-cell"
+											>{formatBytes(document.size, (value) => workspace.i18n.number(value))}</Table.Cell
+										>
+										<Table.Cell class="text-muted-foreground hidden lg:table-cell"
+											>{workspace.i18n.date(document.createdAt)}</Table.Cell
+										>
 										<Table.Cell>
 											<DropdownMenu.Root>
-												<DropdownMenu.Trigger>{#snippet child({ props })}<Button {...props} variant="ghost" size="icon-xs" aria-label={workspace.t('ui.ws.more_actions')}><Ellipsis class="size-4" /></Button>{/snippet}</DropdownMenu.Trigger>
+												<DropdownMenu.Trigger
+													>{#snippet child({ props })}<Button
+															{...props}
+															variant="ghost"
+															size="icon-xs"
+															aria-label={workspace.t('ui.ws.more_actions')}><Ellipsis class="size-4" /></Button
+														>{/snippet}</DropdownMenu.Trigger
+												>
 												<DropdownMenu.Content align="end">
-													<DropdownMenu.Item onclick={() => (preview = document)}>{workspace.t('ui.ws.documents.preview')}</DropdownMenu.Item>
-													<a href={document.dataUrl} download={document.name}><DropdownMenu.Item>{workspace.t('ui.ws.documents.download')}</DropdownMenu.Item></a>
+													<DropdownMenu.Item onclick={() => (preview = document)}
+														>{workspace.t('ui.ws.documents.preview')}</DropdownMenu.Item
+													>
+													<a href={document.dataUrl} download={document.name}
+														><DropdownMenu.Item>{workspace.t('ui.ws.documents.download')}</DropdownMenu.Item></a
+													>
 													{#if canWrite}
-														<DropdownMenu.Item onclick={() => ask(workspace.t('ui.ws.documents.rename'), document.name, (name) => model.rename(document, name))}>{workspace.t('ui.ws.documents.rename')}</DropdownMenu.Item>
-														<DropdownMenu.Item onclick={() => (linking = document)}><Link2 class="size-4" />{workspace.t('ui.ws.documents.link_contact')}</DropdownMenu.Item>
+														<DropdownMenu.Item
+															onclick={() =>
+																ask(workspace.t('ui.ws.documents.rename'), document.name, (name) =>
+																	model.rename(document, name),
+																)}>{workspace.t('ui.ws.documents.rename')}</DropdownMenu.Item
+														>
+														<DropdownMenu.Item onclick={() => (linking = document)}
+															><Link2 class="size-4" />{workspace.t('ui.ws.documents.link_contact')}</DropdownMenu.Item
+														>
 														<DropdownMenu.Sub>
-															<DropdownMenu.SubTrigger>{workspace.t('ui.ws.documents.move_to')}</DropdownMenu.SubTrigger>
+															<DropdownMenu.SubTrigger>{workspace.t('ui.ws.documents.move_to')}</DropdownMenu.SubTrigger
+															>
 															<DropdownMenu.SubContent>
-																<DropdownMenu.Item onclick={() => model.move(document, null)}>{workspace.t('ui.ws.documents.all_files')}</DropdownMenu.Item>
-																{#each model.folders as folder (folder.id)}<DropdownMenu.Item onclick={() => model.move(document, folder.id)}>{folder.name}</DropdownMenu.Item>{/each}
+																<DropdownMenu.Item onclick={() => model.move(document, null)}
+																	>{workspace.t('ui.ws.documents.all_files')}</DropdownMenu.Item
+																>
+																{#each model.folders as folder (folder.id)}<DropdownMenu.Item
+																		onclick={() => model.move(document, folder.id)}>{folder.name}</DropdownMenu.Item
+																	>{/each}
 															</DropdownMenu.SubContent>
 														</DropdownMenu.Sub>
 														<DropdownMenu.Separator />
-														<DropdownMenu.Item variant="destructive" onclick={() => model.remove(document)}>{workspace.t('ui.ws.delete')}</DropdownMenu.Item>
+														<DropdownMenu.Item variant="destructive" onclick={() => model.remove(document)}
+															>{workspace.t('ui.ws.delete')}</DropdownMenu.Item
+														>
 													{/if}
 												</DropdownMenu.Content>
 											</DropdownMenu.Root>
@@ -212,9 +291,15 @@
 </ModuleGate>
 
 <Dialog.Root open={preview !== null} onOpenChange={(open) => !open && (preview = null)}>
-	<Dialog.Content class="sm:max-w-3xl">
+	<Dialog.Content closeLabel={workspace.t('ui.ws.close')} class="sm:max-w-3xl">
 		{#if preview}
-			<Dialog.Header><Dialog.Title>{preview.name}</Dialog.Title><Dialog.Description>{formatBytes(preview.size, (value) => workspace.i18n.number(value))} · {workspace.i18n.dateTime(preview.createdAt)}</Dialog.Description></Dialog.Header>
+			<Dialog.Header
+				><Dialog.Title>{preview.name}</Dialog.Title><Dialog.Description
+					>{formatBytes(preview.size, (value) => workspace.i18n.number(value))} · {workspace.i18n.dateTime(
+						preview.createdAt,
+					)}</Dialog.Description
+				></Dialog.Header
+			>
 			<div class="bg-muted/40 max-h-[70vh] overflow-auto rounded-lg border">
 				{#if preview.mimeType.startsWith('image/')}
 					<img src={preview.dataUrl} alt={preview.name} class="mx-auto max-h-[68vh]" />
@@ -226,26 +311,45 @@
 					<p class="text-muted-foreground p-8 text-center text-sm">{workspace.t('ui.ws.documents.no_preview')}</p>
 				{/if}
 			</div>
-			<Dialog.Footer><Button href={preview.dataUrl} download={preview.name}>{workspace.t('ui.ws.documents.download')}</Button></Dialog.Footer>
+			<Dialog.Footer
+				><Button href={preview.dataUrl} download={preview.name}>{workspace.t('ui.ws.documents.download')}</Button
+				></Dialog.Footer
+			>
 		{/if}
 	</Dialog.Content>
 </Dialog.Root>
 
 <Dialog.Root open={naming !== null} onOpenChange={(open) => !open && (naming = null)}>
-	<Dialog.Content class="sm:max-w-sm">
+	<Dialog.Content closeLabel={workspace.t('ui.ws.close')} class="sm:max-w-sm">
 		{#if naming}
 			<Dialog.Header><Dialog.Title>{naming.title}</Dialog.Title></Dialog.Header>
-			<form id="name-form" onsubmit={submitName}><Input bind:value={naming.value} aria-label={workspace.t('ui.ws.contacts.name')} /></form>
-			<Dialog.Footer><Button variant="outline" onclick={() => (naming = null)}>{workspace.t('ui.ws.cancel')}</Button><Button type="submit" form="name-form">{workspace.t('ui.save')}</Button></Dialog.Footer>
+			<form id="name-form" onsubmit={submitName}>
+				<Input bind:value={naming.value} aria-label={workspace.t('ui.ws.contacts.name')} />
+			</form>
+			<Dialog.Footer
+				><Button variant="outline" onclick={() => (naming = null)}>{workspace.t('ui.ws.cancel')}</Button><Button
+					type="submit"
+					form="name-form">{workspace.t('ui.save')}</Button
+				></Dialog.Footer
+			>
 		{/if}
 	</Dialog.Content>
 </Dialog.Root>
 
 <Dialog.Root open={linking !== null} onOpenChange={(open) => !open && (linking = null)}>
-	<Dialog.Content class="sm:max-w-md">
-		<Dialog.Header><Dialog.Title>{workspace.t('ui.ws.documents.link_contact')}</Dialog.Title><Dialog.Description>{linking?.name}</Dialog.Description></Dialog.Header>
+	<Dialog.Content closeLabel={workspace.t('ui.ws.close')} class="sm:max-w-md">
+		<Dialog.Header
+			><Dialog.Title>{workspace.t('ui.ws.documents.link_contact')}</Dialog.Title><Dialog.Description
+				>{linking?.name}</Dialog.Description
+			></Dialog.Header
+		>
 		<ContactPicker bind:value={linkContact} contacts={model.resource.data?.contacts ?? []} allowEmpty={false} />
-		<Dialog.Footer><Button variant="outline" onclick={() => (linking = null)}>{workspace.t('ui.ws.cancel')}</Button><Button disabled={!linkContact} onclick={saveLink}>{workspace.t('ui.ws.documents.link')}</Button></Dialog.Footer>
+		<Dialog.Footer
+			><Button variant="outline" onclick={() => (linking = null)}>{workspace.t('ui.ws.cancel')}</Button><Button
+				disabled={!linkContact}
+				onclick={saveLink}>{workspace.t('ui.ws.documents.link')}</Button
+			></Dialog.Footer
+		>
 	</Dialog.Content>
 </Dialog.Root>
 <ConfirmDialog bind:request={confirm} />

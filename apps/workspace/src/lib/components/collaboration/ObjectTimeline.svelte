@@ -8,7 +8,9 @@
 	let { targetId, people }: { targetId: string; people: PeopleDirectory } = $props();
 	const workspace = useWorkspace();
 	const resource = new Resource(workspace.db, ['audit'], async () =>
-		(await workspace.api.audit.list((row) => row.target.id === targetId)).sort((left, right) => right.createdAt.localeCompare(left.createdAt)),
+		(await workspace.api.audit.list((row) => row.target.id === targetId)).sort((left, right) =>
+			right.createdAt.localeCompare(left.createdAt),
+		),
 	);
 	onMount(() => resource.connect());
 </script>

@@ -8,7 +8,8 @@
 	import type { TaskId } from '$lib/domain/ids';
 	import { useWorkspace } from '$lib/workspace.svelte';
 
-	let { model, people, onOpen }: { model: PlannerModel; people: PeopleDirectory; onOpen: (task: Task) => void } = $props();
+	let { model, people, onOpen }: { model: PlannerModel; people: PeopleDirectory; onOpen: (task: Task) => void } =
+		$props();
 	const workspace = useWorkspace();
 	const canWrite = $derived(workspace.session.can('planner.write'));
 	let dragging = $state<Task | null>(null);
@@ -40,10 +41,12 @@
 		if (!canWrite || !event.altKey) return;
 		const statuses = model.columns.map((entry) => entry.status);
 		const position = statuses.indexOf(task.status);
-		if (event.key === 'ArrowRight' && position < statuses.length - 1) void model.moveTo(task, statuses[position + 1], null);
+		if (event.key === 'ArrowRight' && position < statuses.length - 1)
+			void model.moveTo(task, statuses[position + 1], null);
 		else if (event.key === 'ArrowLeft' && position > 0) void model.moveTo(task, statuses[position - 1], null);
 		else if (event.key === 'ArrowUp' && index > 0) void model.moveTo(task, task.status, column[index - 1].id);
-		else if (event.key === 'ArrowDown' && index < column.length - 1) void model.moveTo(task, task.status, column[index + 2]?.id ?? null);
+		else if (event.key === 'ArrowDown' && index < column.length - 1)
+			void model.moveTo(task, task.status, column[index + 2]?.id ?? null);
 		else return;
 		event.preventDefault();
 	}
@@ -52,21 +55,34 @@
 <div class="flex gap-3 overflow-x-auto pb-3">
 	{#each model.columns as column (column.status)}
 		<section
-			class="bg-muted/40 flex w-72 shrink-0 flex-col rounded-xl border {target?.status === column.status ? 'ring-primary/40 ring-2' : ''}"
+			class="bg-muted/40 flex w-72 shrink-0 flex-col rounded-xl border {target?.status === column.status
+				? 'ring-primary/40 ring-2'
+				: ''}"
 			aria-label={workspace.t(`ui.ws.task.status.${column.status}`)}
 			ondragover={(event) => over(event, column.status, null)}
 			ondrop={drop}
 		>
 			<header class="flex items-center justify-between px-3 py-2">
-				<h2 class="text-sm font-semibold">{workspace.t(`ui.ws.task.status.${column.status}`)} <span class="text-muted-foreground font-normal">{column.tasks.length}</span></h2>
+				<h2 class="text-sm font-semibold">
+					{workspace.t(`ui.ws.task.status.${column.status}`)}
+					<span class="text-muted-foreground font-normal">{column.tasks.length}</span>
+				</h2>
 				{#if canWrite}
-					<button class="text-muted-foreground hover:text-foreground rounded p-1" onclick={() => (adding = column.status)} aria-label={workspace.t('ui.ws.planner.add_in', { column: workspace.t(`ui.ws.task.status.${column.status}`) })}><Plus class="size-4" /></button>
+					<button
+						class="text-muted-foreground hover:text-foreground rounded p-1"
+						onclick={() => (adding = column.status)}
+						aria-label={workspace.t('ui.ws.planner.add_in', {
+							column: workspace.t(`ui.ws.task.status.${column.status}`),
+						})}><Plus class="size-4" /></button
+					>
 				{/if}
 			</header>
 			<ol class="flex min-h-16 flex-1 flex-col gap-2 px-2 pb-2">
 				{#each column.tasks as task, index (task.id)}
 					<li ondragover={(event) => over(event, column.status, task.id)}>
-						{#if target?.before === task.id && dragging?.id !== task.id}<div class="bg-primary mb-2 h-0.5 rounded"></div>{/if}
+						{#if target?.before === task.id && dragging?.id !== task.id}<div
+								class="bg-primary mb-2 h-0.5 rounded"
+							></div>{/if}
 						<button
 							type="button"
 							draggable={canWrite}
@@ -80,7 +96,10 @@
 							}}
 							onclick={() => onOpen(task)}
 							onkeydown={(event) => onCardKey(event, task, index, column.tasks)}
-							class="bg-card hover:border-foreground/20 w-full rounded-lg border p-3 text-left shadow-xs transition {dragging?.id === task.id ? 'opacity-40' : ''}"
+							class="bg-card hover:border-foreground/20 w-full rounded-lg border p-3 text-left shadow-xs transition {dragging?.id ===
+							task.id
+								? 'opacity-40'
+								: ''}"
 							aria-keyshortcuts="Alt+ArrowLeft Alt+ArrowRight Alt+ArrowUp Alt+ArrowDown"
 						>
 							<TaskCard {task} {people} />

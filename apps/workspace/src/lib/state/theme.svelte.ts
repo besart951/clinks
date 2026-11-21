@@ -34,7 +34,8 @@ export class ThemeController {
 	}
 
 	#apply() {
-		const dark = this.mode === 'dark' || (this.mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+		const dark =
+			this.mode === 'dark' || (this.mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 		document.documentElement.classList.toggle('dark', dark);
 	}
 }

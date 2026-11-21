@@ -1,6 +1,6 @@
 import type { Contact } from '../../domain/types.ts';
 import type { Draft } from '../../data/repository.ts';
-import { emptyContact } from './contact-form.svelte.ts';
+import { emptyContact } from './empty-contact.ts';
 
 /** Splits CSV text with comma or semicolon separators and quoted fields. */
 export function parseCsv(text: string): string[][] {
@@ -70,7 +70,12 @@ export function contactsFromCsv(rows: string[][]): Draft<Contact>[] {
 }
 
 /** Pairs of contacts that are probably the same person (same email or same name and city). */
-export function duplicateKey(contact: Pick<Contact, 'email' | 'firstName' | 'lastName' | 'companyName' | 'address'>): string {
+export function duplicateKey(
+	contact: Pick<Contact, 'email' | 'firstName' | 'lastName' | 'companyName' | 'address'>,
+): string {
 	if (contact.email) return contact.email.toLowerCase();
-	return `${contact.firstName} ${contact.lastName} ${contact.companyName} ${contact.address.city}`.toLowerCase().replace(/\s+/g, ' ').trim();
+	return `${contact.firstName} ${contact.lastName} ${contact.companyName} ${contact.address.city}`
+		.toLowerCase()
+		.replace(/\s+/g, ' ')
+		.trim();
 }

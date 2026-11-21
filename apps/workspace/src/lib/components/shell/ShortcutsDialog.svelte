@@ -14,7 +14,7 @@
 </script>
 
 <Dialog.Root bind:open>
-	<Dialog.Content class="sm:max-w-lg">
+	<Dialog.Content closeLabel={workspace.t('ui.ws.close')} class="sm:max-w-lg">
 		<Dialog.Header>
 			<Dialog.Title>{workspace.t('ui.ws.shortcuts.title')}</Dialog.Title>
 			<Dialog.Description>{workspace.t('ui.ws.shortcuts.text')}</Dialog.Description>
@@ -24,7 +24,9 @@
 				{#each general as shortcut (shortcut.label)}
 					<div class="flex items-center justify-between gap-2">
 						<dt>{workspace.t(shortcut.label)}</dt>
-						<dd class="flex gap-1">{#each shortcut.keys as key (key)}<kbd class="bg-muted rounded border px-1.5 text-xs">{key}</kbd>{/each}</dd>
+						<dd class="flex gap-1">
+							{#each shortcut.keys as key (key)}<kbd class="bg-muted rounded border px-1.5 text-xs">{key}</kbd>{/each}
+						</dd>
 					</div>
 				{/each}
 			</dl>
@@ -32,7 +34,11 @@
 				{#each allNavigationItems.filter((item) => item.shortcut) as item (item.path)}
 					<div class="flex items-center justify-between gap-2">
 						<dt>{workspace.t(item.label)}</dt>
-						<dd class="flex gap-1"><kbd class="bg-muted rounded border px-1.5 text-xs">G</kbd><kbd class="bg-muted rounded border px-1.5 text-xs">{item.shortcut?.toUpperCase()}</kbd></dd>
+						<dd class="flex gap-1">
+							<kbd class="bg-muted rounded border px-1.5 text-xs">G</kbd><kbd
+								class="bg-muted rounded border px-1.5 text-xs">{item.shortcut?.toUpperCase()}</kbd
+							>
+						</dd>
 					</div>
 				{/each}
 			</dl>

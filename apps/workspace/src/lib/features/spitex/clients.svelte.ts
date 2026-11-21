@@ -19,8 +19,14 @@ export class ClientsModel {
 			const now = new Date().toISOString();
 			const weekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString();
 			return clients.map((client) => {
-				const own = visits.filter((visit) => visit.contactId === client.id).sort((left, right) => left.start.localeCompare(right.start));
-				return { client, next: own.find((visit) => visit.start >= now) ?? null, perWeek: own.filter((visit) => visit.start >= weekAgo && visit.start < now).length };
+				const own = visits
+					.filter((visit) => visit.contactId === client.id)
+					.sort((left, right) => left.start.localeCompare(right.start));
+				return {
+					client,
+					next: own.find((visit) => visit.start >= now) ?? null,
+					perWeek: own.filter((visit) => visit.start >= weekAgo && visit.start < now).length,
+				};
 			});
 		});
 	}
@@ -28,7 +34,11 @@ export class ClientsModel {
 	get rows() {
 		const query = this.search.trim().toLowerCase();
 		return (this.resource.data ?? [])
-			.filter((row) => !query || `${row.client.firstName} ${row.client.lastName} ${row.client.address.city}`.toLowerCase().includes(query))
+			.filter(
+				(row) =>
+					!query ||
+					`${row.client.firstName} ${row.client.lastName} ${row.client.address.city}`.toLowerCase().includes(query),
+			)
 			.sort((left, right) => left.client.lastName.localeCompare(right.client.lastName, 'de'));
 	}
 }
@@ -53,7 +63,9 @@ export class ClientFileModel {
 			return {
 				client,
 				visits: visits.sort((left, right) => right.start.localeCompare(left.start)),
-				notes: notes.sort((left, right) => right.date.localeCompare(left.date) || right.createdAt.localeCompare(left.createdAt)),
+				notes: notes.sort(
+					(left, right) => right.date.localeCompare(left.date) || right.createdAt.localeCompare(left.createdAt),
+				),
 			};
 		});
 	}
@@ -62,7 +74,15 @@ export class ClientFileModel {
 		if (!Object.values(this.draft).some((value) => value.trim())) return;
 		this.busy = true;
 		const result = await this.#workspace.run(
-			() => this.#workspace.api.spitexNotes.create({ kind: 'spitex', contactId: this.#id, appointmentId: null, date: today(), authorId: this.#workspace.session.user!.id, ...$state.snapshot(this.draft) }),
+			() =>
+				this.#workspace.api.spitexNotes.create({
+					kind: 'spitex',
+					contactId: this.#id,
+					appointmentId: null,
+					date: today(),
+					authorId: this.#workspace.session.user!.id,
+					...$state.snapshot(this.draft),
+				}),
 			{ success: 'ui.ws.spitex.note_saved' },
 		);
 		if (result) this.draft = { subjective: '', objective: '', assessment: '', plan: '' };
@@ -84,7 +104,9 @@ export class TimeTrackingModel {
 			const since = new Date(Date.now() - 21 * 86_400_000).toISOString();
 			const [entries, visits] = await Promise.all([
 				workspace.api.timeEntries.list(),
-				workspace.api.appointments.list((row) => row.kind === 'spitex' && row.start >= since && row.status !== 'cancelled'),
+				workspace.api.appointments.list(
+					(row) => row.kind === 'spitex' && row.start >= since && row.status !== 'cancelled',
+				),
 			]);
 			return { entries: entries.sort((left, right) => right.date.localeCompare(left.date)), visits };
 		});
@@ -99,7 +121,14 @@ export class TimeTrackingModel {
 	async add() {
 		const userId = this.#workspace.session.user!.id;
 		const result = await this.#workspace.run(
-			() => this.#workspace.api.timeEntries.create({ userId, appointmentId: null, date: this.date, minutes: Number(this.minutes), description: this.description }),
+			() =>
+				this.#workspace.api.timeEntries.create({
+					userId,
+					appointmentId: null,
+					date: this.date,
+					minutes: Number(this.minutes),
+					description: this.description,
+				}),
 			{ success: 'ui.ws.spitex.time_saved' },
 		);
 		if (result) this.description = '';
@@ -107,6 +136,9 @@ export class TimeTrackingModel {
 
 	async remove(entry: TimeEntry) {
 		const api = this.#workspace.api.timeEntries;
-		await this.#workspace.run(() => api.remove(entry.id), { success: 'ui.ws.spitex.time_deleted', undo: () => api.restore(entry) });
+		await this.#workspace.run(() => api.remove(entry.id), {
+			success: 'ui.ws.spitex.time_deleted',
+			undo: () => api.restore(entry),
+		});
 	}
 }

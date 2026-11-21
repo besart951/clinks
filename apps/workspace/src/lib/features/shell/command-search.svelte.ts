@@ -37,8 +37,17 @@ export class CommandSearch {
 			.filter(([, , , module]) => session.hasModule(module))
 			.map(([id, label, path]) => ({ id, group: 'actions' as const, label: w.t(label), detail: '', path }));
 		const pages = allNavigationItems
-			.filter((item) => (!item.permission || session.can(item.permission)) && (!item.module || session.hasModule(item.module)))
-			.map((item) => ({ id: `page-${item.path}`, group: 'pages' as const, label: w.t(item.label), detail: '', path: item.path }));
+			.filter(
+				(item) =>
+					(!item.permission || session.can(item.permission)) && (!item.module || session.hasModule(item.module)),
+			)
+			.map((item) => ({
+				id: `page-${item.path}`,
+				group: 'pages' as const,
+				label: w.t(item.label),
+				detail: '',
+				path: item.path,
+			}));
 		const optional = async <T>(enabled: boolean, load: () => Promise<T[]>): Promise<T[]> => {
 			if (!enabled) return [];
 			try {
@@ -50,7 +59,9 @@ export class CommandSearch {
 		const until = addDays(today(), 30);
 		const [contacts, appointments, invoices, tasks, mails] = await Promise.all([
 			optional(session.can('contacts.read'), () => w.api.contacts.list((row) => !row.archived)),
-			optional(session.can('calendar.read'), () => w.api.appointments.list((row) => row.start.slice(0, 10) >= today() && row.start.slice(0, 10) <= until)),
+			optional(session.can('calendar.read'), () =>
+				w.api.appointments.list((row) => row.start.slice(0, 10) >= today() && row.start.slice(0, 10) <= until),
+			),
 			optional(session.can('finance.read') && session.hasModule('finance'), () => w.api.invoices.list()),
 			optional(session.can('planner.read') && session.hasModule('planner'), () => w.api.tasks.list()),
 			optional(session.can('mail.read') && session.hasModule('mail'), () => w.api.mails.list()),
@@ -58,11 +69,41 @@ export class CommandSearch {
 		this.entries = [
 			...actions,
 			...pages,
-			...contacts.map((row) => ({ id: row.id, group: 'contacts' as const, label: contactName(row), detail: row.email || row.address.city, path: `/contacts/${row.id}` })),
-			...appointments.slice(0, 60).map((row) => ({ id: row.id, group: 'appointments' as const, label: row.title, detail: w.i18n.dateTime(row.start), path: `/calendar?date=${row.start.slice(0, 10)}&appointment=${row.id}` })),
-			...invoices.map((row) => ({ id: row.id, group: 'invoices' as const, label: row.number, detail: w.i18n.date(row.issueDate), path: `/finance/invoices/${row.id}` })),
-			...tasks.map((row) => ({ id: row.id, group: 'tasks' as const, label: row.title, detail: '', path: `/planner?task=${row.id}` })),
-			...mails.map((row) => ({ id: row.id, group: 'mails' as const, label: row.subject, detail: row.fromName, path: `/mail?message=${row.id}` })),
+			...contacts.map((row) => ({
+				id: row.id,
+				group: 'contacts' as const,
+				label: contactName(row),
+				detail: row.email || row.address.city,
+				path: `/contacts/${row.id}`,
+			})),
+			...appointments.slice(0, 60).map((row) => ({
+				id: row.id,
+				group: 'appointments' as const,
+				label: row.title,
+				detail: w.i18n.dateTime(row.start),
+				path: `/calendar?date=${row.start.slice(0, 10)}&appointment=${row.id}`,
+			})),
+			...invoices.map((row) => ({
+				id: row.id,
+				group: 'invoices' as const,
+				label: row.number,
+				detail: w.i18n.date(row.issueDate),
+				path: `/finance/invoices/${row.id}`,
+			})),
+			...tasks.map((row) => ({
+				id: row.id,
+				group: 'tasks' as const,
+				label: row.title,
+				detail: '',
+				path: `/planner?task=${row.id}`,
+			})),
+			...mails.map((row) => ({
+				id: row.id,
+				group: 'mails' as const,
+				label: row.subject,
+				detail: row.fromName,
+				path: `/mail?message=${row.id}`,
+			})),
 		];
 		this.loading = false;
 	}

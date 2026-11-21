@@ -27,14 +27,19 @@ export class NotificationsModel {
 	async markRead(notification: AppNotification) {
 		if (notification.read) return;
 		this.resource.patch((rows) => rows.map((row) => (row.id === notification.id ? { ...row, read: true } : row)));
-		await this.#workspace.run(() => this.#workspace.api.notifications.update(notification.id, notification.revision, { read: true }));
+		await this.#workspace.run(() =>
+			this.#workspace.api.notifications.update(notification.id, notification.revision, { read: true }),
+		);
 	}
 
 	async markAllRead() {
 		const unread = (this.resource.data ?? []).filter((row) => !row.read);
 		this.resource.patch((rows) => rows.map((row) => ({ ...row, read: true })));
 		await this.#workspace.run(
-			() => Promise.all(unread.map((row) => this.#workspace.api.notifications.update(row.id, row.revision, { read: true }))),
+			() =>
+				Promise.all(
+					unread.map((row) => this.#workspace.api.notifications.update(row.id, row.revision, { read: true })),
+				),
 			{ success: 'ui.ws.notifications.all_read' },
 		);
 	}

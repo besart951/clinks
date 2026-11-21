@@ -29,10 +29,6 @@ export function addDays(value: CalendarDate, days: number): CalendarDate {
 	return toCalendarDate(date);
 }
 
-export function addMinutes(value: Timestamp, minutes: number): Timestamp {
-	return new Date(new Date(value).getTime() + minutes * minute).toISOString();
-}
-
 export function minutesBetween(start: Timestamp, end: Timestamp): number {
 	return Math.round((new Date(end).getTime() - new Date(start).getTime()) / minute);
 }

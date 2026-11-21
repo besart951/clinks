@@ -32,11 +32,19 @@ export class ContactDetailModel {
 			const contact = await api.contacts.get(id);
 			const [appointments, invoices, mails, tasks] = await Promise.all([
 				optional(session.can('calendar.read'), () => api.appointments.list((row) => row.contactId === id)),
-				optional(session.can('finance.read') && session.hasModule('finance'), () => api.invoices.list((row) => row.contactId === id)),
-				optional(session.can('mail.read') && session.hasModule('mail'), () =>
-					api.mails.list((row) => row.contactId === id || (!!contact.email && (row.from === contact.email || row.to.includes(contact.email)))),
+				optional(session.can('finance.read') && session.hasModule('finance'), () =>
+					api.invoices.list((row) => row.contactId === id),
 				),
-				optional(session.can('planner.read') && session.hasModule('planner'), () => api.tasks.list((row) => row.contactId === id)),
+				optional(session.can('mail.read') && session.hasModule('mail'), () =>
+					api.mails.list(
+						(row) =>
+							row.contactId === id ||
+							(!!contact.email && (row.from === contact.email || row.to.includes(contact.email))),
+					),
+				),
+				optional(session.can('planner.read') && session.hasModule('planner'), () =>
+					api.tasks.list((row) => row.contactId === id),
+				),
 			]);
 			return {
 				contact,

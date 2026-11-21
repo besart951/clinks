@@ -16,12 +16,23 @@
 		invalid = false,
 		allowEmpty = true,
 		onchange,
-	}: { id?: string; value?: ContactId | null; contacts: Contact[]; invalid?: boolean; allowEmpty?: boolean; onchange?: (contact: Contact | null) => void } = $props();
+	}: {
+		id?: string;
+		value?: ContactId | null;
+		contacts: Contact[];
+		invalid?: boolean;
+		allowEmpty?: boolean;
+		onchange?: (contact: Contact | null) => void;
+	} = $props();
 
 	const workspace = useWorkspace();
 	let open = $state(false);
 	const selected = $derived(contacts.find((contact) => contact.id === value) ?? null);
-	const sorted = $derived([...contacts].filter((contact) => !contact.archived).sort((left, right) => contactName(left).localeCompare(contactName(right), 'de')));
+	const sorted = $derived(
+		[...contacts]
+			.filter((contact) => !contact.archived)
+			.sort((left, right) => contactName(left).localeCompare(contactName(right), 'de')),
+	);
 
 	function choose(contact: Contact | null) {
 		value = contact?.id ?? null;
@@ -33,8 +44,18 @@
 <Popover.Root bind:open>
 	<Popover.Trigger>
 		{#snippet child({ props })}
-			<Button {...props} {id} variant="outline" class="w-full justify-between font-normal" aria-invalid={invalid || undefined} role="combobox" aria-expanded={open}>
-				<span class="truncate" class:text-muted-foreground={!selected}>{selected ? contactName(selected) : workspace.t('ui.ws.contact_picker.placeholder')}</span>
+			<Button
+				{...props}
+				{id}
+				variant="outline"
+				class="w-full justify-between font-normal"
+				aria-invalid={invalid || undefined}
+				role="combobox"
+				aria-expanded={open}
+			>
+				<span class="truncate" class:text-muted-foreground={!selected}
+					>{selected ? contactName(selected) : workspace.t('ui.ws.contact_picker.placeholder')}</span
+				>
 				<ChevronsUpDown class="text-muted-foreground size-4" />
 			</Button>
 		{/snippet}
@@ -45,10 +66,15 @@
 			<Command.List class="max-h-64">
 				<Command.Empty>{workspace.t('ui.ws.command.empty')}</Command.Empty>
 				{#if allowEmpty}
-					<Command.Item value="__none" onSelect={() => choose(null)}>{workspace.t('ui.ws.contact_picker.none')}</Command.Item>
+					<Command.Item value="__none" onSelect={() => choose(null)}
+						>{workspace.t('ui.ws.contact_picker.none')}</Command.Item
+					>
 				{/if}
 				{#each sorted as contact (contact.id)}
-					<Command.Item value={`${contactName(contact)} ${contact.email} ${contact.address.city} ${contact.id}`} onSelect={() => choose(contact)}>
+					<Command.Item
+						value={`${contactName(contact)} ${contact.email} ${contact.address.city} ${contact.id}`}
+						onSelect={() => choose(contact)}
+					>
 						<Check class="size-4 {contact.id === value ? '' : 'opacity-0'}" />
 						<span class="truncate">{contactName(contact)}</span>
 						<span class="text-muted-foreground ml-auto truncate text-xs">{contact.address.city}</span>

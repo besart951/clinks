@@ -14,7 +14,10 @@
 
 	const groups = $derived(
 		navigationGroups
-			.map((group) => ({ ...group, items: group.items.filter((item) => !item.permission || session.can(item.permission)) }))
+			.map((group) => ({
+				...group,
+				items: group.items.filter((item) => !item.permission || session.can(item.permission)),
+			}))
 			.filter((group) => group.items.length > 0),
 	);
 
@@ -37,7 +40,11 @@
 </script>
 
 {#if sidebar.mobile && sidebar.open}
-	<button class="fixed inset-0 z-20 bg-black/40 md:hidden" aria-label={workspace.t('ui.ws.shell.close_menu')} onclick={() => sidebar.close()}></button>
+	<button
+		class="fixed inset-0 z-20 bg-black/40 md:hidden"
+		aria-label={workspace.t('ui.ws.shell.close_menu')}
+		onclick={() => sidebar.close()}
+	></button>
 {/if}
 
 <Sidebar>
@@ -59,7 +66,9 @@
 			{#each groups as group (group.label)}
 				<div class="space-y-1">
 					{#if !collapsed}
-						<p class="text-muted-foreground px-2 text-[11px] font-medium tracking-wide uppercase">{workspace.t(group.label)}</p>
+						<p class="text-muted-foreground px-2 text-[11px] font-medium tracking-wide uppercase">
+							{workspace.t(group.label)}
+						</p>
 					{/if}
 					{#each group.items as item (item.path)}
 						<a

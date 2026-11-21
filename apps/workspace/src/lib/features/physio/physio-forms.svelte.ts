@@ -15,7 +15,11 @@ abstract class Form {
 		this.workspace = workspace;
 	}
 
-	protected async attempt(action: () => Promise<unknown>, success: string, params: { [name: string]: string | number } = {}): Promise<boolean> {
+	protected async attempt(
+		action: () => Promise<unknown>,
+		success: string,
+		params: { [name: string]: string | number } = {},
+	): Promise<boolean> {
 		this.busy = true;
 		this.fields = {};
 		try {
@@ -33,21 +37,40 @@ abstract class Form {
 }
 
 export class PrescriptionForm extends Form {
-	value = $state<Draft<Prescription>>({ contactId: '' as ContactId, doctor: '', diagnosis: '', tariff: '7301', sessionsPrescribed: 9, issuedOn: today(), validUntil: addDays(today(), 70) });
+	value = $state<Draft<Prescription>>({
+		contactId: '' as ContactId,
+		doctor: '',
+		diagnosis: '',
+		tariff: '7301',
+		sessionsPrescribed: 9,
+		issuedOn: today(),
+		validUntil: addDays(today(), 70),
+	});
 	original = $state.raw<Prescription | null>(null);
 
 	start(contactId: ContactId, prescription: Prescription | null) {
 		this.original = prescription;
 		this.value = prescription
 			? structuredClone($state.snapshot(prescription))
-			: { contactId, doctor: '', diagnosis: '', tariff: '7301' as PhysioTariff, sessionsPrescribed: 9, issuedOn: today(), validUntil: addDays(today(), 70) };
+			: {
+					contactId,
+					doctor: '',
+					diagnosis: '',
+					tariff: '7301' as PhysioTariff,
+					sessionsPrescribed: 9,
+					issuedOn: today(),
+					validUntil: addDays(today(), 70),
+				};
 		this.fields = {};
 	}
 
 	save() {
 		const api = this.workspace.api.prescriptions;
 		const draft = $state.snapshot(this.value) as Draft<Prescription>;
-		return this.attempt(() => (this.original ? api.update(this.original.id, this.original.revision, draft) : api.create(draft)), 'ui.ws.physio.prescription_saved');
+		return this.attempt(
+			() => (this.original ? api.update(this.original.id, this.original.revision, draft) : api.create(draft)),
+			'ui.ws.physio.prescription_saved',
+		);
 	}
 }
 
@@ -98,11 +121,19 @@ export class SeriesForm extends Form {
 	assigneeId = $state<UserId | null>(null);
 
 	get preview() {
-		return seriesSlots({ firstDate: this.firstDate, time: this.time, durationMinutes: this.duration, weekdays: this.weekdays, count: this.count });
+		return seriesSlots({
+			firstDate: this.firstDate,
+			time: this.time,
+			durationMinutes: this.duration,
+			weekdays: this.weekdays,
+			count: this.count,
+		});
 	}
 
 	toggleWeekday(day: number) {
-		this.weekdays = this.weekdays.includes(day) ? this.weekdays.filter((candidate) => candidate !== day) : [...this.weekdays, day].sort();
+		this.weekdays = this.weekdays.includes(day)
+			? this.weekdays.filter((candidate) => candidate !== day)
+			: [...this.weekdays, day].sort();
 	}
 
 	start(remaining: number, assigneeId: UserId | null) {
@@ -120,8 +151,19 @@ export class SeriesForm extends Form {
 			async () => {
 				for (const slot of slots) {
 					await api.create({
-						title, kind: 'physio', status: 'planned', contactId, assigneeId: this.assigneeId, start: slot.start, end: slot.end,
-						location: '', notes: '', seriesId, service: this.service, arrivalWindow: null, billedInvoiceId: null,
+						title,
+						kind: 'physio',
+						status: 'planned',
+						contactId,
+						assigneeId: this.assigneeId,
+						start: slot.start,
+						end: slot.end,
+						location: '',
+						notes: '',
+						seriesId,
+						service: this.service,
+						arrivalWindow: null,
+						billedInvoiceId: null,
 					});
 				}
 			},

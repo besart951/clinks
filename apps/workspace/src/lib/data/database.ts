@@ -77,7 +77,8 @@ export const tableNames: readonly TableName[] = [
 	'audit',
 ];
 
-export type ErrorCode = 'validation' | 'not_found' | 'conflict' | 'unauthorized' | 'offline' | 'storage_full' | 'internal';
+export type ErrorCode =
+	'validation' | 'not_found' | 'conflict' | 'unauthorized' | 'offline' | 'storage_full' | 'internal';
 
 /** Carries a message that is already localized, like errors from the real API. */
 export class MockApiError extends Error {
@@ -154,7 +155,8 @@ export class MockDatabase {
 			const latency = conditions.minLatency + random() * Math.max(conditions.maxLatency - conditions.minLatency, 0);
 			await (this.#options.sleep ?? defaultSleep)(latency);
 			if (conditions.offline) throw new MockApiError('offline', this.#options.localize('error.ws.offline'));
-			if (random() < conditions.failureRate) throw new MockApiError('internal', this.#options.localize('error.internal'));
+			if (random() < conditions.failureRate)
+				throw new MockApiError('internal', this.#options.localize('error.internal'));
 			const before = changed.length > 0 ? structuredClone(this.#pick(changed)) : null;
 			const result = operation();
 			if (changed.length > 0) this.#commit(changed, before);
@@ -226,7 +228,8 @@ export class MockDatabase {
 		try {
 			const parsed = JSON.parse(raw) as Partial<Snapshot>;
 			const snapshot = emptySnapshot();
-			for (const name of tableNames) if (Array.isArray(parsed[name])) (snapshot as { [key: string]: unknown })[name] = parsed[name];
+			for (const name of tableNames)
+				if (Array.isArray(parsed[name])) (snapshot as { [key: string]: unknown })[name] = parsed[name];
 			return snapshot.tenants.length > 0 ? snapshot : null;
 		} catch {
 			return null;
@@ -238,7 +241,10 @@ export class MockDatabase {
 	}
 }
 
-export function stamp<T extends BaseRecord>(record: Omit<T, 'revision' | 'createdAt' | 'updatedAt'>, now = new Date()): T {
+export function stamp<T extends BaseRecord>(
+	record: Omit<T, 'revision' | 'createdAt' | 'updatedAt'>,
+	now = new Date(),
+): T {
 	const time = now.toISOString();
 	return { ...record, revision: 1, createdAt: time, updatedAt: time } as T;
 }

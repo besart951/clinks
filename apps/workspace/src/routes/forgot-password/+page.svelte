@@ -36,7 +36,12 @@
 			<p>{workspace.t('ui.ws.auth.reset_sent', { email: form.email })}</p>
 		</div>
 		<form class="space-y-4" onsubmit={reset} novalidate>
-			<FormField id="code" label={workspace.t('ui.ws.auth.code')} error={form.fields.code} hint={workspace.t('ui.ws.auth.verify_demo_hint')}>
+			<FormField
+				id="code"
+				label={workspace.t('ui.ws.auth.code')}
+				error={form.fields.code}
+				hint={workspace.t('ui.ws.auth.verify_demo_hint')}
+			>
 				<Input id="code" inputmode="numeric" maxlength={6} bind:value={form.code} />
 			</FormField>
 			<FormField id="password" label={workspace.t('ui.ws.auth.new_password')} error={form.fields.password}>
@@ -49,6 +54,8 @@
 		<Button href={href('/login')} class="w-full">{workspace.t('ui.sign_in')}</Button>
 	{/if}
 	{#snippet footer()}
-		<a class="text-foreground font-medium underline-offset-4 hover:underline" href={href('/login')}>{workspace.t('ui.ws.auth.back_to_login')}</a>
+		<a class="text-foreground font-medium underline-offset-4 hover:underline" href={href('/login')}
+			>{workspace.t('ui.ws.auth.back_to_login')}</a
+		>
 	{/snippet}
 </AuthShell>

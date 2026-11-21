@@ -7,7 +7,15 @@
 	let { open = $bindable(false) }: { open: boolean } = $props();
 	const workspace = useWorkspace();
 	const search = new CommandSearch(workspace);
-	const groups: CommandEntry['group'][] = ['actions', 'pages', 'contacts', 'appointments', 'invoices', 'tasks', 'mails'];
+	const groups: CommandEntry['group'][] = [
+		'actions',
+		'pages',
+		'contacts',
+		'appointments',
+		'invoices',
+		'tasks',
+		'mails',
+	];
 
 	function onOpenChange(next: boolean) {
 		open = next;

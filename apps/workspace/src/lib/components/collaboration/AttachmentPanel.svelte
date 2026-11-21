@@ -29,19 +29,33 @@
 		{#each model.resource.data ?? [] as document (document.id)}
 			<li class="flex items-center gap-3 px-3 py-2 text-sm">
 				<FileText class="text-muted-foreground size-4 shrink-0" />
-				<a class="min-w-0 flex-1 truncate font-medium hover:underline" href={document.dataUrl} download={document.name}>{document.name}</a>
-				<span class="text-muted-foreground shrink-0 text-xs">{formatBytes(document.size, (value) => workspace.i18n.number(value))}</span>
+				<a class="min-w-0 flex-1 truncate font-medium hover:underline" href={document.dataUrl} download={document.name}
+					>{document.name}</a
+				>
+				<span class="text-muted-foreground shrink-0 text-xs"
+					>{formatBytes(document.size, (value) => workspace.i18n.number(value))}</span
+				>
 				{#if canWrite}
-					<Button variant="ghost" size="icon-xs" onclick={() => model.detach(document)} aria-label={workspace.t('ui.ws.documents.detach', { name: document.name })}><Unlink class="size-3.5" /></Button>
+					<Button
+						variant="ghost"
+						size="icon-xs"
+						onclick={() => model.detach(document)}
+						aria-label={workspace.t('ui.ws.documents.detach', { name: document.name })}
+						><Unlink class="size-3.5" /></Button
+					>
 				{/if}
 			</li>
 		{:else}
-			<li class="text-muted-foreground px-3 py-4 text-center text-sm">{workspace.t('ui.ws.documents.no_attachments')}</li>
+			<li class="text-muted-foreground px-3 py-4 text-center text-sm">
+				{workspace.t('ui.ws.documents.no_attachments')}
+			</li>
 		{/each}
 	</ul>
 	{#if canWrite}
 		<label
-			class="text-muted-foreground hover:bg-muted flex cursor-pointer flex-col items-center gap-1 rounded-lg border border-dashed px-3 py-4 text-center text-sm {dragging ? 'border-foreground bg-muted' : ''}"
+			class="text-muted-foreground hover:bg-muted flex cursor-pointer flex-col items-center gap-1 rounded-lg border border-dashed px-3 py-4 text-center text-sm {dragging
+				? 'border-foreground bg-muted'
+				: ''}"
 			ondragover={(event) => {
 				event.preventDefault();
 				dragging = true;

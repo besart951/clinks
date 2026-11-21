@@ -37,45 +37,92 @@
 
 <ModuleGate module="finance" permission="finance.read">
 	<PageHeader title={workspace.t('ui.ws.module.finance')}>
-		{#snippet actions()}{#if canWrite}<Button href={href('/finance/invoices/new')} aria-keyshortcuts="N"><Plus class="size-4" />{workspace.t('ui.ws.command.new_invoice')}</Button>{/if}{/snippet}
+		{#snippet actions()}{#if canWrite}<Button href={href('/finance/invoices/new')} aria-keyshortcuts="N"
+					><Plus class="size-4" />{workspace.t('ui.ws.command.new_invoice')}</Button
+				>{/if}{/snippet}
 	</PageHeader>
 	<FinanceNav />
 	<AsyncView resource={model.resource}>
 		{#snippet children()}
 			{@const summary = model.summary}
 			<div class="mb-4 grid gap-4 sm:grid-cols-3">
-				<Card.Root><Card.Content><p class="text-muted-foreground text-sm">{workspace.t('ui.ws.finance.open_receivables')}</p><p class="text-2xl font-semibold tabular-nums">{workspace.i18n.money(summary.open)}</p></Card.Content></Card.Root>
-				<Card.Root><Card.Content><p class="text-muted-foreground text-sm">{workspace.t('ui.ws.finance.overdue')}</p><p class="text-destructive text-2xl font-semibold tabular-nums">{workspace.i18n.money(summary.overdue)}</p></Card.Content></Card.Root>
-				<Card.Root><Card.Content><p class="text-muted-foreground text-sm">{workspace.t('ui.ws.finance.drafts')}</p><p class="text-2xl font-semibold">{summary.drafts}</p></Card.Content></Card.Root>
+				<Card.Root
+					><Card.Content
+						><p class="text-muted-foreground text-sm">{workspace.t('ui.ws.finance.open_receivables')}</p>
+						<p class="text-2xl font-semibold tabular-nums">{workspace.i18n.money(summary.open)}</p></Card.Content
+					></Card.Root
+				>
+				<Card.Root
+					><Card.Content
+						><p class="text-muted-foreground text-sm">{workspace.t('ui.ws.finance.overdue')}</p>
+						<p class="text-destructive text-2xl font-semibold tabular-nums">
+							{workspace.i18n.money(summary.overdue)}
+						</p></Card.Content
+					></Card.Root
+				>
+				<Card.Root
+					><Card.Content
+						><p class="text-muted-foreground text-sm">{workspace.t('ui.ws.finance.drafts')}</p>
+						<p class="text-2xl font-semibold">{summary.drafts}</p></Card.Content
+					></Card.Root
+				>
 			</div>
 			<div class="mb-4 flex flex-wrap gap-2">
 				<SearchInput bind:value={model.search} label={workspace.t('ui.ws.finance.search')} class="w-full sm:w-72" />
-				<Choice bind:value={model.status} class="w-44" label={workspace.t('ui.ws.status')} options={[{ value: '', label: workspace.t('ui.ws.finance.all_statuses') }, ...invoiceStatuses.map((status) => ({ value: status, label: workspace.t(`ui.ws.invoice.status.${status}`) }))]} />
+				<Choice
+					bind:value={model.status}
+					class="w-44"
+					label={workspace.t('ui.ws.status')}
+					options={[
+						{ value: '', label: workspace.t('ui.ws.finance.all_statuses') },
+						...invoiceStatuses.map((status) => ({
+							value: status,
+							label: workspace.t(`ui.ws.invoice.status.${status}`),
+						})),
+					]}
+				/>
 			</div>
 			{#if model.rows.length === 0}
 				<EmptyState icon={ReceiptText} title={workspace.t('ui.ws.finance.no_invoices')} />
 			{:else}
 				<div class="rounded-xl border">
 					<Table.Root>
-						<Table.Header><Table.Row>
-							<Table.Head>{workspace.t('ui.ws.finance.number')}</Table.Head>
-							<Table.Head>{workspace.t('ui.ws.calendar.contact')}</Table.Head>
-							<Table.Head class="hidden md:table-cell">{workspace.t('ui.ws.finance.issue_date')}</Table.Head>
-							<Table.Head class="hidden md:table-cell">{workspace.t('ui.ws.finance.due_date')}</Table.Head>
-							<Table.Head class="text-right">{workspace.t('ui.ws.invoice.amount')}</Table.Head>
-							<Table.Head class="hidden text-right lg:table-cell">{workspace.t('ui.ws.finance.balance')}</Table.Head>
-							<Table.Head>{workspace.t('ui.ws.status')}</Table.Head>
-						</Table.Row></Table.Header>
+						<Table.Header
+							><Table.Row>
+								<Table.Head>{workspace.t('ui.ws.finance.number')}</Table.Head>
+								<Table.Head>{workspace.t('ui.ws.calendar.contact')}</Table.Head>
+								<Table.Head class="hidden md:table-cell">{workspace.t('ui.ws.finance.issue_date')}</Table.Head>
+								<Table.Head class="hidden md:table-cell">{workspace.t('ui.ws.finance.due_date')}</Table.Head>
+								<Table.Head class="text-right">{workspace.t('ui.ws.invoice.amount')}</Table.Head>
+								<Table.Head class="hidden text-right lg:table-cell">{workspace.t('ui.ws.finance.balance')}</Table.Head>
+								<Table.Head>{workspace.t('ui.ws.status')}</Table.Head>
+							</Table.Row></Table.Header
+						>
 						<Table.Body>
 							{#each model.rows as row (row.invoice.id)}
 								<Table.Row class="cursor-pointer" onclick={() => navigate(`/finance/invoices/${row.invoice.id}`)}>
-									<Table.Cell><a class="font-medium hover:underline" href={href(`/finance/invoices/${row.invoice.id}`)} onclick={(event) => event.stopPropagation()}>{row.invoice.number}</a></Table.Cell>
+									<Table.Cell
+										><a
+											class="font-medium hover:underline"
+											href={href(`/finance/invoices/${row.invoice.id}`)}
+											onclick={(event) => event.stopPropagation()}>{row.invoice.number}</a
+										></Table.Cell
+									>
 									<Table.Cell class="max-w-48 truncate">{row.contact ? contactName(row.contact) : '—'}</Table.Cell>
 									<Table.Cell class="hidden md:table-cell">{workspace.i18n.date(row.invoice.issueDate)}</Table.Cell>
 									<Table.Cell class="hidden md:table-cell">{workspace.i18n.date(row.invoice.dueDate)}</Table.Cell>
 									<Table.Cell class="text-right tabular-nums">{workspace.i18n.money(row.totals.gross)}</Table.Cell>
-									<Table.Cell class="hidden text-right tabular-nums lg:table-cell">{row.totals.balance > 0 && row.status !== 'draft' && row.status !== 'cancelled' ? workspace.i18n.money(row.totals.balance) : '—'}</Table.Cell>
-									<Table.Cell><StatusBadge tone={invoiceTone[row.status]} label={workspace.t(`ui.ws.invoice.status.${row.status}`)} /></Table.Cell>
+									<Table.Cell class="hidden text-right tabular-nums lg:table-cell"
+										>{row.totals.balance > 0 && row.status !== 'draft' && row.status !== 'cancelled'
+											? workspace.i18n.money(row.totals.balance)
+											: '—'}</Table.Cell
+									>
+									<Table.Cell
+										><StatusBadge
+											tone={invoiceTone[row.status]}
+											label={workspace.t(`ui.ws.invoice.status.${row.status}`)}
+										/></Table.Cell
+									>
 								</Table.Row>
 							{/each}
 						</Table.Body>

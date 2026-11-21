@@ -6,4 +6,8 @@
 	const workspace = useWorkspace();
 </script>
 
-<EmptyState icon={Lock} title={workspace.t('ui.ws.state.forbidden_title')} description={workspace.t('ui.ws.state.forbidden_text')} />
+<EmptyState
+	icon={Lock}
+	title={workspace.t('ui.ws.state.forbidden_title')}
+	description={workspace.t('ui.ws.state.forbidden_text')}
+/>

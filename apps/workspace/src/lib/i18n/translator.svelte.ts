@@ -75,7 +75,11 @@ export class Translator {
 
 	relative(value: Timestamp, now: Date = new Date()): string {
 		const seconds = (new Date(value).getTime() - now.getTime()) / 1000;
-		const units: [Intl.RelativeTimeFormatUnit, number][] = [['day', 86_400], ['hour', 3_600], ['minute', 60]];
+		const units: [Intl.RelativeTimeFormatUnit, number][] = [
+			['day', 86_400],
+			['hour', 3_600],
+			['minute', 60],
+		];
 		for (const [unit, size] of units) {
 			if (Math.abs(seconds) >= size) return this.#relative.format(Math.round(seconds / size), unit);
 		}

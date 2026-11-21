@@ -29,7 +29,9 @@ export class CalendarModel {
 		this.resource = new Resource(workspace.db, ['appointments', 'contacts'], async () => {
 			const [from, to] = this.range;
 			const [appointments, contacts] = await Promise.all([
-				workspace.api.appointments.list((row) => row.start.slice(0, 10) >= addDays(from, -1) && row.start.slice(0, 10) <= addDays(to, 1)),
+				workspace.api.appointments.list(
+					(row) => row.start.slice(0, 10) >= addDays(from, -1) && row.start.slice(0, 10) <= addDays(to, 1),
+				),
 				workspace.session.can('contacts.read') ? workspace.api.contacts.list() : Promise.resolve([]),
 			]);
 			return { appointments, contacts: new Map(contacts.map((contact) => [contact.id, contact])) };
@@ -57,7 +59,9 @@ export class CalendarModel {
 
 	on(date: CalendarDate, assigneeId?: UserId | null): Appointment[] {
 		return this.visible.filter(
-			(row) => new Date(row.start).toDateString() === new Date(`${date}T12:00:00`).toDateString() && (assigneeId === undefined || row.assigneeId === assigneeId),
+			(row) =>
+				new Date(row.start).toDateString() === new Date(`${date}T12:00:00`).toDateString() &&
+				(assigneeId === undefined || row.assigneeId === assigneeId),
 		);
 	}
 
@@ -79,11 +83,15 @@ export class CalendarModel {
 	}
 
 	togglePerson(id: UserId) {
-		this.hiddenPeople = this.hiddenPeople.includes(id) ? this.hiddenPeople.filter((candidate) => candidate !== id) : [...this.hiddenPeople, id];
+		this.hiddenPeople = this.hiddenPeople.includes(id)
+			? this.hiddenPeople.filter((candidate) => candidate !== id)
+			: [...this.hiddenPeople, id];
 	}
 
 	toggleKind(kind: AppointmentKind) {
-		this.hiddenKinds = this.hiddenKinds.includes(kind) ? this.hiddenKinds.filter((candidate) => candidate !== kind) : [...this.hiddenKinds, kind];
+		this.hiddenKinds = this.hiddenKinds.includes(kind)
+			? this.hiddenKinds.filter((candidate) => candidate !== kind)
+			: [...this.hiddenKinds, kind];
 	}
 
 	find(id: AppointmentId | string | null): Appointment | null {
@@ -95,19 +103,25 @@ export class CalendarModel {
 		const duration = new Date(appointment.end).getTime() - new Date(appointment.start).getTime();
 		const patch = { start: start.toISOString(), end: new Date(start.getTime() + duration).toISOString(), assigneeId };
 		if (patch.start === appointment.start && assigneeId === appointment.assigneeId) return;
-		this.resource.patch((data) => ({ ...data, appointments: data.appointments.map((row) => (row.id === appointment.id ? { ...row, ...patch } : row)) }));
-		const saved = await this.#workspace.run(() => this.#workspace.api.appointments.update(appointment.id, appointment.revision, patch), {
-			success: 'ui.ws.calendar.moved',
-			successParams: { title: appointment.title },
-			undo: async () => {
-				const current = await this.#workspace.api.appointments.get(appointment.id);
-				return this.#workspace.api.appointments.update(current.id, current.revision, {
-					start: appointment.start,
-					end: appointment.end,
-					assigneeId: appointment.assigneeId,
-				});
+		this.resource.patch((data) => ({
+			...data,
+			appointments: data.appointments.map((row) => (row.id === appointment.id ? { ...row, ...patch } : row)),
+		}));
+		const saved = await this.#workspace.run(
+			() => this.#workspace.api.appointments.update(appointment.id, appointment.revision, patch),
+			{
+				success: 'ui.ws.calendar.moved',
+				successParams: { title: appointment.title },
+				undo: async () => {
+					const current = await this.#workspace.api.appointments.get(appointment.id);
+					return this.#workspace.api.appointments.update(current.id, current.revision, {
+						start: appointment.start,
+						end: appointment.end,
+						assigneeId: appointment.assigneeId,
+					});
+				},
 			},
-		});
+		);
 		if (saved === null) void this.resource.reload(true);
 	}
 }

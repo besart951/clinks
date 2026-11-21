@@ -14,7 +14,9 @@
 </script>
 
 <section class="bg-muted/50 space-y-2 rounded-xl border p-3 text-sm" aria-labelledby="demo-accounts">
-	<p id="demo-accounts" class="flex items-center gap-2 font-medium"><KeyRound class="size-4" />{workspace.t('ui.ws.auth.demo_title')}</p>
+	<p id="demo-accounts" class="flex items-center gap-2 font-medium">
+		<KeyRound class="size-4" />{workspace.t('ui.ws.auth.demo_title')}
+	</p>
 	<p class="text-muted-foreground text-xs">{workspace.t('ui.ws.auth.demo_text', { password: demoPassword })}</p>
 	<ul class="grid gap-1">
 		{#each accounts as account (account.email)}

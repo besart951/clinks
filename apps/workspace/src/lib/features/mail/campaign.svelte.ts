@@ -21,7 +21,10 @@ export class CampaignEditorModel {
 	constructor(workspace: Workspace, id: CampaignId) {
 		this.#workspace = workspace;
 		this.resource = new Resource(workspace.db, ['campaigns'], async () => {
-			const [campaign, contacts] = await Promise.all([workspace.api.campaigns.get(id), workspace.api.contacts.list().catch(() => [])]);
+			const [campaign, contacts] = await Promise.all([
+				workspace.api.campaigns.get(id),
+				workspace.api.contacts.list().catch(() => []),
+			]);
 			if (!this.dirty || this.#initial === '') this.#reset(campaign);
 			return { campaign, contacts };
 		});
@@ -34,7 +37,9 @@ export class CampaignEditorModel {
 	}
 
 	get recipients(): Contact[] {
-		return (this.resource.data?.contacts ?? []).filter((contact) => contact.email && !contact.archived && contact.tags.includes(this.value.audienceTag));
+		return (this.resource.data?.contacts ?? []).filter(
+			(contact) => contact.email && !contact.archived && contact.tags.includes(this.value.audienceTag),
+		);
 	}
 
 	get checks() {
@@ -57,7 +62,10 @@ export class CampaignEditorModel {
 		const campaign = this.resource.data?.campaign;
 		if (!campaign) return null;
 		this.busy = true;
-		const saved = await this.#workspace.run(() => this.#workspace.api.campaigns.update(campaign.id, campaign.revision, $state.snapshot(this.value)), { success: 'ui.ws.campaign.saved' });
+		const saved = await this.#workspace.run(
+			() => this.#workspace.api.campaigns.update(campaign.id, campaign.revision, $state.snapshot(this.value)),
+			{ success: 'ui.ws.campaign.saved' },
+		);
 		if (saved) this.#reset(saved);
 		this.busy = false;
 		return saved;
@@ -81,9 +89,12 @@ export class CampaignEditorModel {
 			patch.stats = { recipients, opens: 0, clicks: 0, unsubscribes: 0 };
 		}
 		const current = campaign;
-		const saved = await this.#workspace.run(() => this.#workspace.api.campaigns.update(current.id, current.revision, patch), {
-			success: `ui.ws.campaign.transition_${status}`,
-		});
+		const saved = await this.#workspace.run(
+			() => this.#workspace.api.campaigns.update(current.id, current.revision, patch),
+			{
+				success: `ui.ws.campaign.transition_${status}`,
+			},
+		);
 		if (saved && status === 'review') {
 			const people = await this.#workspace.api.people();
 			await this.#workspace.api.notify(
@@ -96,7 +107,13 @@ export class CampaignEditorModel {
 	}
 
 	#reset(campaign: Campaign) {
-		this.value = { name: campaign.name, subject: campaign.subject, previewText: campaign.previewText, body: campaign.body, audienceTag: campaign.audienceTag };
+		this.value = {
+			name: campaign.name,
+			subject: campaign.subject,
+			previewText: campaign.previewText,
+			body: campaign.body,
+			audienceTag: campaign.audienceTag,
+		};
 		this.#initial = JSON.stringify(this.value);
 		const inTwoDays = new Date(Date.now() + 2 * 86_400_000);
 		inTwoDays.setHours(9, 0, 0, 0);
@@ -150,6 +167,9 @@ export class CampaignListModel {
 
 	async remove(campaign: Campaign) {
 		const api = this.#workspace.api.campaigns;
-		await this.#workspace.run(() => api.remove(campaign.id), { success: 'ui.ws.campaign.deleted', undo: () => api.restore(campaign) });
+		await this.#workspace.run(() => api.remove(campaign.id), {
+			success: 'ui.ws.campaign.deleted',
+			undo: () => api.restore(campaign),
+		});
 	}
 }

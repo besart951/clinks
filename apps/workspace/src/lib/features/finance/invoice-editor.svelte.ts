@@ -34,16 +34,26 @@ export class InvoiceEditorModel {
 	#initial = $state('');
 	#workspace: Workspace;
 
-	dirty = $derived(JSON.stringify([this.contactId, this.issueDate, this.paymentDays, this.lines, this.notes]) !== this.#initial);
+	dirty = $derived(
+		JSON.stringify([this.contactId, this.issueDate, this.paymentDays, this.lines, this.notes]) !== this.#initial,
+	);
 	totals = $derived(invoiceTotals({ lines: this.lines, payments: [] }));
 
-	constructor(workspace: Workspace, id: InvoiceId | null, preset: { contactId: ContactId | null; appointmentId: AppointmentId | null }) {
+	constructor(
+		workspace: Workspace,
+		id: InvoiceId | null,
+		preset: { contactId: ContactId | null; appointmentId: AppointmentId | null },
+	) {
 		this.#workspace = workspace;
 		this.resource = new Resource(workspace.db, ['contacts'], async () => {
 			const [contacts, invoices, appointments, invoice] = await Promise.all([
 				workspace.api.contacts.list(),
 				workspace.api.invoices.list(),
-				workspace.session.can('calendar.read') ? workspace.api.appointments.list((row) => row.billedInvoiceId === null && row.contactId !== null && row.status !== 'cancelled') : Promise.resolve([]),
+				workspace.session.can('calendar.read')
+					? workspace.api.appointments.list(
+							(row) => row.billedInvoiceId === null && row.contactId !== null && row.status !== 'cancelled',
+						)
+					: Promise.resolve([]),
 				id ? workspace.api.invoices.get(id) : Promise.resolve(null),
 			]);
 			if (this.#initial === '') this.#prepare(invoice, preset, appointments);
@@ -57,7 +67,9 @@ export class InvoiceEditorModel {
 			.sort((left, right) => left.start.localeCompare(right.start));
 	}
 
-	addLine(line: InvoiceLine = { description: '', quantity: 1, unitPrice: 0, vatRate: this.lines.at(-1)?.vatRate ?? 810 }) {
+	addLine(
+		line: InvoiceLine = { description: '', quantity: 1, unitPrice: 0, vatRate: this.lines.at(-1)?.vatRate ?? 810 },
+	) {
 		this.lines = [...this.lines.filter((existing) => existing.description || existing.unitPrice), { ...line }];
 	}
 
@@ -97,14 +109,25 @@ export class InvoiceEditorModel {
 		try {
 			const saved = data.invoice
 				? await api.invoices.update(data.invoice.id, data.invoice.revision, draft)
-				: await api.invoices.create({ ...draft, number: nextInvoiceNumber(data.invoices, new Date(this.issueDate).getFullYear()), kind: 'invoice', payments: [], reminderLevel: 0 });
+				: await api.invoices.create({
+						...draft,
+						number: nextInvoiceNumber(data.invoices, new Date(this.issueDate).getFullYear()),
+						kind: 'invoice',
+						payments: [],
+						reminderLevel: 0,
+					});
 			if (issue) {
 				for (const appointment of data.appointments.filter((row) => this.appointmentIds.includes(row.id))) {
-					await api.appointments.update(appointment.id, appointment.revision, { billedInvoiceId: saved.id, status: 'done' });
+					await api.appointments.update(appointment.id, appointment.revision, {
+						billedInvoiceId: saved.id,
+						status: 'done',
+					});
 				}
 			}
 			this.#initial = this.#snapshot();
-			toast.success(this.#workspace.t(issue ? 'ui.ws.invoice.issued' : 'ui.ws.invoice.draft_saved', { number: saved.number }));
+			toast.success(
+				this.#workspace.t(issue ? 'ui.ws.invoice.issued' : 'ui.ws.invoice.draft_saved', { number: saved.number }),
+			);
 			return saved;
 		} catch (error) {
 			this.fields = this.#workspace.fieldErrors(error);
@@ -115,7 +138,11 @@ export class InvoiceEditorModel {
 		}
 	}
 
-	#prepare(invoice: Invoice | null, preset: { contactId: ContactId | null; appointmentId: AppointmentId | null }, appointments: Appointment[]) {
+	#prepare(
+		invoice: Invoice | null,
+		preset: { contactId: ContactId | null; appointmentId: AppointmentId | null },
+		appointments: Appointment[],
+	) {
 		if (invoice) {
 			this.contactId = invoice.contactId;
 			this.issueDate = invoice.issueDate;
@@ -144,6 +171,11 @@ export class InvoiceEditorModel {
 			return { ...tariff, description: `${tariff.description} (${date})` };
 		}
 		const hours = (new Date(appointment.end).getTime() - new Date(appointment.start).getTime()) / 3_600_000;
-		return { description: `${appointment.title} (${date})`, quantity: Math.round(hours * 100) / 100, unitPrice: appointment.kind === 'spitex' ? 7680 : 12000, vatRate: appointment.kind === 'spitex' ? 0 : 810 };
+		return {
+			description: `${appointment.title} (${date})`,
+			quantity: Math.round(hours * 100) / 100,
+			unitPrice: appointment.kind === 'spitex' ? 7680 : 12000,
+			vatRate: appointment.kind === 'spitex' ? 0 : 810,
+		};
 	}
 }

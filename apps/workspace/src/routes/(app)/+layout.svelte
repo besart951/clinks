@@ -29,11 +29,15 @@
 
 	onMount(async () => {
 		await session.ready;
-		if (session.status !== 'authenticated' || !session.tenantId) await navigate(landingPath(session), { replaceState: true });
+		if (session.status !== 'authenticated' || !session.tenantId)
+			await navigate(landingPath(session), { replaceState: true });
 	});
 
 	function typing(target: EventTarget | null) {
-		return target instanceof HTMLElement && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName));
+		return (
+			target instanceof HTMLElement &&
+			(target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))
+		);
 	}
 
 	function onKeydown(event: KeyboardEvent) {
@@ -65,12 +69,20 @@
 		<AppSidebar />
 		<SidebarInset class="flex min-h-dvh min-w-0 flex-col pb-16 md:pb-0">
 			<Banners />
-			<header class="bg-background/90 sticky top-0 z-10 flex h-14 items-center gap-2 border-b px-3 backdrop-blur sm:px-4">
+			<header
+				class="bg-background/90 sticky top-0 z-10 flex h-14 items-center gap-2 border-b px-3 backdrop-blur sm:px-4"
+			>
 				<SidebarTrigger />
 				<TenantSwitcher />
 				<div class="flex-1"></div>
 				<SyncStatus />
-				<Button variant="outline" size="sm" class="text-muted-foreground gap-2" onclick={() => (paletteOpen = true)} aria-keyshortcuts="Meta+K">
+				<Button
+					variant="outline"
+					size="sm"
+					class="text-muted-foreground gap-2"
+					onclick={() => (paletteOpen = true)}
+					aria-keyshortcuts="Meta+K"
+				>
 					<Search class="size-4" />
 					<span class="hidden sm:inline">{workspace.t('ui.ws.shell.search')}</span>
 					<kbd class="bg-muted hidden rounded border px-1 text-[10px] sm:inline">⌘K</kbd>

@@ -32,7 +32,11 @@ export class MailboxModel {
 	get messages(): MailMessage[] {
 		const query = this.search.trim().toLowerCase();
 		return (this.resource.data?.mails ?? [])
-			.filter((mail) => mail.folder === this.folder && (!query || `${mail.subject} ${mail.fromName} ${mail.from} ${mail.body}`.toLowerCase().includes(query)))
+			.filter(
+				(mail) =>
+					mail.folder === this.folder &&
+					(!query || `${mail.subject} ${mail.fromName} ${mail.from} ${mail.body}`.toLowerCase().includes(query)),
+			)
 			.sort((left, right) => right.sentAt.localeCompare(left.sentAt));
 	}
 
@@ -50,19 +54,28 @@ export class MailboxModel {
 
 	contactFor(mail: MailMessage): Contact | null {
 		const contacts = this.resource.data?.contacts ?? [];
-		return contacts.find((contact) => contact.id === mail.contactId) ?? contacts.find((contact) => contact.email && (contact.email === mail.from || mail.to.includes(contact.email))) ?? null;
+		return (
+			contacts.find((contact) => contact.id === mail.contactId) ??
+			contacts.find((contact) => contact.email && (contact.email === mail.from || mail.to.includes(contact.email))) ??
+			null
+		);
 	}
 
 	async select(mail: MailMessage) {
 		this.selectedId = mail.id;
 		if (!mail.read && this.#workspace.session.can('mail.write')) {
-			this.resource.patch((data) => ({ ...data, mails: data.mails.map((row) => (row.id === mail.id ? { ...row, read: true } : row)) }));
+			this.resource.patch((data) => ({
+				...data,
+				mails: data.mails.map((row) => (row.id === mail.id ? { ...row, read: true } : row)),
+			}));
 			await this.#workspace.api.mails.update(mail.id, mail.revision, { read: true }).catch(() => undefined);
 		}
 	}
 
 	async toggleStar(mail: MailMessage) {
-		await this.#workspace.run(() => this.#workspace.api.mails.update(mail.id, mail.revision, { starred: !mail.starred }));
+		await this.#workspace.run(() =>
+			this.#workspace.api.mails.update(mail.id, mail.revision, { starred: !mail.starred }),
+		);
 	}
 
 	async markUnread(mail: MailMessage) {
@@ -86,7 +99,10 @@ export class MailboxModel {
 	async remove(mail: MailMessage) {
 		const api = this.#workspace.api.mails;
 		this.selectedId = null;
-		await this.#workspace.run(() => api.remove(mail.id), { success: 'ui.ws.mail.deleted', undo: () => api.restore(mail) });
+		await this.#workspace.run(() => api.remove(mail.id), {
+			success: 'ui.ws.mail.deleted',
+			undo: () => api.restore(mail),
+		});
 	}
 
 	async toTask(mail: MailMessage) {

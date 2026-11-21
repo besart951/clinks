@@ -19,7 +19,10 @@
 	];
 </script>
 
-<nav class="bg-background/95 fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 border-t pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden" aria-label={workspace.t('ui.ws.shell.mobile_navigation')}>
+<nav
+	class="bg-background/95 fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 border-t pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
+	aria-label={workspace.t('ui.ws.shell.mobile_navigation')}
+>
 	{#each items as item (item.path)}
 		<a
 			href={href(item.path)}
@@ -30,7 +33,10 @@
 			{workspace.t(item.label)}
 		</a>
 	{/each}
-	<button class="text-muted-foreground flex flex-col items-center gap-0.5 py-2 text-[11px]" onclick={() => sidebar.toggle()}>
+	<button
+		class="text-muted-foreground flex flex-col items-center gap-0.5 py-2 text-[11px]"
+		onclick={() => sidebar.toggle()}
+	>
 		<Menu class="size-5" />
 		{workspace.t('ui.ws.shell.more')}
 	</button>

@@ -8,8 +8,12 @@
 		path?: string;
 	}
 
-	let { title, description, crumbs = [], actions }: { title: string; description?: string; crumbs?: Crumb[]; actions?: Snippet } =
-		$props();
+	let {
+		title,
+		description,
+		crumbs = [],
+		actions,
+	}: { title: string; description?: string; crumbs?: Crumb[]; actions?: Snippet } = $props();
 </script>
 
 <header class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">

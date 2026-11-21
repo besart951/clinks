@@ -15,7 +15,11 @@ export const contactSchema = z
 		companyName: z.string(),
 		email: optionalEmail,
 		phone: z.string().regex(/^[+\d\s()/-]*$/, { error: 'error.ws.invalid_phone' }),
-		address: z.object({ street: z.string(), zip: z.string().regex(/^(\d{4,5})?$/, { error: 'error.ws.invalid_zip' }), city: z.string() }),
+		address: z.object({
+			street: z.string(),
+			zip: z.string().regex(/^(\d{4,5})?$/, { error: 'error.ws.invalid_zip' }),
+			city: z.string(),
+		}),
 	})
 	.loose()
 	.superRefine((value, context) => {
@@ -30,7 +34,10 @@ export const contactSchema = z
 export const appointmentSchema = z
 	.object({ title: required, start: z.iso.datetime(), end: z.iso.datetime() })
 	.loose()
-	.refine((value) => new Date(value.end) > new Date(value.start), { path: ['end'], message: 'error.ws.end_before_start' });
+	.refine((value) => new Date(value.end) > new Date(value.start), {
+		path: ['end'],
+		message: 'error.ws.end_before_start',
+	});
 
 export const invoiceSchema = z
 	.object({
@@ -69,8 +76,10 @@ export const mailSchema = z
 	.loose()
 	.superRefine((value, context) => {
 		const draft = (value as { folder?: string }).folder === 'drafts';
-		if (!draft && value.to.length === 0) context.addIssue({ code: 'custom', path: ['to'], message: 'error.ws.recipient_required' });
-		if (!draft && !value.subject.trim()) context.addIssue({ code: 'custom', path: ['subject'], message: 'error.ws.required' });
+		if (!draft && value.to.length === 0)
+			context.addIssue({ code: 'custom', path: ['to'], message: 'error.ws.recipient_required' });
+		if (!draft && !value.subject.trim())
+			context.addIssue({ code: 'custom', path: ['subject'], message: 'error.ws.required' });
 	});
 
 export const campaignSchema = z.object({ name: required }).loose();
@@ -79,7 +88,11 @@ export const prescriptionSchema = z
 	.object({
 		doctor: required,
 		diagnosis: required,
-		sessionsPrescribed: z.number().int().min(1, { error: 'error.ws.positive_number' }).max(36, { error: 'error.ws.too_many_sessions' }),
+		sessionsPrescribed: z
+			.number()
+			.int()
+			.min(1, { error: 'error.ws.positive_number' })
+			.max(36, { error: 'error.ws.too_many_sessions' }),
 		issuedOn: calendarDate,
 		validUntil: calendarDate,
 	})

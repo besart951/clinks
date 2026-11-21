@@ -5,7 +5,18 @@ import type { Draft } from '../../data/repository.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 
 export function emptyTask(): Draft<Task> {
-	return { title: '', description: '', status: 'todo', priority: 'medium', assigneeIds: [], dueDate: null, labels: [], order: 0, contactId: null, checklist: [] };
+	return {
+		title: '',
+		description: '',
+		status: 'todo',
+		priority: 'medium',
+		assigneeIds: [],
+		dueDate: null,
+		labels: [],
+		order: 0,
+		contactId: null,
+		checklist: [],
+	};
 }
 
 /** Editing one task in the side panel. Saving notifies newly assigned people. */
@@ -28,13 +39,17 @@ export class TaskFormModel {
 	start(task: Task | null, preset: Partial<Draft<Task>> = {}) {
 		this.original = task;
 		const me = this.#workspace.session.user?.id;
-		this.value = task ? structuredClone($state.snapshot(task)) : { ...emptyTask(), assigneeIds: me ? [me] : [], ...preset };
+		this.value = task
+			? structuredClone($state.snapshot(task))
+			: { ...emptyTask(), assigneeIds: me ? [me] : [], ...preset };
 		this.#initial = JSON.stringify(this.value);
 		this.fields = {};
 	}
 
 	toggleAssignee(id: UserId) {
-		this.value.assigneeIds = this.value.assigneeIds.includes(id) ? this.value.assigneeIds.filter((candidate) => candidate !== id) : [...this.value.assigneeIds, id];
+		this.value.assigneeIds = this.value.assigneeIds.includes(id)
+			? this.value.assigneeIds.filter((candidate) => candidate !== id)
+			: [...this.value.assigneeIds, id];
 	}
 
 	addChecklistItem() {
@@ -59,10 +74,17 @@ export class TaskFormModel {
 		const api = this.#workspace.api;
 		const draft = $state.snapshot(this.value) as Draft<Task>;
 		try {
-			const saved = this.original ? await api.tasks.update(this.original.id, this.original.revision, draft) : await api.tasks.create(draft);
+			const saved = this.original
+				? await api.tasks.update(this.original.id, this.original.revision, draft)
+				: await api.tasks.create(draft);
 			const added = saved.assigneeIds.filter((id) => !(this.original?.assigneeIds ?? []).includes(id));
 			if (added.length > 0) {
-				await api.notify(added, 'assignment', { key: 'ui.ws.notification.assigned', params: { target: saved.title } }, `/planner?task=${saved.id}`);
+				await api.notify(
+					added,
+					'assignment',
+					{ key: 'ui.ws.notification.assigned', params: { target: saved.title } },
+					`/planner?task=${saved.id}`,
+				);
 			}
 			this.original = saved;
 			this.value = structuredClone(saved);
@@ -82,6 +104,11 @@ export class TaskFormModel {
 		const original = this.original;
 		if (!original) return false;
 		const api = this.#workspace.api.tasks;
-		return (await this.#workspace.run(() => api.remove(original.id), { success: 'ui.ws.planner.deleted', undo: () => api.restore(original) })) !== null;
+		return (
+			(await this.#workspace.run(() => api.remove(original.id), {
+				success: 'ui.ws.planner.deleted',
+				undo: () => api.restore(original),
+			})) !== null
+		);
 	}
 }

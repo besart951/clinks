@@ -13,7 +13,9 @@ export class AdminModel {
 
 	constructor(workspace: Workspace) {
 		this.#workspace = workspace;
-		this.resource = new Resource(workspace.db, ['tenants', 'memberships', 'contacts', 'invoices'], () => workspace.account.platformTenants());
+		this.resource = new Resource(workspace.db, ['tenants', 'memberships', 'contacts', 'invoices'], () =>
+			workspace.account.platformTenants(),
+		);
 	}
 
 	get rows(): TenantOverview[] {
@@ -22,7 +24,9 @@ export class AdminModel {
 	}
 
 	setFlag(tenantId: TenantId, flag: string, enabled: boolean) {
-		return this.#workspace.run(() => this.#workspace.account.setFeatureFlag(tenantId, flag, enabled), { success: 'ui.ws.admin.flag_saved' });
+		return this.#workspace.run(() => this.#workspace.account.setFeatureFlag(tenantId, flag, enabled), {
+			success: 'ui.ws.admin.flag_saved',
+		});
 	}
 
 	/** Support access: view the tenant as one of its administrators, clearly marked by a banner. */

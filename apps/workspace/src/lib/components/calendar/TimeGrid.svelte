@@ -29,7 +29,10 @@
 	let { columns, handlers, editable }: { columns: GridColumn[]; handlers: GridHandlers; editable: boolean } = $props();
 	const workspace = useWorkspace();
 	const pixelsPerMinute = 0.9;
-	const hours = Array.from({ length: (dayEndMinutes - dayStartMinutes) / 60 }, (_, index) => dayStartMinutes / 60 + index);
+	const hours = Array.from(
+		{ length: (dayEndMinutes - dayStartMinutes) / 60 },
+		(_, index) => dayStartMinutes / 60 + index,
+	);
 	let dragging = $state<Appointment | null>(null);
 	let hover = $state<{ key: string; minutes: number } | null>(null);
 	const now = new Date();
@@ -37,7 +40,10 @@
 
 	function minutesAt(event: MouseEvent | DragEvent, element: HTMLElement) {
 		const offset = event.clientY - element.getBoundingClientRect().top;
-		return Math.max(dayStartMinutes, Math.min(dayEndMinutes - 15, dayStartMinutes + Math.round(offset / pixelsPerMinute / 15) * 15));
+		return Math.max(
+			dayStartMinutes,
+			Math.min(dayEndMinutes - 15, dayStartMinutes + Math.round(offset / pixelsPerMinute / 15) * 15),
+		);
 	}
 
 	function onSlotClick(event: MouseEvent, column: GridColumn) {
@@ -53,7 +59,8 @@
 
 	function onDrop(event: DragEvent, column: GridColumn) {
 		event.preventDefault();
-		if (dragging) handlers.drop(dragging, column.date, minutesAt(event, event.currentTarget as HTMLElement), column.assigneeId);
+		if (dragging)
+			handlers.drop(dragging, column.date, minutesAt(event, event.currentTarget as HTMLElement), column.assigneeId);
 		dragging = null;
 		hover = null;
 	}
@@ -67,14 +74,22 @@
 	<div class="grid min-w-[640px]" style:grid-template-columns="3.5rem repeat({columns.length}, minmax(7rem, 1fr))">
 		<div class="bg-background sticky top-0 z-10 border-b"></div>
 		{#each columns as column (column.key)}
-			<div class="bg-background sticky top-0 z-10 border-b border-l px-2 py-2 text-center text-sm {column.highlight ? 'text-primary font-semibold' : ''}">
+			<div
+				class="bg-background sticky top-0 z-10 border-b border-l px-2 py-2 text-center text-sm {column.highlight
+					? 'text-primary font-semibold'
+					: ''}"
+			>
 				<p class="truncate">{column.label}</p>
 				{#if column.sublabel}<p class="text-muted-foreground truncate text-xs font-normal">{column.sublabel}</p>{/if}
 			</div>
 		{/each}
 		<div class="relative" style:height="{(dayEndMinutes - dayStartMinutes) * pixelsPerMinute}px">
 			{#each hours as hour (hour)}
-				<span class="text-muted-foreground absolute right-2 -translate-y-1/2 text-[11px] tabular-nums" style:top="{(hour * 60 - dayStartMinutes) * pixelsPerMinute}px">{hour > dayStartMinutes / 60 ? `${hour}:00` : ''}</span>
+				<span
+					class="text-muted-foreground absolute right-2 -translate-y-1/2 text-[11px] tabular-nums"
+					style:top="{(hour * 60 - dayStartMinutes) * pixelsPerMinute}px"
+					>{hour > dayStartMinutes / 60 ? `${hour}:00` : ''}</span
+				>
 			{/each}
 		</div>
 		{#each columns as column (column.key)}
@@ -82,7 +97,8 @@
 			<div
 				class="relative border-l {editable ? 'cursor-copy' : ''}"
 				style:height="{(dayEndMinutes - dayStartMinutes) * pixelsPerMinute}px"
-				style:background-image="repeating-linear-gradient(to bottom, var(--border) 0, var(--border) 1px, transparent 1px, transparent {60 * pixelsPerMinute}px)"
+				style:background-image="repeating-linear-gradient(to bottom, var(--border) 0, var(--border) 1px, transparent
+				1px, transparent {60 * pixelsPerMinute}px)"
 				role="grid"
 				tabindex="-1"
 				aria-label={workspace.t('ui.ws.calendar.column', { label: `${column.label} ${column.sublabel ?? ''}`.trim() })}
@@ -92,10 +108,20 @@
 				ondrop={(event) => onDrop(event, column)}
 			>
 				{#if column.highlight && nowMinutes > dayStartMinutes && nowMinutes < dayEndMinutes}
-					<div class="pointer-events-none absolute inset-x-0 z-[5] h-px bg-red-500" style:top="{(nowMinutes - dayStartMinutes) * pixelsPerMinute}px"></div>
+					<div
+						class="pointer-events-none absolute inset-x-0 z-[5] h-px bg-red-500"
+						style:top="{(nowMinutes - dayStartMinutes) * pixelsPerMinute}px"
+					></div>
 				{/if}
 				{#if hover?.key === column.key && dragging}
-					<div class="border-primary bg-primary/10 pointer-events-none absolute inset-x-1 z-[4] rounded-md border-2 border-dashed px-1 text-[11px]" style:top="{(hover.minutes - dayStartMinutes) * pixelsPerMinute}px" style:height="{((new Date(dragging.end).getTime() - new Date(dragging.start).getTime()) / 60000) * pixelsPerMinute}px">{label(hover.minutes)}</div>
+					<div
+						class="border-primary bg-primary/10 pointer-events-none absolute inset-x-1 z-[4] rounded-md border-2 border-dashed px-1 text-[11px]"
+						style:top="{(hover.minutes - dayStartMinutes) * pixelsPerMinute}px"
+						style:height="{((new Date(dragging.end).getTime() - new Date(dragging.start).getTime()) / 60000) *
+							pixelsPerMinute}px"
+					>
+						{label(hover.minutes)}
+					</div>
 				{/if}
 				{#each layoutDay(column.appointments, dayStartMinutes, dayEndMinutes) as item (item.appointment.id)}
 					{@const appointment = item.appointment}
@@ -112,17 +138,27 @@
 							hover = null;
 						}}
 						onclick={() => handlers.open(appointment)}
-						class="absolute z-[3] overflow-hidden rounded-md border-l-[3px] px-1.5 py-0.5 text-left text-[11px] leading-tight shadow-xs transition-opacity hover:z-[6] hover:shadow-md focus-visible:z-[6] {appointment.status === 'cancelled' ? 'line-through opacity-50' : ''} {appointment.assigneeId === null ? 'border-dashed' : ''} {dragging?.id === appointment.id ? 'opacity-40' : ''}"
+						class="absolute z-[3] overflow-hidden rounded-md border-l-[3px] px-1.5 py-0.5 text-left text-[11px] leading-tight shadow-xs transition-opacity hover:z-[6] hover:shadow-md focus-visible:z-[6] {appointment.status ===
+						'cancelled'
+							? 'line-through opacity-50'
+							: ''} {appointment.assigneeId === null ? 'border-dashed' : ''} {dragging?.id === appointment.id
+							? 'opacity-40'
+							: ''}"
 						style:top="{item.top * pixelsPerMinute}px"
 						style:height="{Math.max(item.height * pixelsPerMinute - 2, 16)}px"
 						style:left="calc({(item.lane / item.lanes) * 100}% + 2px)"
 						style:width="calc({100 / item.lanes}% - 4px)"
 						style:border-left-color={color}
 						style:background-color="color-mix(in oklab, {color} 14%, var(--background))"
-						aria-label="{workspace.i18n.time(appointment.start)}–{workspace.i18n.time(appointment.end)} {appointment.title}"
+						aria-label="{workspace.i18n.time(appointment.start)}–{workspace.i18n.time(
+							appointment.end,
+						)} {appointment.title}"
 					>
 						<span class="block truncate font-medium">{appointment.title}</span>
-						{#if item.height >= 30}<span class="text-muted-foreground block truncate">{workspace.i18n.time(appointment.start)}–{workspace.i18n.time(appointment.end)} {handlers.subtitle(appointment)}</span>{/if}
+						{#if item.height >= 30}<span class="text-muted-foreground block truncate"
+								>{workspace.i18n.time(appointment.start)}–{workspace.i18n.time(appointment.end)}
+								{handlers.subtitle(appointment)}</span
+							>{/if}
 					</button>
 				{/each}
 			</div>

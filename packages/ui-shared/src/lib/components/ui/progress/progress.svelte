@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Progress as ProgressPrimitive } from "bits-ui";
-	import { cn, type WithoutChildrenOrChild } from "@clinks/ui-shared/utils.js";
+	import { Progress as ProgressPrimitive } from 'bits-ui';
+	import { cn, type WithoutChildrenOrChild } from '@clinks/ui-shared/utils.js';
 
 	let {
 		ref = $bindable(null),
@@ -14,7 +14,7 @@
 <ProgressPrimitive.Root
 	bind:ref
 	data-slot="progress"
-	class={cn("bg-muted h-1 rounded-full relative flex w-full items-center overflow-x-hidden", className)}
+	class={cn('bg-muted h-1 rounded-full relative flex w-full items-center overflow-x-hidden', className)}
 	{value}
 	{max}
 	{...restProps}

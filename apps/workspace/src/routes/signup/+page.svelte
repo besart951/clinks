@@ -21,17 +21,38 @@
 	<form class="space-y-4" onsubmit={submit} novalidate>
 		<div class="grid grid-cols-2 gap-3">
 			<FormField id="first-name" label={workspace.t('ui.ws.field.first_name')} error={form.fields.firstName}>
-				<Input id="first-name" autocomplete="given-name" bind:value={form.firstName} aria-invalid={!!form.fields.firstName} />
+				<Input
+					id="first-name"
+					autocomplete="given-name"
+					bind:value={form.firstName}
+					aria-invalid={!!form.fields.firstName}
+				/>
 			</FormField>
 			<FormField id="last-name" label={workspace.t('ui.ws.field.last_name')} error={form.fields.lastName}>
-				<Input id="last-name" autocomplete="family-name" bind:value={form.lastName} aria-invalid={!!form.fields.lastName} />
+				<Input
+					id="last-name"
+					autocomplete="family-name"
+					bind:value={form.lastName}
+					aria-invalid={!!form.fields.lastName}
+				/>
 			</FormField>
 		</div>
 		<FormField id="email" label={workspace.t('ui.email')} error={form.fields.email}>
 			<Input id="email" type="email" autocomplete="email" bind:value={form.email} aria-invalid={!!form.fields.email} />
 		</FormField>
-		<FormField id="password" label={workspace.t('ui.password')} error={form.fields.password} hint={workspace.t('error.ws.password_too_short')}>
-			<Input id="password" type="password" autocomplete="new-password" bind:value={form.password} aria-invalid={!!form.fields.password} />
+		<FormField
+			id="password"
+			label={workspace.t('ui.password')}
+			error={form.fields.password}
+			hint={workspace.t('error.ws.password_too_short')}
+		>
+			<Input
+				id="password"
+				type="password"
+				autocomplete="new-password"
+				bind:value={form.password}
+				aria-invalid={!!form.fields.password}
+			/>
 		</FormField>
 		<div class="space-y-1">
 			<label class="flex items-start gap-2 text-sm">
@@ -44,6 +65,8 @@
 	</form>
 	{#snippet footer()}
 		{workspace.t('ui.already_have_account')}
-		<a class="text-foreground font-medium underline-offset-4 hover:underline" href={href('/login')}>{workspace.t('ui.sign_in')}</a>
+		<a class="text-foreground font-medium underline-offset-4 hover:underline" href={href('/login')}
+			>{workspace.t('ui.sign_in')}</a
+		>
 	{/snippet}
 </AuthShell>

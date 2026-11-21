@@ -25,21 +25,35 @@
 <svelte:head><title>{workspace.t('ui.ws.notifications.title')} · CLinks</title></svelte:head>
 
 <PageHeader title={workspace.t('ui.ws.notifications.title')}>
-	{#snippet actions()}<Button variant="outline" disabled={model.unread === 0} onclick={() => model.markAllRead()}>{workspace.t('ui.ws.notifications.mark_all')}</Button>{/snippet}
+	{#snippet actions()}<Button variant="outline" disabled={model.unread === 0} onclick={() => model.markAllRead()}
+			>{workspace.t('ui.ws.notifications.mark_all')}</Button
+		>{/snippet}
 </PageHeader>
 <Tabs.Root bind:value={filter} class="mb-4">
-	<Tabs.List><Tabs.Trigger value="all">{workspace.t('ui.ws.contacts.kind_all')}</Tabs.Trigger><Tabs.Trigger value="unread">{workspace.t('ui.ws.mail.unread')} ({model.unread})</Tabs.Trigger></Tabs.List>
+	<Tabs.List
+		><Tabs.Trigger value="all">{workspace.t('ui.ws.contacts.kind_all')}</Tabs.Trigger><Tabs.Trigger value="unread"
+			>{workspace.t('ui.ws.mail.unread')} ({model.unread})</Tabs.Trigger
+		></Tabs.List
+	>
 </Tabs.Root>
-<AsyncView resource={model.resource} isEmpty={(rows) => rows.filter((row) => filter === 'all' || !row.read).length === 0}>
+<AsyncView
+	resource={model.resource}
+	isEmpty={(rows) => rows.filter((row) => filter === 'all' || !row.read).length === 0}
+>
 	{#snippet empty()}<EmptyState icon={Bell} title={workspace.t('ui.ws.notifications.empty')} />{/snippet}
 	{#snippet children(rows)}
 		<ul class="divide-y rounded-xl border">
 			{#each rows.filter((row) => filter === 'all' || !row.read) as notification (notification.id)}
 				<li>
-					<button class="hover:bg-muted/60 flex w-full items-start gap-3 px-4 py-3 text-left text-sm" onclick={() => open(notification)}>
-						<span class="mt-1.5 size-2 shrink-0 rounded-full {notification.read ? 'bg-transparent' : 'bg-sky-500'}"></span>
+					<button
+						class="hover:bg-muted/60 flex w-full items-start gap-3 px-4 py-3 text-left text-sm"
+						onclick={() => open(notification)}
+					>
+						<span class="mt-1.5 size-2 shrink-0 rounded-full {notification.read ? 'bg-transparent' : 'bg-sky-500'}"
+						></span>
 						<span class="flex-1 {notification.read ? '' : 'font-medium'}">{model.text(notification)}</span>
-						<span class="text-muted-foreground shrink-0 text-xs">{workspace.i18n.relative(notification.createdAt)}</span>
+						<span class="text-muted-foreground shrink-0 text-xs">{workspace.i18n.relative(notification.createdAt)}</span
+						>
 					</button>
 				</li>
 			{/each}

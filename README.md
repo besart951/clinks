@@ -2,6 +2,8 @@
 
 clinks is a multi-tenant planning platform. It has three Svelte applications, a Go API, and PostgreSQL.
 
+[`apps/workspace`](apps/workspace/README.md) is a backend-free UI prototype of the complete CLinks SaaS (all modules on a mock API in the browser). Start it with `pnpm --filter @clinks/workspace dev` and open http://localhost:5176.
+
 ```mermaid
 flowchart LR
   Browser --> Admin[Admin]

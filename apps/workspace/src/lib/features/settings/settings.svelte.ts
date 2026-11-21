@@ -1,6 +1,15 @@
 import { toast } from 'svelte-sonner';
 import type { InvitationId, MembershipId, RoleId, SessionId } from '../../domain/ids.ts';
-import type { BrowserSession, Invitation, ModuleKey, NotificationPreferences, Permission, PlanCode, Role, Tenant } from '../../domain/types.ts';
+import type {
+	BrowserSession,
+	Invitation,
+	ModuleKey,
+	NotificationPreferences,
+	Permission,
+	PlanCode,
+	Role,
+	Tenant,
+} from '../../domain/types.ts';
 import type { Member, PlatformInvoice } from '../../data/account-api.ts';
 import type { Locale } from '../../i18n/catalog.ts';
 import { Resource } from '../../state/resource.svelte.ts';
@@ -33,17 +42,38 @@ abstract class SettingsForm {
 	}
 }
 
-type CompanyFields = Pick<Tenant, 'name' | 'address' | 'vatNumber' | 'iban' | 'brandColor' | 'logoDataUrl' | 'locale' | 'timeZone'>;
+type CompanyFields = Pick<
+	Tenant,
+	'name' | 'address' | 'vatNumber' | 'iban' | 'brandColor' | 'logoDataUrl' | 'locale' | 'timeZone'
+>;
 
 export class CompanySettingsModel extends SettingsForm {
-	value = $state<CompanyFields>({ name: '', address: { street: '', zip: '', city: '' }, vatNumber: '', iban: '', brandColor: '#0f766e', logoDataUrl: null, locale: 'de-CH', timeZone: 'Europe/Zurich' });
+	value = $state<CompanyFields>({
+		name: '',
+		address: { street: '', zip: '', city: '' },
+		vatNumber: '',
+		iban: '',
+		brandColor: '#0f766e',
+		logoDataUrl: null,
+		locale: 'de-CH',
+		timeZone: 'Europe/Zurich',
+	});
 	#initial = $state('');
 	dirty = $derived(JSON.stringify(this.value) !== this.#initial);
 
 	load() {
 		const tenant = this.workspace.session.tenant;
 		if (!tenant) return;
-		this.value = structuredClone({ name: tenant.name, address: tenant.address, vatNumber: tenant.vatNumber, iban: tenant.iban, brandColor: tenant.brandColor, logoDataUrl: tenant.logoDataUrl, locale: tenant.locale, timeZone: tenant.timeZone });
+		this.value = structuredClone({
+			name: tenant.name,
+			address: tenant.address,
+			vatNumber: tenant.vatNumber,
+			iban: tenant.iban,
+			brandColor: tenant.brandColor,
+			logoDataUrl: tenant.logoDataUrl,
+			locale: tenant.locale,
+			timeZone: tenant.timeZone,
+		});
 		this.#initial = JSON.stringify(this.value);
 	}
 
@@ -57,7 +87,10 @@ export class CompanySettingsModel extends SettingsForm {
 	}
 
 	async save() {
-		const saved = await this.attempt(() => this.workspace.account.updateTenant($state.snapshot(this.value)), 'ui.ws.settings.saved');
+		const saved = await this.attempt(
+			() => this.workspace.account.updateTenant($state.snapshot(this.value)),
+			'ui.ws.settings.saved',
+		);
 		if (saved) {
 			await this.workspace.session.refresh();
 			this.load();
@@ -102,7 +135,14 @@ export class ProfileModel extends SettingsForm {
 
 	async save() {
 		const saved = await this.attempt(
-			() => this.workspace.account.updateProfile({ firstName: this.firstName, lastName: this.lastName, email: this.email, avatarDataUrl: this.avatarDataUrl, notificationPreferences: $state.snapshot(this.preferences) }),
+			() =>
+				this.workspace.account.updateProfile({
+					firstName: this.firstName,
+					lastName: this.lastName,
+					email: this.email,
+					avatarDataUrl: this.avatarDataUrl,
+					notificationPreferences: $state.snapshot(this.preferences),
+				}),
 			'ui.ws.settings.saved',
 		);
 		if (saved) await this.workspace.session.refresh();
@@ -114,7 +154,10 @@ export class ProfileModel extends SettingsForm {
 	}
 
 	async changePassword() {
-		const ok = await this.attempt(() => this.workspace.account.changePassword(this.currentPassword, this.newPassword), 'ui.ws.settings.password_changed');
+		const ok = await this.attempt(
+			() => this.workspace.account.changePassword(this.currentPassword, this.newPassword),
+			'ui.ws.settings.password_changed',
+		);
 		if (ok !== null) {
 			this.currentPassword = '';
 			this.newPassword = '';
@@ -122,7 +165,10 @@ export class ProfileModel extends SettingsForm {
 	}
 
 	async setTwoFactor(enabled: boolean) {
-		const saved = await this.attempt(() => this.workspace.account.setTwoFactor(enabled, this.twoFactorCode), enabled ? 'ui.ws.settings.two_factor_enabled' : 'ui.ws.settings.two_factor_disabled');
+		const saved = await this.attempt(
+			() => this.workspace.account.setTwoFactor(enabled, this.twoFactorCode),
+			enabled ? 'ui.ws.settings.two_factor_enabled' : 'ui.ws.settings.two_factor_disabled',
+		);
 		if (saved) {
 			this.twoFactorCode = '';
 			await this.workspace.session.refresh();
@@ -131,7 +177,9 @@ export class ProfileModel extends SettingsForm {
 	}
 
 	async revoke(id: SessionId) {
-		await this.workspace.run(() => this.workspace.account.revokeSession(id), { success: 'ui.ws.settings.session_revoked' });
+		await this.workspace.run(() => this.workspace.account.revokeSession(id), {
+			success: 'ui.ws.settings.session_revoked',
+		});
 	}
 }
 
@@ -143,19 +191,32 @@ export class TeamModel extends SettingsForm {
 
 	constructor(workspace: Workspace) {
 		super(workspace);
-		this.resource = new Resource(workspace.db, ['memberships', 'invitations', 'roles', 'users'], () => workspace.account.members());
+		this.resource = new Resource(workspace.db, ['memberships', 'invitations', 'roles', 'users'], () =>
+			workspace.account.members(),
+		);
 	}
 
 	get members(): Member[] {
 		const query = this.search.trim().toLowerCase();
 		return (this.resource.data?.members ?? [])
-			.filter((member) => !query || `${member.user.firstName} ${member.user.lastName} ${member.user.email}`.toLowerCase().includes(query))
-			.sort((left, right) => Number(right.membership.status === 'active') - Number(left.membership.status === 'active') || left.user.lastName.localeCompare(right.user.lastName));
+			.filter(
+				(member) =>
+					!query ||
+					`${member.user.firstName} ${member.user.lastName} ${member.user.email}`.toLowerCase().includes(query),
+			)
+			.sort(
+				(left, right) =>
+					Number(right.membership.status === 'active') - Number(left.membership.status === 'active') ||
+					left.user.lastName.localeCompare(right.user.lastName),
+			);
 	}
 
 	async invite(): Promise<boolean> {
 		const roleId = (this.inviteRole || this.resource.data?.roles.find((role) => role.kind === 'user')?.id) as RoleId;
-		const created = await this.attempt(() => this.workspace.account.invite(this.inviteEmail, roleId), 'ui.ws.team.invited');
+		const created = await this.attempt(
+			() => this.workspace.account.invite(this.inviteEmail, roleId),
+			'ui.ws.team.invited',
+		);
 		if (created) {
 			this.inviteEmail = '';
 			return true;
@@ -164,13 +225,18 @@ export class TeamModel extends SettingsForm {
 	}
 
 	changeRole(id: MembershipId, roleId: RoleId) {
-		return this.workspace.run(() => this.workspace.account.changeMember(id, { roleId }), { success: 'ui.ws.team.role_changed' });
+		return this.workspace.run(() => this.workspace.account.changeMember(id, { roleId }), {
+			success: 'ui.ws.team.role_changed',
+		});
 	}
 
 	setActive(id: MembershipId, active: boolean) {
-		return this.workspace.run(() => this.workspace.account.changeMember(id, { status: active ? 'active' : 'inactive' }), {
-			success: active ? 'ui.ws.team.reactivated' : 'ui.ws.team.deactivated',
-		});
+		return this.workspace.run(
+			() => this.workspace.account.changeMember(id, { status: active ? 'active' : 'inactive' }),
+			{
+				success: active ? 'ui.ws.team.reactivated' : 'ui.ws.team.deactivated',
+			},
+		);
 	}
 
 	setJobTitle(id: MembershipId, jobTitle: string) {
@@ -199,18 +265,24 @@ export class RolesModel extends SettingsForm {
 	}
 
 	usage(roleId: RoleId) {
-		return (this.resource.data?.members ?? []).filter((member) => member.role.id === roleId && member.membership.status === 'active').length;
+		return (this.resource.data?.members ?? []).filter(
+			(member) => member.role.id === roleId && member.membership.status === 'active',
+		).length;
 	}
 
 	edit(role: Role | null) {
-		this.editing = role ? { id: role.id, name: role.name, permissions: [...role.permissions] } : { id: null, name: '', permissions: ['contacts.read', 'calendar.read'] };
+		this.editing = role
+			? { id: role.id, name: role.name, permissions: [...role.permissions] }
+			: { id: null, name: '', permissions: ['contacts.read', 'calendar.read'] };
 		this.fields = {};
 	}
 
 	toggle(permission: Permission) {
 		if (!this.editing) return;
 		const has = this.editing.permissions.includes(permission);
-		this.editing.permissions = has ? this.editing.permissions.filter((candidate) => candidate !== permission) : [...this.editing.permissions, permission];
+		this.editing.permissions = has
+			? this.editing.permissions.filter((candidate) => candidate !== permission)
+			: [...this.editing.permissions, permission];
 		if (!has && permission.endsWith('.write')) {
 			const read = permission.replace('.write', '.read') as Permission;
 			if (!this.editing.permissions.includes(read)) this.editing.permissions = [...this.editing.permissions, read];
@@ -219,7 +291,10 @@ export class RolesModel extends SettingsForm {
 
 	async save(): Promise<boolean> {
 		if (!this.editing) return false;
-		const saved = await this.attempt(() => this.workspace.account.saveRole($state.snapshot(this.editing!)), 'ui.ws.roles.saved');
+		const saved = await this.attempt(
+			() => this.workspace.account.saveRole($state.snapshot(this.editing!)),
+			'ui.ws.roles.saved',
+		);
 		if (saved) {
 			this.editing = null;
 			await this.workspace.session.refresh();
@@ -245,19 +320,30 @@ export class BillingModel extends SettingsForm {
 	}
 
 	async choosePlan(plan: PlanCode) {
-		const saved = await this.attempt(() => this.workspace.account.changePlan(plan, this.cycle), 'ui.ws.billing.plan_changed');
+		const saved = await this.attempt(
+			() => this.workspace.account.changePlan(plan, this.cycle),
+			'ui.ws.billing.plan_changed',
+		);
 		if (saved) await this.workspace.session.refresh();
 	}
 
 	async toggleModule(module: ModuleKey, enabled: boolean) {
 		const tenant = this.workspace.session.tenant!;
-		const enabledModules = enabled ? [...new Set([...tenant.enabledModules, module])] : tenant.enabledModules.filter((candidate) => candidate !== module);
-		const saved = await this.attempt(() => this.workspace.account.updateTenant({ enabledModules }), enabled ? 'ui.ws.billing.module_enabled' : 'ui.ws.billing.module_disabled');
+		const enabledModules = enabled
+			? [...new Set([...tenant.enabledModules, module])]
+			: tenant.enabledModules.filter((candidate) => candidate !== module);
+		const saved = await this.attempt(
+			() => this.workspace.account.updateTenant({ enabledModules }),
+			enabled ? 'ui.ws.billing.module_enabled' : 'ui.ws.billing.module_disabled',
+		);
 		if (saved) await this.workspace.session.refresh();
 	}
 
 	async savePaymentMethod(): Promise<boolean> {
-		const saved = await this.attempt(() => this.workspace.account.updatePaymentMethod({ number: this.cardNumber, expires: this.cardExpires }), 'ui.ws.billing.card_saved');
+		const saved = await this.attempt(
+			() => this.workspace.account.updatePaymentMethod({ number: this.cardNumber, expires: this.cardExpires }),
+			'ui.ws.billing.card_saved',
+		);
 		if (saved) {
 			this.cardNumber = '';
 			this.cardExpires = '';
@@ -267,11 +353,13 @@ export class BillingModel extends SettingsForm {
 	}
 
 	async cancel() {
-		if (await this.attempt(() => this.workspace.account.cancelSubscription(), 'ui.ws.billing.cancelled')) await this.workspace.session.refresh();
+		if (await this.attempt(() => this.workspace.account.cancelSubscription(), 'ui.ws.billing.cancelled'))
+			await this.workspace.session.refresh();
 	}
 
 	async resume() {
-		if (await this.attempt(() => this.workspace.account.resumeSubscription(), 'ui.ws.billing.resumed')) await this.workspace.session.refresh();
+		if (await this.attempt(() => this.workspace.account.resumeSubscription(), 'ui.ws.billing.resumed'))
+			await this.workspace.session.refresh();
 	}
 }
 

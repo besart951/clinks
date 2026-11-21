@@ -25,7 +25,9 @@ export class ContactsModel {
 	}
 
 	get tags(): string[] {
-		return [...new Set((this.resource.data ?? []).flatMap((contact) => contact.tags))].sort((left, right) => left.localeCompare(right));
+		return [...new Set((this.resource.data ?? []).flatMap((contact) => contact.tags))].sort((left, right) =>
+			left.localeCompare(right),
+		);
 	}
 
 	get visible(): Contact[] {
@@ -35,11 +37,23 @@ export class ContactsModel {
 				contact.archived === this.showArchived &&
 				(this.kind === 'all' || contact.kind === this.kind) &&
 				(!this.tag || contact.tags.includes(this.tag)) &&
-				(!query || [contactName(contact), contact.email, contact.phone, contact.address.city].join(' ').toLowerCase().includes(query)),
+				(!query ||
+					[contactName(contact), contact.email, contact.phone, contact.address.city]
+						.join(' ')
+						.toLowerCase()
+						.includes(query)),
 		);
 		const key = (contact: Contact) =>
-			this.sort === 'city' ? contact.address.city : this.sort === 'created' ? contact.createdAt : (contact.kind === 'company' ? contact.companyName : contact.lastName);
-		return rows.sort((left, right) => (this.sort === 'created' ? key(right).localeCompare(key(left)) : key(left).localeCompare(key(right), 'de')));
+			this.sort === 'city'
+				? contact.address.city
+				: this.sort === 'created'
+					? contact.createdAt
+					: contact.kind === 'company'
+						? contact.companyName
+						: contact.lastName;
+		return rows.sort((left, right) =>
+			this.sort === 'created' ? key(right).localeCompare(key(left)) : key(left).localeCompare(key(right), 'de'),
+		);
 	}
 
 	/** Groups of two or more contacts that look like the same person. */
@@ -53,7 +67,9 @@ export class ContactsModel {
 	}
 
 	toggle(id: ContactId) {
-		this.selected = this.selected.includes(id) ? this.selected.filter((candidate) => candidate !== id) : [...this.selected, id];
+		this.selected = this.selected.includes(id)
+			? this.selected.filter((candidate) => candidate !== id)
+			: [...this.selected, id];
 	}
 
 	toggleAll() {
@@ -63,10 +79,13 @@ export class ContactsModel {
 
 	async archive(contacts: Contact[], archived: boolean) {
 		const api = this.#workspace.api.contacts;
-		await this.#workspace.run(() => Promise.all(contacts.map((contact) => api.update(contact.id, contact.revision, { archived }))), {
-			success: archived ? 'ui.ws.contacts.archived' : 'ui.ws.contacts.unarchived',
-			successParams: { count: contacts.length },
-		});
+		await this.#workspace.run(
+			() => Promise.all(contacts.map((contact) => api.update(contact.id, contact.revision, { archived }))),
+			{
+				success: archived ? 'ui.ws.contacts.archived' : 'ui.ws.contacts.unarchived',
+				successParams: { count: contacts.length },
+			},
+		);
 		this.selected = [];
 	}
 
@@ -99,7 +118,8 @@ export class ContactsModel {
 	async merge(primary: Contact, others: Contact[]) {
 		const { api } = this.#workspace;
 		const otherIds = new Set<string>(others.map((contact) => contact.id));
-		const fill = <K extends 'email' | 'phone' | 'insurer' | 'notes'>(key: K) => primary[key] || others.find((other) => other[key])?.[key] || '';
+		const fill = <K extends 'email' | 'phone' | 'insurer' | 'notes'>(key: K) =>
+			primary[key] || others.find((other) => other[key])?.[key] || '';
 		const done = await this.#workspace.run(
 			async () => {
 				const repoint = async <T extends { id: string; revision: number; contactId: ContactId | null }>(
@@ -110,7 +130,9 @@ export class ContactsModel {
 						await update(row.id, row.revision, { contactId: primary.id });
 					}
 				};
-				await repoint(await api.appointments.list(), (id, revision, patch) => api.appointments.update(id, revision, patch));
+				await repoint(await api.appointments.list(), (id, revision, patch) =>
+					api.appointments.update(id, revision, patch),
+				);
 				await repoint(await api.tasks.list(), (id, revision, patch) => api.tasks.update(id, revision, patch));
 				await repoint(await api.mails.list(), (id, revision, patch) => api.mails.update(id, revision, patch));
 				if (this.#workspace.session.can('finance.read')) {

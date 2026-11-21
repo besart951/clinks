@@ -63,7 +63,12 @@ export class SignupForm extends Form {
 			return false;
 		}
 		return this.submitWith(() =>
-			this.workspace.session.signUp({ firstName: this.firstName, lastName: this.lastName, email: this.email, password: this.password }),
+			this.workspace.session.signUp({
+				firstName: this.firstName,
+				lastName: this.lastName,
+				email: this.email,
+				password: this.password,
+			}),
 		);
 	}
 }

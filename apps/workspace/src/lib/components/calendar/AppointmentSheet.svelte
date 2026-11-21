@@ -23,7 +23,12 @@
 		people,
 		appointments,
 		onSaved,
-	}: { contacts: Contact[]; people: Person[]; appointments: Appointment[]; onSaved?: (appointment: Appointment) => void } = $props();
+	}: {
+		contacts: Contact[];
+		people: Person[];
+		appointments: Appointment[];
+		onSaved?: (appointment: Appointment) => void;
+	} = $props();
 
 	const workspace = useWorkspace();
 	const session = workspace.session;
@@ -79,7 +84,8 @@
 
 	function pickContact(picked: Contact | null) {
 		if (picked && !form.value.title) form.value.title = contactName(picked);
-		if (picked && form.value.kind === 'spitex' && !form.value.location) form.value.location = `${picked.address.street}, ${picked.address.city}`;
+		if (picked && form.value.kind === 'spitex' && !form.value.location)
+			form.value.location = `${picked.address.street}, ${picked.address.city}`;
 	}
 
 	const serviceOptions = $derived(
@@ -92,10 +98,18 @@
 </script>
 
 <Sheet.Root {open} onOpenChange={close}>
-	<Sheet.Content class="w-full overflow-y-auto sm:max-w-lg">
+	<Sheet.Content closeLabel={workspace.t('ui.ws.close')} class="w-full overflow-y-auto sm:max-w-lg">
 		<Sheet.Header>
-			<Sheet.Title>{form.original ? workspace.t('ui.ws.calendar.edit') : workspace.t('ui.ws.command.new_appointment')}</Sheet.Title>
-			<Sheet.Description>{form.original ? workspace.i18n.dateTime(form.original.start) : workspace.t('ui.ws.calendar.form_text')}</Sheet.Description>
+			<Sheet.Title
+				>{form.original
+					? workspace.t('ui.ws.calendar.edit')
+					: workspace.t('ui.ws.command.new_appointment')}</Sheet.Title
+			>
+			<Sheet.Description
+				>{form.original
+					? workspace.i18n.dateTime(form.original.start)
+					: workspace.t('ui.ws.calendar.form_text')}</Sheet.Description
+			>
 		</Sheet.Header>
 		<form id="appointment-form" class="space-y-4 px-4" onsubmit={submit} novalidate>
 			<fieldset disabled={!canWrite} class="space-y-4">
@@ -104,22 +118,56 @@
 				</FormField>
 				<div class="grid grid-cols-2 gap-3">
 					<FormField id="a-kind" label={workspace.t('ui.ws.calendar.kind')}>
-						<Choice id="a-kind" bind:value={form.value.kind} options={appointmentKinds.filter((kind) => (kind === 'physio' ? session.hasModule('physio') : kind === 'spitex' ? session.hasModule('spitex') : true)).map((kind) => ({ value: kind, label: workspace.t(`ui.ws.calendar.kind_${kind}`) }))} onchange={() => (form.value.service = null)} />
+						<Choice
+							id="a-kind"
+							bind:value={form.value.kind}
+							options={appointmentKinds
+								.filter((kind) =>
+									kind === 'physio'
+										? session.hasModule('physio')
+										: kind === 'spitex'
+											? session.hasModule('spitex')
+											: true,
+								)
+								.map((kind) => ({ value: kind, label: workspace.t(`ui.ws.calendar.kind_${kind}`) }))}
+							onchange={() => (form.value.service = null)}
+						/>
 					</FormField>
 					<FormField id="a-status" label={workspace.t('ui.ws.status')}>
-						<Choice id="a-status" bind:value={form.value.status} options={(['planned', 'confirmed', 'done', 'cancelled'] as const).map((status) => ({ value: status, label: workspace.t(`ui.ws.appointment.status.${status}`) }))} />
+						<Choice
+							id="a-status"
+							bind:value={form.value.status}
+							options={(['planned', 'confirmed', 'done', 'cancelled'] as const).map((status) => ({
+								value: status,
+								label: workspace.t(`ui.ws.appointment.status.${status}`),
+							}))}
+						/>
 					</FormField>
 				</div>
 				{#if serviceOptions.length > 0}
 					<FormField id="a-service" label={workspace.t('ui.ws.calendar.service')}>
-						<Choice id="a-service" value={form.value.service ?? ''} options={serviceOptions} placeholder={workspace.t('ui.ws.calendar.choose_service')} onchange={(value) => (form.value.service = value as AppointmentFields['service'])} />
+						<Choice
+							id="a-service"
+							value={form.value.service ?? ''}
+							options={serviceOptions}
+							placeholder={workspace.t('ui.ws.calendar.choose_service')}
+							onchange={(value) => (form.value.service = value as AppointmentFields['service'])}
+						/>
 					</FormField>
 				{/if}
 				<FormField id="a-contact" label={workspace.t('ui.ws.calendar.contact')}>
 					<ContactPicker id="a-contact" bind:value={form.value.contactId} {contacts} onchange={pickContact} />
 				</FormField>
 				<FormField id="a-assignee" label={workspace.t('ui.ws.calendar.assignee')}>
-					<Choice id="a-assignee" value={form.value.assigneeId ?? ''} options={[{ value: '', label: workspace.t('ui.ws.calendar.unassigned') }, ...people.map((person) => ({ value: person.id, label: person.name }))]} onchange={(value) => (form.value.assigneeId = (value || null) as AppointmentFields['assigneeId'])} />
+					<Choice
+						id="a-assignee"
+						value={form.value.assigneeId ?? ''}
+						options={[
+							{ value: '', label: workspace.t('ui.ws.calendar.unassigned') },
+							...people.map((person) => ({ value: person.id, label: person.name })),
+						]}
+						onchange={(value) => (form.value.assigneeId = (value || null) as AppointmentFields['assigneeId'])}
+					/>
 				</FormField>
 				<div class="grid grid-cols-[1fr_6rem_6rem] gap-3">
 					<FormField id="a-date" label={workspace.t('ui.ws.calendar.date')}>
@@ -143,11 +191,22 @@
 					</div>
 				{/if}
 				{#if conflicts.length > 0 || form.outsideWindow}
-					<div class="space-y-1 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-900 dark:text-amber-200" role="alert">
+					<div
+						class="space-y-1 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-900 dark:text-amber-200"
+						role="alert"
+					>
 						{#each conflicts as conflict (conflict.id)}
-							<p class="flex items-start gap-2"><TriangleAlert class="mt-0.5 size-4 shrink-0" />{workspace.t('ui.ws.calendar.conflict', { title: conflict.title, from: workspace.i18n.time(conflict.start), to: workspace.i18n.time(conflict.end) })}</p>
+							<p class="flex items-start gap-2">
+								<TriangleAlert class="mt-0.5 size-4 shrink-0" />{workspace.t('ui.ws.calendar.conflict', {
+									title: conflict.title,
+									from: workspace.i18n.time(conflict.start),
+									to: workspace.i18n.time(conflict.end),
+								})}
+							</p>
 						{/each}
-						{#if form.outsideWindow}<p class="flex items-start gap-2"><TriangleAlert class="mt-0.5 size-4 shrink-0" />{workspace.t('ui.ws.spitex.outside_window')}</p>{/if}
+						{#if form.outsideWindow}<p class="flex items-start gap-2">
+								<TriangleAlert class="mt-0.5 size-4 shrink-0" />{workspace.t('ui.ws.spitex.outside_window')}
+							</p>{/if}
 					</div>
 				{/if}
 				<FormField id="a-location" label={workspace.t('ui.ws.calendar.location')}>
@@ -159,18 +218,35 @@
 			</fieldset>
 			{#if form.original}
 				<div class="flex flex-wrap gap-2 border-t pt-4">
-					{#if contact}<Button variant="outline" size="sm" href={href(`/contacts/${contact.id}`)}><UserRound class="size-4" />{contactName(contact)}</Button>{/if}
+					{#if contact}<Button variant="outline" size="sm" href={href(`/contacts/${contact.id}`)}
+							><UserRound class="size-4" />{contactName(contact)}</Button
+						>{/if}
 					{#if contact && session.hasModule('finance') && session.can('finance.write') && !form.original.billedInvoiceId}
-						<Button variant="outline" size="sm" onclick={() => navigate(`/finance/invoices/new?appointment=${form.original?.id}`)}><ReceiptText class="size-4" />{workspace.t('ui.ws.calendar.bill')}</Button>
+						<Button
+							variant="outline"
+							size="sm"
+							onclick={() => navigate(`/finance/invoices/new?appointment=${form.original?.id}`)}
+							><ReceiptText class="size-4" />{workspace.t('ui.ws.calendar.bill')}</Button
+						>
 					{/if}
-					{#if form.original.billedInvoiceId}<Button variant="ghost" size="sm" href={href(`/finance/invoices/${form.original.billedInvoiceId}`)}><ReceiptText class="size-4" />{workspace.t('ui.ws.calendar.billed')}</Button>{/if}
+					{#if form.original.billedInvoiceId}<Button
+							variant="ghost"
+							size="sm"
+							href={href(`/finance/invoices/${form.original.billedInvoiceId}`)}
+							><ReceiptText class="size-4" />{workspace.t('ui.ws.calendar.billed')}</Button
+						>{/if}
 				</div>
 			{/if}
 		</form>
 		<Sheet.Footer class="flex-row items-center">
-			{#if form.original && canWrite}<Button variant="ghost" class="text-destructive mr-auto" onclick={askDelete}><Trash2 class="size-4" />{workspace.t('ui.ws.delete')}</Button>{/if}
-			<Button variant="outline" onclick={() => close(false)}>{canWrite ? workspace.t('ui.ws.cancel') : workspace.t('ui.ws.close')}</Button>
-			{#if canWrite}<Button type="submit" form="appointment-form" disabled={form.busy}>{workspace.t('ui.save')}</Button>{/if}
+			{#if form.original && canWrite}<Button variant="ghost" class="text-destructive mr-auto" onclick={askDelete}
+					><Trash2 class="size-4" />{workspace.t('ui.ws.delete')}</Button
+				>{/if}
+			<Button variant="outline" onclick={() => close(false)}
+				>{canWrite ? workspace.t('ui.ws.cancel') : workspace.t('ui.ws.close')}</Button
+			>
+			{#if canWrite}<Button type="submit" form="appointment-form" disabled={form.busy}>{workspace.t('ui.save')}</Button
+				>{/if}
 		</Sheet.Footer>
 	</Sheet.Content>
 </Sheet.Root>

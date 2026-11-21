@@ -72,3 +72,30 @@ export function firstFreeStart(
 	}
 	return null;
 }
+
+/** Assigns visits to the people who are free inside each visit's arrival window. */
+export function planAssignments(
+	open: readonly Appointment[],
+	day: readonly Appointment[],
+	staff: readonly UserId[],
+	date: CalendarDate,
+) {
+	const planned = [...day];
+	const result: { visit: Appointment; assigneeId: UserId; start: string }[] = [];
+	const load = new Map(staff.map((id) => [id, planned.filter((row) => row.assigneeId === id).length]));
+	for (const visit of [...open].sort((left, right) => left.start.localeCompare(right.start))) {
+		const candidates = [...staff].sort((left, right) => (load.get(left) ?? 0) - (load.get(right) ?? 0));
+		for (const assigneeId of candidates) {
+			const start = firstFreeStart(visit, date, assigneeId, planned);
+			if (!start) continue;
+			const end = new Date(
+				new Date(start).getTime() + (new Date(visit.end).getTime() - new Date(visit.start).getTime()),
+			).toISOString();
+			planned.push({ ...visit, assigneeId, start, end });
+			load.set(assigneeId, (load.get(assigneeId) ?? 0) + 1);
+			result.push({ visit, assigneeId, start });
+			break;
+		}
+	}
+	return result;
+}

@@ -27,5 +27,9 @@ export function setQuery(url: URL, changes: { [key: string]: string | null }) {
 		else query.set(key, value);
 	}
 	const search = query.toString();
-	return goto(href(`${routePath(url)}${search ? `?${search}` : ''}`), { replaceState: true, keepFocus: true, noScroll: true });
+	return goto(href(`${routePath(url)}${search ? `?${search}` : ''}`), {
+		replaceState: true,
+		keepFocus: true,
+		noScroll: true,
+	});
 }

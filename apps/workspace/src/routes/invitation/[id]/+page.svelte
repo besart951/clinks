@@ -59,7 +59,12 @@
 	}
 </script>
 
-<AuthShell title={workspace.t('ui.accept_invitation')} description={details ? workspace.t('ui.ws.invitation.text', { tenant: details.tenantName, role: details.roleName }) : undefined}>
+<AuthShell
+	title={workspace.t('ui.accept_invitation')}
+	description={details
+		? workspace.t('ui.ws.invitation.text', { tenant: details.tenantName, role: details.roleName })
+		: undefined}
+>
 	{#if error}
 		<Alert.Root variant="destructive"><Alert.Description>{error}</Alert.Description></Alert.Root>
 		<Button href={href('/login')} variant="outline">{workspace.t('ui.ws.auth.back_to_login')}</Button>
@@ -67,15 +72,27 @@
 		<SkeletonRows rows={2} />
 	{:else}
 		<form class="space-y-4" onsubmit={accept}>
-			<FormField id="iv-email" label={workspace.t('ui.email')}><Input id="iv-email" value={details.invitation.email} disabled /></FormField>
+			<FormField id="iv-email" label={workspace.t('ui.email')}
+				><Input id="iv-email" value={details.invitation.email} disabled /></FormField
+			>
 			{#if !details.existingUser}
 				<div class="grid grid-cols-2 gap-3">
-					<FormField id="iv-first" label={workspace.t('ui.ws.field.first_name')}><Input id="iv-first" bind:value={firstName} /></FormField>
-					<FormField id="iv-last" label={workspace.t('ui.ws.field.last_name')}><Input id="iv-last" bind:value={lastName} /></FormField>
+					<FormField id="iv-first" label={workspace.t('ui.ws.field.first_name')}
+						><Input id="iv-first" bind:value={firstName} /></FormField
+					>
+					<FormField id="iv-last" label={workspace.t('ui.ws.field.last_name')}
+						><Input id="iv-last" bind:value={lastName} /></FormField
+					>
 				</div>
-				<p class="text-muted-foreground text-xs">{workspace.t('ui.ws.invitation.demo_password', { password: demoPassword })}</p>
+				<p class="text-muted-foreground text-xs">
+					{workspace.t('ui.ws.invitation.demo_password', { password: demoPassword })}
+				</p>
 			{/if}
-			{#if workspace.session.status === 'authenticated' && workspace.session.user?.email !== details.invitation.email}<p class="text-muted-foreground text-xs">{workspace.t('ui.invitation_replaces_session')}</p>{/if}
+			{#if workspace.session.status === 'authenticated' && workspace.session.user?.email !== details.invitation.email}<p
+					class="text-muted-foreground text-xs"
+				>
+					{workspace.t('ui.invitation_replaces_session')}
+				</p>{/if}
 			<Button type="submit" class="w-full" disabled={busy}>{workspace.t('ui.accept_invitation')}</Button>
 		</form>
 	{/if}

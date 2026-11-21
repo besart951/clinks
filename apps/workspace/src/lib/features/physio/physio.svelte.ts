@@ -16,18 +16,41 @@ export interface PrescriptionProgress {
 }
 
 /** Sessions used on a prescription: finished appointments since it was issued. */
-export function prescriptionProgress(prescription: Prescription, appointments: readonly Appointment[], on: string = today()): PrescriptionProgress {
+export function prescriptionProgress(
+	prescription: Prescription,
+	appointments: readonly Appointment[],
+	on: string = today(),
+): PrescriptionProgress {
 	const used = appointments.filter(
-		(appointment) => appointment.contactId === prescription.contactId && appointment.kind === 'physio' && appointment.status !== 'cancelled' && appointment.start.slice(0, 10) >= prescription.issuedOn && appointment.start.slice(0, 10) <= on,
+		(appointment) =>
+			appointment.contactId === prescription.contactId &&
+			appointment.kind === 'physio' &&
+			appointment.status !== 'cancelled' &&
+			appointment.start.slice(0, 10) >= prescription.issuedOn &&
+			appointment.start.slice(0, 10) <= on,
 	).length;
 	const remaining = Math.max(prescription.sessionsPrescribed - used, 0);
 	const alert: PrescriptionAlert | null =
-		prescription.validUntil < on ? 'expired' : remaining <= 2 ? 'almost_used' : daysBetween(on, prescription.validUntil) <= 14 ? 'expiring' : null;
+		prescription.validUntil < on
+			? 'expired'
+			: remaining <= 2
+				? 'almost_used'
+				: daysBetween(on, prescription.validUntil) <= 14
+					? 'expiring'
+					: null;
 	return { prescription, used, remaining, alert };
 }
 
-export function activePrescription(prescriptions: readonly Prescription[], contactId: ContactId, on: string = today()): Prescription | null {
-	return [...prescriptions].filter((row) => row.contactId === contactId && row.validUntil >= on).sort((left, right) => right.issuedOn.localeCompare(left.issuedOn))[0] ?? null;
+export function activePrescription(
+	prescriptions: readonly Prescription[],
+	contactId: ContactId,
+	on: string = today(),
+): Prescription | null {
+	return (
+		[...prescriptions]
+			.filter((row) => row.contactId === contactId && row.validUntil >= on)
+			.sort((left, right) => right.issuedOn.localeCompare(left.issuedOn))[0] ?? null
+	);
 }
 
 export interface PatientRow {
@@ -53,7 +76,9 @@ export class PatientsModel {
 			]);
 			const now = new Date().toISOString();
 			return contacts.map((patient) => {
-				const own = appointments.filter((row) => row.contactId === patient.id && row.status !== 'cancelled').sort((left, right) => left.start.localeCompare(right.start));
+				const own = appointments
+					.filter((row) => row.contactId === patient.id && row.status !== 'cancelled')
+					.sort((left, right) => left.start.localeCompare(right.start));
 				const active = activePrescription(prescriptions, patient.id);
 				const progress = active ? prescriptionProgress(active, appointments) : null;
 				return {
@@ -71,8 +96,18 @@ export class PatientsModel {
 		const query = this.search.trim().toLowerCase();
 		const weekEnd = addDays(today(), 7);
 		return (this.resource.data ?? [])
-			.filter((row) => !query || `${row.patient.firstName} ${row.patient.lastName} ${row.patient.insurer} ${row.patient.phone}`.toLowerCase().includes(query))
-			.filter((row) => this.filter === 'all' || (this.filter === 'alerts' ? row.alert !== null : row.next !== null && row.next.start.slice(0, 10) <= weekEnd))
+			.filter(
+				(row) =>
+					!query ||
+					`${row.patient.firstName} ${row.patient.lastName} ${row.patient.insurer} ${row.patient.phone}`
+						.toLowerCase()
+						.includes(query),
+			)
+			.filter(
+				(row) =>
+					this.filter === 'all' ||
+					(this.filter === 'alerts' ? row.alert !== null : row.next !== null && row.next.start.slice(0, 10) <= weekEnd),
+			)
 			.sort((left, right) => left.patient.lastName.localeCompare(right.patient.lastName, 'de'));
 	}
 }
@@ -93,26 +128,37 @@ export class PatientRecordModel {
 	constructor(workspace: Workspace, id: ContactId) {
 		this.#workspace = workspace;
 		const { api, session } = workspace;
-		this.resource = new Resource(workspace.db, ['contacts', 'appointments', 'prescriptions', 'notes', 'invoices'], async () => {
-			const [patient, appointments, prescriptions, notes, invoices] = await Promise.all([
-				api.contacts.get(id),
-				api.appointments.list((row) => row.contactId === id),
-				api.prescriptions.list((row) => row.contactId === id),
-				api.physioNotes.list((row) => row.contactId === id && row.kind === 'physio'),
-				session.can('finance.read') && session.hasModule('finance') ? api.invoices.list((row) => row.contactId === id) : Promise.resolve([]),
-			]);
-			return {
-				patient,
-				appointments: appointments.sort((left, right) => right.start.localeCompare(left.start)),
-				prescriptions: prescriptions.sort((left, right) => right.issuedOn.localeCompare(left.issuedOn)),
-				notes: notes.sort((left, right) => right.date.localeCompare(left.date) || right.createdAt.localeCompare(left.createdAt)),
-				invoices: invoices.sort((left, right) => right.issueDate.localeCompare(left.issueDate)),
-			};
-		});
+		this.resource = new Resource(
+			workspace.db,
+			['contacts', 'appointments', 'prescriptions', 'notes', 'invoices'],
+			async () => {
+				const [patient, appointments, prescriptions, notes, invoices] = await Promise.all([
+					api.contacts.get(id),
+					api.appointments.list((row) => row.contactId === id),
+					api.prescriptions.list((row) => row.contactId === id),
+					api.physioNotes.list((row) => row.contactId === id && row.kind === 'physio'),
+					session.can('finance.read') && session.hasModule('finance')
+						? api.invoices.list((row) => row.contactId === id)
+						: Promise.resolve([]),
+				]);
+				return {
+					patient,
+					appointments: appointments.sort((left, right) => right.start.localeCompare(left.start)),
+					prescriptions: prescriptions.sort((left, right) => right.issuedOn.localeCompare(left.issuedOn)),
+					notes: notes.sort(
+						(left, right) => right.date.localeCompare(left.date) || right.createdAt.localeCompare(left.createdAt),
+					),
+					invoices: invoices.sort((left, right) => right.issueDate.localeCompare(left.issueDate)),
+				};
+			},
+		);
 	}
 
 	async removeNote(note: ClinicalNote) {
 		const api = this.#workspace.api.physioNotes;
-		await this.#workspace.run(() => api.remove(note.id), { success: 'ui.ws.physio.note_deleted', undo: () => api.restore(note) });
+		await this.#workspace.run(() => api.remove(note.id), {
+			success: 'ui.ws.physio.note_deleted',
+			undo: () => api.restore(note),
+		});
 	}
 }
