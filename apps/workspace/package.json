@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
-    "build:artifact": "WORKSPACE_ARTIFACT=1 vite build",
+    "build:artifact": "WORKSPACE_ARTIFACT=1 vite build && node scripts/finalize-artifact.mjs",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "test": "node --test test/*.test.ts",
