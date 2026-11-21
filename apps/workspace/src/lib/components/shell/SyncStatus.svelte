@@ -11,7 +11,12 @@
 	);
 </script>
 
-<span class="text-muted-foreground hidden items-center gap-1.5 text-xs lg:flex" role="status" aria-live="polite">
+<span
+	class="text-muted-foreground grid size-7 shrink-0 place-items-center"
+	role="status"
+	aria-live="polite"
+	title={workspace.t(label)}
+>
 	{#if network.offline}
 		<CloudOff class="size-3.5 text-amber-600" />
 	{:else if network.pending > 0}
@@ -19,5 +24,5 @@
 	{:else}
 		<Cloud class="size-3.5" />
 	{/if}
-	{workspace.t(label)}
+	<span class="sr-only">{workspace.t(label)}</span>
 </span>

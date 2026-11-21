@@ -8,11 +8,7 @@
 	import CommandPalette from '$lib/components/shell/CommandPalette.svelte';
 	import DevPanel from '$lib/components/shell/DevPanel.svelte';
 	import MobileNav from '$lib/components/shell/MobileNav.svelte';
-	import NotificationBell from '$lib/components/shell/NotificationBell.svelte';
 	import ShortcutsDialog from '$lib/components/shell/ShortcutsDialog.svelte';
-	import SyncStatus from '$lib/components/shell/SyncStatus.svelte';
-	import TenantSwitcher from '$lib/components/shell/TenantSwitcher.svelte';
-	import UserMenu from '$lib/components/shell/UserMenu.svelte';
 	import SkeletonRows from '$lib/components/common/SkeletonRows.svelte';
 	import { landingPath } from '$lib/features/auth/auth-forms.svelte';
 	import { allNavigationItems } from '$lib/features/shell/navigation-items';
@@ -66,31 +62,26 @@
 
 {#if ready}
 	<SidebarProvider>
-		<AppSidebar />
+		{#key session.tenantId}
+			{#key session.tenantId}
+				<AppSidebar actions={{ search: () => (paletteOpen = true), shortcuts: () => (shortcutsOpen = true) }} />
+			{/key}
+		{/key}
 		<SidebarInset class="flex min-h-dvh min-w-0 flex-col pb-16 md:pb-0">
 			<Banners />
 			<header
-				class="bg-background/90 sticky top-0 z-10 flex h-14 items-center gap-2 border-b px-3 backdrop-blur sm:px-4"
+				class="bg-background/90 sticky top-0 z-10 flex h-12 items-center gap-2 border-b px-3 backdrop-blur md:hidden"
 			>
 				<SidebarTrigger />
-				<TenantSwitcher />
-				<div class="flex-1"></div>
-				<SyncStatus />
+				<span class="flex-1 truncate text-sm font-semibold">{session.tenant?.name}</span>
 				<Button
-					variant="outline"
-					size="sm"
-					class="text-muted-foreground gap-2"
+					variant="ghost"
+					size="icon-sm"
 					onclick={() => (paletteOpen = true)}
-					aria-keyshortcuts="Meta+K"
+					aria-label={workspace.t('ui.ws.shell.search')}><Search class="size-4" /></Button
 				>
-					<Search class="size-4" />
-					<span class="hidden sm:inline">{workspace.t('ui.ws.shell.search')}</span>
-					<kbd class="bg-muted hidden rounded border px-1 text-[10px] sm:inline">⌘K</kbd>
-				</Button>
-				<NotificationBell />
-				<UserMenu onShortcuts={() => (shortcutsOpen = true)} />
 			</header>
-			<main class="mx-auto w-full max-w-[1400px] flex-1 p-4 sm:p-6">
+			<main class="mx-auto w-full max-w-[1440px] flex-1 px-4 py-5 sm:px-8 sm:py-7">
 				{@render children()}
 			</main>
 		</SidebarInset>

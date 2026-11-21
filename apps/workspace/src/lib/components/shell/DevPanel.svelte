@@ -38,7 +38,7 @@
 				{...props}
 				variant="outline"
 				size="icon-sm"
-				class="fixed bottom-20 left-3 z-30 rounded-full shadow-md md:bottom-3"
+				class="fixed right-3 bottom-20 z-30 rounded-full shadow-md md:bottom-3"
 				aria-label={workspace.t('ui.ws.dev.title')}
 			>
 				<Wrench class="size-3.5" />

@@ -27,6 +27,12 @@ export interface RunOptions {
 	undo?: () => Promise<unknown>;
 }
 
+/** The slice of a repository an in-place edit needs. */
+export interface PatchableApi<Record extends { id: string; revision: number }, Patch extends object> {
+	get(id: Record['id']): Promise<Record>;
+	update(id: Record['id'], revision: number, patch: Patch): Promise<Record>;
+}
+
 /** Everything a screen needs: the mock API, the signed-in session and the translator. */
 export class Workspace {
 	readonly network = new NetworkSimulator();
@@ -96,6 +102,27 @@ export class Workspace {
 			toast.error(this.message(error));
 			return null;
 		}
+	}
+
+	/**
+	 * Saves an in-place edit of one record: a quiet toast with undo, which restores the previous values on the
+	 * latest revision so later edits by others are not lost.
+	 */
+	async patch<Record extends { id: string; revision: number }, Patch extends object>(
+		api: PatchableApi<Record, Patch>,
+		record: Record,
+		patch: Patch,
+		label: string,
+	): Promise<Record | null> {
+		const previous = Object.fromEntries(Object.keys(patch).map((key) => [key, record[key as keyof Record]])) as Patch;
+		return this.run(() => api.update(record.id, record.revision, patch), {
+			success: 'ui.ws.inline.saved',
+			successParams: { field: label },
+			undo: async () => {
+				const current = await api.get(record.id);
+				return api.update(record.id, current.revision, previous);
+			},
+		});
 	}
 
 	/** Registers the page's create action for the "N" shortcut; returns the cleanup. */

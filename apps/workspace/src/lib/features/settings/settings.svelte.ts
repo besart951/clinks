@@ -1,3 +1,5 @@
+import type { InlineFieldSpec } from '../../components/kit/inline-edit.svelte.ts';
+import { isValidSwissIban } from '../../domain/qr-bill.ts';
 import { toast } from 'svelte-sonner';
 import type { InvitationId, MembershipId, RoleId, SessionId } from '../../domain/ids.ts';
 import type {
@@ -42,59 +44,116 @@ abstract class SettingsForm {
 	}
 }
 
-type CompanyFields = Pick<
-	Tenant,
-	'name' | 'address' | 'vatNumber' | 'iban' | 'brandColor' | 'logoDataUrl' | 'locale' | 'timeZone'
->;
+/** Company settings edited in place: every row saves on its own, with undo. */
+export class CompanySettingsModel {
+	#workspace: Workspace;
 
-export class CompanySettingsModel extends SettingsForm {
-	value = $state<CompanyFields>({
-		name: '',
-		address: { street: '', zip: '', city: '' },
-		vatNumber: '',
-		iban: '',
-		brandColor: '#0f766e',
-		logoDataUrl: null,
-		locale: 'de-CH',
-		timeZone: 'Europe/Zurich',
-	});
-	#initial = $state('');
-	dirty = $derived(JSON.stringify(this.value) !== this.#initial);
+	constructor(workspace: Workspace) {
+		this.#workspace = workspace;
+	}
 
-	load() {
-		const tenant = this.workspace.session.tenant;
-		if (!tenant) return;
-		this.value = structuredClone({
-			name: tenant.name,
-			address: tenant.address,
-			vatNumber: tenant.vatNumber,
-			iban: tenant.iban,
-			brandColor: tenant.brandColor,
-			logoDataUrl: tenant.logoDataUrl,
-			locale: tenant.locale,
-			timeZone: tenant.timeZone,
-		});
-		this.#initial = JSON.stringify(this.value);
+	fields(tenant: Tenant): InlineFieldSpec[] {
+		const t = (key: string) => this.#workspace.t(key);
+		return [
+			{
+				key: 'name',
+				label: t('ui.ws.settings.tenant_name'),
+				value: tenant.name,
+				validate: (value) => (value ? null : t('ui.ws.inline.required')),
+			},
+			{ key: 'street', label: t('ui.ws.settings.street'), value: tenant.address.street },
+			{ key: 'zip', label: t('ui.ws.field.zip'), value: tenant.address.zip },
+			{ key: 'city', label: t('ui.ws.field.city'), value: tenant.address.city },
+			{ key: 'vatNumber', label: t('ui.ws.settings.vat_number'), value: tenant.vatNumber, mono: true },
+			{
+				key: 'iban',
+				label: t('ui.ws.settings.iban'),
+				value: tenant.iban,
+				mono: true,
+				validate: (value) => (value === '' || isValidSwissIban(value) ? null : t('ui.ws.settings.iban_invalid')),
+			},
+		];
+	}
+
+	regionalFields(tenant: Tenant): InlineFieldSpec[] {
+		const t = (key: string) => this.#workspace.t(key);
+		return [
+			{
+				key: 'locale',
+				label: t('ui.ws.settings.default_language'),
+				value: tenant.locale,
+				kind: 'select',
+				options: [
+					{ value: 'de-CH', label: 'Deutsch (Schweiz)' },
+					{ value: 'en-US', label: 'English (US)' },
+				],
+			},
+			{
+				key: 'timeZone',
+				label: t('ui.ws.settings.time_zone'),
+				value: tenant.timeZone,
+				kind: 'select',
+				options: ['Europe/Zurich', 'Europe/Berlin', 'Europe/Vienna'].map((zone) => ({ value: zone, label: zone })),
+			},
+		];
+	}
+
+	saveField(field: InlineFieldSpec, value: string) {
+		const tenant = this.#workspace.session.tenant!;
+		const address = ['street', 'zip', 'city'].includes(field.key);
+		const patch: Partial<Tenant> = address
+			? { address: { ...tenant.address, [field.key]: value } }
+			: { [field.key]: value };
+		const previous: Partial<Tenant> = address
+			? { address: tenant.address }
+			: { [field.key]: tenant[field.key as keyof Tenant] };
+		return this.#apply(patch, previous, field.label);
+	}
+
+	setBrandColor(color: string) {
+		const tenant = this.#workspace.session.tenant!;
+		return this.#apply(
+			{ brandColor: color },
+			{ brandColor: tenant.brandColor },
+			this.#workspace.t('ui.ws.settings.brand_color'),
+		);
 	}
 
 	async setLogo(file: File | undefined) {
 		if (!file) return;
 		if (file.size > maxUploadBytes) {
-			toast.error(this.workspace.t('error.ws.file_too_large'));
+			toast.error(this.#workspace.t('error.ws.file_too_large'));
 			return;
 		}
-		this.value.logoDataUrl = await readAsDataUrl(file);
+		const tenant = this.#workspace.session.tenant!;
+		await this.#apply(
+			{ logoDataUrl: await readAsDataUrl(file) },
+			{ logoDataUrl: tenant.logoDataUrl },
+			this.#workspace.t('ui.ws.settings.logo'),
+		);
 	}
 
-	async save() {
-		const saved = await this.attempt(
-			() => this.workspace.account.updateTenant($state.snapshot(this.value)),
-			'ui.ws.settings.saved',
+	removeLogo() {
+		const tenant = this.#workspace.session.tenant!;
+		return this.#apply(
+			{ logoDataUrl: null },
+			{ logoDataUrl: tenant.logoDataUrl },
+			this.#workspace.t('ui.ws.settings.logo'),
 		);
-		if (saved) {
-			await this.workspace.session.refresh();
-			this.load();
-		}
+	}
+
+	async #apply(patch: Partial<Tenant>, previous: Partial<Tenant>, label: string) {
+		const { account, session } = this.#workspace;
+		const saved = await this.#workspace.run(() => account.updateTenant(patch), {
+			success: 'ui.ws.inline.saved',
+			successParams: { field: label },
+			undo: async () => {
+				await account.updateTenant(previous);
+				await session.refresh();
+			},
+		});
+		if (saved) await session.refresh();
+		return saved;
 	}
 }
 

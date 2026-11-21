@@ -4541,6 +4541,330 @@
       "ui.ws.settings.time_zone": {
         "de-CH": "Zeitzone",
         "en-US": "Time zone"
+      },
+      "ui.ws.billing_mode.tiers_garant": {
+        "de-CH": "Tiers garant – Patient:in zahlt",
+        "en-US": "Tiers garant – patient pays"
+      },
+      "ui.ws.billing_mode.tiers_payant": {
+        "de-CH": "Tiers payant – Versicherung zahlt",
+        "en-US": "Tiers payant – insurer pays"
+      },
+      "ui.ws.campaign.approved_by": {
+        "de-CH": "Freigegeben von",
+        "en-US": "Approved by"
+      },
+      "ui.ws.campaign.checks_of": {
+        "de-CH": "{done} von {total}",
+        "en-US": "{done} of {total}"
+      },
+      "ui.ws.campaign.fix": {
+        "de-CH": "Beheben",
+        "en-US": "Fix"
+      },
+      "ui.ws.campaign.recipient_count": {
+        "de-CH": "{count} Empfänger",
+        "en-US": "{count} recipients"
+      },
+      "ui.ws.campaign.responsibility": {
+        "de-CH": "Zuständigkeit",
+        "en-US": "Responsibility"
+      },
+      "ui.ws.campaign.review_banner": {
+        "de-CH": "Deine Prüfung ist gefragt",
+        "en-US": "Your review is needed"
+      },
+      "ui.ws.campaign.review_banner_text": {
+        "de-CH": "Inhalt, Empfänger und Checkliste ansehen – dann freigeben oder zurückgeben.",
+        "en-US": "Check content, recipients and checklist – then approve or send back."
+      },
+      "ui.ws.campaign.review_waiting": {
+        "de-CH": "Wartet auf Freigabe",
+        "en-US": "Waiting for approval"
+      },
+      "ui.ws.campaign.scheduled_label": {
+        "de-CH": "Geplant für",
+        "en-US": "Scheduled for"
+      },
+      "ui.ws.campaign.stat_clicks": {
+        "de-CH": "Klicks",
+        "en-US": "Clicks"
+      },
+      "ui.ws.campaign.stat_opens": {
+        "de-CH": "Geöffnet",
+        "en-US": "Opens"
+      },
+      "ui.ws.campaign.stat_recipients": {
+        "de-CH": "Empfänger",
+        "en-US": "Recipients"
+      },
+      "ui.ws.campaign.stat_unsubscribes": {
+        "de-CH": "Abmeldungen",
+        "en-US": "Unsubscribes"
+      },
+      "ui.ws.campaign.tab_content": {
+        "de-CH": "Inhalt",
+        "en-US": "Content"
+      },
+      "ui.ws.campaign.tab_recipients": {
+        "de-CH": "Empfänger",
+        "en-US": "Recipients"
+      },
+      "ui.ws.campaign.tab_results": {
+        "de-CH": "Ergebnisse",
+        "en-US": "Results"
+      },
+      "ui.ws.campaign.tab_review": {
+        "de-CH": "Prüfung",
+        "en-US": "Review"
+      },
+      "ui.ws.contacts.done_tasks": {
+        "de-CH": "Erledigte ({count})",
+        "en-US": "Done ({count})"
+      },
+      "ui.ws.contacts.history": {
+        "de-CH": "Verlauf",
+        "en-US": "History"
+      },
+      "ui.ws.contacts.notes_placeholder": {
+        "de-CH": "Notiz hinzufügen …",
+        "en-US": "Add a note …"
+      },
+      "ui.ws.contacts.older_mails": {
+        "de-CH": "Ältere ({count})",
+        "en-US": "Older ({count})"
+      },
+      "ui.ws.contacts.open_tasks": {
+        "de-CH": "Aufgaben",
+        "en-US": "Tasks"
+      },
+      "ui.ws.contacts.paid_invoices": {
+        "de-CH": "Bezahlte ({count})",
+        "en-US": "Paid ({count})"
+      },
+      "ui.ws.contacts.upcoming": {
+        "de-CH": "Termine",
+        "en-US": "Appointments"
+      },
+      "ui.ws.dashboard.appointment_count": {
+        "de-CH": "{count} Termine",
+        "en-US": "{count} appointments"
+      },
+      "ui.ws.dashboard.done_so_far": {
+        "de-CH": "erledigt",
+        "en-US": "done"
+      },
+      "ui.ws.dashboard.hint_open_visit": {
+        "de-CH": "Offener Einsatz {date} – noch niemand eingeteilt",
+        "en-US": "Open visit {date} – nobody assigned yet"
+      },
+      "ui.ws.dashboard.hint_overdue": {
+        "de-CH": "Rechnung {number} überfällig",
+        "en-US": "Invoice {number} overdue"
+      },
+      "ui.ws.dashboard.hint_task_late": {
+        "de-CH": "Überfällig seit {days} Tagen",
+        "en-US": "Overdue for {days} days"
+      },
+      "ui.ws.dashboard.hint_unbilled": {
+        "de-CH": "{count} Sitzungen verrechnen",
+        "en-US": "Bill {count} sessions"
+      },
+      "ui.ws.dashboard.hints": {
+        "de-CH": "Hinweise",
+        "en-US": "Notices"
+      },
+      "ui.ws.dashboard.more_hints": {
+        "de-CH": "{count} weitere",
+        "en-US": "{count} more"
+      },
+      "ui.ws.dashboard.no_hints": {
+        "de-CH": "Alles im grünen Bereich.",
+        "en-US": "All clear."
+      },
+      "ui.ws.dashboard.now": {
+        "de-CH": "Jetzt",
+        "en-US": "Now"
+      },
+      "ui.ws.dashboard.up_next": {
+        "de-CH": "Als Nächstes",
+        "en-US": "Up next"
+      },
+      "ui.ws.field.ahv": {
+        "de-CH": "AHV-Nr.",
+        "en-US": "AHV no."
+      },
+      "ui.ws.field.ahv_invalid": {
+        "de-CH": "Format 756.XXXX.XXXX.XX",
+        "en-US": "Format 756.XXXX.XXXX.XX"
+      },
+      "ui.ws.field.billing_mode": {
+        "de-CH": "Abrechnungsart",
+        "en-US": "Billing mode"
+      },
+      "ui.ws.field.employer": {
+        "de-CH": "Arbeitgeber",
+        "en-US": "Employer"
+      },
+      "ui.ws.field.insurance_number": {
+        "de-CH": "Versichertennummer",
+        "en-US": "Insurance number"
+      },
+      "ui.ws.field.language": {
+        "de-CH": "Sprache",
+        "en-US": "Language"
+      },
+      "ui.ws.inline.add_field": {
+        "de-CH": "Feld hinzufügen",
+        "en-US": "Add field"
+      },
+      "ui.ws.inline.add_tag": {
+        "de-CH": "Tag",
+        "en-US": "Tag"
+      },
+      "ui.ws.inline.age": {
+        "de-CH": "{years} J.",
+        "en-US": "{years} y"
+      },
+      "ui.ws.inline.edit_hint": {
+        "de-CH": "Klicken zum Bearbeiten",
+        "en-US": "Click to edit"
+      },
+      "ui.ws.inline.empty": {
+        "de-CH": "Leer",
+        "en-US": "Empty"
+      },
+      "ui.ws.inline.hide": {
+        "de-CH": "Verbergen",
+        "en-US": "Hide"
+      },
+      "ui.ws.inline.past": {
+        "de-CH": "Vergangene ({count})",
+        "en-US": "Past ({count})"
+      },
+      "ui.ws.inline.remove": {
+        "de-CH": "{field} entfernen",
+        "en-US": "Remove {field}"
+      },
+      "ui.ws.inline.required": {
+        "de-CH": "Darf nicht leer sein",
+        "en-US": "Must not be empty"
+      },
+      "ui.ws.inline.saved": {
+        "de-CH": "{field} gespeichert",
+        "en-US": "{field} saved"
+      },
+      "ui.ws.inline.show": {
+        "de-CH": "Anzeigen",
+        "en-US": "Show"
+      },
+      "ui.ws.invoice.draft_number": {
+        "de-CH": "Entwurf",
+        "en-US": "Draft"
+      },
+      "ui.ws.invoice.edit_panel": {
+        "de-CH": "Rechnung bearbeiten",
+        "en-US": "Edit invoice"
+      },
+      "ui.ws.invoice.new_draft": {
+        "de-CH": "Neuer Entwurf",
+        "en-US": "New draft"
+      },
+      "ui.ws.invoice.pdf_preview": {
+        "de-CH": "PDF-Vorschau",
+        "en-US": "PDF preview"
+      },
+      "ui.ws.language.de": {
+        "de-CH": "Deutsch",
+        "en-US": "German"
+      },
+      "ui.ws.language.en": {
+        "de-CH": "Englisch",
+        "en-US": "English"
+      },
+      "ui.ws.language.fr": {
+        "de-CH": "Französisch",
+        "en-US": "French"
+      },
+      "ui.ws.language.it": {
+        "de-CH": "Italienisch",
+        "en-US": "Italian"
+      },
+      "ui.ws.physio.bill_count": {
+        "de-CH": "{count} verrechnen",
+        "en-US": "Bill {count}"
+      },
+      "ui.ws.physio.insurance": {
+        "de-CH": "Versicherung",
+        "en-US": "Insurance"
+      },
+      "ui.ws.physio.note_for": {
+        "de-CH": "Notiz {date}",
+        "en-US": "Note {date}"
+      },
+      "ui.ws.physio.prescription_number": {
+        "de-CH": "Verordnung {number}",
+        "en-US": "Prescription {number}"
+      },
+      "ui.ws.physio.sessions_planned": {
+        "de-CH": "{used}/{total} · {planned} geplant",
+        "en-US": "{used}/{total} · {planned} planned"
+      },
+      "ui.ws.settings.appearance_text": {
+        "de-CH": "Logo und Markenfarbe erscheinen in der Seitenleiste und auf Rechnungen.",
+        "en-US": "Logo and brand colour appear in the sidebar and on invoices."
+      },
+      "ui.ws.settings.company_inline_text": {
+        "de-CH": "Firmendaten, Erscheinungsbild und Region – alles klickbar, Änderungen werden sofort gespeichert.",
+        "en-US": "Company data, appearance and region – click any value; changes save immediately."
+      },
+      "ui.ws.settings.regional": {
+        "de-CH": "Region",
+        "en-US": "Region"
+      },
+      "ui.ws.settings.regional_text": {
+        "de-CH": "Standardsprache für neue Mitglieder und Zeitzone für Termine.",
+        "en-US": "Default language for new members and time zone for appointments."
+      },
+      "ui.ws.settings.street": {
+        "de-CH": "Strasse und Nr.",
+        "en-US": "Street and no."
+      },
+      "ui.ws.settings.tenant_name": {
+        "de-CH": "Firmenname",
+        "en-US": "Company name"
+      },
+      "ui.ws.shell.badge": {
+        "de-CH": "{count} offen",
+        "en-US": "{count} open"
+      },
+      "ui.ws.shell.dark_theme": {
+        "de-CH": "Dunkles Theme",
+        "en-US": "Dark theme"
+      },
+      "ui.ws.shell.demo_note": {
+        "de-CH": "Demo mit erfundenen Daten – Änderungen bleiben nur in diesem Browser.",
+        "en-US": "Demo with made-up data – changes stay in this browser only."
+      },
+      "ui.ws.shell.demo_note_volatile": {
+        "de-CH": "Demo mit erfundenen Daten – Änderungen werden nicht gespeichert.",
+        "en-US": "Demo with made-up data – changes are not saved."
+      },
+      "ui.ws.shell.light_theme": {
+        "de-CH": "Helles Theme",
+        "en-US": "Light theme"
+      },
+      "ui.ws.shell.search_actions": {
+        "de-CH": "Suchen & Aktionen",
+        "en-US": "Search & actions"
+      },
+      "ui.ws.spitex.access_note": {
+        "de-CH": "Zugangshinweis",
+        "en-US": "Access note"
+      },
+      "ui.ws.spitex.access_placeholder": {
+        "de-CH": "Zugang, Schlüsselsafe, Haustiere … hinzufügen",
+        "en-US": "Add access, key safe, pets …"
       }
     }
   }

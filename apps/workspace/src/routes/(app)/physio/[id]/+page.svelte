@@ -4,21 +4,29 @@
 	import Plus from '@lucide/svelte/icons/plus';
 	import CalendarRange from '@lucide/svelte/icons/calendar-range';
 	import ReceiptText from '@lucide/svelte/icons/receipt-text';
-	import Trash2 from '@lucide/svelte/icons/trash-2';
+	import Pencil from '@lucide/svelte/icons/pencil';
+	import Phone from '@lucide/svelte/icons/phone';
 	import UserRound from '@lucide/svelte/icons/user-round';
-	import * as Card from '@clinks/ui-shared/components/ui/card';
-	import * as Tabs from '@clinks/ui-shared/components/ui/tabs';
 	import * as Dialog from '@clinks/ui-shared/components/ui/dialog';
 	import { Button } from '@clinks/ui-shared/components/ui/button';
 	import { Input } from '@clinks/ui-shared/components/ui/input';
 	import { Textarea } from '@clinks/ui-shared/components/ui/textarea';
-	import { Progress } from '@clinks/ui-shared/components/ui/progress';
-	import PageHeader from '$lib/components/common/PageHeader.svelte';
 	import AsyncView from '$lib/components/common/AsyncView.svelte';
 	import FormField from '$lib/components/common/FormField.svelte';
 	import Choice from '$lib/components/common/Choice.svelte';
 	import StatusBadge from '$lib/components/common/StatusBadge.svelte';
-	import { appointmentTone, invoiceTone } from '$lib/components/common/tones';
+	import { invoiceTone } from '$lib/components/common/tones';
+	import DetailHeader from '$lib/components/kit/DetailHeader.svelte';
+	import Accordion from '$lib/components/kit/Accordion.svelte';
+	import AccordionSection from '$lib/components/kit/AccordionSection.svelte';
+	import AttributeList from '$lib/components/kit/AttributeList.svelte';
+	import SideCard from '$lib/components/kit/SideCard.svelte';
+	import PastToggle from '$lib/components/kit/PastToggle.svelte';
+	import ProgressRing from '$lib/components/kit/ProgressRing.svelte';
+	import SoapNote from '$lib/components/kit/SoapNote.svelte';
+	import AppointmentRow from '$lib/components/kit/AppointmentRow.svelte';
+	import { personBadge } from '$lib/components/kit/avatar';
+	import { insuranceFields, patientMasterFields } from '$lib/features/physio/patient-fields';
 	import AttachmentPanel from '$lib/components/collaboration/AttachmentPanel.svelte';
 	import ModuleGate from '$lib/components/shell/ModuleGate.svelte';
 	import { PatientRecordModel, activePrescription, prescriptionProgress } from '$lib/features/physio/physio.svelte';
@@ -26,10 +34,10 @@
 	import { PeopleDirectory } from '$lib/features/collaboration/people.svelte';
 	import { contactName } from '$lib/data/workspace-api';
 	import { effectiveStatus, invoiceTotals } from '$lib/domain/money';
-	import { today } from '$lib/domain/dates';
+	import { ageOn, today } from '$lib/domain/dates';
 	import { physioServices, physioTariffs, type Prescription } from '$lib/domain/types';
 	import type { ContactId } from '$lib/domain/ids';
-	import { href, routeQuery, setQuery } from '$lib/navigation';
+	import { href, navigate } from '$lib/navigation';
 	import { useWorkspace } from '$lib/workspace.svelte';
 
 	const workspace = useWorkspace();
@@ -41,7 +49,14 @@
 	const noteForm = new NoteForm(workspace);
 	const seriesForm = new SeriesForm(workspace);
 	const canWrite = $derived(session.can('physio.write'));
-	const tab = $derived(routeQuery(page.url).get('tab') ?? 'overview');
+	const text = { t: workspace.t.bind(workspace), date: (value: string) => workspace.i18n.date(value) };
+	let composing = $state(false);
+	const soapLabels = {
+		subjective: workspace.t('ui.ws.physio.subjective'),
+		objective: workspace.t('ui.ws.physio.objective'),
+		assessment: workspace.t('ui.ws.physio.assessment'),
+		plan: workspace.t('ui.ws.physio.plan'),
+	};
 	let prescriptionOpen = $state(false);
 	let seriesOpen = $state(false);
 	const weekdays = [1, 2, 3, 4, 5, 6];
@@ -74,7 +89,7 @@
 
 	async function saveNote(event: SubmitEvent) {
 		event.preventDefault();
-		await noteForm.save(id);
+		if (await noteForm.save(id)) composing = false;
 	}
 </script>
 
@@ -89,274 +104,243 @@
 		{#snippet children({ patient, appointments, prescriptions, notes, invoices })}
 			{@const active = activePrescription(prescriptions, patient.id)}
 			{@const progress = active ? prescriptionProgress(active, appointments) : null}
-			<PageHeader
-				title={contactName(patient)}
-				description={[patient.birthDate ? workspace.i18n.date(patient.birthDate) : '', patient.insurer, patient.phone]
-					.filter(Boolean)
-					.join(' · ')}
-				crumbs={[{ label: workspace.t('ui.ws.physio.patients'), path: '/physio' }, { label: contactName(patient) }]}
+			{@const now = new Date().toISOString()}
+			{@const upcoming = appointments.filter((row) => row.start >= now).reverse()}
+			{@const past = appointments.filter((row) => row.start < now)}
+			{@const unbilled = appointments.filter(
+				(row) => row.status === 'done' && row.billedInvoiceId === null && row.kind === 'physio',
+			).length}
+			<DetailHeader
+				header={{
+					title: contactName(patient),
+					back: { label: workspace.t('ui.ws.physio.patients'), path: '/physio' },
+					avatar: personBadge(contactName(patient)),
+					meta: patient.birthDate
+						? [workspace.t('ui.ws.inline.age', { years: ageOn(patient.birthDate, today()) })]
+						: [],
+					badges: [patient.insurer, patient.language?.toUpperCase() ?? ''].filter(Boolean),
+				}}
 			>
 				{#snippet actions()}
-					<Button variant="outline" href={href(`/contacts/${patient.id}`)}
+					{#if patient.phone}<Button
+							variant="ghost"
+							size="icon-sm"
+							href="tel:{patient.phone}"
+							aria-label={patient.phone}><Phone class="size-4" /></Button
+						>{/if}
+					<Button variant="outline" size="sm" href={href(`/contacts/${patient.id}`)}
 						><UserRound class="size-4" />{workspace.t('ui.ws.physio.contact_card')}</Button
 					>
 					{#if canWrite && session.can('calendar.write')}<Button
 							variant="outline"
+							size="sm"
 							onclick={() => openSeries(progress?.remaining ?? 9)}
 							><CalendarRange class="size-4" />{workspace.t('ui.ws.physio.plan_series')}</Button
 						>{/if}
 					{#if session.hasModule('finance') && session.can('finance.write')}<Button
+							size="sm"
 							href={href(`/finance/invoices/new?contact=${patient.id}`)}
-							><ReceiptText class="size-4" />{workspace.t('ui.ws.physio.bill_services')}</Button
+							><ReceiptText class="size-4" />{unbilled > 0
+								? workspace.t('ui.ws.physio.bill_count', { count: unbilled })
+								: workspace.t('ui.ws.physio.bill_services')}</Button
 						>{/if}
 				{/snippet}
-			</PageHeader>
+			</DetailHeader>
 
-			<Tabs.Root
-				value={tab}
-				onValueChange={(value) => setQuery(page.url, { tab: value === 'overview' ? null : value })}
-			>
-				<Tabs.List class="mb-4 max-w-full overflow-x-auto">
-					<Tabs.Trigger value="overview">{workspace.t('ui.ws.contacts.tab_overview')}</Tabs.Trigger>
-					<Tabs.Trigger value="notes">{workspace.t('ui.ws.physio.progress_notes')} ({notes.length})</Tabs.Trigger>
-					<Tabs.Trigger value="prescriptions"
-						>{workspace.t('ui.ws.physio.prescriptions')} ({prescriptions.length})</Tabs.Trigger
+			<div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+				<Accordion>
+					<AccordionSection section={{ id: 'patient.master', title: workspace.t('ui.ws.contacts.master_data') }}>
+						<AttributeList
+							list={{ fields: patientMasterFields(patient, text), readonly: !canWrite }}
+							onsave={(field, value) => model.saveField(patient, field.key, value, field.label)}
+						/>
+					</AccordionSection>
+					<AccordionSection
+						section={{
+							id: 'patient.insurance',
+							title: workspace.t('ui.ws.physio.insurance'),
+							count: patient.insurer,
+							defaultOpen: false,
+						}}
 					>
-					<Tabs.Trigger value="appointments"
-						>{workspace.t('ui.ws.command.group_appointments')} ({appointments.length})</Tabs.Trigger
+						<AttributeList
+							list={{ fields: insuranceFields(patient, text), readonly: !canWrite }}
+							onsave={(field, value) => model.saveField(patient, field.key, value, field.label)}
+						/>
+					</AccordionSection>
+					<AccordionSection
+						section={{
+							id: 'patient.prescriptions',
+							title: workspace.t('ui.ws.physio.prescriptions'),
+							count: prescriptions.length,
+						}}
 					>
-					{#if session.hasModule('finance') && session.can('finance.read')}<Tabs.Trigger value="invoices"
-							>{workspace.t('ui.ws.command.group_invoices')} ({invoices.length})</Tabs.Trigger
-						>{/if}
-					<Tabs.Trigger value="documents">{workspace.t('ui.ws.module.documents')}</Tabs.Trigger>
-				</Tabs.List>
-
-				<Tabs.Content value="overview">
-					<div class="grid gap-4 lg:grid-cols-3">
-						<Card.Root>
-							<Card.Header><Card.Title>{workspace.t('ui.ws.physio.active_prescription')}</Card.Title></Card.Header>
-							<Card.Content class="space-y-3 text-sm">
-								{#if active && progress}
-									<p class="font-medium">{active.diagnosis}</p>
-									<p class="text-muted-foreground">
-										{active.doctor} · {workspace.t('ui.ws.physio.tariff', { tariff: active.tariff })}
-									</p>
-									<Progress
-										value={(progress.used / active.sessionsPrescribed) * 100}
-										aria-label={workspace.t('ui.ws.physio.sessions_used', {
-											used: progress.used,
-											total: active.sessionsPrescribed,
-										})}
-									/>
-									<p>
-										{workspace.t('ui.ws.physio.sessions_used', {
-											used: progress.used,
-											total: active.sessionsPrescribed,
-										})} · {workspace.t('ui.ws.physio.valid_until', { date: workspace.i18n.date(active.validUntil) })}
-									</p>
-									{#if progress.alert}<StatusBadge
-											tone="warning"
-											label={workspace.t(`ui.ws.physio.alert_${progress.alert}`)}
-										/>{/if}
-								{:else}
-									<p class="text-muted-foreground">{workspace.t('ui.ws.physio.alert_none')}</p>
-									{#if canWrite}<Button size="sm" onclick={() => editPrescription(null)}
-											><Plus class="size-4" />{workspace.t('ui.ws.physio.new_prescription')}</Button
-										>{/if}
-								{/if}
-							</Card.Content>
-						</Card.Root>
-						<Card.Root>
-							<Card.Header><Card.Title>{workspace.t('ui.ws.physio.latest_note')}</Card.Title></Card.Header>
-							<Card.Content class="space-y-1 text-sm">
-								{#if notes[0]}
-									<p class="text-muted-foreground text-xs">
-										{workspace.i18n.date(notes[0].date)} · {people.get(notes[0].authorId)?.name ?? ''}
-									</p>
-									<p><span class="font-medium">S</span> {notes[0].subjective}</p>
-									<p><span class="font-medium">P</span> {notes[0].plan}</p>
-								{:else}<p class="text-muted-foreground">{workspace.t('ui.ws.physio.no_notes')}</p>{/if}
-							</Card.Content>
-						</Card.Root>
-						<Card.Root>
-							<Card.Header><Card.Title>{workspace.t('ui.ws.physio.next_appointments')}</Card.Title></Card.Header>
-							<Card.Content>
-								<ul class="space-y-1 text-sm">
-									{#each appointments
-										.filter((row) => row.start >= new Date().toISOString() && row.status !== 'cancelled')
-										.reverse()
-										.slice(0, 5) as appointment (appointment.id)}
-										<li class="flex justify-between gap-2">
-											<a
-												class="hover:underline"
-												href={href(`/calendar?date=${appointment.start.slice(0, 10)}&appointment=${appointment.id}`)}
-												>{workspace.i18n.dateTime(appointment.start)}</a
-											><span class="text-muted-foreground"
-												>{people.get(appointment.assigneeId)?.name.split(' ')[0] ?? ''}</span
+						{#snippet tools()}
+							{#if canWrite}<Button variant="ghost" size="sm" onclick={() => editPrescription(null)}
+									><Plus class="size-4" />{workspace.t('ui.ws.physio.new_prescription')}</Button
+								>{/if}
+						{/snippet}
+						<div class="grid gap-1">
+							{#each prescriptions as prescription, index (prescription.id)}
+								{@const state = prescriptionProgress(prescription, appointments)}
+								{@const planned = appointments.filter(
+									(row) => row.start >= now && row.status !== 'cancelled' && row.kind === 'physio',
+								).length}
+								<div
+									class="rise reveal-scope hover:bg-accent grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg px-1 py-2"
+									style:--i={index}
+								>
+									<ProgressRing value={state.used} max={prescription.sessionsPrescribed} />
+									<div class="grid min-w-0 gap-0.5 text-sm">
+										<div class="flex flex-wrap items-baseline gap-2">
+											<b class="font-semibold"
+												>{workspace.t('ui.ws.physio.prescription_number', { number: prescriptions.length - index })}</b
 											>
-										</li>
-									{:else}<li class="text-muted-foreground">{workspace.t('ui.ws.contacts.no_appointments')}</li>{/each}
-								</ul>
-							</Card.Content>
-						</Card.Root>
-					</div>
-				</Tabs.Content>
-
-				<Tabs.Content value="notes">
-					<div class="grid gap-6 lg:grid-cols-[1fr_24rem]">
-						<ol class="space-y-3">
-							{#each notes as note (note.id)}
-								<li class="rounded-xl border p-4 text-sm">
-									<div class="mb-2 flex items-center gap-2 text-xs">
-										<span class="font-medium">{workspace.i18n.date(note.date)}</span><span class="text-muted-foreground"
-											>{people.get(note.authorId)?.name ?? ''}</span
-										>{#if canWrite && note.authorId === session.user?.id}<button
-												class="text-muted-foreground hover:text-destructive ml-auto"
-												onclick={() => model.removeNote(note)}
-												aria-label={workspace.t('ui.ws.delete')}><Trash2 class="size-3.5" /></button
-											>{/if}
+											<span class="text-muted-foreground text-[13px]">{workspace.i18n.date(prescription.issuedOn)}</span
+											>
+											{#if state.alert && state.alert !== 'none'}<StatusBadge
+													tone={state.alert === 'expired' ? 'neutral' : 'warning'}
+													label={workspace.t(`ui.ws.physio.alert_${state.alert}`)}
+												/>{/if}
+										</div>
+										<span class="truncate">{prescription.diagnosis}</span>
+										<span class="text-muted-foreground truncate text-[13px]"
+											>{prescription.doctor} · {workspace.t('ui.ws.physio.tariff', { tariff: prescription.tariff })} · {workspace.t(
+												'ui.ws.physio.sessions_planned',
+												{
+													used: state.used,
+													total: prescription.sessionsPrescribed,
+													planned: index === 0 ? planned : 0,
+												},
+											)}</span
+										>
 									</div>
-									<dl class="grid gap-1 sm:grid-cols-[1.5rem_1fr]">
-										<dt class="font-semibold">S</dt>
-										<dd>{note.subjective || '—'}</dd>
-										<dt class="font-semibold">O</dt>
-										<dd>{note.objective || '—'}</dd>
-										<dt class="font-semibold">A</dt>
-										<dd>{note.assessment || '—'}</dd>
-										<dt class="font-semibold">P</dt>
-										<dd>{note.plan || '—'}</dd>
-									</dl>
-								</li>
-							{:else}<li class="text-muted-foreground text-sm">{workspace.t('ui.ws.physio.no_notes')}</li>{/each}
-						</ol>
-						{#if canWrite}
-							<Card.Root class="h-fit">
-								<Card.Header
-									><Card.Title>{workspace.t('ui.ws.physio.new_note')}</Card.Title><Card.Description
-										>{workspace.t('ui.ws.physio.soap_hint')}</Card.Description
-									></Card.Header
-								>
-								<Card.Content>
-									<form class="space-y-3" onsubmit={saveNote}>
-										<FormField id="n-date" label={workspace.t('ui.ws.calendar.date')}
-											><Input id="n-date" type="date" bind:value={noteForm.date} /></FormField
-										>
-										<FormField id="n-s" label={workspace.t('ui.ws.physio.subjective')}
-											><Textarea
-												id="n-s"
-												rows={2}
-												bind:value={noteForm.subjective}
-												placeholder={workspace.t('ui.ws.physio.subjective_placeholder')}
-											/></FormField
-										>
-										<FormField id="n-o" label={workspace.t('ui.ws.physio.objective')}
-											><Textarea
-												id="n-o"
-												rows={2}
-												bind:value={noteForm.objective}
-												placeholder={workspace.t('ui.ws.physio.objective_placeholder')}
-											/></FormField
-										>
-										<FormField id="n-a" label={workspace.t('ui.ws.physio.assessment')}
-											><Textarea id="n-a" rows={2} bind:value={noteForm.assessment} /></FormField
-										>
-										<FormField id="n-p" label={workspace.t('ui.ws.physio.plan')}
-											><Textarea
-												id="n-p"
-												rows={2}
-												bind:value={noteForm.plan}
-												placeholder={workspace.t('ui.ws.physio.plan_placeholder')}
-											/></FormField
-										>
-										<Button type="submit" class="w-full" disabled={noteForm.busy || noteForm.empty}
-											>{workspace.t('ui.save')}</Button
-										>
-									</form>
-								</Card.Content>
-							</Card.Root>
-						{/if}
-					</div>
-				</Tabs.Content>
-
-				<Tabs.Content value="prescriptions">
-					{#if canWrite}<Button class="mb-3" onclick={() => editPrescription(null)}
-							><Plus class="size-4" />{workspace.t('ui.ws.physio.new_prescription')}</Button
-						>{/if}
-					<ul class="divide-y rounded-xl border">
-						{#each prescriptions as prescription (prescription.id)}
-							{@const state = prescriptionProgress(prescription, appointments)}
-							<li class="flex flex-wrap items-center gap-3 px-4 py-3 text-sm">
-								<div class="min-w-0 flex-1">
-									<p class="font-medium">{prescription.diagnosis}</p>
-									<p class="text-muted-foreground">
-										{prescription.doctor} · {workspace.i18n.date(prescription.issuedOn)} – {workspace.i18n.date(
-											prescription.validUntil,
-										)} · {workspace.t('ui.ws.physio.tariff', { tariff: prescription.tariff })}
-									</p>
+									{#if canWrite}<Button
+											variant="ghost"
+											size="icon-sm"
+											class="reveal"
+											aria-label={workspace.t('ui.ws.physio.edit_prescription')}
+											onclick={() => editPrescription(prescription)}><Pencil class="size-4" /></Button
+										>{/if}
 								</div>
-								<span class="tabular-nums">{state.used}/{prescription.sessionsPrescribed}</span>
-								{#if state.alert}<StatusBadge
-										tone={state.alert === 'expired' ? 'neutral' : 'warning'}
-										label={workspace.t(`ui.ws.physio.alert_${state.alert}`)}
-									/>{/if}
-								{#if canWrite}<Button variant="ghost" size="sm" onclick={() => editPrescription(prescription)}
-										>{workspace.t('ui.ws.edit')}</Button
-									>{/if}
-							</li>
-						{:else}<li class="text-muted-foreground px-4 py-6 text-center text-sm">
-								{workspace.t('ui.ws.physio.alert_none')}
-							</li>{/each}
-					</ul>
-				</Tabs.Content>
-
-				<Tabs.Content value="appointments">
-					<ul class="divide-y rounded-xl border">
-						{#each appointments as appointment (appointment.id)}
-							<li class="flex flex-wrap items-center gap-3 px-4 py-2.5 text-sm">
-								<a
-									class="w-40 tabular-nums hover:underline"
-									href={href(`/calendar?date=${appointment.start.slice(0, 10)}&appointment=${appointment.id}`)}
-									>{workspace.i18n.dateTime(appointment.start)}</a
-								>
-								<span class="flex-1"
-									>{appointment.service
-										? workspace.t(`ui.ws.physio.service.${appointment.service}`)
-										: appointment.title}</span
-								>
-								<span class="text-muted-foreground">{people.get(appointment.assigneeId)?.name ?? ''}</span>
-								{#if appointment.billedInvoiceId}<StatusBadge
-										tone="success"
-										label={workspace.t('ui.ws.calendar.billed')}
-									/>{/if}
-								<StatusBadge
-									tone={appointmentTone[appointment.status]}
-									label={workspace.t(`ui.ws.appointment.status.${appointment.status}`)}
+							{:else}
+								<p class="text-muted-foreground px-1 text-sm">{workspace.t('ui.ws.physio.alert_none')}</p>
+							{/each}
+						</div>
+					</AccordionSection>
+					<AccordionSection section={{ id: 'patient.documents', title: workspace.t('ui.ws.module.documents') }}>
+						<AttachmentPanel target={{ kind: 'contact', id: patient.id }} />
+					</AccordionSection>
+					<AccordionSection
+						section={{ id: 'patient.notes', title: workspace.t('ui.ws.physio.progress_notes'), count: notes.length }}
+					>
+						{#snippet tools()}
+							{#if canWrite && !composing}<Button variant="ghost" size="sm" onclick={() => (composing = true)}
+									><Plus class="size-4" />{workspace.t('ui.ws.physio.note_for', {
+										date: workspace.i18n.format(new Date(), { weekday: 'short', day: 'numeric', month: 'short' }),
+									})}</Button
+								>{/if}
+						{/snippet}
+						{#if composing}
+							<form class="bg-sunken mb-2 grid gap-2 rounded-lg border p-3" onsubmit={saveNote}>
+								{#each [['subjective', 'S'], ['objective', 'O'], ['assessment', 'A'], ['plan', 'P']] as const as [field, letter] (field)}
+									<label class="grid grid-cols-[1.5rem_minmax(0,1fr)] items-start gap-2">
+										<span
+											class="bg-muted text-muted-foreground mt-1.5 grid size-5 place-items-center rounded text-[11px] font-semibold"
+											title={workspace.t(`ui.ws.physio.${field}`)}>{letter}</span
+										>
+										<Textarea
+											rows={2}
+											class="bg-field min-h-0"
+											bind:value={noteForm[field]}
+											placeholder={workspace.t(`ui.ws.physio.${field}`)}
+											{@attach (node) => {
+												if (field === 'subjective') node.focus();
+											}}
+										/>
+									</label>
+								{/each}
+								<div class="flex items-center justify-end gap-2">
+									<Input
+										type="date"
+										class="mr-auto h-8 w-40"
+										bind:value={noteForm.date}
+										aria-label={workspace.t('ui.ws.calendar.date')}
+									/>
+									<Button variant="ghost" size="sm" type="button" onclick={() => (composing = false)}
+										>{workspace.t('ui.ws.cancel')}</Button
+									>
+									<Button size="sm" type="submit" disabled={noteForm.busy || noteForm.empty}
+										>{workspace.t('ui.save')}</Button
+									>
+								</div>
+							</form>
+						{/if}
+						<div class="grid">
+							{#each notes as note, index (note.id)}
+								<SoapNote
+									{note}
+									meta={{ author: people.get(note.authorId)?.name ?? '', labels: soapLabels, open: index === 0 }}
+									actions={canWrite
+										? {
+												save: (field, value) => model.saveNote(note, field, value),
+												remove: note.authorId === session.user?.id ? () => model.removeNote(note) : undefined,
+											}
+										: null}
 								/>
-							</li>
-						{:else}<li class="text-muted-foreground px-4 py-6 text-center text-sm">
-								{workspace.t('ui.ws.contacts.no_appointments')}
-							</li>{/each}
-					</ul>
-				</Tabs.Content>
+							{:else}
+								{#if !composing}<p class="text-muted-foreground px-1 text-sm">
+										{workspace.t('ui.ws.physio.no_notes')}
+									</p>{/if}
+							{/each}
+						</div>
+					</AccordionSection>
+				</Accordion>
 
-				<Tabs.Content value="invoices">
-					<ul class="divide-y rounded-xl border">
-						{#each invoices as invoice (invoice.id)}
-							{@const status = effectiveStatus(invoice, today())}
-							<li class="flex items-center gap-3 px-4 py-2.5 text-sm">
-								<a class="w-28 font-medium hover:underline" href={href(`/finance/invoices/${invoice.id}`)}
-									>{invoice.number}</a
-								><span class="text-muted-foreground flex-1">{workspace.i18n.date(invoice.issueDate)}</span><span
-									class="tabular-nums">{workspace.i18n.money(invoiceTotals(invoice).gross)}</span
-								><StatusBadge tone={invoiceTone[status]} label={workspace.t(`ui.ws.invoice.status.${status}`)} />
-							</li>
-						{:else}<li class="text-muted-foreground px-4 py-6 text-center text-sm">
-								{workspace.t('ui.ws.contacts.no_invoices')}
-							</li>{/each}
-					</ul>
-				</Tabs.Content>
-				<Tabs.Content value="documents"><AttachmentPanel target={{ kind: 'contact', id: patient.id }} /></Tabs.Content>
-			</Tabs.Root>
+				<aside class="grid gap-4">
+					<SideCard
+						card={{
+							title: workspace.t('ui.ws.contacts.upcoming'),
+							count: upcoming.length,
+							addLabel: workspace.t('ui.ws.command.new_appointment'),
+						}}
+						onadd={session.can('calendar.write') ? () => navigate(`/calendar?new=1&contact=${patient.id}`) : undefined}
+					>
+						<div class="grid">
+							{#each upcoming as appointment, index (appointment.id)}<AppointmentRow {appointment} {index} />{:else}
+								<p class="text-muted-foreground px-1 text-[13px]">{workspace.t('ui.ws.contacts.no_appointments')}</p>
+							{/each}
+						</div>
+						{#if past.length > 0}
+							<PastToggle label={workspace.t('ui.ws.inline.past', { count: past.length })}>
+								{#each past as appointment, index (appointment.id)}<AppointmentRow {appointment} {index} />{/each}
+							</PastToggle>
+						{/if}
+					</SideCard>
+					{#if session.hasModule('finance') && session.can('finance.read')}
+						<SideCard card={{ title: workspace.t('ui.ws.command.group_invoices'), count: invoices.length }}>
+							<div class="grid">
+								{#each invoices as invoice (invoice.id)}
+									{@const status = effectiveStatus(invoice, today())}
+									<a
+										class="hover:bg-accent grid h-10 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 rounded-md px-1 text-[13px]"
+										href={href(`/finance/invoices/${invoice.id}`)}
+									>
+										<span class="truncate"
+											><b class="font-mono text-xs font-medium">{invoice.number}</b>
+											<span class="text-muted-foreground">{workspace.i18n.date(invoice.issueDate)}</span></span
+										>
+										<span class="tabular-nums">{workspace.i18n.money(invoiceTotals(invoice).gross)}</span>
+										<StatusBadge tone={invoiceTone[status]} label={workspace.t(`ui.ws.invoice.status.${status}`)} />
+									</a>
+								{:else}
+									<p class="text-muted-foreground px-1 text-[13px]">{workspace.t('ui.ws.contacts.no_invoices')}</p>
+								{/each}
+							</div>
+						</SideCard>
+					{/if}
+				</aside>
+			</div>
 		{/snippet}
 	</AsyncView>
 </ModuleGate>

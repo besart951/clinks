@@ -10,6 +10,7 @@
 	import SpitexNav from '$lib/components/spitex/SpitexNav.svelte';
 	import ContactFormSheet from '$lib/components/contacts/ContactFormSheet.svelte';
 	import { ClientsModel, clientTag } from '$lib/features/spitex/clients.svelte';
+	import Initials from '$lib/components/kit/Initials.svelte';
 	import { contactName } from '$lib/data/workspace-api';
 	import { href, navigate } from '$lib/navigation';
 	import { useWorkspace } from '$lib/workspace.svelte';
@@ -48,20 +49,30 @@
 						{#each model.rows as row (row.client.id)}
 							<Table.Row class="cursor-pointer" onclick={() => navigate(`/spitex/clients/${row.client.id}`)}>
 								<Table.Cell
-									><a
-										class="font-medium hover:underline"
-										href={href(`/spitex/clients/${row.client.id}`)}
-										onclick={(event) => event.stopPropagation()}>{contactName(row.client)}</a
-									>{#if row.client.notes}<span class="text-muted-foreground block max-w-64 truncate text-xs"
-											>{row.client.notes}</span
-										>{/if}</Table.Cell
+									><span class="flex items-center gap-2.5"
+										><Initials name={contactName(row.client)} /><span class="grid min-w-0"
+											><a
+												class="font-medium hover:underline"
+												href={href(`/spitex/clients/${row.client.id}`)}
+												onclick={(event) => event.stopPropagation()}>{contactName(row.client)}</a
+											>{#if row.client.notes}<span class="text-muted-foreground block max-w-64 truncate text-xs"
+													>{row.client.notes}</span
+												>{/if}</span
+										></span
+									></Table.Cell
 								>
 								<Table.Cell class="hidden md:table-cell"
 									>{row.client.address.street}, {row.client.address.city}</Table.Cell
 								>
 								<Table.Cell>{row.next ? workspace.i18n.dateTime(row.next.start) : '—'}</Table.Cell>
 								<Table.Cell class="hidden sm:table-cell"
-									>{workspace.t('ui.ws.spitex.count', { count: row.perWeek })}</Table.Cell
+									><span class="flex items-center gap-3"
+										><span class="flex gap-[3px]" aria-hidden="true"
+											>{#each row.weekdays as visited, day (day)}<span
+													class="size-[5px] rounded-full {visited ? 'bg-foreground' : 'bg-border'}"
+												></span>{/each}</span
+										>{workspace.t('ui.ws.spitex.count', { count: row.perWeek })}</span
+									></Table.Cell
 								>
 							</Table.Row>
 						{/each}

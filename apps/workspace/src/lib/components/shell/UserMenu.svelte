@@ -1,7 +1,6 @@
 <script lang="ts">
 	import LogOut from '@lucide/svelte/icons/log-out';
 	import UserRound from '@lucide/svelte/icons/user-round';
-	import Moon from '@lucide/svelte/icons/moon';
 	import Keyboard from '@lucide/svelte/icons/keyboard';
 	import LifeBuoy from '@lucide/svelte/icons/life-buoy';
 	import * as DropdownMenu from '@clinks/ui-shared/components/ui/dropdown-menu';
@@ -20,7 +19,10 @@
 </script>
 
 <DropdownMenu.Root>
-	<DropdownMenu.Trigger class="rounded-full" aria-label={workspace.t('ui.ws.shell.account_menu')}>
+	<DropdownMenu.Trigger
+		class="hover:bg-sidebar-accent flex h-9 min-w-0 flex-1 items-center gap-2 rounded-md px-1.5 text-left text-sm"
+		aria-label={workspace.t('ui.ws.shell.account_menu')}
+	>
 		{#if session.user}
 			<PersonAvatar
 				person={{
@@ -28,11 +30,14 @@
 					avatarColor: session.user.avatarColor,
 					avatarDataUrl: session.user.avatarDataUrl,
 				}}
-				size="sm"
+				size="xs"
 			/>
+			<span class="min-w-0 flex-1 truncate"
+				>{session.displayName}<span class="text-muted-foreground"> · {session.role?.name}</span></span
+			>
 		{/if}
 	</DropdownMenu.Trigger>
-	<DropdownMenu.Content align="end" class="w-60">
+	<DropdownMenu.Content align="start" side="top" class="w-60">
 		<DropdownMenu.Label>
 			<p class="truncate text-sm font-medium">{session.displayName}</p>
 			<p class="text-muted-foreground truncate text-xs font-normal">{session.user?.email}</p>
@@ -41,9 +46,6 @@
 		<DropdownMenu.Separator />
 		<DropdownMenu.Item onclick={() => navigate('/settings/profile')}
 			><UserRound class="size-4" />{workspace.t('ui.ws.settings.profile')}</DropdownMenu.Item
-		>
-		<DropdownMenu.Item onclick={() => workspace.theme.toggle()}
-			><Moon class="size-4" />{workspace.t('ui.ws.shell.toggle_theme')}</DropdownMenu.Item
 		>
 		<DropdownMenu.Item onclick={onShortcuts}
 			><Keyboard class="size-4" />{workspace.t('ui.ws.shortcuts.title')}<DropdownMenu.Shortcut>?</DropdownMenu.Shortcut

@@ -61,6 +61,30 @@ export class InvoiceEditorModel {
 		});
 	}
 
+	/** The draft as the recipient will see it; the preview updates with every keystroke. */
+	preview(draftLabel: string): Invoice {
+		const data = this.resource.data;
+		const base = data?.invoice;
+		return {
+			id: (base?.id ?? 'preview') as InvoiceId,
+			tenantId: base?.tenantId ?? this.#workspace.session.tenantId!,
+			revision: base?.revision ?? 0,
+			createdAt: base?.createdAt ?? new Date().toISOString(),
+			updatedAt: base?.updatedAt ?? new Date().toISOString(),
+			number: base?.number ?? draftLabel,
+			kind: 'invoice',
+			contactId: this.contactId as ContactId,
+			issueDate: this.issueDate,
+			dueDate: addDays(this.issueDate, this.paymentDays),
+			status: 'draft',
+			lines: this.lines.filter((line) => line.description || line.unitPrice),
+			payments: base?.payments ?? [],
+			reminderLevel: 0,
+			notes: this.notes,
+			appointmentIds: this.appointmentIds,
+		} as Invoice;
+	}
+
 	get unbilled(): Appointment[] {
 		return (this.resource.data?.appointments ?? [])
 			.filter((appointment) => appointment.contactId === this.contactId && new Date(appointment.start) < new Date())

@@ -1,5 +1,6 @@
 import type { ContactId } from '../../domain/ids.ts';
 import type { Appointment, Contact, Invoice, MailMessage, Task } from '../../domain/types.ts';
+import { contactPatch } from './contact-fields.ts';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 
@@ -54,6 +55,20 @@ export class ContactDetailModel {
 				tasks,
 			};
 		});
+	}
+
+	/** In-place edit of one master-data row. */
+	saveField(contact: Contact, key: string, value: string, label: string) {
+		return this.#workspace.patch(this.#workspace.api.contacts, contact, contactPatch(key, value), label);
+	}
+
+	saveTags(contact: Contact, tags: string[]) {
+		return this.#workspace.patch(
+			this.#workspace.api.contacts,
+			contact,
+			{ tags },
+			this.#workspace.t('ui.ws.field.tags'),
+		);
 	}
 
 	async setArchived(contact: Contact, archived: boolean) {

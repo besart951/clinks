@@ -24,6 +24,7 @@
 	import ImportContactsDialog from '$lib/components/contacts/ImportContactsDialog.svelte';
 	import MergeContactsDialog from '$lib/components/contacts/MergeContactsDialog.svelte';
 	import { ContactsModel } from '$lib/features/contacts/contacts.svelte';
+	import Initials from '$lib/components/kit/Initials.svelte';
 	import { contactName } from '$lib/data/workspace-api';
 	import type { Contact } from '$lib/domain/types';
 	import { href, navigate, routeQuery } from '$lib/navigation';
@@ -207,12 +208,13 @@
 								<Table.Cell>
 									<a
 										href={href(`/contacts/${contact.id}`)}
-										class="flex items-center gap-2 font-medium"
+										class="flex items-center gap-2.5 font-medium"
 										onclick={(event) => event.stopPropagation()}
 									>
-										{#if contact.kind === 'company'}<Building2 class="text-muted-foreground size-4" />{:else}<Users
-												class="text-muted-foreground size-4"
-											/>{/if}
+										{#if contact.kind === 'company'}<span
+												class="bg-muted text-muted-foreground grid size-7 shrink-0 place-items-center rounded-md"
+												><Building2 class="size-3.5" /></span
+											>{:else}<Initials name={contactName(contact)} />{/if}
 										{contactName(contact)}
 									</a>
 								</Table.Cell>

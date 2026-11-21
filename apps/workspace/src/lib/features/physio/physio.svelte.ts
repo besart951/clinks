@@ -1,6 +1,7 @@
 import { addDays, daysBetween, today } from '../../domain/dates.ts';
 import type { ContactId } from '../../domain/ids.ts';
 import type { Appointment, ClinicalNote, Contact, Invoice, Prescription } from '../../domain/types.ts';
+import { contactPatch } from '../contacts/contact-fields.ts';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 
@@ -151,6 +152,19 @@ export class PatientRecordModel {
 					invoices: invoices.sort((left, right) => right.issueDate.localeCompare(left.issueDate)),
 				};
 			},
+		);
+	}
+
+	saveField(patient: Contact, key: string, value: string, label: string) {
+		return this.#workspace.patch(this.#workspace.api.contacts, patient, contactPatch(key, value), label);
+	}
+
+	saveNote(note: ClinicalNote, field: 'subjective' | 'objective' | 'assessment' | 'plan', value: string) {
+		return this.#workspace.patch(
+			this.#workspace.api.physioNotes,
+			note,
+			{ [field]: value },
+			this.#workspace.t(`ui.ws.physio.${field}`),
 		);
 	}
 

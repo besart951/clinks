@@ -6,7 +6,6 @@
 	import * as Table from '@clinks/ui-shared/components/ui/table';
 	import * as Tabs from '@clinks/ui-shared/components/ui/tabs';
 	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { Progress } from '@clinks/ui-shared/components/ui/progress';
 	import PageHeader from '$lib/components/common/PageHeader.svelte';
 	import AsyncView from '$lib/components/common/AsyncView.svelte';
 	import SearchInput from '$lib/components/common/SearchInput.svelte';
@@ -15,6 +14,8 @@
 	import ModuleGate from '$lib/components/shell/ModuleGate.svelte';
 	import ContactFormSheet from '$lib/components/contacts/ContactFormSheet.svelte';
 	import { PatientsModel, patientTag } from '$lib/features/physio/physio.svelte';
+	import Initials from '$lib/components/kit/Initials.svelte';
+	import ProgressRing from '$lib/components/kit/ProgressRing.svelte';
 	import { contactName } from '$lib/data/workspace-api';
 	import { href, navigate } from '$lib/navigation';
 	import { useWorkspace } from '$lib/workspace.svelte';
@@ -72,27 +73,28 @@
 						{#each model.rows as row (row.patient.id)}
 							<Table.Row class="cursor-pointer" onclick={() => navigate(`/physio/${row.patient.id}`)}>
 								<Table.Cell
-									><a
-										class="font-medium hover:underline"
-										href={href(`/physio/${row.patient.id}`)}
-										onclick={(event) => event.stopPropagation()}>{contactName(row.patient)}</a
-									>{#if row.patient.birthDate}<span class="text-muted-foreground block text-xs"
-											>{workspace.i18n.date(row.patient.birthDate)}</span
-										>{/if}</Table.Cell
+									><span class="flex items-center gap-2.5"
+										><Initials name={contactName(row.patient)} /><span class="grid min-w-0"
+											><a
+												class="font-medium hover:underline"
+												href={href(`/physio/${row.patient.id}`)}
+												onclick={(event) => event.stopPropagation()}>{contactName(row.patient)}</a
+											>{#if row.patient.birthDate}<span class="text-muted-foreground block text-xs"
+													>{workspace.i18n.date(row.patient.birthDate)}</span
+												>{/if}</span
+										></span
+									></Table.Cell
 								>
 								<Table.Cell class="hidden md:table-cell">{row.patient.insurer || '—'}</Table.Cell>
 								<Table.Cell>{row.next ? workspace.i18n.dateTime(row.next.start) : '—'}</Table.Cell>
 								<Table.Cell class="hidden lg:table-cell">
 									{#if row.progress}
 										<div class="flex items-center gap-2">
-											<Progress
-												value={(row.progress.used / row.progress.prescription.sessionsPrescribed) * 100}
-												class="w-24"
-												aria-label={workspace.t('ui.ws.physio.sessions_used', {
-													used: row.progress.used,
-													total: row.progress.prescription.sessionsPrescribed,
-												})}
-											/><span class="text-xs tabular-nums"
+											<ProgressRing
+												value={row.progress.used}
+												max={row.progress.prescription.sessionsPrescribed}
+												size={30}
+											/><span class="text-muted-foreground text-xs tabular-nums"
 												>{row.progress.used}/{row.progress.prescription.sessionsPrescribed}</span
 											>
 										</div>

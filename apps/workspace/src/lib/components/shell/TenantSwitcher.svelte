@@ -3,7 +3,6 @@
 	import Plus from '@lucide/svelte/icons/plus';
 	import Check from '@lucide/svelte/icons/check';
 	import * as DropdownMenu from '@clinks/ui-shared/components/ui/dropdown-menu';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
 	import { toast } from 'svelte-sonner';
 	import { navigate } from '$lib/navigation';
 	import type { Tenant } from '$lib/domain/types';
@@ -23,11 +22,24 @@
 <DropdownMenu.Root>
 	<DropdownMenu.Trigger>
 		{#snippet child({ props })}
-			<Button {...props} variant="ghost" size="sm" class="max-w-56 gap-2" aria-label={workspace.t('ui.workspace')}>
-				<span class="size-2.5 shrink-0 rounded-full" style:background-color={session.tenant?.brandColor}></span>
-				<span class="truncate">{session.tenant?.name}</span>
-				<ChevronsUpDown class="text-muted-foreground size-3.5" />
-			</Button>
+			<button
+				{...props}
+				type="button"
+				class="hover:bg-sidebar-accent flex h-9 min-w-0 flex-1 items-center gap-2 rounded-md px-1.5 text-left"
+				aria-label={workspace.t('ui.workspace')}
+			>
+				{#if session.tenant?.logoDataUrl}
+					<img src={session.tenant.logoDataUrl} alt="" class="size-5 shrink-0 rounded-md object-cover" />
+				{:else}
+					<span
+						class="grid size-5 shrink-0 place-items-center rounded-md"
+						style:background-color={session.tenant?.brandColor ?? '#18181b'}
+						aria-hidden="true"><span class="size-1.5 rounded-full bg-white"></span></span
+					>
+				{/if}
+				<span class="flex-1 truncate text-[15px] font-semibold">{session.tenant?.name}</span>
+				<ChevronsUpDown class="text-muted-foreground size-3.5 shrink-0" />
+			</button>
 		{/snippet}
 	</DropdownMenu.Trigger>
 	<DropdownMenu.Content align="start" class="w-64">

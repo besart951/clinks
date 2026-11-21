@@ -177,6 +177,11 @@ export interface Contact extends TenantRecord<ContactId> {
 	tags: string[];
 	notes: string;
 	archived: boolean;
+	/** Optional health-care details, added on demand under "Feld hinzufügen". */
+	ahvNumber?: string;
+	insuranceNumber?: string;
+	language?: string;
+	billingMode?: string;
 }
 
 export const appointmentKinds = ['meeting', 'physio', 'spitex', 'other'] as const;

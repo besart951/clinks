@@ -1,13 +1,21 @@
 import { today, toCalendarDate } from '../../domain/dates.ts';
 import type { ContactId } from '../../domain/ids.ts';
 import type { Appointment, ClinicalNote, Contact, TimeEntry } from '../../domain/types.ts';
+import { contactPatch } from '../contacts/contact-fields.ts';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 
 export const clientTag = 'Klient:in';
 
+/** Which weekdays (Monday first) had a visit, for the dot pattern in the client list. */
+export function visitWeekdays(visits: Appointment[]): boolean[] {
+	const days = Array.from({ length: 7 }, () => false);
+	for (const visit of visits) days[(new Date(visit.start).getDay() + 6) % 7] = true;
+	return days;
+}
+
 export class ClientsModel {
-	readonly resource: Resource<{ client: Contact; next: Appointment | null; perWeek: number }[]>;
+	readonly resource: Resource<{ client: Contact; next: Appointment | null; perWeek: number; weekdays: boolean[] }[]>;
 	search = $state('');
 
 	constructor(workspace: Workspace) {
@@ -26,6 +34,7 @@ export class ClientsModel {
 					client,
 					next: own.find((visit) => visit.start >= now) ?? null,
 					perWeek: own.filter((visit) => visit.start >= weekAgo && visit.start < now).length,
+					weekdays: visitWeekdays(own.filter((visit) => visit.start >= weekAgo && visit.start < now)),
 				};
 			});
 		});
@@ -70,8 +79,21 @@ export class ClientFileModel {
 		});
 	}
 
-	async addNote() {
-		if (!Object.values(this.draft).some((value) => value.trim())) return;
+	saveField(client: Contact, key: string, value: string, label: string) {
+		return this.#workspace.patch(this.#workspace.api.contacts, client, contactPatch(key, value), label);
+	}
+
+	saveNote(
+		note: ClinicalNote,
+		field: 'subjective' | 'objective' | 'assessment' | 'plan',
+		value: string,
+		label: string,
+	) {
+		return this.#workspace.patch(this.#workspace.api.spitexNotes, note, { [field]: value }, label);
+	}
+
+	async addNote(): Promise<boolean> {
+		if (!Object.values(this.draft).some((value) => value.trim())) return false;
 		this.busy = true;
 		const result = await this.#workspace.run(
 			() =>
@@ -87,6 +109,7 @@ export class ClientFileModel {
 		);
 		if (result) this.draft = { subjective: '', objective: '', assessment: '', plan: '' };
 		this.busy = false;
+		return result !== null;
 	}
 }
 

@@ -1,6 +1,8 @@
 import { invoiceTotals, effectiveStatus } from '../../domain/money.ts';
-import { addDays, today } from '../../domain/dates.ts';
-import type { Appointment, AuditEntry, Contact, Rappen, Task } from '../../domain/types.ts';
+import { addDays, daysBetween, today } from '../../domain/dates.ts';
+import type { UserId } from '../../domain/ids.ts';
+import { contactName } from '../../data/workspace-api.ts';
+import type { Appointment, AuditEntry, Contact, Invoice, Rappen, Task } from '../../domain/types.ts';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 
@@ -10,6 +12,75 @@ export interface SetupStep {
 	path: string;
 }
 
+/** One actionable notice in the "Hinweise" list. */
+export interface DashboardHint {
+	kind: 'invoice' | 'task' | 'visit' | 'billing';
+	title: string;
+	key: string;
+	params: { [name: string]: string | number };
+	path: string;
+}
+
+export interface HintSources {
+	invoices: Invoice[];
+	tasks: Task[];
+	appointments: Appointment[];
+	contacts: Map<string, Contact>;
+	me: UserId;
+	now: Date;
+}
+
+/** Things that need someone's attention, most urgent first. */
+export function dashboardHints(sources: HintSources): DashboardHint[] {
+	const day = today(sources.now);
+	const name = (id: string | null) => {
+		const contact = id ? sources.contacts.get(id) : undefined;
+		return contact ? contactName(contact) : '';
+	};
+	const overdue: DashboardHint[] = sources.invoices
+		.filter((invoice) => ['overdue', 'reminded'].includes(effectiveStatus(invoice, day)))
+		.map((invoice) => ({
+			kind: 'invoice',
+			title: name(invoice.contactId),
+			key: 'ui.ws.dashboard.hint_overdue',
+			params: { number: invoice.number },
+			path: `/finance/invoices/${invoice.id}`,
+		}));
+	const lateTasks: DashboardHint[] = sources.tasks
+		.filter(
+			(task) =>
+				task.status !== 'done' && task.dueDate !== null && task.dueDate < day && task.assigneeIds.includes(sources.me),
+		)
+		.map((task) => ({
+			kind: 'task',
+			title: task.title,
+			key: 'ui.ws.dashboard.hint_task_late',
+			params: { days: daysBetween(task.dueDate!, day) },
+			path: `/planner?task=${task.id}`,
+		}));
+	const openVisits: DashboardHint[] = sources.appointments
+		.filter((entry) => entry.kind === 'spitex' && entry.assigneeId === null && entry.start >= sources.now.toISOString())
+		.map((entry) => ({
+			kind: 'visit',
+			title: name(entry.contactId) || entry.title,
+			key: 'ui.ws.dashboard.hint_open_visit',
+			params: { date: entry.start },
+			path: `/spitex?date=${entry.start.slice(0, 10)}`,
+		}));
+	const unbilled = new Map<string, number>();
+	for (const entry of sources.appointments)
+		if (entry.kind === 'physio' && entry.status === 'done' && entry.billedInvoiceId === null && entry.contactId)
+			unbilled.set(entry.contactId, (unbilled.get(entry.contactId) ?? 0) + 1);
+	const billing: DashboardHint[] = [...unbilled].map(([contactId, count]) => ({
+		kind: 'billing',
+		title: name(contactId),
+		key: 'ui.ws.dashboard.hint_unbilled',
+		params: { count },
+		path: `/physio/${contactId}`,
+	}));
+	return [...overdue, ...lateTasks, ...openVisits, ...billing];
+}
+
 export interface DashboardData {
 	appointmentsToday: Appointment[];
 	myTasks: Task[];
@@ -17,6 +88,7 @@ export interface DashboardData {
 	unreadMails: number;
 	openInvoices: { count: number; total: Rappen; overdue: number };
 	activity: AuditEntry[];
+	hints: DashboardHint[];
 	contacts: Map<string, Contact>;
 	setup: SetupStep[];
 }
@@ -76,7 +148,7 @@ export class DashboardModel {
 		const day = today();
 		const can = (module: Parameters<typeof session.hasModule>[0], permission: Parameters<typeof session.can>[0]) =>
 			session.hasModule(module) && session.can(permission);
-		const [appointments, tasks, mails, invoices, activity, contacts, members] = await Promise.all([
+		const [appointments, tasks, mails, invoices, activity, contacts, members, attention] = await Promise.all([
 			optional(
 				can('calendar', 'calendar.read'),
 				() =>
@@ -91,7 +163,18 @@ export class DashboardModel {
 			optional(session.can('audit.read'), () => api.audit.list(), []),
 			optional(session.can('contacts.read'), () => api.contacts.list(), []),
 			optional(session.can('team.manage'), () => this.#workspace.account.members(), null),
+			optional(
+				session.can('calendar.read'),
+				() =>
+					api.appointments.list(
+						(row) =>
+							(row.kind === 'physio' && row.status === 'done' && row.billedInvoiceId === null) ||
+							(row.kind === 'spitex' && row.assigneeId === null),
+					),
+				[],
+			),
 		]);
+		const contactMap = new Map(contacts.map((contact) => [contact.id, contact]));
 		const appointmentsToday = appointments
 			.filter((row) => new Date(row.start).toDateString() === new Date().toDateString() && row.status !== 'cancelled')
 			.filter((row) => row.assigneeId === me || session.can('calendar.write'))
@@ -118,7 +201,15 @@ export class DashboardModel {
 				overdue: unpaid.filter((invoice) => ['overdue', 'reminded'].includes(effectiveStatus(invoice, day))).length,
 			},
 			activity: activity.sort((left, right) => right.createdAt.localeCompare(left.createdAt)).slice(0, 8),
-			contacts: new Map(contacts.map((contact) => [contact.id, contact])),
+			hints: dashboardHints({
+				invoices,
+				tasks,
+				appointments: attention.filter((row) => row.kind !== 'physio' || session.hasModule('physio')),
+				contacts: contactMap,
+				me,
+				now: new Date(),
+			}),
+			contacts: contactMap,
 			setup: [
 				{ key: 'logo', done: tenant.logoDataUrl !== null, path: '/settings' },
 				{ key: 'contact', done: contacts.length > 0, path: '/contacts?new=1' },

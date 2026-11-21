@@ -83,3 +83,10 @@ export function atTime(date: CalendarDate, time: string): Timestamp {
 export function minutesToTime(minutes: number): string {
 	return `${pad(Math.floor(minutes / 60))}:${pad(minutes % 60)}`;
 }
+
+/** Completed years between a birth date and a reference day. */
+export function ageOn(birthDate: CalendarDate, on: CalendarDate): number {
+	const [birthYear, birthMonth, birthDay] = birthDate.split('-').map(Number);
+	const [year, month, day] = on.split('-').map(Number);
+	return year - birthYear - (month < birthMonth || (month === birthMonth && day < birthDay) ? 1 : 0);
+}

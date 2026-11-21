@@ -90,3 +90,33 @@ test('switches the interface to English', async ({ page }) => {
 	await page.getByRole('menuitemradio', { name: 'English' }).click();
 	await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
 });
+
+test('edits master data in place and collapses sections', async ({ page }) => {
+	await signIn(page);
+	await page.goto('/#/contacts?new=1');
+	await page.getByLabel('Vorname').fill('Inline');
+	await page.getByLabel('Nachname').fill('Test');
+	await page.getByRole('button', { name: 'Speichern' }).click();
+	await expect(page.getByRole('heading', { level: 1, name: 'Inline Test' })).toBeVisible();
+
+	// Click the value, type, Enter saves; the toast offers undo.
+	await page.getByRole('button', { name: 'Test', exact: true }).click();
+	await page.getByRole('textbox', { name: 'Nachname' }).fill('Direkt');
+	await page.keyboard.press('Enter');
+	await expect(page.getByRole('heading', { level: 1, name: 'Inline Direkt' })).toBeVisible();
+	await expect(page.getByText('Nachname gespeichert')).toBeVisible();
+
+	// Escape restores the value without saving.
+	await page.getByRole('button', { name: 'Direkt', exact: true }).click();
+	await page.getByRole('textbox', { name: 'Nachname' }).fill('Verworfen');
+	await page.keyboard.press('Escape');
+	await expect(page.getByRole('heading', { level: 1, name: 'Inline Direkt' })).toBeVisible();
+
+	// Accordion sections fold away and remember it.
+	const master = page.getByRole('button', { name: 'Stammdaten' });
+	await expect(master).toHaveAttribute('aria-expanded', 'true');
+	await master.click();
+	await expect(master).toHaveAttribute('aria-expanded', 'false');
+	await page.reload();
+	await expect(page.getByRole('button', { name: 'Stammdaten' })).toHaveAttribute('aria-expanded', 'false');
+});
