@@ -3,6 +3,7 @@
 	import UserRound from '@lucide/svelte/icons/user-round';
 	import Moon from '@lucide/svelte/icons/moon';
 	import Keyboard from '@lucide/svelte/icons/keyboard';
+	import LifeBuoy from '@lucide/svelte/icons/life-buoy';
 	import * as DropdownMenu from '@clinks/ui-shared/components/ui/dropdown-menu';
 	import PersonAvatar from '$lib/components/common/PersonAvatar.svelte';
 	import { navigate } from '$lib/navigation';
@@ -34,6 +35,7 @@
 		<DropdownMenu.Item onclick={() => navigate('/settings/profile')}><UserRound class="size-4" />{workspace.t('ui.ws.settings.profile')}</DropdownMenu.Item>
 		<DropdownMenu.Item onclick={() => workspace.theme.toggle()}><Moon class="size-4" />{workspace.t('ui.ws.shell.toggle_theme')}</DropdownMenu.Item>
 		<DropdownMenu.Item onclick={onShortcuts}><Keyboard class="size-4" />{workspace.t('ui.ws.shortcuts.title')}<DropdownMenu.Shortcut>?</DropdownMenu.Shortcut></DropdownMenu.Item>
+		<DropdownMenu.Item onclick={() => navigate('/help')}><LifeBuoy class="size-4" />{workspace.t('ui.ws.help.title')}</DropdownMenu.Item>
 		<DropdownMenu.Separator />
 		<DropdownMenu.Item onclick={signOut}><LogOut class="size-4" />{workspace.t('ui.sign_out')}</DropdownMenu.Item>
 	</DropdownMenu.Content>

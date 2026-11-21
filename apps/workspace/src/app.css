@@ -10,3 +10,18 @@ html {
 	outline: 2px solid var(--ring);
 	outline-offset: 2px;
 }
+
+@media print {
+	body * {
+		visibility: hidden;
+	}
+	.invoice-document,
+	.invoice-document * {
+		visibility: visible;
+	}
+	.invoice-document {
+		position: absolute;
+		inset: 0;
+		box-shadow: none;
+	}
+}

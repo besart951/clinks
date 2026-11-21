@@ -306,6 +306,21 @@ export class AccountApi {
 		}, ['invitations', 'audit']);
 	}
 
+	/** Public view of an invitation link: which workspace, which role, for which address. */
+	invitationDetails(id: InvitationId): Promise<{ invitation: Invitation; tenantName: string; roleName: string; existingUser: boolean }> {
+		return this.#db.request(() => {
+			const invitation = this.#db.table('invitations').find((row) => row.id === id);
+			if (!invitation || invitation.status !== 'pending') throw new MockApiError('not_found', this.#localize('error.invitation_invalid'));
+			if (new Date(invitation.expiresAt) < new Date()) throw new MockApiError('validation', this.#localize('error.invitation_expired'));
+			return {
+				invitation,
+				tenantName: this.#db.table('tenants').find((row) => row.id === invitation.tenantId)?.name ?? '',
+				roleName: this.#db.table('roles').find((row) => row.id === invitation.roleId)?.name ?? '',
+				existingUser: this.#db.table('users').some((row) => row.email === invitation.email),
+			};
+		});
+	}
+
 	/** Simulates the invitee clicking the link in the email, so the flow can be tried without a mailbox. */
 	acceptInvitation(id: InvitationId, name: { firstName: string; lastName: string }): Promise<Membership> {
 		return this.#db.request(() => {

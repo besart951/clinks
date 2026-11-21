@@ -1,5 +1,6 @@
 import { addDays, atTime, toCalendarDate } from '../domain/dates.ts';
 import { newId, type ContactId, type FolderId, type RoleId, type TenantId } from '../domain/ids.ts';
+import { invoiceTotals } from '../domain/money.ts';
 import { administratorPermissions, userPermissions } from '../domain/permissions.ts';
 import type {
 	Appointment,
@@ -209,7 +210,7 @@ function invoiceFor(
 ): Invoice {
 	const issueDate = addDays(context.today, -ageDays);
 	const dueDate = addDays(issueDate, 30);
-	const gross = lines.reduce((sum, line) => sum + line.quantity * line.unitPrice, 0);
+	const gross = invoiceTotals({ lines, payments: [] }).gross;
 	const roll = context.random();
 	const status = ageDays < 3 && roll < 0.5 ? 'draft' : 'open';
 	const paid = status === 'open' && (ageDays > 40 ? roll < 0.75 : roll < 0.4);
@@ -224,7 +225,7 @@ function invoiceFor(
 		status,
 		lines,
 		payments: paid
-			? [{ date: addDays(issueDate, between(context, 5, 28)), amount: Math.round((gross * 1.081) / 5) * 5 }]
+			? [{ date: addDays(issueDate, between(context, 5, 28)), amount: gross }]
 			: partially
 				? [{ date: addDays(issueDate, 10), amount: Math.round(gross / 2 / 5) * 5 }]
 				: [],
@@ -380,7 +381,7 @@ const physioLines: { [service in PhysioService]: InvoiceLine } = {
 };
 
 function seedFinance(context: SeedContext, tenantId: TenantId, industry: Industry, payers: Contact[]) {
-	for (let index = 1; index <= 24; index++) {
+	for (let index = 1; index <= 40; index++) {
 		const payer = payers[index % payers.length];
 		const lines: InvoiceLine[] =
 			industry === 'physio'
@@ -389,7 +390,7 @@ function seedFinance(context: SeedContext, tenantId: TenantId, industry: Industr
 						{ description: 'Pflegeleistungen KLV Art. 7 lit. b', quantity: between(context, 4, 20), unitPrice: 7680, vatRate: 0 },
 						{ description: 'Hauswirtschaft', quantity: between(context, 2, 8), unitPrice: 4500, vatRate: 810 },
 					];
-		invoiceFor(context, tenantId, payer, lines, index, (24 - index) * 4 + between(context, 0, 3));
+		invoiceFor(context, tenantId, payer, lines, index, (40 - index) * 8 + between(context, 0, 3));
 	}
 	const expenses: [string, string, 'material' | 'rent' | 'vehicle' | 'insurance' | 'it' | 'advertising' | 'travel' | 'other', number][] = [
 		['Miete Praxisräume', 'Immobilien Seeland AG', 'rent', 280000],
@@ -405,7 +406,7 @@ function seedFinance(context: SeedContext, tenantId: TenantId, industry: Industr
 		const [description, supplier, category, amount] = expenses[index % expenses.length];
 		add(context, 'expenses', {
 			tenantId,
-			date: addDays(context.today, -index * 4 - between(context, 0, 3)),
+			date: addDays(context.today, -index * 22 - between(context, 0, 3)),
 			description,
 			supplier,
 			category,

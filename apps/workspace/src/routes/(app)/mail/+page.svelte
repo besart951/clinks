@@ -41,7 +41,7 @@
 	onMount(() => {
 		const stop = model.resource.connect();
 		const stopShortcut = workspace.registerNewAction(() => canWrite && compose.show());
-		if (query.get('compose') === '1' && canWrite) compose.show({ to: query.get('to') ? [query.get('to')!] : [] });
+		if (query.get('compose') === '1' && canWrite) compose.show({ to: query.get('to') ? [query.get('to')!] : [], subject: query.get('subject') ?? undefined });
 		return () => {
 			stop();
 			stopShortcut();

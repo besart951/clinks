@@ -2693,6 +2693,1854 @@
       "ui.ws.mail.template_hint": {
         "de-CH": "Platzhalter: {placeholders}",
         "en-US": "Placeholders: {placeholders}"
+      },
+      "ui.ws.documents.folder_created": {
+        "de-CH": "Ordner erstellt",
+        "en-US": "Folder created"
+      },
+      "ui.ws.documents.folder_deleted": {
+        "de-CH": "Ordner «{name}» gelöscht",
+        "en-US": "Folder “{name}” deleted"
+      },
+      "ui.ws.documents.renamed": {
+        "de-CH": "Umbenannt",
+        "en-US": "Renamed"
+      },
+      "ui.ws.documents.moved": {
+        "de-CH": "Verschoben",
+        "en-US": "Moved"
+      },
+      "ui.ws.documents.linked": {
+        "de-CH": "Mit Kontakt verknüpft",
+        "en-US": "Linked to contact"
+      },
+      "ui.ws.documents.deleted": {
+        "de-CH": "«{name}» gelöscht",
+        "en-US": "“{name}” deleted"
+      },
+      "ui.ws.documents.description": {
+        "de-CH": "Dateien der ganzen Firma, in Ordnern und an Kontakten.",
+        "en-US": "Company files, in folders and on contacts."
+      },
+      "ui.ws.documents.new_folder": {
+        "de-CH": "Neuer Ordner",
+        "en-US": "New folder"
+      },
+      "ui.ws.documents.upload": {
+        "de-CH": "Hochladen",
+        "en-US": "Upload"
+      },
+      "ui.ws.documents.path": {
+        "de-CH": "Ordnerpfad",
+        "en-US": "Folder path"
+      },
+      "ui.ws.documents.all_files": {
+        "de-CH": "Alle Dateien",
+        "en-US": "All files"
+      },
+      "ui.ws.documents.search": {
+        "de-CH": "Dateien suchen",
+        "en-US": "Search files"
+      },
+      "ui.ws.documents.drop_zone": {
+        "de-CH": "Dateien hier ablegen",
+        "en-US": "Drop files here"
+      },
+      "ui.ws.documents.file_count": {
+        "de-CH": "{count} Dateien",
+        "en-US": "{count} files"
+      },
+      "ui.ws.documents.rename": {
+        "de-CH": "Umbenennen",
+        "en-US": "Rename"
+      },
+      "ui.ws.documents.delete_folder_title": {
+        "de-CH": "Ordner «{name}» löschen?",
+        "en-US": "Delete folder “{name}”?"
+      },
+      "ui.ws.documents.delete_folder_text": {
+        "de-CH": "Die Dateien darin werden in den übergeordneten Ordner verschoben.",
+        "en-US": "The files inside are moved to the parent folder."
+      },
+      "ui.ws.documents.empty_title": {
+        "de-CH": "Keine Dateien",
+        "en-US": "No files"
+      },
+      "ui.ws.documents.empty_text": {
+        "de-CH": "Ziehe Dateien hierher oder lade sie hoch.",
+        "en-US": "Drop files here or upload them."
+      },
+      "ui.ws.documents.linked_to": {
+        "de-CH": "Verknüpft mit",
+        "en-US": "Linked to"
+      },
+      "ui.ws.documents.size": {
+        "de-CH": "Grösse",
+        "en-US": "Size"
+      },
+      "ui.ws.documents.uploaded_at": {
+        "de-CH": "Hochgeladen",
+        "en-US": "Uploaded"
+      },
+      "ui.ws.documents.preview": {
+        "de-CH": "Vorschau",
+        "en-US": "Preview"
+      },
+      "ui.ws.documents.download": {
+        "de-CH": "Herunterladen",
+        "en-US": "Download"
+      },
+      "ui.ws.documents.link_contact": {
+        "de-CH": "Mit Kontakt verknüpfen",
+        "en-US": "Link to contact"
+      },
+      "ui.ws.documents.move_to": {
+        "de-CH": "Verschieben nach",
+        "en-US": "Move to"
+      },
+      "ui.ws.documents.drop_page_hint": {
+        "de-CH": "Tipp: Dateien direkt auf diese Seite ziehen. Im Prototyp bleiben sie im Browser gespeichert.",
+        "en-US": "Tip: drop files directly on this page. In the prototype they stay stored in the browser."
+      },
+      "ui.ws.documents.no_preview": {
+        "de-CH": "Für diesen Dateityp gibt es keine Vorschau.",
+        "en-US": "No preview for this file type."
+      },
+      "ui.ws.documents.link": {
+        "de-CH": "Verknüpfen",
+        "en-US": "Link"
+      },
+      "ui.ws.invoice.issued": {
+        "de-CH": "Rechnung {number} gestellt",
+        "en-US": "Invoice {number} issued"
+      },
+      "ui.ws.invoice.draft_saved": {
+        "de-CH": "Entwurf {number} gespeichert",
+        "en-US": "Draft {number} saved"
+      },
+      "ui.ws.invoice.payment_recorded": {
+        "de-CH": "Zahlung für {number} erfasst",
+        "en-US": "Payment for {number} recorded"
+      },
+      "ui.ws.invoice.reminder_sent": {
+        "de-CH": "{level}. Mahnung für {number} versendet",
+        "en-US": "Reminder {level} for {number} sent"
+      },
+      "ui.ws.invoice.cancelled": {
+        "de-CH": "Rechnung {number} storniert",
+        "en-US": "Invoice {number} cancelled"
+      },
+      "ui.ws.invoice.duplicated": {
+        "de-CH": "Rechnung als Entwurf kopiert",
+        "en-US": "Invoice copied as draft"
+      },
+      "ui.ws.invoice.deleted": {
+        "de-CH": "Entwurf gelöscht",
+        "en-US": "Draft deleted"
+      },
+      "ui.ws.finance.expenses": {
+        "de-CH": "Ausgaben",
+        "en-US": "Expenses"
+      },
+      "ui.ws.finance.reports": {
+        "de-CH": "Auswertung",
+        "en-US": "Reports"
+      },
+      "ui.ws.invoice.qr_bill": {
+        "de-CH": "QR-Rechnung",
+        "en-US": "QR bill"
+      },
+      "ui.ws.invoice.payment_part": {
+        "de-CH": "Zahlteil",
+        "en-US": "Payment part"
+      },
+      "ui.ws.invoice.qr_missing_iban": {
+        "de-CH": "Für die QR-Rechnung fehlt eine gültige Schweizer IBAN in den Einstellungen.",
+        "en-US": "A valid Swiss IBAN is missing in the settings for the QR bill."
+      },
+      "ui.ws.invoice.currency": {
+        "de-CH": "Währung",
+        "en-US": "Currency"
+      },
+      "ui.ws.invoice.amount": {
+        "de-CH": "Betrag",
+        "en-US": "Amount"
+      },
+      "ui.ws.invoice.account": {
+        "de-CH": "Konto / Zahlbar an",
+        "en-US": "Account / Payable to"
+      },
+      "ui.ws.invoice.additional_info": {
+        "de-CH": "Zusätzliche Informationen",
+        "en-US": "Additional information"
+      },
+      "ui.ws.invoice.payable_by": {
+        "de-CH": "Zahlbar durch",
+        "en-US": "Payable by"
+      },
+      "ui.ws.invoice.document": {
+        "de-CH": "Rechnung {number}",
+        "en-US": "Invoice {number}"
+      },
+      "ui.ws.invoice.credit_note": {
+        "de-CH": "Gutschrift",
+        "en-US": "Credit note"
+      },
+      "ui.ws.invoice.invoice": {
+        "de-CH": "Rechnung",
+        "en-US": "Invoice"
+      },
+      "ui.ws.invoice.dates": {
+        "de-CH": "Rechnungsdatum {issued} · zahlbar bis {due}",
+        "en-US": "Invoice date {issued} · payable by {due}"
+      },
+      "ui.ws.invoice.position": {
+        "de-CH": "Position",
+        "en-US": "Item"
+      },
+      "ui.ws.invoice.quantity": {
+        "de-CH": "Menge",
+        "en-US": "Qty"
+      },
+      "ui.ws.invoice.unit_price": {
+        "de-CH": "Preis",
+        "en-US": "Price"
+      },
+      "ui.ws.invoice.vat": {
+        "de-CH": "MWST",
+        "en-US": "VAT"
+      },
+      "ui.ws.invoice.net": {
+        "de-CH": "Netto",
+        "en-US": "Net"
+      },
+      "ui.ws.invoice.vat_on": {
+        "de-CH": "MWST {rate} auf {net}",
+        "en-US": "VAT {rate} on {net}"
+      },
+      "ui.ws.invoice.total": {
+        "de-CH": "Total CHF",
+        "en-US": "Total CHF"
+      },
+      "ui.ws.invoice.thanks": {
+        "de-CH": "Vielen Dank für Ihr Vertrauen.",
+        "en-US": "Thank you for your trust."
+      },
+      "ui.ws.invoice.reference": {
+        "de-CH": "Rechnung {number}",
+        "en-US": "Invoice {number}"
+      },
+      "ui.ws.finance.open_receivables": {
+        "de-CH": "Offene Forderungen",
+        "en-US": "Open receivables"
+      },
+      "ui.ws.finance.overdue": {
+        "de-CH": "Davon überfällig",
+        "en-US": "Of which overdue"
+      },
+      "ui.ws.finance.drafts": {
+        "de-CH": "Entwürfe",
+        "en-US": "Drafts"
+      },
+      "ui.ws.finance.search": {
+        "de-CH": "Nummer oder Kontakt",
+        "en-US": "Number or contact"
+      },
+      "ui.ws.finance.all_statuses": {
+        "de-CH": "Alle Status",
+        "en-US": "All statuses"
+      },
+      "ui.ws.finance.no_invoices": {
+        "de-CH": "Keine Rechnungen gefunden",
+        "en-US": "No invoices found"
+      },
+      "ui.ws.finance.number": {
+        "de-CH": "Nummer",
+        "en-US": "Number"
+      },
+      "ui.ws.finance.issue_date": {
+        "de-CH": "Rechnungsdatum",
+        "en-US": "Invoice date"
+      },
+      "ui.ws.finance.due_date": {
+        "de-CH": "Fällig",
+        "en-US": "Due"
+      },
+      "ui.ws.finance.balance": {
+        "de-CH": "Offen",
+        "en-US": "Outstanding"
+      },
+      "ui.ws.invoice.edit_title": {
+        "de-CH": "Rechnung {number} bearbeiten",
+        "en-US": "Edit invoice {number}"
+      },
+      "ui.ws.invoice.save_draft": {
+        "de-CH": "Als Entwurf speichern",
+        "en-US": "Save as draft"
+      },
+      "ui.ws.invoice.issue": {
+        "de-CH": "Rechnung stellen",
+        "en-US": "Issue invoice"
+      },
+      "ui.ws.finance.recipient": {
+        "de-CH": "Empfänger",
+        "en-US": "Recipient"
+      },
+      "ui.ws.finance.payment_days": {
+        "de-CH": "Zahlungsfrist (Tage)",
+        "en-US": "Payment terms (days)"
+      },
+      "ui.ws.finance.lines": {
+        "de-CH": "Positionen",
+        "en-US": "Line items"
+      },
+      "ui.ws.finance.add_tariff": {
+        "de-CH": "Tarifposition",
+        "en-US": "Tariff item"
+      },
+      "ui.ws.finance.unit_price_chf": {
+        "de-CH": "Preis CHF",
+        "en-US": "Price CHF"
+      },
+      "ui.ws.finance.add_line": {
+        "de-CH": "Position hinzufügen",
+        "en-US": "Add line"
+      },
+      "ui.ws.finance.notes": {
+        "de-CH": "Bemerkungen auf der Rechnung",
+        "en-US": "Remarks on the invoice"
+      },
+      "ui.ws.finance.gross": {
+        "de-CH": "Total",
+        "en-US": "Total"
+      },
+      "ui.ws.finance.rounding_hint": {
+        "de-CH": "Das Total wird auf 5 Rappen gerundet.",
+        "en-US": "The total is rounded to 5 centimes."
+      },
+      "ui.ws.finance.unbilled": {
+        "de-CH": "Nicht verrechnete Termine",
+        "en-US": "Unbilled appointments"
+      },
+      "ui.ws.finance.unbilled_text": {
+        "de-CH": "Vergangene Termine dieses Kontakts, die noch auf keiner Rechnung stehen.",
+        "en-US": "Past appointments of this contact that are not on an invoice yet."
+      },
+      "ui.ws.finance.added": {
+        "de-CH": "Hinzugefügt",
+        "en-US": "Added"
+      },
+      "ui.ws.finance.add": {
+        "de-CH": "Hinzufügen",
+        "en-US": "Add"
+      },
+      "ui.ws.invoice.mail_subject": {
+        "de-CH": "Rechnung {number} von {company}",
+        "en-US": "Invoice {number} from {company}"
+      },
+      "ui.ws.invoice.cancel_title": {
+        "de-CH": "Rechnung stornieren?",
+        "en-US": "Cancel invoice?"
+      },
+      "ui.ws.invoice.cancel_text": {
+        "de-CH": "Die Rechnung bleibt sichtbar, gilt aber nicht mehr als offen.",
+        "en-US": "The invoice stays visible but no longer counts as open."
+      },
+      "ui.ws.invoice.cancel_action": {
+        "de-CH": "Stornieren",
+        "en-US": "Cancel invoice"
+      },
+      "ui.ws.invoice.record_payment": {
+        "de-CH": "Zahlung erfassen",
+        "en-US": "Record payment"
+      },
+      "ui.ws.invoice.send_reminder": {
+        "de-CH": "{level}. Mahnung",
+        "en-US": "Reminder {level}"
+      },
+      "ui.ws.invoice.print": {
+        "de-CH": "Drucken / PDF",
+        "en-US": "Print / PDF"
+      },
+      "ui.ws.invoice.send_mail": {
+        "de-CH": "Per Mail senden",
+        "en-US": "Send by email"
+      },
+      "ui.ws.invoice.overview": {
+        "de-CH": "Übersicht",
+        "en-US": "Overview"
+      },
+      "ui.ws.invoice.paid": {
+        "de-CH": "Bezahlt",
+        "en-US": "Paid"
+      },
+      "ui.ws.invoice.reminders": {
+        "de-CH": "Mahnstufe",
+        "en-US": "Reminder level"
+      },
+      "ui.ws.invoice.payments": {
+        "de-CH": "Zahlungen",
+        "en-US": "Payments"
+      },
+      "ui.ws.invoice.payment_date": {
+        "de-CH": "Zahlungsdatum",
+        "en-US": "Payment date"
+      },
+      "ui.ws.expense.saved": {
+        "de-CH": "Ausgabe gespeichert",
+        "en-US": "Expense saved"
+      },
+      "ui.ws.expense.booked": {
+        "de-CH": "Ausgabe verbucht",
+        "en-US": "Expense booked"
+      },
+      "ui.ws.expense.deleted": {
+        "de-CH": "Ausgabe gelöscht",
+        "en-US": "Expense deleted"
+      },
+      "ui.ws.expense.new": {
+        "de-CH": "Neue Ausgabe",
+        "en-US": "New expense"
+      },
+      "ui.ws.expense.edit": {
+        "de-CH": "Ausgabe bearbeiten",
+        "en-US": "Edit expense"
+      },
+      "ui.ws.expense.status_open": {
+        "de-CH": "Offen",
+        "en-US": "Open"
+      },
+      "ui.ws.expense.status_booked": {
+        "de-CH": "Verbucht",
+        "en-US": "Booked"
+      },
+      "ui.ws.expense.category": {
+        "de-CH": "Kategorie",
+        "en-US": "Category"
+      },
+      "ui.ws.expense.all_categories": {
+        "de-CH": "Alle Kategorien",
+        "en-US": "All categories"
+      },
+      "ui.ws.expense.total": {
+        "de-CH": "Total: {amount}",
+        "en-US": "Total: {amount}"
+      },
+      "ui.ws.expense.input_vat": {
+        "de-CH": "Vorsteuer",
+        "en-US": "Input VAT"
+      },
+      "ui.ws.expense.show_receipt": {
+        "de-CH": "Beleg anzeigen",
+        "en-US": "Show receipt"
+      },
+      "ui.ws.expense.book": {
+        "de-CH": "Verbuchen",
+        "en-US": "Book"
+      },
+      "ui.ws.expense.amount_gross": {
+        "de-CH": "Betrag inkl. MWST (CHF)",
+        "en-US": "Amount incl. VAT (CHF)"
+      },
+      "ui.ws.expense.supplier": {
+        "de-CH": "Lieferant",
+        "en-US": "Supplier"
+      },
+      "ui.ws.expense.receipt": {
+        "de-CH": "Beleg",
+        "en-US": "Receipt"
+      },
+      "ui.ws.expense.receipt_present": {
+        "de-CH": "Ein Beleg ist bereits hinterlegt.",
+        "en-US": "A receipt is already attached."
+      },
+      "ui.ws.expense.category_material": {
+        "de-CH": "Material",
+        "en-US": "Material"
+      },
+      "ui.ws.expense.category_rent": {
+        "de-CH": "Miete",
+        "en-US": "Rent"
+      },
+      "ui.ws.expense.category_vehicle": {
+        "de-CH": "Fahrzeug",
+        "en-US": "Vehicle"
+      },
+      "ui.ws.expense.category_insurance": {
+        "de-CH": "Versicherungen",
+        "en-US": "Insurance"
+      },
+      "ui.ws.expense.category_it": {
+        "de-CH": "Informatik",
+        "en-US": "IT"
+      },
+      "ui.ws.expense.category_advertising": {
+        "de-CH": "Werbung",
+        "en-US": "Advertising"
+      },
+      "ui.ws.expense.category_travel": {
+        "de-CH": "Reisen",
+        "en-US": "Travel"
+      },
+      "ui.ws.expense.category_other": {
+        "de-CH": "Übriges",
+        "en-US": "Other"
+      },
+      "ui.ws.report.revenue_year": {
+        "de-CH": "Zahlungseingänge dieses Jahr",
+        "en-US": "Payments received this year"
+      },
+      "ui.ws.report.expenses_year": {
+        "de-CH": "Ausgaben dieses Jahr",
+        "en-US": "Expenses this year"
+      },
+      "ui.ws.report.result_year": {
+        "de-CH": "Ergebnis dieses Jahr",
+        "en-US": "Result this year"
+      },
+      "ui.ws.report.monthly": {
+        "de-CH": "Letzte 12 Monate",
+        "en-US": "Last 12 months"
+      },
+      "ui.ws.report.payments_received": {
+        "de-CH": "Zahlungseingänge",
+        "en-US": "Payments received"
+      },
+      "ui.ws.report.aging": {
+        "de-CH": "Offene Forderungen nach Alter",
+        "en-US": "Receivables by age"
+      },
+      "ui.ws.report.aging_current": {
+        "de-CH": "Noch nicht fällig",
+        "en-US": "Not yet due"
+      },
+      "ui.ws.report.vat": {
+        "de-CH": "MWST {quarter}",
+        "en-US": "VAT {quarter}"
+      },
+      "ui.ws.report.vat_text": {
+        "de-CH": "Vereinfachte Übersicht nach vereinbartem Entgelt.",
+        "en-US": "Simplified overview based on agreed consideration."
+      },
+      "ui.ws.report.output_vat": {
+        "de-CH": "Umsatzsteuer {rate}",
+        "en-US": "Output VAT {rate}"
+      },
+      "ui.ws.report.vat_payable": {
+        "de-CH": "Zu bezahlen",
+        "en-US": "Payable"
+      },
+      "ui.ws.report.categories": {
+        "de-CH": "Ausgaben nach Kategorie (dieses Jahr)",
+        "en-US": "Expenses by category (this year)"
+      },
+      "ui.ws.report.aging_month": {
+        "de-CH": "1–30 Tage überfällig",
+        "en-US": "1–30 days overdue"
+      },
+      "ui.ws.report.aging_two_months": {
+        "de-CH": "31–60 Tage überfällig",
+        "en-US": "31–60 days overdue"
+      },
+      "ui.ws.report.aging_older": {
+        "de-CH": "Über 60 Tage überfällig",
+        "en-US": "More than 60 days overdue"
+      },
+      "ui.ws.physio.note_deleted": {
+        "de-CH": "Verlaufsnotiz gelöscht",
+        "en-US": "Progress note deleted"
+      },
+      "ui.ws.physio.prescription_saved": {
+        "de-CH": "Verordnung gespeichert",
+        "en-US": "Prescription saved"
+      },
+      "ui.ws.physio.note_saved": {
+        "de-CH": "Verlaufsnotiz gespeichert",
+        "en-US": "Progress note saved"
+      },
+      "ui.ws.physio.series_created": {
+        "de-CH": "{count} Termine geplant",
+        "en-US": "{count} appointments planned"
+      },
+      "ui.ws.physio.patients": {
+        "de-CH": "Patient:innen",
+        "en-US": "Patients"
+      },
+      "ui.ws.physio.patients_text": {
+        "de-CH": "Verordnungen, Verlauf und Serien – die Patientenakte hängt am gemeinsamen Kontakt.",
+        "en-US": "Prescriptions, progress and series – the patient record belongs to the shared contact."
+      },
+      "ui.ws.physio.agenda": {
+        "de-CH": "Tagesagenda",
+        "en-US": "Daily agenda"
+      },
+      "ui.ws.physio.new_patient": {
+        "de-CH": "Neue:r Patient:in",
+        "en-US": "New patient"
+      },
+      "ui.ws.physio.search": {
+        "de-CH": "Name, Versicherung, Telefon …",
+        "en-US": "Name, insurer, phone …"
+      },
+      "ui.ws.physio.with_alerts": {
+        "de-CH": "Mit Hinweis",
+        "en-US": "With alert"
+      },
+      "ui.ws.physio.this_week": {
+        "de-CH": "Diese Woche",
+        "en-US": "This week"
+      },
+      "ui.ws.physio.no_patients": {
+        "de-CH": "Keine Patient:innen gefunden",
+        "en-US": "No patients found"
+      },
+      "ui.ws.physio.patient": {
+        "de-CH": "Patient:in",
+        "en-US": "Patient"
+      },
+      "ui.ws.physio.next_appointment": {
+        "de-CH": "Nächster Termin",
+        "en-US": "Next appointment"
+      },
+      "ui.ws.physio.prescription": {
+        "de-CH": "Verordnung",
+        "en-US": "Prescription"
+      },
+      "ui.ws.physio.alerts": {
+        "de-CH": "Hinweise",
+        "en-US": "Alerts"
+      },
+      "ui.ws.physio.sessions_used": {
+        "de-CH": "{used} von {total} Sitzungen",
+        "en-US": "{used} of {total} sessions"
+      },
+      "ui.ws.physio.alert_none": {
+        "de-CH": "Keine aktive Verordnung",
+        "en-US": "No active prescription"
+      },
+      "ui.ws.physio.alert_expiring": {
+        "de-CH": "Verordnung läuft bald ab",
+        "en-US": "Prescription expires soon"
+      },
+      "ui.ws.physio.alert_almost_used": {
+        "de-CH": "Fast alle Sitzungen genutzt",
+        "en-US": "Almost all sessions used"
+      },
+      "ui.ws.physio.alert_expired": {
+        "de-CH": "Verordnung abgelaufen",
+        "en-US": "Prescription expired"
+      },
+      "ui.ws.physio.alerts_hint": {
+        "de-CH": "{count} Patient:innen mit geplanten Terminen brauchen eine neue Verordnung.",
+        "en-US": "{count} patients with planned appointments need a new prescription."
+      },
+      "ui.ws.physio.contact_card": {
+        "de-CH": "Kontakt",
+        "en-US": "Contact"
+      },
+      "ui.ws.physio.plan_series": {
+        "de-CH": "Serie planen",
+        "en-US": "Plan series"
+      },
+      "ui.ws.physio.bill_services": {
+        "de-CH": "Leistungen verrechnen",
+        "en-US": "Bill services"
+      },
+      "ui.ws.physio.progress_notes": {
+        "de-CH": "Verlauf",
+        "en-US": "Progress"
+      },
+      "ui.ws.physio.prescriptions": {
+        "de-CH": "Verordnungen",
+        "en-US": "Prescriptions"
+      },
+      "ui.ws.physio.active_prescription": {
+        "de-CH": "Aktive Verordnung",
+        "en-US": "Active prescription"
+      },
+      "ui.ws.physio.tariff": {
+        "de-CH": "Tarif {tariff}",
+        "en-US": "Tariff {tariff}"
+      },
+      "ui.ws.physio.valid_until": {
+        "de-CH": "gültig bis {date}",
+        "en-US": "valid until {date}"
+      },
+      "ui.ws.physio.new_prescription": {
+        "de-CH": "Neue Verordnung",
+        "en-US": "New prescription"
+      },
+      "ui.ws.physio.edit_prescription": {
+        "de-CH": "Verordnung bearbeiten",
+        "en-US": "Edit prescription"
+      },
+      "ui.ws.physio.latest_note": {
+        "de-CH": "Letzte Verlaufsnotiz",
+        "en-US": "Latest progress note"
+      },
+      "ui.ws.physio.no_notes": {
+        "de-CH": "Noch keine Verlaufsnotizen.",
+        "en-US": "No progress notes yet."
+      },
+      "ui.ws.physio.next_appointments": {
+        "de-CH": "Nächste Termine",
+        "en-US": "Upcoming appointments"
+      },
+      "ui.ws.physio.new_note": {
+        "de-CH": "Neue Verlaufsnotiz",
+        "en-US": "New progress note"
+      },
+      "ui.ws.physio.soap_hint": {
+        "de-CH": "Nach dem SOAP-Schema: Subjektiv, Objektiv, Assessment, Plan.",
+        "en-US": "Following SOAP: subjective, objective, assessment, plan."
+      },
+      "ui.ws.physio.subjective": {
+        "de-CH": "Subjektiv – was die Person berichtet",
+        "en-US": "Subjective – what the person reports"
+      },
+      "ui.ws.physio.subjective_placeholder": {
+        "de-CH": "Schmerz NRS, Alltag …",
+        "en-US": "Pain NRS, daily life …"
+      },
+      "ui.ws.physio.objective": {
+        "de-CH": "Objektiv – Befund, Messungen",
+        "en-US": "Objective – findings, measurements"
+      },
+      "ui.ws.physio.objective_placeholder": {
+        "de-CH": "ROM, Kraft, Tests …",
+        "en-US": "ROM, strength, tests …"
+      },
+      "ui.ws.physio.assessment": {
+        "de-CH": "Assessment – Einschätzung",
+        "en-US": "Assessment"
+      },
+      "ui.ws.physio.plan": {
+        "de-CH": "Plan – nächste Schritte",
+        "en-US": "Plan – next steps"
+      },
+      "ui.ws.physio.plan_placeholder": {
+        "de-CH": "Nächste Sitzung, Heimprogramm …",
+        "en-US": "Next session, home exercises …"
+      },
+      "ui.ws.physio.doctor": {
+        "de-CH": "Verordnende:r Ärzt:in",
+        "en-US": "Prescribing doctor"
+      },
+      "ui.ws.physio.diagnosis": {
+        "de-CH": "Diagnose",
+        "en-US": "Diagnosis"
+      },
+      "ui.ws.physio.tariff_label": {
+        "de-CH": "Tarifposition",
+        "en-US": "Tariff item"
+      },
+      "ui.ws.physio.sessions": {
+        "de-CH": "Sitzungen",
+        "en-US": "Sessions"
+      },
+      "ui.ws.physio.issued_on": {
+        "de-CH": "Ausgestellt am",
+        "en-US": "Issued on"
+      },
+      "ui.ws.physio.valid_until_label": {
+        "de-CH": "Gültig bis",
+        "en-US": "Valid until"
+      },
+      "ui.ws.physio.series_text": {
+        "de-CH": "Legt mehrere Termine auf einmal an; Überschneidungen siehst du danach im Kalender.",
+        "en-US": "Creates several appointments at once; overlaps show up in the calendar afterwards."
+      },
+      "ui.ws.physio.first_date": {
+        "de-CH": "Erster Tag",
+        "en-US": "First day"
+      },
+      "ui.ws.physio.time": {
+        "de-CH": "Uhrzeit",
+        "en-US": "Time"
+      },
+      "ui.ws.physio.count": {
+        "de-CH": "Anzahl",
+        "en-US": "Count"
+      },
+      "ui.ws.physio.weekdays": {
+        "de-CH": "Wochentage",
+        "en-US": "Weekdays"
+      },
+      "ui.ws.physio.series_preview": {
+        "de-CH": "{count} Termine, erster am {first}, letzter am {last}.",
+        "en-US": "{count} appointments, first on {first}, last on {last}."
+      },
+      "ui.ws.physio.create_series": {
+        "de-CH": "Serie erstellen",
+        "en-US": "Create series"
+      },
+      "ui.ws.spitex.unassigned": {
+        "de-CH": "Zuweisung von «{title}» aufgehoben",
+        "en-US": "“{title}” unassigned"
+      },
+      "ui.ws.spitex.assigned_outside": {
+        "de-CH": "«{title}» zugewiesen – ausserhalb des Ankunftsfensters",
+        "en-US": "“{title}” assigned – outside the arrival window"
+      },
+      "ui.ws.spitex.assigned": {
+        "de-CH": "«{title}» zugewiesen",
+        "en-US": "“{title}” assigned"
+      },
+      "ui.ws.spitex.nothing_to_assign": {
+        "de-CH": "Kein freier Platz im Ankunftsfenster gefunden.",
+        "en-US": "No free slot found in the arrival window."
+      },
+      "ui.ws.spitex.auto_assigned": {
+        "de-CH": "{count} Einsätze automatisch zugewiesen, {open} bleiben offen.",
+        "en-US": "{count} visits assigned automatically, {open} remain open."
+      },
+      "ui.ws.spitex.planning": {
+        "de-CH": "Einsatzplanung",
+        "en-US": "Visit planning"
+      },
+      "ui.ws.spitex.clients": {
+        "de-CH": "Klient:innen",
+        "en-US": "Clients"
+      },
+      "ui.ws.spitex.time_tracking": {
+        "de-CH": "Zeiterfassung",
+        "en-US": "Time tracking"
+      },
+      "ui.ws.spitex.open_visits": {
+        "de-CH": "Offene Einsätze",
+        "en-US": "Open visits"
+      },
+      "ui.ws.spitex.count": {
+        "de-CH": "{count} Einsätze",
+        "en-US": "{count} visits"
+      },
+      "ui.ws.spitex.print_plan": {
+        "de-CH": "Einsatzplan drucken",
+        "en-US": "Print visit plan"
+      },
+      "ui.ws.spitex.auto_assign": {
+        "de-CH": "Automatisch zuweisen",
+        "en-US": "Assign automatically"
+      },
+      "ui.ws.spitex.new_visit": {
+        "de-CH": "Neuer Einsatz",
+        "en-US": "New visit"
+      },
+      "ui.ws.spitex.open_count": {
+        "de-CH": "{count} offen",
+        "en-US": "{count} open"
+      },
+      "ui.ws.spitex.all_assigned": {
+        "de-CH": "Alles zugewiesen",
+        "en-US": "All assigned"
+      },
+      "ui.ws.spitex.open_text": {
+        "de-CH": "Ziehe einen Einsatz in die Spalte einer Person oder wähle «Zuweisen».",
+        "en-US": "Drag a visit into a person's column or choose “Assign”."
+      },
+      "ui.ws.spitex.window": {
+        "de-CH": "Ankunft {window}",
+        "en-US": "Arrival {window}"
+      },
+      "ui.ws.spitex.assign": {
+        "de-CH": "Zuweisen",
+        "en-US": "Assign"
+      },
+      "ui.ws.spitex.no_slot": {
+        "de-CH": "Kein Platz",
+        "en-US": "No slot"
+      },
+      "ui.ws.spitex.none_open": {
+        "de-CH": "Für diesen Tag sind keine Einsätze offen.",
+        "en-US": "No open visits for this day."
+      },
+      "ui.ws.spitex.board_hint": {
+        "de-CH": "Ziehe Einsätze zwischen den Spalten. In «Offene Einsätze» abgelegt, wird die Zuweisung aufgehoben.",
+        "en-US": "Drag visits between columns. Dropped on “Open visits”, the assignment is removed."
+      },
+      "ui.ws.spitex.week_load": {
+        "de-CH": "Einsatzzeit pro Person und Tag (Stunden:Minuten)",
+        "en-US": "Visit time per person and day (hours:minutes)"
+      },
+      "ui.ws.spitex.note_saved": {
+        "de-CH": "Pflegedokumentation gespeichert",
+        "en-US": "Care note saved"
+      },
+      "ui.ws.spitex.time_saved": {
+        "de-CH": "Zeit erfasst",
+        "en-US": "Time recorded"
+      },
+      "ui.ws.spitex.time_deleted": {
+        "de-CH": "Zeiteintrag gelöscht",
+        "en-US": "Time entry deleted"
+      },
+      "ui.ws.spitex.new_client": {
+        "de-CH": "Neue:r Klient:in",
+        "en-US": "New client"
+      },
+      "ui.ws.spitex.next_visit": {
+        "de-CH": "Nächster Einsatz",
+        "en-US": "Next visit"
+      },
+      "ui.ws.spitex.last_week": {
+        "de-CH": "Letzte 7 Tage",
+        "en-US": "Last 7 days"
+      },
+      "ui.ws.spitex.care_notes": {
+        "de-CH": "Pflegedokumentation",
+        "en-US": "Care documentation"
+      },
+      "ui.ws.spitex.visits": {
+        "de-CH": "Einsätze",
+        "en-US": "Visits"
+      },
+      "ui.ws.spitex.wellbeing": {
+        "de-CH": "Befinden",
+        "en-US": "Wellbeing"
+      },
+      "ui.ws.spitex.vitals": {
+        "de-CH": "Vitalwerte",
+        "en-US": "Vital signs"
+      },
+      "ui.ws.spitex.evaluation": {
+        "de-CH": "Beurteilung",
+        "en-US": "Evaluation"
+      },
+      "ui.ws.spitex.measures": {
+        "de-CH": "Massnahmen",
+        "en-US": "Measures"
+      },
+      "ui.ws.spitex.no_notes": {
+        "de-CH": "Noch keine Einträge.",
+        "en-US": "No entries yet."
+      },
+      "ui.ws.spitex.new_note": {
+        "de-CH": "Neuer Eintrag",
+        "en-US": "New entry"
+      },
+      "ui.ws.spitex.worked": {
+        "de-CH": "Gearbeitet",
+        "en-US": "Worked"
+      },
+      "ui.ws.spitex.planned": {
+        "de-CH": "Geplant",
+        "en-US": "Planned"
+      },
+      "ui.ws.spitex.record_time": {
+        "de-CH": "Zeit erfassen",
+        "en-US": "Record time"
+      },
+      "ui.ws.spitex.minutes": {
+        "de-CH": "Minuten",
+        "en-US": "Minutes"
+      },
+      "ui.ws.settings.saved": {
+        "de-CH": "Einstellungen gespeichert",
+        "en-US": "Settings saved"
+      },
+      "ui.ws.settings.password_changed": {
+        "de-CH": "Passwort geändert",
+        "en-US": "Password changed"
+      },
+      "ui.ws.settings.two_factor_enabled": {
+        "de-CH": "Zwei-Faktor-Anmeldung aktiviert",
+        "en-US": "Two-factor sign-in enabled"
+      },
+      "ui.ws.settings.two_factor_disabled": {
+        "de-CH": "Zwei-Faktor-Anmeldung deaktiviert",
+        "en-US": "Two-factor sign-in disabled"
+      },
+      "ui.ws.settings.session_revoked": {
+        "de-CH": "Sitzung abgemeldet",
+        "en-US": "Session signed out"
+      },
+      "ui.ws.team.invited": {
+        "de-CH": "Einladung versendet",
+        "en-US": "Invitation sent"
+      },
+      "ui.ws.team.role_changed": {
+        "de-CH": "Rolle geändert",
+        "en-US": "Role changed"
+      },
+      "ui.ws.team.reactivated": {
+        "de-CH": "Mitglied wieder aktiviert",
+        "en-US": "Member reactivated"
+      },
+      "ui.ws.team.deactivated": {
+        "de-CH": "Mitglied deaktiviert",
+        "en-US": "Member deactivated"
+      },
+      "ui.ws.team.resent": {
+        "de-CH": "Einladung erneut gesendet",
+        "en-US": "Invitation resent"
+      },
+      "ui.ws.team.revoked": {
+        "de-CH": "Einladung zurückgezogen",
+        "en-US": "Invitation revoked"
+      },
+      "ui.ws.roles.saved": {
+        "de-CH": "Rolle gespeichert",
+        "en-US": "Role saved"
+      },
+      "ui.ws.roles.deleted": {
+        "de-CH": "Rolle gelöscht",
+        "en-US": "Role deleted"
+      },
+      "ui.ws.billing.plan_changed": {
+        "de-CH": "Abo geändert",
+        "en-US": "Subscription changed"
+      },
+      "ui.ws.billing.module_enabled": {
+        "de-CH": "Modul aktiviert",
+        "en-US": "Module enabled"
+      },
+      "ui.ws.billing.module_disabled": {
+        "de-CH": "Modul deaktiviert",
+        "en-US": "Module disabled"
+      },
+      "ui.ws.billing.card_saved": {
+        "de-CH": "Zahlungsmethode gespeichert",
+        "en-US": "Payment method saved"
+      },
+      "ui.ws.billing.cancelled": {
+        "de-CH": "Abo gekündigt",
+        "en-US": "Subscription cancelled"
+      },
+      "ui.ws.billing.resumed": {
+        "de-CH": "Abo fortgesetzt",
+        "en-US": "Subscription resumed"
+      },
+      "ui.ws.privacy.exported": {
+        "de-CH": "Export erstellt",
+        "en-US": "Export created"
+      },
+      "ui.ws.privacy.deleted": {
+        "de-CH": "Konto gelöscht",
+        "en-US": "Account deleted"
+      },
+      "ui.ws.settings.company": {
+        "de-CH": "Firma",
+        "en-US": "Company"
+      },
+      "ui.ws.settings.team": {
+        "de-CH": "Team",
+        "en-US": "Team"
+      },
+      "ui.ws.settings.roles": {
+        "de-CH": "Rollen & Rechte",
+        "en-US": "Roles & permissions"
+      },
+      "ui.ws.settings.billing": {
+        "de-CH": "Abo & Rechnungen",
+        "en-US": "Subscription & billing"
+      },
+      "ui.ws.settings.privacy": {
+        "de-CH": "Datenschutz",
+        "en-US": "Privacy"
+      },
+      "ui.ws.settings.company_text": {
+        "de-CH": "Diese Angaben erscheinen auf Rechnungen und im Arbeitsbereich.",
+        "en-US": "These details appear on invoices and in the workspace."
+      },
+      "ui.ws.settings.appearance": {
+        "de-CH": "Erscheinungsbild",
+        "en-US": "Appearance"
+      },
+      "ui.ws.settings.logo": {
+        "de-CH": "Logo",
+        "en-US": "Logo"
+      },
+      "ui.ws.settings.remove_logo": {
+        "de-CH": "Logo entfernen",
+        "en-US": "Remove logo"
+      },
+      "ui.ws.settings.brand_color": {
+        "de-CH": "Markenfarbe",
+        "en-US": "Brand colour"
+      },
+      "ui.ws.settings.company_data": {
+        "de-CH": "Firmendaten",
+        "en-US": "Company details"
+      },
+      "ui.ws.settings.vat_number": {
+        "de-CH": "MWST-Nummer",
+        "en-US": "VAT number"
+      },
+      "ui.ws.settings.iban": {
+        "de-CH": "IBAN für QR-Rechnungen",
+        "en-US": "IBAN for QR bills"
+      },
+      "ui.ws.settings.iban_invalid": {
+        "de-CH": "Bitte gib eine gültige Schweizer IBAN ein.",
+        "en-US": "Please enter a valid Swiss IBAN."
+      },
+      "ui.ws.settings.iban_hint": {
+        "de-CH": "Schweizer oder Liechtensteiner IBAN",
+        "en-US": "Swiss or Liechtenstein IBAN"
+      },
+      "ui.ws.settings.profile_text": {
+        "de-CH": "Deine persönlichen Angaben gelten in allen Arbeitsbereichen.",
+        "en-US": "Your personal details apply in all workspaces."
+      },
+      "ui.ws.settings.personal": {
+        "de-CH": "Persönliche Angaben",
+        "en-US": "Personal details"
+      },
+      "ui.ws.settings.photo": {
+        "de-CH": "Foto",
+        "en-US": "Photo"
+      },
+      "ui.ws.settings.notifications": {
+        "de-CH": "Benachrichtigungen",
+        "en-US": "Notifications"
+      },
+      "ui.ws.settings.notify_in_app": {
+        "de-CH": "Im Arbeitsbereich (Glocke)",
+        "en-US": "In the workspace (bell)"
+      },
+      "ui.ws.settings.notify_email": {
+        "de-CH": "Per E-Mail",
+        "en-US": "By email"
+      },
+      "ui.ws.settings.notify_push": {
+        "de-CH": "Push-Mitteilungen auf dem Handy",
+        "en-US": "Push notifications on the phone"
+      },
+      "ui.ws.settings.digest": {
+        "de-CH": "Zusammenfassung",
+        "en-US": "Digest"
+      },
+      "ui.ws.settings.digest_never": {
+        "de-CH": "Nie",
+        "en-US": "Never"
+      },
+      "ui.ws.settings.digest_daily": {
+        "de-CH": "Täglich",
+        "en-US": "Daily"
+      },
+      "ui.ws.settings.digest_weekly": {
+        "de-CH": "Wöchentlich",
+        "en-US": "Weekly"
+      },
+      "ui.ws.settings.display": {
+        "de-CH": "Anzeige",
+        "en-US": "Display"
+      },
+      "ui.ws.settings.language": {
+        "de-CH": "Sprache",
+        "en-US": "Language"
+      },
+      "ui.ws.settings.security": {
+        "de-CH": "Sicherheit",
+        "en-US": "Security"
+      },
+      "ui.ws.settings.current_password": {
+        "de-CH": "Aktuelles Passwort",
+        "en-US": "Current password"
+      },
+      "ui.ws.settings.change_password": {
+        "de-CH": "Passwort ändern",
+        "en-US": "Change password"
+      },
+      "ui.ws.settings.two_factor": {
+        "de-CH": "Zwei-Faktor-Anmeldung",
+        "en-US": "Two-factor sign-in"
+      },
+      "ui.ws.settings.two_factor_on": {
+        "de-CH": "Aktiv: Bei der Anmeldung braucht es zusätzlich einen Code.",
+        "en-US": "Active: signing in also needs a code."
+      },
+      "ui.ws.settings.two_factor_off": {
+        "de-CH": "Schütze dein Konto mit einem Code aus einer Authenticator-App.",
+        "en-US": "Protect your account with a code from an authenticator app."
+      },
+      "ui.ws.settings.disable": {
+        "de-CH": "Deaktivieren",
+        "en-US": "Disable"
+      },
+      "ui.ws.settings.enable": {
+        "de-CH": "Aktivieren",
+        "en-US": "Enable"
+      },
+      "ui.ws.settings.two_factor_setup": {
+        "de-CH": "Scanne den QR-Code mit deiner Authenticator-App und gib den angezeigten Code ein.",
+        "en-US": "Scan the QR code with your authenticator app and enter the code shown."
+      },
+      "ui.ws.settings.sessions": {
+        "de-CH": "Angemeldete Geräte",
+        "en-US": "Signed-in devices"
+      },
+      "ui.ws.settings.this_device": {
+        "de-CH": "Dieses Gerät",
+        "en-US": "This device"
+      },
+      "ui.ws.roles.area_contacts": {
+        "de-CH": "Kontakte",
+        "en-US": "Contacts"
+      },
+      "ui.ws.roles.area_calendar": {
+        "de-CH": "Kalender",
+        "en-US": "Calendar"
+      },
+      "ui.ws.roles.area_documents": {
+        "de-CH": "Dokumente",
+        "en-US": "Documents"
+      },
+      "ui.ws.roles.area_mail": {
+        "de-CH": "Mail",
+        "en-US": "Mail"
+      },
+      "ui.ws.roles.area_finance": {
+        "de-CH": "Finanzen",
+        "en-US": "Finance"
+      },
+      "ui.ws.roles.area_planner": {
+        "de-CH": "Aufgaben",
+        "en-US": "Tasks"
+      },
+      "ui.ws.roles.area_physio": {
+        "de-CH": "Physio",
+        "en-US": "Physio"
+      },
+      "ui.ws.roles.area_spitex": {
+        "de-CH": "Spitex",
+        "en-US": "Home care"
+      },
+      "ui.ws.roles.area_team": {
+        "de-CH": "Team verwalten",
+        "en-US": "Manage team"
+      },
+      "ui.ws.roles.area_roles": {
+        "de-CH": "Rollen verwalten",
+        "en-US": "Manage roles"
+      },
+      "ui.ws.roles.area_billing": {
+        "de-CH": "Abo verwalten",
+        "en-US": "Manage subscription"
+      },
+      "ui.ws.roles.area_settings": {
+        "de-CH": "Einstellungen verwalten",
+        "en-US": "Manage settings"
+      },
+      "ui.ws.roles.area_audit": {
+        "de-CH": "Aktivitätsprotokoll",
+        "en-US": "Activity log"
+      },
+      "ui.ws.team.text": {
+        "de-CH": "Wer im Arbeitsbereich mitarbeitet und mit welcher Rolle.",
+        "en-US": "Who works in this workspace and with which role."
+      },
+      "ui.ws.team.seats": {
+        "de-CH": "{used} von {total} Plätzen im Abo belegt",
+        "en-US": "{used} of {total} seats in the plan used"
+      },
+      "ui.ws.team.search": {
+        "de-CH": "Mitglieder suchen",
+        "en-US": "Search members"
+      },
+      "ui.ws.team.job_title": {
+        "de-CH": "Funktion",
+        "en-US": "Job title"
+      },
+      "ui.ws.team.you": {
+        "de-CH": "du",
+        "en-US": "you"
+      },
+      "ui.ws.team.status_active": {
+        "de-CH": "Aktiv",
+        "en-US": "Active"
+      },
+      "ui.ws.team.status_inactive": {
+        "de-CH": "Inaktiv",
+        "en-US": "Inactive"
+      },
+      "ui.ws.team.deactivate": {
+        "de-CH": "Deaktivieren",
+        "en-US": "Deactivate"
+      },
+      "ui.ws.team.reactivate": {
+        "de-CH": "Wieder aktivieren",
+        "en-US": "Reactivate"
+      },
+      "ui.ws.team.pending": {
+        "de-CH": "Offene Einladungen",
+        "en-US": "Pending invitations"
+      },
+      "ui.ws.team.pending_text": {
+        "de-CH": "Im Prototyp kannst du den Einladungslink direkt öffnen und annehmen.",
+        "en-US": "In the prototype you can open and accept the invitation link directly."
+      },
+      "ui.ws.team.expires": {
+        "de-CH": "Läuft ab am {date}",
+        "en-US": "Expires on {date}"
+      },
+      "ui.ws.team.open_link": {
+        "de-CH": "Link öffnen",
+        "en-US": "Open link"
+      },
+      "ui.ws.team.resend": {
+        "de-CH": "Erneut senden",
+        "en-US": "Resend"
+      },
+      "ui.ws.team.revoke": {
+        "de-CH": "Zurückziehen",
+        "en-US": "Revoke"
+      },
+      "ui.ws.team.no_pending": {
+        "de-CH": "Keine offenen Einladungen.",
+        "en-US": "No pending invitations."
+      },
+      "ui.ws.roles.text": {
+        "de-CH": "Administrator und Benutzer sind geschützt. Eigene Rollen bündeln genau die Rechte, die ein Team braucht.",
+        "en-US": "Administrator and User are protected. Custom roles bundle exactly the permissions a team needs."
+      },
+      "ui.ws.roles.new": {
+        "de-CH": "Neue Rolle",
+        "en-US": "New role"
+      },
+      "ui.ws.roles.edit": {
+        "de-CH": "Rolle bearbeiten",
+        "en-US": "Edit role"
+      },
+      "ui.ws.roles.matrix": {
+        "de-CH": "Rechte pro Rolle und Bereich",
+        "en-US": "Permissions per role and area"
+      },
+      "ui.ws.roles.area": {
+        "de-CH": "Bereich",
+        "en-US": "Area"
+      },
+      "ui.ws.roles.protected": {
+        "de-CH": "Geschützte Rolle",
+        "en-US": "Protected role"
+      },
+      "ui.ws.roles.members": {
+        "de-CH": "{count} Mitglieder",
+        "en-US": "{count} members"
+      },
+      "ui.ws.roles.write": {
+        "de-CH": "Bearbeiten",
+        "en-US": "Edit"
+      },
+      "ui.ws.roles.read": {
+        "de-CH": "Lesen",
+        "en-US": "Read"
+      },
+      "ui.ws.roles.allowed": {
+        "de-CH": "Erlaubt",
+        "en-US": "Allowed"
+      },
+      "ui.ws.roles.hint": {
+        "de-CH": "Klicke auf eine eigene Rolle, um ihre Rechte zu ändern. Bearbeiten schliesst Lesen ein.",
+        "en-US": "Click a custom role to change its permissions. Edit includes read."
+      },
+      "ui.ws.billing.cancel_title": {
+        "de-CH": "Abo kündigen?",
+        "en-US": "Cancel subscription?"
+      },
+      "ui.ws.billing.cancel_text": {
+        "de-CH": "Der Arbeitsbereich bleibt bis zum Ende der Periode nutzbar. Du kannst die Kündigung jederzeit zurücknehmen.",
+        "en-US": "The workspace stays usable until the end of the period. You can take the cancellation back at any time."
+      },
+      "ui.ws.billing.cancel": {
+        "de-CH": "Abo kündigen",
+        "en-US": "Cancel subscription"
+      },
+      "ui.ws.billing.text": {
+        "de-CH": "Preise in CHF exkl. MWST, berechnet für {seats} aktive Mitglieder.",
+        "en-US": "Prices in CHF excl. VAT, calculated for {seats} active members."
+      },
+      "ui.ws.billing.highlight": {
+        "de-CH": "{module} ist in deinem aktuellen Abo nicht enthalten oder nicht aktiviert.",
+        "en-US": "{module} is not included in your current plan or not enabled."
+      },
+      "ui.ws.billing.plans": {
+        "de-CH": "Abos",
+        "en-US": "Plans"
+      },
+      "ui.ws.billing.monthly": {
+        "de-CH": "Monatlich",
+        "en-US": "Monthly"
+      },
+      "ui.ws.billing.yearly": {
+        "de-CH": "Jährlich (2 Monate geschenkt)",
+        "en-US": "Yearly (2 months free)"
+      },
+      "ui.ws.billing.plan_starter": {
+        "de-CH": "Starter",
+        "en-US": "Starter"
+      },
+      "ui.ws.billing.plan_starter_text": {
+        "de-CH": "Für kleine Teams, die Termine, Aufgaben und Mail an einem Ort wollen.",
+        "en-US": "For small teams who want appointments, tasks and mail in one place."
+      },
+      "ui.ws.billing.plan_team": {
+        "de-CH": "Team",
+        "en-US": "Team"
+      },
+      "ui.ws.billing.plan_team_text": {
+        "de-CH": "Mit Rechnungen, QR-Zahlteil und Auswertungen.",
+        "en-US": "With invoices, QR payment part and reports."
+      },
+      "ui.ws.billing.plan_business": {
+        "de-CH": "Praxis & Pflege",
+        "en-US": "Practice & care"
+      },
+      "ui.ws.billing.plan_business_text": {
+        "de-CH": "Alles inklusive Physio- und Spitex-Modul.",
+        "en-US": "Everything including the physio and home care modules."
+      },
+      "ui.ws.billing.current": {
+        "de-CH": "Aktuell",
+        "en-US": "Current"
+      },
+      "ui.ws.billing.per_year": {
+        "de-CH": "pro Jahr",
+        "en-US": "per year"
+      },
+      "ui.ws.billing.per_month": {
+        "de-CH": "pro Monat",
+        "en-US": "per month"
+      },
+      "ui.ws.billing.price_detail": {
+        "de-CH": "{price} pro Person und Monat · bis {seats} Personen",
+        "en-US": "{price} per person and month · up to {seats} people"
+      },
+      "ui.ws.billing.switch_cycle": {
+        "de-CH": "Zahlungsrhythmus wechseln",
+        "en-US": "Switch billing cycle"
+      },
+      "ui.ws.billing.choose": {
+        "de-CH": "Wählen",
+        "en-US": "Choose"
+      },
+      "ui.ws.billing.modules": {
+        "de-CH": "Module",
+        "en-US": "Modules"
+      },
+      "ui.ws.billing.modules_text": {
+        "de-CH": "Schalte gebuchte Module ein oder aus. Kontakte, Kalender und Dokumente sind immer dabei.",
+        "en-US": "Turn booked modules on or off. Contacts, calendar and documents are always included."
+      },
+      "ui.ws.billing.not_in_plan": {
+        "de-CH": "Nicht im aktuellen Abo",
+        "en-US": "Not in the current plan"
+      },
+      "ui.ws.billing.payment_method": {
+        "de-CH": "Zahlungsmethode",
+        "en-US": "Payment method"
+      },
+      "ui.ws.billing.card": {
+        "de-CH": "{brand} endet auf {last}, gültig bis {expires}",
+        "en-US": "{brand} ending in {last}, valid until {expires}"
+      },
+      "ui.ws.billing.no_card": {
+        "de-CH": "Keine Zahlungsmethode hinterlegt.",
+        "en-US": "No payment method on file."
+      },
+      "ui.ws.billing.add_card": {
+        "de-CH": "Hinzufügen",
+        "en-US": "Add"
+      },
+      "ui.ws.billing.history": {
+        "de-CH": "Rechnungen von CLinks",
+        "en-US": "Invoices from CLinks"
+      },
+      "ui.ws.billing.card_hint": {
+        "de-CH": "Prototyp: Es wird nichts belastet. Gib keine echten Kartendaten ein.",
+        "en-US": "Prototype: nothing is charged. Do not enter real card details."
+      },
+      "ui.ws.billing.card_number": {
+        "de-CH": "Kartennummer",
+        "en-US": "Card number"
+      },
+      "ui.ws.billing.card_expires": {
+        "de-CH": "Gültig bis (MM/JJ)",
+        "en-US": "Expiry (MM/YY)"
+      },
+      "ui.ws.privacy.text": {
+        "de-CH": "Deine Rechte nach dem Schweizer Datenschutzgesetz (revDSG).",
+        "en-US": "Your rights under the Swiss Data Protection Act (revFADP)."
+      },
+      "ui.ws.privacy.hosting": {
+        "de-CH": "Datenhaltung",
+        "en-US": "Data storage"
+      },
+      "ui.ws.privacy.hosting_text": {
+        "de-CH": "Im Betrieb liegen alle Daten in Rechenzentren in der Schweiz. Im Prototyp bleiben sie nur in diesem Browser.",
+        "en-US": "In production all data is stored in Swiss data centres. In the prototype it only stays in this browser."
+      },
+      "ui.ws.privacy.health_text": {
+        "de-CH": "Gesundheitsdaten werden verschlüsselt gespeichert und jeder Zugriff wird protokolliert.",
+        "en-US": "Health data is stored encrypted and every access is logged."
+      },
+      "ui.ws.privacy.export": {
+        "de-CH": "Daten exportieren",
+        "en-US": "Export data"
+      },
+      "ui.ws.privacy.export_text": {
+        "de-CH": "Alle Daten dieses Arbeitsbereichs als JSON-Datei.",
+        "en-US": "All data of this workspace as a JSON file."
+      },
+      "ui.ws.privacy.export_button": {
+        "de-CH": "Export herunterladen",
+        "en-US": "Download export"
+      },
+      "ui.ws.privacy.delete": {
+        "de-CH": "Konto löschen",
+        "en-US": "Delete account"
+      },
+      "ui.ws.privacy.delete_text": {
+        "de-CH": "Dein Benutzerkonto wird gelöscht und deine Mitgliedschaften werden beendet. Daten des Arbeitsbereichs bleiben erhalten.",
+        "en-US": "Your user account is deleted and your memberships end. Workspace data is kept."
+      },
+      "ui.ws.privacy.delete_button": {
+        "de-CH": "Konto endgültig löschen",
+        "en-US": "Delete account permanently"
+      },
+      "ui.ws.privacy.delete_confirm_title": {
+        "de-CH": "Wirklich löschen?",
+        "en-US": "Really delete?"
+      },
+      "ui.ws.privacy.delete_confirm_text": {
+        "de-CH": "Bestätige mit deinem Passwort. Das kann nicht rückgängig gemacht werden.",
+        "en-US": "Confirm with your password. This cannot be undone."
+      },
+      "ui.ws.activity.kind_contact": {
+        "de-CH": "Kontakte",
+        "en-US": "Contacts"
+      },
+      "ui.ws.activity.kind_appointment": {
+        "de-CH": "Termine",
+        "en-US": "Appointments"
+      },
+      "ui.ws.activity.kind_invoice": {
+        "de-CH": "Rechnungen",
+        "en-US": "Invoices"
+      },
+      "ui.ws.activity.kind_expense": {
+        "de-CH": "Ausgaben",
+        "en-US": "Expenses"
+      },
+      "ui.ws.activity.kind_task": {
+        "de-CH": "Aufgaben",
+        "en-US": "Tasks"
+      },
+      "ui.ws.activity.kind_document": {
+        "de-CH": "Dokumente",
+        "en-US": "Documents"
+      },
+      "ui.ws.activity.kind_mail": {
+        "de-CH": "Mails",
+        "en-US": "Emails"
+      },
+      "ui.ws.activity.kind_campaign": {
+        "de-CH": "Kampagnen",
+        "en-US": "Campaigns"
+      },
+      "ui.ws.activity.kind_membership": {
+        "de-CH": "Mitglieder",
+        "en-US": "Members"
+      },
+      "ui.ws.activity.kind_invitation": {
+        "de-CH": "Einladungen",
+        "en-US": "Invitations"
+      },
+      "ui.ws.activity.kind_role": {
+        "de-CH": "Rollen",
+        "en-US": "Roles"
+      },
+      "ui.ws.activity.kind_tenant": {
+        "de-CH": "Arbeitsbereich",
+        "en-US": "Workspace"
+      },
+      "ui.ws.activity.kind_note": {
+        "de-CH": "Notizen",
+        "en-US": "Notes"
+      },
+      "ui.ws.activity.kind_prescription": {
+        "de-CH": "Verordnungen",
+        "en-US": "Prescriptions"
+      },
+      "ui.ws.activity.kind_session": {
+        "de-CH": "Sitzungen",
+        "en-US": "Sessions"
+      },
+      "ui.ws.activity.search": {
+        "de-CH": "Aktion oder Objekt",
+        "en-US": "Action or object"
+      },
+      "ui.ws.activity.who": {
+        "de-CH": "Wer",
+        "en-US": "Who"
+      },
+      "ui.ws.activity.everyone": {
+        "de-CH": "Alle Personen",
+        "en-US": "Everyone"
+      },
+      "ui.ws.activity.what": {
+        "de-CH": "Bereich",
+        "en-US": "Area"
+      },
+      "ui.ws.activity.everything": {
+        "de-CH": "Alle Bereiche",
+        "en-US": "All areas"
+      },
+      "ui.ws.help.title": {
+        "de-CH": "Hilfe & Support",
+        "en-US": "Help & support"
+      },
+      "ui.ws.help.faq": {
+        "de-CH": "Häufige Fragen",
+        "en-US": "FAQ"
+      },
+      "ui.ws.help.changelog": {
+        "de-CH": "Neuigkeiten",
+        "en-US": "What's new"
+      },
+      "ui.ws.help.legal": {
+        "de-CH": "Rechtliches",
+        "en-US": "Legal"
+      },
+      "ui.ws.help.q_invite": {
+        "de-CH": "Wie lade ich mein Team ein?",
+        "en-US": "How do I invite my team?"
+      },
+      "ui.ws.help.a_invite": {
+        "de-CH": "Unter Einstellungen → Team eine E-Mail-Adresse und Rolle eingeben. Die Person erhält einen Link, der 7 Tage gültig ist.",
+        "en-US": "Under Settings → Team enter an email address and role. The person gets a link that is valid for 7 days."
+      },
+      "ui.ws.help.q_modules": {
+        "de-CH": "Wie schalte ich weitere Module frei?",
+        "en-US": "How do I enable more modules?"
+      },
+      "ui.ws.help.a_modules": {
+        "de-CH": "Unter Einstellungen → Abo & Rechnungen das passende Abo wählen und die Module einschalten.",
+        "en-US": "Under Settings → Subscription & billing choose the right plan and turn the modules on."
+      },
+      "ui.ws.help.q_qr": {
+        "de-CH": "Warum fehlt der QR-Zahlteil?",
+        "en-US": "Why is the QR payment part missing?"
+      },
+      "ui.ws.help.a_qr": {
+        "de-CH": "Der Zahlteil braucht eine gültige Schweizer IBAN unter Einstellungen → Firma.",
+        "en-US": "The payment part needs a valid Swiss IBAN under Settings → Company."
+      },
+      "ui.ws.help.q_offline": {
+        "de-CH": "Funktioniert CLinks ohne Internet?",
+        "en-US": "Does CLinks work without internet?"
+      },
+      "ui.ws.help.a_offline": {
+        "de-CH": "Gelesene Daten bleiben sichtbar. Änderungen werden gespeichert, sobald die Verbindung zurück ist; der Status oben rechts zeigt es an.",
+        "en-US": "Data you have loaded stays visible. Changes are saved once the connection is back; the status at the top right shows it."
+      },
+      "ui.ws.help.q_export": {
+        "de-CH": "Kann ich meine Daten mitnehmen?",
+        "en-US": "Can I take my data with me?"
+      },
+      "ui.ws.help.a_export": {
+        "de-CH": "Ja, unter Einstellungen → Datenschutz als JSON-Export.",
+        "en-US": "Yes, under Settings → Privacy as a JSON export."
+      },
+      "ui.ws.help.q_roles": {
+        "de-CH": "Wer darf was sehen?",
+        "en-US": "Who can see what?"
+      },
+      "ui.ws.help.a_roles": {
+        "de-CH": "Rollen bündeln Rechte pro Bereich. Die Übersicht findest du unter Einstellungen → Rollen & Rechte.",
+        "en-US": "Roles bundle permissions per area. The overview is under Settings → Roles & permissions."
+      },
+      "ui.ws.help.contact": {
+        "de-CH": "Support kontaktieren",
+        "en-US": "Contact support"
+      },
+      "ui.ws.help.contact_text": {
+        "de-CH": "Wir antworten werktags innert 4 Stunden.",
+        "en-US": "We answer within 4 hours on working days."
+      },
+      "ui.ws.help.sent": {
+        "de-CH": "Nachricht an den Support gesendet",
+        "en-US": "Message sent to support"
+      },
+      "ui.ws.help.version": {
+        "de-CH": "Version {version}",
+        "en-US": "Version {version}"
+      },
+      "ui.ws.help.release_four_a": {
+        "de-CH": "Neue App-Hülle mit Suche, Benachrichtigungen und Tastenkürzeln",
+        "en-US": "New app shell with search, notifications and shortcuts"
+      },
+      "ui.ws.help.release_four_b": {
+        "de-CH": "Abo, Team und Rollen selbst verwalten",
+        "en-US": "Manage subscription, team and roles yourself"
+      },
+      "ui.ws.help.release_three_a": {
+        "de-CH": "Spitex-Einsatzplanung mit automatischer Zuweisung",
+        "en-US": "Home care visit planning with automatic assignment"
+      },
+      "ui.ws.help.release_three_b": {
+        "de-CH": "QR-Rechnungen und MWST-Übersicht",
+        "en-US": "QR bills and VAT overview"
+      },
+      "ui.ws.help.release_two_a": {
+        "de-CH": "Physio-Patientenakte mit Verordnungen und Serien",
+        "en-US": "Physio patient record with prescriptions and series"
+      },
+      "ui.ws.help.terms": {
+        "de-CH": "AGB",
+        "en-US": "Terms"
+      },
+      "ui.ws.help.terms_text": {
+        "de-CH": "Die Nutzung von CLinks erfolgt im Abo, monatlich oder jährlich kündbar. Gerichtsstand ist Biel/Bienne. Dies ist ein Platzhaltertext für den Prototyp.",
+        "en-US": "CLinks is used on subscription, cancellable monthly or yearly. Place of jurisdiction is Biel/Bienne. This is placeholder text for the prototype."
+      },
+      "ui.ws.help.privacy": {
+        "de-CH": "Datenschutzerklärung",
+        "en-US": "Privacy policy"
+      },
+      "ui.ws.help.privacy_text": {
+        "de-CH": "Wir bearbeiten Personendaten nur zur Erbringung des Dienstes und speichern sie in der Schweiz. Ein Auftragsbearbeitungsvertrag (AVV) steht allen Kundinnen und Kunden zur Verfügung. Platzhaltertext für den Prototyp.",
+        "en-US": "We process personal data only to provide the service and store it in Switzerland. A data processing agreement is available to all customers. Placeholder text for the prototype."
+      },
+      "ui.ws.onboarding.title_company": {
+        "de-CH": "Wie heisst deine Firma?",
+        "en-US": "What is your company called?"
+      },
+      "ui.ws.onboarding.title_industry": {
+        "de-CH": "In welcher Branche arbeitest du?",
+        "en-US": "Which industry do you work in?"
+      },
+      "ui.ws.onboarding.title_modules": {
+        "de-CH": "Welche Module brauchst du?",
+        "en-US": "Which modules do you need?"
+      },
+      "ui.ws.onboarding.title_team": {
+        "de-CH": "Wer arbeitet mit?",
+        "en-US": "Who works with you?"
+      },
+      "ui.ws.onboarding.title_finish": {
+        "de-CH": "Fast fertig",
+        "en-US": "Almost done"
+      },
+      "ui.ws.onboarding.step": {
+        "de-CH": "Schritt {current} von {total}",
+        "en-US": "Step {current} of {total}"
+      },
+      "ui.ws.onboarding.industry_physio": {
+        "de-CH": "Physiotherapie",
+        "en-US": "Physiotherapy"
+      },
+      "ui.ws.onboarding.industry_physio_text": {
+        "de-CH": "Patientenakte, Verordnungen, Tarif 312",
+        "en-US": "Patient records, prescriptions, tariff 312"
+      },
+      "ui.ws.onboarding.industry_spitex": {
+        "de-CH": "Spitex & Pflege",
+        "en-US": "Home care"
+      },
+      "ui.ws.onboarding.industry_spitex_text": {
+        "de-CH": "Einsatzplanung, Pflegedokumentation",
+        "en-US": "Visit planning, care documentation"
+      },
+      "ui.ws.onboarding.industry_services": {
+        "de-CH": "Dienstleistung & Büro",
+        "en-US": "Services & office"
+      },
+      "ui.ws.onboarding.industry_services_text": {
+        "de-CH": "Kontakte, Aufgaben, Rechnungen",
+        "en-US": "Contacts, tasks, invoices"
+      },
+      "ui.ws.onboarding.modules_text": {
+        "de-CH": "Kontakte, Kalender und Dokumente sind immer dabei. Du kannst Module später jederzeit ändern.",
+        "en-US": "Contacts, calendar and documents are always included. You can change modules at any time."
+      },
+      "ui.ws.onboarding.invites": {
+        "de-CH": "E-Mail-Adressen",
+        "en-US": "Email addresses"
+      },
+      "ui.ws.onboarding.invites_hint": {
+        "de-CH": "Getrennt durch Komma oder Zeilenumbruch. Alle erhalten die Rolle Benutzer.",
+        "en-US": "Separated by comma or line break. Everyone gets the User role."
+      },
+      "ui.ws.onboarding.skip": {
+        "de-CH": "Später einladen",
+        "en-US": "Invite later"
+      },
+      "ui.ws.onboarding.demo": {
+        "de-CH": "Beispieldaten anlegen",
+        "en-US": "Add sample data"
+      },
+      "ui.ws.onboarding.demo_text": {
+        "de-CH": "Ein paar Kontakte, Termine und Aufgaben zum Ausprobieren.",
+        "en-US": "A few contacts, appointments and tasks to try things out."
+      },
+      "ui.ws.onboarding.summary": {
+        "de-CH": "«{name}» mit {modules} Modulen und {invites} Einladungen. Die Testphase dauert 14 Tage.",
+        "en-US": "“{name}” with {modules} modules and {invites} invitations. The trial lasts 14 days."
+      },
+      "ui.ws.onboarding.create": {
+        "de-CH": "Arbeitsbereich erstellen",
+        "en-US": "Create workspace"
+      },
+      "ui.ws.invitation.text": {
+        "de-CH": "Du wurdest in «{tenant}» als {role} eingeladen.",
+        "en-US": "You were invited to “{tenant}” as {role}."
+      },
+      "ui.ws.invitation.accepted_login": {
+        "de-CH": "Einladung angenommen. Melde dich jetzt an.",
+        "en-US": "Invitation accepted. Sign in now."
+      },
+      "ui.ws.invitation.demo_password": {
+        "de-CH": "Im Prototyp erhält dein neues Konto das Passwort {password}.",
+        "en-US": "In the prototype your new account gets the password {password}."
+      },
+      "ui.ws.admin.title": {
+        "de-CH": "CLinks Plattform",
+        "en-US": "CLinks platform"
+      },
+      "ui.ws.admin.text": {
+        "de-CH": "Alle Mandanten mit Nutzung, Feature-Flags und Support-Zugang.",
+        "en-US": "All tenants with usage, feature flags and support access."
+      },
+      "ui.ws.admin.search": {
+        "de-CH": "Mandant suchen",
+        "en-US": "Search tenant"
+      },
+      "ui.ws.admin.plan": {
+        "de-CH": "Abo",
+        "en-US": "Plan"
+      },
+      "ui.ws.admin.trial_until": {
+        "de-CH": "Test bis {date}",
+        "en-US": "Trial until {date}"
+      },
+      "ui.ws.admin.flag_command_palette": {
+        "de-CH": "Befehlspalette",
+        "en-US": "Command palette"
+      },
+      "ui.ws.admin.flag_beta_reports": {
+        "de-CH": "Beta-Auswertungen",
+        "en-US": "Beta reports"
+      },
+      "ui.ws.admin.flag_assistant": {
+        "de-CH": "Assistent",
+        "en-US": "Assistant"
+      },
+      "ui.ws.admin.flag_saved": {
+        "de-CH": "Feature-Flag gespeichert",
+        "en-US": "Feature flag saved"
+      },
+      "ui.ws.admin.impersonate": {
+        "de-CH": "Als Admin ansehen",
+        "en-US": "View as admin"
+      },
+      "ui.ws.settings.default_language": {
+        "de-CH": "Standardsprache",
+        "en-US": "Default language"
+      },
+      "ui.ws.settings.time_zone": {
+        "de-CH": "Zeitzone",
+        "en-US": "Time zone"
       }
     }
   }
