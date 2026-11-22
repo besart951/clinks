@@ -70,7 +70,7 @@ export class OnboardingModel {
 		this.busy = true;
 		this.error = '';
 		try {
-			const tenant = await this.#workspace.account.completeOnboarding(
+			const tenantId = await this.#workspace.auth.createTenant(
 				{
 					companyName: this.companyName,
 					industry: this.industry,
@@ -81,7 +81,7 @@ export class OnboardingModel {
 				(tenantId) => this.#workspace.seedDemo(tenantId),
 			);
 			await this.#workspace.session.refresh();
-			await this.#workspace.session.switchTenant(tenant.id);
+			await this.#workspace.session.switchTenant(tenantId);
 			return true;
 		} catch (error) {
 			this.error = this.#workspace.message(error);

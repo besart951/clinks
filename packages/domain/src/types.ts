@@ -58,7 +58,8 @@ export const coreModules: readonly ModuleKey[] = ['contacts', 'calendar', 'docum
 export const planCodes = ['starter', 'team', 'business'] as const;
 export type PlanCode = (typeof planCodes)[number];
 
-export type Industry = 'physio' | 'spitex' | 'services';
+export const industries = ['physio', 'spitex', 'services'] as const;
+export type Industry = (typeof industries)[number];
 
 export interface Address {
 	street: string;

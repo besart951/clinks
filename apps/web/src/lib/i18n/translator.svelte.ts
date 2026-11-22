@@ -1,7 +1,7 @@
 import type { CalendarDate, Rappen, Timestamp } from '@clinks/domain/types';
 import { fromCalendarDate } from '@clinks/domain/dates';
 import type { Preferences } from '../platform/types.ts';
-import { bundleFor, defaultLocale, interpolate, locales, type Locale } from './catalog.ts';
+import { bundleFor, defaultLocale, interpolate, locales, type Locale } from '@clinks/i18n-types/catalog';
 
 export type TranslationParams = { [name: string]: string | number };
 

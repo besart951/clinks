@@ -1,4 +1,4 @@
-import catalog from '../../../../../localization/product-catalog.json' with { type: 'json' };
+import catalog from '../../../localization/product-catalog.json' with { type: 'json' };
 
 export type Locale = 'de-CH' | 'en-US';
 export const locales: readonly Locale[] = ['de-CH', 'en-US'];
@@ -8,8 +8,8 @@ type LocalizedValues = { [locale: string]: string };
 type Catalog = { defaultLocale: string; translations: { [scope: string]: { [key: string]: LocalizedValues } } };
 
 /**
- * The prototype has no translation API, so it resolves the source-controlled product catalog itself:
- * shared texts in the default language, overlaid with the requested language, exactly as the server does.
+ * Resolves the source-controlled product catalog for the web app and the API alike:
+ * shared texts in the default language, overlaid with the requested language.
  */
 export function bundleFor(locale: Locale, source: Catalog = catalog as Catalog): Map<string, string> {
 	const bundle = new Map<string, string>();

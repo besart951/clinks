@@ -10,11 +10,14 @@
   },
   "scripts": {
     "dev": "pnpm --filter @clinks/web dev",
+    "dev:api": "pnpm --filter @clinks/api dev",
     "dev:services": "docker compose -f infra/compose.dev.yml up -d",
     "dev:services:down": "docker compose -f infra/compose.dev.yml down",
+    "db:migrate": "DATABASE_OWNER_URL=${DATABASE_OWNER_URL:-postgres://clinks:clinks-dev@localhost:5432/clinks} pnpm --filter @clinks/db migrate",
     "check": "pnpm -r check",
     "lint": "eslint .",
     "test": "pnpm -r test",
+    "test:integration": "pnpm --filter @clinks/db --filter @clinks/api test:integration",
     "test:e2e": "pnpm --filter @clinks/web test:e2e",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -22,7 +25,8 @@
     "check:translations": "node scripts/generate-translation-catalog.mjs --check",
     "build": "pnpm -r build",
     "build:artifact": "pnpm --filter @clinks/web build:artifact",
-    "verify": "pnpm format:check && pnpm lint && pnpm check:translations && pnpm check && pnpm test && pnpm build"
+    "verify": "pnpm format:check && pnpm lint && pnpm check:translations && pnpm check:openapi && pnpm check && pnpm test && pnpm build",
+    "check:openapi": "pnpm --filter @clinks/api openapi --check"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

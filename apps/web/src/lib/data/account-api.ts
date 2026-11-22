@@ -11,10 +11,8 @@ import {
 import { administratorPermissions, roleGrants, userPermissions } from '@clinks/domain/permissions';
 import { planFor, priceFor } from '@clinks/domain/plans';
 import type {
-	Industry,
 	Invitation,
 	Membership,
-	ModuleKey,
 	NotificationPreferences,
 	Permission,
 	PlanCode,
@@ -25,6 +23,8 @@ import type {
 } from '@clinks/domain/types';
 import { MockApiError, stamp, type MockDatabase, type Snapshot, type TableName } from './database.ts';
 import { appendAudit, validationError } from './repository.ts';
+import { demoPassword } from './seed.ts';
+import type { NewTenant } from '../session/auth-gateway.ts';
 import { invitationSchema, roleSchema } from '@clinks/contracts/schemas';
 
 export interface Caller {
@@ -51,14 +51,6 @@ export interface TenantOverview {
 	members: number;
 	contacts: number;
 	invoices: number;
-}
-
-export interface OnboardingInput {
-	companyName: string;
-	industry: Industry;
-	modules: ModuleKey[];
-	invites: string[];
-	demoData: boolean;
 }
 
 export function roleFor(db: MockDatabase, userId: UserId | null, tenantId: TenantId | null): Role | null {
@@ -136,8 +128,14 @@ export class AccountApi {
 		return this.#db.request(() => undefined);
 	}
 
-	resetPassword(email: string, password: string): Promise<void> {
+	/** The demo mail is never sent; its code is always 000000. */
+	resetPassword(email: string, code: string, password: string): Promise<void> {
 		return this.#db.request(() => {
+			if (code.trim() !== '000000') {
+				throw new MockApiError('validation', this.#localize('error.ws.invalid_code'), {
+					code: this.#localize('error.ws.invalid_code'),
+				});
+			}
 			if (password.length < 8) {
 				throw new MockApiError('validation', this.#localize('error.validation'), {
 					password: this.#localize('error.ws.password_too_short'),
@@ -165,7 +163,7 @@ export class AccountApi {
 		});
 	}
 
-	completeOnboarding(input: OnboardingInput, seedDemo: (tenantId: TenantId) => Partial<Snapshot>): Promise<Tenant> {
+	completeOnboarding(input: NewTenant, seedDemo: (tenantId: TenantId) => Partial<Snapshot>): Promise<Tenant> {
 		return this.#db.request(() => {
 			const userId = this.#requireUser();
 			if (!input.companyName.trim()) {
@@ -387,7 +385,10 @@ export class AccountApi {
 	}
 
 	/** Simulates the invitee clicking the link in the email, so the flow can be tried without a mailbox. */
-	acceptInvitation(id: InvitationId, name: { firstName: string; lastName: string }): Promise<Membership> {
+	acceptInvitation(
+		id: InvitationId,
+		name: { firstName: string; lastName: string; password?: string },
+	): Promise<Membership> {
 		return this.#db.request(() => {
 			const invitation = this.#db.table('invitations').find((row) => row.id === id && row.status === 'pending');
 			if (!invitation) throw new MockApiError('not_found', this.#localize('error.invitation_invalid'));
@@ -402,7 +403,7 @@ export class AccountApi {
 					lastName: name.lastName,
 					avatarColor: '#1d4ed8',
 					avatarDataUrl: null,
-					password: 'demo1234',
+					password: name.password ?? demoPassword,
 					emailVerified: true,
 					twoFactorEnabled: false,
 					locale: 'de-CH',

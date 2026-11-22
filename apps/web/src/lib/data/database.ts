@@ -174,6 +174,21 @@ export class MockDatabase {
 		(this.#data as { [table: string]: unknown })[name] = rows;
 	}
 
+	/**
+	 * Takes rows a real backend owns (the signed-in account, its tenants and roles) and replaces local rows
+	 * with the same id, so the mock-backed screens keep working until PowerSync takes over in phase 4.
+	 */
+	merge(rows: Partial<Snapshot>) {
+		const changed = Object.keys(rows) as TableName[];
+		for (const name of changed) {
+			const incoming = rows[name] as { id: string }[];
+			const ids = new Set(incoming.map((row) => row.id));
+			const kept = (this.#data[name] as { id: string }[]).filter((row) => !ids.has(row.id));
+			(this.#data as { [table: string]: unknown })[name] = [...kept, ...incoming];
+		}
+		this.#commit(changed, null);
+	}
+
 	on(listener: (table: TableName) => void): () => void {
 		this.#listeners.add(listener);
 		return () => this.#listeners.delete(listener);

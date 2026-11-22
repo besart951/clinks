@@ -11,7 +11,7 @@
 	import Choice from '#lib/components/common/Choice.svelte';
 	import PersonAvatar from '#lib/components/common/PersonAvatar.svelte';
 	import { ProfileModel } from '#lib/features/settings/settings.svelte';
-	import { locales, type Locale } from '#lib/i18n/catalog';
+	import { locales, type Locale } from '@clinks/i18n-types/catalog';
 	import type { ThemeMode } from '#lib/state/theme.svelte';
 	import { useWorkspace } from '#lib/workspace.svelte';
 

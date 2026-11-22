@@ -10,6 +10,10 @@ import { roleGrants } from '@clinks/domain/permissions';
 import type { TenantId } from '@clinks/domain/ids';
 import { Translator, type TranslationParams } from './i18n/translator.svelte.ts';
 import { Session } from './session/session.svelte.ts';
+import type { AuthGateway } from './session/auth-gateway.ts';
+import { MockAuthGateway } from './session/mock-auth.ts';
+import { RemoteAuthGateway } from './session/remote-auth.ts';
+import { ApiClient } from './data/api-client.ts';
 import { ThemeController } from './state/theme.svelte.ts';
 import type { Platform } from './platform/types.ts';
 import { createWebPlatform } from './platform/web.svelte.ts';
@@ -29,6 +33,8 @@ export class Workspace {
 	readonly theme: ThemeController;
 	readonly db: MockDatabase;
 	readonly account: AccountApi;
+	/** Sign-in, onboarding and invitations: against the API when `VITE_API_URL` is set, otherwise the demo. */
+	readonly auth: AuthGateway;
 	readonly session: Session;
 	readonly api: WorkspaceApi;
 	readonly persistent: boolean;
@@ -56,7 +62,11 @@ export class Workspace {
 			tenantId: () => this.session.tenantId,
 			localize,
 		});
-		this.session = new Session(this.account, platform.secure);
+		const apiUrl = import.meta.env.VITE_API_URL as string | undefined;
+		this.auth = apiUrl
+			? new RemoteAuthGateway(new ApiClient(apiUrl, () => this.i18n.locale, localize), this.db)
+			: new MockAuthGateway(this.account, localize);
+		this.session = new Session(this.account, this.auth, platform.secure);
 		this.api = new WorkspaceApi(this.db, {
 			tenantId: () => this.session.tenantId,
 			actorId: () => this.session.callerId(),

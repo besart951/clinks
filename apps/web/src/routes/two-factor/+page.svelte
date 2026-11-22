@@ -27,7 +27,7 @@
 			id="code"
 			label={workspace.t('ui.ws.auth.code')}
 			error={form.error}
-			hint={workspace.t('ui.ws.auth.two_factor_demo_hint')}
+			hint={workspace.auth.remote ? undefined : workspace.t('ui.ws.auth.two_factor_demo_hint')}
 		>
 			<Input
 				id="code"

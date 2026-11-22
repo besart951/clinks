@@ -26,6 +26,8 @@ services:
     image: journeyapps/powersync-service:${POWERSYNC_VERSION:-1.29.1}
     restart: unless-stopped
     command: ['start', '-r', 'unified']
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
     depends_on:
       postgres:
         condition: service_healthy
@@ -35,8 +37,8 @@ services:
       PS_DATA_SOURCE_URI: postgresql://${PG_USER:-clinks}:${PG_PASSWORD:-clinks-dev}@postgres:5432/${PG_DATABASE:-clinks}
       PS_STORAGE_SOURCE_URI: postgresql://${PG_USER:-clinks}:${PG_PASSWORD:-clinks-dev}@postgres:5432/powersync_storage
       PS_PORT: '8080'
-      # Development signing secret (base64url). Phase 2 replaces this with the API's JWKS endpoint.
-      PS_DEV_JWT_SECRET: ${PS_DEV_JWT_SECRET:-Y2xpbmtzLWRldi1vbmx5LXNlY3JldC1jaGFuZ2UtbWU}
+      # The API runs on the host (`pnpm dev:api`) and publishes its signing keys here.
+      PS_JWKS_URI: ${PS_JWKS_URI:-http://host.docker.internal:8787/.well-known/jwks.json}
       PS_ADMIN_TOKEN: ${PS_ADMIN_TOKEN:-clinks-dev-admin-token}
     ports:
       - '${POWERSYNC_PORT:-8080}:8080'

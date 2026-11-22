@@ -1,11 +1,13 @@
 # clinks
 
-clinks is a backend-free, clickable prototype of the complete CLinks SaaS: platform shell, contacts, calendar, tasks,
-mail and campaigns, documents, finance with Swiss QR bills, Physio and Spitex — all running on a mock API in the
-browser. Details: [`apps/web`](apps/web/README.md).
+clinks is the CLinks SaaS: platform shell, contacts, calendar, tasks, mail and campaigns, documents, finance with
+Swiss QR bills, Physio and Spitex. Sign-in, accounts and tenants run on the real API; the screens behind them still
+use an in-browser mock until PowerSync takes over (phase 4). Details: [`apps/web`](apps/web/README.md).
 
 ```
 apps/web        SvelteKit app (Svelte 5, Tailwind 4), mock API, tests
+apps/api        Hono API: own sign-in (argon2id, TOTP), EdDSA tokens + JWKS, tenants, invitations, OpenAPI
+packages/db           Kysely types, SQL migrations, row-level security, tenant-scoped transactions
 packages/ui           shadcn-svelte components and the CLinks UI kit
 packages/domain       pure business rules and types (money, QR bill, scheduling, permissions)
 packages/contracts    shared Zod schemas and repository interfaces
@@ -21,18 +23,23 @@ You need Node.js 26 LTS, pnpm 12 and Docker.
 ```sh
 pnpm install
 pnpm dev:services   # Postgres 18, PowerSync, S3 (RustFS), Mailpit – see infra/compose.dev.yml
-pnpm dev            # http://localhost:5176
+pnpm db:migrate     # applies packages/db/migrations as the database owner
+pnpm dev:api        # http://localhost:8787 – OpenAPI at /openapi.json, keys at /.well-known/jwks.json
+VITE_API_URL=http://localhost:8787 pnpm dev   # http://localhost:5176, signed in through the API
 ```
 
-Demo sign-in: `besi@stille.ch` / `demo1234` (more accounts on the sign-in page). Until phase 3 the app still runs on its
-in-browser mock API; the services are there for the API and sync work that follows.
+Without `VITE_API_URL` the app runs fully on the mock (demo sign-in `besi@stille.ch` / `demo1234`, code `000000`) –
+that is also what the single-file build and `pnpm test:e2e` use. With it, sign-up codes, reset links and invitations
+arrive in Mailpit. Outside production the API makes a signing key at start-up; for a stable one run
+`pnpm --filter @clinks/api keys` and put the line into `apps/api/.env` (see `apps/api/.env.example`).
 
-| Service     | URL                                                                             |
-| ----------- | ------------------------------------------------------------------------------- |
-| PostgreSQL  | `postgresql://clinks:clinks-dev@localhost:5432/clinks` (logical replication on) |
-| PowerSync   | http://localhost:8080 (probe: `/probes/liveness`)                               |
-| S3 (RustFS) | http://localhost:9000, console http://localhost:9001                            |
-| Mailpit     | http://localhost:8025                                                           |
+| Service     | URL                                                                                         |
+| ----------- | ------------------------------------------------------------------------------------------- |
+| PostgreSQL  | `postgresql://clinks:clinks-dev@localhost:5432/clinks` (logical replication on)             |
+| API role    | `postgresql://clinks_api:clinks-api-dev@localhost:5432/clinks` (row-level security applies) |
+| PowerSync   | http://localhost:8080 (probe: `/probes/liveness`)                                           |
+| S3 (RustFS) | http://localhost:9000, console http://localhost:9001                                        |
+| Mailpit     | http://localhost:8025                                                                       |
 
 Defaults work without configuration; override them in `infra/.env` (see `infra/.env.example`). Stripe webhooks:
 `docker compose -f infra/compose.dev.yml --profile payments up -d` with a test-mode key.
@@ -42,9 +49,14 @@ pnpm 12 refuses packages published less than a day ago (`minimumReleaseAge`); ke
 ## Checks
 
 ```sh
-pnpm verify         # format, lint, translations, type checks, unit tests (Vitest), build
-pnpm test:e2e       # Playwright (uses the installed Chrome)
+pnpm verify             # format, lint, translations, type checks, unit tests (Vitest), build
+pnpm test:integration   # API and database against real Postgres (needs dev:services); one fresh DB per file
+pnpm test:e2e           # Playwright on the mock (uses the installed Chrome)
+pnpm --filter @clinks/web test:e2e:remote   # Playwright against the API (needs dev:services and dev:api)
 ```
+
+After changing a route or a contract, run `pnpm --filter @clinks/api openapi` to refresh
+`packages/contracts/openapi.json`.
 
 After changing `localization/product-catalog.json` run `pnpm generate:translations`.
 

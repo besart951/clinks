@@ -90,23 +90,31 @@ export class CodeForm extends Form {
 export class PasswordResetForm extends Form {
 	step = $state<'request' | 'sent' | 'reset' | 'done'>('request');
 	email = $state('');
+	/** The demo code, or the token from the link in the reset mail. */
 	code = $state('');
 	password = $state('');
+	/** Opened from the mail link: the token is known, only the new password is missing. */
+	fromLink = $state(false);
+
+	constructor(workspace: Workspace, linkToken: string | null = null) {
+		super(workspace);
+		if (linkToken) {
+			this.code = linkToken;
+			this.fromLink = true;
+			this.step = 'reset';
+		}
+	}
 
 	request() {
 		return this.submitWith(async () => {
-			await this.workspace.account.requestPasswordReset(this.email);
+			await this.workspace.auth.requestPasswordReset(this.email);
 			this.step = 'sent';
 		});
 	}
 
 	reset() {
 		return this.submitWith(async () => {
-			if (this.code.trim() !== '000000') {
-				this.fields = { code: this.workspace.t('error.ws.invalid_code') };
-				throw new Error(this.workspace.t('error.ws.invalid_code'));
-			}
-			await this.workspace.account.resetPassword(this.email, this.password);
+			await this.workspace.auth.resetPassword({ email: this.email, token: this.code, password: this.password });
 			this.step = 'done';
 		});
 	}

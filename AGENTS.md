@@ -9,12 +9,18 @@ Before changing this repository, read [codestyle.md](codestyle.md) and [apps/web
 - Screens never touch storage directly; they go through the repositories in `apps/web/src/lib/data`.
 - Tenant-scoped data is always read and written through the tenant-scoped repository.
 - Generate persistent entity IDs as UUIDv7.
-- Errors come back localized from the mock API; screens render them verbatim.
+- Errors come back localized from the API (and the mock API); screens render them verbatim. API errors are
+  `ApiError` with a catalog key, never a hand-written message.
+- The API reads and writes tenant data only inside `inScope(db, { tenantId, userId }, …)`, so row-level security
+  applies; it connects as `clinks_api`, never as the database owner. Secrets (password hashes, TOTP secrets, token
+  hashes) live in the `auth` schema, which is never published to PowerSync.
+- Schema changes are new files in `packages/db/migrations`; applied migrations are never edited.
 - Keep secrets out of the repository.
 
 ## Quality gate
 
-Before handoff, run `pnpm verify` and, for UI changes, `pnpm test:e2e`. Check for dead code, long methods,
+Before handoff, run `pnpm verify`, for API or database changes `pnpm test:integration`, and for UI changes
+`pnpm test:e2e`. Check for dead code, long methods,
 duplicated branches and primitive IDs where a domain type is appropriate.
 
 ## Modern web guidance

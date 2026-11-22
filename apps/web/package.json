@@ -13,7 +13,8 @@
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:e2e:remote": "VITE_API_URL=${VITE_API_URL:-http://localhost:8787} playwright test"
   },
   "dependencies": {
     "@clinks/contracts": "workspace:*",

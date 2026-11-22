@@ -6,7 +6,7 @@ import { campaignChecks, fillPlaceholders } from '../src/lib/features/mail/templ
 import { buildReport } from '../src/lib/features/finance/reports.svelte.ts';
 import { prescriptionProgress } from '../src/lib/features/physio/physio.svelte.ts';
 import { mentionedPeople } from '../src/lib/features/collaboration/comments.svelte.ts';
-import { bundleFor, interpolate } from '../src/lib/i18n/catalog.ts';
+import { bundleFor, interpolate } from '@clinks/i18n-types/catalog';
 
 describe('contacts import', () => {
 	it('parses semicolon CSV with quotes and German headers', () => {
