@@ -3,3 +3,8 @@ node_modules
 **/build
 **/dist
 packages/i18n-types/src/product-translation-key.generated.ts
+**/build-artifact
+**/test-results
+pnpm-lock.yaml
+# Workflow files are edited by hand on GitHub until the CI update in phase 0 lands
+.github/workflows

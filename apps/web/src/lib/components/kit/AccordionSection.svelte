@@ -1,0 +1,68 @@
+<script lang="ts" module>
+	export interface SectionSpec {
+		/** Stable id; the open state is remembered per browser under it. */
+		id: string;
+		title: string;
+		/** Muted summary after the title: a count, the insurance model … */
+		count?: string | number;
+		defaultOpen?: boolean;
+	}
+</script>
+
+<script lang="ts">
+	import { untrack, type Snippet } from 'svelte';
+	import ChevronDown from '@lucide/svelte/icons/chevron-down';
+	import { rememberSection, sectionOpen } from './inline-edit.svelte';
+
+	let { section, tools, children }: { section: SectionSpec; tools?: Snippet; children: Snippet } = $props();
+
+	let open = $state(untrack(() => sectionOpen(section.id, section.defaultOpen ?? true)));
+	const contentId = $derived(`section-${section.id}`);
+
+	function toggle() {
+		open = !open;
+		rememberSection(section.id, open);
+	}
+</script>
+
+<section class="reveal-scope border-b" data-open={open ? '' : undefined}>
+	<div class="flex items-center gap-1">
+		<button
+			type="button"
+			class="hover:text-foreground flex h-12 flex-1 items-center gap-2 rounded-md px-1 text-left text-[13px] font-semibold"
+			aria-expanded={open}
+			aria-controls={contentId}
+			onclick={toggle}
+		>
+			<ChevronDown
+				class="text-muted-foreground size-4 transition-transform duration-300 ease-[var(--ease-out)] {open
+					? ''
+					: '-rotate-90'}"
+			/>
+			{section.title}
+			{#if section.count !== undefined && section.count !== ''}<span
+					class="text-muted-foreground font-normal tabular-nums"
+				>
+					{section.count}
+				</span>{/if}
+		</button>
+		{#if tools}<span class="reveal flex items-center gap-1">{@render tools()}</span>{/if}
+	</div>
+	<div
+		id={contentId}
+		class="grid transition-[grid-template-rows] duration-300 ease-[var(--ease-out)] {open
+			? 'grid-rows-[1fr]'
+			: 'grid-rows-[0fr]'}"
+		inert={!open}
+	>
+		<div class="overflow-hidden">
+			<div
+				class="pb-3 transition-[opacity,transform] duration-300 ease-[var(--ease-out)] {open
+					? 'translate-y-0 opacity-100 delay-75'
+					: '-translate-y-1 opacity-0'}"
+			>
+				{@render children()}
+			</div>
+		</div>
+	</div>
+</section>

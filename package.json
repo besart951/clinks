@@ -1,27 +1,37 @@
 {
   "name": "clinks",
   "private": true,
+  "type": "module",
   "version": "0.1.0",
-  "packageManager": "pnpm@10.28.2",
+  "packageManager": "pnpm@12.21.0",
   "engines": {
-    "node": ">=24.13.0",
-    "pnpm": ">=10.28.2"
+    "node": ">=26.13.0",
+    "pnpm": ">=12.21.0"
   },
   "scripts": {
-    "dev": "pnpm --filter @clinks/workspace dev",
-    "check": "pnpm format:frontend:check && pnpm -r check && pnpm check:translations",
-    "test": "pnpm --filter @clinks/workspace test",
-    "test:e2e": "pnpm --filter @clinks/workspace test:e2e",
-    "format:frontend": "prettier --write apps packages .vscode package.json pnpm-workspace.yaml prettier.config.mjs",
-    "format:frontend:check": "prettier --check apps packages .vscode package.json pnpm-workspace.yaml prettier.config.mjs",
+    "dev": "pnpm --filter @clinks/web dev",
+    "dev:services": "docker compose -f infra/compose.dev.yml up -d",
+    "dev:services:down": "docker compose -f infra/compose.dev.yml down",
+    "check": "pnpm -r check",
+    "lint": "eslint .",
+    "test": "pnpm -r test",
+    "test:e2e": "pnpm --filter @clinks/web test:e2e",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "generate:translations": "node scripts/generate-translation-catalog.mjs",
     "check:translations": "node scripts/generate-translation-catalog.mjs --check",
     "build": "pnpm -r build",
-    "build:artifact": "pnpm --filter @clinks/workspace build:artifact",
-    "verify:push": "pnpm check && pnpm test && pnpm build"
+    "build:artifact": "pnpm --filter @clinks/web build:artifact",
+    "verify": "pnpm format:check && pnpm lint && pnpm check:translations && pnpm check && pnpm test && pnpm build"
   },
   "devDependencies": {
-    "prettier": "^3.9.6",
-    "prettier-plugin-svelte": "^4.1.1"
+    "@eslint/js": "10.0.1",
+    "eslint": "10.15.0",
+    "eslint-plugin-svelte": "3.24.1",
+    "globals": "17.14.0",
+    "prettier": "3.10.1",
+    "prettier-plugin-svelte": "4.2.0",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.73.0"
   }
 }
