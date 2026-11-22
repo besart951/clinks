@@ -14,6 +14,10 @@ import type { AuthGateway } from './session/auth-gateway.ts';
 import { MockAuthGateway } from './session/mock-auth.ts';
 import { RemoteAuthGateway } from './session/remote-auth.ts';
 import { ApiClient } from './data/api-client.ts';
+import type { RequestContext } from './data/repository.ts';
+import { SyncEngine } from './sync/sync-engine.svelte.ts';
+import { SyncedRepository } from './sync/synced-repository.ts';
+import { appointmentSchema, contactSchema } from '@clinks/contracts/schemas';
 import { ThemeController } from './state/theme.svelte.ts';
 import type { Platform } from './platform/types.ts';
 import { createWebPlatform } from './platform/web.svelte.ts';
@@ -37,6 +41,8 @@ export class Workspace {
 	readonly auth: AuthGateway;
 	readonly session: Session;
 	readonly api: WorkspaceApi;
+	/** The synced local database; null on the mock. */
+	readonly sync: SyncEngine | null;
 	readonly persistent: boolean;
 	/** The "N" shortcut runs the create action of the page that is open. */
 	newAction = $state<(() => void) | null>(null);
@@ -62,17 +68,44 @@ export class Workspace {
 			tenantId: () => this.session.tenantId,
 			localize,
 		});
-		const apiUrl = import.meta.env.VITE_API_URL as string | undefined;
-		this.auth = apiUrl
-			? new RemoteAuthGateway(new ApiClient(apiUrl, () => this.i18n.locale, localize), this.db)
-			: new MockAuthGateway(this.account, localize);
-		this.session = new Session(this.account, this.auth, platform.secure);
-		this.api = new WorkspaceApi(this.db, {
+		const context: RequestContext = {
 			tenantId: () => this.session.tenantId,
 			actorId: () => this.session.callerId(),
 			can: (permission) => roleGrants(roleFor(this.db, this.session.callerId(), this.session.tenantId), permission),
 			localize,
-		});
+		};
+		const apiUrl = import.meta.env.VITE_API_URL as string | undefined;
+		if (apiUrl) {
+			const client = new ApiClient(apiUrl, () => this.i18n.locale, localize);
+			this.sync = new SyncEngine(
+				client,
+				(import.meta.env.VITE_POWERSYNC_URL as string | undefined) ?? 'http://localhost:8080',
+				{
+					changed: (table) => this.db.touch(table),
+					rejected: (message) => toast.error(message),
+				},
+			);
+			this.auth = new RemoteAuthGateway(client, this.db, this.sync);
+			this.api = new WorkspaceApi(this.db, context, {
+				contacts: new SyncedRepository(this.sync, context, {
+					table: 'contacts',
+					read: 'contacts.read',
+					write: 'contacts.write',
+					schema: contactSchema,
+				}),
+				appointments: new SyncedRepository(this.sync, context, {
+					table: 'appointments',
+					read: 'calendar.read',
+					write: 'calendar.write',
+					schema: appointmentSchema,
+				}),
+			});
+		} else {
+			this.sync = null;
+			this.auth = new MockAuthGateway(this.account, localize);
+			this.api = new WorkspaceApi(this.db, context);
+		}
+		this.session = new Session(this.account, this.auth, platform.secure);
 		this.db.on((table) => (this.versions[table] += 1));
 		this.db.onPending((pending) => (this.network.pending = pending));
 	}

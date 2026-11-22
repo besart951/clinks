@@ -1,5 +1,8 @@
 import { CamelCasePlugin, Kysely, PostgresDialect } from 'kysely';
 import pg from 'pg';
+
+// `date` columns stay 'YYYY-MM-DD' strings; as JS Dates they would shift with the server's time zone.
+pg.types.setTypeParser(pg.types.builtins.DATE, (value) => value);
 import type { Database } from './schema.ts';
 
 export type Db = Kysely<Database>;

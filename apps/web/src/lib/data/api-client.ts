@@ -22,6 +22,7 @@ export class ApiClient {
 	readonly #locale: () => string;
 	readonly #localize: (key: string) => string;
 	#accessToken: string | null = null;
+	#expiresAt = 0;
 	#refreshing: Promise<boolean> | null = null;
 
 	constructor(baseUrl: string, locale: () => string, localize: (key: string) => string) {
@@ -46,6 +47,13 @@ export class ApiClient {
 	/** Keeps the session the API just opened. */
 	adopt(session: SessionResponse) {
 		this.#accessToken = session.accessToken;
+		this.#expiresAt = new Date(session.expiresAt).getTime();
+	}
+
+	/** A valid access token for other services (PowerSync); renewed a minute before it expires. */
+	async accessToken(): Promise<string | null> {
+		if (this.#accessToken && this.#expiresAt - Date.now() > 60_000) return this.#accessToken;
+		return (await this.refresh()) ? this.#accessToken : null;
 	}
 
 	/** A new access token from the refresh cookie; one request at a time, even if many calls hit a 401 together. */
@@ -66,6 +74,7 @@ export class ApiClient {
 
 	forget() {
 		this.#accessToken = null;
+		this.#expiresAt = 0;
 	}
 
 	async #send(method: string, path: string, body: unknown): Promise<Response> {

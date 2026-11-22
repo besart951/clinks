@@ -1,12 +1,34 @@
 # yaml-language-server: $schema=https://unpkg.com/@powersync/service-sync-rules@latest/schema/sync_rules.json
-# Sync streams. Phase 3 adds the tenant-scoped streams (contacts, appointments, …) filtered by JWT claims.
-# Changes are not watched: restart the service after editing.
+# Sync streams. Changes are not watched: restart the service after editing.
+#
+# Each stream syncs one table of the tenant in the access token (`tenant_id` claim), and only while the
+# user's membership there is active and its role grants the read permission. Membership and role are
+# read from the replicated tables, so a removed member stops syncing without waiting for a new token.
 
 config:
   edition: 3
+  timestamp_max_precision: milliseconds
 
 streams:
   system:
     auto_subscribe: true
     queries:
       - SELECT * FROM system_status
+
+  contacts:
+    auto_subscribe: true
+    query: |
+      SELECT * FROM contacts WHERE tenant_id IN (
+        SELECT m.tenant_id FROM memberships m INNER JOIN roles r ON r.id = m.role_id
+        WHERE m.user_id = auth.user_id() AND m.tenant_id = auth.parameter('tenant_id') AND m.status = 'active'
+          AND 'contacts.read' IN r.permissions
+      )
+
+  appointments:
+    auto_subscribe: true
+    query: |
+      SELECT * FROM appointments WHERE tenant_id IN (
+        SELECT m.tenant_id FROM memberships m INNER JOIN roles r ON r.id = m.role_id
+        WHERE m.user_id = auth.user_id() AND m.tenant_id = auth.parameter('tenant_id') AND m.status = 'active'
+          AND 'calendar.read' IN r.permissions
+      )

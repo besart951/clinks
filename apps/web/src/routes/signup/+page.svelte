@@ -1,4 +1,5 @@
 <script lang="ts">
+	import * as Alert from '@clinks/ui/components/ui/alert';
 	import { Button } from '@clinks/ui/components/ui/button';
 	import { Input } from '@clinks/ui/components/ui/input';
 	import { Checkbox } from '@clinks/ui/components/ui/checkbox';
@@ -19,6 +20,12 @@
 
 <AuthShell title={workspace.t('ui.create_account')} description={workspace.t('ui.ws.auth.signup_text')}>
 	<form class="space-y-4" onsubmit={submit} novalidate>
+		<!-- Errors without a field (too many attempts, offline) would otherwise go unseen. -->
+		{#if form.error && Object.keys(form.fields).length === 0}
+			<Alert.Root variant="destructive" aria-live="polite">
+				<Alert.Description>{form.error}</Alert.Description>
+			</Alert.Root>
+		{/if}
 		<div class="grid grid-cols-2 gap-3">
 			<FormField id="first-name" label={workspace.t('ui.ws.field.first_name')} error={form.fields.firstName}>
 				<Input

@@ -18,6 +18,9 @@ export default defineConfig({
 			version: { pollInterval: artifact ? 0 : 300_000 },
 		}),
 	],
+	// PowerSync runs SQLite (WASM) in workers; Vite must not pre-bundle it.
+	optimizeDeps: { exclude: ['@powersync/web', '@journeyapps/wa-sqlite'] },
+	worker: { format: 'es' },
 	server: { port: 5176, fs: { allow: ['../..'] } },
 	// The single-file artifact carries its fonts as data URIs.
 	build: { assetsInlineLimit: artifact ? 10_000_000 : 4096 },

@@ -189,6 +189,11 @@ export class MockDatabase {
 		this.#commit(changed, null);
 	}
 
+	/** Tells screens that a table changed elsewhere (e.g. in the synced local database). */
+	touch(table: TableName) {
+		this.#emit(table);
+	}
+
 	on(listener: (table: TableName) => void): () => void {
 		this.#listeners.add(listener);
 		return () => this.#listeners.delete(listener);

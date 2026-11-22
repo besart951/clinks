@@ -4493,6 +4493,18 @@
       "ui.ws.roles.default_user": {
         "de-CH": "Benutzer",
         "en-US": "User"
+      },
+      "ui.ws.sync.label": {
+        "de-CH": "Sync-Status",
+        "en-US": "Sync status"
+      },
+      "ui.ws.sync.pending": {
+        "de-CH": "{count} Änderungen warten auf den Upload",
+        "en-US": "{count} changes waiting to upload"
+      },
+      "ui.ws.sync.last": {
+        "de-CH": "Zuletzt synchronisiert um {time}",
+        "en-US": "Last synced at {time}"
       }
     }
   }

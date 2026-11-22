@@ -82,6 +82,7 @@ export class Session {
 			this.status = resumed.verified ? 'authenticated' : 'verify_email';
 			await this.#load(resumed.userId, stored?.tenantId ?? null);
 			this.impersonatorId = stored?.userId === resumed.userId ? stored.impersonatorId : null;
+			await this.#selectTenant();
 		} catch (error) {
 			// Offline or a flaky connection: the last snapshot still opens the workspace.
 			const cached =
@@ -172,7 +173,13 @@ export class Session {
 		this.user = { id: userId } as User;
 		this.status = 'authenticated';
 		await this.#load(userId, null);
+		await this.#selectTenant();
 		this.#persist(true);
+	}
+
+	/** The gateway works in the same tenant as the session (the API's token carries it). */
+	async #selectTenant() {
+		if (this.tenantId) await this.#gateway.switchTenant(this.tenantId);
 	}
 
 	async #load(userId: UserId, preferredTenant: TenantId | null) {

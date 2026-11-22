@@ -1,4 +1,5 @@
 import * as contract from '@clinks/contracts/auth';
+import { syncWriteRequest } from '@clinks/contracts/sync';
 import { getConnInfo } from '@hono/node-server/conninfo';
 import { createRoute, OpenAPIHono, type RouteConfig } from '@hono/zod-openapi';
 import type { ProductTranslationKey } from '@clinks/i18n-types';
@@ -15,6 +16,7 @@ import { pickLocale, translate } from './i18n.ts';
 import { AuthService } from './services/auth.ts';
 import type { Caller, Services } from './services/context.ts';
 import { SessionService, type OpenedSession } from './services/sessions.ts';
+import { SyncService } from './services/sync.ts';
 import { TenantService } from './services/tenants.ts';
 import type { AccessClaims } from './tokens.ts';
 
@@ -32,6 +34,7 @@ export function createApp({ services, config }: AppOptions) {
 	const sessions = new SessionService(services);
 	const auth = new AuthService(services, sessions);
 	const tenants = new TenantService(services, sessions);
+	const sync = new SyncService(services);
 	const app = new OpenAPIHono<Env>({
 		defaultHook: validationHook,
 	});
@@ -48,7 +51,8 @@ export function createApp({ services, config }: AppOptions) {
 	);
 	app.use(
 		bodyLimit({
-			maxSize: 64 * 1024,
+			// Upload batches of the sync queue can be a few hundred rows.
+			maxSize: 1024 * 1024,
 			onError: () => {
 				throw new ApiError(413, 'error.validation');
 			},
@@ -441,6 +445,20 @@ export function createApp({ services, config }: AppOptions) {
 			await tenants.revokeInvitation(c.var.claims, c.req.valid('param').id, caller(c));
 			return c.body(null, 204);
 		},
+	);
+
+	me.openapi(
+		route(
+			{
+				method: 'post',
+				path: '/sync/write',
+				tags: ['sync'],
+				request: body(syncWriteRequest),
+				responses: { 200: json(z.object({ applied: z.number().int() })) },
+			},
+			true,
+		),
+		async (c) => c.json(await sync.write(c.var.claims, c.req.valid('json'), caller(c)), 200),
 	);
 
 	const invitationToken = z.object({ token: z.string().min(20).max(200) });

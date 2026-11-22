@@ -17,6 +17,7 @@
     "@clinks/db": "workspace:*",
     "@clinks/domain": "workspace:*",
     "@clinks/i18n-types": "workspace:*",
+    "@clinks/sync-schema": "workspace:*",
     "@hono/node-server": "2.1.11",
     "@hono/zod-openapi": "1.6.3",
     "@node-rs/argon2": "2.2.2",
@@ -30,6 +31,7 @@
   "devDependencies": {
     "@types/node": "26.6.6",
     "@types/nodemailer": "8.0.2",
+    "kysely": "0.29.9",
     "typescript": "6.0.3",
     "vitest": "5.1.1"
   }
