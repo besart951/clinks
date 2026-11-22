@@ -106,7 +106,7 @@
 										href={href(`/finance/invoices/${row.invoice.id}`)}
 										onclick={(event) => event.stopPropagation()}
 									>
-										{row.invoice.number}
+										{row.invoice.number || workspace.t('ui.ws.invoice.awaiting_number')}
 									</a>
 								</Table.Cell>
 								<Table.Cell class="max-w-48 truncate">{row.contact ? contactName(row.contact) : '—'}</Table.Cell>

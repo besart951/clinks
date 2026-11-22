@@ -13,7 +13,12 @@
 	const session = workspace.session;
 
 	async function signOut() {
-		session.signOut();
+		if (
+			workspace.sync?.pendingWrites &&
+			!window.confirm(workspace.t('ui.ws.sync.confirm_discard', { count: workspace.sync.pendingWrites }))
+		)
+			return;
+		await session.signOut();
 		await navigate('/login');
 	}
 </script>

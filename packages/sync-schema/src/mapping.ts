@@ -7,9 +7,9 @@ function columnsOf(table: SyncedTableName): readonly Column[] {
 	return [...serverColumns, ...syncedTables[table].columns];
 }
 
-function fromSqlite(column: Column, value: string | number | null | undefined): unknown {
+function fromSqlite(column: Column, value: unknown): unknown {
 	if (value === null || value === undefined) return column.nullable ? null : column.type === 'boolean' ? false : value;
-	if (column.type === 'boolean') return value === 1 || value === '1' || value === 'true';
+	if (column.type === 'boolean') return value === true || value === 1 || value === '1' || value === 'true';
 	if (column.type === 'json') return typeof value === 'string' ? JSON.parse(value) : value;
 	if (column.type === 'integer') return Number(value);
 	return value;
@@ -58,7 +58,13 @@ export function uploadToFields(
 		if (serverColumns.some((column) => column.column === name) || name === 'id') continue;
 		const column = byColumn.get(name);
 		if (!column) unknown.push(name);
-		else fields[column.field] = fromSqlite(column, value as string | number | null);
+		else {
+			try {
+				fields[column.field] = fromSqlite(column, value as string | number | null);
+			} catch {
+				unknown.push(name);
+			}
+		}
 	}
 	return { fields, unknown };
 }

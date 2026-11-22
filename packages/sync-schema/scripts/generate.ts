@@ -1,6 +1,6 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { serverColumns, syncedTables, type ColumnType } from '../src/tables.ts';
+import { readOnlyColumns, localTableNames, serverColumns, syncedTables, type ColumnType } from '../src/tables.ts';
 
 // Writes the PowerSync client schema for TypeScript. A Dart generator for the Flutter app comes later
 // from the same definition. `--check` fails when the committed file is out of date.
@@ -22,12 +22,18 @@ const tables = Object.entries(syncedTables).map(([name, table]) => {
 	return `export const ${name} = new Table(\n\t{\n${columns.map((line) => `\t${line}`).join('\n')}\n\t},\n\t{ indexes: { tenant: ['tenant_id'] } },\n);`;
 });
 
+for (const [name, columns] of Object.entries(readOnlyColumns)) {
+	tables.push(
+		`export const ${name} = new Table({\n${columns.map((column) => `\t${column}: column.text,`).join('\n')}\n});`,
+	);
+}
+
 const output = `// Generated from src/tables.ts by \`pnpm --filter @clinks/sync-schema generate\`. DO NOT EDIT.
 import { column, Schema, Table } from '@powersync/common';
 
 ${tables.join('\n\n')}
 
-export const powerSyncSchema = new Schema({ ${Object.keys(syncedTables).join(', ')} });
+export const powerSyncSchema = new Schema({ ${localTableNames.join(', ')} });
 `;
 
 const target = fileURLToPath(new URL('../src/powersync-schema.generated.ts', import.meta.url));

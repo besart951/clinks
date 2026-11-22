@@ -45,18 +45,20 @@
 			</Card.Content>
 		</Card.Root>
 	{/if}
-	<Card.Root class="border-destructive/40">
-		<Card.Header>
-			<Card.Title class="text-destructive">{workspace.t('ui.ws.privacy.delete')}</Card.Title><Card.Description>
-				{workspace.t('ui.ws.privacy.delete_text')}
-			</Card.Description>
-		</Card.Header>
-		<Card.Content>
-			<Button variant="destructive" onclick={() => (deleteOpen = true)}>
-				{workspace.t('ui.ws.privacy.delete_button')}
-			</Button>
-		</Card.Content>
-	</Card.Root>
+	{#if !workspace.remote}
+		<Card.Root class="border-destructive/40">
+			<Card.Header>
+				<Card.Title class="text-destructive">{workspace.t('ui.ws.privacy.delete')}</Card.Title><Card.Description>
+					{workspace.t('ui.ws.privacy.delete_text')}
+				</Card.Description>
+			</Card.Header>
+			<Card.Content>
+				<Button variant="destructive" onclick={() => (deleteOpen = true)}>
+					{workspace.t('ui.ws.privacy.delete_button')}
+				</Button>
+			</Card.Content>
+		</Card.Root>
+	{/if}
 </div>
 
 <Dialog.Root bind:open={deleteOpen}>

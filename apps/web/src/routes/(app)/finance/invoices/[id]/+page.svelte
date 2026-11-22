@@ -42,7 +42,6 @@
 	let confirm = $state<ConfirmRequest | null>(null);
 
 	onMount(() => {
-		void people.load();
 		return model.resource.connect();
 	});
 
@@ -102,8 +101,13 @@
 			{@const status = model.status}
 			<div class="print:hidden">
 				<PageHeader
-					title={workspace.t('ui.ws.invoice.document', { number: invoice.number })}
-					crumbs={[{ label: workspace.t('ui.ws.module.finance'), path: '/finance' }, { label: invoice.number }]}
+					title={workspace.t('ui.ws.invoice.document', {
+						number: invoice.number || workspace.t('ui.ws.invoice.awaiting_number'),
+					})}
+					crumbs={[
+						{ label: workspace.t('ui.ws.module.finance'), path: '/finance' },
+						{ label: invoice.number || workspace.t('ui.ws.invoice.awaiting_number') },
+					]}
 				>
 					{#snippet actions()}
 						<StatusBadge tone={invoiceTone[status]} label={workspace.t(`ui.ws.invoice.status.${status}`)} />
@@ -126,7 +130,7 @@
 									})}
 								</Button>{/if}
 						{/if}
-						<Button variant="outline" onclick={() => workspace.platform.files.print()}>
+						<Button variant="outline" disabled={!invoice.number} onclick={() => workspace.platform.files.print()}>
 							<Printer class="size-4" />{workspace.t('ui.ws.invoice.print')}
 						</Button>
 						<DropdownMenu.Root>

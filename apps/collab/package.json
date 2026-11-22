@@ -1,0 +1,23 @@
+{
+  "name": "@clinks/collab",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env src/main.ts",
+    "check": "tsc --noEmit -p ."
+  },
+  "dependencies": {
+    "@clinks/db": "workspace:*",
+    "@clinks/domain": "workspace:*",
+    "@hocuspocus/server": "4.9.0",
+    "@hocuspocus/extension-database": "4.9.0",
+    "jose": "6.2.18",
+    "yjs": "13.6.33",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3",
+    "@types/node": "26.6.6"
+  }
+}

@@ -158,21 +158,4 @@ export class PatientRecordModel {
 	saveField(patient: Contact, key: string, value: string, label: string) {
 		return this.#workspace.patch(this.#workspace.api.contacts, patient, contactPatch(key, value), label);
 	}
-
-	saveNote(note: ClinicalNote, field: 'subjective' | 'objective' | 'assessment' | 'plan', value: string) {
-		return this.#workspace.patch(
-			this.#workspace.api.physioNotes,
-			note,
-			{ [field]: value },
-			this.#workspace.t(`ui.ws.physio.${field}`),
-		);
-	}
-
-	async removeNote(note: ClinicalNote) {
-		const api = this.#workspace.api.physioNotes;
-		await this.#workspace.run(() => api.remove(note.id), {
-			success: 'ui.ws.physio.note_deleted',
-			undo: () => api.restore(note),
-		});
-	}
 }

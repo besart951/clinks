@@ -46,7 +46,6 @@
 	let composing = $state(false);
 
 	onMount(() => {
-		void people.load();
 		return model.resource.connect();
 	});
 
@@ -171,9 +170,6 @@
 								<SoapNote
 									{note}
 									meta={{ author: people.get(note.authorId)?.name ?? '', labels, open: index === 0, letters }}
-									actions={canWrite
-										? { save: (field, value) => model.saveNote(note, field, value, labels[field]) }
-										: null}
 								/>
 							{:else}
 								{#if !composing}<p class="text-muted-foreground px-1 text-sm">

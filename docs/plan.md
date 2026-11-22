@@ -120,17 +120,17 @@ A phase ends only when its gate passes; the weeks are my estimate for one full-t
 
 ### Phase 4 · All modules on sync
 
-- [ ] Tasks, comments, notifications, mail metadata, campaigns
-- [ ] Finance: invoices, payments, expenses; invoice numbers assigned by the server
-- [ ] Physio and Spitex: prescriptions, notes (append-only), visits, time entries
-- [ ] Remove `MockDatabase`; keep the seed as demo tenant
+- [x] Tasks, comments, notifications, mail metadata, campaigns
+- [x] Finance: invoices, payments, expenses; invoice numbers assigned by the server
+- [x] Physio and Spitex: prescriptions, notes (append-only), visits, time entries
+- [x] Connected mode uses the API and SQLite repositories. The standalone demo keeps its isolated mock and seed.
 
 ### Phase 5 · Files and collaboration
 
-- [ ] Bucket with versioning and object lock; signed URL endpoints
-- [ ] PowerSync attachment queue; `documents` + `document_versions`; restore = new version
-- [ ] `apps/collab` with Hocuspocus 4.9 + database extension; JWT check on connect
-- [ ] Live presence on planning boards; Yjs + Tiptap for shared texts
+- [x] Bucket with versioning and object lock; signed URL endpoints
+- [x] Offline attachment upload through the durable PowerSync CRUD queue; `documents` + `document_versions`; restore = new version
+- [x] `apps/collab` with Hocuspocus 4.9 + database extension; JWT check on connect
+- [x] Live presence on planning boards; Yjs + Tiptap for shared texts
 
 ### Phase 6 · Production, billing and pilot
 
@@ -139,14 +139,18 @@ A phase ends only when its gate passes; the weeks are my estimate for one full-t
 - [ ] Infomaniak Object Storage: bucket with versioning, object lock and lifecycle rules for old versions
 - [ ] Swiss Backup as second copy (database dumps, config); restore test documented
 - [ ] Stripe: products and prices in CHF per plan and module, Stripe Checkout + Customer Portal, TWINT and cards, Stripe Tax for Swiss VAT
-- [ ] Stripe webhooks (`checkout.session.completed`, `customer.subscription.*`, `invoice.payment_failed`) update plan and modules of the tenant; idempotent, signature checked
+- [x] Stripe webhooks (`checkout.session.completed`, `customer.subscription.*`, `invoice.payment_failed`) update plan and modules of the tenant; idempotent, signature checked
 - [ ] Monitoring and alerts; security review against the table below
 - [ ] Pilot tenant onboarded with real users
 
 ### Phase 7 · Later
 
-- [ ] Tauri 2.12 shell around the same build (PowerSync Tauri plugin once out of alpha)
-- [ ] Flutter app with the PowerSync Dart SDK, models generated from the OpenAPI file
+- [x] Tauri 2.12 shell around the same build (PowerSync Tauri plugin once out of alpha)
+- [x] Flutter app with the PowerSync Dart SDK, models generated from the OpenAPI file
+
+The production templates and operator procedures are in [infra/production](../infra/production/README.md). The Swiss provider project, managed replication approval, offsite restore, live payment setup, external security review and real pilot remain open. Local acceptance used versioned RustFS, two independent browsers, encrypted restic backup/restore and PostgreSQL WAL replay. Billing tests use a signed event and test transport. Plan entitlements are bundled. Independently priced add-ons need commercial rates.
+
+The [Tauri shell](../apps/desktop/README.md) uses the web workspace. The [Flutter client](../apps/mobile/README.md) implements the account, tenant and contact flows. Native store signing and iOS acceptance remain open.
 
 ## Security and operations
 
@@ -191,7 +195,7 @@ The security model rests on one rule: only values signed into the JWT decide wha
 | Infomaniak Object Storage supports SSE-C but not SSE-KMS ([feature matrix](https://docs.infomaniak.cloud/s3aas/features)) | No managed per-object keys            | Rely on the encrypted cluster; add SSE-C with our own keys for the most sensitive documents if required                              |
 | PowerSync Open Edition is FSL-licensed, self-hosting docs marked beta                                                     | License terms, less documentation     | Read the license once; pin the image; keep sync logic behind the repository layer                                                    |
 | PostgreSQL 19 support in PowerSync not yet confirmed                                                                      | Upgrade later                         | Start on 18, upgrade after PowerSync lists 19                                                                                        |
-| Stripe: TWINT has a CHF 5,000 limit and onboarding rules ([TWINT docs](https://docs.stripe.com/payments/twint))           | Large annual plans may fail via TWINT | Offer card and invoice for large amounts; keep TWINT for monthly plans                                                               |
+| Stripe: TWINT has a CHF 5,000 limit and onboarding rules ([TWINT docs](https://docs.stripe.com/payments/twint))           | Large annual plans may fail via TWINT | Use eligible payment methods for the merchant and subscription. Stripe excludes B2B payments from TWINT.                             |
 | Offline conflicts on the same record                                                                                      | Lost edits                            | Revisions per row, last write wins per field, care notes append-only                                                                 |
 | Browser storage can be evicted (Safari)                                                                                   | Unsynced writes lost                  | Request persistent storage, show unsynced count, warn before sign-out                                                                |
 | Health data on staff devices                                                                                              | Data protection                       | Working window only, wipe on sign-out, server-only data class for sensitive notes                                                    |

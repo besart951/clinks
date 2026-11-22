@@ -32,3 +32,14 @@ test-results/
 Thumbs.db
 *.swp
 *.swo
+
+# Native builds and generated platform tooling
+apps/desktop/src-tauri/target/
+apps/desktop/src-tauri/gen/
+
+# Cloud state and operator variables
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfplan

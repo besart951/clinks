@@ -5,6 +5,10 @@ type Defaulted<T> = ColumnType<T, T | undefined, T>;
 type Timestamp = ColumnType<Date, Date | string | undefined, Date | string>;
 
 export interface TenantTable {
+	logoDataUrl: string | null;
+	address: Defaulted<{ street: string; zip: string; city: string }>;
+	vatNumber: Defaulted<string>;
+	iban: Defaulted<string>;
 	id: string;
 	name: string;
 	industry: 'physio' | 'spitex' | 'services';
@@ -23,6 +27,13 @@ export interface TenantTable {
 }
 
 export interface UserTable {
+	avatarDataUrl: string | null;
+	notificationPreferences: Defaulted<{
+		inApp: boolean;
+		email: boolean;
+		push: boolean;
+		digest: 'never' | 'daily' | 'weekly';
+	}>;
 	id: string;
 	email: string;
 	firstName: Defaulted<string>;
@@ -133,6 +144,37 @@ export interface RefreshTokenTable {
 export type SyncedRow = { id: string; tenantId: string; revision: Generated<number> } & { [column: string]: unknown };
 
 export interface Database {
+	syncAccess: { id: string; tenantId: string; userId: string; readPermissions: string[] };
+	billingAccounts: { tenantId: string; customerId: string; status: Defaulted<string> };
+	billingEvents: { id: string; tenantId: string; createdAt: Timestamp };
+	planningRooms: { tenantId: string; state: Uint8Array; updatedAt: Timestamp };
+	documentVersions: {
+		id: string;
+		tenantId: string;
+		documentId: string;
+		objectKey: string;
+		objectVersion: string;
+		size: number;
+		mimeType: string;
+		authorId: string;
+		createdAt: Timestamp;
+	};
+	folders: SyncedRow;
+	documents: SyncedRow;
+	invoices: SyncedRow;
+	expenses: SyncedRow;
+	tasks: SyncedRow;
+	contact_comments: SyncedRow;
+	task_comments: SyncedRow;
+	invoice_comments: SyncedRow;
+	mails: SyncedRow;
+	templates: SyncedRow;
+	campaigns: SyncedRow;
+	prescriptions: SyncedRow;
+	physio_notes: SyncedRow;
+	spitex_notes: SyncedRow;
+	time_entries: SyncedRow;
+	notifications: SyncedRow;
 	contacts: SyncedRow;
 	appointments: SyncedRow;
 	tenants: TenantTable;

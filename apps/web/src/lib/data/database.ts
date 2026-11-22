@@ -1,3 +1,4 @@
+import type { TenantId } from '@clinks/domain/ids';
 import type {
 	AppNotification,
 	Appointment,
@@ -121,23 +122,24 @@ function defaultSleep(milliseconds: number) {
 	return new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
 }
 
-function emptySnapshot(): Snapshot {
+export function emptySnapshot(): Snapshot {
 	return Object.fromEntries(tableNames.map((name) => [name, []])) as unknown as Snapshot;
 }
 
 /**
- * The backend stand-in: one in-browser data set that survives reloads, answers with simulated latency
- * and can fail on purpose so loading, error and offline states can be tried out.
+ * Local snapshot and table-change subscriptions. The connected workspace caches its authenticated account here.
  */
-export class MockDatabase {
+export class WorkspaceCache {
 	#data: Snapshot;
-	#options: DatabaseOptions;
+	protected options: Pick<DatabaseOptions, 'seed' | 'storage' | 'localize'>;
+	readonly #key: string;
 	#listeners = new Set<(table: TableName) => void>();
 	#pending = 0;
 	#pendingListeners = new Set<(pending: number) => void>();
 
-	constructor(options: DatabaseOptions) {
-		this.#options = options;
+	constructor(options: Pick<DatabaseOptions, 'seed' | 'storage' | 'localize'>, key = storageKey) {
+		this.#key = key;
+		this.options = options;
 		this.#data = this.#load() ?? options.seed();
 		this.#persist();
 	}
@@ -150,13 +152,7 @@ export class MockDatabase {
 	async request<T>(operation: () => T, changed: readonly TableName[] = []): Promise<T> {
 		this.#setPending(this.#pending + 1);
 		try {
-			const conditions = this.#options.conditions();
-			const random = this.#options.random ?? Math.random;
-			const latency = conditions.minLatency + random() * Math.max(conditions.maxLatency - conditions.minLatency, 0);
-			await (this.#options.sleep ?? defaultSleep)(latency);
-			if (conditions.offline) throw new MockApiError('offline', this.#options.localize('error.ws.offline'));
-			if (random() < conditions.failureRate)
-				throw new MockApiError('internal', this.#options.localize('error.internal'));
+			await this.beforeRequest(changed);
 			const before = changed.length > 0 ? structuredClone(this.#pick(changed)) : null;
 			const result = operation();
 			if (changed.length > 0) this.#commit(changed, before);
@@ -164,6 +160,10 @@ export class MockDatabase {
 		} finally {
 			this.#setPending(this.#pending - 1);
 		}
+	}
+
+	protected async beforeRequest(changed: readonly TableName[]) {
+		if (changed.length) throw new MockApiError('validation', this.options.localize('error.ws.unavailable'));
 	}
 
 	table<Name extends TableName>(name: Name): Tables[Name][] {
@@ -176,7 +176,7 @@ export class MockDatabase {
 
 	/**
 	 * Takes rows a real backend owns (the signed-in account, its tenants and roles) and replaces local rows
-	 * with the same id, so the mock-backed screens keep working until PowerSync takes over in phase 4.
+	 * with the same id, for the account settings and session snapshot.
 	 */
 	merge(rows: Partial<Snapshot>) {
 		const changed = Object.keys(rows) as TableName[];
@@ -187,6 +187,18 @@ export class MockDatabase {
 			(this.#data as { [table: string]: unknown })[name] = [...kept, ...incoming];
 		}
 		this.#commit(changed, null);
+	}
+
+	removeImported(tenantId: TenantId, imported: ReadonlyMap<TableName, Set<string>>) {
+		const tables = [...imported.keys()];
+		const before = this.#pick(tables);
+		for (const [table, ids] of imported) {
+			const rows = this.#data[table].filter(
+				(row) => !('tenantId' in row && row.tenantId === tenantId && ids.has(row.id)),
+			);
+			this.replace(table, rows);
+		}
+		this.#commit(tables, before);
 	}
 
 	/** Tells screens that a table changed elsewhere (e.g. in the synced local database). */
@@ -205,14 +217,14 @@ export class MockDatabase {
 	}
 
 	reset() {
-		this.#data = this.#options.seed();
+		this.#data = this.options.seed();
 		this.#persist();
 		for (const name of tableNames) this.#emit(name);
 	}
 
 	clear() {
 		this.#data = emptySnapshot();
-		this.#options.storage?.removeItem(storageKey);
+		this.options.storage?.removeItem(this.#key);
 	}
 
 	export(): Snapshot {
@@ -228,7 +240,7 @@ export class MockDatabase {
 			this.#persist();
 		} catch {
 			if (before) for (const name of changed) (this.#data as { [key: string]: unknown })[name] = before[name];
-			throw new MockApiError('storage_full', this.#options.localize('error.ws.storage_full'));
+			throw new MockApiError('storage_full', this.options.localize('error.ws.storage_full'));
 		}
 		for (const name of changed) this.#emit(name);
 	}
@@ -243,21 +255,37 @@ export class MockDatabase {
 	}
 
 	#load(): Snapshot | null {
-		const raw = this.#options.storage?.getItem(storageKey);
+		const raw = this.options.storage?.getItem(this.#key);
 		if (!raw) return null;
 		try {
 			const parsed = JSON.parse(raw) as Partial<Snapshot>;
 			const snapshot = emptySnapshot();
 			for (const name of tableNames)
 				if (Array.isArray(parsed[name])) (snapshot as { [key: string]: unknown })[name] = parsed[name];
-			return snapshot.tenants.length > 0 ? snapshot : null;
+			return snapshot;
 		} catch {
 			return null;
 		}
 	}
 
 	#persist() {
-		this.#options.storage?.setItem(storageKey, JSON.stringify(this.#data));
+		this.options.storage?.setItem(this.#key, JSON.stringify(this.#data));
+	}
+}
+
+export class MockDatabase extends WorkspaceCache {
+	readonly #simulation: DatabaseOptions;
+	constructor(options: DatabaseOptions) {
+		super(options);
+		this.#simulation = options;
+	}
+	protected override async beforeRequest() {
+		const conditions = this.#simulation.conditions();
+		const random = this.#simulation.random ?? Math.random;
+		const latency = conditions.minLatency + random() * Math.max(conditions.maxLatency - conditions.minLatency, 0);
+		await (this.#simulation.sleep ?? defaultSleep)(latency);
+		if (conditions.offline) throw new MockApiError('offline', this.options.localize('error.ws.offline'));
+		if (random() < conditions.failureRate) throw new MockApiError('internal', this.options.localize('error.internal'));
 	}
 }
 

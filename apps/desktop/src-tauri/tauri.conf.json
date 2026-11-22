@@ -1,0 +1,15 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "CLinks Workspace",
+  "version": "0.1.0",
+  "identifier": "ch.clinks.workspace",
+  "build": { "beforeBuildCommand": "pnpm --filter @clinks/web build", "frontendDist": "../../web/build" },
+  "app": {
+    "windows": [{ "title": "CLinks Workspace", "width": 1240, "height": 820, "minWidth": 720 }],
+    "security": {
+      "capabilities": [],
+      "csp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:; connect-src 'self' https: wss: ipc: http://ipc.localhost; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; frame-src data: blob:"
+    }
+  },
+  "bundle": { "active": true, "icon": ["icons/icon.png"] }
+}

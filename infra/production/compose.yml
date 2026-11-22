@@ -1,0 +1,53 @@
+name: clinks
+x-workspace: &workspace
+  image: clinks-workspace:${RELEASE:?release tag required}
+  build:
+    context: ../..
+    dockerfile: infra/production/Dockerfile
+    target: workspace
+  restart: unless-stopped
+  security_opt: [no-new-privileges:true]
+services:
+  api:
+    <<: *workspace
+    env_file: ${CONFIG_DIR:?absolute private config directory}/api.env
+    environment:
+      NODE_ENV: production
+      TRUST_PROXY: 'true'
+      COOKIE_SECURE: 'true'
+  collab:
+    <<: *workspace
+    command: [node, apps/collab/src/main.ts]
+    env_file: ${CONFIG_DIR}/collab.env
+  powersync:
+    image: journeyapps/powersync-service:1.29.1
+    restart: unless-stopped
+    command: [start, -r, unified]
+    env_file: ${CONFIG_DIR}/powersync.env
+    environment:
+      POWERSYNC_CONFIG_PATH: /config/service.yaml
+      PS_PORT: '8080'
+    volumes:
+      - ./powersync.yaml:/config/service.yaml:ro
+      - ../powersync/sync-config.yaml:/config/sync-config.yaml:ro
+  caddy:
+    image: clinks-edge:${RELEASE}
+    build:
+      context: ../..
+      dockerfile: infra/production/Dockerfile
+      target: edge
+      args:
+        API_ORIGIN: https://${API_HOST:?API host required}
+        SYNC_ORIGIN: https://${SYNC_HOST:?PowerSync host required}
+        COLLAB_ORIGIN: wss://${COLLAB_HOST:?collaboration host required}
+    environment:
+      WEB_HOST: ${WEB_HOST:?web host required}
+      API_HOST: ${API_HOST}
+      SYNC_HOST: ${SYNC_HOST}
+      COLLAB_HOST: ${COLLAB_HOST}
+    restart: unless-stopped
+    ports: ['80:80', '443:443']
+    volumes: [caddy_data:/data, caddy_config:/config]
+volumes:
+  caddy_data:
+  caddy_config:

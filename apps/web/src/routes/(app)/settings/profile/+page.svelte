@@ -35,7 +35,7 @@
 	}
 
 	async function confirmTwoFactor() {
-		if (await model.setTwoFactor(true)) enabling = false;
+		if (await model.setTwoFactor(!user?.twoFactorEnabled)) enabling = false;
 	}
 </script>
 
@@ -72,7 +72,7 @@
 					<Input id="pf-last" bind:value={model.lastName} />
 				</FormField>
 				<FormField id="pf-email" label={workspace.t('ui.email')} error={model.fields.email} class="sm:col-span-2">
-					<Input id="pf-email" type="email" bind:value={model.email} />
+					<Input id="pf-email" readonly={Boolean(workspace.remote)} type="email" bind:value={model.email} />
 				</FormField>
 				<fieldset class="space-y-3 sm:col-span-2">
 					<legend class="mb-2 text-sm font-medium">{workspace.t('ui.ws.settings.notifications')}</legend>
@@ -165,20 +165,27 @@
 								: workspace.t('ui.ws.settings.two_factor_off')}
 						</p>
 					</div>
-					{#if user?.twoFactorEnabled}<Button variant="outline" onclick={() => model.setTwoFactor(false)}>
+					{#if user?.twoFactorEnabled}<Button
+							variant="outline"
+							onclick={() => (workspace.remote ? (enabling = true) : model.setTwoFactor(false))}
+						>
 							{workspace.t('ui.ws.settings.disable')}
-						</Button>{:else if !enabling}<Button onclick={() => (enabling = true)}>
+						</Button>{:else if !enabling}<Button onclick={async () => (enabling = await model.startTwoFactor())}>
 							{workspace.t('ui.ws.settings.enable')}
 						</Button>{/if}
 				</div>
+				{#if model.recoveryCodes.length}<p>{workspace.t('ui.ws.settings.recovery_codes')}</p>
+					<pre>{model.recoveryCodes.join('\n')}</pre>{/if}
 				{#if enabling}
 					<div class="bg-muted/50 flex flex-wrap items-end gap-3 rounded-lg border p-3">
-						<p class="text-sm sm:basis-full">{workspace.t('ui.ws.settings.two_factor_setup')}</p>
+						<p class="text-sm sm:basis-full">
+							{workspace.remote ? model.twoFactorSecret : workspace.t('ui.ws.settings.two_factor_setup')}
+						</p>
 						<FormField
 							id="tf-code"
 							label={workspace.t('ui.ws.auth.code')}
 							error={model.fields.code}
-							hint={workspace.t('ui.ws.auth.two_factor_demo_hint')}
+							hint={workspace.remote ? undefined : workspace.t('ui.ws.auth.two_factor_demo_hint')}
 						>
 							<Input id="tf-code" inputmode="numeric" maxlength={6} bind:value={model.twoFactorCode} />
 						</FormField>

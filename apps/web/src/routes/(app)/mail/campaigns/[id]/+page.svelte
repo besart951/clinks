@@ -35,7 +35,6 @@
 	const people = new PeopleDirectory(workspace);
 	let tab = $state('content');
 	onMount(() => {
-		void people.load();
 		return model.resource.connect();
 	});
 

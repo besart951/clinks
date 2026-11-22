@@ -4,24 +4,16 @@
 	export const soapFields = ['subjective', 'objective', 'assessment', 'plan'] as const;
 
 	export type SoapField = 'subjective' | 'objective' | 'assessment' | 'plan';
-
-	export interface SoapNoteActions {
-		save: (field: SoapField, value: string) => unknown;
-		remove?: () => void;
-	}
 </script>
 
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import Trash2 from '@lucide/svelte/icons/trash-2';
-	import InlineText from './InlineText.svelte';
 	import Initials from '@clinks/ui/kit/Initials.svelte';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let {
 		note,
 		meta,
-		actions,
 	}: {
 		note: ClinicalNote;
 		/** Author name, row labels (SOAP for physio, care vocabulary for Spitex) and whether it starts expanded. */
@@ -31,7 +23,6 @@
 			letters?: { [field in SoapField]: string };
 			open?: boolean;
 		};
-		actions: SoapNoteActions | null;
 	} = $props();
 
 	const workspace = useWorkspace();
@@ -66,28 +57,9 @@
 					>
 						{meta.letters?.[row.field] ?? row.letter}
 					</span>
-					<InlineText
-						text={{
-							value: note[row.field],
-							placeholder: workspace.t('ui.ws.inline.empty'),
-							label: meta.labels[row.field],
-						}}
-						readonly={!actions}
-						onsave={(value) => actions?.save(row.field, value)}
-					/>
+					<p class="whitespace-pre-wrap px-1 py-1 text-sm">{note[row.field] || workspace.t('ui.ws.inline.empty')}</p>
 				</div>
 			{/each}
-			{#if actions?.remove}
-				<div class="reveal flex justify-end">
-					<button
-						type="button"
-						class="text-muted-foreground hover:text-destructive inline-flex h-7 items-center gap-1.5 rounded-md px-2 text-xs"
-						onclick={actions.remove}
-					>
-						<Trash2 class="size-3.5" />{workspace.t('ui.ws.delete')}
-					</button>
-				</div>
-			{/if}
 		</div>
 	{/if}
 </article>

@@ -1,5 +1,7 @@
+import { SettingsService } from './services/settings.ts';
+import { BillingService, checkoutRequest } from './services/billing.ts';
 import * as contract from '@clinks/contracts/auth';
-import { syncWriteRequest } from '@clinks/contracts/sync';
+import { syncImportRequest, syncWriteRequest } from '@clinks/contracts/sync';
 import { getConnInfo } from '@hono/node-server/conninfo';
 import { createRoute, OpenAPIHono, type RouteConfig } from '@hono/zod-openapi';
 import type { ProductTranslationKey } from '@clinks/i18n-types';
@@ -16,6 +18,7 @@ import { pickLocale, translate } from './i18n.ts';
 import { AuthService } from './services/auth.ts';
 import type { Caller, Services } from './services/context.ts';
 import { SessionService, type OpenedSession } from './services/sessions.ts';
+import { FileService, versionUpload } from './services/files.ts';
 import { SyncService } from './services/sync.ts';
 import { TenantService } from './services/tenants.ts';
 import type { AccessClaims } from './tokens.ts';
@@ -49,20 +52,30 @@ export function createApp({ services, config }: AppOptions) {
 			maxAge: 600,
 		}),
 	);
-	app.use(
+	const limit = (maxSize: number) =>
 		bodyLimit({
-			// Upload batches of the sync queue can be a few hundred rows.
-			maxSize: 1024 * 1024,
+			maxSize,
 			onError: () => {
 				throw new ApiError(413, 'error.validation');
 			},
-		}),
-	);
+		});
+	const defaultLimit = limit(1024 * 1024);
+	const writeLimit = limit(2 * 1024 * 1024); // One base64-encoded document plus metadata.
+	const importLimit = limit(12 * 1024 * 1024); // One legacy browser workspace, including JSON escaping.
+	app.use((c, next) => {
+		if (c.req.path === '/sync/import') return importLimit(c, next);
+		if (['/sync/write', '/tenant/settings', '/me/profile'].includes(c.req.path)) return writeLimit(c, next);
+		return defaultLimit(c, next);
+	});
 
 	app.onError((error, c) => {
 		const locale = pickLocale(c.req.header('Accept-Language'));
+		if (c.req.path === '/webhooks/stripe')
+			console.warn(
+				JSON.stringify({ event: 'billing.webhook_failed', status: error instanceof ApiError ? error.status : 500 }),
+			);
 		if (error instanceof ApiError) return c.json(errorBody(locale, error.key, error.fields), error.status);
-		console.error(error);
+		console.error(JSON.stringify({ event: 'api.failure', method: c.req.method, errorType: error.name }));
 		return c.json(errorBody(locale, 'error.internal'), 500);
 	});
 	app.notFound((c) => c.json(errorBody(pickLocale(c.req.header('Accept-Language')), 'error.ws.not_found'), 404));
@@ -459,6 +472,226 @@ export function createApp({ services, config }: AppOptions) {
 			true,
 		),
 		async (c) => c.json(await sync.write(c.var.claims, c.req.valid('json'), caller(c)), 200),
+	);
+
+	me.openapi(
+		route(
+			{
+				method: 'post',
+				path: '/sync/import',
+				tags: ['sync'],
+				request: body(syncImportRequest),
+				responses: { 200: json(z.object({ applied: z.number().int() })) },
+			},
+			true,
+		),
+		async (c) => c.json(await sync.write(c.var.claims, c.req.valid('json'), caller(c), 'import'), 200),
+	);
+
+	const settings = new SettingsService(services);
+	me.openapi(
+		route(
+			{
+				method: 'post',
+				path: '/tenant/invitations/{id}/resend',
+				tags: ['tenants'],
+				request: { params: z.object({ id: z.uuid() }) },
+				responses: { 204: empty() },
+			},
+			true,
+		),
+		async (c) => {
+			await tenants.resend(c.var.claims, c.req.valid('param').id, caller(c));
+			return c.body(null, 204);
+		},
+	);
+	me.openapi(
+		route(
+			{ method: 'get', path: '/tenant/team', tags: ['tenants'], responses: { 200: json(contract.teamResponse) } },
+			true,
+		),
+		async (c) => c.json(await settings.team(c.var.claims), 200),
+	);
+	me.openapi(
+		route(
+			{
+				method: 'post',
+				path: '/tenant/roles',
+				tags: ['tenants'],
+				request: body(contract.roleUpdate),
+				responses: { 200: json(z.object({ id: z.uuid() })) },
+			},
+			true,
+		),
+		async (c) => c.json(await settings.saveRole(c.var.claims, c.req.valid('json')), 200),
+	);
+	me.openapi(
+		route(
+			{
+				method: 'delete',
+				path: '/tenant/roles/{id}',
+				tags: ['tenants'],
+				request: { params: z.object({ id: z.uuid() }) },
+				responses: { 204: empty() },
+			},
+			true,
+		),
+		async (c) => {
+			await settings.role(c.var.claims, c.req.valid('param').id);
+			return c.body(null, 204);
+		},
+	);
+	me.openapi(
+		route(
+			{
+				method: 'post',
+				path: '/tenant/members/{id}',
+				tags: ['tenants'],
+				request: { params: z.object({ id: z.uuid() }), ...body(contract.memberUpdate) },
+				responses: { 204: empty() },
+			},
+			true,
+		),
+		async (c) => {
+			await settings.member(c.var.claims, c.req.valid('param').id, c.req.valid('json'));
+			return c.body(null, 204);
+		},
+	);
+	me.openapi(
+		route(
+			{
+				method: 'post',
+				path: '/tenant/settings',
+				tags: ['tenants'],
+				request: body(contract.companyUpdate),
+				responses: { 204: empty() },
+			},
+			true,
+		),
+		async (c) => {
+			await settings.company(c.var.claims, c.req.valid('json'));
+			return c.body(null, 204);
+		},
+	);
+	me.openapi(
+		route(
+			{
+				method: 'post',
+				path: '/me/profile',
+				tags: ['account'],
+				request: body(contract.profileUpdate),
+				responses: { 204: empty() },
+			},
+			true,
+		),
+		async (c) => {
+			await settings.profile(c.var.claims, c.req.valid('json'));
+			return c.body(null, 204);
+		},
+	);
+	const billing = new BillingService(services);
+	app.post('/webhooks/stripe', async (c) => {
+		await billing.webhook(await c.req.text(), c.req.header('Stripe-Signature') ?? '');
+		return c.body(null, 204);
+	});
+	me.openapi(
+		route(
+			{
+				method: 'post',
+				path: '/billing/checkout',
+				tags: ['billing'],
+				request: body(checkoutRequest),
+				responses: { 200: json(z.object({ url: z.url() })) },
+			},
+			true,
+		),
+		async (c) => c.json(await billing.open(c.var.claims, c.req.valid('json')), 200),
+	);
+	me.openapi(
+		route(
+			{
+				method: 'post',
+				path: '/billing/portal',
+				tags: ['billing'],
+				responses: { 200: json(z.object({ url: z.url() })) },
+			},
+			true,
+		),
+		async (c) => c.json(await billing.open(c.var.claims), 200),
+	);
+	const files = new FileService(services);
+	const documentParams = z.object({ doc: z.uuid() });
+	const versionParams = documentParams.extend({ id: z.uuid() });
+	const versions = '/documents/{doc}/versions';
+	me.openapi(
+		route(
+			{
+				method: 'get',
+				path: versions,
+				tags: ['files'],
+				request: { params: documentParams },
+				responses: {
+					200: json(
+						z.array(z.object({ id: z.uuid(), size: z.int(), mimeType: z.string(), createdAt: z.iso.datetime() })),
+					),
+				},
+			},
+			true,
+		),
+		async (c) =>
+			c.json(
+				(await files.list(c.var.claims, c.req.valid('param').doc)).map((row) => ({
+					...row,
+					createdAt: row.createdAt.toISOString(),
+				})),
+				200,
+			),
+	);
+	me.openapi(
+		route(
+			{
+				method: 'get',
+				path: versions + '/{id}/download',
+				tags: ['files'],
+				request: { params: versionParams },
+				responses: { 200: json(z.object({ url: z.url() })) },
+			},
+			true,
+		),
+		async (c) => {
+			const { doc, id } = c.req.valid('param');
+			c.header('Cache-Control', 'no-store');
+			return c.json(await files.download(c.var.claims, doc, id), 200);
+		},
+	);
+	me.openapi(
+		route(
+			{
+				method: 'post',
+				path: versions + '/upload',
+				tags: ['files'],
+				request: { params: documentParams, ...body(versionUpload) },
+				responses: { 200: json(z.object({ id: z.uuid(), url: z.url() })) },
+			},
+			true,
+		),
+		async (c) => c.json(await files.upload(c.var.claims, c.req.valid('param').doc, c.req.valid('json')), 200),
+	);
+	me.openapi(
+		route(
+			{
+				method: 'post',
+				path: versions + '/{id}/commit',
+				tags: ['files'],
+				request: { params: versionParams, ...body(z.object({ restoreFrom: z.uuid().optional() })) },
+				responses: { 200: json(z.object({ id: z.uuid() })) },
+			},
+			true,
+		),
+		async (c) => {
+			const { doc, id } = c.req.valid('param');
+			return c.json(await files.commit(c.var.claims, doc, id, c.req.valid('json').restoreFrom), 200);
+		},
 	);
 
 	const invitationToken = z.object({ token: z.string().min(20).max(200) });

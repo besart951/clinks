@@ -1,10 +1,20 @@
-# CLinks web app
+# CLinks Workspace
 
 Agent rules for this app: [AGENTS.md](AGENTS.md).
 
 The complete SaaS front end for CLinks. Without `VITE_API_URL` it runs **without a backend**. It covers the platform shell, account
 and tenant management, and all modules — contacts, calendar, tasks, mail, documents, finance, physio and home care
-(Spitex) — on top of a mock API that lives in the browser.
+(Spitex) — through tenant-scoped repositories. Set `VITE_API_URL` to use the API and PowerSync, or leave it unset for the standalone demo.
+
+## Synced workspace
+
+The eight modules use the signed-in tenant’s SQLite repositories. PowerSync delivers rows for the active membership and role. Notifications are private to their recipient. The activity feed and staff directory are read-only projections. Existing local-only rows migrate in a validated transaction. Failed imports retain their source data. Accounts, roles and company settings use the API. The standalone demo keeps its own storage.
+
+Offline edits survive a restart of the installed or previously loaded production build. Reconnecting sends its queued transactions. Invoice numbers appear after server acknowledgement. Clinical notes are append-only. The service worker caches the app shell and static assets. Signing out clears local synced records and account data.
+
+With S3 configured, the first upload (up to 1 MB) travels in the durable write queue. After acknowledgement the database carries the immutable object reference. Viewing the original on another device, replacing a version and restoring a previous one use the file API. The standalone demo keeps file bytes in browser storage. Configure the API’s AWS credentials, bucket and endpoint, and run its bucket initialiser with the retention settings described in the [production runbook](../../infra/production/README.md).
+
+For shared planning notes set VITE_COLLAB_URL (locally ws://localhost:1234), then start `pnpm --filter @clinks/collab start` with DATABASE_URL, TOKEN_ISSUER and JWKS_URL. Online participants see presence and shared edits. Stored Yjs state is tenant-scoped. Run the real-browser tests with TEST_VERSIONED_FILES=1, VITE_COLLAB_URL and VITE_API_URL to include both services.
 
 ```sh
 pnpm --filter @clinks/web dev       # http://localhost:5176
@@ -28,7 +38,7 @@ Codes in the prototype: email verification and password reset `000000`, two-fact
 
 ## How the mock backend works
 
-The UI never touches storage directly. Every screen talks to a mock API shaped like a real backend would be:
+The UI never touches storage directly. In standalone mode the repositories use the following components:
 
 - `src/lib/data/database.ts` — `MockDatabase`: one in-browser data set persisted to `localStorage`. Each call goes
   through `request()`, which adds latency, can fail on purpose, reports `offline`, and rolls back when the browser
@@ -42,8 +52,7 @@ The UI never touches storage directly. Every screen talks to a mock API shaped l
 - `src/lib/data/seed.ts` — deterministic demo data relative to today. Reset it in the developer menu (wrench button,
   bottom right), where latency, failure rate and offline mode can also be simulated.
 
-Moving to a real backend means replacing these files with API calls; screens and
-view models keep working because they only depend on the repository methods (`list`, `get`, `create`, `update`,
+Both backends implement the same repository methods (`list`, `get`, `create`, `update`,
 `remove`, `restore`).
 
 ## Structure
@@ -63,8 +72,7 @@ test/                unit tests and Playwright specs
 All texts are keys in `localization/product-catalog.json` (`ui.ws.*`, `error.ws.*`); run `pnpm generate:translations`
 after changing it. The app uses hash routing so the static build works anywhere, including as a single HTML file.
 
-## Not part of the prototype
+## Standalone demo limitations
 
 No data leaves the browser: mail is not sent, payments are not charged, files stay in `localStorage` (1 MB per
-file). Offline changes are rejected, not queued; a service worker, push notifications and background sync come with
-the real backend.
+file). The demo network simulator can reject requests. The connected build exercises the durable offline queue.

@@ -164,9 +164,14 @@
 								<span class="text-muted-foreground text-xs">
 									{workspace.t('ui.ws.team.expires', { date: workspace.i18n.date(invitation.expiresAt) })}
 								</span>
-								<Button variant="ghost" size="sm" href={href(`/invitation/${invitation.id}`)} target="_blank">
-									<MailOpen class="size-4" />{workspace.t('ui.ws.team.open_link')}
-								</Button>
+								{#if !workspace.remote}<Button
+										variant="ghost"
+										size="sm"
+										href={href(`/invitation/${invitation.id}`)}
+										target="_blank"
+									>
+										<MailOpen class="size-4" />{workspace.t('ui.ws.team.open_link')}
+									</Button>{/if}
 								<Button variant="ghost" size="sm" onclick={() => model.resend(invitation.id)}>
 									{workspace.t('ui.ws.team.resend')}
 								</Button>

@@ -1,3 +1,6 @@
+import Stripe from 'stripe';
+import { priceBook } from './services/billing.ts';
+import { ObjectStore } from './object-store.ts';
 import { createDb } from '@clinks/db/client';
 import { serve } from '@hono/node-server';
 import { createApp } from './app.ts';
@@ -7,6 +10,15 @@ import { RateLimiter } from './rate-limit.ts';
 import { TokenService } from './tokens.ts';
 
 const config = loadConfig();
+const billing = config.STRIPE_SECRET_KEY
+	? {
+			stripe: new Stripe(config.STRIPE_SECRET_KEY, { timeout: 10000 }),
+			secret: config.STRIPE_WEBHOOK_SECRET ?? '',
+			prices: priceBook.parse(JSON.parse(config.STRIPE_PRICES ?? '{}')),
+			tax: config.STRIPE_TAX,
+		}
+	: undefined;
+if (billing && !billing.secret) throw new Error('STRIPE_WEBHOOK_SECRET is required when billing is enabled');
 const db = createDb(config.DATABASE_URL);
 const tokens = await TokenService.create({
 	issuer: config.TOKEN_ISSUER,
@@ -18,7 +30,9 @@ if (!config.SIGNING_KEY) console.warn('No SIGNING_KEY: using a key that lasts un
 
 const app = createApp({
 	services: {
+		billing,
 		db,
+		objects: config.S3_BUCKET ? new ObjectStore(config.S3_BUCKET, config.S3_ENDPOINT, config.S3_REGION) : undefined,
 		tokens,
 		mailer: smtpMailer(config.SMTP_URL, config.MAIL_FROM),
 		limiter: new RateLimiter(),

@@ -1,9 +1,19 @@
+import { RemoteAccountApi } from './data/remote-account.ts';
+import { DocumentFiles } from './data/document-files.ts';
 import { createContext } from 'svelte';
 import { toast } from 'svelte-sonner';
 import { AccountApi, roleFor } from './data/account-api.ts';
-import { MockApiError, MockDatabase, tableNames, type TableName } from './data/database.ts';
+import {
+	MockApiError,
+	MockDatabase,
+	WorkspaceCache,
+	emptySnapshot,
+	tableNames,
+	type TableName,
+} from './data/database.ts';
 import { NetworkSimulator } from './data/network.svelte.ts';
 import { demoRowsFor, createSeed } from './data/seed.ts';
+import { workspaceTable } from './data/workspace-tables.ts';
 import { WorkspaceApi } from './data/workspace-api.ts';
 import type { Patchable } from '@clinks/contracts/repository';
 import { roleGrants } from '@clinks/domain/permissions';
@@ -16,8 +26,6 @@ import { RemoteAuthGateway } from './session/remote-auth.ts';
 import { ApiClient } from './data/api-client.ts';
 import type { RequestContext } from './data/repository.ts';
 import { SyncEngine } from './sync/sync-engine.svelte.ts';
-import { SyncedRepository } from './sync/synced-repository.ts';
-import { appointmentSchema, contactSchema } from '@clinks/contracts/schemas';
 import { ThemeController } from './state/theme.svelte.ts';
 import type { Platform } from './platform/types.ts';
 import { createWebPlatform } from './platform/web.svelte.ts';
@@ -35,8 +43,10 @@ export class Workspace {
 	readonly network: NetworkSimulator;
 	readonly i18n: Translator;
 	readonly theme: ThemeController;
-	readonly db: MockDatabase;
+	readonly db: WorkspaceCache;
 	readonly account: AccountApi;
+	readonly documentFiles: DocumentFiles;
+	readonly remote: ApiClient | null;
 	/** Sign-in, onboarding and invitations: against the API when `VITE_API_URL` is set, otherwise the demo. */
 	readonly auth: AuthGateway;
 	readonly session: Session;
@@ -53,55 +63,50 @@ export class Workspace {
 		this.network = new NetworkSimulator(platform.preferences);
 		this.i18n = new Translator(platform.preferences);
 		this.theme = new ThemeController(platform.preferences);
-		// The mock database is browser-only and goes away with PowerSync in phase 4.
 		const storage = browserStorage();
 		this.persistent = storage !== null;
 		const localize = (key: string) => this.i18n.t(key);
-		this.db = new MockDatabase({
-			storage,
-			seed: () => createSeed(new Date()),
-			conditions: () => this.network.conditions(),
-			localize,
-		});
-		this.account = new AccountApi(this.db, {
-			userId: () => this.session.callerId(),
-			tenantId: () => this.session.tenantId,
-			localize,
-		});
+		const apiUrl = import.meta.env.VITE_API_URL as string | undefined;
+		const client = apiUrl ? new ApiClient(apiUrl, () => this.i18n.locale, localize) : null;
+		const options = { storage, localize, seed: emptySnapshot };
+		this.db = client
+			? new WorkspaceCache(options, 'clinks.workspace.account.v1')
+			: new MockDatabase({
+					...options,
+					seed: () => createSeed(new Date()),
+					conditions: () => this.network.conditions(),
+				});
+		const caller = { userId: () => this.session.callerId(), tenantId: () => this.session.tenantId, localize };
 		const context: RequestContext = {
 			tenantId: () => this.session.tenantId,
 			actorId: () => this.session.callerId(),
 			can: (permission) => roleGrants(roleFor(this.db, this.session.callerId(), this.session.tenantId), permission),
 			localize,
 		};
-		const apiUrl = import.meta.env.VITE_API_URL as string | undefined;
-		if (apiUrl) {
-			const client = new ApiClient(apiUrl, () => this.i18n.locale, localize);
+		this.remote = client;
+		this.documentFiles = new DocumentFiles(client, platform.files, localize);
+		if (client) {
 			this.sync = new SyncEngine(
 				client,
 				(import.meta.env.VITE_POWERSYNC_URL as string | undefined) ?? 'http://localhost:8080',
 				{
-					changed: (table) => this.db.touch(table),
+					changed: (table) => this.db.touch(workspaceTable(table)),
 					rejected: (message) => toast.error(message),
 				},
 			);
-			this.auth = new RemoteAuthGateway(client, this.db, this.sync);
-			this.api = new WorkspaceApi(this.db, context, {
-				contacts: new SyncedRepository(this.sync, context, {
-					table: 'contacts',
-					read: 'contacts.read',
-					write: 'contacts.write',
-					schema: contactSchema,
-				}),
-				appointments: new SyncedRepository(this.sync, context, {
-					table: 'appointments',
-					read: 'calendar.read',
-					write: 'calendar.write',
-					schema: appointmentSchema,
-				}),
-			});
+			const gateway = new RemoteAuthGateway(
+				client,
+				this.db,
+				this.sync,
+				() => new WorkspaceCache(options),
+				platform.preferences,
+			);
+			this.auth = gateway;
+			this.account = new RemoteAccountApi(this.db, caller, client, gateway);
+			this.api = new WorkspaceApi(this.db, context, this.sync);
 		} else {
 			this.sync = null;
+			this.account = new AccountApi(this.db, caller);
 			this.auth = new MockAuthGateway(this.account, localize);
 			this.api = new WorkspaceApi(this.db, context);
 		}

@@ -31,7 +31,38 @@
 	const workspace = useWorkspace();
 	const model = new DocumentsModel(workspace);
 	const canWrite = $derived(workspace.session.can('documents.write'));
-	let preview = $state<StoredDocument | null>(null);
+	let preview = $state<(StoredDocument & { text: string }) | null>(null);
+	let versioned = $state<StoredDocument | null>(null);
+	let versions = $state<import('#lib/data/document-files').DocumentVersion[]>([]);
+	async function showPreview(doc: StoredDocument) {
+		preview = await workspace.run(() => workspace.documentFiles.preview(doc));
+	}
+	async function showVersions(doc: StoredDocument) {
+		const list = await workspace.run(() => workspace.documentFiles.versions(doc));
+		if (list) {
+			versions = list;
+			versioned = doc;
+		}
+	}
+	async function replace(doc: StoredDocument, file?: File) {
+		if (
+			file &&
+			(await workspace.run(async () => {
+				await workspace.documentFiles.replace(doc, file);
+				return true;
+			}))
+		)
+			await showVersions(doc);
+	}
+	async function restore(doc: StoredDocument, id: string) {
+		if (
+			await workspace.run(async () => {
+				await workspace.documentFiles.restore(doc, id);
+				return true;
+			})
+		)
+			await showVersions(doc);
+	}
 	let naming = $state<{ title: string; value: string; save: (name: string) => Promise<unknown> } | null>(null);
 	let linking = $state<StoredDocument | null>(null);
 	let linkContact = $state<ContactId | null>(null);
@@ -217,7 +248,7 @@
 									<Table.Cell>
 										<button
 											class="flex items-center gap-2 text-left font-medium hover:underline"
-											onclick={() => (preview = document)}
+											onclick={() => showPreview(document)}
 										>
 											{#if document.mimeType.startsWith('image/')}<FileImage
 													class="text-muted-foreground size-4"
@@ -254,12 +285,17 @@
 													</Button>{/snippet}
 											</DropdownMenu.Trigger>
 											<DropdownMenu.Content align="end">
-												<DropdownMenu.Item onclick={() => (preview = document)}>
+												<DropdownMenu.Item onclick={() => showPreview(document)}>
 													{workspace.t('ui.ws.documents.preview')}
 												</DropdownMenu.Item>
-												<a href={document.dataUrl} download={document.name}>
-													<DropdownMenu.Item>{workspace.t('ui.ws.documents.download')}</DropdownMenu.Item>
-												</a>
+												<DropdownMenu.Item onclick={() => workspace.run(() => workspace.documentFiles.save(document))}>
+													{workspace.t('ui.ws.documents.download')}
+												</DropdownMenu.Item>
+												{#if document.dataUrl.startsWith('version:')}
+													<DropdownMenu.Item onclick={() => showVersions(document)}>
+														{workspace.t('ui.ws.documents.versions')}
+													</DropdownMenu.Item>
+												{/if}
 												{#if canWrite}
 													<DropdownMenu.Item
 														onclick={() =>
@@ -318,9 +354,9 @@
 				{#if preview.mimeType.startsWith('image/')}
 					<img src={preview.dataUrl} alt={preview.name} class="mx-auto max-h-[68vh]" />
 				{:else if preview.mimeType === 'application/pdf'}
-					<iframe src={preview.dataUrl} title={preview.name} class="h-[68vh] w-full"></iframe>
+					<iframe sandbox="" src={preview.dataUrl} title={preview.name} class="h-[68vh] w-full"></iframe>
 				{:else if preview.mimeType.startsWith('text/')}
-					<pre class="p-4 text-sm whitespace-pre-wrap">{decodeURIComponent(preview.dataUrl.split(',')[1] ?? '')}</pre>
+					<pre class="p-4 text-sm whitespace-pre-wrap">{preview.text}</pre>
 				{:else}
 					<p class="text-muted-foreground p-8 text-center text-sm">{workspace.t('ui.ws.documents.no_preview')}</p>
 				{/if}
@@ -370,3 +406,32 @@
 	</Dialog.Content>
 </Dialog.Root>
 <ConfirmDialog bind:request={confirm} />
+
+<Dialog.Root open={versioned !== null} onOpenChange={(open) => !open && (versioned = null)}>
+	<Dialog.Content closeLabel={workspace.t('ui.ws.close')}>
+		{#if versioned}{@const doc = versioned}
+			<Dialog.Header>
+				<Dialog.Title>{workspace.t('ui.ws.documents.versions')}</Dialog.Title><Dialog.Description>
+					{doc.name}
+				</Dialog.Description>
+			</Dialog.Header>
+			<ul>
+				{#each versions as version (version.id)}<li class="flex items-center justify-between gap-3 py-2">
+						{workspace.i18n.dateTime(version.createdAt)}
+						{#if canWrite && version.id !== versions[0]?.id}<Button
+								variant="outline"
+								onclick={() => restore(doc, version.id)}
+							>
+								{workspace.t('ui.ws.documents.restore_version')}
+							</Button>{/if}
+					</li>{/each}
+			</ul>
+			{#if canWrite}<label>
+					{workspace.t('ui.ws.documents.upload_version')}<input
+						type="file"
+						onchange={(event) => replace(doc, event.currentTarget.files?.[0])}
+					/>
+				</label>{/if}
+		{/if}
+	</Dialog.Content>
+</Dialog.Root>

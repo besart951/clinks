@@ -21,7 +21,7 @@ import type {
 	Tenant,
 	User,
 } from '@clinks/domain/types';
-import { MockApiError, stamp, type MockDatabase, type Snapshot, type TableName } from './database.ts';
+import { MockApiError, stamp, type WorkspaceCache, type Snapshot, type TableName } from './database.ts';
 import { appendAudit, validationError } from './repository.ts';
 import { demoPassword } from './seed.ts';
 import type { NewTenant } from '../session/auth-gateway.ts';
@@ -35,7 +35,7 @@ export interface Caller {
 
 export interface Member {
 	membership: Membership;
-	user: User;
+	user: Pick<User, 'id' | 'email' | 'firstName' | 'lastName' | 'avatarColor' | 'avatarDataUrl'>;
 	role: Role;
 }
 
@@ -53,7 +53,7 @@ export interface TenantOverview {
 	invoices: number;
 }
 
-export function roleFor(db: MockDatabase, userId: UserId | null, tenantId: TenantId | null): Role | null {
+export function roleFor(db: WorkspaceCache, userId: UserId | null, tenantId: TenantId | null): Role | null {
 	if (!userId || !tenantId) return null;
 	const membership = db
 		.table('memberships')
@@ -63,10 +63,10 @@ export function roleFor(db: MockDatabase, userId: UserId | null, tenantId: Tenan
 
 /** Accounts, tenants, memberships and billing: the control-plane part of the mock API. */
 export class AccountApi {
-	#db: MockDatabase;
+	#db: WorkspaceCache;
 	#caller: Caller;
 
-	constructor(db: MockDatabase, caller: Caller) {
+	constructor(db: WorkspaceCache, caller: Caller) {
 		this.#db = db;
 		this.#caller = caller;
 	}

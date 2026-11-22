@@ -1,0 +1,29 @@
+telemetry:
+  disable_telemetry_sharing: true
+
+replication:
+  connections:
+    - type: postgresql
+      uri: !env PS_DATA_SOURCE_URI
+      sslmode: verify-full
+
+storage:
+  type: postgresql
+  uri: !env PS_STORAGE_SOURCE_URI
+  sslmode: verify-full
+
+port: !env PS_PORT
+
+sync_config:
+  path: sync-config.yaml
+
+client_auth:
+  # Access tokens are signed by the API (EdDSA); PowerSync fetches the public keys from its JWKS.
+  jwks_uri: !env PS_JWKS_URI
+  # The dev API runs on the host, a private address; production uses the public HTTPS URL.
+  block_local_jwks: true
+  audience: ['clinks']
+
+api:
+  tokens:
+    - !env PS_ADMIN_TOKEN

@@ -20,7 +20,6 @@
 	const people = new PeopleDirectory(workspace);
 	const canWrite = $derived(workspace.session.can('spitex.write'));
 	onMount(() => {
-		void people.load();
 		return model.resource.connect();
 	});
 

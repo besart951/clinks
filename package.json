@@ -25,7 +25,7 @@
     "check:translations": "node scripts/generate-translation-catalog.mjs --check",
     "build": "pnpm -r build",
     "build:artifact": "pnpm --filter @clinks/web build:artifact",
-    "verify": "pnpm format:check && pnpm lint && pnpm check:translations && pnpm check:openapi && pnpm check && pnpm test && pnpm build",
+    "verify": "pnpm format:check && pnpm lint && pnpm check:translations && pnpm check:openapi && node apps/mobile/tool/generate.mjs --check && pnpm check && pnpm test && pnpm build",
     "check:openapi": "pnpm --filter @clinks/api openapi --check"
   },
   "devDependencies": {

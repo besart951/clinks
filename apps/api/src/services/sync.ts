@@ -1,22 +1,20 @@
-import { appointmentSchema, contactSchema } from '@clinks/contracts/schemas';
+import { coreModules } from '@clinks/domain/types';
+import { workspaceSchemas } from '@clinks/contracts/workspace-schemas';
 import type { SyncWriteRequest } from '@clinks/contracts/sync';
 import { inScope, type Tx } from '@clinks/db/scope';
 import { roleGrants } from '@clinks/domain/permissions';
-import type { Permission, RoleKind } from '@clinks/domain/types';
+import { activeRole } from './permissions.ts';
+import { storeDocument } from './files.ts';
 import { uploadToFields } from '@clinks/sync-schema/mapping';
 import { isSyncedTable, syncedTables, type Column, type SyncedTableName } from '@clinks/sync-schema/tables';
 import type { ProductTranslationKey } from '@clinks/i18n-types';
-import type { ZodType } from 'zod';
+import { z } from 'zod';
 import { ApiError, forbidden } from '../errors.ts';
 import type { AccessClaims } from '../tokens.ts';
 import { audit } from './audit.ts';
 import type { Caller, Services } from './context.ts';
 
-/** The domain rules every write must pass, the same the mock API and the forms use. */
-const schemas: { [table in SyncedTableName]: ZodType } = { contacts: contactSchema, appointments: appointmentSchema };
-
 type Fields = { [field: string]: unknown };
-type Role = { kind: RoleKind; permissions: Permission[] };
 
 /**
  * Applies the PowerSync upload queue. Each request is one local transaction of a client; it is checked
@@ -33,29 +31,65 @@ export class SyncService {
 		this.#services = services;
 	}
 
-	async write(claims: AccessClaims, request: SyncWriteRequest, caller: Caller): Promise<{ applied: number }> {
+	async write(
+		claims: AccessClaims,
+		request: SyncWriteRequest,
+		caller: Caller,
+		mode: 'upload' | 'import' = 'upload',
+	): Promise<{ applied: number }> {
 		const tenantId = claims.tenant_id;
 		if (!tenantId) throw forbidden();
 		await inScope(this.#services.db, { tenantId, userId: claims.sub }, async (tx) => {
-			const role = await this.#role(tx, tenantId, claims.sub);
+			const deferred: { table: SyncedTableName; fields: Fields }[] = [];
+			const role = await activeRole(tx, tenantId, claims.sub);
+			const entitlements = await tx
+				.selectFrom('tenants')
+				.select('enabledModules')
+				.where('id', '=', tenantId)
+				.executeTakeFirst();
+			const modules = new Set([...coreModules, ...(entitlements?.enabledModules ?? [])]);
 			for (const op of request.ops) {
 				if (!isSyncedTable(op.table)) throw new ApiError(400, 'error.validation', { table: 'error.ws.not_found' });
 				const table = op.table;
-				if (!role || !roleGrants(role, syncedTables[table].write as Permission)) throw forbidden();
-				const action = await this.#apply(tx, tenantId, table, op);
-				if (action)
+				const permission = syncedTables[table].write;
+				if (!role || !roleGrants(role, permission) || (permission && !modules.has(permission.split('.')[0])))
+					throw forbidden();
+				if (op.data?.tenant_id !== undefined && op.data.tenant_id !== tenantId) throw forbidden();
+				const action = await this.#apply(
+					tx,
+					{ tenantId, userId: claims.sub },
+					table,
+					op,
+					mode === 'import' ? deferred : null,
+				);
+				if (action && syncedTables[table].audit)
 					await audit(
 						tx,
 						{ action: `${syncedTables[table].audit}.${action}`, actorId: claims.sub, tenantId, target: op.id },
 						caller,
 					);
 			}
+			for (const { table, fields } of deferred) await checkReferences(tx, tenantId, table, fields);
+		}).catch((error: unknown) => {
+			const code = (error as { code?: string }).code;
+			if (code === '23503') throw new ApiError(409, 'error.conflict');
+			if (code === '23502' || code === '23514' || code?.startsWith('22')) throw new ApiError(400, 'error.validation');
+			throw error;
 		});
 		return { applied: request.ops.length };
 	}
 
-	async #apply(tx: Tx, tenantId: string, table: SyncedTableName, op: SyncWriteRequest['ops'][number]) {
+	async #apply(
+		tx: Tx,
+		scope: { tenantId: string; userId: string },
+		table: SyncedTableName,
+		op: SyncWriteRequest['ops'][number],
+		deferred: { table: SyncedTableName; fields: Fields }[] | null,
+	) {
+		const { tenantId, userId } = scope;
 		const now = this.#services.now();
+		const clinical = table === 'physio_notes' || table === 'spitex_notes';
+		if (clinical && op.op !== 'PUT') throw forbidden();
 		if (op.op === 'DELETE') {
 			const deleted = await tx.deleteFrom(table).where('id', '=', op.id).executeTakeFirst();
 			return deleted.numDeletedRows > 0n ? 'deleted' : null;
@@ -67,13 +101,43 @@ export class SyncService {
 				'error.validation',
 				Object.fromEntries(unknown.map((name) => [name, 'error.validation'])),
 			);
-		const existing = await tx.selectFrom(table).selectAll().where('id', '=', op.id).executeTakeFirst();
+		const existing = await tx.selectFrom(table).selectAll().where('id', '=', op.id).forUpdate().executeTakeFirst();
 		// A patch for a row that is gone (deleted elsewhere) has nothing left to change.
-		if (op.op === 'PATCH' && !existing) return null;
-		const merged = { ...(existing ? dbToFields(table, existing) : {}), ...fields };
+		if ((op.op === 'PATCH' && !existing) || (deferred && existing)) return null;
+		// PowerSync can omit null columns on insert.
+		const merged = { ...dbToFields(table, existing ?? {}), ...fields };
 		validate(table, merged);
-		await checkReferences(tx, table, fields);
+		if (clinical && existing) {
+			const saved = dbToFields(table, existing);
+			if (Object.entries(fields).some(([key, value]) => saved[key] !== value)) throw forbidden();
+			return null;
+		}
+		if (
+			(table.endsWith('_comments') || table.endsWith('_notes')) &&
+			fields.authorId !== undefined &&
+			fields.authorId !== (existing?.authorId ?? userId)
+		)
+			throw forbidden();
+		if (
+			table === 'documents' &&
+			fields.uploadedBy !== undefined &&
+			fields.uploadedBy !== (existing?.uploadedBy ?? userId)
+		)
+			throw forbidden();
+		if (
+			table === 'notifications' &&
+			existing &&
+			Object.keys(fields).some((key) => key !== 'read' && fields[key] !== dbToFields(table, existing)[key])
+		)
+			throw forbidden();
+		if (deferred) deferred.push({ table, fields });
+		else await checkReferences(tx, tenantId, table, fields);
 		const values = fieldsToDb(table, op.op === 'PUT' ? merged : fields);
+		if (
+			table === 'documents' &&
+			(fields.dataUrl !== undefined || fields.size !== undefined || fields.mimeType !== undefined)
+		)
+			Object.assign(values, await storeDocument(tx, this.#services.objects, scope, op.id, merged, existing?.dataUrl));
 		if (existing) {
 			await tx
 				.updateTable(table)
@@ -94,35 +158,48 @@ export class SyncService {
 		}
 		return 'created';
 	}
-
-	/** The role of the caller's active membership; the token's role claim may be up to 15 minutes old. */
-	async #role(tx: Tx, tenantId: string, userId: string): Promise<Role | null> {
-		const row = await tx
-			.selectFrom('memberships')
-			.innerJoin('roles', 'roles.id', 'memberships.roleId')
-			.select(['roles.kind', 'roles.permissions'])
-			.where('memberships.tenantId', '=', tenantId)
-			.where('memberships.userId', '=', userId)
-			.where('memberships.status', '=', 'active')
-			.executeTakeFirst();
-		return row ? { kind: row.kind, permissions: row.permissions as Permission[] } : null;
-	}
 }
 
 /** A reference must point into the same tenant; foreign keys alone would accept another tenant's id. */
-async function checkReferences(tx: Tx, table: SyncedTableName, fields: Fields) {
-	for (const column of syncedTables[table].columns as readonly Column[]) {
-		const target = column.references;
-		const id = fields[column.field];
-		if (!target || typeof id !== 'string') continue;
-		// Row-level security limits the lookup to the caller's tenant.
-		const found = await tx.selectFrom(target).select('id').where('id', '=', id).executeTakeFirst();
-		if (!found) throw new ApiError(400, 'error.validation', { [column.field]: 'error.ws.not_found' });
+async function checkReferences(tx: Tx, tenantId: string, table: SyncedTableName, fields: Fields) {
+	const targets = { contact: 'contacts', invoice: 'invoices', task: 'tasks', expense: 'expenses' } as const;
+	type Target = keyof typeof targets;
+	type Reference = NonNullable<Column['references']> | 'tasks' | 'expenses';
+	const references = new Map<Reference, Set<string>>();
+	function add(target: Reference, value: unknown) {
+		if (value == null) return;
+		if (!z.uuid().safeParse(value).success) throw new ApiError(400, 'error.validation');
+		const ids = references.get(target) ?? new Set<string>();
+		ids.add(value as string);
+		references.set(target, ids);
+	}
+	for (const column of syncedTables[table].columns as readonly Column[])
+		if (column.references) add(column.references, fields[column.field]);
+	for (const id of (fields.appointmentIds ?? []) as string[]) add('appointments', id);
+	for (const id of (fields.assigneeIds ?? fields.mentions ?? []) as string[]) add('users', id);
+	const links = (fields.targets ?? (fields.target ? [fields.target] : [])) as { kind: Target; id: string }[];
+	for (const link of links) add(targets[link.kind], link.id);
+	for (const [target, ids] of references) {
+		const rows =
+			target === 'users'
+				? await tx
+						.selectFrom('memberships')
+						.select('userId')
+						.where('tenantId', '=', tenantId)
+						.where('status', '=', 'active')
+						.where('userId', 'in', [...ids])
+						.execute()
+				: await tx
+						.selectFrom(target)
+						.select('id')
+						.where('id', 'in', [...ids])
+						.execute();
+		if (rows.length !== ids.size) throw new ApiError(400, 'error.validation', { reference: 'error.ws.not_found' });
 	}
 }
 
 function validate(table: SyncedTableName, record: Fields) {
-	const result = schemas[table].safeParse(record);
+	const result = workspaceSchemas[table].safeParse(record);
 	if (result.success) return;
 	const fields: { [field: string]: ProductTranslationKey } = {};
 	for (const issue of result.error.issues) {
@@ -143,7 +220,8 @@ function dbToFields(table: SyncedTableName, row: Fields): Fields {
 	const fields: Fields = {};
 	for (const column of syncedTables[table].columns) {
 		const value = row[dbKey(column)];
-		fields[column.field] = value instanceof Date ? value.toISOString() : value;
+		if (value !== undefined || ('nullable' in column && column.nullable))
+			fields[column.field] = value instanceof Date ? value.toISOString() : (value ?? null);
 	}
 	return fields;
 }

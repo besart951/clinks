@@ -105,3 +105,27 @@ describe('row-level security', () => {
 		assert.equal(rows.length, 0);
 	});
 });
+
+it('updates the stream lookup on role, module and membership changes within the same transaction', async () => {
+	await inScope(app, { tenantId: tenantA, userId: alice }, async (tx) => {
+		const read = async () =>
+			(await tx.selectFrom('syncAccess').select('readPermissions').where('userId', '=', alice).executeTakeFirst())
+				?.readPermissions;
+		await tx
+			.updateTable('roles')
+			.set({ permissions: ['contacts.read', 'finance.read'] })
+			.where('id', '=', roleA)
+			.execute();
+		await tx
+			.updateTable('tenants')
+			.set({ enabledModules: ['finance'] })
+			.where('id', '=', tenantA)
+			.execute();
+		assert.deepEqual(await read(), ['contacts.read', 'finance.read']);
+		await tx.updateTable('tenants').set({ enabledModules: [] }).where('id', '=', tenantA).execute();
+		assert.deepEqual(await read(), ['contacts.read']);
+		assert.equal((await tx.selectFrom('syncAccess').select('id').where('tenantId', '=', tenantB).execute()).length, 0);
+		await tx.updateTable('memberships').set({ status: 'inactive' }).where('userId', '=', alice).execute();
+		assert.equal(await read(), undefined);
+	});
+});

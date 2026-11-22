@@ -97,6 +97,7 @@ export class Session {
 	}
 
 	async signIn(email: string, password: string): Promise<SessionStatus> {
+		await this.ready;
 		const step = await this.#gateway.signIn(email, password);
 		if (step.status === 'authenticated') await this.#establish(step.userId);
 		else {
@@ -115,6 +116,7 @@ export class Session {
 	}
 
 	async signUp(input: { firstName: string; lastName: string; email: string; password: string }) {
+		await this.ready;
 		const user = await this.#gateway.signUp(input);
 		this.user = user;
 		this.pendingEmail = input.email;
@@ -149,7 +151,7 @@ export class Session {
 	}
 
 	async impersonate(userId: UserId, tenantId: TenantId) {
-		if (!this.isSuperAdministrator || !this.user) return;
+		if (this.#gateway.remote || !this.isSuperAdministrator || !this.user) return;
 		const administratorId = this.user.id;
 		await this.#load(userId, tenantId);
 		this.impersonatorId = administratorId;
@@ -164,8 +166,8 @@ export class Session {
 		this.#persist(true);
 	}
 
-	signOut() {
-		void this.#gateway.signOut();
+	async signOut() {
+		await this.#gateway.signOut();
 		this.#clear();
 	}
 

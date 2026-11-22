@@ -135,7 +135,9 @@ export class InvoiceEditorModel {
 				? await api.invoices.update(data.invoice.id, data.invoice.revision, draft)
 				: await api.invoices.create({
 						...draft,
-						number: nextInvoiceNumber(data.invoices, new Date(this.issueDate).getFullYear()),
+						number: this.#workspace.sync
+							? ''
+							: nextInvoiceNumber(data.invoices, new Date(this.issueDate).getFullYear()),
 						kind: 'invoice',
 						payments: [],
 						reminderLevel: 0,

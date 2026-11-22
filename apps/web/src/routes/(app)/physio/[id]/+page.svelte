@@ -62,7 +62,6 @@
 	const weekdays = [1, 2, 3, 4, 5, 6];
 
 	onMount(() => {
-		void people.load();
 		return model.resource.connect();
 	});
 
@@ -290,12 +289,6 @@
 								<SoapNote
 									{note}
 									meta={{ author: people.get(note.authorId)?.name ?? '', labels: soapLabels, open: index === 0 }}
-									actions={canWrite
-										? {
-												save: (field, value) => model.saveNote(note, field, value),
-												remove: note.authorId === session.user?.id ? () => model.removeNote(note) : undefined,
-											}
-										: null}
 								/>
 							{:else}
 								{#if !composing}<p class="text-muted-foreground px-1 text-sm">
