@@ -13,3 +13,4 @@ pnpm-lock.yaml
 .agents
 .claude/skills
 skills-lock.json
+packages/contracts/openapi.json

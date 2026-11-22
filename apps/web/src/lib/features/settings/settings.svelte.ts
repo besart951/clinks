@@ -13,7 +13,7 @@ import type {
 	Tenant,
 } from '@clinks/domain/types';
 import type { Member, PlatformInvoice } from '../../data/account-api.ts';
-import type { Locale } from '../../i18n/catalog.ts';
+import type { Locale } from '@clinks/i18n-types/catalog';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 import { maxUploadBytes } from '../collaboration/attachments.svelte.ts';

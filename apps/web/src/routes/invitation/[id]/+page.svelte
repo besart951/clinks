@@ -8,22 +8,23 @@
 	import AuthShell from '#lib/components/auth/AuthShell.svelte';
 	import FormField from '#lib/components/common/FormField.svelte';
 	import SkeletonRows from '#lib/components/common/SkeletonRows.svelte';
-	import { demoPassword } from '#lib/data/seed';
-	import type { InvitationId } from '@clinks/domain/ids';
+	import type { InvitationDetails } from '@clinks/contracts/auth';
 	import { href, navigate } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
-	const id = page.params.id as InvitationId;
-	let details = $state<Awaited<ReturnType<typeof workspace.account.invitationDetails>> | null>(null);
+	// The demo links by invitation id, the real mail by a one-time token.
+	const token = page.params.id ?? '';
+	let details = $state<InvitationDetails | null>(null);
 	let error = $state('');
 	let firstName = $state('');
 	let lastName = $state('');
+	let password = $state('');
 	let busy = $state(false);
 
 	onMount(async () => {
 		try {
-			details = await workspace.account.invitationDetails(id);
+			details = await workspace.auth.invitationDetails(token);
 		} catch (failure) {
 			error = workspace.message(failure);
 		}
@@ -34,18 +35,20 @@
 		if (!details) return;
 		busy = true;
 		try {
-			const membership = await workspace.account.acceptInvitation(id, { firstName, lastName });
+			const accepted = await workspace.auth.acceptInvitation(token, {
+				firstName,
+				lastName,
+				password: details.hasAccount ? undefined : password,
+			});
 			const session = workspace.session;
-			if (session.status === 'authenticated' && session.user?.email === details.invitation.email) {
-				await session.refresh();
-				await session.switchTenant(membership.tenantId);
+			if (accepted.signedInAs) {
+				await session.adopt(accepted.signedInAs, accepted.tenantId);
 				await navigate('/dashboard');
 				return;
 			}
-			if (!details.existingUser) {
-				session.signOut();
-				await session.signIn(details.invitation.email, demoPassword);
-				await session.switchTenant(membership.tenantId);
+			if (session.status === 'authenticated' && session.user?.email === details.email) {
+				await session.refresh();
+				await session.switchTenant(accepted.tenantId);
 				await navigate('/dashboard');
 				return;
 			}
@@ -73,9 +76,9 @@
 	{:else}
 		<form class="space-y-4" onsubmit={accept}>
 			<FormField id="iv-email" label={workspace.t('ui.email')}>
-				<Input id="iv-email" value={details.invitation.email} disabled />
+				<Input id="iv-email" value={details.email} disabled />
 			</FormField>
-			{#if !details.existingUser}
+			{#if !details.hasAccount}
 				<div class="grid grid-cols-2 gap-3">
 					<FormField id="iv-first" label={workspace.t('ui.ws.field.first_name')}>
 						<Input id="iv-first" bind:value={firstName} />
@@ -84,11 +87,18 @@
 						<Input id="iv-last" bind:value={lastName} />
 					</FormField>
 				</div>
-				<p class="text-muted-foreground text-xs">
-					{workspace.t('ui.ws.invitation.demo_password', { password: demoPassword })}
-				</p>
+				<FormField id="iv-password" label={workspace.t('ui.password')}>
+					<Input
+						id="iv-password"
+						type="password"
+						autocomplete="new-password"
+						minlength={10}
+						required
+						bind:value={password}
+					/>
+				</FormField>
 			{/if}
-			{#if workspace.session.status === 'authenticated' && workspace.session.user?.email !== details.invitation.email}<p
+			{#if workspace.session.status === 'authenticated' && workspace.session.user?.email !== details.email}<p
 					class="text-muted-foreground text-xs"
 				>
 					{workspace.t('ui.invitation_replaces_session')}

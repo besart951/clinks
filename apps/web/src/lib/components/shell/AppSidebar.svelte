@@ -13,7 +13,7 @@
 	import UserMenu from './UserMenu.svelte';
 	import { navigationGroups, type NavigationItem } from '#lib/features/shell/navigation-items';
 	import { NavBadges } from '#lib/features/shell/nav-badges.svelte';
-	import { locales, type Locale } from '#lib/i18n/catalog';
+	import { locales, type Locale } from '@clinks/i18n-types/catalog';
 	import { href, routePath } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 

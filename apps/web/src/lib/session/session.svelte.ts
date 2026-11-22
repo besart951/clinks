@@ -4,15 +4,9 @@ import type { Membership, ModuleKey, Permission, Role, Tenant, User } from '@cli
 import type { AccountApi } from '../data/account-api.ts';
 import { MockApiError } from '../data/database.ts';
 import type { SecureStorage } from '../platform/types.ts';
+import type { AuthGateway, StoredSession } from './auth-gateway.ts';
 
 export type SessionStatus = 'loading' | 'anonymous' | 'two_factor' | 'verify_email' | 'authenticated';
-
-interface StoredSession {
-	userId: UserId;
-	tenantId: TenantId | null;
-	impersonatorId: UserId | null;
-	verified: boolean;
-}
 
 const storageKey = 'clinks.workspace.session';
 const cacheKey = 'clinks.workspace.session.cache';
@@ -28,12 +22,14 @@ function parse<T>(raw: string | null): T | null {
 }
 
 /**
- * Fake sign-in for the prototype. Credentials are checked by the mock API; the chosen user and tenant
- * stay in the platform's secure storage until phase 2 replaces them with real tokens.
+ * The signed-in person. The gateway decides who that is (demo credentials or the real API); the account,
+ * tenants and roles are then read from the local database. Only ids are stored, never a token.
  */
 export class Session {
 	status = $state<SessionStatus>('loading');
 	user = $state<User | null>(null);
+	/** The address a sign-up waits to have confirmed, before there is a user to show. */
+	pendingEmail = $state('');
 	memberships = $state<Membership[]>([]);
 	tenants = $state<Tenant[]>([]);
 	roles = $state<Role[]>([]);
@@ -46,13 +42,13 @@ export class Session {
 	isSuperAdministrator = $derived(this.user?.globalRole === 'super_administrator');
 	displayName = $derived(this.user ? `${this.user.firstName} ${this.user.lastName}`.trim() : '');
 
-	#account: AccountApi;
-	#pendingUserId: UserId | null = null;
+	readonly #account: AccountApi;
+	readonly #gateway: AuthGateway;
+	readonly #secure: SecureStorage;
 
-	#secure: SecureStorage;
-
-	constructor(account: AccountApi, secure: SecureStorage) {
+	constructor(account: AccountApi, gateway: AuthGateway, secure: SecureStorage) {
 		this.#account = account;
+		this.#gateway = gateway;
 		this.#secure = secure;
 	}
 
@@ -79,66 +75,63 @@ export class Session {
 
 	async #restore() {
 		const stored = parse<StoredSession>(this.#secure.read(storageKey));
-		if (!stored) {
-			this.status = 'anonymous';
-			return;
-		}
-		this.user = { id: stored.userId } as User;
-		this.status = stored.verified ? 'authenticated' : 'verify_email';
 		try {
-			await this.#load(stored.userId, stored.tenantId);
-			this.impersonatorId = stored.impersonatorId;
+			const resumed = await this.#gateway.resume(stored);
+			if (!resumed) return this.#clear();
+			this.user = { id: resumed.userId } as User;
+			this.status = resumed.verified ? 'authenticated' : 'verify_email';
+			await this.#load(resumed.userId, stored?.tenantId ?? null);
+			this.impersonatorId = stored?.userId === resumed.userId ? stored.impersonatorId : null;
 		} catch (error) {
+			// Offline or a flaky connection: the last snapshot still opens the workspace.
 			const cached =
-				error instanceof MockApiError && error.code !== 'unauthorized' ? this.#readCache(stored.userId) : null;
-			if (!cached) {
-				this.#clear();
-				return;
-			}
+				stored && error instanceof MockApiError && error.code !== 'unauthorized'
+					? this.#readCache(stored.userId)
+					: null;
+			if (!cached || !stored) return this.#clear();
+			this.status = stored.verified ? 'authenticated' : 'verify_email';
 			this.#apply(cached, stored.tenantId);
 			this.impersonatorId = stored.impersonatorId;
 		}
 	}
 
 	async signIn(email: string, password: string): Promise<SessionStatus> {
-		const user = await this.#account.signIn(email, password);
-		if (user.twoFactorEnabled) {
-			this.#pendingUserId = user.id;
-			this.status = 'two_factor';
-			return this.status;
+		const step = await this.#gateway.signIn(email, password);
+		if (step.status === 'authenticated') await this.#establish(step.userId);
+		else {
+			this.pendingEmail = email;
+			this.status = step.status;
 		}
-		await this.#establish(user);
 		return this.status;
 	}
 
 	async confirmTwoFactor(code: string) {
-		if (!this.#pendingUserId) return;
-		await this.#account.verifyTwoFactor(code);
-		const snapshot = await this.#account.snapshotFor(this.#pendingUserId);
-		this.#pendingUserId = null;
-		await this.#establish(snapshot.user);
+		await this.#establish(await this.#gateway.confirmTwoFactor(code));
 	}
 
 	cancelTwoFactor() {
-		this.#pendingUserId = null;
 		this.status = 'anonymous';
 	}
 
 	async signUp(input: { firstName: string; lastName: string; email: string; password: string }) {
-		const user = await this.#account.signUp(input);
+		const user = await this.#gateway.signUp(input);
 		this.user = user;
+		this.pendingEmail = input.email;
 		this.status = 'verify_email';
 		this.#persist(false);
 	}
 
 	async verifyEmail(code: string) {
-		if (!this.user) return;
-		const user = await this.#account.verifyEmail(this.user.id, code);
-		await this.#establish(user);
+		await this.#establish(await this.#gateway.verifyEmail(code, this.user?.id ?? null));
+	}
+
+	resendVerification() {
+		return this.#gateway.resendVerification();
 	}
 
 	async switchTenant(tenantId: TenantId) {
 		if (!this.memberships.some((membership) => membership.tenantId === tenantId)) return;
+		await this.#gateway.switchTenant(tenantId);
 		this.tenantId = tenantId;
 		this.#persist(true);
 	}
@@ -146,6 +139,12 @@ export class Session {
 	/** Re-reads user, tenants and roles after they were changed elsewhere. */
 	async refresh() {
 		if (this.user && this.status === 'authenticated') await this.#load(this.user.id, this.tenantId);
+	}
+
+	/** Signs in as an account the gateway has just opened (e.g. by accepting an invitation). */
+	async adopt(userId: UserId, tenantId: TenantId) {
+		await this.#establish(userId);
+		await this.switchTenant(tenantId);
 	}
 
 	async impersonate(userId: UserId, tenantId: TenantId) {
@@ -165,13 +164,14 @@ export class Session {
 	}
 
 	signOut() {
+		void this.#gateway.signOut();
 		this.#clear();
 	}
 
-	async #establish(user: User) {
-		this.user = user;
+	async #establish(userId: UserId) {
+		this.user = { id: userId } as User;
 		this.status = 'authenticated';
-		await this.#load(user.id, null);
+		await this.#load(userId, null);
 		this.#persist(true);
 	}
 
@@ -211,6 +211,7 @@ export class Session {
 	#clear() {
 		this.status = 'anonymous';
 		this.user = null;
+		this.pendingEmail = '';
 		this.memberships = [];
 		this.tenants = [];
 		this.roles = [];

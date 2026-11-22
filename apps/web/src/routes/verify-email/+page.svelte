@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { toast } from 'svelte-sonner';
 	import { Button } from '@clinks/ui/components/ui/button';
 	import { Input } from '@clinks/ui/components/ui/input';
 	import AuthShell from '#lib/components/auth/AuthShell.svelte';
@@ -19,14 +18,16 @@
 
 <AuthShell
 	title={workspace.t('ui.ws.auth.verify_title')}
-	description={workspace.t('ui.ws.auth.verify_text', { email: workspace.session.user?.email ?? '' })}
+	description={workspace.t('ui.ws.auth.verify_text', {
+		email: workspace.session.user?.email ?? workspace.session.pendingEmail,
+	})}
 >
 	<form class="space-y-4" onsubmit={submit} novalidate>
 		<FormField
 			id="code"
 			label={workspace.t('ui.ws.auth.code')}
 			error={form.error}
-			hint={workspace.t('ui.ws.auth.verify_demo_hint')}
+			hint={workspace.auth.remote ? undefined : workspace.t('ui.ws.auth.verify_demo_hint')}
 		>
 			<Input
 				id="code"
@@ -42,7 +43,7 @@
 			type="button"
 			variant="ghost"
 			class="w-full"
-			onclick={() => toast.success(workspace.t('ui.ws.auth.code_resent'))}
+			onclick={() => workspace.run(() => workspace.session.resendVerification(), { success: 'ui.ws.auth.code_resent' })}
 		>
 			{workspace.t('ui.ws.auth.resend_code')}
 		</Button>

@@ -4062,10 +4062,6 @@
         "de-CH": "Einladung angenommen. Melde dich jetzt an.",
         "en-US": "Invitation accepted. Sign in now."
       },
-      "ui.ws.invitation.demo_password": {
-        "de-CH": "Im Prototyp erhält dein neues Konto das Passwort {password}.",
-        "en-US": "In the prototype your new account gets the password {password}."
-      },
       "ui.ws.admin.title": {
         "de-CH": "CLinks Plattform",
         "en-US": "CLinks platform"
@@ -4445,6 +4441,58 @@
       "ui.ws.update.reload": {
         "de-CH": "Neu laden",
         "en-US": "Reload"
+      },
+      "error.forbidden": {
+        "de-CH": "Dafür fehlt dir die Berechtigung.",
+        "en-US": "You do not have permission to do this."
+      },
+      "error.account_locked": {
+        "de-CH": "Zu viele Fehlversuche. Das Konto ist für 15 Minuten gesperrt.",
+        "en-US": "Too many failed attempts. The account is locked for 15 minutes."
+      },
+      "error.code_expired": {
+        "de-CH": "Der Code ist abgelaufen. Fordere einen neuen an.",
+        "en-US": "The code has expired. Request a new one."
+      },
+      "error.reset_link_invalid": {
+        "de-CH": "Der Link ist ungültig oder abgelaufen. Fordere einen neuen an.",
+        "en-US": "The link is invalid or has expired. Request a new one."
+      },
+      "error.two_factor_enabled": {
+        "de-CH": "Die Zwei-Faktor-Anmeldung ist bereits aktiv.",
+        "en-US": "Two-factor sign-in is already enabled."
+      },
+      "mail.verify_email.subject": {
+        "de-CH": "Dein Bestätigungscode für CLinks",
+        "en-US": "Your CLinks confirmation code"
+      },
+      "mail.verify_email.body": {
+        "de-CH": "Hallo\n\nDein Bestätigungscode lautet {code}. Er ist 30 Minuten gültig.\n\nFalls du dich nicht bei CLinks registriert hast, kannst du diese E-Mail ignorieren.",
+        "en-US": "Hello\n\nYour confirmation code is {code}. It is valid for 30 minutes.\n\nIf you did not sign up for CLinks, you can ignore this email."
+      },
+      "mail.reset_password.subject": {
+        "de-CH": "Passwort für CLinks zurücksetzen",
+        "en-US": "Reset your CLinks password"
+      },
+      "mail.reset_password.body": {
+        "de-CH": "Hallo\n\nÜber diesen Link setzt du ein neues Passwort. Er ist eine Stunde gültig und funktioniert nur einmal:\n\n{link}\n\nFalls du das nicht angefordert hast, kannst du diese E-Mail ignorieren. Dein Passwort bleibt unverändert.",
+        "en-US": "Hello\n\nUse this link to set a new password. It is valid for one hour and works only once:\n\n{link}\n\nIf you did not request this, you can ignore this email. Your password stays the same."
+      },
+      "mail.invitation.subject": {
+        "de-CH": "Einladung zu {tenant} auf CLinks",
+        "en-US": "Invitation to {tenant} on CLinks"
+      },
+      "mail.invitation.body": {
+        "de-CH": "Hallo\n\nDu wurdest eingeladen, bei {tenant} auf CLinks mitzuarbeiten. Die Einladung ist 72 Stunden gültig:\n\n{link}",
+        "en-US": "Hello\n\nYou have been invited to work with {tenant} on CLinks. The invitation is valid for 72 hours:\n\n{link}"
+      },
+      "ui.ws.roles.default_administrator": {
+        "de-CH": "Administrator",
+        "en-US": "Administrator"
+      },
+      "ui.ws.roles.default_user": {
+        "de-CH": "Benutzer",
+        "en-US": "User"
       }
     }
   }

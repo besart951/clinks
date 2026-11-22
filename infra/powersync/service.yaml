@@ -21,14 +21,11 @@ sync_config:
   path: sync-config.yaml
 
 client_auth:
-  # Phase 2 switches to the API's JWKS endpoint (jwks_uri) with EdDSA keys.
-  jwks:
-    keys:
-      - kty: oct
-        alg: HS256
-        kid: clinks-dev
-        k: !env PS_DEV_JWT_SECRET
-  audience: ['clinks-dev']
+  # Access tokens are signed by the API (EdDSA); PowerSync fetches the public keys from its JWKS.
+  jwks_uri: !env PS_JWKS_URI
+  # The dev API runs on the host, a private address; production uses the public HTTPS URL.
+  block_local_jwks: false
+  audience: ['clinks']
 
 api:
   tokens:

@@ -1,12 +1,17 @@
 import { defineConfig } from '@playwright/test';
 
+// `pnpm test:e2e` runs the prototype against the in-browser mock; `pnpm test:e2e:remote` runs the sign-in
+// flows against the real API (needs `pnpm dev:services` and `pnpm dev:api`).
+const remote = Boolean(process.env.VITE_API_URL);
+
 export default defineConfig({
 	testDir: 'test/e2e',
+	testMatch: remote ? 'remote.spec.ts' : 'workspace.spec.ts',
 	timeout: 60_000,
 	use: {
 		baseURL: 'http://localhost:5176',
 		channel: process.env.PLAYWRIGHT_CHANNEL ?? 'chrome',
 		viewport: { width: 1400, height: 900 },
 	},
-	webServer: { command: 'pnpm dev --strictPort', port: 5176, reuseExistingServer: true },
+	webServer: { command: 'pnpm dev --strictPort', port: 5176, reuseExistingServer: !remote },
 });
