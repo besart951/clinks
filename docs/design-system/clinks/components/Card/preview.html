@@ -1,0 +1,27 @@
+<!-- @dsCard group="Layout" height=236 subtitle="Default with action and ruled footer; small with a nested card" -->
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<title>Card — preview</title>
+</head>
+<body>
+<div style="padding:var(--desktop-page);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--form-gap);align-items:start">
+  <div class="cl-card">
+    <div class="cl-card-header">
+      <div class="cl-card-title">Abrechnung</div>
+      <p class="cl-card-desc">InfraLink Team, jährliche Zahlung.</p>
+      <div class="cl-card-action"><button class="cl-btn cl-btn--ghost cl-btn--icon-sm" type="button" aria-label="Bearbeiten"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg></button></div>
+    </div>
+    <div class="cl-card-content">Nächste Rechnung am 1. Januar 2027.</div>
+    <div class="cl-card-footer cl-ruled"><button class="cl-btn cl-btn--outline cl-btn--sm" type="button">Rechnungen</button></div>
+  </div>
+  <div class="cl-card cl-card--sm">
+    <div class="cl-card-header"><div class="cl-card-title">Mitglieder</div></div>
+    <div class="cl-card-content">
+      <div class="cl-card cl-card--sm"><div class="cl-card-content">Eine verschachtelte Card wechselt auf <code>muted</code>.</div></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

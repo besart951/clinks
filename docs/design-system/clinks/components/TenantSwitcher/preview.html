@@ -1,0 +1,21 @@
+<!-- @dsCard group="Account" height=264 subtitle="Header switcher with search" -->
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<title>TenantSwitcher — preview</title>
+</head>
+<body>
+<div style="padding:var(--desktop-page);display:flex;gap:24px;align-items:flex-start">
+  <button class="cl-switcher-button" type="button" aria-expanded="true"><span class="cl-initials">FM</span><span>Firma Muster AG</span><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg></button>
+  <div class="cl-menu" role="menu" style="width:260px">
+    <div class="cl-menu-label">Unternehmen</div>
+    <div class="cl-switcher-search"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg><input type="search" placeholder="Suchen..." aria-label="Unternehmen suchen"></div>
+    <div class="cl-menu-item cl-switcher-item" data-highlighted><span class="cl-initials cl-initials--outline">FM</span><span class="cl-account-text"><b>Firma Muster AG</b><span>9400 Rorschach</span></span><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></div>
+    <div class="cl-menu-item cl-switcher-item"><span class="cl-initials cl-initials--outline">MT</span><span class="cl-account-text"><b>Muster Treuhand GmbH</b><span>8001 Zürich</span></span></div>
+    <div class="cl-menu-separator"></div>
+    <div class="cl-menu-item cl-switcher-item"><span class="cl-initials cl-initials--outline"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>Unternehmen hinzufügen</div>
+  </div>
+</div>
+</body>
+</html>

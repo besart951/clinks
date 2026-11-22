@@ -4,6 +4,9 @@ clinks is the CLinks SaaS: platform shell, contacts, calendar, tasks, mail and c
 Swiss QR bills, Physio and Spitex. Sign-in, accounts and tenants run on the real API; contacts and the calendar sync
 through PowerSync (local SQLite, works offline); the other screens still use an in-browser mock until phase 4. Details: [`apps/web`](apps/web/README.md).
 
+Working with an AI agent? Start at [`AGENTS.md`](AGENTS.md); plan, product docs and design systems are indexed in
+[`docs/`](docs/README.md).
+
 ```
 apps/web        SvelteKit app (Svelte 5, Tailwind 4), mock API, tests
 apps/api        Hono API: own sign-in (argon2id, TOTP), EdDSA tokens + JWKS, tenants, invitations, OpenAPI
@@ -15,6 +18,7 @@ packages/contracts    shared Zod schemas and repository interfaces
 packages/i18n-types   generated translation keys
 localization          product-catalog.json – every UI text in de-CH and en-US
 scripts               translation catalog generator
+docs                  build plan, product docs, design systems, prototypes
 ```
 
 ## Development

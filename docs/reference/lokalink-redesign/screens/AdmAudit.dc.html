@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<title>CLinks Admin – Audit-Protokoll</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400..700&amp;family=Roboto+Mono:wght@400..500&amp;display=swap">
+<style>
+body{margin:0;background:oklch(0.9788 0.0022 255);color:oklch(0.2 0.016 255);font-family:'Roboto',sans-serif;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+a{color:oklch(0.488 0.243 264.376)}a:hover{color:oklch(0.4294 0.2138 264.376)}
+*{box-sizing:border-box}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid oklch(0.488 0.243 264.376);outline-offset:2px}
+.nav:hover{background:oklch(0.965 0 0)}
+.qb{transition:background-color .1s}.qb:hover{background:oklch(0.965 0 0)}
+.pb{transition:background-color .1s}.pb:hover{background:oklch(0.4294 0.2138 264.376)}
+.row{transition:background-color .1s;cursor:pointer}.row:hover{background:oklch(0.97 0 0 / 0.7)}
+.reveal{opacity:0;transition:opacity .12s}.row:hover .reveal,.row:focus-within .reveal{opacity:1}
+@media (pointer:coarse){.reveal{opacity:1}}
+.tile{transition:border-color .1s}.tile:hover{border-color:oklch(0.82 0 0)}
+.menu-i:hover{background:oklch(0.965 0 0)}
+.ctl{width:100%;height:40px;padding:0 12px;border-radius:9.6px;background:oklch(0.99 0.001 255);border:1px solid oklch(0.64 0.008 255);font-size:14px;transition:border-color .1s}
+.ctl:hover{border-color:oklch(0.48 0 0)}
+.ctl:focus{outline:none;border-color:oklch(0.488 0.243 264.376);box-shadow:0 0 0 1px oklch(0.488 0.243 264.376)}
+textarea.ctl{height:auto;padding:10px 12px;line-height:20px;resize:vertical}
+input::placeholder,textarea::placeholder{color:oklch(0.6 0 0)}
+.lb{font-size:14px;font-weight:500}
+.hint{font-size:12px;line-height:19.5px;color:oklch(0.5 0 0);margin:0}
+.mono{font-family:'Roboto Mono',ui-monospace,monospace;font-size:12px}
+th{font-size:12px;font-weight:500;color:oklch(0.5 0 0);text-align:left;padding:0 12px;height:40px;white-space:nowrap;background:oklch(0.985 0 0)}
+td{padding:12px;font-size:14px;vertical-align:middle;border-top:1px solid oklch(0.94 0 0)}
+.skip{position:absolute;left:-9999px;top:8px;z-index:60;padding:10px 14px;border-radius:10px;background:oklch(0.488 0.243 264.376);color:oklch(0.97 0.014 254.604);font-size:14px;font-weight:500;text-decoration:none}
+.skip:focus{left:12px}
+.sw{width:40px;height:24px;border-radius:9999px;border:0;padding:2px;cursor:pointer;display:inline-flex;transition:background-color .15s}
+.tip{position:relative;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:9999px;color:oklch(0.5 0 0);cursor:help;vertical-align:middle}
+.tip:hover,.tip:focus{color:oklch(0.488 0.243 264.376);outline:none}
+.tip:focus-visible{box-shadow:0 0 0 2px oklch(0.488 0.243 264.376)}
+.tipbox{display:none;position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);width:max-content;max-width:280px;padding:8px 10px;border-radius:8px;background:oklch(0.2 0.016 255);color:#fff;font-size:12px;line-height:17px;font-weight:400;z-index:20;box-shadow:0 4px 6px -1px #0000001a, 0 2px 4px -2px #0000001a;white-space:normal;text-align:left}
+.tip:hover .tipbox,.tip:focus .tipbox{display:block}
+.unit{position:relative;display:block}
+.unit .ctl{padding-right:56px}
+.unit span.u{position:absolute;right:12px;top:0;height:40px;display:flex;align-items:center;font-size:13px;color:oklch(0.5 0 0);pointer-events:none}
+.mono-in{font-family:'Roboto Mono',ui-monospace,monospace;font-size:13px}
+.chip{transition:background-color .1s,border-color .1s}
+.secnav a:hover{background:oklch(0.965 0 0)}
+</style>
+</helmet>
+
+<div style="min-height: 100vh; background: oklch(0.9788 0.0022 255); color: oklch(0.2 0.016 255); display: flex; flex-wrap: wrap; position: relative">
+  <a href="#inhalt" class="skip">Zum Inhalt springen</a>
+  <aside style="{{asideStyle}}">
+    <div style="height: 64px; padding: 0 12px 0 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid oklch(0.9246 0 0)">
+      <a href="AdmUebersicht.dc.html" aria-label="CLinks Admin, Übersicht" style="display: flex; align-items: center; gap: 10px; color: oklch(0.2 0.016 255); text-decoration: none; flex: 1; min-width: 0"><svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true"><path d="M22.5 8.2A10 10 0 1 0 22.5 23.8" fill="none" stroke="oklch(0.2 0.016 255)" stroke-width="4" stroke-linecap="round"></path><circle cx="17" cy="16" r="2.6" fill="oklch(0.45 0 0)"></circle><path d="M19.6 16h5" stroke="#f00016" stroke-width="2.2" stroke-linecap="round"></path><circle cx="27" cy="16" r="2.6" fill="#f00016"></circle></svg>
+        <sc-if value="{{expanded}}" hint-placeholder-val="{{true}}"><span style="display: flex; flex-direction: column; line-height: 17px"><span style="font-size: 15px; font-weight: 600">CLinks</span><span style="font-size: 12px; color: oklch(0.5 0 0)">Plattformverwaltung</span></span></sc-if></a>
+    </div>
+    <nav aria-label="Hauptnavigation" style="padding: 12px; display: flex; flex-direction: column; gap: 14px; flex: 1">
+      <sc-for list="{{groups}}" as="g" hint-placeholder-count="6">
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <sc-if value="{{g.show}}" hint-placeholder-val="{{true}}"><span style="padding: 0 10px 4px; font-size: 12px; line-height: 16px; font-weight: 500; color: oklch(0.5 0 0)">{{g.label}}</span></sc-if>
+          <sc-for list="{{g.items}}" as="it" hint-placeholder-count="2">
+            <a href="{{it.href}}" class="nav" aria-current="{{it.current}}" aria-label="{{it.label}}" title="{{it.label}}" style="{{it.style}}">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{it.icon}}"></path></svg>
+              <sc-if value="{{it.show}}" hint-placeholder-val="{{true}}"><span style="flex: 1">{{it.label}}</span></sc-if>
+              <sc-if value="{{it.showBadge}}" hint-placeholder-val="{{false}}"><span style="{{it.badgeStyle}}">{{it.badge}}</span></sc-if>
+              <sc-if value="{{it.dot}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="position: absolute; top: 8px; right: 14px; width: 7px; height: 7px; border-radius: 9999px; background: {{it.dotColor}}"></span></sc-if>
+            </a>
+          </sc-for>
+        </div>
+      </sc-for>
+    </nav>
+    <div style="padding: 12px; border-top: 1px solid oklch(0.9246 0 0)">
+      <a href="WsProfil.dc.html" class="nav" aria-label="Konto von Besart Morina" style="height: 52px; padding: 0 8px; border-radius: 11.6px; display: flex; align-items: center; justify-content: center; gap: 10px; color: oklch(0.2 0.016 255); text-decoration: none">
+        <span aria-hidden="true" style="flex: 0 0 auto; width: 32px; height: 32px; border-radius: 9999px; background: oklch(0.965 0 0); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600">BM</span>
+        <sc-if value="{{expanded}}" hint-placeholder-val="{{true}}"><span style="flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 16px"><span style="font-size: 14px; font-weight: 500">Besart Morina</span><span style="font-size: 12px; color: oklch(0.5 0 0)">Superadministrator</span></span><span style="color: oklch(0.5 0 0)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></span></sc-if>
+      </a>
+    </div>
+  </aside>
+
+  <div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+    <header style="height: 64px; padding: 0 16px 0 12px; background: oklch(1 0 0); border-bottom: 1px solid oklch(0.9246 0 0); display: flex; align-items: center; gap: 12px">
+      <button type="button" class="qb" onClick="{{toggleCol}}" aria-label="{{colLabel}}" title="{{colLabel}}" style="width: 40px; height: 40px; border: 0; background: transparent; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: oklch(0.5 0 0); cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h18v18H3ZM9 3v18"></path></svg></button>
+      <nav aria-label="Brotkrumen" style="flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; font-size: 14px"><a href="AdmWartung.dc.html" style="color: oklch(0.5 0 0); text-decoration: none">Betrieb</a><span aria-hidden="true" style="color: oklch(0.5 0 0)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></span><span aria-current="page" style="color: oklch(0.2 0.016 255); font-weight: 500">Audit-Protokoll</span></nav>
+      <button type="button" class="qb" onClick="{{openCmd}}" aria-haspopup="dialog" style="height: 40px; width: 300px; max-width: 36vw; padding: 0 8px 0 12px; border-radius: 12px; border: 1px solid oklch(0.9246 0 0); background: oklch(1 0 0); display: flex; align-items: center; gap: 8px; font-size: 14px; color: oklch(0.5 0 0); cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM20 20l-3.5-3.5"></path></svg><span style="flex: 1; text-align: left">Seiten und Aktionen suchen</span><kbd style="height: 22px; padding: 0 6px; border-radius: 6px; border: 1px solid oklch(0.9246 0 0); font-family: ui-monospace, monospace; font-size: 11px; display: inline-flex; align-items: center">Strg K</kbd></button>
+    </header>
+    <div role="note" style="padding: 8px 24px; background: oklch(0.9795 0.0097 264.376); border-bottom: 1px solid oklch(0.9246 0 0); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px">
+      <span style="display: inline-flex; align-items: center; gap: 8px; color: oklch(0.488 0.243 264.376); font-weight: 500"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"></path></svg> Plattformverwaltung<span style="color: oklch(0.5 0 0); font-weight: 400">Änderungen hier wirken auf alle Mandanten.</span></span>
+      <a href="WsDashboard.dc.html" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; font-weight: 500"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3l4 4-4 4M3 7h18M7 21l-4-4 4-4M21 17H3"></path></svg> Zum Workspace Empower</a>
+    </div>
+    <main id="inhalt" style="padding: 28px 32px 56px; width: 100%; max-width: 1280px; display: flex; flex-direction: column; gap: 24px">
+<div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px"><div><h1 style="margin: 0; font-size: 28px; line-height: 35px; font-weight: 600; letter-spacing: -0.02em">Audit-Protokoll</h1><p style="margin: 4px 0 0; font-size: 14px; line-height: 20px; color: oklch(0.5 0 0); max-width: 720px">Wer wann was in der Plattform geändert hat.</p></div><div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center"><button type="button" class="qb" aria-label="Neu laden" title="Neu laden" style="width: 40px; height: 40px; border-radius: 12.8px; border: 1px solid oklch(0.9246 0 0); background: oklch(1 0 0); display: inline-flex; align-items: center; justify-content: center; color: oklch(0.2 0.016 255); cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"></path></svg></button><button type="button" class="qb" style="height: 40px; padding: 0 14px; border-radius: 12.8px; border: 1px solid oklch(0.9246 0 0); background: oklch(1 0 0); color: oklch(0.2 0.016 255); font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; text-decoration: none; white-space: nowrap"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path></svg>Exportieren</button></div></div>
+      <div role="tablist" aria-label="Audit-Protokoll" style="display: flex; gap: 24px; border-bottom: 1px solid oklch(0.9246 0 0)">
+        <sc-for list="{{tabs}}" as="t" hint-placeholder-count="2">
+          <button type="button" role="tab" aria-selected="{{t.selected}}" onClick="{{t.pick}}" style="{{t.style}}">{{t.label}}<sc-if value="{{t.hasCount}}" hint-placeholder-val="{{false}}"><span style="min-width: 20px; height: 20px; padding: 0 6px; border-radius: 9999px; background: oklch(0.965 0 0); font-size: 12px; display: inline-flex; align-items: center; justify-content: center">{{t.count}}</span></sc-if></button>
+        </sc-for></div>
+      <sc-if value="{{isHist}}" hint-placeholder-val="{{true}}">
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center"><label style="position: relative; flex: 0 1 320px; min-width: 200px; display: block"><span style="position: absolute; left: 12px; top: 12px; color: oklch(0.5 0 0)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM20 20l-3.5-3.5"></path></svg></span><input class="ctl" type="search" placeholder="Ereignis, E-Mail oder ID suchen" aria-label="Ereignis, E-Mail oder ID suchen" style="padding-left: 38px"></label>
+            <select class="ctl" aria-label="Mandant" style="width: 180px"><option>Alle Mandanten</option><option>Plattform</option><option>Empower</option></select>
+            <select class="ctl" aria-label="Zeitraum" style="width: 180px"><option>Letzte 7 Tage</option><option>Letzte 30 Tage</option></select></div>
+          <div style="border-radius: 16px; background: oklch(1 0 0); border: 1px solid oklch(0.9246 0 0); overflow-x: auto"><table style="width: 100%; border-collapse: collapse; min-width: 760px"><thead><tr><th style="padding-left: 20px">Zeit</th><th>Ereignis</th><th>Akteur</th><th>Mandant</th><th></th></tr></thead><tbody><sc-for list="{{days}}" as="d" hint-placeholder-count="2">
+            <tr><td colspan="5" style="padding: 10px 20px; font-size: 12px; font-weight: 500; color: oklch(0.5 0 0); background: oklch(0.985 0 0)">{{d.label}}</td></tr>
+            <sc-for list="{{d.items}}" as="e" hint-placeholder-count="4">
+              <tr class="row" onClick="{{e.open}}">
+                <td style="padding-left: 20px; width: 80px; color: oklch(0.5 0 0)">{{e.time}}</td>
+                <td><span style="display: flex; flex-direction: column; line-height: 20px"><span style="font-weight: 500">{{e.label}}</span><span class="mono" style="color: oklch(0.5 0 0)">{{e.key}}</span></span></td>
+                <td>Besart Morina</td><td>{{e.tenant}}</td>
+                <td style="text-align: right; padding-right: 16px; color: oklch(0.5 0 0)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></td>
+              </tr>
+            </sc-for>
+          </sc-for></tbody></table></div>
+          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: oklch(0.5 0 0)"><span>25 Ereignisse geladen</span><button type="button" class="qb" style="height: 32px; padding: 0 12px; border-radius: 12.8px; border: 1px solid oklch(0.9246 0 0); background: oklch(1 0 0); color: oklch(0.2 0.016 255); font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; text-decoration: none; white-space: nowrap">Ältere laden</button></div>
+        </div>
+      </sc-if>
+      <sc-if value="{{isLive}}" hint-placeholder-val="{{false}}"><div style="display: flex; flex-direction: column; gap: 12px"><div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between">
+          <div style="display: flex; gap: 8px; align-items: center">
+            <span style="height: 32px; padding: 0 12px; border-radius: 9999px; background: color-mix(in oklch, oklch(0.46 0.142 155.214) 10%, transparent); color: oklch(0.46 0.142 155.214); font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 8px"><span style="width: 8px; height: 8px; border-radius: 9999px; background: oklch(0.46 0.142 155.214)"></span>{{liveLabel}}</span>
+            <button type="button" class="qb" onClick="{{togglePause}}" style="height: 32px; padding: 0 12px; border-radius: 12.8px; border: 1px solid oklch(0.9246 0 0); background: oklch(1 0 0); font-size: 13px; font-weight: 500; cursor: pointer">{{pauseLabel}}</button>
+            <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; margin-left: 8px"><input type="checkbox" checked style="width: 16px; height: 16px; accent-color: oklch(0.488 0.243 264.376)"> Automatisch mitscrollen</label>
+          </div>
+          <label style="position: relative; flex: 0 1 320px; min-width: 200px; display: block"><span style="position: absolute; left: 12px; top: 12px; color: oklch(0.5 0 0)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM20 20l-3.5-3.5"></path></svg></span><input class="ctl" type="search" placeholder="Live-Ereignisse filtern" aria-label="Live-Ereignisse filtern" style="padding-left: 38px"></label>
+        </div>
+        <div style="border-radius: 16px; border: 1px dashed oklch(0.64 0.008 255); padding: 48px 24px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; background: oklch(1 0 0)">
+      <span style="width: 44px; height: 44px; border-radius: 12px; background: oklch(0.965 0 0); display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg></span>
+      <p style="margin: 0; font-size: 15px; font-weight: 500">Noch keine Live-Ereignisse.</p><p style="margin: 0; font-size: 13px; line-height: 19.5px; color: oklch(0.5 0 0); max-width: 440px">Aktionen auf dem Server erscheinen hier sofort, sobald sie passieren.</p><div style="display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap; justify-content: center"></div></div></div></sc-if>
+      <sc-if value="{{evOpen}}" hint-placeholder-val="{{false}}">
+      <div onClick="{{closeEv}}" style="position: fixed; inset: 0; z-index: 40; background: #0f172a40; display: flex; justify-content: flex-end">
+        <aside role="dialog" aria-modal="true" aria-label="Ereignis" onClick="{{stop}}" style="width: 440px; max-width: 100%; height: 100%; background: oklch(1 0 0); box-shadow: 0 10px 15px -3px #0000001a, 0 4px 6px -4px #0000001a; display: flex; flex-direction: column">
+          <div style="padding: 20px 24px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; border-bottom: 1px solid oklch(0.94 0 0)">
+            <h2 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Ereignis</h2>
+            <button type="button" class="qb" onClick="{{closeEv}}" aria-label="Schliessen" style="width: 32px; height: 32px; border: 0; background: transparent; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: oklch(0.5 0 0); cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+          </div>
+          <div style="padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; flex: 1; overflow-y: auto"><dl style="margin: 0; display: flex; flex-direction: column">
+          <div style="padding: 10px 0; border-top: 1px solid oklch(0.94 0 0)"><dt class="hint">Ereignis</dt><dd style="margin: 2px 0 0; font-size: 14px">{{ev.label}}</dd></div>
+          <div style="padding: 10px 0; border-top: 1px solid oklch(0.94 0 0)"><dt class="hint">Technischer Schlüssel</dt><dd style="margin: 2px 0 0" class="mono">{{ev.key}}</dd></div>
+          <div style="padding: 10px 0; border-top: 1px solid oklch(0.94 0 0)"><dt class="hint">Akteur</dt><dd style="margin: 2px 0 0; font-size: 14px">Besart Morina, besart_morina@hotmail.com</dd></div>
+          <div style="padding: 10px 0; border-top: 1px solid oklch(0.94 0 0)"><dt class="hint">Mandant</dt><dd style="margin: 2px 0 0; font-size: 14px">{{ev.tenant}}</dd></div>
+          <div style="padding: 10px 0; border-top: 1px solid oklch(0.94 0 0)"><dt class="hint">Zeitpunkt</dt><dd style="margin: 2px 0 0; font-size: 14px">{{ev.when}}</dd></div>
+        </dl>
+        <div style="display: flex; flex-direction: column; gap: 8px"><span class="lb">Rohdaten</span><pre class="mono" style="margin: 0; padding: 12px; border-radius: 10px; background: oklch(0.965 0 0); white-space: pre-wrap">[EREIGNIS-DATEN ALS JSON]</pre></div></div>
+        </aside>
+      </div>
+    </sc-if>
+    </main>
+  </div>
+
+  <sc-if value="{{cmdOpen}}" hint-placeholder-val="{{false}}">
+    <div onClick="{{closeCmd}}" style="position: fixed; inset: 0; z-index: 50; background: #0f172a40; display: flex; justify-content: center; align-items: flex-start; padding: 12vh 16px 16px">
+      <div role="dialog" aria-modal="true" aria-label="Seiten und Aktionen suchen" onClick="{{stop}}" style="width: 640px; max-width: 100%; border-radius: 16px; background: oklch(1 0 0); box-shadow: 0 10px 15px -3px #0000001a, 0 4px 6px -4px #0000001a; overflow: hidden">
+        <div style="display: flex; align-items: center; gap: 10px; padding: 0 12px 0 16px; height: 56px; border-bottom: 1px solid oklch(0.94 0 0)"><span style="color: oklch(0.5 0 0)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM20 20l-3.5-3.5"></path></svg></span>
+          <input ref="{{focusEl}}" type="text" value="{{q}}" onInput="{{setQ}}" placeholder="Seite oder Aktion eingeben" aria-label="Seite oder Aktion eingeben" style="flex: 1; height: 100%; border: 0; background: transparent; font-size: 15px; outline: none">
+          <button type="button" class="qb" onClick="{{closeCmd}}" aria-label="Schliessen" style="width: 32px; height: 32px; border: 0; background: transparent; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: oklch(0.5 0 0); cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button></div>
+        <ul style="list-style: none; margin: 0; padding: 6px; max-height: 380px; overflow-y: auto">
+          <sc-for list="{{cmdItems}}" as="c" hint-placeholder-count="6"><li><a href="{{c.href}}" class="menu-i" style="height: 42px; padding: 0 10px; border-radius: 10px; display: flex; align-items: center; gap: 12px; color: oklch(0.2 0.016 255); text-decoration: none; font-size: 14px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{c.icon}}"></path></svg><span style="flex: 1">{{c.label}}</span><span style="font-size: 12px; color: oklch(0.5 0 0)">{{c.kind}}</span></a></li></sc-for>
+        </ul>
+        <sc-if value="{{cmdEmpty}}" hint-placeholder-val="{{false}}"><p style="margin: 0; padding: 20px 16px 24px; font-size: 14px; color: oklch(0.5 0 0); text-align: center">Keine Seite oder Aktion gefunden.</p></sc-if>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{toastOn}}" hint-placeholder-val="{{false}}">
+      <div role="status" style="position: fixed; right: 24px; bottom: 24px; z-index: 45; padding: 10px 8px 10px 16px; border-radius: 14px; background: oklch(1 0 0); border: 1px solid oklch(0.9246 0 0); box-shadow: 0 4px 12px #0000001a; display: flex; align-items: center; gap: 12px; font-size: 14px">
+        <span style="color: oklch(0.46 0.142 155.214)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></span>{{toastText}}
+        <button type="button" class="qb" onClick="{{hideToast}}" aria-label="Meldung schliessen" style="width: 32px; height: 32px; border: 0; background: transparent; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: oklch(0.5 0 0); cursor: pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+      </div></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = Object.assign({ cmd: false, q: '', col: false, toast: '' }, { tab: 'Verlauf', ev: null, paused: false }); }
+  renderVals() {
+    const ACTIVE = 'Audit-Protokoll';
+    const st = this.state;
+
+    const P = {home: 'M3 10 12 3l9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z', app: 'M3 5h18v14H3ZM3 9h18M7 7h.01', boxes: 'M12 2 3 7l9 5 9-5-9-5ZM3 17l9 5 9-5M3 12l9 5 9-5', building: 'M4 21V3h10v18M14 9h6v12M8 7h2M8 11h2M8 15h2M2 21h20', users: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8', brief: 'M3 7h18v13H3ZM8 7V4h8v3M3 13h18', shield: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z', mail: 'M2 4h20v16H2ZM22 6l-10 7L2 6', chart: 'M3 3v18h18M7 16v-4M12 16V8M17 16v-7', card: 'M2 5h20v14H2ZM2 10h20', search: 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM20 20l-3.5-3.5', plus: 'M12 5v14M5 12h14', arrow: 'M7 17 17 7M8 7h9v9', chev: 'm9 18 6-6-6-6', chevd: 'm6 9 6 6 6-6', updown: 'm7 15 5 5 5-5M7 9l5-5 5 5', bell: 'M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0', panel: 'M3 3h18v18H3ZM9 3v18', filter: 'M4 6h16M7 12h10M10 18h4', more: 'M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM19 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM5 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z', alert: 'M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z', check: 'M20 6 9 17l-5-5', circle: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z', lock: 'M5 11h14v10H5ZM8 11V7a4 4 0 0 1 8 0v4', copy: 'M8 8h12v12H8ZM16 8V4H4v12h4', user: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4 21a8 8 0 0 1 16 0', userplus: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM19 8v6M22 11h-6', calendar: 'M3 5h18v16H3ZM3 10h18M8 3v4M16 3v4', trend: 'M3 17l6-6 4 4 8-8M15 7h6v6', pin: 'M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0ZM12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z', clip: 'M9 4h6v3H9ZM6 6h12v15H6ZM9 12h6M9 16h4', flow: 'M5 3h4v4H5ZM15 3h4v4h-4ZM10 17h4v4h-4ZM7 7v4h10V7M12 11v6', refresh: 'M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5', save: 'M5 3h11l3 3v15H5ZM8 3v5h7M8 21v-7h8v7', x: 'M18 6 6 18M6 6l12 12', send: 'm22 2-7 20-4-9-9-4 20-7Z', ext: 'M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6', grid: 'M3 3h7v7H3ZM14 3h7v7h-7ZM3 14h7v7H3ZM14 14h7v7h-7Z', list: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01', info: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 16v-4M12 8h.01', outbox: 'M22 12h-6l-2 3h-4l-2-3H2M5.5 5h13L22 12v7H2v-7ZM12 2v7M9 5l3-3 3 3', draft: 'M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z', clock: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 7v5l3 2', megaphone: 'M3 11v2a1 1 0 0 0 1 1h3l6 4V6L7 10H4a1 1 0 0 0-1 1ZM17 9a4 4 0 0 1 0 6M20 6a8 8 0 0 1 0 12', layout: 'M3 3h18v18H3ZM3 9h18M9 9v12', target: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10ZM12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z', badgecheck: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM8 12l3 3 5-6', zap: 'M13 2 3 14h9l-1 8 10-12h-9l1-8Z', db: 'M12 8c4.4 0 8-1.3 8-3s-3.6-3-8-3-8 1.3-8 3 3.6 3 8 3ZM4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3', sliders: 'M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6', paperclip: 'm21 11-9 9a5.7 5.7 0 0 1-8-8l9-9a3.8 3.8 0 0 1 5.4 5.4l-9 9a1.9 1.9 0 0 1-2.7-2.7l8.3-8.3', back: 'm15 18-6-6 6-6', type: 'M4 7V4h16v3M9 20h6M12 4v16', braces: 'M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1M16 3h1a2 2 0 0 1 2 2v5a2 2 0 0 0 2 2 2 2 0 0 0-2 2v5a2 2 0 0 1-2 2h-1', pointer: 'M3 3h18v8H3ZM12 15l2 6 1.5-2.5L18 21l1-1-2.5-2.5L19 16Z', image: 'M3 3h18v18H3ZM9 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM21 15l-5-5L5 21', minus: 'M5 12h14', trash: 'M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15', monitor: 'M2 4h20v13H2ZM8 21h8M12 17v4', phone: 'M7 2h10v20H7ZM11 18h2', link: 'M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7', star: 'm12 2 3 6.5 7 .9-5.1 4.8 1.3 7L12 17.8 5.8 21.2l1.3-7L2 9.4l7-.9Z', grid4: 'M3 3h7v9H3ZM14 3h7v5h-7ZM14 12h7v9h-7ZM3 16h7v5H3Z', key: 'M15 7a2 2 0 1 1 0 .01M21 2l-9.6 9.6a5.5 5.5 0 1 1-1.4-1.4L19 1M16 5l3 3', wrench: 'M14.7 6.3a4 4 0 0 0 5 5L22 14l-8 8-2.3-2.3a4 4 0 0 0-5-5L2 10l8-8 2.3 2.3a4 4 0 0 0 2.4 2Z', gear: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0-1.2-2.9H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 2.9-1.2V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0 1.2 2.9H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z', activity: 'M22 12h-4l-3 9L9 3l-3 9H2', play: 'm6 3 14 9-14 9Z', pause: 'M6 4h4v16H6ZM14 4h4v16h-4Z', download: 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3', globe: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20ZM2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20', eye: 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12ZM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z', server: 'M3 3h18v7H3ZM3 14h18v7H3ZM7 6.5h.01M7 17.5h.01', ban: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20ZM4.9 4.9l14.2 14.2', external: 'M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6', switch: 'M17 3l4 4-4 4M3 7h18M7 21l-4-4 4-4M21 17H3', bold: 'M6 4h8a4 4 0 0 1 0 8H6ZM6 12h9a4 4 0 0 1 0 8H6Z', italic: 'M19 4h-9M14 20H5M15 4 9 20', listul: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01'};
+    const col = !!st.col;
+    const groups = [['', [['Übersicht', 'grid4', 'AdmUebersicht', '', '']]], ['Kunden', [['Mandanten', 'building', 'AdmMandanten', '', ''], ['Benutzer', 'users', 'AdmBenutzer', '1', 'info'], ['Pakete', 'card', 'AdmPakete', '', '']]], ['Zugriff', [['Rollen', 'shield', 'AdmRollen', '', ''], ['Anmeldung', 'key', 'AdmAnmeldung', '', '']]], ['Betrieb', [['Wartung', 'wrench', 'AdmWartung', '', ''], ['Systemmitteilungen', 'megaphone', 'AdmMitteilungen', '', ''], ['Versand und Jobs', 'activity', 'AdmJobs', '2', 'destr'], ['Audit-Protokoll', 'list', 'AdmAudit', '', '']]], ['Daten', [['Adressbestand', 'pin', 'AdmAdressen', '', '']]], ['Konfiguration', [['E-Mail-Versand', 'send', 'AdmSmtp', '', ''], ['E-Mail-Vorlagen', 'layout', 'AdmVorlagen', '', ''], ['Einstellungen', 'gear', 'AdmEinstellungen', '', '']]]].map(([label, items]) => ({ label, show: !col && label !== '', items: items.map(([l, icon, file, badge, kind]) => {
+      const on = l === ACTIVE;
+      return { label: l, icon: P[icon], href: file === '#' ? '#' : file + '.dc.html', current: on ? 'page' : 'false', show: !col,
+        badge, showBadge: !col && badge !== '', dot: col && badge !== '',
+        badgeStyle: 'min-width: 20px; height: 20px; padding: 0 6px; border-radius: 9999px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; ' + (kind === 'destr' ? 'background: oklch(0.5 0.215 27.325 / 0.12); color: oklch(0.5 0.215 27.325)' : 'background: oklch(0.488 0.243 264.376 / 0.12); color: oklch(0.488 0.243 264.376)'),
+        dotColor: kind === 'destr' ? 'oklch(0.5 0.215 27.325)' : 'oklch(0.488 0.243 264.376)',
+        style: 'height: 38px; border-radius: 11.6px; display: flex; align-items: center; gap: 10px; font-size: 14px; text-decoration: none; position: relative; ' + (col ? 'padding: 0; justify-content: center; ' : 'padding: 0 10px; ') + 'font-weight: ' + (on ? 600 : 400) + '; color: ' + (on ? 'oklch(0.488 0.243 264.376)' : 'oklch(0.2 0.016 255)') + '; background: ' + (on ? 'oklch(0.959 0.0194 264.376)' : 'transparent') };
+    }) }));
+    const q = (st.q || '').trim().toLowerCase();
+    const cmdItems = [['Übersicht', 'Seite', 'grid4', 'AdmUebersicht.dc.html'], ['Mandanten', 'Seite', 'building', 'AdmMandanten.dc.html'], ['Benutzer', 'Seite', 'users', 'AdmBenutzer.dc.html'], ['Pakete', 'Seite', 'card', 'AdmPakete.dc.html'], ['Rollen', 'Seite', 'shield', 'AdmRollen.dc.html'], ['Anmeldung: Clients', 'Seite', 'key', 'AdmAnmeldung.dc.html'], ['Anmeldung: Identitätsanbieter', 'Seite', 'key', 'AdmAnmeldungIdp.dc.html'], ['Wartung', 'Seite', 'wrench', 'AdmWartung.dc.html'], ['Systemmitteilungen', 'Seite', 'megaphone', 'AdmMitteilungen.dc.html'], ['Versand und Jobs', 'Seite', 'activity', 'AdmJobs.dc.html'], ['Audit-Protokoll', 'Seite', 'list', 'AdmAudit.dc.html'], ['Adressbestand', 'Seite', 'pin', 'AdmAdressen.dc.html'], ['E-Mail-Versand (SMTP)', 'Seite', 'send', 'AdmSmtp.dc.html'], ['E-Mail-Vorlagen', 'Seite', 'layout', 'AdmVorlagen.dc.html'], ['Mandant erstellen', 'Aktion', 'plus', 'AdmMandanten.dc.html'], ['Paket vergeben', 'Aktion', 'card', 'AdmPakete.dc.html'], ['Benutzer einladen', 'Aktion', 'userplus', 'AdmBenutzer.dc.html'], ['Wartung starten', 'Aktion', 'wrench', 'AdmWartung.dc.html'], ['Fehlgeschlagene Jobs ansehen', 'Aktion', 'alert', 'AdmJobs.dc.html'], ['Zum Workspace wechseln', 'Aktion', 'switch', 'WsDashboard.dc.html']].filter(c => !q || c[0].toLowerCase().indexOf(q) >= 0).map(([label, kind, icon, href]) => ({ label, kind, href, icon: P[icon] }));
+    
+    const segList = (items, cur, key) => items.map(it => { const [label, count, color] = Array.isArray(it) ? it : [it, '', ''];
+      return { label, count, hasCount: count !== '', countColor: color || 'oklch(0.5 0 0)', pressed: cur === label ? 'true' : 'false',
+        pick: () => this.setState({ [key]: label }),
+        style: 'height: 32px; padding: 0 12px; border: 0; border-radius: 9px; font-size: 13px; font-weight: 500; cursor: pointer; color: oklch(0.2 0.016 255); background: ' + (cur === label ? 'oklch(1 0 0)' : 'transparent') + '; box-shadow: ' + (cur === label ? '0 1px 2px #0000001a' : 'none') }; });
+    const tabList = (items, cur, key) => items.map(it => { const [label, count] = Array.isArray(it) ? it : [it, ''];
+      return { label, count, hasCount: count !== '', selected: cur === label ? 'true' : 'false', pick: () => this.setState({ [key]: label }),
+        style: 'height: 44px; padding: 0 2px; border: 0; background: transparent; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; cursor: pointer; margin-bottom: -1px; border-bottom: 2px solid ' + (cur === label ? 'oklch(0.488 0.243 264.376)' : 'transparent') + '; color: ' + (cur === label ? 'oklch(0.2 0.016 255)' : 'oklch(0.5 0 0)') }; });
+
+    const SH = {
+      groups, expanded: !col,
+      asideStyle: (col ? 'flex: 0 0 72px; max-width: 72px' : 'flex: 1 1 256px; max-width: 256px') + '; min-height: 100vh; background: oklch(1 0 0); border-right: 1px solid oklch(0.9246 0 0); display: flex; flex-direction: column',
+      toggleCol: () => this.setState({ col: !col }), colLabel: col ? 'Seitenleiste ausklappen' : 'Seitenleiste einklappen',
+      cmdOpen: !!st.cmd, q: st.q || '', cmdItems, cmdEmpty: cmdItems.length === 0,
+      openCmd: () => this.setState({ cmd: true, q: '' }), closeCmd: () => this.setState({ cmd: false }),
+      setQ: (e) => this.setState({ q: e.target.value }), stop: (e) => e.stopPropagation(),
+      focusEl: (el) => { if (el) setTimeout(() => el.focus(), 0); },
+      toastOn: !!st.toast, toastText: st.toast || '', hideToast: () => this.setState({ toast: '' })
+    };
+
+    const mk = (t, label, key, tenant, day) => ({ time: t, label, key, tenant, when: day + ', ' + t, open: () => this.setState({ ev: { label, key, tenant, when: day + ', ' + t } }) });
+    const days = [
+      { label: 'Heute, 17.11.2026', items: [mk('19:14', 'Sitzung aktualisiert', 'session.updated', 'Plattform', '17.11.2026'), mk('13:13', 'Sitzung aktualisiert', 'session.updated', 'Plattform', '17.11.2026'), mk('09:52', 'Sitzung aktualisiert', 'session.updated', 'Plattform', '17.11.2026'), mk('08:37', 'Sitzung erstellt', 'session.created', 'Plattform', '17.11.2026')] },
+      { label: 'Gestern, 16.11.2026', items: [mk('23:01', 'Sitzung aktualisiert', 'session.updated', 'Plattform', '16.11.2026'), mk('22:35', 'Eigene Adresse gespeichert', 'profile.address.saved', 'Plattform', '16.11.2026'), mk('22:33', 'Nachricht versendet', 'tenant.communication.run.sent', 'Empower', '16.11.2026'), mk('22:33', 'Entwurf gespeichert', 'tenant.communication.draft.saved', 'Empower', '16.11.2026')] }
+    ];
+    const V = { days, tabs: tabList(['Verlauf', 'Live'], st.tab, 'tab'), isHist: st.tab === 'Verlauf', isLive: st.tab === 'Live',
+      liveLabel: st.paused ? 'Pausiert' : 'Live verbunden', pauseLabel: st.paused ? 'Fortsetzen' : 'Pausieren', togglePause: () => this.setState({ paused: !st.paused }),
+      evOpen: !!st.ev, ev: st.ev || { label: '', key: '', tenant: '', when: '' }, closeEv: () => this.setState({ ev: null }) };
+    return Object.assign({}, SH, V);
+  }
+}
+</script>
+</body>
+</html>

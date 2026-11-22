@@ -1,0 +1,25 @@
+<!-- @dsCard group="Forms" height=250 subtitle="Single with open list; multi with chips" -->
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<title>SearchableCombobox — preview</title>
+</head>
+<body>
+<div style="padding:var(--desktop-page);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--desktop-page);align-items:start">
+  <div class="cl-field">
+    <label class="cl-label" for="cb1">Kunde</label>
+    <div class="cl-search cl-combobox"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg><input class="cl-input" id="cb1" role="combobox" aria-expanded="true" value="Mus"><svg class="cl-icon cl-combobox-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></div>
+    <div class="cl-combobox-list" role="listbox">
+      <div class="cl-combobox-option" role="option" aria-selected="true" data-highlighted><span class="cl-combobox-check"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>Firma Muster AG</b><small>9400 Rorschach</small></span></div>
+      <div class="cl-combobox-option" role="option"><span class="cl-combobox-check"></span><span><b>Muster Treuhand GmbH</b><small>8001 Zürich</small></span></div>
+    </div>
+  </div>
+  <div class="cl-field">
+    <label class="cl-label" for="cb2">Mitarbeitende</label>
+    <div class="cl-chips"><span class="cl-chip">Anna Meier<button type="button" aria-label="Anna Meier entfernen"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></span><span class="cl-chip">Luca Rossi<button type="button" aria-label="Luca Rossi entfernen"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></span></div>
+    <div class="cl-search cl-combobox"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg><input class="cl-input" id="cb2" role="combobox" placeholder="Optionen suchen"><svg class="cl-icon cl-combobox-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></div>
+  </div>
+</div>
+</body>
+</html>

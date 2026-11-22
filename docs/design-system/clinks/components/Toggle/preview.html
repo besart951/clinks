@@ -1,0 +1,26 @@
+<!-- @dsCard group="Actions" height=200 subtitle="Toggle states; joined group; Stille segment control" -->
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<title>Toggle — preview</title>
+</head>
+<body>
+<div style="padding:var(--desktop-page);display:grid;gap:var(--form-gap);">
+  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:var(--control-gap);">
+    <button class="cl-toggle" type="button" aria-pressed="true"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>Spalten</button>
+    <button class="cl-toggle cl-toggle--outline" type="button" aria-pressed="false">Archivierte</button>
+    <button class="cl-toggle cl-toggle--sm" type="button" aria-pressed="false" aria-label="Filter"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 5h20"/><path d="M6 12h12"/><path d="M9 19h6"/></svg></button>
+  </div>
+  <div class="cl-toggle-group cl-toggle-group--joined" role="group" aria-label="Dichte">
+    <button class="cl-toggle cl-toggle--outline" type="button" data-state="on">Kompakt</button>
+    <button class="cl-toggle cl-toggle--outline" type="button">Normal</button>
+    <button class="cl-toggle cl-toggle--outline" type="button">Weit</button>
+  </div>
+  <div class="cl-segmented" role="radiogroup" aria-label="Ansicht">
+    <button type="button" role="radio" aria-checked="false">Tag</button>
+    <button type="button" role="radio" aria-checked="true">Woche</button>
+  </div>
+</div>
+</body>
+</html>

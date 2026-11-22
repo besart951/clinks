@@ -1,0 +1,30 @@
+<!-- @dsCard group="Navigation" height=420 subtitle="One main colour per product: app tile, accent text and primary action" -->
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<title>ProductIdentity — preview</title>
+<style>
+.pi { display:grid; gap:6px; padding:var(--desktop-page); }
+.pi-row { display:grid; grid-template-columns:24px minmax(0,1fr) auto 9.5rem; align-items:center; gap:12px; min-height:40px; padding:0 8px; border-bottom:1px solid var(--border); }
+.pi-tile { display:inline-grid; place-items:center; width:24px; height:24px; border-radius:6px; }
+.pi-tile .cl-icon { width:14px; height:14px; }
+.pi-tile--mark img { width:20px; height:20px; }
+.pi-name { font-weight:500; }
+.pi-btn { display:inline-flex; align-items:center; height:32px; padding:0 12px; border-radius:var(--radius-md); font-weight:500; font-size:14px; }
+.pi-token { font-family:var(--font-mono, monospace); font-size:12px; color:var(--muted-foreground); }
+</style>
+</head>
+<body>
+<div class="pi" role="list" aria-label="Produktfarben">
+<div class="pi-row"><span class="pi-tile pi-tile--mark"><img class="cl-on-light" src="/_blob/ac322a5b3fb00884f211e7355ef41057" alt=""><img class="cl-on-dark" src="/_blob/56f51ae1ae4f0fc92e41353f91291f2b" alt=""></span><span class="pi-name" style="color:var(--product-hub-text)">CLinks</span><span class="pi-btn" style="background:var(--product-hub);color:var(--product-hub-foreground)">Speichern</span><code class="pi-token">product-hub</code></div>
+<div class="pi-row"><span class="pi-tile" style="background:var(--product-planer);color:var(--product-planer-foreground)"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg></span><span class="pi-name" style="color:var(--product-planer-text)">PlanerLink</span><span class="pi-btn" style="background:var(--product-planer);color:var(--product-planer-foreground)">Speichern</span><code class="pi-token">product-planer</code></div>
+<div class="pi-row"><span class="pi-tile" style="background:var(--product-finanz);color:var(--product-finanz-foreground)"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg></span><span class="pi-name" style="color:var(--product-finanz-text)">FinanzLink</span><span class="pi-btn" style="background:var(--product-finanz);color:var(--product-finanz-foreground)">Speichern</span><code class="pi-token">product-finanz</code></div>
+<div class="pi-row"><span class="pi-tile" style="background:var(--product-infra);color:var(--product-infra-foreground)"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></svg></span><span class="pi-name" style="color:var(--product-infra-text)">InfraLink</span><span class="pi-btn" style="background:var(--product-infra);color:var(--product-infra-foreground)">Speichern</span><code class="pi-token">product-infra</code></div>
+<div class="pi-row"><span class="pi-tile" style="background:var(--product-kurs);color:var(--product-kurs-foreground)"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/></svg></span><span class="pi-name" style="color:var(--product-kurs-text)">KursLink</span><span class="pi-btn" style="background:var(--product-kurs);color:var(--product-kurs-foreground)">Speichern</span><code class="pi-token">product-kurs</code></div>
+<div class="pi-row"><span class="pi-tile" style="background:var(--product-loka);color:var(--product-loka-foreground)"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg></span><span class="pi-name" style="color:var(--product-loka-text)">LokaLink</span><span class="pi-btn" style="background:var(--product-loka);color:var(--product-loka-foreground)">Speichern</span><code class="pi-token">product-loka</code></div>
+<div class="pi-row"><span class="pi-tile" style="background:var(--product-cale);color:var(--product-cale-foreground)"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg></span><span class="pi-name" style="color:var(--product-cale-text)">CaleLink</span><span class="pi-btn" style="background:var(--product-cale);color:var(--product-cale-foreground)">Speichern</span><code class="pi-token">product-cale</code></div>
+<div class="pi-row"><span class="pi-tile" style="background:var(--product-physio);color:var(--product-physio-foreground)"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg></span><span class="pi-name" style="color:var(--product-physio-text)">PhysioLink</span><span class="pi-btn" style="background:var(--product-physio);color:var(--product-physio-foreground)">Speichern</span><code class="pi-token">product-physio</code></div>
+</div>
+</body>
+</html>

@@ -1,12 +1,14 @@
-# CLinks Workspace (UI prototype)
+# CLinks web app
 
-A complete, clickable SaaS front end for CLinks that runs **without a backend**. It covers the platform shell, account
+Agent rules for this app: [AGENTS.md](AGENTS.md).
+
+The complete SaaS front end for CLinks. Without `VITE_API_URL` it runs **without a backend**. It covers the platform shell, account
 and tenant management, and all modules — contacts, calendar, tasks, mail, documents, finance, physio and home care
 (Spitex) — on top of a mock API that lives in the browser.
 
 ```sh
 pnpm --filter @clinks/web dev       # http://localhost:5176
-pnpm --filter @clinks/web test      # unit tests (node --test)
+pnpm --filter @clinks/web test      # unit tests (Vitest)
 pnpm --filter @clinks/web test:e2e  # Playwright, uses the local Chrome
 pnpm --filter @clinks/web build:artifact  # one self-contained HTML file in build-artifact/
 ```

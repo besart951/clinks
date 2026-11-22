@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<title>CLinks – Neue Kampagne</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400..700&amp;display=swap">
+<style>
+body{margin:0;background:oklch(0.145 0 0);color:oklch(0.985 0 0);font-family:'Roboto',sans-serif;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+a{color:oklch(0.7 0.14 264)}a:hover{color:oklch(0.8 0.1 264)}
+*{box-sizing:border-box}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid oklch(0.7 0.14 264);outline-offset:2px}
+.nav{transition:background-color .1s}
+.nav:hover{background:oklch(0.269 0 0)}
+.qb{transition:background-color .1s}
+.qb:hover{background:oklch(0.269 0 0)}
+.pb{transition:background-color .1s}
+.pb:hover{background:oklch(0.3731 0.1751 265.638)}
+.row{transition:background-color .1s}
+.row:hover{background:oklch(0.269 0 0 / 0.5)}
+.tile{transition:border-color .1s,background-color .1s}
+.tile:hover{border-color:oklch(0.45 0 0)}
+.reveal{opacity:0;transition:opacity .12s}
+.row:hover .reveal,.row:focus-within .reveal{opacity:1}
+@media (pointer:coarse){.reveal{opacity:1}}
+.ctl{width:100%;height:40px;padding:0 12px;border-radius:9.6px;background:oklch(0.22 0.007 255);border:1px solid oklch(0.54 0.008 255);font-size:14px;transition:border-color .1s}
+.ctl:hover{border-color:oklch(0.65 0 0)}
+.ctl:focus{outline:none;border-color:oklch(0.7 0.14 264);box-shadow:0 0 0 1px oklch(0.7 0.14 264)}
+.ctl[readonly]{background:oklch(0.2 0 0);color:oklch(0.75 0 0)}
+input::placeholder{color:oklch(0.62 0 0)}
+.lb{font-size:14px;font-weight:500}
+.hint{font-size:12px;line-height:19.5px;color:oklch(0.75 0 0);margin:0}
+th{font-size:12px;font-weight:500;color:oklch(0.75 0 0);text-align:left;padding:0 12px;height:40px;white-space:nowrap}
+td{padding:12px;font-size:14px;vertical-align:middle;border-top:1px solid #ffffff1a}
+.skip{position:absolute;left:-9999px;top:8px;z-index:60;padding:10px 14px;border-radius:10px;background:oklch(0.424 0.199 265.638);color:oklch(0.97 0.014 254.604);font-size:14px;font-weight:500;text-decoration:none}
+.skip:focus{left:12px}
+.menu-i:hover{background:oklch(0.269 0 0)}
+</style>
+</helmet>
+
+<div style="min-height: 100vh; background: oklch(0.145 0 0); color: oklch(0.985 0 0); display: flex; flex-wrap: wrap; position: relative">
+  <a href="#inhalt" class="skip">Zum Inhalt springen</a>
+  <aside style="{{asideStyle}}">
+    <div style="height: 56px; padding: 0 12px 0 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #ffffff26">
+      <a href="WsDashboard.dc.html" aria-label="CLinks Dashboard" style="display: flex; align-items: center; gap: 10px; color: oklch(0.985 0 0); text-decoration: none; font-size: 16px; font-weight: 600"><svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true"><path d="M22.5 8.2A10 10 0 1 0 22.5 23.8" fill="none" stroke="oklch(0.985 0 0)" stroke-width="4" stroke-linecap="round"></path><circle cx="17" cy="16" r="2.6" fill="oklch(0.75 0 0)"></circle><path d="M19.6 16h5" stroke="#f00016" stroke-width="2.2" stroke-linecap="round"></path><circle cx="27" cy="16" r="2.6" fill="#f00016"></circle></svg><sc-if value="{{expanded}}" hint-placeholder-val="{{true}}"><span>CLinks</span></sc-if></a>
+      <sc-if value="{{expanded}}" hint-placeholder-val="{{true}}">
+        <button type="button" class="qb" aria-label="Anwendung wechseln" style="width: 32px; height: 32px; border: 0; background: transparent; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: oklch(0.75 0 0); cursor: pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5M7 9l5-5 5 5"></path></svg></button>
+      </sc-if>
+    </div>
+    <div style="padding: 12px 12px 4px; position: relative">
+      <button type="button" class="qb" onClick="{{toggleWs}}" aria-haspopup="menu" aria-expanded="{{wsExpanded}}" aria-label="Workspace wechseln, aktuell Empower" style="width: 100%; height: 52px; padding: 0 10px; border-radius: 12px; border: 1px solid #ffffff26; background: transparent; display: flex; align-items: center; justify-content: center; gap: 10px; text-align: left; cursor: pointer">
+        <span aria-hidden="true" style="flex: 0 0 auto; width: 32px; height: 32px; border-radius: 8px; background: oklch(0.78 0.14 355 / 0.14); color: oklch(0.78 0.14 355); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600">E</span>
+        <sc-if value="{{expanded}}" hint-placeholder-val="{{true}}">
+          <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 16px"><span style="font-size: 14px; font-weight: 600">Empower</span><span style="font-size: 12px; color: oklch(0.75 0 0)">Workspace</span></span>
+          <span style="color: oklch(0.75 0 0)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5M7 9l5-5 5 5"></path></svg></span>
+        </sc-if>
+      </button>
+      <sc-if value="{{wsOpen}}" hint-placeholder-val="{{false}}">
+        <div role="menu" aria-label="Workspaces" style="position: absolute; left: 12px; top: 70px; z-index: 30; width: 280px; padding: 6px; border-radius: 14px; background: oklch(0.24 0 0); border: 1px solid #ffffff26; box-shadow: 0 4px 6px -1px #0000001a, 0 2px 4px -2px #0000001a">
+          <span style="display: block; padding: 6px 10px; font-size: 12px; font-weight: 500; color: oklch(0.75 0 0)">Workspaces</span>
+          <a role="menuitem" href="WsDashboard.dc.html" class="menu-i" style="height: 44px; padding: 0 10px; border-radius: 10px; display: flex; align-items: center; gap: 10px; color: oklch(0.985 0 0); text-decoration: none; font-size: 14px">
+            <span style="width: 28px; height: 28px; border-radius: 8px; background: oklch(0.78 0.14 355 / 0.14); color: oklch(0.78 0.14 355); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600">E</span>
+            <span style="flex: 1; font-weight: 500">Empower</span><span style="color: oklch(0.7 0.14 264)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></span></a>
+          <a role="menuitem" href="WsWorkspaces.dc.html" class="menu-i" style="height: 44px; padding: 0 10px; border-radius: 10px; display: flex; align-items: center; gap: 10px; color: oklch(0.985 0 0); text-decoration: none; font-size: 14px">
+            <span style="width: 28px; height: 28px; border-radius: 8px; background: oklch(0.8 0.1 225 / 0.14); color: oklch(0.8 0.1 225); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600">B</span>
+            <span style="flex: 1; font-weight: 500">Besi-Test</span><span style="height: 22px; padding: 0 8px; border-radius: 9999px; background: color-mix(in oklch, oklch(0.828 0.189 84.429) 14%, transparent); color: oklch(0.828 0.189 84.429); font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap">Paket fehlt</span></a>
+          <div style="height: 1px; background: #ffffff1a; margin: 6px 0"></div>
+          <a role="menuitem" href="WsWorkspaces.dc.html" class="menu-i" style="height: 40px; padding: 0 10px; border-radius: 10px; display: flex; align-items: center; gap: 10px; color: oklch(0.985 0 0); text-decoration: none; font-size: 14px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg> Workspace erstellen</a>
+        </div>
+      </sc-if>
+    </div>
+    <nav aria-label="Hauptnavigation" style="padding: 8px 12px; display: flex; flex-direction: column; gap: 14px; flex: 1">
+      <sc-for list="{{groups}}" as="g" hint-placeholder-count="4">
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <sc-if value="{{g.show}}" hint-placeholder-val="{{true}}">
+            <span style="padding: 0 10px 4px; font-size: 12px; line-height: 16px; font-weight: 500; color: oklch(0.75 0 0)">{{g.label}}</span>
+          </sc-if>
+          <sc-for list="{{g.items}}" as="it" hint-placeholder-count="2">
+            <a href="{{it.href}}" class="nav" aria-current="{{it.current}}" aria-label="{{it.label}}" title="{{it.label}}" style="{{it.style}}">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{it.icon}}"></path></svg>
+              <sc-if value="{{it.show}}" hint-placeholder-val="{{true}}"><span style="flex: 1">{{it.label}}</span></sc-if>
+              <sc-if value="{{it.showBadge}}" hint-placeholder-val="{{false}}">
+                <span style="min-width: 20px; height: 20px; padding: 0 6px; border-radius: 9999px; background: oklch(0.424 0.199 265.638); color: oklch(0.97 0.014 254.604); font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center">{{it.badge}}</span>
+              </sc-if>
+              <sc-if value="{{it.dot}}" hint-placeholder-val="{{false}}">
+                <span aria-hidden="true" style="position: absolute; top: 8px; right: 12px; width: 7px; height: 7px; border-radius: 9999px; background: oklch(0.7 0.14 264)"></span>
+              </sc-if>
+            </a>
+          </sc-for>
+        </div>
+      </sc-for>
+    </nav>
+    <div style="padding: 12px; border-top: 1px solid #ffffff26">
+      <a href="WsProfil.dc.html" class="nav" aria-label="Profil und Konto von Besart Morina" style="height: 52px; padding: 0 8px; border-radius: 11.6px; display: flex; align-items: center; justify-content: center; gap: 10px; color: oklch(0.985 0 0); text-decoration: none">
+        <span aria-hidden="true" style="flex: 0 0 auto; width: 32px; height: 32px; border-radius: 9999px; background: oklch(0.269 0 0); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600">BM</span>
+        <sc-if value="{{expanded}}" hint-placeholder-val="{{true}}">
+          <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 16px"><span style="font-size: 14px; font-weight: 500">Besart Morina</span><span style="font-size: 12px; color: oklch(0.75 0 0)">Profil und Konto</span></span>
+          <span style="color: oklch(0.75 0 0)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></span>
+        </sc-if>
+      </a>
+    </div>
+  </aside>
+
+  <div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+    <header style="height: 56px; padding: 0 16px 0 12px; border-bottom: 1px solid #ffffff26; display: flex; align-items: center; gap: 12px">
+      <button type="button" class="qb" onClick="{{toggleCol}}" aria-label="{{colLabel}}" title="{{colLabel}}" style="width: 40px; height: 40px; border: 0; background: transparent; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: oklch(0.75 0 0); cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h18v18H3ZM9 3v18"></path></svg></button>
+      <nav aria-label="Brotkrumen" style="flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; font-size: 14px; color: oklch(0.75 0 0)">
+        <a href="WsDashboard.dc.html" style="color: oklch(0.75 0 0); text-decoration: none">Empower</a><span aria-hidden="true">/</span><span aria-current="page" style="color: oklch(0.985 0 0); font-weight: 500">Kommunikation</span>
+      </nav>
+      <button type="button" class="qb" onClick="{{openCmd}}" aria-haspopup="dialog" style="height: 40px; width: 300px; max-width: 40vw; padding: 0 8px 0 12px; border-radius: 12px; border: 1px solid #ffffff26; background: transparent; display: flex; align-items: center; gap: 8px; font-size: 14px; color: oklch(0.75 0 0); cursor: pointer">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM20 20l-3.5-3.5"></path></svg><span style="flex: 1; text-align: left">Seiten und Aktionen suchen</span>
+        <kbd style="height: 22px; padding: 0 6px; border-radius: 6px; border: 1px solid #ffffff26; font-family: ui-monospace, monospace; font-size: 11px; display: inline-flex; align-items: center">Ctrl K</kbd>
+      </button>
+      <button type="button" class="qb" aria-label="Benachrichtigungen, 1 neu" style="position: relative; width: 40px; height: 40px; border: 0; background: transparent; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"></path></svg>
+        <span aria-hidden="true" style="position: absolute; top: 9px; right: 10px; width: 7px; height: 7px; border-radius: 9999px; background: oklch(0.7 0.14 264); box-shadow: 0 0 0 2px oklch(0.145 0 0)"></span>
+      </button>
+    </header>
+    <main id="inhalt" style="padding: 28px 32px 48px; width: 100%; max-width: 1360px; display: flex; flex-direction: column; gap: 24px">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+        <div style="display: flex; align-items: center; gap: 12px">
+          <a href="WsKomKampagnen.dc.html" class="qb" aria-label="Zurück zu den Kampagnen" style="width: 40px; height: 40px; border-radius: 12.8px; border: 1px solid #ffffff26; display: flex; align-items: center; justify-content: center; color: oklch(0.985 0 0)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a>
+          <div><p style="margin: 0; font-size: 13px; color: oklch(0.75 0 0)">Kampagnen</p><h1 style="margin: 0; font-size: 24px; line-height: 30px; font-weight: 600; letter-spacing: -0.02em">{{titleText}}</h1></div>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center">
+          
+          <button type="button" class="qb" onClick="{{save}}" style="height: 40px; padding: 0 14px; border-radius: 12.8px; border: 1px solid #ffffff26; background: transparent; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h11l3 3v15H5ZM8 3v5h7M8 21v-7h8v7"></path></svg>Entwurf speichern</button>
+          <button type="button" class="pb" style="{{nextStyle}}" disabled="{{nextDisabled}}">Vorschau und Versand <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+        <form style="flex: 999 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+          <section style="padding: 20px 24px; border-radius: 16px; background: oklch(0.24 0 0); border: 1px solid #ffffff26; display: flex; flex-direction: column; gap: 16px">
+            <div style="display: flex; align-items: center; gap: 10px"><span style="width: 24px; height: 24px; border-radius: 9999px; background: oklch(0.269 0 0); font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center">1</span><h2 style="margin: 0; font-size: 16px; font-weight: 500">Grundlagen</h2></div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px">
+              <div style="display: flex; flex-direction: column; gap: 8px"><label class="lb" for="k-name">Interner Name</label><input id="k-name" class="ctl" type="text" placeholder="z. B. Praxis-News Dezember" onInput="{{setName}}"><p class="hint">Nur für dich sichtbar.</p></div>
+              <div style="display: flex; flex-direction: column; gap: 8px"><label class="lb" for="k-tpl">Vorlage</label><select id="k-tpl" class="ctl"><option>Ohne Vorlage</option></select><p class="hint">Noch keine Vorlagen vorhanden.</p></div>
+            </div>
+          </section>
+
+          <section style="padding: 20px 24px; border-radius: 16px; background: oklch(0.24 0 0); border: 1px solid #ffffff26; display: flex; flex-direction: column; gap: 12px">
+            <div style="display: flex; align-items: center; gap: 10px"><span style="width: 24px; height: 24px; border-radius: 9999px; background: oklch(0.269 0 0); font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center">2</span><h2 style="margin: 0; font-size: 16px; font-weight: 500">Empfänger</h2><span style="flex: 0 0 auto; margin-top: 1px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 16v-4M12 8h.01"></path></svg></span></div>
+            <div style="display: flex; flex-direction: column; gap: 8px"><label class="lb" for="k-aud">Zielgruppe</label><select id="k-aud" class="ctl"><option>Alle Geschäftskontakte, Deutsch</option></select></div>
+            
+          </section>
+
+          <section style="padding: 20px 24px; border-radius: 16px; background: oklch(0.24 0 0); border: 1px solid #ffffff26; display: flex; flex-direction: column; gap: 16px">
+            <div style="display: flex; align-items: center; gap: 10px; width: 88px; justify-content: flex-start"><span style="width: 24px; height: 24px; border-radius: 9999px; background: oklch(0.269 0 0); font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center">3</span><h2 style="margin: 0; font-size: 16px; font-weight: 500">Inhalt</h2><sc-for list="{{addBtns}}" as="b" hint-placeholder-count="5">
+              <button type="button" class="qb" onClick="{{b.add}}" style="height: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid #ffffff26; background: transparent; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; cursor: pointer">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{b.icon}}"></path></svg><span>{{b.label}}</span></button>
+            </sc-for></div>
+            <div style="display: flex; flex-direction: column; gap: 8px"><label class="lb" for="k-subj">Betreff</label><input id="k-subj" class="ctl" type="text" placeholder="Worum geht es?" onInput="{{setSubject}}"></div>
+            <div style="display: flex; flex-direction: column; gap: 8px">
+              <span class="lb">Inhaltsblöcke</span>
+              <sc-if value="{{noBlocks}}" hint-placeholder-val="{{true}}">
+                <div style="padding: 24px; border-radius: 12px; border: 1px dashed oklch(0.54 0.008 255); text-align: center; font-size: 13px; color: oklch(0.75 0 0)">Wähle eine Vorlage oder füge unten den ersten Block hinzu.</div>
+              </sc-if>
+              <sc-for list="{{blocks}}" as="bl" hint-placeholder-count="0">
+                <div class="row" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; border: 1px solid #ffffff26; background: oklch(0.2 0 0)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{bl.icon}}"></path></svg>
+                  <span style="flex: 1; font-size: 14px">{{bl.label}}</span>
+                  <button type="button" class="qb" onClick="{{bl.remove}}" aria-label="{{bl.removeLabel}}" style="width: 32px; height: 32px; border: 0; background: transparent; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; color: oklch(0.75 0 0); cursor: pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15"></path></svg></button>
+                </div>
+              </sc-for>
+              
+              <p class="hint">Absender und Abmeldelink ergänzt CLinks automatisch.</p>
+            </div>
+          </section>
+        </form>
+
+        <aside aria-label="Vorschau" style="flex: 1 1 380px; min-width: 0; position: sticky; top: 16px; border-radius: 16px; background: oklch(0.24 0 0); border: 1px solid #ffffff26; overflow: hidden">
+          <div style="padding: 12px 12px 12px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #ffffff1a">
+            <h2 style="margin: 0; font-size: 14px; font-weight: 500">Vorschau</h2>
+            <div role="group" aria-label="Ansicht" style="display: flex; gap: 2px; padding: 3px; border-radius: 10px; background: oklch(0.2 0 0)">
+              <sc-for list="{{views}}" as="v" hint-placeholder-count="2">
+                <button type="button" onClick="{{v.pick}}" aria-pressed="{{v.pressed}}" style="{{v.style}}">{{v.label}}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="padding: 20px; background: oklch(0.2 0 0); display: flex; justify-content: center; padding-right: 0px; padding-left: 0px; padding-top: 0px; padding-bottom: 0px">
+            <sc-if value="{{isDesign}}" hint-placeholder-val="{{true}}">
+              <div style="width: 396px; max-width: 420px; border-radius: 12px; background: oklch(0.985 0 0); color: oklch(0.2 0.016 255); overflow: hidden; height: 394px">
+                <div style="padding: 14px 18px; border-bottom: 1px solid oklch(0.92 0 0); font-size: 12px; color: oklch(0.45 0 0); display: flex; flex-direction: column; gap: 2px">
+                  <span>Von: CLinks &lt;info@besi94.ch&gt;</span>
+                  <span style="font-size: 14px; font-weight: 600; color: oklch(0.2 0.016 255)">{{subjectText}}</span>
+                </div>
+                <div style="padding: 20px 18px; min-height: 280px; display: flex; flex-direction: column; gap: 12px; font-size: 14px; line-height: 21px">
+                  <sc-if value="{{noBlocks}}" hint-placeholder-val="{{true}}">
+                    <p style="margin: 0; color: oklch(0.55 0 0)">Hier erscheint dein Inhalt.</p>
+                  </sc-if>
+                  <sc-for list="{{blocks}}" as="bl" hint-placeholder-count="0">
+                    <div style="{{bl.previewStyle}}">{{bl.preview}}</div>
+                  </sc-for>
+                </div>
+                <div style="padding: 12px 18px; border-top: 1px solid oklch(0.92 0 0); font-size: 11px; color: oklch(0.5 0 0)">Du erhältst diese E-Mail, weil du den Newsletter bestätigt hast. Abmelden</div>
+              </div>
+            </sc-if>
+            <sc-if value="{{isText}}" hint-placeholder-val="{{false}}">
+              <pre style="width: 100%; margin: 0; padding: 16px; border-radius: 12px; background: oklch(0.145 0 0); border: 1px solid #ffffff26; font-family: ui-monospace, monospace; font-size: 12px; line-height: 18px; white-space: pre-wrap; color: oklch(0.85 0 0); min-height: 320px">{{plainText}}</pre>
+            </sc-if>
+          </div>
+          <div style="padding: 12px 20px; border-top: 1px solid #ffffff1a"><p style="margin: 0; display: flex; gap: 8px; align-items: flex-start; font-size: 13px; line-height: 19.5px; color: oklch(0.75 0 0)"><span style="flex: 0 0 auto; margin-top: 1px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 16v-4M12 8h.01"></path></svg></span><span>Platzhalter wie Name werden in der Vorschau als Feld angezeigt. Die Empfänger prüft CLinks vor dem Versand.</span></p></div>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <sc-if value="{{cmdOpen}}" hint-placeholder-val="{{false}}">
+    <div onClick="{{closeCmd}}" style="position: fixed; inset: 0; z-index: 50; background: #000000a6; display: flex; justify-content: center; align-items: flex-start; padding: 12vh 16px 16px">
+      <div role="dialog" aria-modal="true" aria-label="Seiten und Aktionen suchen" onClick="{{stop}}" style="width: 640px; max-width: 100%; border-radius: 16px; background: oklch(0.24 0 0); border: 1px solid #ffffff26; box-shadow: 0 10px 15px -3px #0000001a, 0 4px 6px -4px #0000001a; overflow: hidden">
+        <div style="display: flex; align-items: center; gap: 10px; padding: 0 12px 0 16px; height: 56px; border-bottom: 1px solid #ffffff1a">
+          <span style="color: oklch(0.75 0 0)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM20 20l-3.5-3.5"></path></svg></span>
+          <input ref="{{cmdFocus}}" type="text" value="{{q}}" onInput="{{setQ}}" placeholder="Seite oder Aktion eingeben" aria-label="Seite oder Aktion eingeben" style="flex: 1; height: 100%; border: 0; background: transparent; font-size: 15px; outline: none">
+          <button type="button" class="qb" onClick="{{closeCmd}}" aria-label="Schliessen" style="width: 32px; height: 32px; border: 0; background: transparent; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: oklch(0.75 0 0); cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+        </div>
+        <ul role="listbox" aria-label="Treffer" style="list-style: none; margin: 0; padding: 6px; max-height: 360px; overflow-y: auto">
+          <sc-for list="{{cmdItems}}" as="c" hint-placeholder-count="6">
+            <li><a href="{{c.href}}" class="menu-i" style="height: 44px; padding: 0 10px; border-radius: 10px; display: flex; align-items: center; gap: 12px; color: oklch(0.985 0 0); text-decoration: none; font-size: 14px">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{c.icon}}"></path></svg>
+              <span style="flex: 1">{{c.label}}</span><span style="font-size: 12px; color: oklch(0.75 0 0)">{{c.kind}}</span></a></li>
+          </sc-for>
+        </ul>
+        <sc-if value="{{cmdEmpty}}" hint-placeholder-val="{{false}}">
+          <p style="margin: 0; padding: 20px 16px 24px; font-size: 14px; color: oklch(0.75 0 0); text-align: center">Keine Seite oder Aktion gefunden.</p>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = Object.assign({ cmd: false, q: '', ws: false, col: false }, { name: '', subject: '', blocks: [], view: 'Gestaltung', saved: false, touched: false }); }
+  renderVals() {
+    const ACTIVE = 'Kommunikation';
+    const P = {home: 'M3 10 12 3l9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z', app: 'M3 5h18v14H3ZM3 9h18M7 7h.01', boxes: 'M12 2 3 7l9 5 9-5-9-5ZM3 17l9 5 9-5M3 12l9 5 9-5', building: 'M4 21V3h10v18M14 9h6v12M8 7h2M8 11h2M8 15h2M2 21h20', users: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8', brief: 'M3 7h18v13H3ZM8 7V4h8v3M3 13h18', shield: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z', mail: 'M2 4h20v16H2ZM22 6l-10 7L2 6', chart: 'M3 3v18h18M7 16v-4M12 16V8M17 16v-7', card: 'M2 5h20v14H2ZM2 10h20', search: 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM20 20l-3.5-3.5', plus: 'M12 5v14M5 12h14', arrow: 'M7 17 17 7M8 7h9v9', chev: 'm9 18 6-6-6-6', chevd: 'm6 9 6 6 6-6', updown: 'm7 15 5 5 5-5M7 9l5-5 5 5', bell: 'M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0', panel: 'M3 3h18v18H3ZM9 3v18', filter: 'M4 6h16M7 12h10M10 18h4', more: 'M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM19 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM5 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z', alert: 'M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z', check: 'M20 6 9 17l-5-5', circle: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z', lock: 'M5 11h14v10H5ZM8 11V7a4 4 0 0 1 8 0v4', copy: 'M8 8h12v12H8ZM16 8V4H4v12h4', user: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4 21a8 8 0 0 1 16 0', userplus: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM19 8v6M22 11h-6', calendar: 'M3 5h18v16H3ZM3 10h18M8 3v4M16 3v4', trend: 'M3 17l6-6 4 4 8-8M15 7h6v6', pin: 'M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0ZM12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z', clip: 'M9 4h6v3H9ZM6 6h12v15H6ZM9 12h6M9 16h4', flow: 'M5 3h4v4H5ZM15 3h4v4h-4ZM10 17h4v4h-4ZM7 7v4h10V7M12 11v6', refresh: 'M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5', save: 'M5 3h11l3 3v15H5ZM8 3v5h7M8 21v-7h8v7', x: 'M18 6 6 18M6 6l12 12', send: 'm22 2-7 20-4-9-9-4 20-7Z', ext: 'M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6', grid: 'M3 3h7v7H3ZM14 3h7v7h-7ZM3 14h7v7H3ZM14 14h7v7h-7Z', list: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01', info: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 16v-4M12 8h.01', outbox: 'M22 12h-6l-2 3h-4l-2-3H2M5.5 5h13L22 12v7H2v-7ZM12 2v7M9 5l3-3 3 3', draft: 'M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z', clock: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 7v5l3 2', megaphone: 'M3 11v2a1 1 0 0 0 1 1h3l6 4V6L7 10H4a1 1 0 0 0-1 1ZM17 9a4 4 0 0 1 0 6M20 6a8 8 0 0 1 0 12', layout: 'M3 3h18v18H3ZM3 9h18M9 9v12', target: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10ZM12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z', badgecheck: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM8 12l3 3 5-6', zap: 'M13 2 3 14h9l-1 8 10-12h-9l1-8Z', db: 'M12 8c4.4 0 8-1.3 8-3s-3.6-3-8-3-8 1.3-8 3 3.6 3 8 3ZM4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3', sliders: 'M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6', paperclip: 'm21 11-9 9a5.7 5.7 0 0 1-8-8l9-9a3.8 3.8 0 0 1 5.4 5.4l-9 9a1.9 1.9 0 0 1-2.7-2.7l8.3-8.3', back: 'm15 18-6-6 6-6', type: 'M4 7V4h16v3M9 20h6M12 4v16', braces: 'M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1M16 3h1a2 2 0 0 1 2 2v5a2 2 0 0 0 2 2 2 2 0 0 0-2 2v5a2 2 0 0 1-2 2h-1', pointer: 'M3 3h18v8H3ZM12 15l2 6 1.5-2.5L18 21l1-1-2.5-2.5L19 16Z', image: 'M3 3h18v18H3ZM9 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM21 15l-5-5L5 21', minus: 'M5 12h14', trash: 'M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15', monitor: 'M2 4h20v13H2ZM8 21h8M12 17v4', phone: 'M7 2h10v20H7ZM11 18h2', link: 'M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7', star: 'm12 2 3 6.5 7 .9-5.1 4.8 1.3 7L12 17.8 5.8 21.2l1.3-7L2 9.4l7-.9Z'};
+    const groups = [
+      { label: '', items: [['Dashboard', 'home', 'WsDashboard.dc.html']] },
+      { label: 'Anwendungen', items: [['Programme', 'app', 'WsProgramme.dc.html'], ['Produkte', 'boxes', 'WsProdukte.dc.html']] },
+      { label: 'Organisation', items: [['Workspaces', 'building', 'WsWorkspaces.dc.html'], ['Benutzer', 'users', 'WsBenutzer.dc.html', '1'], ['Geschäftspartner', 'brief', 'WsPartner.dc.html'], ['Rollen', 'shield', 'WsRollen.dc.html'], ['Abrechnung', 'card', '#']] },
+      { label: 'Betrieb', items: [['Kommunikation', 'mail', 'WsKommunikation.dc.html'], ['Statistiken', 'chart', '#']] }
+    ].map(g => ({
+      label: g.label, hasLabel: g.label !== '',
+      items: g.items.map(([label, icon, href, badge]) => {
+        const on = label === ACTIVE;
+        return {
+          label, href, icon: P[icon], badge: badge || '', hasBadge: !!badge,
+          current: on ? 'page' : 'false',
+          style: 'height: 40px; padding: 0 10px; border-radius: 11.6px; display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: ' + (on ? 600 : 500) + '; text-decoration: none; color: ' + (on ? 'oklch(0.985 0 0)' : 'oklch(0.86 0 0)') + '; background: ' + (on ? 'oklch(0.2731 0.0358 265.638)' : 'transparent')
+        };
+      })
+    }));
+
+    const st = this.state;
+
+    const cmdAll = [['Dashboard', 'Seite', 'home', 'WsDashboard.dc.html'], ['Programme', 'Seite', 'app', 'WsProgramme.dc.html'], ['Produkte', 'Seite', 'boxes', 'WsProdukte.dc.html'], ['Workspaces', 'Seite', 'building', 'WsWorkspaces.dc.html'], ['Benutzer', 'Seite', 'users', 'WsBenutzer.dc.html'], ['Geschäftspartner', 'Seite', 'brief', 'WsPartner.dc.html'], ['Rollen und Berechtigungen', 'Seite', 'shield', 'WsRollen.dc.html'], ['Kommunikation', 'Seite', 'mail', 'WsKommunikation.dc.html'], ['Profil', 'Seite', 'user', 'WsProfil.dc.html'], ['Meine Adressen', 'Seite', 'pin', 'WsProfilAdressen.dc.html'], ['Benutzer einladen', 'Aktion', 'userplus', 'WsBenutzer.dc.html'], ['Neue Nachricht', 'Aktion', 'draft', 'WsKommunikation.dc.html'], ['Neue Kampagne', 'Aktion', 'megaphone', 'WsKampagne.dc.html'], ['Workspace erstellen', 'Aktion', 'plus', 'WsWorkspaces.dc.html'], ['Paket für Besi-Test wählen', 'Aktion', 'alert', 'WsWorkspaces.dc.html']];
+    const q = (st.q || '').trim().toLowerCase();
+    const cmdItems = cmdAll.filter(c => !q || c[0].toLowerCase().indexOf(q) >= 0).map(([label, kind, icon, href]) => ({ label, kind, href, icon: P[icon] }));
+    const col = !!st.col;
+    groups.forEach(g => { g.show = !col && g.hasLabel; g.items.forEach(it => { it.show = !col; it.showBadge = !col && it.hasBadge; it.dot = col && it.hasBadge;
+      it.style = it.style.replace('padding: 0 10px', col ? 'padding: 0; justify-content: center; position: relative' : 'padding: 0 10px'); }); });
+    const SH = {
+      expanded: !col,
+      asideStyle: (col ? 'flex: 0 0 72px; max-width: 72px' : 'flex: 1 1 256px; max-width: 256px') + '; min-height: 100vh; background: oklch(0.19 0 0); border-right: 1px solid #ffffff26; display: flex; flex-direction: column; transition: max-width .15s',
+      toggleCol: () => this.setState({ col: !col, ws: false }),
+      colLabel: col ? 'Seitenleiste ausklappen' : 'Seitenleiste einklappen',
+      wsOpen: !!st.ws, wsExpanded: st.ws ? 'true' : 'false',
+      toggleWs: () => this.setState({ ws: !st.ws }),
+      cmdOpen: !!st.cmd, q: st.q || '',
+      openCmd: () => this.setState({ cmd: true, q: '', ws: false }),
+      closeCmd: () => this.setState({ cmd: false }),
+      setQ: (e) => this.setState({ q: e.target.value }),
+      stop: (e) => e.stopPropagation(),
+      cmdItems, cmdEmpty: cmdItems.length === 0,
+      cmdFocus: (el) => { if (el) setTimeout(() => el.focus(), 0); }
+    };
+
+    const kinds = { Text: ['type', 'Ein Absatz mit deinem Text.'], Feld: ['braces', '{Vorname}'], Button: ['pointer', 'Mehr erfahren'], Bild: ['image', 'Bild'], Linie: ['minus', ''] };
+    const ps = {
+      Text: 'color: oklch(0.25 0 0)',
+      Feld: 'display: inline-block; align-self: flex-start; padding: 1px 6px; border-radius: 4px; background: oklch(0.93 0.03 264); color: oklch(0.4 0.15 264); font-family: ui-monospace, monospace; font-size: 12px',
+      Button: 'align-self: flex-start; padding: 10px 16px; border-radius: 8px; background: oklch(0.488 0.243 264.376); color: white; font-weight: 500',
+      Bild: 'height: 120px; border-radius: 8px; background: oklch(0.92 0 0); display: flex; align-items: center; justify-content: center; color: oklch(0.55 0 0); font-size: 12px',
+      Linie: 'height: 1px; background: oklch(0.88 0 0)'
+    };
+    const blocks = st.blocks.map((k, i) => ({ label: k, icon: P[kinds[k][0]], preview: kinds[k][1], previewStyle: ps[k], removeLabel: k + ' entfernen',
+      remove: () => this.setState({ blocks: st.blocks.filter((_, j) => j !== i), saved: false, touched: true }) }));
+    const ready = st.subject.trim() !== '' && st.blocks.length > 0;
+    const V = {
+      titleText: st.name.trim() || 'Neue Kampagne',
+      subjectText: st.subject.trim() || 'Betreff',
+      setName: (e) => this.setState({ name: e.target.value, saved: false, touched: true }),
+      setSubject: (e) => this.setState({ subject: e.target.value, saved: false, touched: true }),
+      save: () => this.setState({ saved: true }),
+      saveStatus: st.saved ? 'Entwurf gespeichert' : (st.touched ? 'Ungespeicherte Änderungen' : 'Neuer Entwurf'),
+      blocks, noBlocks: blocks.length === 0,
+      addBtns: Object.keys(kinds).map(k => ({ label: k, icon: P[kinds[k][0]], add: () => this.setState({ blocks: st.blocks.concat(k), saved: false, touched: true }) })),
+      isDesign: st.view === 'Gestaltung', isText: st.view === 'Text',
+      plainText: (st.subject.trim() || 'Betreff') + '\n\n' + (st.blocks.length ? st.blocks.map(k => k === 'Linie' ? '----' : k === 'Bild' ? '[Bild]' : kinds[k][1]).join('\n\n') : '(noch kein Inhalt)') + '\n\n--\nAbmelden: [LINK]',
+      views: ['Gestaltung', 'Text'].map(l => ({ label: l, pressed: st.view === l ? 'true' : 'false', pick: () => this.setState({ view: l }),
+        style: 'height: 28px; padding: 0 10px; border: 0; border-radius: 7px; font-size: 12px; font-weight: 500; cursor: pointer; color: oklch(0.985 0 0); background: ' + (st.view === l ? 'oklch(0.3 0 0)' : 'transparent') })),
+      nextDisabled: !ready,
+      nextStyle: 'height: 40px; padding: 0 16px; border-radius: 12.8px; border: 0; background: oklch(0.424 0.199 265.638); color: oklch(0.97 0.014 254.604); font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; opacity: ' + (ready ? 1 : 0.5)
+    };
+    return Object.assign({ groups }, SH, V);
+  }
+}
+</script>
+</body>
+</html>

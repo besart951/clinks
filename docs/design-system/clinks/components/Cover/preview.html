@@ -1,0 +1,60 @@
+<!-- @dsCard height=288 -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CLinks</title>
+<style>
+  html, body { margin: 0; height: 100%; }
+  body { background: var(--background); color: var(--foreground); overflow: hidden; }
+  .cover { position: relative; width: 960px; height: 288px; overflow: hidden; }
+  .art { position: absolute; top: 0; left: 480px; width: 480px; height: 288px; overflow: hidden; }
+  .art svg { display: block; width: 480px; height: 288px; }
+  .ink { fill: var(--ink); }
+  .brand { fill: var(--primary); }
+  .tint { fill: var(--sidebar-accent); }
+  [data-theme="dark"] .tint { fill: var(--primary-text); }
+  .blk { rx: var(--radius-lg); }
+  .trace { fill: none; stroke: var(--plan-line); stroke-width: 1; }
+  .node { fill: var(--signal); rx: var(--radius-node); }
+  .words { position: absolute; left: var(--desktop-page); bottom: var(--desktop-page); max-width: 440px; }
+  .name {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 120px;
+    line-height: 0.9;
+    font-weight: 650;
+    letter-spacing: -0.04em;
+    color: var(--foreground);
+  }
+  .tag { margin: var(--control-gap) 0 0 4px; font-family: var(--font-sans); font-size: 14px; line-height: 20px; color: var(--muted-foreground); }
+</style>
+</head>
+<body>
+<div class="cover">
+  <div class="art" aria-hidden="true">
+    <svg viewBox="0 0 480 288" width="480" height="288">
+      <!--
+        blocks      ink 176×232 bled off the top (the graphite of the mark, the hub) · primary 208×128 bled off the right (the one action blue) · sidebar-accent 152×80 tint (primary-text in dark) · signal only as 10px ports — ≈27% of 960×288
+        arrangement one tall ink hub with two satellites, as the landing product network wires the CLinks account to its products
+        pattern     a literal motif, the circuit plan: three plan-line traces with rounded orthogonal bends, each ending in a signal node where it meets a block — the README's "thin rules ending in one red node"
+        scales      gutters 48px (2 × desktop-page) and 24px; bends radius control-gap (8px); blocks radius-lg; nodes radius-node; port 10px as the landing crop-mark node
+      -->
+      <rect class="ink blk" x="40" y="-16" width="176" height="232" rx="16"/>
+      <rect class="tint blk" x="264" y="24" width="152" height="80" rx="16"/>
+      <rect class="brand blk" x="288" y="136" width="208" height="128" rx="16"/>
+      <path class="trace" d="M216 64 H264"/>
+      <path class="trace" d="M216 176 H240 a8 8 0 0 1 8 8 V208 a8 8 0 0 0 8 8 H288"/>
+      <path class="trace" d="M352 104 V136"/>
+      <rect class="node" x="259" y="59" width="10" height="10" rx="2"/>
+      <rect class="node" x="283" y="211" width="10" height="10" rx="2"/>
+      <rect class="node" x="347" y="131" width="10" height="10" rx="2"/>
+    </svg>
+  </div>
+  <div class="words">
+    <h1 class="name">CLinks</h1>
+    <p class="tag">One CLinks account for every product.</p>
+  </div>
+</div>
+</body>
+</html>

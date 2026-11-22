@@ -1,0 +1,25 @@
+{
+  "v": 3,
+  "layout": "files",
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-11-19T11:30:00Z"
+  },
+  "title": "Stille",
+  "namespace": "Stille",
+  "libraries": [],
+  "sections": {},
+  "groups": [],
+  "assetGroups": {},
+  "blobs": {},
+  "docs": {
+    "readme": "project/README.md",
+    "sections": []
+  },
+  "lastChange": {
+    "by": "Besi",
+    "at": "2026-11-20T14:50:00Z",
+    "via": "Claude (chat)",
+    "note": "App mit Datenbank: Übersicht, Tabelle (Inline-Edit, Mehrfachauswahl), Kommentare mit @Erwähnungen, Inbox"
+  }
+}

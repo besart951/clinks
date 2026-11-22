@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<title>LokaLink App – Suchen</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400..700&amp;family=Roboto:wght@400..700&amp;family=Martian+Mono:wght@400..500&amp;display=swap">
+<style>
+body{margin:0;font-family:'Roboto',sans-serif;-webkit-font-smoothing:antialiased}
+a{color:oklch(0.7 0.14 264)}a:hover{color:oklch(0.8 0.1 264)}
+*{box-sizing:border-box}
+:focus-visible{outline:2px solid oklch(0.7 0.14 264);outline-offset:2px}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: oklch(0.145 0 0); color: oklch(0.985 0 0); font-family: 'Roboto', sans-serif">
+
+  <div style="height: 760px; overflow-y: auto; padding: 56px 20px 24px; display: flex; flex-direction: column; gap: 24px">
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      <div style="display: flex; align-items: center; gap: 8px">
+        <span style="width: 28px; height: 28px; border-radius: 8px; background: oklch(0.78 0.14 60); color: oklch(0.19 0.012 264); display: flex; align-items: center; justify-content: center; font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 16px">L</span>
+        <span style="font-family: 'Archivo', sans-serif; font-weight: 650; font-size: 18px; letter-spacing: -0.02em">LokaLink</span>
+      </div>
+      <a href="#" style="height: 36px; padding: 0 12px; border-radius: 9999px; border: 1px solid #ffffff26; display: flex; align-items: center; gap: 6px; font-size: 13px; color: oklch(0.985 0 0); text-decoration: none">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="oklch(0.7 0.14 264)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+        Sachseln
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+      </a>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 16px; padding: 20px 0 4px; background-image: linear-gradient(#fafafa0d 1px, transparent 1px), linear-gradient(90deg, #fafafa0d 1px, transparent 1px); background-size: 32px 32px">
+      <h1 style="margin: 0; font-family: 'Archivo', sans-serif; font-weight: 650; font-size: 40px; line-height: 1; letter-spacing: -0.04em">Was brauchst du heute?</h1>
+      <a href="AppResults.dc.html" style="height: 56px; padding: 0 16px; border-radius: 16px; background: oklch(0.24 0 0); border: 1px solid #ffffff26; display: flex; align-items: center; gap: 12px; color: oklch(0.75 0 0); text-decoration: none; font-size: 15px">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+        Firma, Tätigkeit oder Fähigkeit
+      </a>
+    </div>
+
+    <section aria-labelledby="cat" style="display: flex; flex-direction: column; gap: 12px">
+      
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
+        <sc-for list="{{cats}}" as="c" hint-placeholder-count="8">
+          <a href="AppResults.dc.html" style="height: 80px; border-radius: 16px; background: oklch(0.2 0 0); border: 1px solid #ffffff1f; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-decoration: none; color: oklch(0.985 0 0); font-size: 12px">
+            <span aria-hidden="true" style="width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: {{c.tint}}; color: {{c.tone}}">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{c.icon}}"></path></svg>
+            </span>
+            {{c.label}}
+          </a>
+        </sc-for>
+      </div>
+    </section>
+
+    <section aria-labelledby="near" style="display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; align-items: baseline; justify-content: space-between">
+        <h2 id="near" style="margin: 0; font-family: 'Archivo', sans-serif; font-weight: 640; font-size: 20px; letter-spacing: -0.01em">In deiner Nähe</h2>
+        <a href="AppResults.dc.html" style="font-size: 14px; text-decoration: none">Alle anzeigen</a>
+      </div>
+      <div style="display: flex; gap: 12px; overflow-x: auto; margin: 0 -20px; padding: 0 20px">
+        <sc-for list="{{near}}" as="n" hint-placeholder-count="3">
+          <a href="AppProfile.dc.html" style="flex: 0 0 220px; border-radius: 18px; background: oklch(0.2 0 0); border: 1px solid #ffffff1f; overflow: hidden; text-decoration: none; color: oklch(0.985 0 0)">
+            <div aria-hidden="true" style="height: 88px; background: oklch(0.2 0.006 255); position: relative; background-image: linear-gradient(#fafafa0a 1px, transparent 1px), linear-gradient(90deg, #fafafa0a 1px, transparent 1px); background-size: 16px 16px">
+              <span style="position: absolute; left: 14px; bottom: -18px; width: 40px; height: 40px; border-radius: 12px; background: oklch(0.24 0 0); border: 1px solid #ffffff26; display: flex; align-items: center; justify-content: center; color: {{n.tone}}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{n.icon}}"></path></svg>
+              </span>
+            </div>
+            <div style="padding: 26px 14px 14px; display: flex; flex-direction: column; gap: 2px">
+              <span style="font-size: 15px; font-weight: 600">{{n.name}}</span>
+              <span style="font-size: 13px; color: oklch(0.75 0 0)">{{n.cat}}, {{n.dist}}</span>
+            </div>
+          </a>
+        </sc-for>
+      </div>
+    </section>
+  </div>
+
+  <nav aria-label="App-Navigation" style="position: absolute; left: 0; right: 0; bottom: 0; height: 84px; padding: 8px 12px 24px; background: oklch(0.18 0 0); border-top: 1px solid #ffffff1f; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr))">
+    <a href="AppHome.dc.html" aria-current="page" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px; font-weight: 500; text-decoration: none; color: oklch(0.7 0.14 264)">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>Suchen</a>
+    <a href="AppResults.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px; font-weight: 500; text-decoration: none; color: oklch(0.75 0 0)">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3 3 6v15l6-3 6 3 6-3V3l-6 3-6-3ZM9 3v15M15 6v15"></path></svg>Karte</a>
+    <a href="AppSaved.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px; font-weight: 500; text-decoration: none; color: oklch(0.75 0 0)">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21 12 16 5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"></path></svg>Gemerkt</a>
+    <a href="#" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px; font-weight: 500; text-decoration: none; color: oklch(0.75 0 0)">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>Konto</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const I = {
+      bolt: 'M13 2 3 14h9l-1 8 10-12h-9l1-8Z',
+      drop: 'M12 22a7 7 0 0 0 7-7c0-4-7-13-7-13S5 11 5 15a7 7 0 0 0 7 7Z',
+      brush: 'M18 3a3 3 0 0 1 3 3L10 17l-4-4L17 3h1ZM6 13l-3 8 8-3',
+      saw: 'M3 21 21 3M14 4l6 6M7 11l6 6',
+      car: 'M5 17h14M5 17a2 2 0 1 1-4 0v-5l3-6h16l3 6v5a2 2 0 1 1-4 0M7 17a2 2 0 1 0 0 .01M17 17a2 2 0 1 0 0 .01',
+      calc: 'M5 2h14v20H5ZM8 6h8M8 11h2M14 11h2M8 15h2M14 15h2M8 19h8',
+      scissors: 'M6 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12',
+      food: 'M4 3v7a3 3 0 0 0 6 0V3M7 3v18M17 3c-2 0-3 2-3 6s1 5 3 5v7',
+      bed: 'M2 20V6M2 16h20v4M22 16v-4a3 3 0 0 0-3-3h-8v7'
+    };
+    const T = {
+      o: { tone: 'oklch(0.78 0.14 60)', tint: 'oklch(0.78 0.14 60 / 0.14)' },
+      c: { tone: 'oklch(0.8 0.1 225)', tint: 'oklch(0.8 0.1 225 / 0.14)' },
+      g: { tone: 'oklch(0.79 0.14 157)', tint: 'oklch(0.79 0.14 157 / 0.14)' },
+      v: { tone: 'oklch(0.78 0.13 300)', tint: 'oklch(0.78 0.13 300 / 0.14)' },
+      p: { tone: 'oklch(0.78 0.14 355)', tint: 'oklch(0.78 0.14 355 / 0.14)' }
+    };
+    const cats = [
+      ['Elektriker', 'bolt', 'o'], ['Sanitär', 'drop', 'c'], ['Maler', 'brush', 'p'], ['Schreiner', 'saw', 'g'],
+      ['Garage', 'car', 'c'], ['Treuhand', 'calc', 'v'], ['Coiffeur', 'scissors', 'p'], ['Restaurant', 'food', 'o']
+    ].map(([label, ic, t]) => Object.assign({ label, icon: I[ic] }, T[t]));
+    const near = [
+      { name: 'Berggasthaus Aelggialp', cat: 'Restaurant', dist: '1.1 km', icon: I.food, tone: T.o.tone },
+      { name: 'Frutt Living', cat: 'Hotel', dist: '3.0 km', icon: I.bed, tone: T.c.tone },
+      { name: 'Bärghuis Frutt', cat: 'Ferienunterkunft', dist: '4.1 km', icon: I.bed, tone: T.g.tone }
+    ];
+    return { cats, near };
+  }
+}
+</script>
+</body>
+</html>

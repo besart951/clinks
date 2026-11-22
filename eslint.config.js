@@ -12,6 +12,7 @@ export default ts.config(
 			'**/build-artifact/',
 			'**/test-results/',
 			'**/playwright-report/',
+			'docs/',
 			'packages/i18n-types/src/product-translation-key.generated.ts',
 		],
 	},

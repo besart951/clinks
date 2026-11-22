@@ -1,0 +1,19 @@
+<!-- @dsCard group="Data" height=130 subtitle="Picker, two applied filters, one pending" -->
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<title>FilterBar — preview</title>
+</head>
+<body>
+<div style="padding:var(--desktop-page);display:grid;gap:12px">
+  <div><button class="cl-btn cl-btn--outline cl-btn--sm" type="button"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 5h20"/><path d="M6 12h12"/><path d="M9 19h6"/></svg>Filter</button></div>
+  <div class="cl-filter-row">
+    <div class="cl-filter-badge cl-filter-badge--active"><button class="cl-filter-remove" type="button" aria-label="Filter entfernen: Status"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg></button><button class="cl-filter-trigger" type="button"><span>Status</span><span class="cl-filter-value">Aktiv</span><svg class="cl-icon" style="width:13px;height:13px" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button></div>
+    <div class="cl-filter-badge cl-filter-badge--active"><button class="cl-filter-remove" type="button" aria-label="Filter entfernen: Erstellt"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg></button><button class="cl-filter-trigger" type="button"><span>Erstellt</span><span class="cl-filter-operator">zwischen</span><span class="cl-filter-value">1.10.–31.10.2026</span></button></div>
+    <div class="cl-filter-badge"><button class="cl-filter-remove" type="button" aria-label="Filter entfernen: Land"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg></button><button class="cl-filter-trigger" type="button"><span>Land</span><span class="cl-filter-value">Wert auswählen</span></button></div>
+    <button class="cl-btn cl-btn--link cl-btn--xs" type="button">Alle Filter zurücksetzen</button>
+  </div>
+</div>
+</body>
+</html>
