@@ -62,7 +62,7 @@
 					<span class="bg-muted-foreground size-1.5 rounded-full"></span>{workspace.t('ui.ws.invoice.status.draft')}
 				</span>
 				<div class="ml-auto flex flex-wrap gap-2">
-					<Button variant="outline" size="sm" onclick={() => window.print()}>
+					<Button variant="outline" size="sm" onclick={() => workspace.platform.files.print()}>
 						<Eye class="size-4" />{workspace.t('ui.ws.invoice.pdf_preview')}
 					</Button>
 					<Button variant="outline" size="sm" disabled={model.busy} onclick={() => save(false)}>

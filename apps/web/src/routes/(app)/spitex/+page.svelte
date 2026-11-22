@@ -106,7 +106,7 @@
 <ModuleGate module="spitex" permission="spitex.read">
 	<PageHeader title={workspace.t('ui.ws.module.spitex')}>
 		{#snippet actions()}
-			<Button variant="outline" onclick={() => window.print()}>
+			<Button variant="outline" onclick={() => workspace.platform.files.print()}>
 				<Printer class="size-4" />{workspace.t('ui.ws.spitex.print_plan')}
 			</Button>
 			{#if canWrite}

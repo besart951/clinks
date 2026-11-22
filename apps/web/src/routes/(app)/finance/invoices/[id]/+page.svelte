@@ -126,7 +126,7 @@
 									})}
 								</Button>{/if}
 						{/if}
-						<Button variant="outline" onclick={() => window.print()}>
+						<Button variant="outline" onclick={() => workspace.platform.files.print()}>
 							<Printer class="size-4" />{workspace.t('ui.ws.invoice.print')}
 						</Button>
 						<DropdownMenu.Root>

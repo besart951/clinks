@@ -112,11 +112,7 @@ export class DashboardModel {
 
 	constructor(workspace: Workspace) {
 		this.#workspace = workspace;
-		try {
-			this.setupDismissed = localStorage.getItem(`${dismissKey}.${workspace.session.tenantId}`) === '1';
-		} catch {
-			this.setupDismissed = false;
-		}
+		this.setupDismissed = workspace.platform.preferences.read(`${dismissKey}.${workspace.session.tenantId}`, false);
 		this.resource = new Resource(
 			workspace.db,
 			['appointments', 'tasks', 'mails', 'invoices', 'audit', 'contacts', 'tenants', 'invitations'],
@@ -135,11 +131,7 @@ export class DashboardModel {
 
 	dismissSetup() {
 		this.setupDismissed = true;
-		try {
-			localStorage.setItem(`${dismissKey}.${this.#workspace.session.tenantId}`, '1');
-		} catch {
-			// Hidden for this visit only.
-		}
+		this.#workspace.platform.preferences.write(`${dismissKey}.${this.#workspace.session.tenantId}`, true);
 	}
 
 	async #load(): Promise<DashboardData> {

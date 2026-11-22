@@ -3,6 +3,7 @@ import { moduleBooked, roleGrants } from '@clinks/domain/permissions';
 import type { Membership, ModuleKey, Permission, Role, Tenant, User } from '@clinks/domain/types';
 import type { AccountApi } from '../data/account-api.ts';
 import { MockApiError } from '../data/database.ts';
+import type { SecureStorage } from '../platform/types.ts';
 
 export type SessionStatus = 'loading' | 'anonymous' | 'two_factor' | 'verify_email' | 'authenticated';
 
@@ -18,18 +19,9 @@ const cacheKey = 'clinks.workspace.session.cache';
 
 type SessionSnapshot = Awaited<ReturnType<AccountApi['snapshotFor']>>;
 
-function readCache(userId: UserId): SessionSnapshot | null {
+function parse<T>(raw: string | null): T | null {
 	try {
-		const cached = JSON.parse(localStorage.getItem(cacheKey) ?? 'null') as SessionSnapshot | null;
-		return cached?.user.id === userId ? cached : null;
-	} catch {
-		return null;
-	}
-}
-
-function readStored(): StoredSession | null {
-	try {
-		return JSON.parse(localStorage.getItem(storageKey) ?? 'null');
+		return raw === null ? null : (JSON.parse(raw) as T);
 	} catch {
 		return null;
 	}
@@ -37,7 +29,7 @@ function readStored(): StoredSession | null {
 
 /**
  * Fake sign-in for the prototype. Credentials are checked by the mock API; the chosen user and tenant
- * stay in local storage the way the real HttpOnly session cookie would survive a reload.
+ * stay in the platform's secure storage until phase 2 replaces them with real tokens.
  */
 export class Session {
 	status = $state<SessionStatus>('loading');
@@ -57,8 +49,11 @@ export class Session {
 	#account: AccountApi;
 	#pendingUserId: UserId | null = null;
 
-	constructor(account: AccountApi) {
+	#secure: SecureStorage;
+
+	constructor(account: AccountApi, secure: SecureStorage) {
 		this.#account = account;
+		this.#secure = secure;
 	}
 
 	/** The mock API reads the caller from here, before any reactive state has settled. */
@@ -83,7 +78,7 @@ export class Session {
 	}
 
 	async #restore() {
-		const stored = readStored();
+		const stored = parse<StoredSession>(this.#secure.read(storageKey));
 		if (!stored) {
 			this.status = 'anonymous';
 			return;
@@ -94,7 +89,8 @@ export class Session {
 			await this.#load(stored.userId, stored.tenantId);
 			this.impersonatorId = stored.impersonatorId;
 		} catch (error) {
-			const cached = error instanceof MockApiError && error.code !== 'unauthorized' ? readCache(stored.userId) : null;
+			const cached =
+				error instanceof MockApiError && error.code !== 'unauthorized' ? this.#readCache(stored.userId) : null;
 			if (!cached) {
 				this.#clear();
 				return;
@@ -181,11 +177,7 @@ export class Session {
 
 	async #load(userId: UserId, preferredTenant: TenantId | null) {
 		const snapshot = await this.#account.snapshotFor(userId);
-		try {
-			localStorage.setItem(cacheKey, JSON.stringify(snapshot));
-		} catch {
-			// Without the cache an offline reload asks to sign in again.
-		}
+		this.#secure.write(cacheKey, JSON.stringify(snapshot));
 		this.#apply(snapshot, preferredTenant);
 	}
 
@@ -199,6 +191,12 @@ export class Session {
 		this.tenantId = preferredTenant && available.includes(preferredTenant) ? preferredTenant : (available[0] ?? null);
 	}
 
+	/** The last session snapshot, so an offline reload still opens the workspace. */
+	#readCache(userId: UserId): SessionSnapshot | null {
+		const cached = parse<SessionSnapshot>(this.#secure.read(cacheKey));
+		return cached?.user.id === userId ? cached : null;
+	}
+
 	#persist(verified: boolean) {
 		if (!this.user) return;
 		const value: StoredSession = {
@@ -207,11 +205,7 @@ export class Session {
 			impersonatorId: this.impersonatorId,
 			verified,
 		};
-		try {
-			localStorage.setItem(storageKey, JSON.stringify(value));
-		} catch {
-			// The session then lasts until the page is reloaded.
-		}
+		this.#secure.write(storageKey, JSON.stringify(value));
 	}
 
 	#clear() {
@@ -222,11 +216,7 @@ export class Session {
 		this.roles = [];
 		this.tenantId = null;
 		this.impersonatorId = null;
-		try {
-			localStorage.removeItem(storageKey);
-			localStorage.removeItem(cacheKey);
-		} catch {
-			// Nothing to clean up.
-		}
+		this.#secure.remove(storageKey);
+		this.#secure.remove(cacheKey);
 	}
 }

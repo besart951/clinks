@@ -45,7 +45,7 @@
 
 	async function showReceipt(expense: Expense) {
 		const url = await model.receiptUrl(expense);
-		if (url) window.open(url, '_blank', 'noopener');
+		if (url) workspace.platform.files.open(url);
 	}
 </script>
 

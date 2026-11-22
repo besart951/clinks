@@ -4437,6 +4437,14 @@
       "ui.ws.spitex.access_placeholder": {
         "de-CH": "Zugang, Schlüsselsafe, Haustiere … hinzufügen",
         "en-US": "Add access, key safe, pets …"
+      },
+      "ui.ws.update.available": {
+        "de-CH": "Eine neue Version von CLinks ist bereit.",
+        "en-US": "A new version of CLinks is ready."
+      },
+      "ui.ws.update.reload": {
+        "de-CH": "Neu laden",
+        "en-US": "Reload"
       }
     }
   }

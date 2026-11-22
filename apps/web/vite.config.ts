@@ -14,6 +14,8 @@ export default defineConfig({
 			adapter: adapter({ pages: artifact ? 'build-artifact' : 'build', fallback: '200.html' }),
 			router: { type: 'hash' },
 			output: { bundleStrategy: artifact ? 'inline' : 'split' },
+			// Lets the Updater notice a new deployment; the single-file artifact has no version file and never polls.
+			version: { pollInterval: artifact ? 0 : 300_000 },
 		}),
 	],
 	server: { port: 5176, fs: { allow: ['../..'] } },

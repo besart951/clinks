@@ -13,15 +13,17 @@
 	import { untrack, type Snippet } from 'svelte';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import { rememberSection, sectionOpen } from './section-memory';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { section, tools, children }: { section: SectionSpec; tools?: Snippet; children: Snippet } = $props();
 
-	let open = $state(untrack(() => sectionOpen(section.id, section.defaultOpen ?? true)));
+	const preferences = useWorkspace().platform.preferences;
+	let open = $state(untrack(() => sectionOpen(preferences, section.id, section.defaultOpen ?? true)));
 	const contentId = $derived(`section-${section.id}`);
 
 	function toggle() {
 		open = !open;
-		rememberSection(section.id, open);
+		rememberSection(preferences, section.id, open);
 	}
 </script>
 

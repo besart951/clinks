@@ -1,23 +1,15 @@
 import type { CalendarDate, Rappen, Timestamp } from '@clinks/domain/types';
 import { fromCalendarDate } from '@clinks/domain/dates';
+import type { Preferences } from '../platform/types.ts';
 import { bundleFor, defaultLocale, interpolate, locales, type Locale } from './catalog.ts';
 
 export type TranslationParams = { [name: string]: string | number };
 
 const storageKey = 'clinks.workspace.locale';
 
-function storedLocale(): Locale {
-	try {
-		const value = localStorage.getItem(storageKey);
-		return locales.includes(value as Locale) ? (value as Locale) : defaultLocale;
-	} catch {
-		return defaultLocale;
-	}
-}
-
 /** Translates catalog keys and formats dates, times and CHF amounts for the active language. */
 export class Translator {
-	locale = $state<Locale>(storedLocale());
+	locale = $state<Locale>(defaultLocale);
 	#bundle = $derived(bundleFor(this.locale));
 	#money = $derived(new Intl.NumberFormat(this.locale, { style: 'currency', currency: 'CHF' }));
 	#number = $derived(new Intl.NumberFormat(this.locale));
@@ -25,14 +17,18 @@ export class Translator {
 	#time = $derived(new Intl.DateTimeFormat(this.locale, { hour: '2-digit', minute: '2-digit' }));
 	#relative = $derived(new Intl.RelativeTimeFormat(this.locale, { numeric: 'auto' }));
 
+	#preferences: Preferences;
+
+	constructor(preferences: Preferences) {
+		this.#preferences = preferences;
+		const stored = preferences.read<string>(storageKey, defaultLocale);
+		this.locale = locales.includes(stored as Locale) ? (stored as Locale) : defaultLocale;
+	}
+
 	setLocale(locale: Locale) {
 		this.locale = locale;
 		document.documentElement.lang = locale;
-		try {
-			localStorage.setItem(storageKey, locale);
-		} catch {
-			// The language still changes for this visit when storage is unavailable.
-		}
+		this.#preferences.write(storageKey, locale);
 	}
 
 	t(key: string, params?: TranslationParams): string {

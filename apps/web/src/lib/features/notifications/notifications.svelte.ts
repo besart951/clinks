@@ -6,14 +6,27 @@ import type { Workspace } from '../../workspace.svelte.ts';
 export class NotificationsModel {
 	readonly resource: Resource<AppNotification[]>;
 	#workspace: Workspace;
+	/** Unread notifications already announced; null until the first load, which announces nothing. */
+	#announced: Set<string> | null = null;
 
 	constructor(workspace: Workspace) {
 		this.#workspace = workspace;
 		this.resource = new Resource(workspace.db, ['notifications'], async () => {
 			const userId = workspace.session.user?.id;
 			const rows = await workspace.api.notifications.list((row) => row.userId === userId);
+			this.#announce(rows);
 			return rows.sort((left, right) => right.createdAt.localeCompare(left.createdAt));
 		});
+	}
+
+	/** New unread notifications become system notifications while the app is in the background. */
+	#announce(rows: AppNotification[]) {
+		const unread = rows.filter((row) => !row.read);
+		if (this.#announced) {
+			for (const row of unread.filter((candidate) => !this.#announced!.has(candidate.id)))
+				this.#workspace.platform.notifier.notify('CLinks', this.text(row));
+		}
+		this.#announced = new Set(unread.map((row) => row.id));
 	}
 
 	get unread() {

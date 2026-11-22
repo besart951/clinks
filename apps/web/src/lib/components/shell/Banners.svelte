@@ -2,6 +2,7 @@
 	import WifiOff from '@lucide/svelte/icons/wifi-off';
 	import Clock from '@lucide/svelte/icons/clock';
 	import UserCog from '@lucide/svelte/icons/user-cog';
+	import RefreshCw from '@lucide/svelte/icons/refresh-cw';
 	import { Button } from '@clinks/ui/components/ui/button';
 	import { daysBetween, today, toCalendarDate } from '@clinks/domain/dates';
 	import { href, navigate } from '#lib/navigation';
@@ -20,6 +21,18 @@
 	}
 </script>
 
+{#if workspace.platform.updater.available}
+	<div
+		class="bg-primary text-primary-foreground flex items-center justify-center gap-3 px-4 py-1.5 text-sm"
+		role="status"
+	>
+		<RefreshCw class="size-4" />
+		{workspace.t('ui.ws.update.available')}
+		<Button size="xs" variant="secondary" onclick={() => workspace.platform.updater.apply()}>
+			{workspace.t('ui.ws.update.reload')}
+		</Button>
+	</div>
+{/if}
 {#if session.impersonatorId}
 	<div class="flex items-center justify-center gap-3 bg-violet-600 px-4 py-1.5 text-sm text-white" role="status">
 		<UserCog class="size-4" />
