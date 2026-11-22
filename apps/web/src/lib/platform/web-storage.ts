@@ -41,7 +41,11 @@ export class StoragePreferences implements Preferences {
 	}
 }
 
-/** Raw strings in Web Storage. The browser offers nothing safer; native builds use the OS keychain. */
+/**
+ * Raw strings in Web Storage, for the mock session only. Any script on the page can read Web Storage,
+ * so real tokens never go here: phase 2 keeps the session in an HttpOnly cookie and native builds use
+ * the OS keychain.
+ */
 export class StorageSecrets implements SecureStorage {
 	#storage: KeyValueStorage | null;
 
