@@ -3,6 +3,10 @@
   "compilerOptions": {
     "allowJs": true,
     "checkJs": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "paths": {
+      "#lib/*": ["./src/lib/*"],
+      "$app/types": ["./.svelte-kit/types/index.d.ts"]
+    }
   }
 }

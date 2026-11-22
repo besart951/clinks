@@ -1,6 +1,6 @@
-import { addMonths, daysBetween, startOfMonth, today } from '../../domain/dates.ts';
-import { effectiveStatus, invoiceTotals, vatFromGross } from '../../domain/money.ts';
-import type { Expense, ExpenseCategory, Invoice, Rappen, VatRate } from '../../domain/types.ts';
+import { addMonths, daysBetween, startOfMonth, today } from '@clinks/domain/dates';
+import { effectiveStatus, invoiceTotals, vatFromGross } from '@clinks/domain/money';
+import type { Expense, ExpenseCategory, Invoice, Rappen, VatRate } from '@clinks/domain/types';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 

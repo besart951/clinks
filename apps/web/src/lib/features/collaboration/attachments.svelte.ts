@@ -1,18 +1,9 @@
-import type { AttachmentTarget, StoredDocument } from '../../domain/types.ts';
+import type { AttachmentTarget, StoredDocument } from '@clinks/domain/types';
 import { MockApiError } from '../../data/database.ts';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 
 export const maxUploadBytes = 1_000_000;
-
-export function readAsDataUrl(file: File): Promise<string> {
-	return new Promise((resolve, reject) => {
-		const reader = new FileReader();
-		reader.onload = () => resolve(String(reader.result));
-		reader.onerror = () => reject(reader.error);
-		reader.readAsDataURL(file);
-	});
-}
 
 /** Uploads one browser file into the mock document store. */
 export async function uploadDocument(
@@ -21,7 +12,7 @@ export async function uploadDocument(
 	options: { folderId?: StoredDocument['folderId']; target?: AttachmentTarget },
 ) {
 	if (file.size > maxUploadBytes) throw new MockApiError('validation', workspace.t('error.ws.file_too_large'));
-	const dataUrl = await readAsDataUrl(file);
+	const dataUrl = await workspace.platform.files.readAsDataUrl(file);
 	return workspace.api.documents.create({
 		name: file.name,
 		folderId: options.folderId ?? null,

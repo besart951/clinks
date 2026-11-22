@@ -1,7 +1,7 @@
 import { toast } from 'svelte-sonner';
-import type { UserId } from '../../domain/ids.ts';
-import type { Task } from '../../domain/types.ts';
-import type { Draft } from '../../data/repository.ts';
+import type { UserId } from '@clinks/domain/ids';
+import type { Task } from '@clinks/domain/types';
+import type { Draft } from '@clinks/contracts/repository';
 import type { Workspace } from '../../workspace.svelte.ts';
 
 export function emptyTask(): Draft<Task> {

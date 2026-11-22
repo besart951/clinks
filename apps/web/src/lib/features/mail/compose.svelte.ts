@@ -1,5 +1,5 @@
 import { toast } from 'svelte-sonner';
-import type { Contact, MailMessage, MailTemplate } from '../../domain/types.ts';
+import type { Contact, MailMessage, MailTemplate } from '@clinks/domain/types';
 import type { Workspace } from '../../workspace.svelte.ts';
 import { fillPlaceholders } from './templates.ts';
 

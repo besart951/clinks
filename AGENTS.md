@@ -16,3 +16,7 @@ Before changing this repository, read [codestyle.md](codestyle.md) and [apps/web
 
 Before handoff, run `pnpm verify` and, for UI changes, `pnpm test:e2e`. Check for dead code, long methods,
 duplicated branches and primitive IDs where a domain type is appropriate.
+
+## Modern web guidance
+
+The `modern-web-guidance` skill (GoogleChrome, installed under `.agents/skills/`, locked in `skills-lock.json`) is mandatory for every HTML, CSS and client-side JS change: search and retrieve the matching guides before writing UI code, follow their fallbacks for features that are not Baseline widely available, and name the applied guides in the PR. Skip it for backend, infra, tooling and test-only changes. Update it with `pnpx modern-web-guidance@latest update`.

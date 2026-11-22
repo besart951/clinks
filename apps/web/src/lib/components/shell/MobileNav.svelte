@@ -5,9 +5,9 @@
 	import Users from '@lucide/svelte/icons/users';
 	import SquareKanban from '@lucide/svelte/icons/square-kanban';
 	import Menu from '@lucide/svelte/icons/menu';
-	import { getSidebarContext } from '@clinks/ui-shared/components/ui/sidebar';
-	import { href, routePath } from '$lib/navigation';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import { getSidebarContext } from '@clinks/ui/components/ui/sidebar';
+	import { href, routePath } from '#lib/navigation';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
 	const sidebar = getSidebarContext();

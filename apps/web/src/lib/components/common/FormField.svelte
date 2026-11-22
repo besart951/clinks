@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { Label } from '@clinks/ui-shared/components/ui/label';
+	import { Label } from '@clinks/ui/components/ui/label';
 
 	let {
 		id,

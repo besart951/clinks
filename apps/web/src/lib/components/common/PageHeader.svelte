@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
-	import { href } from '$lib/navigation';
+	import { href } from '#lib/navigation';
 
 	interface Crumb {
 		label: string;

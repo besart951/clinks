@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { href, routePath } from '$lib/navigation';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import { href, routePath } from '#lib/navigation';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { label, links }: { label: string; links: { path: string; label: string; exact?: boolean; match?: string }[] } =
 		$props();

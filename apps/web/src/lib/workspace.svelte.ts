@@ -1,25 +1,19 @@
 import { createContext } from 'svelte';
 import { toast } from 'svelte-sonner';
 import { AccountApi, roleFor } from './data/account-api.ts';
-import { MockApiError, MockDatabase, tableNames, type StorageLike, type TableName } from './data/database.ts';
+import { MockApiError, MockDatabase, tableNames, type TableName } from './data/database.ts';
 import { NetworkSimulator } from './data/network.svelte.ts';
 import { demoRowsFor, createSeed } from './data/seed.ts';
 import { WorkspaceApi } from './data/workspace-api.ts';
-import { roleGrants } from './domain/permissions.ts';
-import type { TenantId } from './domain/ids.ts';
+import type { Patchable } from '@clinks/contracts/repository';
+import { roleGrants } from '@clinks/domain/permissions';
+import type { TenantId } from '@clinks/domain/ids';
 import { Translator, type TranslationParams } from './i18n/translator.svelte.ts';
 import { Session } from './session/session.svelte.ts';
 import { ThemeController } from './state/theme.svelte.ts';
-
-function browserStorage(): StorageLike | null {
-	try {
-		localStorage.setItem('clinks.workspace.probe', '1');
-		localStorage.removeItem('clinks.workspace.probe');
-		return localStorage;
-	} catch {
-		return null;
-	}
-}
+import type { Platform } from './platform/types.ts';
+import { createWebPlatform } from './platform/web.svelte.ts';
+import { browserStorage } from './platform/web-storage.ts';
 
 export interface RunOptions {
 	success?: string;
@@ -27,17 +21,12 @@ export interface RunOptions {
 	undo?: () => Promise<unknown>;
 }
 
-/** The slice of a repository an in-place edit needs. */
-export interface PatchableApi<Record extends { id: string; revision: number }, Patch extends object> {
-	get(id: Record['id']): Promise<Record>;
-	update(id: Record['id'], revision: number, patch: Patch): Promise<Record>;
-}
-
 /** Everything a screen needs: the mock API, the signed-in session and the translator. */
 export class Workspace {
-	readonly network = new NetworkSimulator();
-	readonly i18n = new Translator();
-	readonly theme = new ThemeController();
+	readonly platform: Platform;
+	readonly network: NetworkSimulator;
+	readonly i18n: Translator;
+	readonly theme: ThemeController;
 	readonly db: MockDatabase;
 	readonly account: AccountApi;
 	readonly session: Session;
@@ -47,7 +36,12 @@ export class Workspace {
 	newAction = $state<(() => void) | null>(null);
 	versions = $state(Object.fromEntries(tableNames.map((name) => [name, 0])) as { [Name in TableName]: number });
 
-	constructor() {
+	constructor(platform: Platform = createWebPlatform()) {
+		this.platform = platform;
+		this.network = new NetworkSimulator(platform.preferences);
+		this.i18n = new Translator(platform.preferences);
+		this.theme = new ThemeController(platform.preferences);
+		// The mock database is browser-only and goes away with PowerSync in phase 4.
 		const storage = browserStorage();
 		this.persistent = storage !== null;
 		const localize = (key: string) => this.i18n.t(key);
@@ -62,7 +56,7 @@ export class Workspace {
 			tenantId: () => this.session.tenantId,
 			localize,
 		});
-		this.session = new Session(this.account);
+		this.session = new Session(this.account, platform.secure);
 		this.api = new WorkspaceApi(this.db, {
 			tenantId: () => this.session.tenantId,
 			actorId: () => this.session.callerId(),
@@ -109,7 +103,7 @@ export class Workspace {
 	 * latest revision so later edits by others are not lost.
 	 */
 	async patch<Record extends { id: string; revision: number }, Patch extends object>(
-		api: PatchableApi<Record, Patch>,
+		api: Patchable<Record, Patch>,
 		record: Record,
 		patch: Patch,
 		label: string,

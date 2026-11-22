@@ -6,7 +6,9 @@ browser. Details: [`apps/web`](apps/web/README.md).
 
 ```
 apps/web        SvelteKit app (Svelte 5, Tailwind 4), mock API, tests
-packages/ui-shared    shadcn-svelte components shared by apps
+packages/ui           shadcn-svelte components and the CLinks UI kit
+packages/domain       pure business rules and types (money, QR bill, scheduling, permissions)
+packages/contracts    shared Zod schemas and repository interfaces
 packages/i18n-types   generated translation keys
 localization          product-catalog.json – every UI text in de-CH and en-US
 scripts               translation catalog generator

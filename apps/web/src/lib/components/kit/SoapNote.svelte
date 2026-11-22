@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	import type { ClinicalNote } from '$lib/domain/types';
+	import type { ClinicalNote } from '@clinks/domain/types';
 
 	export const soapFields = ['subjective', 'objective', 'assessment', 'plan'] as const;
 
@@ -15,8 +15,8 @@
 	import { untrack } from 'svelte';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import InlineText from './InlineText.svelte';
-	import Initials from './Initials.svelte';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import Initials from '@clinks/ui/kit/Initials.svelte';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let {
 		note,

@@ -7,9 +7,9 @@
 	import ShieldCheck from '@lucide/svelte/icons/shield-check';
 	import CreditCard from '@lucide/svelte/icons/credit-card';
 	import Lock from '@lucide/svelte/icons/lock';
-	import type { Permission } from '$lib/domain/types';
-	import { href, routePath } from '$lib/navigation';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import type { Permission } from '@clinks/domain/types';
+	import { href, routePath } from '#lib/navigation';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { children }: { children: Snippet } = $props();
 	const workspace = useWorkspace();

@@ -1,4 +1,4 @@
-import { addDays, toCalendarDate } from '../domain/dates.ts';
+import { addDays, toCalendarDate } from '@clinks/domain/dates';
 import {
 	newId,
 	type InvitationId,
@@ -7,9 +7,9 @@ import {
 	type SessionId,
 	type TenantId,
 	type UserId,
-} from '../domain/ids.ts';
-import { administratorPermissions, roleGrants, userPermissions } from '../domain/permissions.ts';
-import { planFor, priceFor } from '../domain/plans.ts';
+} from '@clinks/domain/ids';
+import { administratorPermissions, roleGrants, userPermissions } from '@clinks/domain/permissions';
+import { planFor, priceFor } from '@clinks/domain/plans';
 import type {
 	Industry,
 	Invitation,
@@ -22,10 +22,10 @@ import type {
 	Role,
 	Tenant,
 	User,
-} from '../domain/types.ts';
+} from '@clinks/domain/types';
 import { MockApiError, stamp, type MockDatabase, type Snapshot, type TableName } from './database.ts';
 import { appendAudit, validationError } from './repository.ts';
-import { invitationSchema, roleSchema } from './schemas.ts';
+import { invitationSchema, roleSchema } from '@clinks/contracts/schemas';
 
 export interface Caller {
 	userId(): UserId | null;

@@ -1,0 +1,20 @@
+{
+  "name": "@clinks/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared write schemas (Zod) and repository interfaces for clients and the API.",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "check": "tsc --noEmit -p ."
+  },
+  "dependencies": {
+    "@clinks/domain": "workspace:*",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3"
+  }
+}

@@ -1,4 +1,4 @@
-import type { AppointmentStatus, CampaignStatus, InvoiceStatus, TaskPriority } from '../../domain/types.ts';
+import type { AppointmentStatus, CampaignStatus, InvoiceStatus, TaskPriority } from '@clinks/domain/types';
 import type { Tone } from './StatusBadge.svelte';
 
 export const invoiceTone: { [status in InvoiceStatus]: Tone } = {

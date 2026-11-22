@@ -1,11 +1,11 @@
 <script lang="ts">
 	import Wrench from '@lucide/svelte/icons/wrench';
-	import * as Popover from '@clinks/ui-shared/components/ui/popover';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { Switch } from '@clinks/ui-shared/components/ui/switch';
-	import { Label } from '@clinks/ui-shared/components/ui/label';
-	import ConfirmDialog, { type ConfirmRequest } from '$lib/components/common/ConfirmDialog.svelte';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import * as Popover from '@clinks/ui/components/ui/popover';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { Switch } from '@clinks/ui/components/ui/switch';
+	import { Label } from '@clinks/ui/components/ui/label';
+	import ConfirmDialog, { type ConfirmRequest } from '#lib/components/common/ConfirmDialog.svelte';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
 	const network = workspace.network;

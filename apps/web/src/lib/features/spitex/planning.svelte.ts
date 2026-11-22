@@ -8,10 +8,10 @@ import {
 	weekDays,
 	startOfWeek,
 	minutesBetween,
-} from '../../domain/dates.ts';
-import type { UserId } from '../../domain/ids.ts';
-import { planAssignments, withinArrivalWindow } from '../../domain/scheduling.ts';
-import type { Appointment, CalendarDate, Contact } from '../../domain/types.ts';
+} from '@clinks/domain/dates';
+import type { UserId } from '@clinks/domain/ids';
+import { planAssignments, withinArrivalWindow } from '@clinks/domain/scheduling';
+import type { Appointment, CalendarDate, Contact } from '@clinks/domain/types';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 import type { Person } from '../collaboration/people.svelte.ts';

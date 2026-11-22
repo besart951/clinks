@@ -1,14 +1,14 @@
 <script lang="ts">
 	import Download from '@lucide/svelte/icons/download';
-	import * as Card from '@clinks/ui-shared/components/ui/card';
-	import * as Dialog from '@clinks/ui-shared/components/ui/dialog';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { Input } from '@clinks/ui-shared/components/ui/input';
-	import PageHeader from '$lib/components/common/PageHeader.svelte';
-	import FormField from '$lib/components/common/FormField.svelte';
-	import { PrivacyModel } from '$lib/features/settings/settings.svelte';
-	import { navigate } from '$lib/navigation';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import * as Card from '@clinks/ui/components/ui/card';
+	import * as Dialog from '@clinks/ui/components/ui/dialog';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { Input } from '@clinks/ui/components/ui/input';
+	import PageHeader from '#lib/components/common/PageHeader.svelte';
+	import FormField from '#lib/components/common/FormField.svelte';
+	import { PrivacyModel } from '#lib/features/settings/settings.svelte';
+	import { navigate } from '#lib/navigation';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
 	const model = new PrivacyModel(workspace);

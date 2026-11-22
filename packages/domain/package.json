@@ -1,0 +1,19 @@
+{
+  "name": "@clinks/domain",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Pure business rules and types: money and VAT, QR bill, scheduling, plans, permissions. Imports nothing.",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "check": "tsc --noEmit -p .",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.6",
+    "typescript": "6.0.3",
+    "vitest": "5.1.1"
+  }
+}

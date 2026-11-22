@@ -1,5 +1,5 @@
-import type { Contact } from '../../domain/types.ts';
-import type { Draft } from '../../data/repository.ts';
+import type { Contact } from '@clinks/domain/types';
+import type { Draft } from '@clinks/contracts/repository';
 import { emptyContact } from './empty-contact.ts';
 
 /** Splits CSV text with comma or semicolon separators and quoted fields. */

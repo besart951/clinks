@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Lock from '@lucide/svelte/icons/lock';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import { useWorkspace } from '#lib/workspace.svelte';
 	import EmptyState from './EmptyState.svelte';
 
 	const workspace = useWorkspace();

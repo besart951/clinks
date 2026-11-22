@@ -1,5 +1,5 @@
-import type { Comment, CommentTarget } from '../../domain/types.ts';
-import type { UserId } from '../../domain/ids.ts';
+import type { Comment, CommentTarget } from '@clinks/domain/types';
+import type { UserId } from '@clinks/domain/ids';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 import type { Person } from './people.svelte.ts';

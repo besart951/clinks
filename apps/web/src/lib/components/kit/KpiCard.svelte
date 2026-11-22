@@ -13,7 +13,7 @@
 </script>
 
 <script lang="ts">
-	import { href } from '$lib/navigation';
+	import { href } from '#lib/navigation';
 
 	let { kpi, path }: { kpi: KpiSpec; path: string } = $props();
 </script>

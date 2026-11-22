@@ -1,7 +1,7 @@
 import { toast } from 'svelte-sonner';
-import type { Contact } from '../../domain/types.ts';
+import type { Contact } from '@clinks/domain/types';
 import { emptyContact } from './empty-contact.ts';
-import type { Draft } from '../../data/repository.ts';
+import type { Draft } from '@clinks/contracts/repository';
 import type { Workspace } from '../../workspace.svelte.ts';
 
 /** Create or edit one contact; field errors come back localized from the mock API. */

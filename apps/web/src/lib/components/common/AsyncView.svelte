@@ -1,6 +1,6 @@
 <script lang="ts" generics="T">
 	import type { Snippet } from 'svelte';
-	import type { Resource } from '$lib/state/resource.svelte';
+	import type { Resource } from '#lib/state/resource.svelte';
 	import ErrorState from './ErrorState.svelte';
 	import Forbidden from './Forbidden.svelte';
 	import SkeletonRows from './SkeletonRows.svelte';

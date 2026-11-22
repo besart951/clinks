@@ -1,18 +1,18 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import * as Card from '@clinks/ui-shared/components/ui/card';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { Input } from '@clinks/ui-shared/components/ui/input';
-	import PageHeader from '$lib/components/common/PageHeader.svelte';
-	import AsyncView from '$lib/components/common/AsyncView.svelte';
-	import ActivityFeed from '$lib/components/common/ActivityFeed.svelte';
-	import SearchInput from '$lib/components/common/SearchInput.svelte';
-	import Choice from '$lib/components/common/Choice.svelte';
-	import ModuleGate from '$lib/components/shell/ModuleGate.svelte';
-	import { ActivityModel } from '$lib/features/activity/activity.svelte';
-	import { PeopleDirectory } from '$lib/features/collaboration/people.svelte';
-	import type { AuditTargetKind } from '$lib/domain/types';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import * as Card from '@clinks/ui/components/ui/card';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { Input } from '@clinks/ui/components/ui/input';
+	import PageHeader from '#lib/components/common/PageHeader.svelte';
+	import AsyncView from '#lib/components/common/AsyncView.svelte';
+	import ActivityFeed from '#lib/components/common/ActivityFeed.svelte';
+	import SearchInput from '#lib/components/common/SearchInput.svelte';
+	import Choice from '#lib/components/common/Choice.svelte';
+	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
+	import { ActivityModel } from '#lib/features/activity/activity.svelte';
+	import { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
+	import type { AuditTargetKind } from '@clinks/domain/types';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
 	const model = new ActivityModel(workspace);

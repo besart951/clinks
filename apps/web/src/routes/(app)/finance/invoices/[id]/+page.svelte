@@ -7,30 +7,30 @@
 	import BellRing from '@lucide/svelte/icons/bell-ring';
 	import Pencil from '@lucide/svelte/icons/pencil';
 	import Ellipsis from '@lucide/svelte/icons/ellipsis';
-	import * as Card from '@clinks/ui-shared/components/ui/card';
-	import * as Dialog from '@clinks/ui-shared/components/ui/dialog';
-	import * as DropdownMenu from '@clinks/ui-shared/components/ui/dropdown-menu';
-	import * as Tabs from '@clinks/ui-shared/components/ui/tabs';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { Input } from '@clinks/ui-shared/components/ui/input';
-	import PageHeader from '$lib/components/common/PageHeader.svelte';
-	import AsyncView from '$lib/components/common/AsyncView.svelte';
-	import FormField from '$lib/components/common/FormField.svelte';
-	import StatusBadge from '$lib/components/common/StatusBadge.svelte';
-	import ConfirmDialog, { type ConfirmRequest } from '$lib/components/common/ConfirmDialog.svelte';
-	import { invoiceTone } from '$lib/components/common/tones';
-	import CommentThread from '$lib/components/collaboration/CommentThread.svelte';
-	import AttachmentPanel from '$lib/components/collaboration/AttachmentPanel.svelte';
-	import ObjectTimeline from '$lib/components/collaboration/ObjectTimeline.svelte';
-	import ModuleGate from '$lib/components/shell/ModuleGate.svelte';
-	import InvoiceDocument from '$lib/components/finance/InvoiceDocument.svelte';
-	import { InvoiceDetailModel } from '$lib/features/finance/invoice-detail.svelte';
-	import { PeopleDirectory } from '$lib/features/collaboration/people.svelte';
-	import { contactName } from '$lib/data/workspace-api';
-	import { today } from '$lib/domain/dates';
-	import type { InvoiceId } from '$lib/domain/ids';
-	import { href, navigate } from '$lib/navigation';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import * as Card from '@clinks/ui/components/ui/card';
+	import * as Dialog from '@clinks/ui/components/ui/dialog';
+	import * as DropdownMenu from '@clinks/ui/components/ui/dropdown-menu';
+	import * as Tabs from '@clinks/ui/components/ui/tabs';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { Input } from '@clinks/ui/components/ui/input';
+	import PageHeader from '#lib/components/common/PageHeader.svelte';
+	import AsyncView from '#lib/components/common/AsyncView.svelte';
+	import FormField from '#lib/components/common/FormField.svelte';
+	import StatusBadge from '#lib/components/common/StatusBadge.svelte';
+	import ConfirmDialog, { type ConfirmRequest } from '#lib/components/common/ConfirmDialog.svelte';
+	import { invoiceTone } from '#lib/components/common/tones';
+	import CommentThread from '#lib/components/collaboration/CommentThread.svelte';
+	import AttachmentPanel from '#lib/components/collaboration/AttachmentPanel.svelte';
+	import ObjectTimeline from '#lib/components/collaboration/ObjectTimeline.svelte';
+	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
+	import InvoiceDocument from '#lib/components/finance/InvoiceDocument.svelte';
+	import { InvoiceDetailModel } from '#lib/features/finance/invoice-detail.svelte';
+	import { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
+	import { contactName } from '#lib/data/workspace-api';
+	import { today } from '@clinks/domain/dates';
+	import type { InvoiceId } from '@clinks/domain/ids';
+	import { href, navigate } from '#lib/navigation';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
 	const model = new InvoiceDetailModel(workspace, page.params.id as InvoiceId);
@@ -126,7 +126,7 @@
 									})}
 								</Button>{/if}
 						{/if}
-						<Button variant="outline" onclick={() => window.print()}>
+						<Button variant="outline" onclick={() => workspace.platform.files.print()}>
 							<Printer class="size-4" />{workspace.t('ui.ws.invoice.print')}
 						</Button>
 						<DropdownMenu.Root>

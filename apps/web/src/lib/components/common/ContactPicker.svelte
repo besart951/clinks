@@ -1,13 +1,13 @@
 <script lang="ts">
 	import ChevronsUpDown from '@lucide/svelte/icons/chevrons-up-down';
 	import Check from '@lucide/svelte/icons/check';
-	import * as Popover from '@clinks/ui-shared/components/ui/popover';
-	import * as Command from '@clinks/ui-shared/components/ui/command';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { contactName } from '$lib/data/workspace-api';
-	import type { Contact } from '$lib/domain/types';
-	import type { ContactId } from '$lib/domain/ids';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import * as Popover from '@clinks/ui/components/ui/popover';
+	import * as Command from '@clinks/ui/components/ui/command';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { contactName } from '#lib/data/workspace-api';
+	import type { Contact } from '@clinks/domain/types';
+	import type { ContactId } from '@clinks/domain/ids';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let {
 		id,

@@ -2,19 +2,19 @@
 	import { onMount } from 'svelte';
 	import Link2 from '@lucide/svelte/icons/link-2';
 	import UserCog from '@lucide/svelte/icons/user-cog';
-	import * as Card from '@clinks/ui-shared/components/ui/card';
-	import * as Table from '@clinks/ui-shared/components/ui/table';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { Switch } from '@clinks/ui-shared/components/ui/switch';
-	import { Badge } from '@clinks/ui-shared/components/ui/badge';
-	import AsyncView from '$lib/components/common/AsyncView.svelte';
-	import SearchInput from '$lib/components/common/SearchInput.svelte';
-	import Forbidden from '$lib/components/common/Forbidden.svelte';
-	import LocaleSwitch from '$lib/components/shell/LocaleSwitch.svelte';
-	import { AdminModel, featureFlags } from '$lib/features/admin/admin.svelte';
-	import { landingPath } from '$lib/features/auth/auth-forms.svelte';
-	import { navigate } from '$lib/navigation';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import * as Card from '@clinks/ui/components/ui/card';
+	import * as Table from '@clinks/ui/components/ui/table';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { Switch } from '@clinks/ui/components/ui/switch';
+	import { Badge } from '@clinks/ui/components/ui/badge';
+	import AsyncView from '#lib/components/common/AsyncView.svelte';
+	import SearchInput from '#lib/components/common/SearchInput.svelte';
+	import Forbidden from '#lib/components/common/Forbidden.svelte';
+	import LocaleSwitch from '#lib/components/shell/LocaleSwitch.svelte';
+	import { AdminModel, featureFlags } from '#lib/features/admin/admin.svelte';
+	import { landingPath } from '#lib/features/auth/auth-forms.svelte';
+	import { navigate } from '#lib/navigation';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
 	const session = workspace.session;
@@ -25,7 +25,7 @@
 		let stop = () => {};
 		void session.ready.then(async () => {
 			if (session.status !== 'authenticated') {
-				await navigate(landingPath(session), { replaceState: true });
+				await navigate(landingPath(session), { replace: true });
 				return;
 			}
 			ready = true;

@@ -1,6 +1,6 @@
-import { today, toCalendarDate } from '../../domain/dates.ts';
-import type { ContactId } from '../../domain/ids.ts';
-import type { Appointment, ClinicalNote, Contact, TimeEntry } from '../../domain/types.ts';
+import { today, toCalendarDate } from '@clinks/domain/dates';
+import type { ContactId } from '@clinks/domain/ids';
+import type { Appointment, ClinicalNote, Contact, TimeEntry } from '@clinks/domain/types';
 import { contactPatch } from '../contacts/contact-fields.ts';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';

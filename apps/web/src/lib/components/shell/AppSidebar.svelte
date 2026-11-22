@@ -6,16 +6,16 @@
 	import Moon from '@lucide/svelte/icons/moon';
 	import Sun from '@lucide/svelte/icons/sun';
 	import SlidersHorizontal from '@lucide/svelte/icons/sliders-horizontal';
-	import { Sidebar, SidebarContent, getSidebarContext } from '@clinks/ui-shared/components/ui/sidebar';
+	import { Sidebar, SidebarContent, getSidebarContext } from '@clinks/ui/components/ui/sidebar';
 	import TenantSwitcher from './TenantSwitcher.svelte';
 	import NotificationBell from './NotificationBell.svelte';
 	import SyncStatus from './SyncStatus.svelte';
 	import UserMenu from './UserMenu.svelte';
-	import { navigationGroups, type NavigationItem } from '$lib/features/shell/navigation-items';
-	import { NavBadges } from '$lib/features/shell/nav-badges.svelte';
-	import { locales, type Locale } from '$lib/i18n/catalog';
-	import { href, routePath } from '$lib/navigation';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import { navigationGroups, type NavigationItem } from '#lib/features/shell/navigation-items';
+	import { NavBadges } from '#lib/features/shell/nav-badges.svelte';
+	import { locales, type Locale } from '#lib/i18n/catalog';
+	import { href, routePath } from '#lib/navigation';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { actions }: { actions: { search: () => void; shortcuts: () => void } } = $props();
 

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { InlineEditor, type InlineSave } from './inline-edit.svelte';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import { InlineEditor, type InlineSave } from '@clinks/ui/kit/inline-edit';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	/** Free text (notes, descriptions) edited in place: click to edit, Ctrl/Cmd+Enter or blur saves, Escape restores. */
 	let {

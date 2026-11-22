@@ -1,3 +1,4 @@
+import type { Preferences } from '../platform/types.ts';
 import type { NetworkConditions } from './database.ts';
 
 const storageKey = 'clinks.workspace.network';
@@ -9,14 +10,7 @@ interface StoredConditions {
 	simulateOffline: boolean;
 }
 
-function load(): StoredConditions {
-	const fallback = { minLatency: 200, maxLatency: 800, failureRate: 0, simulateOffline: false };
-	try {
-		return { ...fallback, ...JSON.parse(localStorage.getItem(storageKey) ?? '{}') };
-	} catch {
-		return fallback;
-	}
-}
+const defaults: StoredConditions = { minLatency: 200, maxLatency: 800, failureRate: 0, simulateOffline: false };
 
 /** Latency, failure rate and connectivity for the mock API; adjustable in the developer menu. */
 export class NetworkSimulator {
@@ -28,8 +22,11 @@ export class NetworkSimulator {
 	pending = $state(0);
 	offline = $derived(this.simulateOffline || !this.browserOnline);
 
-	constructor() {
-		Object.assign(this, load());
+	#preferences: Preferences;
+
+	constructor(preferences: Preferences) {
+		this.#preferences = preferences;
+		Object.assign(this, { ...defaults, ...preferences.read<Partial<StoredConditions>>(storageKey, {}) });
 		this.browserOnline = typeof navigator === 'undefined' ? true : navigator.onLine;
 	}
 
@@ -44,19 +41,12 @@ export class NetworkSimulator {
 
 	update(changes: Partial<StoredConditions>) {
 		Object.assign(this, changes);
-		try {
-			localStorage.setItem(
-				storageKey,
-				JSON.stringify({
-					minLatency: this.minLatency,
-					maxLatency: this.maxLatency,
-					failureRate: this.failureRate,
-					simulateOffline: this.simulateOffline,
-				}),
-			);
-		} catch {
-			// Settings stay active for this visit.
-		}
+		this.#preferences.write(storageKey, {
+			minLatency: this.minLatency,
+			maxLatency: this.maxLatency,
+			failureRate: this.failureRate,
+			simulateOffline: this.simulateOffline,
+		});
 	}
 
 	/** Follows the browser's connectivity events; returns the cleanup. */

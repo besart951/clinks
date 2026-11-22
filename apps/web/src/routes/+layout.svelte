@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount, type Snippet } from 'svelte';
-	import { Toaster } from '@clinks/ui-shared/toaster';
-	import { TooltipProvider } from '@clinks/ui-shared/components/ui/tooltip';
-	import { Workspace, setWorkspace } from '$lib/workspace.svelte';
+	import { Toaster } from '@clinks/ui/toaster';
+	import { TooltipProvider } from '@clinks/ui/components/ui/tooltip';
+	import { Workspace, setWorkspace } from '#lib/workspace.svelte';
 	import '../app.css';
 
 	let { children }: { children: Snippet } = $props();

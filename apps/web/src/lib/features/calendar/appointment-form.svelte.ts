@@ -1,7 +1,7 @@
 import { toast } from 'svelte-sonner';
-import { atTime, timeOfDay, toCalendarDate } from '../../domain/dates.ts';
-import type { ContactId, UserId } from '../../domain/ids.ts';
-import { conflictsFor, withinArrivalWindow } from '../../domain/scheduling.ts';
+import { atTime, timeOfDay, toCalendarDate } from '@clinks/domain/dates';
+import type { ContactId, UserId } from '@clinks/domain/ids';
+import { conflictsFor, withinArrivalWindow } from '@clinks/domain/scheduling';
 import type {
 	Appointment,
 	AppointmentKind,
@@ -9,7 +9,7 @@ import type {
 	CalendarDate,
 	PhysioService,
 	SpitexService,
-} from '../../domain/types.ts';
+} from '@clinks/domain/types';
 import type { Workspace } from '../../workspace.svelte.ts';
 
 export interface AppointmentFields {

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import KeyRound from '@lucide/svelte/icons/key-round';
-	import { demoPassword } from '$lib/data/seed';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import { demoPassword } from '#lib/data/seed';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { onPick }: { onPick: (email: string, password: string) => void } = $props();
 	const workspace = useWorkspace();

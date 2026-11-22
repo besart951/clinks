@@ -3,20 +3,26 @@
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import ReceiptText from '@lucide/svelte/icons/receipt-text';
 	import UserRound from '@lucide/svelte/icons/user-round';
-	import * as Sheet from '@clinks/ui-shared/components/ui/sheet';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { Input } from '@clinks/ui-shared/components/ui/input';
-	import { Textarea } from '@clinks/ui-shared/components/ui/textarea';
-	import FormField from '$lib/components/common/FormField.svelte';
-	import Choice from '$lib/components/common/Choice.svelte';
-	import ContactPicker from '$lib/components/common/ContactPicker.svelte';
-	import ConfirmDialog, { type ConfirmRequest } from '$lib/components/common/ConfirmDialog.svelte';
-	import { AppointmentFormModel, type AppointmentFields } from '$lib/features/calendar/appointment-form.svelte';
-	import type { Person } from '$lib/features/collaboration/people.svelte';
-	import { contactName } from '$lib/data/workspace-api';
-	import { appointmentKinds, physioServices, spitexServices, type Appointment, type Contact } from '$lib/domain/types';
-	import { href, navigate } from '$lib/navigation';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import * as Sheet from '@clinks/ui/components/ui/sheet';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { Input } from '@clinks/ui/components/ui/input';
+	import { Textarea } from '@clinks/ui/components/ui/textarea';
+	import FormField from '#lib/components/common/FormField.svelte';
+	import Choice from '#lib/components/common/Choice.svelte';
+	import ContactPicker from '#lib/components/common/ContactPicker.svelte';
+	import ConfirmDialog, { type ConfirmRequest } from '#lib/components/common/ConfirmDialog.svelte';
+	import { AppointmentFormModel, type AppointmentFields } from '#lib/features/calendar/appointment-form.svelte';
+	import type { Person } from '#lib/features/collaboration/people.svelte';
+	import { contactName } from '#lib/data/workspace-api';
+	import {
+		appointmentKinds,
+		physioServices,
+		spitexServices,
+		type Appointment,
+		type Contact,
+	} from '@clinks/domain/types';
+	import { href, navigate } from '#lib/navigation';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let {
 		contacts,

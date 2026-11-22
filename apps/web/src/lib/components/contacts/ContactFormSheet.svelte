@@ -1,16 +1,16 @@
 <script lang="ts">
 	import X from '@lucide/svelte/icons/x';
-	import * as Sheet from '@clinks/ui-shared/components/ui/sheet';
-	import * as Tabs from '@clinks/ui-shared/components/ui/tabs';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { Input } from '@clinks/ui-shared/components/ui/input';
-	import { Textarea } from '@clinks/ui-shared/components/ui/textarea';
-	import FormField from '$lib/components/common/FormField.svelte';
-	import ConfirmDialog, { type ConfirmRequest } from '$lib/components/common/ConfirmDialog.svelte';
-	import { ContactFormModel } from '$lib/features/contacts/contact-form.svelte';
-	import type { Contact } from '$lib/domain/types';
-	import type { Draft } from '$lib/data/repository';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import * as Sheet from '@clinks/ui/components/ui/sheet';
+	import * as Tabs from '@clinks/ui/components/ui/tabs';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { Input } from '@clinks/ui/components/ui/input';
+	import { Textarea } from '@clinks/ui/components/ui/textarea';
+	import FormField from '#lib/components/common/FormField.svelte';
+	import ConfirmDialog, { type ConfirmRequest } from '#lib/components/common/ConfirmDialog.svelte';
+	import { ContactFormModel } from '#lib/features/contacts/contact-form.svelte';
+	import type { Contact } from '@clinks/domain/types';
+	import type { Draft } from '@clinks/contracts/repository';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { onSaved }: { onSaved?: (contact: Contact) => void } = $props();
 

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { beforeNavigate, goto } from '$app/navigation';
 	import ConfirmDialog, { type ConfirmRequest } from './ConfirmDialog.svelte';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { dirty }: { dirty: boolean } = $props();
 	const workspace = useWorkspace();

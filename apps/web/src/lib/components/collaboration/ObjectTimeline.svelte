@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import ActivityFeed from '$lib/components/common/ActivityFeed.svelte';
-	import type { PeopleDirectory } from '$lib/features/collaboration/people.svelte';
-	import { Resource } from '$lib/state/resource.svelte';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import ActivityFeed from '#lib/components/common/ActivityFeed.svelte';
+	import type { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
+	import { Resource } from '#lib/state/resource.svelte';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { targetId, people }: { targetId: string; people: PeopleDirectory } = $props();
 	const workspace = useWorkspace();

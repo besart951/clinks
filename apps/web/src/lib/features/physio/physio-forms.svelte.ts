@@ -1,9 +1,9 @@
 import { toast } from 'svelte-sonner';
-import { addDays, today } from '../../domain/dates.ts';
-import { newId, type ContactId, type SeriesId, type UserId } from '../../domain/ids.ts';
-import { seriesSlots } from '../../domain/scheduling.ts';
-import type { ClinicalNote, PhysioService, PhysioTariff, Prescription } from '../../domain/types.ts';
-import type { Draft } from '../../data/repository.ts';
+import { addDays, today } from '@clinks/domain/dates';
+import { newId, type ContactId, type SeriesId, type UserId } from '@clinks/domain/ids';
+import { seriesSlots } from '@clinks/domain/scheduling';
+import type { ClinicalNote, PhysioService, PhysioTariff, Prescription } from '@clinks/domain/types';
+import type { Draft } from '@clinks/contracts/repository';
 import type { Workspace } from '../../workspace.svelte.ts';
 
 abstract class Form {

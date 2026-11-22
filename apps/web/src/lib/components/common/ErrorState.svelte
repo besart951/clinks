@@ -1,7 +1,7 @@
 <script lang="ts">
 	import CircleAlert from '@lucide/svelte/icons/circle-alert';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { message, onRetry }: { message: string; onRetry: () => void } = $props();
 	const workspace = useWorkspace();

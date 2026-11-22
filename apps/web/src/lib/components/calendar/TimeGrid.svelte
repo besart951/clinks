@@ -1,6 +1,6 @@
 <script lang="ts" module>
-	import type { UserId } from '$lib/domain/ids';
-	import type { Appointment, CalendarDate } from '$lib/domain/types';
+	import type { UserId } from '@clinks/domain/ids';
+	import type { Appointment, CalendarDate } from '@clinks/domain/types';
 
 	export interface GridColumn {
 		key: string;
@@ -22,9 +22,9 @@
 </script>
 
 <script lang="ts">
-	import { layoutDay } from '$lib/domain/layout';
-	import { dayEndMinutes, dayStartMinutes } from '$lib/features/calendar/calendar.svelte';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import { layoutDay } from '@clinks/domain/layout';
+	import { dayEndMinutes, dayStartMinutes } from '#lib/features/calendar/calendar.svelte';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { columns, handlers, editable }: { columns: GridColumn[]; handlers: GridHandlers; editable: boolean } = $props();
 	const workspace = useWorkspace();

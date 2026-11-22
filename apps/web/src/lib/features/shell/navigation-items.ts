@@ -10,7 +10,7 @@ import HeartPulse from '@lucide/svelte/icons/heart-pulse';
 import House from '@lucide/svelte/icons/house';
 import History from '@lucide/svelte/icons/history';
 import Settings from '@lucide/svelte/icons/settings';
-import type { ModuleKey, Permission } from '../../domain/types.ts';
+import type { ModuleKey, Permission } from '@clinks/domain/types';
 
 export interface NavigationItem {
 	path: string;

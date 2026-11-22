@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Bell from '@lucide/svelte/icons/bell';
-	import * as Popover from '@clinks/ui-shared/components/ui/popover';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { NotificationsModel } from '$lib/features/notifications/notifications.svelte';
-	import { href, navigate } from '$lib/navigation';
-	import type { AppNotification } from '$lib/domain/types';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import * as Popover from '@clinks/ui/components/ui/popover';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { NotificationsModel } from '#lib/features/notifications/notifications.svelte';
+	import { href, navigate } from '#lib/navigation';
+	import type { AppNotification } from '@clinks/domain/types';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
 	const model = new NotificationsModel(workspace);

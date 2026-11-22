@@ -2,7 +2,7 @@
 	import Cloud from '@lucide/svelte/icons/cloud';
 	import CloudOff from '@lucide/svelte/icons/cloud-off';
 	import RefreshCw from '@lucide/svelte/icons/refresh-cw';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
 	const network = workspace.network;

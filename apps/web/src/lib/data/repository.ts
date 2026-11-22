@@ -1,6 +1,7 @@
 import type { ZodType } from 'zod';
-import { newId, type TenantId, type UserId } from '../domain/ids.ts';
-import type { AuditEntry, AuditTargetKind, Permission, TenantRecord } from '../domain/types.ts';
+import { newId, type TenantId, type UserId } from '@clinks/domain/ids';
+import type { AuditEntry, AuditTargetKind, Permission, TenantRecord } from '@clinks/domain/types';
+import type { Draft, Patch, Repository } from '@clinks/contracts/repository';
 import { MockApiError, stamp, type MockDatabase, type TableName, type Tables } from './database.ts';
 
 export type TenantTable = {
@@ -8,8 +9,6 @@ export type TenantTable = {
 }[TableName];
 
 export type Row<Name extends TableName> = Tables[Name];
-export type Draft<T> = Omit<T, 'id' | 'tenantId' | 'revision' | 'createdAt' | 'updatedAt'>;
-export type Patch<T> = Partial<Draft<T>>;
 
 /** What the mock server knows about the caller; the real API derives the same from the session cookie. */
 export interface RequestContext {
@@ -44,7 +43,7 @@ export function validationError(
 }
 
 /** Tenant-scoped CRUD with permission checks, optimistic revisions and audit entries, like the real API. */
-export class TenantRepository<Name extends TenantTable> {
+export class TenantRepository<Name extends TenantTable> implements Repository<Row<Name>> {
 	#db: MockDatabase;
 	#context: RequestContext;
 	#config: RepositoryConfig<Row<Name>>;

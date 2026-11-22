@@ -1,7 +1,7 @@
-import type { ContactId } from '../../domain/ids.ts';
-import type { Contact } from '../../domain/types.ts';
+import type { ContactId } from '@clinks/domain/ids';
+import type { Contact } from '@clinks/domain/types';
 import { contactName } from '../../data/workspace-api.ts';
-import type { Draft } from '../../data/repository.ts';
+import type { Draft } from '@clinks/contracts/repository';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 import { duplicateKey } from './csv.ts';

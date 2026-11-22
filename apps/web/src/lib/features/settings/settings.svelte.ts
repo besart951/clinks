@@ -1,7 +1,7 @@
-import type { InlineFieldSpec } from '../../components/kit/inline-edit.svelte.ts';
-import { isValidSwissIban } from '../../domain/qr-bill.ts';
+import type { InlineFieldSpec } from '@clinks/ui/kit/inline-edit';
+import { isValidSwissIban } from '@clinks/domain/qr-bill';
 import { toast } from 'svelte-sonner';
-import type { InvitationId, MembershipId, RoleId, SessionId } from '../../domain/ids.ts';
+import type { InvitationId, MembershipId, RoleId, SessionId } from '@clinks/domain/ids';
 import type {
 	BrowserSession,
 	Invitation,
@@ -11,12 +11,12 @@ import type {
 	PlanCode,
 	Role,
 	Tenant,
-} from '../../domain/types.ts';
+} from '@clinks/domain/types';
 import type { Member, PlatformInvoice } from '../../data/account-api.ts';
 import type { Locale } from '../../i18n/catalog.ts';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
-import { maxUploadBytes, readAsDataUrl } from '../collaboration/attachments.svelte.ts';
+import { maxUploadBytes } from '../collaboration/attachments.svelte.ts';
 
 abstract class SettingsForm {
 	busy = $state(false);
@@ -127,7 +127,7 @@ export class CompanySettingsModel {
 		}
 		const tenant = this.#workspace.session.tenant!;
 		await this.#apply(
-			{ logoDataUrl: await readAsDataUrl(file) },
+			{ logoDataUrl: await this.#workspace.platform.files.readAsDataUrl(file) },
 			{ logoDataUrl: tenant.logoDataUrl },
 			this.#workspace.t('ui.ws.settings.logo'),
 		);
@@ -189,7 +189,7 @@ export class ProfileModel extends SettingsForm {
 			toast.error(this.workspace.t('error.ws.file_too_large'));
 			return;
 		}
-		this.avatarDataUrl = await readAsDataUrl(file);
+		this.avatarDataUrl = await this.workspace.platform.files.readAsDataUrl(file);
 	}
 
 	async save() {
@@ -428,12 +428,10 @@ export class PrivacyModel extends SettingsForm {
 	async exportData() {
 		const data = await this.attempt(() => this.workspace.account.exportTenantData(), 'ui.ws.privacy.exported');
 		if (!data) return;
-		const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-		const link = document.createElement('a');
-		link.href = URL.createObjectURL(blob);
-		link.download = `clinks-export-${new Date().toISOString().slice(0, 10)}.json`;
-		link.click();
-		URL.revokeObjectURL(link.href);
+		this.workspace.platform.files.save(
+			new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }),
+			`clinks-export-${new Date().toISOString().slice(0, 10)}.json`,
+		);
 	}
 
 	async deleteAccount(): Promise<boolean> {

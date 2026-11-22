@@ -1,8 +1,8 @@
 import { toast } from 'svelte-sonner';
-import { addDays, today } from '../../domain/dates.ts';
-import type { AppointmentId, ContactId, InvoiceId } from '../../domain/ids.ts';
-import { invoiceTotals, nextInvoiceNumber } from '../../domain/money.ts';
-import type { Appointment, Contact, Invoice, InvoiceLine, PhysioService, VatRate } from '../../domain/types.ts';
+import { addDays, today } from '@clinks/domain/dates';
+import type { AppointmentId, ContactId, InvoiceId } from '@clinks/domain/ids';
+import { invoiceTotals, nextInvoiceNumber } from '@clinks/domain/money';
+import type { Appointment, Contact, Invoice, InvoiceLine, PhysioService, VatRate } from '@clinks/domain/types';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 

@@ -2,10 +2,11 @@
 	import WifiOff from '@lucide/svelte/icons/wifi-off';
 	import Clock from '@lucide/svelte/icons/clock';
 	import UserCog from '@lucide/svelte/icons/user-cog';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { daysBetween, today, toCalendarDate } from '$lib/domain/dates';
-	import { href, navigate } from '$lib/navigation';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import RefreshCw from '@lucide/svelte/icons/refresh-cw';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { daysBetween, today, toCalendarDate } from '@clinks/domain/dates';
+	import { href, navigate } from '#lib/navigation';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
 	const session = workspace.session;
@@ -20,6 +21,18 @@
 	}
 </script>
 
+<!-- The live region exists from the start; only its content changes, so screen readers announce the update. -->
+<div role="status">
+	{#if workspace.platform.updater.available}
+		<div class="bg-primary text-primary-foreground flex items-center justify-center gap-3 px-4 py-1.5 text-sm">
+			<RefreshCw class="size-4" aria-hidden="true" />
+			{workspace.t('ui.ws.update.available')}
+			<Button size="xs" variant="secondary" onclick={() => workspace.platform.updater.apply()}>
+				{workspace.t('ui.ws.update.reload')}
+			</Button>
+		</div>
+	{/if}
+</div>
 {#if session.impersonatorId}
 	<div class="flex items-center justify-center gap-3 bg-violet-600 px-4 py-1.5 text-sm text-white" role="status">
 		<UserCog class="size-4" />

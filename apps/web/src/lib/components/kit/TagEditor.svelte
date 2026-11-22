@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Plus from '@lucide/svelte/icons/plus';
 	import X from '@lucide/svelte/icons/x';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let {
 		tags,

@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import * as Card from '@clinks/ui-shared/components/ui/card';
-	import PageHeader from '$lib/components/common/PageHeader.svelte';
-	import AsyncView from '$lib/components/common/AsyncView.svelte';
-	import ModuleGate from '$lib/components/shell/ModuleGate.svelte';
-	import FinanceNav from '$lib/components/finance/FinanceNav.svelte';
-	import { ReportsModel } from '$lib/features/finance/reports.svelte';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import * as Card from '@clinks/ui/components/ui/card';
+	import PageHeader from '#lib/components/common/PageHeader.svelte';
+	import AsyncView from '#lib/components/common/AsyncView.svelte';
+	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
+	import FinanceNav from '#lib/components/finance/FinanceNav.svelte';
+	import { ReportsModel } from '#lib/features/finance/reports.svelte';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
 	const model = new ReportsModel(workspace);
