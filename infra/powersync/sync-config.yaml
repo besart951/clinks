@@ -1,0 +1,12 @@
+# yaml-language-server: $schema=https://unpkg.com/@powersync/service-sync-rules@latest/schema/sync_rules.json
+# Sync streams. Phase 3 adds the tenant-scoped streams (contacts, appointments, …) filtered by JWT claims.
+# Changes are not watched: restart the service after editing.
+
+config:
+  edition: 3
+
+streams:
+  system:
+    auto_subscribe: true
+    queries:
+      - SELECT * FROM system_status

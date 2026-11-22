@@ -1,0 +1,90 @@
+# Local services for development: `pnpm dev:services` (from the repo root).
+# Defaults work without an .env file; override any value in infra/.env (see .env.example).
+name: clinks-dev
+
+services:
+  postgres:
+    image: postgres:18.7
+    restart: unless-stopped
+    command: ['postgres', '-c', 'wal_level=logical', '-c', 'max_replication_slots=10', '-c', 'max_wal_senders=10']
+    environment:
+      POSTGRES_USER: ${PG_USER:-clinks}
+      POSTGRES_PASSWORD: ${PG_PASSWORD:-clinks-dev}
+      POSTGRES_DB: ${PG_DATABASE:-clinks}
+    ports:
+      - '${PG_PORT:-5432}:5432'
+    volumes:
+      - pg_data:/var/lib/postgresql
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${PG_USER:-clinks} -d ${PG_DATABASE:-clinks}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  powersync:
+    image: journeyapps/powersync-service:${POWERSYNC_VERSION:-1.29.1}
+    restart: unless-stopped
+    command: ['start', '-r', 'unified']
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      POWERSYNC_CONFIG_PATH: /config/service.yaml
+      NODE_OPTIONS: --max-old-space-size=1000
+      PS_DATA_SOURCE_URI: postgresql://${PG_USER:-clinks}:${PG_PASSWORD:-clinks-dev}@postgres:5432/${PG_DATABASE:-clinks}
+      PS_STORAGE_SOURCE_URI: postgresql://${PG_USER:-clinks}:${PG_PASSWORD:-clinks-dev}@postgres:5432/powersync_storage
+      PS_PORT: '8080'
+      # Development signing secret (base64url). Phase 2 replaces this with the API's JWKS endpoint.
+      PS_DEV_JWT_SECRET: ${PS_DEV_JWT_SECRET:-Y2xpbmtzLWRldi1vbmx5LXNlY3JldC1jaGFuZ2UtbWU}
+      PS_ADMIN_TOKEN: ${PS_ADMIN_TOKEN:-clinks-dev-admin-token}
+    ports:
+      - '${POWERSYNC_PORT:-8080}:8080'
+    volumes:
+      - ./powersync:/config:ro
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://localhost:8080/probes/liveness').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 5s
+      timeout: 2s
+      retries: 20
+
+  # Local stand-in for Infomaniak Object Storage (S3-compatible). MinIO no longer publishes images, so RustFS.
+  objects:
+    image: rustfs/rustfs:${RUSTFS_VERSION:-1.0.6}
+    restart: unless-stopped
+    environment:
+      RUSTFS_ACCESS_KEY: ${S3_ACCESS_KEY:-clinks}
+      RUSTFS_SECRET_KEY: ${S3_SECRET_KEY:-clinks-dev-secret}
+    ports:
+      - '${S3_PORT:-9000}:9000'
+      - '${S3_CONSOLE_PORT:-9001}:9001'
+    volumes:
+      - object_data:/data
+
+  # Catches every mail the API sends; web UI on http://localhost:8025
+  mail:
+    image: ghcr.io/axllent/mailpit:${MAILPIT_VERSION:-v1}
+    restart: unless-stopped
+    ports:
+      - '${SMTP_PORT:-1025}:1025'
+      - '${MAIL_UI_PORT:-8025}:8025'
+
+  # Forwards Stripe test webhooks to the API: `docker compose -f infra/compose.dev.yml --profile payments up -d`
+  stripe:
+    profiles: ['payments']
+    image: stripe/stripe-cli:${STRIPE_CLI_VERSION:-latest}
+    command: ['listen', '--forward-to', 'http://host.docker.internal:8787/webhooks/stripe']
+    environment:
+      STRIPE_API_KEY: ${STRIPE_SECRET_KEY:-}
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+
+volumes:
+  pg_data:
+  object_data:
