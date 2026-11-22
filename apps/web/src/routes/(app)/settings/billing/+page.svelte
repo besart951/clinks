@@ -9,16 +9,16 @@
 	import { Button } from '@clinks/ui-shared/components/ui/button';
 	import { Input } from '@clinks/ui-shared/components/ui/input';
 	import { Switch } from '@clinks/ui-shared/components/ui/switch';
-	import PageHeader from '$lib/components/common/PageHeader.svelte';
-	import FormField from '$lib/components/common/FormField.svelte';
-	import StatusBadge from '$lib/components/common/StatusBadge.svelte';
-	import ConfirmDialog, { type ConfirmRequest } from '$lib/components/common/ConfirmDialog.svelte';
-	import ModuleGate from '$lib/components/shell/ModuleGate.svelte';
-	import { BillingModel } from '$lib/features/settings/settings.svelte';
-	import { planIncludes, plans, priceFor } from '$lib/domain/plans';
-	import { coreModules, moduleKeys, type ModuleKey } from '$lib/domain/types';
-	import { routeQuery } from '$lib/navigation';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import PageHeader from '#lib/components/common/PageHeader.svelte';
+	import FormField from '#lib/components/common/FormField.svelte';
+	import StatusBadge from '#lib/components/common/StatusBadge.svelte';
+	import ConfirmDialog, { type ConfirmRequest } from '#lib/components/common/ConfirmDialog.svelte';
+	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
+	import { BillingModel } from '#lib/features/settings/settings.svelte';
+	import { planIncludes, plans, priceFor } from '#lib/domain/plans';
+	import { coreModules, moduleKeys, type ModuleKey } from '#lib/domain/types';
+	import { routeQuery } from '#lib/navigation';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
 	const model = new BillingModel(workspace);

@@ -5,10 +5,10 @@
 	import * as Tabs from '@clinks/ui-shared/components/ui/tabs';
 	import { Button } from '@clinks/ui-shared/components/ui/button';
 	import { Textarea } from '@clinks/ui-shared/components/ui/textarea';
-	import PageHeader from '$lib/components/common/PageHeader.svelte';
-	import FormField from '$lib/components/common/FormField.svelte';
-	import { routeQuery, setQuery } from '$lib/navigation';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import PageHeader from '#lib/components/common/PageHeader.svelte';
+	import FormField from '#lib/components/common/FormField.svelte';
+	import { routeQuery, setQuery } from '#lib/navigation';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
 	const tab = $derived(routeQuery(page.url).get('tab') ?? 'help');

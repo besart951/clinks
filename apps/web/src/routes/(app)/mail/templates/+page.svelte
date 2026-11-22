@@ -7,16 +7,16 @@
 	import { Button } from '@clinks/ui-shared/components/ui/button';
 	import { Input } from '@clinks/ui-shared/components/ui/input';
 	import { Textarea } from '@clinks/ui-shared/components/ui/textarea';
-	import PageHeader from '$lib/components/common/PageHeader.svelte';
-	import AsyncView from '$lib/components/common/AsyncView.svelte';
-	import EmptyState from '$lib/components/common/EmptyState.svelte';
-	import FormField from '$lib/components/common/FormField.svelte';
-	import ModuleGate from '$lib/components/shell/ModuleGate.svelte';
-	import MailNav from '$lib/components/mail/MailNav.svelte';
-	import { placeholders } from '$lib/features/mail/templates';
-	import { Resource } from '$lib/state/resource.svelte';
-	import type { MailTemplate } from '$lib/domain/types';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import PageHeader from '#lib/components/common/PageHeader.svelte';
+	import AsyncView from '#lib/components/common/AsyncView.svelte';
+	import EmptyState from '#lib/components/common/EmptyState.svelte';
+	import FormField from '#lib/components/common/FormField.svelte';
+	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
+	import MailNav from '#lib/components/mail/MailNav.svelte';
+	import { placeholders } from '#lib/features/mail/templates';
+	import { Resource } from '#lib/state/resource.svelte';
+	import type { MailTemplate } from '#lib/domain/types';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
 	const api = workspace.api.templates;

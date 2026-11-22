@@ -4,10 +4,10 @@
 	import * as Popover from '@clinks/ui-shared/components/ui/popover';
 	import * as Command from '@clinks/ui-shared/components/ui/command';
 	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { contactName } from '$lib/data/workspace-api';
-	import type { Contact } from '$lib/domain/types';
-	import type { ContactId } from '$lib/domain/ids';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import { contactName } from '#lib/data/workspace-api';
+	import type { Contact } from '#lib/domain/types';
+	import type { ContactId } from '#lib/domain/ids';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let {
 		id,

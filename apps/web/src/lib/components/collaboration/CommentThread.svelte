@@ -3,11 +3,11 @@
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import { Button } from '@clinks/ui-shared/components/ui/button';
 	import { Textarea } from '@clinks/ui-shared/components/ui/textarea';
-	import PersonAvatar from '$lib/components/common/PersonAvatar.svelte';
-	import { CommentThreadModel } from '$lib/features/collaboration/comments.svelte';
-	import type { PeopleDirectory } from '$lib/features/collaboration/people.svelte';
-	import type { CommentTarget } from '$lib/domain/types';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import PersonAvatar from '#lib/components/common/PersonAvatar.svelte';
+	import { CommentThreadModel } from '#lib/features/collaboration/comments.svelte';
+	import type { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
+	import type { CommentTarget } from '#lib/domain/types';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let {
 		target,

@@ -2,11 +2,11 @@
 	import { toast } from 'svelte-sonner';
 	import { Button } from '@clinks/ui-shared/components/ui/button';
 	import { Input } from '@clinks/ui-shared/components/ui/input';
-	import AuthShell from '$lib/components/auth/AuthShell.svelte';
-	import FormField from '$lib/components/common/FormField.svelte';
-	import { CodeForm, landingPath } from '$lib/features/auth/auth-forms.svelte';
-	import { navigate } from '$lib/navigation';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import AuthShell from '#lib/components/auth/AuthShell.svelte';
+	import FormField from '#lib/components/common/FormField.svelte';
+	import { CodeForm, landingPath } from '#lib/features/auth/auth-forms.svelte';
+	import { navigate } from '#lib/navigation';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
 	const form = new CodeForm(workspace, (code) => workspace.session.verifyEmail(code));

@@ -3,13 +3,13 @@
 	import Bell from '@lucide/svelte/icons/bell';
 	import * as Tabs from '@clinks/ui-shared/components/ui/tabs';
 	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import PageHeader from '$lib/components/common/PageHeader.svelte';
-	import AsyncView from '$lib/components/common/AsyncView.svelte';
-	import EmptyState from '$lib/components/common/EmptyState.svelte';
-	import { NotificationsModel } from '$lib/features/notifications/notifications.svelte';
-	import type { AppNotification } from '$lib/domain/types';
-	import { navigate } from '$lib/navigation';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import PageHeader from '#lib/components/common/PageHeader.svelte';
+	import AsyncView from '#lib/components/common/AsyncView.svelte';
+	import EmptyState from '#lib/components/common/EmptyState.svelte';
+	import { NotificationsModel } from '#lib/features/notifications/notifications.svelte';
+	import type { AppNotification } from '#lib/domain/types';
+	import { navigate } from '#lib/navigation';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
 	const model = new NotificationsModel(workspace);

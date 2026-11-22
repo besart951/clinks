@@ -1,13 +1,13 @@
 <script lang="ts">
 	import CalendarClock from '@lucide/svelte/icons/calendar-clock';
 	import ListChecks from '@lucide/svelte/icons/list-checks';
-	import StatusBadge from '$lib/components/common/StatusBadge.svelte';
-	import PersonAvatar from '$lib/components/common/PersonAvatar.svelte';
-	import { priorityTone } from '$lib/components/common/tones';
-	import type { PeopleDirectory } from '$lib/features/collaboration/people.svelte';
-	import { today } from '$lib/domain/dates';
-	import type { Task } from '$lib/domain/types';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import StatusBadge from '#lib/components/common/StatusBadge.svelte';
+	import PersonAvatar from '#lib/components/common/PersonAvatar.svelte';
+	import { priorityTone } from '#lib/components/common/tones';
+	import type { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
+	import { today } from '#lib/domain/dates';
+	import type { Task } from '#lib/domain/types';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { task, people }: { task: Task; people: PeopleDirectory } = $props();
 	const workspace = useWorkspace();

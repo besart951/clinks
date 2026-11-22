@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { Appointment } from '$lib/domain/types';
-	import { minutesBetween } from '$lib/domain/dates';
-	import { href } from '$lib/navigation';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import type { Appointment } from '#lib/domain/types';
+	import { minutesBetween } from '#lib/domain/dates';
+	import { href } from '#lib/navigation';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { appointment, index = 0 }: { appointment: Appointment; index?: number } = $props();
 

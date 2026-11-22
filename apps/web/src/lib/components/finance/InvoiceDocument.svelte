@@ -1,9 +1,9 @@
 <script lang="ts">
 	import QrBill from './QrBill.svelte';
-	import { invoiceTotals, lineNet } from '$lib/domain/money';
-	import { contactName } from '$lib/data/workspace-api';
-	import type { Contact, Invoice, Tenant } from '$lib/domain/types';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import { invoiceTotals, lineNet } from '#lib/domain/money';
+	import { contactName } from '#lib/data/workspace-api';
+	import type { Contact, Invoice, Tenant } from '#lib/domain/types';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { invoice, contact, tenant }: { invoice: Invoice; contact: Contact | null; tenant: Tenant } = $props();
 	const workspace = useWorkspace();

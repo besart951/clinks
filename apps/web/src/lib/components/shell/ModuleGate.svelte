@@ -2,11 +2,11 @@
 	import type { Snippet } from 'svelte';
 	import Sparkles from '@lucide/svelte/icons/sparkles';
 	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import EmptyState from '$lib/components/common/EmptyState.svelte';
-	import Forbidden from '$lib/components/common/Forbidden.svelte';
-	import type { ModuleKey, Permission } from '$lib/domain/types';
-	import { href } from '$lib/navigation';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import EmptyState from '#lib/components/common/EmptyState.svelte';
+	import Forbidden from '#lib/components/common/Forbidden.svelte';
+	import type { ModuleKey, Permission } from '#lib/domain/types';
+	import { href } from '#lib/navigation';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { module, permission, children }: { module?: ModuleKey; permission?: Permission; children: Snippet } = $props();
 	const workspace = useWorkspace();

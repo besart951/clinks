@@ -6,14 +6,14 @@
 	import { Input } from '@clinks/ui-shared/components/ui/input';
 	import { Switch } from '@clinks/ui-shared/components/ui/switch';
 	import { Label } from '@clinks/ui-shared/components/ui/label';
-	import PageHeader from '$lib/components/common/PageHeader.svelte';
-	import FormField from '$lib/components/common/FormField.svelte';
-	import Choice from '$lib/components/common/Choice.svelte';
-	import PersonAvatar from '$lib/components/common/PersonAvatar.svelte';
-	import { ProfileModel } from '$lib/features/settings/settings.svelte';
-	import { locales, type Locale } from '$lib/i18n/catalog';
-	import type { ThemeMode } from '$lib/state/theme.svelte';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import PageHeader from '#lib/components/common/PageHeader.svelte';
+	import FormField from '#lib/components/common/FormField.svelte';
+	import Choice from '#lib/components/common/Choice.svelte';
+	import PersonAvatar from '#lib/components/common/PersonAvatar.svelte';
+	import { ProfileModel } from '#lib/features/settings/settings.svelte';
+	import { locales, type Locale } from '#lib/i18n/catalog';
+	import type { ThemeMode } from '#lib/state/theme.svelte';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
 	const model = new ProfileModel(workspace);

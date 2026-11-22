@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import InvoiceEditorPage from '$lib/components/finance/InvoiceEditorPage.svelte';
-	import type { InvoiceId } from '$lib/domain/ids';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import InvoiceEditorPage from '#lib/components/finance/InvoiceEditorPage.svelte';
+	import type { InvoiceId } from '#lib/domain/ids';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
 </script>

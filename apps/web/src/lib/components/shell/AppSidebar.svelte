@@ -11,11 +11,11 @@
 	import NotificationBell from './NotificationBell.svelte';
 	import SyncStatus from './SyncStatus.svelte';
 	import UserMenu from './UserMenu.svelte';
-	import { navigationGroups, type NavigationItem } from '$lib/features/shell/navigation-items';
-	import { NavBadges } from '$lib/features/shell/nav-badges.svelte';
-	import { locales, type Locale } from '$lib/i18n/catalog';
-	import { href, routePath } from '$lib/navigation';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import { navigationGroups, type NavigationItem } from '#lib/features/shell/navigation-items';
+	import { NavBadges } from '#lib/features/shell/nav-badges.svelte';
+	import { locales, type Locale } from '#lib/i18n/catalog';
+	import { href, routePath } from '#lib/navigation';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { actions }: { actions: { search: () => void; shortcuts: () => void } } = $props();
 

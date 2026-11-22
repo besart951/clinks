@@ -5,12 +5,12 @@
 	import { Button } from '@clinks/ui-shared/components/ui/button';
 	import { Input } from '@clinks/ui-shared/components/ui/input';
 	import { Textarea } from '@clinks/ui-shared/components/ui/textarea';
-	import FormField from '$lib/components/common/FormField.svelte';
-	import ConfirmDialog, { type ConfirmRequest } from '$lib/components/common/ConfirmDialog.svelte';
-	import { ContactFormModel } from '$lib/features/contacts/contact-form.svelte';
-	import type { Contact } from '$lib/domain/types';
-	import type { Draft } from '$lib/data/repository';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import FormField from '#lib/components/common/FormField.svelte';
+	import ConfirmDialog, { type ConfirmRequest } from '#lib/components/common/ConfirmDialog.svelte';
+	import { ContactFormModel } from '#lib/features/contacts/contact-form.svelte';
+	import type { Contact } from '#lib/domain/types';
+	import type { Draft } from '#lib/data/repository';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { onSaved }: { onSaved?: (contact: Contact) => void } = $props();
 

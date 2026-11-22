@@ -8,10 +8,10 @@
 
 <script lang="ts">
 	import PersonAvatar from './PersonAvatar.svelte';
-	import { auditKey, auditPath } from '$lib/features/activity/audit-text';
-	import type { AuditEntry } from '$lib/domain/types';
-	import { href } from '$lib/navigation';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import { auditKey, auditPath } from '#lib/features/activity/audit-text';
+	import type { AuditEntry } from '#lib/domain/types';
+	import { href } from '#lib/navigation';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { entries, actors }: { entries: AuditEntry[]; actors: Map<string, Actor> } = $props();
 	const workspace = useWorkspace();

@@ -4,9 +4,9 @@
 	import FileText from '@lucide/svelte/icons/file-text';
 	import Unlink from '@lucide/svelte/icons/unlink';
 	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { AttachmentsModel, formatBytes } from '$lib/features/collaboration/attachments.svelte';
-	import type { AttachmentTarget } from '$lib/domain/types';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import { AttachmentsModel, formatBytes } from '#lib/features/collaboration/attachments.svelte';
+	import type { AttachmentTarget } from '#lib/domain/types';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { target }: { target: AttachmentTarget } = $props();
 	const workspace = useWorkspace();

@@ -7,12 +7,12 @@
 	import { Button } from '@clinks/ui-shared/components/ui/button';
 	import { Input } from '@clinks/ui-shared/components/ui/input';
 	import { Textarea } from '@clinks/ui-shared/components/ui/textarea';
-	import FormField from '$lib/components/common/FormField.svelte';
-	import ConfirmDialog, { type ConfirmRequest } from '$lib/components/common/ConfirmDialog.svelte';
-	import { ComposeModel } from '$lib/features/mail/compose.svelte';
-	import { contactName } from '$lib/data/workspace-api';
-	import type { Contact, MailTemplate } from '$lib/domain/types';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import FormField from '#lib/components/common/FormField.svelte';
+	import ConfirmDialog, { type ConfirmRequest } from '#lib/components/common/ConfirmDialog.svelte';
+	import { ComposeModel } from '#lib/features/mail/compose.svelte';
+	import { contactName } from '#lib/data/workspace-api';
+	import type { Contact, MailTemplate } from '#lib/domain/types';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { contacts, templates, onClose }: { contacts: Contact[]; templates: MailTemplate[]; onClose?: () => void } =
 		$props();

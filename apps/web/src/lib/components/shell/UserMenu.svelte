@@ -4,9 +4,9 @@
 	import Keyboard from '@lucide/svelte/icons/keyboard';
 	import LifeBuoy from '@lucide/svelte/icons/life-buoy';
 	import * as DropdownMenu from '@clinks/ui-shared/components/ui/dropdown-menu';
-	import PersonAvatar from '$lib/components/common/PersonAvatar.svelte';
-	import { navigate } from '$lib/navigation';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import PersonAvatar from '#lib/components/common/PersonAvatar.svelte';
+	import { navigate } from '#lib/navigation';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { onShortcuts }: { onShortcuts: () => void } = $props();
 	const workspace = useWorkspace();

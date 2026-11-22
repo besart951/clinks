@@ -2,11 +2,11 @@
 	import Plus from '@lucide/svelte/icons/plus';
 	import { Input } from '@clinks/ui-shared/components/ui/input';
 	import TaskCard from './TaskCard.svelte';
-	import type { PlannerModel } from '$lib/features/planner/planner.svelte';
-	import type { PeopleDirectory } from '$lib/features/collaboration/people.svelte';
-	import type { Task, TaskStatus } from '$lib/domain/types';
-	import type { TaskId } from '$lib/domain/ids';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import type { PlannerModel } from '#lib/features/planner/planner.svelte';
+	import type { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
+	import type { Task, TaskStatus } from '#lib/domain/types';
+	import type { TaskId } from '#lib/domain/ids';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { model, people, onOpen }: { model: PlannerModel; people: PeopleDirectory; onOpen: (task: Task) => void } =
 		$props();

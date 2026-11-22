@@ -5,13 +5,13 @@
 	import * as Alert from '@clinks/ui-shared/components/ui/alert';
 	import { Button } from '@clinks/ui-shared/components/ui/button';
 	import { Input } from '@clinks/ui-shared/components/ui/input';
-	import AuthShell from '$lib/components/auth/AuthShell.svelte';
-	import FormField from '$lib/components/common/FormField.svelte';
-	import SkeletonRows from '$lib/components/common/SkeletonRows.svelte';
-	import { demoPassword } from '$lib/data/seed';
-	import type { InvitationId } from '$lib/domain/ids';
-	import { href, navigate } from '$lib/navigation';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import AuthShell from '#lib/components/auth/AuthShell.svelte';
+	import FormField from '#lib/components/common/FormField.svelte';
+	import SkeletonRows from '#lib/components/common/SkeletonRows.svelte';
+	import { demoPassword } from '#lib/data/seed';
+	import type { InvitationId } from '#lib/domain/ids';
+	import { href, navigate } from '#lib/navigation';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
 	const id = page.params.id as InvitationId;

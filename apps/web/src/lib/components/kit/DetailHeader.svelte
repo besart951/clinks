@@ -12,7 +12,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import ChevronLeft from '@lucide/svelte/icons/chevron-left';
-	import { href } from '$lib/navigation';
+	import { href } from '#lib/navigation';
 
 	let { header, actions }: { header: DetailHeaderSpec; actions?: Snippet } = $props();
 </script>

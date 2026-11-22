@@ -4,9 +4,9 @@
 	import Check from '@lucide/svelte/icons/check';
 	import * as DropdownMenu from '@clinks/ui-shared/components/ui/dropdown-menu';
 	import { toast } from 'svelte-sonner';
-	import { navigate } from '$lib/navigation';
-	import type { Tenant } from '$lib/domain/types';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import { navigate } from '#lib/navigation';
+	import type { Tenant } from '#lib/domain/types';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
 	const session = workspace.session;

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as Dialog from '@clinks/ui-shared/components/ui/dialog';
-	import { allNavigationItems } from '$lib/features/shell/navigation-items';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import { allNavigationItems } from '#lib/features/shell/navigation-items';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { open = $bindable(false) }: { open: boolean } = $props();
 	const workspace = useWorkspace();

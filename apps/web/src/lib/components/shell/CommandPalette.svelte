@@ -1,8 +1,8 @@
 <script lang="ts">
 	import * as Command from '@clinks/ui-shared/components/ui/command';
-	import { CommandSearch, type CommandEntry } from '$lib/features/shell/command-search.svelte';
-	import { navigate } from '$lib/navigation';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import { CommandSearch, type CommandEntry } from '#lib/features/shell/command-search.svelte';
+	import { navigate } from '#lib/navigation';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { open = $bindable(false) }: { open: boolean } = $props();
 	const workspace = useWorkspace();

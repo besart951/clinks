@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import Link2 from '@lucide/svelte/icons/link-2';
-	import { useWorkspace } from '$lib/workspace.svelte';
-	import LocaleSwitch from '$lib/components/shell/LocaleSwitch.svelte';
+	import { useWorkspace } from '#lib/workspace.svelte';
+	import LocaleSwitch from '#lib/components/shell/LocaleSwitch.svelte';
 
 	let {
 		title,

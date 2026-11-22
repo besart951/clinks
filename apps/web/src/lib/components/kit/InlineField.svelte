@@ -6,7 +6,7 @@
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import LoaderCircle from '@lucide/svelte/icons/loader-circle';
 	import { InlineEditor, maskValue, type InlineFieldSpec, type InlineSave } from './inline-edit.svelte';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let {
 		field,

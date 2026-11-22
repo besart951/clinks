@@ -1,6 +1,6 @@
 <script lang="ts">
-	import SectionNav from '$lib/components/shell/SectionNav.svelte';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import SectionNav from '#lib/components/shell/SectionNav.svelte';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
 </script>

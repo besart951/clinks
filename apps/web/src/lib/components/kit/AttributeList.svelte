@@ -11,7 +11,7 @@
 	import Plus from '@lucide/svelte/icons/plus';
 	import * as DropdownMenu from '@clinks/ui-shared/components/ui/dropdown-menu';
 	import InlineField from './InlineField.svelte';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { list, onsave }: { list: AttributeListSpec; onsave: (field: InlineFieldSpec, value: string) => unknown } =
 		$props();

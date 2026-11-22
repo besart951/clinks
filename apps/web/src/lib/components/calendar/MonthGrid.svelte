@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	import type { Appointment, CalendarDate } from '$lib/domain/types';
+	import type { Appointment, CalendarDate } from '#lib/domain/types';
 
 	export interface MonthHandlers {
 		appointmentsOn(date: CalendarDate): Appointment[];
@@ -10,8 +10,8 @@
 </script>
 
 <script lang="ts">
-	import { isoWeekday, today } from '$lib/domain/dates';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import { isoWeekday, today } from '#lib/domain/dates';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { days, month, handlers }: { days: CalendarDate[]; month: string; handlers: MonthHandlers } = $props();
 	const workspace = useWorkspace();

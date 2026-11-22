@@ -2,11 +2,11 @@
 	import Upload from '@lucide/svelte/icons/upload';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import ModuleGate from '$lib/components/shell/ModuleGate.svelte';
-	import AttributeList from '$lib/components/kit/AttributeList.svelte';
-	import SettingsCard from '$lib/components/kit/SettingsCard.svelte';
-	import { CompanySettingsModel } from '$lib/features/settings/settings.svelte';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
+	import AttributeList from '#lib/components/kit/AttributeList.svelte';
+	import SettingsCard from '#lib/components/kit/SettingsCard.svelte';
+	import { CompanySettingsModel } from '#lib/features/settings/settings.svelte';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
 	const session = workspace.session;

@@ -8,17 +8,17 @@
 	import * as DropdownMenu from '@clinks/ui-shared/components/ui/dropdown-menu';
 	import { Button } from '@clinks/ui-shared/components/ui/button';
 	import { Input } from '@clinks/ui-shared/components/ui/input';
-	import PageHeader from '$lib/components/common/PageHeader.svelte';
-	import AsyncView from '$lib/components/common/AsyncView.svelte';
-	import FormField from '$lib/components/common/FormField.svelte';
-	import Choice from '$lib/components/common/Choice.svelte';
-	import StatusBadge from '$lib/components/common/StatusBadge.svelte';
-	import ModuleGate from '$lib/components/shell/ModuleGate.svelte';
-	import FinanceNav from '$lib/components/finance/FinanceNav.svelte';
-	import { ExpensesModel } from '$lib/features/finance/expenses.svelte';
-	import { vatFromGross } from '$lib/domain/money';
-	import { expenseCategories, vatRates, type Expense } from '$lib/domain/types';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import PageHeader from '#lib/components/common/PageHeader.svelte';
+	import AsyncView from '#lib/components/common/AsyncView.svelte';
+	import FormField from '#lib/components/common/FormField.svelte';
+	import Choice from '#lib/components/common/Choice.svelte';
+	import StatusBadge from '#lib/components/common/StatusBadge.svelte';
+	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
+	import FinanceNav from '#lib/components/finance/FinanceNav.svelte';
+	import { ExpensesModel } from '#lib/features/finance/expenses.svelte';
+	import { vatFromGross } from '#lib/domain/money';
+	import { expenseCategories, vatRates, type Expense } from '#lib/domain/types';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
 	const model = new ExpensesModel(workspace);

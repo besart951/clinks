@@ -3,17 +3,17 @@
 	import Search from '@lucide/svelte/icons/search';
 	import { SidebarProvider, SidebarTrigger, SidebarInset } from '@clinks/ui-shared/components/ui/sidebar';
 	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import AppSidebar from '$lib/components/shell/AppSidebar.svelte';
-	import Banners from '$lib/components/shell/Banners.svelte';
-	import CommandPalette from '$lib/components/shell/CommandPalette.svelte';
-	import DevPanel from '$lib/components/shell/DevPanel.svelte';
-	import MobileNav from '$lib/components/shell/MobileNav.svelte';
-	import ShortcutsDialog from '$lib/components/shell/ShortcutsDialog.svelte';
-	import SkeletonRows from '$lib/components/common/SkeletonRows.svelte';
-	import { landingPath } from '$lib/features/auth/auth-forms.svelte';
-	import { allNavigationItems } from '$lib/features/shell/navigation-items';
-	import { navigate } from '$lib/navigation';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import AppSidebar from '#lib/components/shell/AppSidebar.svelte';
+	import Banners from '#lib/components/shell/Banners.svelte';
+	import CommandPalette from '#lib/components/shell/CommandPalette.svelte';
+	import DevPanel from '#lib/components/shell/DevPanel.svelte';
+	import MobileNav from '#lib/components/shell/MobileNav.svelte';
+	import ShortcutsDialog from '#lib/components/shell/ShortcutsDialog.svelte';
+	import SkeletonRows from '#lib/components/common/SkeletonRows.svelte';
+	import { landingPath } from '#lib/features/auth/auth-forms.svelte';
+	import { allNavigationItems } from '#lib/features/shell/navigation-items';
+	import { navigate } from '#lib/navigation';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { children }: { children: Snippet } = $props();
 	const workspace = useWorkspace();
@@ -26,7 +26,7 @@
 	onMount(async () => {
 		await session.ready;
 		if (session.status !== 'authenticated' || !session.tenantId)
-			await navigate(landingPath(session), { replaceState: true });
+			await navigate(landingPath(session), { replace: true });
 	});
 
 	function typing(target: EventTarget | null) {

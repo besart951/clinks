@@ -3,17 +3,17 @@
 	import Plus from '@lucide/svelte/icons/plus';
 	import * as Table from '@clinks/ui-shared/components/ui/table';
 	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import PageHeader from '$lib/components/common/PageHeader.svelte';
-	import AsyncView from '$lib/components/common/AsyncView.svelte';
-	import SearchInput from '$lib/components/common/SearchInput.svelte';
-	import ModuleGate from '$lib/components/shell/ModuleGate.svelte';
-	import SpitexNav from '$lib/components/spitex/SpitexNav.svelte';
-	import ContactFormSheet from '$lib/components/contacts/ContactFormSheet.svelte';
-	import { ClientsModel, clientTag } from '$lib/features/spitex/clients.svelte';
-	import Initials from '$lib/components/kit/Initials.svelte';
-	import { contactName } from '$lib/data/workspace-api';
-	import { href, navigate } from '$lib/navigation';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import PageHeader from '#lib/components/common/PageHeader.svelte';
+	import AsyncView from '#lib/components/common/AsyncView.svelte';
+	import SearchInput from '#lib/components/common/SearchInput.svelte';
+	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
+	import SpitexNav from '#lib/components/spitex/SpitexNav.svelte';
+	import ContactFormSheet from '#lib/components/contacts/ContactFormSheet.svelte';
+	import { ClientsModel, clientTag } from '#lib/features/spitex/clients.svelte';
+	import Initials from '#lib/components/kit/Initials.svelte';
+	import { contactName } from '#lib/data/workspace-api';
+	import { href, navigate } from '#lib/navigation';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
 	const model = new ClientsModel(workspace);

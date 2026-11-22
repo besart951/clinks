@@ -7,13 +7,13 @@
 	import { Button } from '@clinks/ui-shared/components/ui/button';
 	import { Input } from '@clinks/ui-shared/components/ui/input';
 	import { Checkbox } from '@clinks/ui-shared/components/ui/checkbox';
-	import PageHeader from '$lib/components/common/PageHeader.svelte';
-	import AsyncView from '$lib/components/common/AsyncView.svelte';
-	import FormField from '$lib/components/common/FormField.svelte';
-	import ModuleGate from '$lib/components/shell/ModuleGate.svelte';
-	import { RolesModel } from '$lib/features/settings/settings.svelte';
-	import { permissionAreas, roleGrants } from '$lib/domain/permissions';
-	import { useWorkspace } from '$lib/workspace.svelte';
+	import PageHeader from '#lib/components/common/PageHeader.svelte';
+	import AsyncView from '#lib/components/common/AsyncView.svelte';
+	import FormField from '#lib/components/common/FormField.svelte';
+	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
+	import { RolesModel } from '#lib/features/settings/settings.svelte';
+	import { permissionAreas, roleGrants } from '#lib/domain/permissions';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
 	const model = new RolesModel(workspace);
