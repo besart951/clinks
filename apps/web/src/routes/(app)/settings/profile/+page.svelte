@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Monitor from '@lucide/svelte/icons/monitor';
-	import * as Card from '@clinks/ui-shared/components/ui/card';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { Input } from '@clinks/ui-shared/components/ui/input';
-	import { Switch } from '@clinks/ui-shared/components/ui/switch';
-	import { Label } from '@clinks/ui-shared/components/ui/label';
+	import * as Card from '@clinks/ui/components/ui/card';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { Input } from '@clinks/ui/components/ui/input';
+	import { Switch } from '@clinks/ui/components/ui/switch';
+	import { Label } from '@clinks/ui/components/ui/label';
 	import PageHeader from '#lib/components/common/PageHeader.svelte';
 	import FormField from '#lib/components/common/FormField.svelte';
 	import Choice from '#lib/components/common/Choice.svelte';

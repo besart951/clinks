@@ -4,8 +4,8 @@
 	import Megaphone from '@lucide/svelte/icons/megaphone';
 	import Copy from '@lucide/svelte/icons/copy';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
-	import * as Card from '@clinks/ui-shared/components/ui/card';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
+	import * as Card from '@clinks/ui/components/ui/card';
+	import { Button } from '@clinks/ui/components/ui/button';
 	import PageHeader from '#lib/components/common/PageHeader.svelte';
 	import AsyncView from '#lib/components/common/AsyncView.svelte';
 	import EmptyState from '#lib/components/common/EmptyState.svelte';

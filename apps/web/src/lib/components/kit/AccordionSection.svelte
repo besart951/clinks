@@ -12,7 +12,7 @@
 <script lang="ts">
 	import { untrack, type Snippet } from 'svelte';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
-	import { rememberSection, sectionOpen } from './inline-edit.svelte';
+	import { rememberSection, sectionOpen } from './section-memory';
 
 	let { section, tools, children }: { section: SectionSpec; tools?: Snippet; children: Snippet } = $props();
 

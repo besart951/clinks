@@ -1,5 +1,5 @@
-import type { FolderId } from '../../domain/ids.ts';
-import type { Contact, Folder, StoredDocument } from '../../domain/types.ts';
+import type { FolderId } from '@clinks/domain/ids';
+import type { Contact, Folder, StoredDocument } from '@clinks/domain/types';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 import { uploadDocument } from '../collaboration/attachments.svelte.ts';

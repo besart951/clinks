@@ -1,0 +1,49 @@
+/* CSS helpers used by the components in src/lib/kit. Motion tokens can be overridden by the app. */
+:root {
+	--ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+	--dur-1: 0.12s;
+	--dur-2: 0.2s;
+	--dur-3: 0.32s;
+}
+
+/* Pastel initials avatars. */
+.pav {
+	background: hsl(var(--h, 220) 40% 92%);
+	color: hsl(var(--h, 220) 35% 30%);
+}
+.dark .pav {
+	background: hsl(var(--h, 220) 25% 22%);
+	color: hsl(var(--h, 220) 40% 82%);
+}
+
+/* Hover-reveal: secondary actions appear when the row or section is hovered or focused. */
+.reveal {
+	opacity: 0;
+	transform: translateX(4px);
+	transition:
+		opacity var(--dur-2) var(--ease-out),
+		transform var(--dur-2) var(--ease-out);
+}
+.reveal-scope:hover .reveal,
+.reveal-scope:focus-within .reveal,
+.reveal-scope[data-revealed] .reveal {
+	opacity: 1;
+	transform: none;
+}
+@media (hover: none) {
+	.reveal {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+@keyframes rise {
+	from {
+		opacity: 0;
+		transform: translateY(4px);
+	}
+}
+.rise {
+	animation: rise var(--dur-3) var(--ease-out) both;
+	animation-delay: calc(var(--i, 0) * 30ms);
+}

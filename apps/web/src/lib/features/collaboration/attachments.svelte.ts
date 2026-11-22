@@ -1,4 +1,4 @@
-import type { AttachmentTarget, StoredDocument } from '../../domain/types.ts';
+import type { AttachmentTarget, StoredDocument } from '@clinks/domain/types';
 import { MockApiError } from '../../data/database.ts';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';

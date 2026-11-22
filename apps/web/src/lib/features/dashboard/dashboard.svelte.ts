@@ -1,8 +1,8 @@
-import { invoiceTotals, effectiveStatus } from '../../domain/money.ts';
-import { addDays, daysBetween, today } from '../../domain/dates.ts';
-import type { UserId } from '../../domain/ids.ts';
+import { invoiceTotals, effectiveStatus } from '@clinks/domain/money';
+import { addDays, daysBetween, today } from '@clinks/domain/dates';
+import type { UserId } from '@clinks/domain/ids';
 import { contactName } from '../../data/workspace-api.ts';
-import type { Appointment, AuditEntry, Contact, Invoice, Rappen, Task } from '../../domain/types.ts';
+import type { Appointment, AuditEntry, Contact, Invoice, Rappen, Task } from '@clinks/domain/types';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 

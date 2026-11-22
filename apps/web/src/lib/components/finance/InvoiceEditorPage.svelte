@@ -6,11 +6,11 @@
 	import Send from '@lucide/svelte/icons/send';
 	import ChevronLeft from '@lucide/svelte/icons/chevron-left';
 	import CalendarCheck from '@lucide/svelte/icons/calendar-check';
-	import * as DropdownMenu from '@clinks/ui-shared/components/ui/dropdown-menu';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { Input } from '@clinks/ui-shared/components/ui/input';
-	import { Textarea } from '@clinks/ui-shared/components/ui/textarea';
-	import SettingsCard from '#lib/components/kit/SettingsCard.svelte';
+	import * as DropdownMenu from '@clinks/ui/components/ui/dropdown-menu';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { Input } from '@clinks/ui/components/ui/input';
+	import { Textarea } from '@clinks/ui/components/ui/textarea';
+	import SettingsCard from '@clinks/ui/kit/SettingsCard.svelte';
 	import InvoiceDocument from './InvoiceDocument.svelte';
 	import AsyncView from '#lib/components/common/AsyncView.svelte';
 	import FormField from '#lib/components/common/FormField.svelte';
@@ -19,9 +19,9 @@
 	import UnsavedChangesGuard from '#lib/components/common/UnsavedChangesGuard.svelte';
 	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
 	import { InvoiceEditorModel, physioTariffLines } from '#lib/features/finance/invoice-editor.svelte';
-	import { lineNet } from '#lib/domain/money';
-	import { vatRates, physioServices } from '#lib/domain/types';
-	import type { AppointmentId, ContactId, InvoiceId } from '#lib/domain/ids';
+	import { lineNet } from '@clinks/domain/money';
+	import { vatRates, physioServices } from '@clinks/domain/types';
+	import type { AppointmentId, ContactId, InvoiceId } from '@clinks/domain/ids';
 	import { href, navigate } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 

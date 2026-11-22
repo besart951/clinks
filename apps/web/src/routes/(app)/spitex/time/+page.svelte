@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
-	import * as Card from '@clinks/ui-shared/components/ui/card';
-	import * as Table from '@clinks/ui-shared/components/ui/table';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { Input } from '@clinks/ui-shared/components/ui/input';
+	import * as Card from '@clinks/ui/components/ui/card';
+	import * as Table from '@clinks/ui/components/ui/table';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { Input } from '@clinks/ui/components/ui/input';
 	import PageHeader from '#lib/components/common/PageHeader.svelte';
 	import AsyncView from '#lib/components/common/AsyncView.svelte';
 	import FormField from '#lib/components/common/FormField.svelte';
@@ -12,7 +12,7 @@
 	import SpitexNav from '#lib/components/spitex/SpitexNav.svelte';
 	import { TimeTrackingModel } from '#lib/features/spitex/clients.svelte';
 	import { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
-	import { minutesToTime } from '#lib/domain/dates';
+	import { minutesToTime } from '@clinks/domain/dates';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();

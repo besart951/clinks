@@ -1,8 +1,8 @@
 <script lang="ts">
 	import QRCode from 'qrcode';
-	import { formatIban, isValidSwissIban, qrBillPayload } from '#lib/domain/qr-bill';
+	import { formatIban, isValidSwissIban, qrBillPayload } from '@clinks/domain/qr-bill';
 	import { contactName } from '#lib/data/workspace-api';
-	import type { Contact, Rappen, Tenant } from '#lib/domain/types';
+	import type { Contact, Rappen, Tenant } from '@clinks/domain/types';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let {

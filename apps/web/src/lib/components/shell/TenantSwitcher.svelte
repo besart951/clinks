@@ -2,10 +2,10 @@
 	import ChevronsUpDown from '@lucide/svelte/icons/chevrons-up-down';
 	import Plus from '@lucide/svelte/icons/plus';
 	import Check from '@lucide/svelte/icons/check';
-	import * as DropdownMenu from '@clinks/ui-shared/components/ui/dropdown-menu';
+	import * as DropdownMenu from '@clinks/ui/components/ui/dropdown-menu';
 	import { toast } from 'svelte-sonner';
 	import { navigate } from '#lib/navigation';
-	import type { Tenant } from '#lib/domain/types';
+	import type { Tenant } from '@clinks/domain/types';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();

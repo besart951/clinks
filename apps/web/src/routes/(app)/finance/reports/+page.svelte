@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import * as Card from '@clinks/ui-shared/components/ui/card';
+	import * as Card from '@clinks/ui/components/ui/card';
 	import PageHeader from '#lib/components/common/PageHeader.svelte';
 	import AsyncView from '#lib/components/common/AsyncView.svelte';
 	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';

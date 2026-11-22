@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Skeleton } from '@clinks/ui-shared/components/ui/skeleton';
+	import { Skeleton } from '@clinks/ui/components/ui/skeleton';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { rows = 6, variant = 'list' }: { rows?: number; variant?: 'list' | 'cards' | 'detail' } = $props();

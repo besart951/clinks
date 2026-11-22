@@ -2,11 +2,11 @@
 	import { onMount } from 'svelte';
 	import Link2 from '@lucide/svelte/icons/link-2';
 	import UserCog from '@lucide/svelte/icons/user-cog';
-	import * as Card from '@clinks/ui-shared/components/ui/card';
-	import * as Table from '@clinks/ui-shared/components/ui/table';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { Switch } from '@clinks/ui-shared/components/ui/switch';
-	import { Badge } from '@clinks/ui-shared/components/ui/badge';
+	import * as Card from '@clinks/ui/components/ui/card';
+	import * as Table from '@clinks/ui/components/ui/table';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { Switch } from '@clinks/ui/components/ui/switch';
+	import { Badge } from '@clinks/ui/components/ui/badge';
 	import AsyncView from '#lib/components/common/AsyncView.svelte';
 	import SearchInput from '#lib/components/common/SearchInput.svelte';
 	import Forbidden from '#lib/components/common/Forbidden.svelte';

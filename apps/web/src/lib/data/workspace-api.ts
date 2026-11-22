@@ -1,5 +1,5 @@
-import { newId, type UserId } from '../domain/ids.ts';
-import type { AppNotification, Contact, NotificationKind } from '../domain/types.ts';
+import { newId, type UserId } from '@clinks/domain/ids';
+import type { AppNotification, Contact, NotificationKind } from '@clinks/domain/types';
 import { stamp, type MockDatabase } from './database.ts';
 import { TenantRepository, type RequestContext } from './repository.ts';
 import {
@@ -15,7 +15,7 @@ import {
 	prescriptionSchema,
 	taskSchema,
 	templateSchema,
-} from './schemas.ts';
+} from '@clinks/contracts/schemas';
 
 export function contactName(contact: Pick<Contact, 'kind' | 'firstName' | 'lastName' | 'companyName'>): string {
 	return contact.kind === 'company' ? contact.companyName : `${contact.firstName} ${contact.lastName}`.trim();

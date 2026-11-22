@@ -1,5 +1,5 @@
-import type { MailId } from '../../domain/ids.ts';
-import type { Contact, MailFolder, MailMessage, MailTemplate } from '../../domain/types.ts';
+import type { MailId } from '@clinks/domain/ids';
+import type { Contact, MailFolder, MailMessage, MailTemplate } from '@clinks/domain/types';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 

@@ -1,12 +1,12 @@
 <script lang="ts">
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import X from '@lucide/svelte/icons/x';
-	import * as Sheet from '@clinks/ui-shared/components/ui/sheet';
-	import * as Tabs from '@clinks/ui-shared/components/ui/tabs';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { Input } from '@clinks/ui-shared/components/ui/input';
-	import { Textarea } from '@clinks/ui-shared/components/ui/textarea';
-	import { Checkbox } from '@clinks/ui-shared/components/ui/checkbox';
+	import * as Sheet from '@clinks/ui/components/ui/sheet';
+	import * as Tabs from '@clinks/ui/components/ui/tabs';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { Input } from '@clinks/ui/components/ui/input';
+	import { Textarea } from '@clinks/ui/components/ui/textarea';
+	import { Checkbox } from '@clinks/ui/components/ui/checkbox';
 	import FormField from '#lib/components/common/FormField.svelte';
 	import Choice from '#lib/components/common/Choice.svelte';
 	import ContactPicker from '#lib/components/common/ContactPicker.svelte';
@@ -17,8 +17,8 @@
 	import ObjectTimeline from '#lib/components/collaboration/ObjectTimeline.svelte';
 	import { TaskFormModel } from '#lib/features/planner/task-form.svelte';
 	import type { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
-	import { taskStatuses, type Contact, type Task } from '#lib/domain/types';
-	import type { Draft } from '#lib/data/repository';
+	import { taskStatuses, type Contact, type Task } from '@clinks/domain/types';
+	import type { Draft } from '@clinks/contracts/repository';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { contacts, people, onClose }: { contacts: Contact[]; people: PeopleDirectory; onClose?: () => void } = $props();

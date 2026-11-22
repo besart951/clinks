@@ -7,12 +7,12 @@
 	import BellRing from '@lucide/svelte/icons/bell-ring';
 	import Pencil from '@lucide/svelte/icons/pencil';
 	import Ellipsis from '@lucide/svelte/icons/ellipsis';
-	import * as Card from '@clinks/ui-shared/components/ui/card';
-	import * as Dialog from '@clinks/ui-shared/components/ui/dialog';
-	import * as DropdownMenu from '@clinks/ui-shared/components/ui/dropdown-menu';
-	import * as Tabs from '@clinks/ui-shared/components/ui/tabs';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { Input } from '@clinks/ui-shared/components/ui/input';
+	import * as Card from '@clinks/ui/components/ui/card';
+	import * as Dialog from '@clinks/ui/components/ui/dialog';
+	import * as DropdownMenu from '@clinks/ui/components/ui/dropdown-menu';
+	import * as Tabs from '@clinks/ui/components/ui/tabs';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { Input } from '@clinks/ui/components/ui/input';
 	import PageHeader from '#lib/components/common/PageHeader.svelte';
 	import AsyncView from '#lib/components/common/AsyncView.svelte';
 	import FormField from '#lib/components/common/FormField.svelte';
@@ -27,8 +27,8 @@
 	import { InvoiceDetailModel } from '#lib/features/finance/invoice-detail.svelte';
 	import { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
 	import { contactName } from '#lib/data/workspace-api';
-	import { today } from '#lib/domain/dates';
-	import type { InvoiceId } from '#lib/domain/ids';
+	import { today } from '@clinks/domain/dates';
+	import type { InvoiceId } from '@clinks/domain/ids';
 	import { href, navigate } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 

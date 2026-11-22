@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	import type { InlineFieldSpec } from './inline-edit.svelte';
+	import type { InlineFieldSpec } from '@clinks/ui/kit/inline-edit';
 
 	export interface AttributeListSpec {
 		fields: InlineFieldSpec[];
@@ -9,7 +9,7 @@
 
 <script lang="ts">
 	import Plus from '@lucide/svelte/icons/plus';
-	import * as DropdownMenu from '@clinks/ui-shared/components/ui/dropdown-menu';
+	import * as DropdownMenu from '@clinks/ui/components/ui/dropdown-menu';
 	import InlineField from './InlineField.svelte';
 	import { useWorkspace } from '#lib/workspace.svelte';
 

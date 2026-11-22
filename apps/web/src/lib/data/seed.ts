@@ -1,7 +1,7 @@
-import { addDays, atTime, toCalendarDate } from '../domain/dates.ts';
-import { newId, type ContactId, type FolderId, type RoleId, type TenantId } from '../domain/ids.ts';
-import { invoiceTotals } from '../domain/money.ts';
-import { administratorPermissions, userPermissions } from '../domain/permissions.ts';
+import { addDays, atTime, toCalendarDate } from '@clinks/domain/dates';
+import { newId, type ContactId, type FolderId, type RoleId, type TenantId } from '@clinks/domain/ids';
+import { invoiceTotals } from '@clinks/domain/money';
+import { administratorPermissions, userPermissions } from '@clinks/domain/permissions';
 import type {
 	Appointment,
 	BaseRecord,
@@ -17,7 +17,7 @@ import type {
 	TaskStatus,
 	Tenant,
 	User,
-} from '../domain/types.ts';
+} from '@clinks/domain/types';
 import type { Snapshot, TableName, Tables } from './database.ts';
 
 /** Same demo data on every reset, shifted so that "today" is always the current day. */

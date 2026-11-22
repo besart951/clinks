@@ -2,16 +2,16 @@
 	import X from '@lucide/svelte/icons/x';
 	import Send from '@lucide/svelte/icons/send';
 	import FileText from '@lucide/svelte/icons/file-text';
-	import * as Sheet from '@clinks/ui-shared/components/ui/sheet';
-	import * as DropdownMenu from '@clinks/ui-shared/components/ui/dropdown-menu';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { Input } from '@clinks/ui-shared/components/ui/input';
-	import { Textarea } from '@clinks/ui-shared/components/ui/textarea';
+	import * as Sheet from '@clinks/ui/components/ui/sheet';
+	import * as DropdownMenu from '@clinks/ui/components/ui/dropdown-menu';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { Input } from '@clinks/ui/components/ui/input';
+	import { Textarea } from '@clinks/ui/components/ui/textarea';
 	import FormField from '#lib/components/common/FormField.svelte';
 	import ConfirmDialog, { type ConfirmRequest } from '#lib/components/common/ConfirmDialog.svelte';
 	import { ComposeModel } from '#lib/features/mail/compose.svelte';
 	import { contactName } from '#lib/data/workspace-api';
-	import type { Contact, MailTemplate } from '#lib/domain/types';
+	import type { Contact, MailTemplate } from '@clinks/domain/types';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { contacts, templates, onClose }: { contacts: Contact[]; templates: MailTemplate[]; onClose?: () => void } =

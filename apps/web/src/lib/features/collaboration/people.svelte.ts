@@ -1,4 +1,4 @@
-import type { UserId } from '../../domain/ids.ts';
+import type { UserId } from '@clinks/domain/ids';
 import type { Workspace } from '../../workspace.svelte.ts';
 
 export interface Person {

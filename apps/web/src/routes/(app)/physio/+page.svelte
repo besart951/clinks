@@ -3,9 +3,9 @@
 	import Plus from '@lucide/svelte/icons/plus';
 	import TriangleAlert from '@lucide/svelte/icons/triangle-alert';
 	import HeartPulse from '@lucide/svelte/icons/heart-pulse';
-	import * as Table from '@clinks/ui-shared/components/ui/table';
-	import * as Tabs from '@clinks/ui-shared/components/ui/tabs';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
+	import * as Table from '@clinks/ui/components/ui/table';
+	import * as Tabs from '@clinks/ui/components/ui/tabs';
+	import { Button } from '@clinks/ui/components/ui/button';
 	import PageHeader from '#lib/components/common/PageHeader.svelte';
 	import AsyncView from '#lib/components/common/AsyncView.svelte';
 	import SearchInput from '#lib/components/common/SearchInput.svelte';
@@ -14,8 +14,8 @@
 	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
 	import ContactFormSheet from '#lib/components/contacts/ContactFormSheet.svelte';
 	import { PatientsModel, patientTag } from '#lib/features/physio/physio.svelte';
-	import Initials from '#lib/components/kit/Initials.svelte';
-	import ProgressRing from '#lib/components/kit/ProgressRing.svelte';
+	import Initials from '@clinks/ui/kit/Initials.svelte';
+	import ProgressRing from '@clinks/ui/kit/ProgressRing.svelte';
 	import { contactName } from '#lib/data/workspace-api';
 	import { href, navigate } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';

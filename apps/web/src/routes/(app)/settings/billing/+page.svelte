@@ -3,20 +3,20 @@
 	import { page } from '$app/state';
 	import Check from '@lucide/svelte/icons/check';
 	import CreditCard from '@lucide/svelte/icons/credit-card';
-	import * as Card from '@clinks/ui-shared/components/ui/card';
-	import * as Tabs from '@clinks/ui-shared/components/ui/tabs';
-	import * as Dialog from '@clinks/ui-shared/components/ui/dialog';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { Input } from '@clinks/ui-shared/components/ui/input';
-	import { Switch } from '@clinks/ui-shared/components/ui/switch';
+	import * as Card from '@clinks/ui/components/ui/card';
+	import * as Tabs from '@clinks/ui/components/ui/tabs';
+	import * as Dialog from '@clinks/ui/components/ui/dialog';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { Input } from '@clinks/ui/components/ui/input';
+	import { Switch } from '@clinks/ui/components/ui/switch';
 	import PageHeader from '#lib/components/common/PageHeader.svelte';
 	import FormField from '#lib/components/common/FormField.svelte';
 	import StatusBadge from '#lib/components/common/StatusBadge.svelte';
 	import ConfirmDialog, { type ConfirmRequest } from '#lib/components/common/ConfirmDialog.svelte';
 	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
 	import { BillingModel } from '#lib/features/settings/settings.svelte';
-	import { planIncludes, plans, priceFor } from '#lib/domain/plans';
-	import { coreModules, moduleKeys, type ModuleKey } from '#lib/domain/types';
+	import { planIncludes, plans, priceFor } from '@clinks/domain/plans';
+	import { coreModules, moduleKeys, type ModuleKey } from '@clinks/domain/types';
 	import { routeQuery } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 

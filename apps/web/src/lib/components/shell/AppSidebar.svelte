@@ -6,7 +6,7 @@
 	import Moon from '@lucide/svelte/icons/moon';
 	import Sun from '@lucide/svelte/icons/sun';
 	import SlidersHorizontal from '@lucide/svelte/icons/sliders-horizontal';
-	import { Sidebar, SidebarContent, getSidebarContext } from '@clinks/ui-shared/components/ui/sidebar';
+	import { Sidebar, SidebarContent, getSidebarContext } from '@clinks/ui/components/ui/sidebar';
 	import TenantSwitcher from './TenantSwitcher.svelte';
 	import NotificationBell from './NotificationBell.svelte';
 	import SyncStatus from './SyncStatus.svelte';

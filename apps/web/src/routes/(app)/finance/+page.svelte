@@ -2,9 +2,9 @@
 	import { onMount } from 'svelte';
 	import Plus from '@lucide/svelte/icons/plus';
 	import ReceiptText from '@lucide/svelte/icons/receipt-text';
-	import * as Card from '@clinks/ui-shared/components/ui/card';
-	import * as Table from '@clinks/ui-shared/components/ui/table';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
+	import * as Card from '@clinks/ui/components/ui/card';
+	import * as Table from '@clinks/ui/components/ui/table';
+	import { Button } from '@clinks/ui/components/ui/button';
 	import PageHeader from '#lib/components/common/PageHeader.svelte';
 	import AsyncView from '#lib/components/common/AsyncView.svelte';
 	import SearchInput from '#lib/components/common/SearchInput.svelte';
@@ -16,7 +16,7 @@
 	import FinanceNav from '#lib/components/finance/FinanceNav.svelte';
 	import { InvoiceListModel } from '#lib/features/finance/invoice-detail.svelte';
 	import { contactName } from '#lib/data/workspace-api';
-	import { invoiceStatuses } from '#lib/domain/types';
+	import { invoiceStatuses } from '@clinks/domain/types';
 	import { href, navigate } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 

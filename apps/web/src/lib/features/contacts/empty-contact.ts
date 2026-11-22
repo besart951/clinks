@@ -1,5 +1,5 @@
-import type { Contact, ContactKind } from '../../domain/types.ts';
-import type { Draft } from '../../data/repository.ts';
+import type { Contact, ContactKind } from '@clinks/domain/types';
+import type { Draft } from '@clinks/contracts/repository';
 
 export function emptyContact(kind: ContactKind = 'person'): Draft<Contact> {
 	return {

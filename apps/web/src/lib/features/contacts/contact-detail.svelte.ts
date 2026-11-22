@@ -1,5 +1,5 @@
-import type { ContactId } from '../../domain/ids.ts';
-import type { Appointment, Contact, Invoice, MailMessage, Task } from '../../domain/types.ts';
+import type { ContactId } from '@clinks/domain/ids';
+import type { Appointment, Contact, Invoice, MailMessage, Task } from '@clinks/domain/types';
 import { contactPatch } from './contact-fields.ts';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';

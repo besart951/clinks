@@ -3,11 +3,11 @@
 	import Plus from '@lucide/svelte/icons/plus';
 	import Paperclip from '@lucide/svelte/icons/paperclip';
 	import Ellipsis from '@lucide/svelte/icons/ellipsis';
-	import * as Sheet from '@clinks/ui-shared/components/ui/sheet';
-	import * as Table from '@clinks/ui-shared/components/ui/table';
-	import * as DropdownMenu from '@clinks/ui-shared/components/ui/dropdown-menu';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { Input } from '@clinks/ui-shared/components/ui/input';
+	import * as Sheet from '@clinks/ui/components/ui/sheet';
+	import * as Table from '@clinks/ui/components/ui/table';
+	import * as DropdownMenu from '@clinks/ui/components/ui/dropdown-menu';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { Input } from '@clinks/ui/components/ui/input';
 	import PageHeader from '#lib/components/common/PageHeader.svelte';
 	import AsyncView from '#lib/components/common/AsyncView.svelte';
 	import FormField from '#lib/components/common/FormField.svelte';
@@ -16,8 +16,8 @@
 	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
 	import FinanceNav from '#lib/components/finance/FinanceNav.svelte';
 	import { ExpensesModel } from '#lib/features/finance/expenses.svelte';
-	import { vatFromGross } from '#lib/domain/money';
-	import { expenseCategories, vatRates, type Expense } from '#lib/domain/types';
+	import { vatFromGross } from '@clinks/domain/money';
+	import { expenseCategories, vatRates, type Expense } from '@clinks/domain/types';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();

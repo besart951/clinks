@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { toast } from 'svelte-sonner';
-	import * as Card from '@clinks/ui-shared/components/ui/card';
-	import * as Tabs from '@clinks/ui-shared/components/ui/tabs';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { Textarea } from '@clinks/ui-shared/components/ui/textarea';
+	import * as Card from '@clinks/ui/components/ui/card';
+	import * as Tabs from '@clinks/ui/components/ui/tabs';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { Textarea } from '@clinks/ui/components/ui/textarea';
 	import PageHeader from '#lib/components/common/PageHeader.svelte';
 	import FormField from '#lib/components/common/FormField.svelte';
 	import { routeQuery, setQuery } from '#lib/navigation';

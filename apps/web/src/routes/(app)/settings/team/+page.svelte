@@ -3,12 +3,12 @@
 	import UserPlus from '@lucide/svelte/icons/user-plus';
 	import Ellipsis from '@lucide/svelte/icons/ellipsis';
 	import MailOpen from '@lucide/svelte/icons/mail-open';
-	import * as Card from '@clinks/ui-shared/components/ui/card';
-	import * as Dialog from '@clinks/ui-shared/components/ui/dialog';
-	import * as Table from '@clinks/ui-shared/components/ui/table';
-	import * as DropdownMenu from '@clinks/ui-shared/components/ui/dropdown-menu';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { Input } from '@clinks/ui-shared/components/ui/input';
+	import * as Card from '@clinks/ui/components/ui/card';
+	import * as Dialog from '@clinks/ui/components/ui/dialog';
+	import * as Table from '@clinks/ui/components/ui/table';
+	import * as DropdownMenu from '@clinks/ui/components/ui/dropdown-menu';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { Input } from '@clinks/ui/components/ui/input';
 	import PageHeader from '#lib/components/common/PageHeader.svelte';
 	import AsyncView from '#lib/components/common/AsyncView.svelte';
 	import FormField from '#lib/components/common/FormField.svelte';
@@ -18,8 +18,8 @@
 	import PersonAvatar from '#lib/components/common/PersonAvatar.svelte';
 	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
 	import { TeamModel } from '#lib/features/settings/settings.svelte';
-	import { planFor } from '#lib/domain/plans';
-	import type { RoleId } from '#lib/domain/ids';
+	import { planFor } from '@clinks/domain/plans';
+	import type { RoleId } from '@clinks/domain/ids';
 	import { href } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 

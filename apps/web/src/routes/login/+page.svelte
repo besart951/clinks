@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { Input } from '@clinks/ui-shared/components/ui/input';
-	import * as Alert from '@clinks/ui-shared/components/ui/alert';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { Input } from '@clinks/ui/components/ui/input';
+	import * as Alert from '@clinks/ui/components/ui/alert';
 	import AuthShell from '#lib/components/auth/AuthShell.svelte';
 	import DemoAccounts from '#lib/components/auth/DemoAccounts.svelte';
 	import FormField from '#lib/components/common/FormField.svelte';

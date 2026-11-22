@@ -9,7 +9,7 @@
 <script lang="ts">
 	import PersonAvatar from './PersonAvatar.svelte';
 	import { auditKey, auditPath } from '#lib/features/activity/audit-text';
-	import type { AuditEntry } from '#lib/domain/types';
+	import type { AuditEntry } from '@clinks/domain/types';
 	import { href } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 

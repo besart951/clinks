@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Search from '@lucide/svelte/icons/search';
-	import { Input } from '@clinks/ui-shared/components/ui/input';
+	import { Input } from '@clinks/ui/components/ui/input';
 
 	let {
 		value = $bindable(''),

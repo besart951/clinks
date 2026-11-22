@@ -4,17 +4,17 @@
 	import House from '@lucide/svelte/icons/house';
 	import Briefcase from '@lucide/svelte/icons/briefcase';
 	import Check from '@lucide/svelte/icons/check';
-	import * as Alert from '@clinks/ui-shared/components/ui/alert';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { Input } from '@clinks/ui-shared/components/ui/input';
-	import { Textarea } from '@clinks/ui-shared/components/ui/textarea';
-	import { Switch } from '@clinks/ui-shared/components/ui/switch';
-	import { Label } from '@clinks/ui-shared/components/ui/label';
+	import * as Alert from '@clinks/ui/components/ui/alert';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { Input } from '@clinks/ui/components/ui/input';
+	import { Textarea } from '@clinks/ui/components/ui/textarea';
+	import { Switch } from '@clinks/ui/components/ui/switch';
+	import { Label } from '@clinks/ui/components/ui/label';
 	import AuthShell from '#lib/components/auth/AuthShell.svelte';
 	import FormField from '#lib/components/common/FormField.svelte';
 	import { OnboardingModel, onboardingSteps } from '#lib/features/auth/onboarding.svelte';
 	import { landingPath } from '#lib/features/auth/auth-forms.svelte';
-	import type { Industry } from '#lib/domain/types';
+	import type { Industry } from '@clinks/domain/types';
 	import { navigate } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 

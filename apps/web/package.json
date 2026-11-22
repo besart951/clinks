@@ -16,8 +16,10 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@clinks/contracts": "workspace:*",
+    "@clinks/domain": "workspace:*",
     "@clinks/i18n-types": "workspace:*",
-    "@clinks/ui-shared": "workspace:*",
+    "@clinks/ui": "workspace:*",
     "@fontsource-variable/geist": "5.3.0",
     "@fontsource-variable/geist-mono": "5.3.0",
     "@lucide/svelte": "1.77.0",

@@ -1,8 +1,8 @@
 <script lang="ts">
-	import * as Dialog from '@clinks/ui-shared/components/ui/dialog';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
+	import * as Dialog from '@clinks/ui/components/ui/dialog';
+	import { Button } from '@clinks/ui/components/ui/button';
 	import { contactName } from '#lib/data/workspace-api';
-	import type { Contact } from '#lib/domain/types';
+	import type { Contact } from '@clinks/domain/types';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let {

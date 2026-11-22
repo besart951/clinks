@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Bell from '@lucide/svelte/icons/bell';
-	import * as Tabs from '@clinks/ui-shared/components/ui/tabs';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
+	import * as Tabs from '@clinks/ui/components/ui/tabs';
+	import { Button } from '@clinks/ui/components/ui/button';
 	import PageHeader from '#lib/components/common/PageHeader.svelte';
 	import AsyncView from '#lib/components/common/AsyncView.svelte';
 	import EmptyState from '#lib/components/common/EmptyState.svelte';
 	import { NotificationsModel } from '#lib/features/notifications/notifications.svelte';
-	import type { AppNotification } from '#lib/domain/types';
+	import type { AppNotification } from '@clinks/domain/types';
 	import { navigate } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 

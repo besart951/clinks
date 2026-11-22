@@ -22,7 +22,7 @@ import type {
 	Tenant,
 	TimeEntry,
 	User,
-} from '../domain/types.ts';
+} from '@clinks/domain/types';
 
 export interface Tables {
 	tenants: Tenant;

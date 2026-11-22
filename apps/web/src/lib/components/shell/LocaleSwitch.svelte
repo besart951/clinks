@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Languages from '@lucide/svelte/icons/languages';
-	import * as DropdownMenu from '@clinks/ui-shared/components/ui/dropdown-menu';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
+	import * as DropdownMenu from '@clinks/ui/components/ui/dropdown-menu';
+	import { Button } from '@clinks/ui/components/ui/button';
 	import { locales, type Locale } from '#lib/i18n/catalog';
 	import { useWorkspace } from '#lib/workspace.svelte';
 

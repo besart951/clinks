@@ -1,4 +1,4 @@
-import { coreModules, moduleKeys, type Industry, type ModuleKey } from '../../domain/types.ts';
+import { coreModules, moduleKeys, type Industry, type ModuleKey } from '@clinks/domain/types';
 import type { Workspace } from '../../workspace.svelte.ts';
 
 export const onboardingSteps = ['company', 'industry', 'modules', 'team', 'finish'] as const;

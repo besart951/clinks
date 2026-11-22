@@ -1,7 +1,7 @@
-import { today } from '../../domain/dates.ts';
-import type { UserId } from '../../domain/ids.ts';
-import { effectiveStatus } from '../../domain/money.ts';
-import type { Appointment, Invoice, MailMessage, Task } from '../../domain/types.ts';
+import { today } from '@clinks/domain/dates';
+import type { UserId } from '@clinks/domain/ids';
+import { effectiveStatus } from '@clinks/domain/money';
+import type { Appointment, Invoice, MailMessage, Task } from '@clinks/domain/types';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 

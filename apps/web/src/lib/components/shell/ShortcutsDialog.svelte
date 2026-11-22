@@ -1,5 +1,5 @@
 <script lang="ts">
-	import * as Dialog from '@clinks/ui-shared/components/ui/dialog';
+	import * as Dialog from '@clinks/ui/components/ui/dialog';
 	import { allNavigationItems } from '#lib/features/shell/navigation-items';
 	import { useWorkspace } from '#lib/workspace.svelte';
 

@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
-import { InlineEditor, maskValue } from '../src/lib/components/kit/inline-edit.svelte.ts';
+import { InlineEditor, maskValue } from '@clinks/ui/kit/inline-edit';
 import { contactPatch, parseAddress, formatAddress } from '../src/lib/features/contacts/contact-fields.ts';
 import { validAhv } from '../src/lib/features/physio/patient-fields.ts';
 import { badgeCounts } from '../src/lib/features/shell/nav-badges.svelte.ts';
 import { visitWeekdays } from '../src/lib/features/spitex/clients.svelte.ts';
-import { ageOn } from '../src/lib/domain/dates.ts';
+import { ageOn } from '@clinks/domain/dates';
 
 describe('inline editor', () => {
 	it('saves a changed value and leaves edit mode', async () => {

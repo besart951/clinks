@@ -2,12 +2,12 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import Plus from '@lucide/svelte/icons/plus';
-	import * as Tabs from '@clinks/ui-shared/components/ui/tabs';
-	import * as Table from '@clinks/ui-shared/components/ui/table';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { Checkbox } from '@clinks/ui-shared/components/ui/checkbox';
-	import { Switch } from '@clinks/ui-shared/components/ui/switch';
-	import { Label } from '@clinks/ui-shared/components/ui/label';
+	import * as Tabs from '@clinks/ui/components/ui/tabs';
+	import * as Table from '@clinks/ui/components/ui/table';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { Checkbox } from '@clinks/ui/components/ui/checkbox';
+	import { Switch } from '@clinks/ui/components/ui/switch';
+	import { Label } from '@clinks/ui/components/ui/label';
 	import PageHeader from '#lib/components/common/PageHeader.svelte';
 	import AsyncView from '#lib/components/common/AsyncView.svelte';
 	import SearchInput from '#lib/components/common/SearchInput.svelte';
@@ -21,8 +21,8 @@
 	import TaskSheet from '#lib/components/planner/TaskSheet.svelte';
 	import { PlannerModel, type PlannerView } from '#lib/features/planner/planner.svelte';
 	import { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
-	import { today } from '#lib/domain/dates';
-	import type { Task } from '#lib/domain/types';
+	import { today } from '@clinks/domain/dates';
+	import type { Task } from '@clinks/domain/types';
 	import { routeQuery, setQuery } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 

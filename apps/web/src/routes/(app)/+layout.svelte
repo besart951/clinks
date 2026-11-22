@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount, type Snippet } from 'svelte';
 	import Search from '@lucide/svelte/icons/search';
-	import { SidebarProvider, SidebarTrigger, SidebarInset } from '@clinks/ui-shared/components/ui/sidebar';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
+	import { SidebarProvider, SidebarTrigger, SidebarInset } from '@clinks/ui/components/ui/sidebar';
+	import { Button } from '@clinks/ui/components/ui/button';
 	import AppSidebar from '#lib/components/shell/AppSidebar.svelte';
 	import Banners from '#lib/components/shell/Banners.svelte';
 	import CommandPalette from '#lib/components/shell/CommandPalette.svelte';

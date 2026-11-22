@@ -1,4 +1,4 @@
-import type { TenantId } from '../../domain/ids.ts';
+import type { TenantId } from '@clinks/domain/ids';
 import type { TenantOverview } from '../../data/account-api.ts';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';

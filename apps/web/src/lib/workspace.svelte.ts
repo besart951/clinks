@@ -5,8 +5,9 @@ import { MockApiError, MockDatabase, tableNames, type StorageLike, type TableNam
 import { NetworkSimulator } from './data/network.svelte.ts';
 import { demoRowsFor, createSeed } from './data/seed.ts';
 import { WorkspaceApi } from './data/workspace-api.ts';
-import { roleGrants } from './domain/permissions.ts';
-import type { TenantId } from './domain/ids.ts';
+import type { Patchable } from '@clinks/contracts/repository';
+import { roleGrants } from '@clinks/domain/permissions';
+import type { TenantId } from '@clinks/domain/ids';
 import { Translator, type TranslationParams } from './i18n/translator.svelte.ts';
 import { Session } from './session/session.svelte.ts';
 import { ThemeController } from './state/theme.svelte.ts';
@@ -25,12 +26,6 @@ export interface RunOptions {
 	success?: string;
 	successParams?: TranslationParams;
 	undo?: () => Promise<unknown>;
-}
-
-/** The slice of a repository an in-place edit needs. */
-export interface PatchableApi<Record extends { id: string; revision: number }, Patch extends object> {
-	get(id: Record['id']): Promise<Record>;
-	update(id: Record['id'], revision: number, patch: Patch): Promise<Record>;
 }
 
 /** Everything a screen needs: the mock API, the signed-in session and the translator. */
@@ -109,7 +104,7 @@ export class Workspace {
 	 * latest revision so later edits by others are not lost.
 	 */
 	async patch<Record extends { id: string; revision: number }, Patch extends object>(
-		api: PatchableApi<Record, Patch>,
+		api: Patchable<Record, Patch>,
 		record: Record,
 		patch: Patch,
 		label: string,

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import InvoiceEditorPage from '#lib/components/finance/InvoiceEditorPage.svelte';
-	import type { AppointmentId, ContactId } from '#lib/domain/ids';
+	import type { AppointmentId, ContactId } from '@clinks/domain/ids';
 	import { routeQuery } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 

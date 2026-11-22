@@ -1,6 +1,6 @@
-import type { TenantId, UserId } from '../domain/ids.ts';
-import { moduleBooked, roleGrants } from '../domain/permissions.ts';
-import type { Membership, ModuleKey, Permission, Role, Tenant, User } from '../domain/types.ts';
+import type { TenantId, UserId } from '@clinks/domain/ids';
+import { moduleBooked, roleGrants } from '@clinks/domain/permissions';
+import type { Membership, ModuleKey, Permission, Role, Tenant, User } from '@clinks/domain/types';
 import type { AccountApi } from '../data/account-api.ts';
 import { MockApiError } from '../data/database.ts';
 

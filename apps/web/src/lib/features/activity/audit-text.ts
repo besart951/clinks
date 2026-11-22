@@ -1,4 +1,4 @@
-import type { AuditEntry } from '../../domain/types.ts';
+import type { AuditEntry } from '@clinks/domain/types';
 
 const knownActions = new Set([
 	'created',

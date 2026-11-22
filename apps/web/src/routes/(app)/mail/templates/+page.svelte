@@ -3,10 +3,10 @@
 	import { toast } from 'svelte-sonner';
 	import Plus from '@lucide/svelte/icons/plus';
 	import FileText from '@lucide/svelte/icons/file-text';
-	import * as Dialog from '@clinks/ui-shared/components/ui/dialog';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { Input } from '@clinks/ui-shared/components/ui/input';
-	import { Textarea } from '@clinks/ui-shared/components/ui/textarea';
+	import * as Dialog from '@clinks/ui/components/ui/dialog';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { Input } from '@clinks/ui/components/ui/input';
+	import { Textarea } from '@clinks/ui/components/ui/textarea';
 	import PageHeader from '#lib/components/common/PageHeader.svelte';
 	import AsyncView from '#lib/components/common/AsyncView.svelte';
 	import EmptyState from '#lib/components/common/EmptyState.svelte';
@@ -15,7 +15,7 @@
 	import MailNav from '#lib/components/mail/MailNav.svelte';
 	import { placeholders } from '#lib/features/mail/templates';
 	import { Resource } from '#lib/state/resource.svelte';
-	import type { MailTemplate } from '#lib/domain/types';
+	import type { MailTemplate } from '@clinks/domain/types';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();

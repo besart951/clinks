@@ -14,7 +14,7 @@
 	import CalendarPlus from '@lucide/svelte/icons/calendar-plus';
 	import ArrowLeft from '@lucide/svelte/icons/arrow-left';
 	import UserRound from '@lucide/svelte/icons/user-round';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
+	import { Button } from '@clinks/ui/components/ui/button';
 	import PageHeader from '#lib/components/common/PageHeader.svelte';
 	import AsyncView from '#lib/components/common/AsyncView.svelte';
 	import SearchInput from '#lib/components/common/SearchInput.svelte';
@@ -24,8 +24,8 @@
 	import ComposeSheet from '#lib/components/mail/ComposeSheet.svelte';
 	import { MailboxModel } from '#lib/features/mail/mailbox.svelte';
 	import { contactName } from '#lib/data/workspace-api';
-	import { mailFolders, type MailFolder, type MailMessage } from '#lib/domain/types';
-	import type { MailId } from '#lib/domain/ids';
+	import { mailFolders, type MailFolder, type MailMessage } from '@clinks/domain/types';
+	import type { MailId } from '@clinks/domain/ids';
 	import { href, navigate, routeQuery, setQuery } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 

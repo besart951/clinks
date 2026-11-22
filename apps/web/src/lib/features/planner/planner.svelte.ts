@@ -1,5 +1,5 @@
-import type { TaskId } from '../../domain/ids.ts';
-import { taskStatuses, type Contact, type Task, type TaskPriority, type TaskStatus } from '../../domain/types.ts';
+import type { TaskId } from '@clinks/domain/ids';
+import { taskStatuses, type Contact, type Task, type TaskPriority, type TaskStatus } from '@clinks/domain/types';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 

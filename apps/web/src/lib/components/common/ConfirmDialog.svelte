@@ -9,8 +9,8 @@
 </script>
 
 <script lang="ts">
-	import * as Dialog from '@clinks/ui-shared/components/ui/dialog';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
+	import * as Dialog from '@clinks/ui/components/ui/dialog';
+	import { Button } from '@clinks/ui/components/ui/button';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { request = $bindable(null) }: { request: ConfirmRequest | null } = $props();

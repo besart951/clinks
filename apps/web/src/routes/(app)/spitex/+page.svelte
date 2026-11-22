@@ -7,9 +7,9 @@
 	import Printer from '@lucide/svelte/icons/printer';
 	import Plus from '@lucide/svelte/icons/plus';
 	import CircleCheck from '@lucide/svelte/icons/circle-check';
-	import * as Card from '@clinks/ui-shared/components/ui/card';
-	import * as DropdownMenu from '@clinks/ui-shared/components/ui/dropdown-menu';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
+	import * as Card from '@clinks/ui/components/ui/card';
+	import * as DropdownMenu from '@clinks/ui/components/ui/dropdown-menu';
+	import { Button } from '@clinks/ui/components/ui/button';
 	import PageHeader from '#lib/components/common/PageHeader.svelte';
 	import AsyncView from '#lib/components/common/AsyncView.svelte';
 	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
@@ -18,10 +18,10 @@
 	import AppointmentSheet from '#lib/components/calendar/AppointmentSheet.svelte';
 	import { PlanningModel } from '#lib/features/spitex/planning.svelte';
 	import { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
-	import { addDays, minutesToTime, today } from '#lib/domain/dates';
-	import { firstFreeStart } from '#lib/domain/scheduling';
-	import type { Appointment } from '#lib/domain/types';
-	import type { UserId } from '#lib/domain/ids';
+	import { addDays, minutesToTime, today } from '@clinks/domain/dates';
+	import { firstFreeStart } from '@clinks/domain/scheduling';
+	import type { Appointment } from '@clinks/domain/types';
+	import type { UserId } from '@clinks/domain/ids';
 	import { routeQuery } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 

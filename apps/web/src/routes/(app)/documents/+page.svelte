@@ -8,11 +8,11 @@
 	import Ellipsis from '@lucide/svelte/icons/ellipsis';
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	import Link2 from '@lucide/svelte/icons/link-2';
-	import * as Dialog from '@clinks/ui-shared/components/ui/dialog';
-	import * as DropdownMenu from '@clinks/ui-shared/components/ui/dropdown-menu';
-	import * as Table from '@clinks/ui-shared/components/ui/table';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { Input } from '@clinks/ui-shared/components/ui/input';
+	import * as Dialog from '@clinks/ui/components/ui/dialog';
+	import * as DropdownMenu from '@clinks/ui/components/ui/dropdown-menu';
+	import * as Table from '@clinks/ui/components/ui/table';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { Input } from '@clinks/ui/components/ui/input';
 	import PageHeader from '#lib/components/common/PageHeader.svelte';
 	import AsyncView from '#lib/components/common/AsyncView.svelte';
 	import SearchInput from '#lib/components/common/SearchInput.svelte';
@@ -23,8 +23,8 @@
 	import { DocumentsModel } from '#lib/features/documents/documents.svelte';
 	import { formatBytes } from '#lib/features/collaboration/attachments.svelte';
 	import { contactName } from '#lib/data/workspace-api';
-	import type { Folder as FolderRecord, StoredDocument } from '#lib/domain/types';
-	import type { ContactId } from '#lib/domain/ids';
+	import type { Folder as FolderRecord, StoredDocument } from '@clinks/domain/types';
+	import type { ContactId } from '@clinks/domain/ids';
 	import { href } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 

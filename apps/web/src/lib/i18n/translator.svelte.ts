@@ -1,5 +1,5 @@
-import type { CalendarDate, Rappen, Timestamp } from '../domain/types.ts';
-import { fromCalendarDate } from '../domain/dates.ts';
+import type { CalendarDate, Rappen, Timestamp } from '@clinks/domain/types';
+import { fromCalendarDate } from '@clinks/domain/dates';
 import { bundleFor, defaultLocale, interpolate, locales, type Locale } from './catalog.ts';
 
 export type TranslationParams = { [name: string]: string | number };

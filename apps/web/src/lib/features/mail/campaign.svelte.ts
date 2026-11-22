@@ -1,6 +1,6 @@
 import { toast } from 'svelte-sonner';
-import type { CampaignId } from '../../domain/ids.ts';
-import type { Campaign, CampaignStatus, Contact } from '../../domain/types.ts';
+import type { CampaignId } from '@clinks/domain/ids';
+import type { Campaign, CampaignStatus, Contact } from '@clinks/domain/types';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 import { campaignChecks } from './templates.ts';

@@ -1,4 +1,4 @@
-import type { AuditEntry, AuditTargetKind } from '../../domain/types.ts';
+import type { AuditEntry, AuditTargetKind } from '@clinks/domain/types';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 

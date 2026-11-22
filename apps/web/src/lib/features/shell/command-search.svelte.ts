@@ -1,5 +1,5 @@
 import { contactName } from '../../data/workspace-api.ts';
-import { addDays, today } from '../../domain/dates.ts';
+import { addDays, today } from '@clinks/domain/dates';
 import type { Workspace } from '../../workspace.svelte.ts';
 import { allNavigationItems } from './navigation-items.ts';
 

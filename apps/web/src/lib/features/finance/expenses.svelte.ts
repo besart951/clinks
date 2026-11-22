@@ -1,7 +1,7 @@
 import { toast } from 'svelte-sonner';
-import { today } from '../../domain/dates.ts';
-import type { Expense, ExpenseCategory, VatRate } from '../../domain/types.ts';
-import type { Draft } from '../../data/repository.ts';
+import { today } from '@clinks/domain/dates';
+import type { Expense, ExpenseCategory, VatRate } from '@clinks/domain/types';
+import type { Draft } from '@clinks/contracts/repository';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 import { uploadDocument } from '../collaboration/attachments.svelte.ts';

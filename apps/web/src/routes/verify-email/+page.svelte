@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { toast } from 'svelte-sonner';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { Input } from '@clinks/ui-shared/components/ui/input';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { Input } from '@clinks/ui/components/ui/input';
 	import AuthShell from '#lib/components/auth/AuthShell.svelte';
 	import FormField from '#lib/components/common/FormField.svelte';
 	import { CodeForm, landingPath } from '#lib/features/auth/auth-forms.svelte';

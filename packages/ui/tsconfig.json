@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@clinks/ui": ["./src/lib"],
+      "@clinks/ui/*": ["./src/lib/*"]
+    }
+  }
+}

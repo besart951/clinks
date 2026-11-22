@@ -2,8 +2,8 @@
 	import WifiOff from '@lucide/svelte/icons/wifi-off';
 	import Clock from '@lucide/svelte/icons/clock';
 	import UserCog from '@lucide/svelte/icons/user-cog';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { daysBetween, today, toCalendarDate } from '#lib/domain/dates';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { daysBetween, today, toCalendarDate } from '@clinks/domain/dates';
 	import { href, navigate } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 

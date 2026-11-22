@@ -3,9 +3,9 @@
 	import Paperclip from '@lucide/svelte/icons/paperclip';
 	import FileText from '@lucide/svelte/icons/file-text';
 	import Unlink from '@lucide/svelte/icons/unlink';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
+	import { Button } from '@clinks/ui/components/ui/button';
 	import { AttachmentsModel, formatBytes } from '#lib/features/collaboration/attachments.svelte';
-	import type { AttachmentTarget } from '#lib/domain/types';
+	import type { AttachmentTarget } from '@clinks/domain/types';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { target }: { target: AttachmentTarget } = $props();

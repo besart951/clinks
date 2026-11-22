@@ -14,19 +14,19 @@
 	import CircleCheck from '@lucide/svelte/icons/circle-check';
 	import Circle from '@lucide/svelte/icons/circle';
 	import X from '@lucide/svelte/icons/x';
-	import * as Card from '@clinks/ui-shared/components/ui/card';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { Progress } from '@clinks/ui-shared/components/ui/progress';
+	import * as Card from '@clinks/ui/components/ui/card';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { Progress } from '@clinks/ui/components/ui/progress';
 	import AsyncView from '#lib/components/common/AsyncView.svelte';
 	import ActivityFeed, { type Actor } from '#lib/components/common/ActivityFeed.svelte';
 	import KpiCard from '#lib/components/kit/KpiCard.svelte';
-	import SideCard from '#lib/components/kit/SideCard.svelte';
-	import PastToggle from '#lib/components/kit/PastToggle.svelte';
-	import { minutesBetween } from '#lib/domain/dates';
+	import SideCard from '@clinks/ui/kit/SideCard.svelte';
+	import PastToggle from '@clinks/ui/kit/PastToggle.svelte';
+	import { minutesBetween } from '@clinks/domain/dates';
 	import { navigate } from '#lib/navigation';
 	import { DashboardModel } from '#lib/features/dashboard/dashboard.svelte';
 	import { contactName } from '#lib/data/workspace-api';
-	import { today } from '#lib/domain/dates';
+	import { today } from '@clinks/domain/dates';
 	import { href } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 

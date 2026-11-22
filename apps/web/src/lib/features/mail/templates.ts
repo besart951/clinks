@@ -1,4 +1,4 @@
-import type { Contact } from '../../domain/types.ts';
+import type { Contact } from '@clinks/domain/types';
 
 /** Placeholders usable in templates and campaigns; replaced per recipient. */
 export const placeholders = ['vorname', 'nachname', 'firma', 'anrede'] as const;

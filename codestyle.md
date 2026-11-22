@@ -3,7 +3,7 @@
 ## Svelte 5 and Tailwind
 
 - Use Svelte 5 runes: `$state` and `$derived`; reserve `$effect` for external non-reactive integrations only.
-- Put shared controls in `packages/ui-shared`. Apps do not keep local error translation maps.
+- Put shared controls in `packages/ui`. Apps do not keep local error translation maps.
 - Use Tailwind utility classes and accessible labels, inputs, and live regions.
 - API errors arrive already localized; screens render them verbatim and keep no local error translation maps.
 - **Test Directory Separation:** Do NOT write test files in the same folder as production code. Separate tests into a dedicated `test/` directory (keeping `src/` strictly for production code).
@@ -56,7 +56,7 @@
   - Prefer standard function declarations and method syntax (`function name() {}` or `async methodName() {}`) over arrow function property assignments (`const name = () => {}` or `methodName = async () => {}`).
   - Use arrow functions primarily for short inline callbacks or preserving outer `this` bindings when passing inline event listeners.
 
-- Use always Shadcn-Ui componet if not installed, install it. in check always first in `packages\ui-shared\src\lib\components\ui`
+- Use always Shadcn-Ui componet if not installed, install it. in check always first in `packages\ui\src\lib\components\ui`
 - text should always have translation
 
 ## Protobuf

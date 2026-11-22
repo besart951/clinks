@@ -1,9 +1,9 @@
 <script lang="ts">
 	import ChevronLeft from '@lucide/svelte/icons/chevron-left';
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { addMonths, monthGrid, today } from '#lib/domain/dates';
-	import type { Task } from '#lib/domain/types';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { addMonths, monthGrid, today } from '@clinks/domain/dates';
+	import type { Task } from '@clinks/domain/types';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { tasks, onOpen }: { tasks: Task[]; onOpen: (task: Task) => void } = $props();

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { Appointment } from '#lib/domain/types';
-	import { minutesBetween } from '#lib/domain/dates';
+	import type { Appointment } from '@clinks/domain/types';
+	import { minutesBetween } from '@clinks/domain/dates';
 	import { href } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 

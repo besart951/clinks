@@ -8,11 +8,11 @@
 	import Merge from '@lucide/svelte/icons/merge';
 	import Users from '@lucide/svelte/icons/users';
 	import Building2 from '@lucide/svelte/icons/building-2';
-	import * as Table from '@clinks/ui-shared/components/ui/table';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { Checkbox } from '@clinks/ui-shared/components/ui/checkbox';
-	import { Switch } from '@clinks/ui-shared/components/ui/switch';
-	import { Label } from '@clinks/ui-shared/components/ui/label';
+	import * as Table from '@clinks/ui/components/ui/table';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { Checkbox } from '@clinks/ui/components/ui/checkbox';
+	import { Switch } from '@clinks/ui/components/ui/switch';
+	import { Label } from '@clinks/ui/components/ui/label';
 	import PageHeader from '#lib/components/common/PageHeader.svelte';
 	import AsyncView from '#lib/components/common/AsyncView.svelte';
 	import EmptyState from '#lib/components/common/EmptyState.svelte';
@@ -24,9 +24,9 @@
 	import ImportContactsDialog from '#lib/components/contacts/ImportContactsDialog.svelte';
 	import MergeContactsDialog from '#lib/components/contacts/MergeContactsDialog.svelte';
 	import { ContactsModel } from '#lib/features/contacts/contacts.svelte';
-	import Initials from '#lib/components/kit/Initials.svelte';
+	import Initials from '@clinks/ui/kit/Initials.svelte';
 	import { contactName } from '#lib/data/workspace-api';
-	import type { Contact } from '#lib/domain/types';
+	import type { Contact } from '@clinks/domain/types';
 	import { href, navigate, routeQuery } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 

@@ -1,6 +1,6 @@
-import { addDays, addMonths, monthGrid, startOfWeek, today, weekDays } from '../../domain/dates.ts';
-import type { AppointmentId, UserId } from '../../domain/ids.ts';
-import type { Appointment, AppointmentKind, CalendarDate, Contact } from '../../domain/types.ts';
+import { addDays, addMonths, monthGrid, startOfWeek, today, weekDays } from '@clinks/domain/dates';
+import type { AppointmentId, UserId } from '@clinks/domain/ids';
+import type { Appointment, AppointmentKind, CalendarDate, Contact } from '@clinks/domain/types';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 

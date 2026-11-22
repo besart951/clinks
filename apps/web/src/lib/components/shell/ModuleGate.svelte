@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import Sparkles from '@lucide/svelte/icons/sparkles';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
+	import { Button } from '@clinks/ui/components/ui/button';
 	import EmptyState from '#lib/components/common/EmptyState.svelte';
 	import Forbidden from '#lib/components/common/Forbidden.svelte';
-	import type { ModuleKey, Permission } from '#lib/domain/types';
+	import type { ModuleKey, Permission } from '@clinks/domain/types';
 	import { href } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 

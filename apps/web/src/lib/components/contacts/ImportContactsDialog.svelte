@@ -1,12 +1,12 @@
 <script lang="ts">
 	import Upload from '@lucide/svelte/icons/upload';
-	import * as Dialog from '@clinks/ui-shared/components/ui/dialog';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { Textarea } from '@clinks/ui-shared/components/ui/textarea';
+	import * as Dialog from '@clinks/ui/components/ui/dialog';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { Textarea } from '@clinks/ui/components/ui/textarea';
 	import { contactsFromCsv, parseCsv } from '#lib/features/contacts/csv';
 	import { contactName } from '#lib/data/workspace-api';
-	import type { Contact } from '#lib/domain/types';
-	import type { Draft } from '#lib/data/repository';
+	import type { Contact } from '@clinks/domain/types';
+	import type { Draft } from '@clinks/contracts/repository';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let {

@@ -1,5 +1,5 @@
-import type { InlineFieldSpec } from '../../components/kit/inline-edit.svelte.ts';
-import type { Contact } from '../../domain/types.ts';
+import type { InlineFieldSpec } from '@clinks/ui/kit/inline-edit';
+import type { Contact } from '@clinks/domain/types';
 import { contactFields, type FieldText } from '../contacts/contact-fields.ts';
 
 export const patientLanguages = ['de', 'fr', 'it', 'en'] as const;

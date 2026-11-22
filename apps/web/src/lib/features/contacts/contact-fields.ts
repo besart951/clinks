@@ -1,6 +1,6 @@
-import type { InlineFieldSpec } from '../../components/kit/inline-edit.svelte.ts';
-import { ageOn, today } from '../../domain/dates.ts';
-import type { Address, CalendarDate, Contact } from '../../domain/types.ts';
+import type { InlineFieldSpec } from '@clinks/ui/kit/inline-edit';
+import { ageOn, today } from '@clinks/domain/dates';
+import type { Address, CalendarDate, Contact } from '@clinks/domain/types';
 
 export interface FieldText {
 	t: (key: string, params?: { [name: string]: string | number }) => string;

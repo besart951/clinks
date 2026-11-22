@@ -1,7 +1,7 @@
-import type { InlineFieldSpec } from '../../components/kit/inline-edit.svelte.ts';
-import { isValidSwissIban } from '../../domain/qr-bill.ts';
+import type { InlineFieldSpec } from '@clinks/ui/kit/inline-edit';
+import { isValidSwissIban } from '@clinks/domain/qr-bill';
 import { toast } from 'svelte-sonner';
-import type { InvitationId, MembershipId, RoleId, SessionId } from '../../domain/ids.ts';
+import type { InvitationId, MembershipId, RoleId, SessionId } from '@clinks/domain/ids';
 import type {
 	BrowserSession,
 	Invitation,
@@ -11,7 +11,7 @@ import type {
 	PlanCode,
 	Role,
 	Tenant,
-} from '../../domain/types.ts';
+} from '@clinks/domain/types';
 import type { Member, PlatformInvoice } from '../../data/account-api.ts';
 import type { Locale } from '../../i18n/catalog.ts';
 import { Resource } from '../../state/resource.svelte.ts';

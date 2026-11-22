@@ -5,16 +5,16 @@
 	import ChevronLeft from '@lucide/svelte/icons/chevron-left';
 	import TriangleAlert from '@lucide/svelte/icons/triangle-alert';
 	import CircleX from '@lucide/svelte/icons/circle-x';
-	import * as Card from '@clinks/ui-shared/components/ui/card';
-	import { Button } from '@clinks/ui-shared/components/ui/button';
-	import { Input } from '@clinks/ui-shared/components/ui/input';
-	import { Textarea } from '@clinks/ui-shared/components/ui/textarea';
-	import Stepper from '#lib/components/kit/Stepper.svelte';
-	import UnderlineTabs from '#lib/components/kit/UnderlineTabs.svelte';
-	import Initials from '#lib/components/kit/Initials.svelte';
+	import * as Card from '@clinks/ui/components/ui/card';
+	import { Button } from '@clinks/ui/components/ui/button';
+	import { Input } from '@clinks/ui/components/ui/input';
+	import { Textarea } from '@clinks/ui/components/ui/textarea';
+	import Stepper from '@clinks/ui/kit/Stepper.svelte';
+	import UnderlineTabs from '@clinks/ui/kit/UnderlineTabs.svelte';
+	import Initials from '@clinks/ui/kit/Initials.svelte';
 	import { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
 	import { contactName } from '#lib/data/workspace-api';
-	import { campaignStatuses } from '#lib/domain/types';
+	import { campaignStatuses } from '@clinks/domain/types';
 	import { href } from '#lib/navigation';
 	import AsyncView from '#lib/components/common/AsyncView.svelte';
 	import FormField from '#lib/components/common/FormField.svelte';
@@ -25,7 +25,7 @@
 	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
 	import { CampaignEditorModel } from '#lib/features/mail/campaign.svelte';
 	import { fillPlaceholders, placeholders } from '#lib/features/mail/templates';
-	import type { CampaignId } from '#lib/domain/ids';
+	import type { CampaignId } from '@clinks/domain/ids';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();

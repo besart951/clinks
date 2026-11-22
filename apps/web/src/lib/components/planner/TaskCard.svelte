@@ -5,8 +5,8 @@
 	import PersonAvatar from '#lib/components/common/PersonAvatar.svelte';
 	import { priorityTone } from '#lib/components/common/tones';
 	import type { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
-	import { today } from '#lib/domain/dates';
-	import type { Task } from '#lib/domain/types';
+	import { today } from '@clinks/domain/dates';
+	import type { Task } from '@clinks/domain/types';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { task, people }: { task: Task; people: PeopleDirectory } = $props();

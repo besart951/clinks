@@ -2,11 +2,11 @@ import assert from 'node:assert/strict';
 import { beforeEach, describe, it } from 'vitest';
 import { AccountApi, roleFor } from '../src/lib/data/account-api.ts';
 import { MockApiError, MockDatabase, type StorageLike } from '../src/lib/data/database.ts';
-import { contactSchema } from '../src/lib/data/schemas.ts';
+import { contactSchema } from '@clinks/contracts/schemas';
 import { createSeed, demoPassword } from '../src/lib/data/seed.ts';
 import { WorkspaceApi } from '../src/lib/data/workspace-api.ts';
-import { roleGrants } from '../src/lib/domain/permissions.ts';
-import type { TenantId, UserId } from '../src/lib/domain/ids.ts';
+import { roleGrants } from '@clinks/domain/permissions';
+import type { TenantId, UserId } from '@clinks/domain/ids';
 
 class MemoryStorage implements StorageLike {
 	values = new Map<string, string>();
