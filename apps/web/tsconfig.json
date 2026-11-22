@@ -1,12 +1,9 @@
 {
-  "extends": ["../../tsconfig.base.json", "./.svelte-kit/tsconfig.json"],
+  "extends": ["../../tsconfig.base.json", "$app/tsconfig"],
   "compilerOptions": {
-    "allowJs": true,
-    "checkJs": true,
     "sourceMap": true,
-    "paths": {
-      "#lib/*": ["./src/lib/*"],
-      "$app/types": ["./.svelte-kit/types/index.d.ts"]
-    }
-  }
+    "paths": { "#lib/*": ["./src/lib/*"] }
+  },
+  "include": ["src", "test", "*"],
+  "exclude": ["src/service-worker"]
 }
