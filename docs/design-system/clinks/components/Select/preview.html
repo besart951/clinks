@@ -1,0 +1,25 @@
+<!-- @dsCard group="Forms" height=248 subtitle="Select with open list, placeholder, NativeSelect" -->
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<title>Select — preview</title>
+</head>
+<body>
+<div style="padding:var(--desktop-page);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--desktop-page);align-items:start;max-width:720px">
+  <div style="display:grid;gap:8px">
+    <button class="cl-input cl-select-trigger" type="button" aria-expanded="true" aria-label="Rolle"><span>Mitarbeitende</span><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+    <div class="cl-menu" role="listbox">
+      <div class="cl-menu-label">Rolle</div>
+      <div class="cl-menu-item cl-select-item" role="option">Administration</div>
+      <div class="cl-menu-item cl-select-item" role="option" aria-selected="true" data-highlighted>Mitarbeitende<span class="cl-menu-indicator"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span></div>
+      <div class="cl-menu-item cl-select-item" role="option">Nur lesen</div>
+    </div>
+  </div>
+  <div style="display:grid;gap:8px">
+    <button class="cl-input cl-select-trigger" type="button" data-placeholder aria-label="Land"><span>Land wählen</span><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+    <select class="cl-input" aria-label="Land"><option>Schweiz</option><option>Deutschland</option><option>Österreich</option></select>
+  </div>
+</div>
+</body>
+</html>

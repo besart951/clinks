@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<title>PlanerLink – Planung</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400..700&amp;display=swap">
+<style>
+:root{color-scheme:dark}input::-webkit-calendar-picker-indicator{opacity:.85;cursor:pointer}
+body{margin:0;background:oklch(0.145 0 0);color:oklch(0.985 0 0);font-family:'Roboto',sans-serif;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+*{box-sizing:border-box}
+a{color:oklch(0.7 0.14 264)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid oklch(0.7 0.14 264);outline-offset:2px}
+.qb{transition:background-color .12s,color .12s}.qb:hover{background:oklch(0.269 0 0)}
+.pb{transition:background-color .12s}.pb:hover{background:oklch(0.3731 0.1751 265.638)}
+.nav:hover{background:oklch(0.25 0 0)}
+.hov .rv{opacity:0;transition:opacity .15s}
+.hov:hover .rv,.hov:focus-within .rv{opacity:1}
+.hov .more{max-height:0;opacity:0;overflow:hidden;transition:max-height .2s,opacity .15s}
+.hov:hover .more,.hov:focus-within .more{max-height:120px;opacity:1}
+@media (pointer:coarse){.hov .rv,.hov .more{opacity:1;max-height:none}}
+.chip-w{position:relative}
+.pop{visibility:hidden;opacity:0;translate:0 -4px;transition:opacity .15s,translate .15s,visibility 0s linear .15s;pointer-events:none;position:absolute;left:0;top:calc(100% + 6px);z-index:30;width:248px;padding:12px;border-radius:12px;background:oklch(0.235 0 0);border:1px solid #ffffff1f;box-shadow:0 10px 15px -3px #00000066, 0 4px 6px -4px #00000066;text-align:left}
+.chip-w:hover .pop,.chip-w:has(:focus-visible) .pop{visibility:visible;opacity:1;translate:0 0;transition-delay:.5s,.5s,.5s}
+.chip-w:has(:focus-visible) .pop{transition-delay:0s}
+.dragging .pop{display:none}
+.chip{transition:transform .1s,background-color .12s,border-color .12s}
+.chip:hover{transform:translateY(-1px)}
+.cell{container-type:inline-size}
+.chip>span[aria-hidden]{flex-shrink:0}
+.cl{min-width:0;overflow:hidden;white-space:nowrap}
+.chip.as{cursor:grab}.chip.as:active{cursor:grabbing}
+.chip .grip{margin-left:auto;display:inline-flex;flex-shrink:0;opacity:0;color:oklch(0.8 0 0);transition:opacity .15s}
+.chip.as:hover .grip,.chip.as:focus-visible .grip{opacity:.75}
+.chip.op .grip,.chip.as .clh{display:none}
+.clh{display:none;align-items:center;gap:4px;white-space:nowrap;overflow:hidden}
+.clh .pl{display:inline-flex}
+.chip.op:hover .cl{display:none}
+.chip.op:hover .clh{display:inline-flex}
+.chip.op:hover{background:oklch(0.828 0.189 84.429 / 0.12)!important;border-style:solid!important}
+.chip.as:hover{border-color:oklch(0.7 0.14 264 / 0.7)!important}
+.chip.src{opacity:.35}
+.chip.tgt{background:oklch(0.2731 0.0358 265.638)!important;border:1px solid oklch(0.7 0.14 264)!important;color:oklch(0.9 0.05 264)!important}
+.chip{overflow:hidden}
+@container (max-width: 84px){.chip.op .clh .pl{display:none}}
+@container (max-width: 68px){.chip.op .clh .t{display:none}.chip.op .clh .pl{display:inline-flex}.chip.op:hover{justify-content:center}}
+@container (max-width: 56px){.chip.op .cl{display:none}.chip.op{justify-content:center}}
+@container (max-width: 96px){.chip .grip{display:none}}
+.wrow{transition:background-color .15s}.wrow:hover{background:#ffffff05}
+.cell{transition:background-color .15s,border-color .15s,box-shadow .15s}
+.dragging .cell.drop{box-shadow:inset 0 0 0 1px oklch(0.7 0.14 264 / 0.45)}
+.dragging .cell.over{box-shadow:inset 0 0 0 2px oklch(0.7 0.14 264);background:oklch(0.2731 0.0358 265.638 / 0.5)!important}
+.dayhead{transition:background-color .15s,color .15s}.dayhead:hover{background:oklch(0.3 0 0)}
+.hl{transition:box-shadow .15s,background-color .15s}.hl:hover{box-shadow:inset 0 0 0 1px oklch(0.7 0.14 264 / 0.55)}
+.rowlink{cursor:pointer;border-radius:10px;transition:background-color .15s}.rowlink:hover{background:#ffffff07}
+.blk{transition:left .16s cubic-bezier(.2,.8,.2,1),box-shadow .15s,filter .15s}
+.blk.as{cursor:grab;touch-action:none;user-select:none}
+.blk.as:hover{box-shadow:0 0 0 1px oklch(0.7 0.14 264)}
+.blk.op:hover{filter:brightness(1.3);border-style:solid!important}
+.blk.drag{cursor:grabbing;z-index:3;box-shadow:0 0 0 2px oklch(0.7 0.14 264),0 10px 24px #000a;transition:left .07s linear,box-shadow .15s}
+@container (max-width: 56px){.chip.op .cl{display:none}}
+@container (max-width: 66px){.bh{display:none}}
+.cell .add{opacity:0;transition:opacity .12s}
+.cell:hover .add{opacity:1}
+.ctl{width:100%;height:40px;padding:0 12px;border-radius:9.6px;background:oklch(0.22 0.007 255);border:1px solid oklch(0.42 0.008 255);font-size:14px}
+.ctl:hover{border-color:oklch(0.6 0 0)}
+.ctl:focus{outline:none;border-color:oklch(0.7 0.14 264);box-shadow:0 0 0 1px oklch(0.7 0.14 264)}
+textarea.ctl{height:auto;padding:10px 12px;line-height:20px;resize:vertical}
+input::placeholder,textarea::placeholder{color:oklch(0.55 0 0)}
+.lb{font-size:13px;font-weight:500;color:oklch(0.72 0 0)}
+.ghost{border:0;background:transparent}
+.seg-b{height:30px;padding:0 12px;border:0;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer}
+.dayhead:hover{color:oklch(0.985 0 0)}
+.sk{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+.ocard{cursor:grab;transition:background-color .15s,border-color .15s,opacity .15s,box-shadow .15s}
+.ocard:hover{border-color:#ffffff40!important;background:oklch(0.215 0 0)!important}
+.ocard:active{cursor:grabbing}
+.ocard .og{opacity:.3;transition:opacity .15s}.ocard:hover .og,.ocard.sel .og{opacity:.9}
+.ocard .m2{max-height:0;opacity:0;overflow:hidden;transition:max-height .2s,opacity .15s}
+.ocard:hover .m2,.ocard.sel .m2,.ocard:focus-visible .m2{max-height:40px;opacity:1}
+.ocard.sel{border-color:oklch(0.7 0.14 264)!important;box-shadow:0 0 0 1px oklch(0.7 0.14 264);background:oklch(0.2731 0.0358 265.638 / 0.6)!important}
+.ocard.src{opacity:.35}
+.prow{transition:opacity .2s}
+.pact .prow.no{opacity:.4}
+.pact .prow.ok .ptrack{cursor:copy}
+.pact .prow.ok .ptrack:hover{background:#ffffff05}
+.pblk{cursor:grab;transition:left .16s cubic-bezier(.2,.8,.2,1),box-shadow .15s,opacity .15s}
+.pblk:hover{box-shadow:0 0 0 1px #ffffff66,0 4px 12px #0006}
+.pblk:active{cursor:grabbing}
+.pblk .x,.wchip .x{opacity:0;transition:opacity .15s,background-color .15s}
+.pblk:hover .x,.wchip:hover .x{opacity:1}
+.x:hover{background:#ffffff26!important}
+.pblk.src,.wchip.src{opacity:.3}
+.just{animation:pl-just 1.1s ease-out}
+@keyframes pl-just{0%{box-shadow:0 0 0 3px oklch(0.7 0.14 264)}100%{box-shadow:0 0 0 0 oklch(0.7 0.14 264 / 0)}}
+.ptip{position:absolute;top:calc(100% - 4px);z-index:20;width:230px;padding:10px 12px;border-radius:10px;background:oklch(0.235 0 0);border:1px solid #ffffff1f;box-shadow:0 10px 24px #0009;display:flex;flex-direction:column;gap:2px;font-size:12px;color:oklch(0.9 0 0);pointer-events:none;visibility:hidden;opacity:0;translate:0 -4px;transition:opacity .15s,translate .15s,visibility 0s linear .15s}
+.pblk:hover+.ptip{visibility:visible;opacity:1;translate:0 0;transition-delay:.45s,.45s,.45s}
+.pact .ptip{display:none}
+.pghost{pointer-events:none;transition:left .1s ease-out}
+.wcell{transition:background-color .15s,box-shadow .15s,opacity .2s}
+.pact .wcell.dim{opacity:.3}
+.pact .wcell.ok{box-shadow:inset 0 0 0 1px oklch(0.7 0.14 264 / 0.4);cursor:copy}
+.pact .wcell.no{cursor:not-allowed}
+.pact .wcell.over.ok{box-shadow:inset 0 0 0 2px oklch(0.7 0.14 264);background:oklch(0.2731 0.0358 265.638 / 0.45)!important}
+.pact .wcell.over.no{box-shadow:inset 0 0 0 2px oklch(0.76 0.16 25)}
+.wchip{cursor:grab;transition:background-color .15s,opacity .15s}.wchip:hover{background:oklch(0.29 0 0)!important}
+.dtab{transition:background-color .15s,color .15s,border-color .15s}.dtab:hover{border-color:#ffffff40!important;color:oklch(0.985 0 0)!important}
+.dh2{transition:background-color .15s}.dh2:hover{background:#ffffff0a!important}
+.pdrop{transition:opacity .15s,border-color .15s,background-color .15s}
+.pdrop.on{border-color:oklch(0.7 0.14 264)!important;background:oklch(0.2731 0.0358 265.638 / 0.85)!important}
+</style>
+</helmet>
+
+<div style="min-height: 100vh; display: flex; background: oklch(0.145 0 0); color: oklch(0.985 0 0); position: relative">
+  <aside style="{{asideStyle}}">
+    <div style="height: 60px; padding: 0 12px; display: flex; align-items: center; gap: 10px">
+      <span aria-hidden="true" style="flex: 0 0 auto; width: 32px; height: 32px; border-radius: 9px; background: oklch(0.48 0.14 48 / 0.18); color: oklch(0.78 0.14 60); display: flex; align-items: center; justify-content: center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4h6v3H9ZM6 6h12v15H6ZM9 12h6M9 16h4"></path></svg></span>
+      <sc-if value="{{expanded}}" hint-placeholder-val="{{true}}"><span style="flex: 1; display: flex; flex-direction: column; line-height: 16px"><span style="font-size: 14px; font-weight: 600">PlanerLink</span><span style="font-size: 12px; color: oklch(0.58 0 0)">Empower</span></span>
+        <button type="button" class="qb ghost" aria-label="Anwendung oder Workspace wechseln" style="width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: oklch(0.58 0 0); cursor: pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5M7 9l5-5 5 5"></path></svg></button></sc-if>
+    </div>
+    <nav aria-label="Hauptnavigation" style="padding: 8px 10px; display: flex; flex-direction: column; gap: 16px; flex: 1">
+      <sc-for list="{{groups}}" as="g" hint-placeholder-count="2"><div style="display: flex; flex-direction: column; gap: 2px">
+        <sc-if value="{{g.show}}" hint-placeholder-val="{{true}}"><span style="padding: 0 10px 4px; font-size: 12px; color: oklch(0.58 0 0)">{{g.label}}</span></sc-if>
+        <sc-for list="{{g.items}}" as="it" hint-placeholder-count="2"><a href="{{it.href}}" class="nav" aria-current="{{it.current}}" aria-label="{{it.label}}" title="{{it.label}}" style="{{it.style}}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{it.icon}}"></path></svg>
+          <sc-if value="{{it.show}}" hint-placeholder-val="{{true}}"><span>{{it.label}}</span></sc-if></a></sc-for>
+      </div></sc-for>
+    </nav>
+    <div style="padding: 10px; border-top: 1px solid #ffffff14">
+      <a href="WsProfil.dc.html" class="nav" aria-label="Konto von Besart Morina" style="height: 44px; padding: 0 6px; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; color: oklch(0.985 0 0); text-decoration: none">
+        <span aria-hidden="true" style="flex: 0 0 auto; width: 30px; height: 30px; border-radius: 9999px; background: oklch(0.269 0 0); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600">BM</span>
+        <sc-if value="{{expanded}}" hint-placeholder-val="{{true}}"><span style="flex: 1; font-size: 13px">Besart Morina</span></sc-if></a>
+    </div>
+  </aside>
+  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+    <header style="height: 60px; padding: 0 16px 0 10px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #ffffff14">
+      <button type="button" class="qb ghost" onClick="{{toggleCol}}" aria-label="{{colLabel}}" title="{{colLabel}}" style="width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; color: oklch(0.58 0 0); cursor: pointer"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h18v18H3ZM9 3v18"></path></svg></button>
+      <h1 style="flex: 1; margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -0.01em">Planung</h1>
+      <button type="button" class="qb ghost" aria-label="Neu laden" title="Neu laden" style="width: 36px; height: 36px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; color: oklch(0.72 0 0); cursor: pointer; "><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"></path></svg></button>
+    </header>
+    <div style="flex: 1; display: flex; min-height: 0">
+      <main style="flex: 1; min-width: 0; padding: 20px 24px 40px; display: flex; flex-direction: column; gap: 16px"><div style="display: flex; flex-direction: column; gap: 14px"><div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px">
+        <div style="display: flex; align-items: center; gap: 6px">
+          <button type="button" class="qb" style="height: 32px; padding: 0 12px; border-radius: 9px; border: 1px solid #ffffff1f; background: transparent; font-size: 13px; font-weight: 500; cursor: pointer">Heute</button>
+          <button type="button" class="qb ghost" aria-label="Zurück" title="Zurück" style="width: 36px; height: 36px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; color: oklch(0.72 0 0); cursor: pointer; "><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button><button type="button" class="qb ghost" aria-label="Weiter" title="Weiter" style="width: 36px; height: 36px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; color: oklch(0.72 0 0); cursor: pointer; "><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+          <span style="font-size: 15px; font-weight: 600; margin-left: 6px">{{rangeLabel}}</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px">
+          <sc-if value="{{isWoche}}" hint-placeholder-val="{{false}}"><button type="button" class="qb" onClick="{{toggleWorkdays}}" title="Wochenende ein- oder ausblenden" style="height: 30px; padding: 0 12px; border-radius: 9999px; border: 1px solid #ffffff1f; background: transparent; font-size: 12px; color: oklch(0.72 0 0); cursor: pointer">{{workdaysLabel}}</button></sc-if>
+          <div role="group" aria-label="Ansicht" style="display: flex; gap: 2px; padding: 3px; border-radius: 10px; background: oklch(0.2 0 0)">
+            <sc-for list="{{views}}" as="v" hint-placeholder-count="2"><button type="button" class="seg-b" onClick="{{v.pick}}" aria-pressed="{{v.pressed}}" style="{{v.style}}">{{v.label}}</button></sc-for>
+          </div>
+        </div>
+      </div>
+      <sc-if value="{{isTag}}" hint-placeholder-val="{{true}}"><div role="tablist" aria-label="Tag wählen" style="display: flex; flex-wrap: wrap; gap: 6px">
+        <sc-for list="{{dayTabs}}" as="t" hint-placeholder-count="7"><button type="button" role="tab" class="dtab" aria-selected="{{t.sel}}" onClick="{{t.pick}}" style="{{t.style}}">{{t.wd}} {{t.d}}<sc-if value="{{t.hasOpen}}" hint-placeholder-val="{{true}}"><span title="offene Einsätze" style="{{t.badge}}">{{t.open}}</span></sc-if></button></sc-for>
+      </div></sc-if><sc-if value="{{isTag}}" hint-placeholder-val="{{true}}">
+      <div role="grid" aria-label="Tagesplanung" class="{{calCls}}" style="display: flex; flex-direction: column; border: 1px solid #ffffff14; border-radius: 12px">
+        <div role="row" style="display: grid; grid-template-columns: 184px 1fr; border-bottom: 1px solid #ffffff1f; background: oklch(0.17 0 0); border-radius: 12px 12px 0 0">
+          <span style="font-size: 12px; color: oklch(0.72 0 0); padding: 10px 12px; border-right: 1px solid #ffffff12">Mitarbeitende</span>
+          <div style="position: relative; height: 34px"><sc-for list="{{hours}}" as="hr" hint-placeholder-count="12"><span style="{{hr.style}}">{{hr.h}}</span></sc-for>
+            <sc-if value="{{hdrBand}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="{{hdrBandStyle}}">{{hdrBandText}}</span></sc-if></div>
+        </div>
+        <sc-for list="{{rowsDay}}" as="r" hint-placeholder-count="4">
+          <div role="row" class="{{r.cls}}" style="display: grid; grid-template-columns: 184px 1fr; border-bottom: 1px solid #ffffff12; min-height: 62px">
+            <div title="{{r.title}}" style="padding: 10px 12px; display: flex; align-items: center; gap: 10px; border-right: 1px solid #ffffff12; min-width: 0">
+              <span aria-hidden="true" style="{{r.avStyle}}">{{r.ini}}</span>
+              <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px">
+                <span style="font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.name}}</span>
+                <span style="font-size: 11px; color: oklch(0.58 0 0); white-space: nowrap">{{r.meta}}</span>
+                <span aria-hidden="true" style="height: 3px; border-radius: 9999px; background: oklch(0.3 0 0); overflow: hidden"><span style="{{r.loadStyle}}"></span></span>
+              </span>
+            </div>
+            <div class="ptrack" role="gridcell" aria-label="{{r.trackLabel}}" onDragOver="{{r.dragOver}}" onDragLeave="{{r.leave}}" onDrop="{{r.drop}}" onMouseMove="{{r.move}}" onMouseLeave="{{r.leave}}" onClick="{{r.click}}" style="position: relative; transition: background-color .15s">
+              <sc-for list="{{r.grid}}" as="g" hint-placeholder-count="12"><span aria-hidden="true" style="{{g.style}}"></span></sc-for>
+              <sc-for list="{{r.off}}" as="o" hint-placeholder-count="2"><span aria-hidden="true" style="{{o.style}}"></span></sc-for>
+              <sc-if value="{{r.hasBand}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="{{r.bandStyle}}"></span></sc-if>
+              <sc-for list="{{r.items}}" as="it" hint-placeholder-count="1"><div class="pblk {{it.cls}}" draggable="true" onDragStart="{{it.dragStart}}" onDragEnd="{{it.dragEnd}}" aria-label="{{it.name}}, {{it.time}}" style="{{it.style}}">
+                <span style="font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 14px">{{it.name}}</span><span style="font-size: 11px; opacity: .75; white-space: nowrap">{{it.time}}</span><button type="button" class="x" onClick="{{it.unassign}}" aria-label="Zuweisung von {{it.name}} aufheben" title="Zuweisung aufheben" style="position: absolute; top: 3px; right: 3px; width: 18px; height: 18px; border: 0; border-radius: 5px; padding: 0; background: #00000040; color: oklch(0.9 0 0); display: inline-flex; align-items: center; justify-content: center; cursor: pointer"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button></div><div class="ptip" role="tooltip" style="{{it.tipStyle}}"><b style="font-size: 13px">{{it.name}}</b><span>{{it.time}} · {{it.what}}</span><span style="color: oklch(0.58 0 0)">{{it.win}}</span><span style="color: oklch(0.58 0 0)">{{it.addr}}</span><span style="color: oklch(0.58 0 0); font-size: 11px; margin-top: 4px">Ziehen zum Verschieben · × hebt die Zuweisung auf</span></div></sc-for>
+              <sc-if value="{{r.hasGhost}}" hint-placeholder-val="{{false}}"><div class="pghost" aria-hidden="true" style="{{r.ghostStyle}}"><span>{{r.ghostLabel}}</span><span style="font-size: 10px; font-weight: 500; opacity: .85">{{r.ghostReason}}</span></div></sc-if>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if><sc-if value="{{isWoche}}" hint-placeholder-val="{{false}}">
+      <div role="grid" aria-label="Wochenplanung" class="{{calCls}}" style="display: flex; flex-direction: column; border: 1px solid #ffffff14; border-radius: 12px; overflow: hidden">
+        <div role="row" style="{{wCols}}; border-bottom: 1px solid #ffffff1f; background: oklch(0.17 0 0)">
+          <span style="font-size: 12px; color: oklch(0.72 0 0); padding: 10px 12px">Mitarbeitende</span>
+          <sc-for list="{{wHeads}}" as="h" hint-placeholder-count="5"><button type="button" class="dh2" onClick="{{h.go}}" title="Tagesansicht {{h.long}}" style="{{h.style}}"><span>{{h.wd}} <b style="font-weight: 600; color: oklch(0.985 0 0)">{{h.d}}</b></span><sc-if value="{{h.hasOpen}}" hint-placeholder-val="{{true}}"><span style="{{h.badge}}">{{h.open}} offen</span></sc-if></button></sc-for>
+        </div>
+        <sc-for list="{{rowsWeek}}" as="r" hint-placeholder-count="4">
+          <div role="row" style="{{r.cols}}; border-bottom: 1px solid #ffffff12">
+            <div title="{{r.title}}" style="padding: 10px 12px; display: flex; align-items: center; gap: 10px; border-right: 1px solid #ffffff12; min-width: 0">
+              <span aria-hidden="true" style="{{r.avStyle}}">{{r.ini}}</span>
+              <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px">
+                <span style="font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.name}}</span>
+                <span style="font-size: 11px; color: oklch(0.58 0 0); white-space: nowrap">{{r.meta}}</span>
+                <span aria-hidden="true" style="height: 3px; border-radius: 9999px; background: oklch(0.3 0 0); overflow: hidden"><span style="{{r.loadStyle}}"></span></span>
+              </span>
+            </div>
+            <sc-for list="{{r.cells}}" as="c" hint-placeholder-count="5"><div role="gridcell" aria-label="{{c.label}}" class="wcell {{c.cls}}" onDragOver="{{c.dragOver}}" onDragLeave="{{c.leave}}" onDrop="{{c.drop}}" onMouseEnter="{{c.enter}}" onMouseLeave="{{c.leave}}" onClick="{{c.click}}" style="{{c.style}}">
+              <sc-for list="{{c.items}}" as="it" hint-placeholder-count="1"><div class="wchip {{it.cls}}" draggable="true" onDragStart="{{it.dragStart}}" onDragEnd="{{it.dragEnd}}" title="{{it.title}}" style="{{it.style}}"><span aria-hidden="true" style="{{it.bar}}"></span><span style="{{it.timeStyle}}">{{it.time}}</span><span style="min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{it.name}}</span><button type="button" class="x" onClick="{{it.unassign}}" aria-label="Zuweisung von {{it.name}} aufheben" title="Zuweisung aufheben" style="position: absolute; top: 3px; right: 3px; width: 18px; height: 18px; border: 0; border-radius: 5px; padding: 0; background: #00000040; color: oklch(0.9 0 0); display: inline-flex; align-items: center; justify-content: center; cursor: pointer"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button></div></sc-for>
+              <sc-if value="{{c.hasGhost}}" hint-placeholder-val="{{false}}"><div aria-hidden="true" style="{{c.ghostStyle}}">{{c.ghostLabel}}</div></sc-if>
+              <span aria-hidden="true" style="{{c.loadStyle}}"></span>
+            </div></sc-for>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if></div></main>
+      <aside aria-label="Offene Einsätze" onDragOver="{{panelOver}}" onDragLeave="{{panelLeave}}" onDrop="{{panelDrop}}" style="flex: 0 0 300px; border-left: 1px solid #ffffff14; display: flex; flex-direction: column; min-height: 0; position: relative">
+      <div style="padding: 16px 16px 12px; display: flex; flex-direction: column; gap: 12px; border-bottom: 1px solid #ffffff12">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+          <h2 style="margin: 0; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px">Offene Einsätze<span style="min-width: 22px; height: 20px; padding: 0 6px; border-radius: 9999px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; color: oklch(0.2 0.05 84); background: oklch(0.828 0.189 84.429)">{{openCount}}</span></h2>
+          <sc-if value="{{canAuto}}" hint-placeholder-val="{{true}}"><button type="button" class="qb" onClick="{{autoPlan}}" title="Offene Einsätze automatisch auf freie Mitarbeitende im Ankunftsfenster verteilen" style="height: 30px; padding: 0 10px; border-radius: 8px; border: 1px solid #ffffff1f; background: transparent; font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; color: oklch(0.72 0 0); cursor: pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4V2M15 16v-2M8 9h2M20 9h2M17.8 11.8 19 13M17.8 6.2 19 5M3 21l9-9M12.2 6.2 11 5"></path></svg>Automatisch</button></sc-if>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px"><span style="font-size: 12px; color: oklch(0.72 0 0)">{{progressText}}</span><span aria-hidden="true" style="height: 4px; border-radius: 9999px; background: oklch(0.3 0 0); overflow: hidden"><span style="{{progressStyle}}"></span></span></div>
+        <label style="position: relative; display: block"><span style="position: absolute; left: 11px; top: 10px; color: oklch(0.58 0 0)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM20 20l-3.5-3.5"></path></svg></span><input class="ctl" type="search" value="{{q}}" onInput="{{setQ}}" placeholder="Klient oder Leistung suchen" aria-label="Offene Einsätze durchsuchen" style="height: 36px; padding-left: 34px; font-size: 13px; border-color: #ffffff1f; background: transparent"></label>
+      </div>
+      <div style="flex: 1; overflow-y: auto; padding: 12px 16px 24px; display: flex; flex-direction: column; gap: 16px">
+        <p style="{{hintStyle}}"><span style="flex: 0 0 auto; margin-top: 1px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 16v-4M12 8h.01"></path></svg></span><span>{{hintText}}</span></p>
+        <sc-for list="{{ogroups}}" as="g" hint-placeholder-count="2"><section style="display: flex; flex-direction: column; gap: 6px">
+          <h3 style="margin: 0; font-size: 12px; font-weight: 600; color: oklch(0.72 0 0); display: flex; justify-content: space-between"><span>{{g.label}}</span><span style="color: oklch(0.58 0 0); font-weight: 400">{{g.count}}</span></h3>
+          <sc-for list="{{g.items}}" as="o" hint-placeholder-count="3"><div class="{{o.cls}}" role="button" tabindex="0" aria-pressed="{{o.pressed}}" aria-label="{{o.label}}" draggable="true" onDragStart="{{o.dragStart}}" onDragEnd="{{o.dragEnd}}" onClick="{{o.click}}" onKeyDown="{{o.key}}" style="padding: 10px 10px 10px 6px; border-radius: 10px; border: 1px solid #ffffff1a; background: oklch(0.19 0 0); display: flex; gap: 6px; user-select: none">
+            <span class="og" aria-hidden="true" style="color: oklch(0.72 0 0); padding-top: 1px; display: inline-flex"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01"></path></svg></span>
+            <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+              <span style="display: flex; justify-content: space-between; gap: 8px; align-items: baseline"><span style="font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{o.name}}</span><span title="Ankunftsfenster" style="font-size: 11px; font-weight: 600; color: oklch(0.828 0.189 84.429); white-space: nowrap; font-variant-numeric: tabular-nums">{{o.win}}</span></span>
+              <span style="font-size: 12px; color: oklch(0.72 0 0)">{{o.what}}</span>
+              <span class="m2" style="font-size: 11px; color: oklch(0.58 0 0)">{{o.addr}}</span>
+            </span>
+          </div></sc-for>
+        </section></sc-for>
+        <sc-if value="{{allDone}}" hint-placeholder-val="{{false}}"><div style="padding: 28px 12px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; color: oklch(0.72 0 0)"><span style="width: 40px; height: 40px; border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; background: oklch(0.723 0.219 149.579 / 0.15); color: oklch(0.723 0.219 149.579)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></span><span style="font-size: 14px; font-weight: 600; color: oklch(0.985 0 0)">Alles zugewiesen</span><span style="font-size: 12px">Für diesen Zeitraum sind keine Einsätze mehr offen.</span><sc-if value="{{hasNext}}" hint-placeholder-val="{{true}}"><button type="button" class="qb" onClick="{{goNext}}" style="margin-top: 6px; height: 32px; padding: 0 12px; border-radius: 9px; border: 1px solid #ffffff1f; background: transparent; font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; cursor: pointer">{{nextLabel}}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button></sc-if></div></sc-if>
+        <sc-if value="{{noHits}}" hint-placeholder-val="{{false}}"><p style="margin: 0; font-size: 13px; color: oklch(0.58 0 0); text-align: center; padding: 20px 0">Keine offenen Einsätze gefunden.</p></sc-if>
+      </div>
+      <sc-if value="{{showDrop}}" hint-placeholder-val="{{false}}"><div class="{{dropCls}}" aria-hidden="true" style="position: absolute; inset: 8px; border-radius: 12px; border: 2px dashed #ffffff40; background: oklch(0.145 0 0 / 0.88); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; font-size: 13px; color: oklch(0.985 0 0); pointer-events: none; text-align: center; padding: 20px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11"></path></svg><span>Hier ablegen, um die<br>Zuweisung aufzuheben</span></div></sc-if>
+    </aside>
+    </div>
+  </div>
+  <sc-if value="{{toastOn}}" hint-placeholder-val="{{false}}">
+    <div role="status" style="position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 60; padding: 10px 8px 10px 16px; border-radius: 12px; background: oklch(0.985 0 0); color: oklch(0.2 0.016 255); display: flex; align-items: center; gap: 12px; font-size: 14px; box-shadow: 0 10px 15px -3px #00000066, 0 4px 6px -4px #00000066">{{toastText}}
+      <sc-if value="{{undoOn}}" hint-placeholder-val="{{false}}"><button type="button" class="ghost" onClick="{{doUndo}}" style="height: 28px; padding: 0 10px; border-radius: 8px; font-size: 13px; font-weight: 600; color: oklch(0.424 0.199 265.638); cursor: pointer">Rückgängig</button></sc-if>
+      <button type="button" class="ghost" onClick="{{hideToast}}" aria-label="Meldung schliessen" style="width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button></div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = Object.assign({ col: false, toast: '' }, { view: 'Tag', day: 16, workdays: true, q: '', sel: null, drag: null, over: null, panelOver: false, just: null, undo: null, asg: { 'k1-16': { emp: 'hp', start: '11:30' }, 'k1-17': { emp: 'hp', start: '11:30' }, 'rb-16': { emp: 'sk', start: '08:00' }, 'rb-17': { emp: 'sk', start: '08:15' }, 'jh-16': { emp: 'ad', start: '14:00' }, 'mf-16': { emp: 'ad', start: '17:00' }, 'pb-17': { emp: 'lm', start: '09:30' } } }); }
+  renderVals() {
+    const ACTIVE = 'Planung';
+    const st = this.state;
+
+    const P = {home: 'M3 10 12 3l9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z', app: 'M3 5h18v14H3ZM3 9h18M7 7h.01', boxes: 'M12 2 3 7l9 5 9-5-9-5ZM3 17l9 5 9-5M3 12l9 5 9-5', building: 'M4 21V3h10v18M14 9h6v12M8 7h2M8 11h2M8 15h2M2 21h20', users: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8', brief: 'M3 7h18v13H3ZM8 7V4h8v3M3 13h18', shield: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z', mail: 'M2 4h20v16H2ZM22 6l-10 7L2 6', chart: 'M3 3v18h18M7 16v-4M12 16V8M17 16v-7', card: 'M2 5h20v14H2ZM2 10h20', search: 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM20 20l-3.5-3.5', plus: 'M12 5v14M5 12h14', arrow: 'M7 17 17 7M8 7h9v9', chev: 'm9 18 6-6-6-6', chevd: 'm6 9 6 6 6-6', updown: 'm7 15 5 5 5-5M7 9l5-5 5 5', bell: 'M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0', panel: 'M3 3h18v18H3ZM9 3v18', filter: 'M4 6h16M7 12h10M10 18h4', more: 'M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM19 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM5 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z', alert: 'M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z', check: 'M20 6 9 17l-5-5', circle: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z', lock: 'M5 11h14v10H5ZM8 11V7a4 4 0 0 1 8 0v4', copy: 'M8 8h12v12H8ZM16 8V4H4v12h4', user: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4 21a8 8 0 0 1 16 0', userplus: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM19 8v6M22 11h-6', calendar: 'M3 5h18v16H3ZM3 10h18M8 3v4M16 3v4', trend: 'M3 17l6-6 4 4 8-8M15 7h6v6', pin: 'M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0ZM12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z', clip: 'M9 4h6v3H9ZM6 6h12v15H6ZM9 12h6M9 16h4', flow: 'M5 3h4v4H5ZM15 3h4v4h-4ZM10 17h4v4h-4ZM7 7v4h10V7M12 11v6', refresh: 'M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5', save: 'M5 3h11l3 3v15H5ZM8 3v5h7M8 21v-7h8v7', x: 'M18 6 6 18M6 6l12 12', send: 'm22 2-7 20-4-9-9-4 20-7Z', ext: 'M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6', grid: 'M3 3h7v7H3ZM14 3h7v7h-7ZM3 14h7v7H3ZM14 14h7v7h-7Z', list: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01', info: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 16v-4M12 8h.01', outbox: 'M22 12h-6l-2 3h-4l-2-3H2M5.5 5h13L22 12v7H2v-7ZM12 2v7M9 5l3-3 3 3', draft: 'M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z', clock: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 7v5l3 2', megaphone: 'M3 11v2a1 1 0 0 0 1 1h3l6 4V6L7 10H4a1 1 0 0 0-1 1ZM17 9a4 4 0 0 1 0 6M20 6a8 8 0 0 1 0 12', layout: 'M3 3h18v18H3ZM3 9h18M9 9v12', target: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10ZM12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z', badgecheck: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM8 12l3 3 5-6', zap: 'M13 2 3 14h9l-1 8 10-12h-9l1-8Z', db: 'M12 8c4.4 0 8-1.3 8-3s-3.6-3-8-3-8 1.3-8 3 3.6 3 8 3ZM4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3', sliders: 'M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6', paperclip: 'm21 11-9 9a5.7 5.7 0 0 1-8-8l9-9a3.8 3.8 0 0 1 5.4 5.4l-9 9a1.9 1.9 0 0 1-2.7-2.7l8.3-8.3', back: 'm15 18-6-6 6-6', type: 'M4 7V4h16v3M9 20h6M12 4v16', braces: 'M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1M16 3h1a2 2 0 0 1 2 2v5a2 2 0 0 0 2 2 2 2 0 0 0-2 2v5a2 2 0 0 1-2 2h-1', pointer: 'M3 3h18v8H3ZM12 15l2 6 1.5-2.5L18 21l1-1-2.5-2.5L19 16Z', image: 'M3 3h18v18H3ZM9 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM21 15l-5-5L5 21', minus: 'M5 12h14', trash: 'M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15', monitor: 'M2 4h20v13H2ZM8 21h8M12 17v4', phone: 'M7 2h10v20H7ZM11 18h2', link: 'M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7', star: 'm12 2 3 6.5 7 .9-5.1 4.8 1.3 7L12 17.8 5.8 21.2l1.3-7L2 9.4l7-.9Z', grid4: 'M3 3h7v9H3ZM14 3h7v5h-7ZM14 12h7v9h-7ZM3 16h7v5H3Z', key: 'M15 7a2 2 0 1 1 0 .01M21 2l-9.6 9.6a5.5 5.5 0 1 1-1.4-1.4L19 1M16 5l3 3', wrench: 'M14.7 6.3a4 4 0 0 0 5 5L22 14l-8 8-2.3-2.3a4 4 0 0 0-5-5L2 10l8-8 2.3 2.3a4 4 0 0 0 2.4 2Z', gear: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0-1.2-2.9H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 2.9-1.2V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0 1.2 2.9H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z', activity: 'M22 12h-4l-3 9L9 3l-3 9H2', play: 'm6 3 14 9-14 9Z', pause: 'M6 4h4v16H6ZM14 4h4v16h-4Z', download: 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3', globe: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20ZM2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20', eye: 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12ZM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z', server: 'M3 3h18v7H3ZM3 14h18v7H3ZM7 6.5h.01M7 17.5h.01', ban: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20ZM4.9 4.9l14.2 14.2', external: 'M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6', switch: 'M17 3l4 4-4 4M3 7h18M7 21l-4-4 4-4M21 17H3', bold: 'M6 4h8a4 4 0 0 1 0 8H6ZM6 12h9a4 4 0 0 1 0 8H6Z', italic: 'M19 4h-9M14 20H5M15 4 9 20', listul: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01', calendar2: 'M3 5h18v16H3ZM3 10h18M8 3v4M16 3v4', calclock: 'M21 10V5H3v16h7M3 10h18M8 3v4M16 3v4M17 14v3l2 1M22 17a5 5 0 1 1-10 0 5 5 0 0 1 10 0Z', printer: 'M6 9V3h12v6M6 18H4v-7h16v7h-2M6 14h12v7H6Z', sidebarR: 'M3 3h18v18H3ZM15 3v18', grip: 'M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01', pencil: 'M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z', note: 'M4 4h16v12l-4 4H4ZM16 20v-4h4'};
+    const col = !!st.col;
+    const groups = [['Planung', [['Planung', 'calendar2', 'PlnPlanung.dc.html'], ['Einsatzplan', 'calclock', '#']]], ['Klienten', [['Klientenübersicht', 'clip', 'PlnWoche.dc.html'], ['Klienten', 'users', 'PlnKlienten.dc.html']]]].map(([label, items]) => ({ label, show: !col, items: items.map(([l, icon, href]) => {
+      const on = l === ACTIVE;
+      return { label: l, icon: P[icon], href, show: !col, current: on ? 'page' : 'false',
+        style: 'height: 38px; border-radius: 10px; display: flex; align-items: center; gap: 10px; font-size: 14px; text-decoration: none; ' + (col ? 'justify-content: center; padding: 0; ' : 'padding: 0 10px; ') + 'font-weight: ' + (on ? 600 : 400) + '; color: ' + (on ? 'oklch(0.985 0 0)' : 'oklch(0.78 0 0)') + '; background: ' + (on ? 'oklch(0.2731 0.0358 265.638)' : 'transparent') };
+    }) }));
+    const SH = { groups, expanded: !col, toggleCol: () => this.setState({ col: !col }), colLabel: col ? 'Seitenleiste ausklappen' : 'Seitenleiste einklappen',
+      asideStyle: (col ? 'flex: 0 0 68px; max-width: 68px' : 'flex: 0 0 236px; max-width: 236px') + '; min-height: 100vh; background: oklch(0.17 0 0); border-right: 1px solid #ffffff14; display: flex; flex-direction: column',
+      stop: (e) => e.stopPropagation(), toastOn: !!st.toast, toastText: st.toast || '', hideToast: () => this.setState({ toast: '', undo: null }),
+      undoOn: !!st.undo, doUndo: () => this.setState({ asg: this.state.undo, undo: null, toast: 'Rückgängig gemacht.' }) };
+    if (st.toast && this._tt !== st.toast) { this._tt = st.toast; const t = st.toast; clearTimeout(this._tto); this._tto = setTimeout(() => { if (this.state.toast === t) this.setState({ toast: '', undo: null }); }, st.undo ? 7000 : 4000); }
+
+
+    const wd = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+    const week = [16, 17, 18, 19, 20, 21, 22].map((d, i) => ({ d, i, wd: wd[i], long: wd[i] + ', ' + d + '.11.' }));
+    const t2m = (t) => { const [h, m] = (t || '0:0').split(':').map(Number); return h * 60 + m; };
+    const m2t = (m) => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+    const emps = [
+      { id: 'hp', name: 'Hans Peter', role: 'Physiotherapeut', ini: 'HP', hue: 264, from: 420, to: 960 },
+      { id: 'sk', name: 'Sandra Keller', role: 'Pflegefachfrau HF', ini: 'SK', hue: 160, from: 420, to: 750 },
+      { id: 'lm', name: 'Luca Meier', role: 'FaGe', ini: 'LM', hue: 70, from: 480, to: 1020 },
+      { id: 'ad', name: 'Aylin Demir', role: 'Pflegehelferin SRK', ini: 'AD', hue: 330, from: 720, to: 1140 }
+    ];
+    const ecol = (e, l, c, a) => 'oklch(' + l + ' ' + c + ' ' + e.hue + (a != null ? ' / ' + a : '') + ')';
+    const clients = [
+      { id: 'k1', name: 'Klient 1', addr: 'Mariabergstrasse 5, Rorschach', days: [0, 1, 2, 3, 4, 5, 6], w0: 690, w1: 720, dur: 30, what: 'Einsatz' },
+      { id: 'k2', name: 'Klient 1 Kopie', addr: 'Mariabergstrasse 5, Rorschach', days: [0, 1, 2, 3, 4, 5, 6], w0: 690, w1: 720, dur: 30, what: 'Einsatz' },
+      { id: 'rb', name: 'Ruth Baumann', addr: 'Signalstrasse 12, Rorschach', days: [0, 1, 2, 3, 4], w0: 480, w1: 540, dur: 45, what: 'Körperpflege' },
+      { id: 'jh', name: 'Josef Huber', addr: 'Thurgauerstrasse 40, Goldach', days: [0, 2, 4], w0: 840, w1: 900, dur: 60, what: 'Wundversorgung' },
+      { id: 'mf', name: 'Marlies Frei', addr: 'Kirchstrasse 3, Rorschacherberg', days: [0, 1, 2, 3, 4, 5], w0: 1020, w1: 1080, dur: 30, what: 'Medikamente' },
+      { id: 'pb', name: 'Peter Brunner', addr: 'Seestrasse 88, Rorschach', days: [1, 3], w0: 570, w1: 630, dur: 45, what: 'Mobilisation' }
+    ];
+    const visits = []; clients.forEach(c => week.forEach(w => { if (c.days.indexOf(w.i) >= 0) visits.push({ key: c.id + '-' + w.d, c, w }); }));
+    const vByKey = (k) => visits.find(v => v.key === k);
+    const asg = st.asg;
+    const H0 = 7 * 60, H1 = 19 * 60, pct = (m) => ((m - H0) / (H1 - H0) * 100).toFixed(3) + '%';
+    const busyN = (A, eid, day, skip) => visits.filter(v => v.w.d === day && A[v.key] && A[v.key].emp === eid && v.key !== skip).map(v => [t2m(A[v.key].start), t2m(A[v.key].start) + v.c.dur]);
+    const fitsN = (A, e, day, s, dur, skip) => { if (s < e.from || s + dur > e.to) return 'off'; for (const [a, b] of busyN(A, e.id, day, skip)) if (s < b && s + dur > a) return 'busy'; return ''; };
+    const freeSlotN = (A, e, v) => { for (let s = v.c.w0; s <= v.c.w1; s += 15) if (!fitsN(A, e, v.w.d, s, v.c.dur, v.key)) return s; return null; };
+    const fits = (e, day, s, dur, skip) => fitsN(asg, e, day, s, dur, skip);
+    const freeSlot = (e, v) => freeSlotN(asg, e, v);
+    const loadN = (A, eid, day) => busyN(A, eid, day, null).reduce((t, [a, b]) => t + b - a, 0);
+    const isTag = st.view === 'Tag', dayN = st.day;
+    const inScope = (v) => isTag ? v.w.d === dayN : (st.workdays ? v.w.i < 5 : true);
+    const days = isTag ? week.filter(w => w.d === dayN) : (st.workdays ? week.slice(0, 5) : week);
+
+    const activeKey = st.drag ? st.drag.key : st.sel;
+    const AV = activeKey ? vByKey(activeKey) : null;
+    const getAV = () => { const k = this.state.drag ? this.state.drag.key : this.state.sel; return k ? vByKey(k) : null; };
+    const clearDrag = () => { if (this.state.drag || this.state.over || this.state.panelOver) this.setState({ drag: null, over: null, panelOver: false }); };
+    const startDrag = (key, from) => (ev) => { try { ev.dataTransfer.effectAllowed = 'move'; ev.dataTransfer.setData('text/plain', key); } catch (er) {} setTimeout(() => this.setState({ drag: { key, from }, sel: null, over: null }), 0); };
+    const place = (v, e, s) => {
+      if (s == null) { this.setState({ over: null, drag: null, undo: null, toast: 'Kein freier Platz im Ankunftsfenster bei ' + e.name + '.' }); return; }
+      const bad = fits(e, v.w.d, s, v.c.dur, v.key);
+      if (bad) { this.setState({ over: null, drag: null, undo: null, toast: e.name + (bad === 'off' ? ' ist um ' + m2t(s) + ' nicht im Dienst.' : ' ist um ' + m2t(s) + ' bereits belegt.') }); return; }
+      const prev = this.state.asg; const was = prev[v.key]; const n = Object.assign({}, prev); n[v.key] = { emp: e.id, start: m2t(s) };
+      const out = s < v.c.w0 || s > v.c.w1;
+      this.setState({ asg: n, undo: prev, drag: null, sel: null, over: null, just: v.key,
+        toast: v.c.name + (was ? ' verschoben → ' : ' → ') + e.name + ', ' + v.w.wd + ' ' + m2t(s) + (out ? ' (ausserhalb Ankunftsfenster)' : '') });
+    };
+    const unassign = (v) => (ev) => { if (ev && ev.stopPropagation) ev.stopPropagation(); const prev = this.state.asg; const n = Object.assign({}, prev); delete n[v.key];
+      this.setState({ asg: n, undo: prev, drag: null, over: null, panelOver: false, toast: 'Zuweisung von ' + v.c.name + ' aufgehoben.' }); };
+    if (!this._esc) { this._esc = (e) => { if (e.key === 'Escape' && (this.state.sel || this.state.drag)) this.setState({ sel: null, drag: null, over: null }); }; document.addEventListener('keydown', this._esc); }
+
+    const empHead = (e, n, mins) => {
+      const cap = e.to - e.from, ratio = Math.min(1, mins / cap);
+      return { ini: e.ini, name: e.name, role: e.role, title: e.name + ' · ' + e.role + ' · Dienst ' + m2t(e.from) + '–' + m2t(e.to),
+        meta: (isTag ? m2t(e.from) + '–' + m2t(e.to) + ' · ' : '') + n + (n === 1 ? ' Einsatz' : ' Einsätze'),
+        avStyle: 'width: 32px; height: 32px; border-radius: 9999px; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; background: ' + ecol(e, 0.72, 0.13) + '; color: oklch(0.17 0 0)',
+        loadStyle: 'display: block; height: 100%; border-radius: 9999px; width: ' + Math.round(ratio * 100) + '%; background: ' + (ratio > 0.85 ? 'oklch(0.828 0.189 84.429)' : ecol(e, 0.72, 0.13)) + '; transition: width .3s cubic-bezier(.2,.8,.2,1)' };
+    };
+
+    // ---------- Tag ----------
+    const calcS = (ev, v) => { const r = ev.currentTarget.getBoundingClientRect(); let m = H0 + (ev.clientX - r.left) / r.width * (H1 - H0) - v.c.dur / 2;
+      m = Math.round(m / 15) * 15; if (m >= v.c.w0 - 30 && m <= v.c.w1 + 30) m = Math.min(v.c.w1, Math.max(v.c.w0, m)); return Math.max(H0, Math.min(H1 - v.c.dur, m)); };
+    const hours = []; for (let h = 7; h <= 18; h++) hours.push({ h: String(h).padStart(2, '0'), style: 'position: absolute; left: ' + pct(h * 60) + '; top: 0; bottom: 0; border-left: 1px solid #ffffff1f; font-size: 11px; color: oklch(0.65 0 0); padding: 10px 0 0 4px' });
+    const bandOn = !!(AV && isTag && AV.w.d === dayN);
+    const bandStyle = bandOn ? 'position: absolute; top: 0; bottom: 0; left: ' + pct(AV.c.w0) + '; width: calc(' + pct(AV.c.w1 + AV.c.dur) + ' - ' + pct(AV.c.w0) + '); background: oklch(0.723 0.219 149.579 / 0.09); border-left: 1px dashed oklch(0.723 0.219 149.579 / 0.6); border-right: 1px dashed oklch(0.723 0.219 149.579 / 0.6); pointer-events: none' : '';
+    const rowsDay = !isTag ? [] : emps.map(e => {
+      const mine = visits.filter(v => v.w.d === dayN && asg[v.key] && asg[v.key].emp === e.id);
+      const items = mine.map(v => { const s = t2m(asg[v.key].start), en = s + v.c.dur, out = s < v.c.w0 || s > v.c.w1;
+        return { name: v.c.name, time: m2t(s) + '–' + m2t(en), what: v.c.what, addr: v.c.addr, win: 'Fenster ' + m2t(v.c.w0) + '–' + m2t(v.c.w1) + (out ? ' · ausserhalb' : ''),
+          tipStyle: 'left: ' + pct(s) + '; ' + (s > H1 - 180 ? 'transform: translateX(calc(-100% + 76px));' : ''), cls: (st.drag && st.drag.key === v.key ? 'src' : '') + (st.just === v.key ? ' just' : ''),
+          dragStart: startDrag(v.key, 'asg'), dragEnd: clearDrag, unassign: unassign(v),
+          style: 'position: absolute; top: 9px; bottom: 9px; left: ' + pct(s) + '; width: calc(' + pct(en) + ' - ' + pct(s) + '); min-width: 76px; border-radius: 7px; padding: 3px 8px; display: flex; flex-direction: column; justify-content: center; gap: 1px; overflow: hidden; z-index: 1; color: oklch(0.97 0 0); background: ' + ecol(e, 0.3, 0.07) + '; border: 1px ' + (out ? 'dashed oklch(0.828 0.189 84.429)' : 'solid ' + ecol(e, 0.6, 0.12, 0.5)) + '; border-left: 3px solid ' + ecol(e, 0.72, 0.14) }; });
+      const target = !!(AV && AV.w.d === dayN), slot = target ? freeSlot(e, AV) : null;
+      const ov = st.over && AV && st.over.emp === e.id && st.over.day === dayN && st.over.s != null ? st.over : null;
+      let ghost = null;
+      if (ov) { const s = ov.s, bad = fits(e, dayN, s, AV.c.dur, AV.key), out = s < AV.c.w0 || s > AV.c.w1;
+        const bc = bad ? 'oklch(0.76 0.16 25)' : (out ? 'oklch(0.828 0.189 84.429)' : 'oklch(0.7 0.14 264)');
+        ghost = { label: m2t(s) + '–' + m2t(s + AV.c.dur), reason: bad === 'busy' ? 'Belegt' : bad === 'off' ? 'Nicht im Dienst' : (out ? 'Ausserhalb Fenster' : AV.c.name),
+          style: 'position: absolute; top: 9px; bottom: 9px; left: ' + pct(s) + '; width: calc(' + pct(s + AV.c.dur) + ' - ' + pct(s) + '); min-width: 76px; border-radius: 7px; border: 1.5px dashed ' + bc + '; background: ' + (bad ? 'oklch(0.76 0.16 25 / 0.14)' : 'oklch(0.2731 0.0358 265.638 / 0.75)') + '; color: ' + (bad ? 'oklch(0.85 0.1 25)' : 'oklch(0.97 0 0)') + '; display: flex; flex-direction: column; justify-content: center; padding: 2px 8px; font-size: 11px; font-weight: 600; white-space: nowrap; overflow: hidden; z-index: 2' }; }
+      const overDay = (ev) => { const v = getAV(); if (!v || v.w.d !== dayN) return; if (this.state.drag) ev.preventDefault(); const s = calcS(ev, v); const o = this.state.over;
+        if (!o || o.emp !== e.id || o.s !== s || o.day !== dayN) this.setState({ over: { emp: e.id, day: dayN, s } }); };
+      const off = [{ style: 'position: absolute; top: 0; bottom: 0; left: 0; width: ' + pct(e.from) + '; background: repeating-linear-gradient(135deg, #ffffff08 0 6px, transparent 6px 12px); pointer-events: none' },
+                   { style: 'position: absolute; top: 0; bottom: 0; left: ' + pct(e.to) + '; right: 0; background: repeating-linear-gradient(135deg, #ffffff08 0 6px, transparent 6px 12px); pointer-events: none' }];
+      return Object.assign(empHead(e, mine.length, loadN(asg, e.id, dayN)), {
+        cls: 'prow' + (target ? (slot != null ? ' ok' : ' no') : ''), items, off, hasGhost: !!ghost, ghostStyle: ghost ? ghost.style : '', ghostLabel: ghost ? ghost.label : '', ghostReason: ghost ? ghost.reason : '',
+        hasBand: bandOn, bandStyle,
+        grid: hours.map(h => ({ style: 'position: absolute; top: 0; bottom: 0; left: ' + pct(Number(h.h) * 60) + '; border-left: 1px solid #ffffff0f; pointer-events: none' })),
+        dragOver: (ev) => { if (this.state.drag) overDay(ev); },
+        move: (ev) => { if (this.state.sel && !this.state.drag) overDay(ev); },
+        leave: (ev) => { if (ev.relatedTarget && ev.currentTarget.contains(ev.relatedTarget)) return; const o = this.state.over; if (o && o.emp === e.id) this.setState({ over: null }); },
+        drop: (ev) => { ev.preventDefault(); const v = getAV(); if (!v || v.w.d !== dayN) return; place(v, e, calcS(ev, v)); },
+        click: (ev) => { if (!this.state.sel) return; const v = getAV(); if (!v || v.w.d !== dayN) return; place(v, e, calcS(ev, v)); },
+        trackLabel: 'Zeitleiste ' + e.name
+      });
+    });
+
+    // ---------- Woche ----------
+    const wCols = 'display: grid; grid-template-columns: 184px repeat(' + days.length + ', minmax(0, 1fr))';
+    const openOf = (w) => visits.filter(v => v.w.d === w.d && !asg[v.key]).length;
+    const wHeads = isTag ? [] : days.map(w => { const o = openOf(w);
+      return { wd: w.wd, d: String(w.d), long: w.long, hasOpen: o > 0, open: String(o), go: () => this.setState({ view: 'Tag', day: w.d, sel: null }),
+        style: 'border: 0; border-left: 1px solid #ffffff0d; background: ' + (w.d === 18 ? 'oklch(0.2731 0.0358 265.638 / 0.5)' : 'transparent') + '; padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; gap: 6px; font-size: 12px; color: oklch(0.85 0 0); cursor: pointer; text-align: left',
+        badge: 'font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 9999px; color: oklch(0.828 0.189 84.429); background: oklch(0.828 0.189 84.429 / 0.12)' }; });
+    const rowsWeek = isTag ? [] : emps.map(e => {
+      let total = 0, mins = 0;
+      const cells = days.map(w => {
+        const mine = visits.filter(v => v.w.d === w.d && asg[v.key] && asg[v.key].emp === e.id).sort((a, b) => t2m(asg[a.key].start) - t2m(asg[b.key].start));
+        total += mine.length; const lm = loadN(asg, e.id, w.d); mins += lm;
+        const items = mine.map(v => { const s = t2m(asg[v.key].start), out = s < v.c.w0 || s > v.c.w1;
+          return { name: v.c.name, time: m2t(s), cls: (st.drag && st.drag.key === v.key ? 'src' : '') + (st.just === v.key ? ' just' : ''),
+            title: v.c.name + ' · ' + v.c.what + ' · ' + m2t(s) + '–' + m2t(s + v.c.dur) + (out ? ' · ausserhalb Ankunftsfenster' : '') + '\nZiehen zum Verschieben',
+            dragStart: startDrag(v.key, 'asg'), dragEnd: clearDrag, unassign: unassign(v),
+            bar: 'width: 3px; align-self: stretch; margin: 4px 0; border-radius: 2px; flex: 0 0 auto; background: ' + ecol(e, 0.72, 0.14),
+            timeStyle: 'font-variant-numeric: tabular-nums; flex: 0 0 auto; color: ' + (out ? 'oklch(0.828 0.189 84.429)' : 'oklch(0.75 0 0)'),
+            style: 'position: relative; display: flex; align-items: center; gap: 6px; height: 26px; padding: 0 22px 0 4px; border-radius: 6px; background: oklch(0.235 0 0); font-size: 11px; overflow: hidden' }; });
+        const target = !!(AV && AV.w.d === w.d), slot = target ? freeSlot(e, AV) : null;
+        const isOver = !!(AV && st.over && st.over.emp === e.id && st.over.day === w.d);
+        const overW = (ev) => { const v = getAV(); if (!v || v.w.d !== w.d) return; if (this.state.drag) ev.preventDefault(); const o = this.state.over;
+          if (!o || o.emp !== e.id || o.day !== w.d) this.setState({ over: { emp: e.id, day: w.d, s: null } }); };
+        const cap = e.to - e.from;
+        return { items, cls: (AV ? (target ? (slot != null ? 'ok' : 'no') : 'dim') : '') + (isOver ? ' over' : ''),
+          hasGhost: isOver && target, ghostLabel: slot != null ? m2t(slot) + ' ' + AV.c.name : 'Kein Platz im Fenster',
+          ghostStyle: 'height: 26px; display: flex; align-items: center; padding: 0 8px; border-radius: 6px; font-size: 11px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; border: 1.5px dashed ' + (slot != null ? 'oklch(0.7 0.14 264)' : 'oklch(0.76 0.16 25)') + '; color: ' + (slot != null ? 'oklch(0.97 0 0)' : 'oklch(0.85 0.1 25)'),
+          loadStyle: 'position: absolute; left: 8px; right: 8px; bottom: 5px; height: 2px; border-radius: 9999px; background: linear-gradient(90deg, ' + (lm / cap > 0.85 ? 'oklch(0.828 0.189 84.429)' : ecol(e, 0.72, 0.13, 0.7)) + ' ' + Math.round(Math.min(1, lm / cap) * 100) + '%, #ffffff0f 0)',
+          label: e.name + ', ' + w.long,
+          dragOver: (ev) => { if (this.state.drag) overW(ev); }, move: () => {}, enter: (ev) => { if (this.state.sel && !this.state.drag) overW(ev); },
+          leave: (ev) => { if (ev.relatedTarget && ev.currentTarget.contains(ev.relatedTarget)) return; const o = this.state.over; if (o && o.emp === e.id && o.day === w.d) this.setState({ over: null }); },
+          drop: (ev) => { ev.preventDefault(); const v = getAV(); if (!v || v.w.d !== w.d) return; place(v, e, freeSlot(e, v)); },
+          click: () => { if (!this.state.sel) return; const v = getAV(); if (!v || v.w.d !== w.d) return; place(v, e, freeSlot(e, v)); },
+          style: 'position: relative; min-height: 84px; padding: 8px 8px 14px; display: flex; flex-direction: column; gap: 4px; border-left: 1px solid #ffffff0d; ' + (w.d === 18 ? 'background: oklch(0.2731 0.0358 265.638 / 0.18)' : '') };
+      });
+      return Object.assign(empHead(e, total, mins), { cells, cols: wCols });
+    });
+
+    // ---------- offene Einsätze ----------
+    const q = (st.q || '').trim().toLowerCase();
+    const scope = visits.filter(inScope);
+    const openVis = scope.filter(v => !asg[v.key] && (!q || v.c.name.toLowerCase().indexOf(q) >= 0 || v.c.what.toLowerCase().indexOf(q) >= 0));
+    const ogroups = week.map(w => { const its = openVis.filter(v => v.w.d === w.d).sort((a, b) => a.c.w0 - b.c.w0);
+      return { label: w.long + (w.d === 18 ? ' · Heute' : ''), count: String(its.length), items: its.map(v => {
+        const sel = st.sel === v.key;
+        const toggle = () => this.setState({ sel: this.state.sel === v.key ? null : v.key, over: null });
+        return { name: v.c.name, win: m2t(v.c.w0) + '–' + m2t(v.c.w1), what: v.c.what + ' · ' + v.c.dur + ' Min.', addr: v.c.addr,
+          cls: 'ocard' + (sel ? ' sel' : '') + (st.drag && st.drag.key === v.key ? ' src' : ''), pressed: sel ? 'true' : 'false',
+          label: v.c.name + ', ' + v.w.long + ', Ankunft ' + m2t(v.c.w0) + '–' + m2t(v.c.w1) + '. Ziehen oder auswählen, um zuzuweisen.',
+          dragStart: startDrag(v.key, 'open'), dragEnd: clearDrag, click: toggle,
+          key: (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); toggle(); } } }; }) }; }).filter(g => g.items.length > 0);
+    const doneN = scope.filter(v => asg[v.key]).length;
+    const autoPlan = () => {
+      const prev = this.state.asg; const n = Object.assign({}, prev); let cnt = 0;
+      visits.filter(v => !n[v.key] && inScope(v)).sort((a, b) => a.w.d - b.w.d || a.c.w0 - b.c.w0).forEach(v => {
+        const order = emps.slice().sort((a, b) => loadN(n, a.id, v.w.d) - loadN(n, b.id, v.w.d));
+        for (const e of order) { const s = freeSlotN(n, e, v); if (s != null) { n[v.key] = { emp: e.id, start: m2t(s) }; cnt++; return; } } });
+      this.setState({ asg: n, undo: cnt ? prev : null, sel: null, just: null, toast: cnt ? cnt + (cnt === 1 ? ' Einsatz' : ' Einsätze') + ' automatisch verteilt.' + (openVis.length - cnt > 0 ? ' ' + (openVis.length - cnt) + ' ohne freien Platz.' : '') : 'Kein freier Platz im Ankunftsfenster gefunden.' });
+    };
+    const selV = st.sel ? vByKey(st.sel) : null;
+    const nextW = isTag ? week.find(w => w.d > dayN && openOf(w) > 0) : null;
+
+    const V = {
+      isTag, isWoche: !isTag,
+      views: ['Tag', 'Woche'].map(v => ({ label: v, pressed: st.view === v ? 'true' : 'false', pick: () => this.setState({ view: v, sel: null, over: null }),
+        style: 'background: ' + (st.view === v ? 'oklch(0.3 0 0)' : 'transparent') + '; color: ' + (st.view === v ? 'oklch(0.985 0 0)' : 'oklch(0.72 0 0)') })),
+      rangeLabel: isTag ? week.find(w => w.d === dayN).wd + ', ' + dayN + '. November 2026' : (st.workdays ? '16.–20. November 2026' : '16.–22. November 2026'),
+      workdaysLabel: st.workdays ? 'Mo–Fr' : 'Mo–So', toggleWorkdays: () => this.setState({ workdays: !st.workdays }),
+      dayTabs: week.map(w => { const o = openOf(w), on = w.d === dayN;
+        return { wd: w.wd, d: String(w.d), sel: on ? 'true' : 'false', hasOpen: o > 0, open: String(o), pick: () => this.setState({ day: w.d, sel: null, over: null }),
+          style: 'height: 34px; padding: 0 10px; border-radius: 9px; border: 1px solid ' + (on ? 'oklch(0.7 0.14 264)' : '#ffffff1f') + '; background: ' + (on ? 'oklch(0.2731 0.0358 265.638)' : 'transparent') + '; color: ' + (on ? 'oklch(0.985 0 0)' : 'oklch(0.75 0 0)') + '; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; cursor: pointer',
+          badge: 'min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9999px; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; color: oklch(0.2 0.05 84); background: oklch(0.828 0.189 84.429)' }; }),
+      calCls: AV ? 'pact' : '',
+      hours, hdrBand: bandOn, hdrBandStyle: bandStyle + '; display: flex; align-items: flex-end; justify-content: center; font-size: 10px; color: oklch(0.8 0.15 149.579); padding-bottom: 2px', hdrBandText: bandOn ? 'Ankunftsfenster' : '',
+      rowsDay, rowsWeek, wHeads, wCols,
+      ogroups, openCount: String(openVis.length), allDone: openVis.length === 0 && !q, noHits: openVis.length === 0 && !!q,
+      hasNext: !!nextW, nextLabel: nextW ? 'Weiter zu ' + nextW.wd + ' ' + nextW.d + '. (' + openOf(nextW) + ' offen)' : '', goNext: () => nextW && this.setState({ day: nextW.d, sel: null }),
+      progressText: doneN + ' von ' + scope.length + ' zugewiesen', progressStyle: 'display: block; height: 100%; border-radius: 9999px; background: oklch(0.723 0.219 149.579); width: ' + (scope.length ? Math.round(doneN / scope.length * 100) : 0) + '%; transition: width .4s cubic-bezier(.2,.8,.2,1)',
+      hintText: selV ? selV.c.name + ' ausgewählt – klicke im Kalender auf eine Person. Esc bricht ab.' : 'Einsatz auf eine Person ziehen – oder anklicken und im Kalender platzieren.',
+      hintStyle: 'margin: 0; font-size: 12px; line-height: 17px; display: flex; gap: 8px; align-items: flex-start; padding: 8px 10px; border-radius: 9px; ' + (selV ? 'color: oklch(0.9 0.05 264); background: oklch(0.2731 0.0358 265.638 / 0.7)' : 'color: oklch(0.6 0 0); background: transparent; padding-left: 0'),
+      q: st.q || '', setQ: (ev) => this.setState({ q: ev.target.value }), autoPlan, canAuto: openVis.length > 0,
+      showDrop: !!(st.drag && st.drag.from === 'asg'), dropCls: 'pdrop' + (st.panelOver ? ' on' : ''),
+      panelOver: (ev) => { if (!this.state.drag || this.state.drag.from !== 'asg') return; ev.preventDefault(); if (!this.state.panelOver) this.setState({ panelOver: true, over: null }); },
+      panelLeave: (ev) => { if (ev.relatedTarget && ev.currentTarget.contains(ev.relatedTarget)) return; if (this.state.panelOver) this.setState({ panelOver: false }); },
+      panelDrop: (ev) => { ev.preventDefault(); const d = this.state.drag; if (!d || d.from !== 'asg') return; unassign(vByKey(d.key))(); }
+    };
+
+    return Object.assign({}, SH, V);
+  }
+}
+</script>
+</body>
+</html>

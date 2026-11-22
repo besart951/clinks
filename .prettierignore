@@ -11,7 +11,10 @@ pnpm-lock.yaml
 
 # Vendored agent skills (managed by skills-lock.json)
 .agents
-.claude/skills
 skills-lock.json
 packages/contracts/openapi.json
 packages/sync-schema/src/powersync-schema.generated.ts
+
+# Vendored design artifacts (copied from the design tools, not edited here)
+docs/reference
+docs/design-system

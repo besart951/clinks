@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<title>PlanerLink – Klienten</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400..700&amp;display=swap">
+<style>
+:root{color-scheme:dark}input::-webkit-calendar-picker-indicator{opacity:.85;cursor:pointer}
+body{margin:0;background:oklch(0.145 0 0);color:oklch(0.985 0 0);font-family:'Roboto',sans-serif;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+*{box-sizing:border-box}
+a{color:oklch(0.7 0.14 264)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid oklch(0.7 0.14 264);outline-offset:2px}
+.qb{transition:background-color .12s,color .12s}.qb:hover{background:oklch(0.269 0 0)}
+.pb{transition:background-color .12s}.pb:hover{background:oklch(0.3731 0.1751 265.638)}
+.nav:hover{background:oklch(0.25 0 0)}
+.hov .rv{opacity:0;transition:opacity .15s}
+.hov:hover .rv,.hov:focus-within .rv{opacity:1}
+.hov .more{max-height:0;opacity:0;overflow:hidden;transition:max-height .2s,opacity .15s}
+.hov:hover .more,.hov:focus-within .more{max-height:120px;opacity:1}
+@media (pointer:coarse){.hov .rv,.hov .more{opacity:1;max-height:none}}
+.chip-w{position:relative}
+.pop{display:none;position:absolute;left:0;top:calc(100% + 6px);z-index:30;width:248px;padding:12px;border-radius:12px;background:oklch(0.235 0 0);border:1px solid #ffffff1f;box-shadow:0 10px 15px -3px #00000066, 0 4px 6px -4px #00000066;text-align:left}
+.chip-w:hover .pop,.chip-w:focus-within .pop{display:block}
+.chip{transition:transform .1s,background-color .12s,border-color .12s}
+.chip:hover{transform:translateY(-1px)}
+.cell .add{opacity:0;transition:opacity .12s}
+.cell:hover .add{opacity:1}
+.ctl{width:100%;height:40px;padding:0 12px;border-radius:9.6px;background:oklch(0.22 0.007 255);border:1px solid oklch(0.42 0.008 255);font-size:14px}
+.ctl:hover{border-color:oklch(0.6 0 0)}
+.ctl:focus{outline:none;border-color:oklch(0.7 0.14 264);box-shadow:0 0 0 1px oklch(0.7 0.14 264)}
+textarea.ctl{height:auto;padding:10px 12px;line-height:20px;resize:vertical}
+input::placeholder,textarea::placeholder{color:oklch(0.55 0 0)}
+.lb{font-size:13px;font-weight:500;color:oklch(0.72 0 0)}
+.ghost{border:0;background:transparent}
+.seg-b{height:30px;padding:0 12px;border:0;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer}
+.dayhead:hover{color:oklch(0.985 0 0)}
+.sk{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</helmet>
+
+<div style="min-height: 100vh; display: flex; background: oklch(0.145 0 0); color: oklch(0.985 0 0); position: relative">
+  <aside style="{{asideStyle}}">
+    <div style="height: 60px; padding: 0 12px; display: flex; align-items: center; gap: 10px">
+      <span aria-hidden="true" style="flex: 0 0 auto; width: 32px; height: 32px; border-radius: 9px; background: oklch(0.48 0.14 48 / 0.18); color: oklch(0.78 0.14 60); display: flex; align-items: center; justify-content: center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4h6v3H9ZM6 6h12v15H6ZM9 12h6M9 16h4"></path></svg></span>
+      <sc-if value="{{expanded}}" hint-placeholder-val="{{true}}"><span style="flex: 1; display: flex; flex-direction: column; line-height: 16px"><span style="font-size: 14px; font-weight: 600">PlanerLink</span><span style="font-size: 12px; color: oklch(0.58 0 0)">Empower</span></span>
+        <button type="button" class="qb ghost" aria-label="Anwendung oder Workspace wechseln" style="width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: oklch(0.58 0 0); cursor: pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5M7 9l5-5 5 5"></path></svg></button></sc-if>
+    </div>
+    <nav aria-label="Hauptnavigation" style="padding: 8px 10px; display: flex; flex-direction: column; gap: 16px; flex: 1">
+      <sc-for list="{{groups}}" as="g" hint-placeholder-count="2"><div style="display: flex; flex-direction: column; gap: 2px">
+        <sc-if value="{{g.show}}" hint-placeholder-val="{{true}}"><span style="padding: 0 10px 4px; font-size: 12px; color: oklch(0.58 0 0)">{{g.label}}</span></sc-if>
+        <sc-for list="{{g.items}}" as="it" hint-placeholder-count="2"><a href="{{it.href}}" class="nav" aria-current="{{it.current}}" aria-label="{{it.label}}" title="{{it.label}}" style="{{it.style}}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{it.icon}}"></path></svg>
+          <sc-if value="{{it.show}}" hint-placeholder-val="{{true}}"><span>{{it.label}}</span></sc-if></a></sc-for>
+      </div></sc-for>
+    </nav>
+    <div style="padding: 10px; border-top: 1px solid #ffffff14">
+      <a href="WsProfil.dc.html" class="nav" aria-label="Konto von Besart Morina" style="height: 44px; padding: 0 6px; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; color: oklch(0.985 0 0); text-decoration: none">
+        <span aria-hidden="true" style="flex: 0 0 auto; width: 30px; height: 30px; border-radius: 9999px; background: oklch(0.269 0 0); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600">BM</span>
+        <sc-if value="{{expanded}}" hint-placeholder-val="{{true}}"><span style="flex: 1; font-size: 13px">Besart Morina</span></sc-if></a>
+    </div>
+  </aside>
+  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+    <header style="height: 60px; padding: 0 16px 0 10px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #ffffff14">
+      <button type="button" class="qb ghost" onClick="{{toggleCol}}" aria-label="{{colLabel}}" title="{{colLabel}}" style="width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; color: oklch(0.58 0 0); cursor: pointer"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h18v18H3ZM9 3v18"></path></svg></button>
+      <h1 style="flex: 1; margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -0.01em">Klienten</h1>
+      <button type="button" class="qb ghost" aria-label="Neu laden" title="Neu laden" style="width: 36px; height: 36px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; color: oklch(0.72 0 0); cursor: pointer; "><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"></path></svg></button><button type="button" class="qb ghost" aria-label="Weitere Aktionen" title="Weitere Aktionen" style="width: 36px; height: 36px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; color: oklch(0.72 0 0); cursor: pointer; "><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM19 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM5 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"></path></svg></button>
+    </header>
+    <div style="flex: 1; display: flex; min-height: 0">
+      <main style="flex: 1; min-width: 0; padding: 20px 24px 40px; display: flex; flex-direction: column; gap: 16px"><div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between">
+        <div style="display: flex; gap: 8px; align-items: center">
+          <label style="position: relative; display: block; width: 280px"><span style="position: absolute; left: 12px; top: 11px; color: oklch(0.58 0 0)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM20 20l-3.5-3.5"></path></svg></span><input class="ctl" type="search" placeholder="Klienten suchen" aria-label="Klienten suchen" onInput="{{setQ}}" style="padding-left: 36px; height: 38px; border-color: #ffffff1f; background: transparent"></label>
+          <div role="group" aria-label="Darstellung" style="display: flex; gap: 2px; padding: 3px; border-radius: 10px; background: oklch(0.2 0 0)"><sc-for list="{{modes}}" as="m" hint-placeholder-count="2"><button type="button" onClick="{{m.pick}}" aria-pressed="{{m.pressed}}" aria-label="{{m.label}}" title="{{m.label}}" style="{{m.style}}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{m.icon}}"></path></svg></button></sc-for></div>
+        </div>
+        <button type="button" class="pb" onClick="{{newClient}}" style="height: 38px; padding: 0 16px; border-radius: 12px; border: 0; background: oklch(0.424 0.199 265.638); color: oklch(0.97 0.014 254.604); font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Klient erstellen</button>
+      </div><sc-if value="{{isList}}" hint-placeholder-val="{{true}}">
+      <div role="list" style="display: flex; flex-direction: column">
+        <sc-for list="{{list}}" as="c" hint-placeholder-count="2">
+          <div role="listitem" class="hov" style="display: grid; grid-template-columns: minmax(200px, 1.3fr) auto minmax(160px, 1fr) auto; align-items: center; gap: 16px; padding: 12px 10px; border-bottom: 1px solid #ffffff12">
+            <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><button type="button" onClick="{{c.edit}}" style="border: 0; background: transparent; padding: 0; text-align: left; font-size: 14px; font-weight: 600; cursor: pointer">{{c.name}}</button>
+              <span class="more" style="font-size: 12px; color: oklch(0.58 0 0)">{{c.addr}}</span></div>
+            <span style="display: inline-flex; gap: 3px"><sc-for list="{{c.days}}" as="d" hint-placeholder-count="7"><span style="{{d.style}}">{{d.w}}</span></sc-for></span>
+            <div style="display: flex; flex-direction: column; gap: 2px; font-size: 13px; color: oklch(0.72 0 0)"><span>{{c.einsatz}}</span><span class="more" style="font-size: 12px; color: oklch(0.58 0 0)">{{c.window}} · {{c.note}}</span></div>
+            <div class="rv" style="display: flex; gap: 2px"><button type="button" class="qb ghost" onClick="{{c.edit}}" aria-label="{{c.name}} bearbeiten" title="Bearbeiten" style="width: 32px; height: 32px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; color: oklch(0.72 0 0); cursor: pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg></button><button type="button" class="qb ghost" aria-label="Weitere Aktionen" title="Weitere Aktionen" style="width: 36px; height: 36px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; color: oklch(0.72 0 0); cursor: pointer; "><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM19 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM5 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"></path></svg></button></div>
+          </div>
+        </sc-for>
+      </div></sc-if><sc-if value="{{isCards}}" hint-placeholder-val="{{false}}">
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px">
+        <sc-for list="{{list}}" as="c" hint-placeholder-count="2">
+          <button type="button" class="hov" onClick="{{c.edit}}" style="padding: 16px; border-radius: 14px; border: 1px solid #ffffff12; background: oklch(0.195 0 0); text-align: left; display: flex; flex-direction: column; gap: 10px; cursor: pointer; color: oklch(0.985 0 0)">
+            <span style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 15px; font-weight: 600">{{c.name}}</span><span class="rv" style="color: oklch(0.72 0 0)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg></span></span>
+            <span style="display: inline-flex; gap: 3px"><sc-for list="{{c.days}}" as="d" hint-placeholder-count="7"><span style="{{d.style}}">{{d.w}}</span></sc-for></span>
+            <span class="more" style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: oklch(0.72 0 0)"><span>{{c.addr}}</span><span>{{c.einsatz}} · {{c.window}}</span><span style="color: oklch(0.58 0 0)">{{c.note}}</span></span>
+          </button>
+        </sc-for>
+      </div></sc-if><sc-if value="{{sheetOpen}}" hint-placeholder-val="{{false}}">
+      <div onClick="{{closeSheet}}" style="position: fixed; inset: 0; z-index: 50; background: #00000080; display: flex; justify-content: flex-end">
+        <aside role="dialog" aria-modal="true" aria-label="{{sheetTitle}}" onClick="{{stop}}" style="width: 480px; max-width: 100%; height: 100%; background: oklch(0.195 0 0); border-left: 1px solid #ffffff1f; display: flex; flex-direction: column">
+          <div style="padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #ffffff12"><h2 style="margin: 0; font-size: 18px; font-weight: 600">{{sheetTitle}}</h2>
+            <button type="button" class="qb ghost" onClick="{{closeSheet}}" aria-label="Schliessen" style="width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: oklch(0.72 0 0); cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button></div>
+          <div style="flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 22px">
+            <div style="display: flex; flex-direction: column; gap: 8px"><label class="lb" for="k-name">Name</label><input id="k-name" class="ctl" type="text" value="{{cname}}" placeholder="Vor- und Nachname"></div>
+            <div style="display: flex; flex-direction: column; gap: 8px; position: relative"><label class="lb" for="k-addr">Adresse</label>
+              <div style="position: relative"><span style="position: absolute; left: 12px; top: 12px; color: oklch(0.58 0 0)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0ZM12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"></path></svg></span><input id="k-addr" class="ctl" type="text" value="{{addrQ}}" placeholder="Strasse, Nr., PLZ oder Ort eingeben" autocomplete="off" onInput="{{setAddr}}" style="padding-left: 36px"></div>
+              <sc-if value="{{showSugg}}" hint-placeholder-val="{{false}}"><div role="listbox" style="position: absolute; top: 72px; left: 0; right: 0; z-index: 5; padding: 4px; border-radius: 10px; background: oklch(0.235 0 0); border: 1px solid #ffffff1f; box-shadow: 0 10px 15px -3px #00000066, 0 4px 6px -4px #00000066">
+                <button type="button" role="option" class="qb ghost" onClick="{{pickSugg}}" style="width: 100%; padding: 8px 10px; border-radius: 8px; text-align: left; font-size: 14px; cursor: pointer">Mariabergstrasse 5<br><span style="font-size: 12px; color: oklch(0.58 0 0)">9400 Rorschach, Schweiz</span></button></div></sc-if>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px">
+              <div style="display: flex; align-items: center; justify-content: space-between"><span class="lb">Wochentage</span><span style="display: flex; gap: 4px"><button type="button" class="qb ghost" onClick="{{daysAll}}" style="height: 26px; padding: 0 8px; border-radius: 6px; font-size: 12px; color: oklch(0.72 0 0); cursor: pointer">Mo–Fr</button><button type="button" class="qb ghost" onClick="{{daysEvery}}" style="height: 26px; padding: 0 8px; border-radius: 6px; font-size: 12px; color: oklch(0.72 0 0); cursor: pointer">Täglich</button></span></div>
+              <div role="group" aria-label="Wochentage" style="display: flex; gap: 6px"><sc-for list="{{edDays}}" as="d" hint-placeholder-count="7"><button type="button" onClick="{{d.toggle}}" aria-pressed="{{d.pressed}}" style="{{d.style}}">{{d.w}}</button></sc-for></div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px">
+              <div style="display: flex; align-items: center; justify-content: space-between"><span class="lb">Einsätze pro Tag</span><button type="button" class="qb ghost" onClick="{{addEinsatz}}" style="height: 28px; padding: 0 8px; border-radius: 8px; font-size: 13px; color: oklch(0.7 0.14 264); display: inline-flex; align-items: center; gap: 4px; cursor: pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Einsatz</button></div>
+              <sc-for list="{{einsaetze}}" as="e" hint-placeholder-count="1">
+                <div class="hov" style="padding: 12px; border-radius: 12px; border: 1px solid #ffffff12; background: oklch(0.17 0 0); display: flex; flex-direction: column; gap: 10px">
+                  <div style="display: flex; align-items: center; gap: 8px"><span style="width: 20px; height: 20px; border-radius: 9999px; background: oklch(0.3 0 0); font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center">{{e.n}}</span>
+                    <label class="sk" for="ein-name">Bezeichnung</label><input id="ein-name" class="ctl" type="text" value="{{e.name}}" style="flex: 1; height: 34px; border-color: transparent; background: transparent; padding: 0 6px; font-weight: 500">
+                    <button type="button" class="qb ghost rv" onClick="{{e.remove}}" aria-label="Einsatz entfernen" title="Einsatz entfernen" style="width: 30px; height: 30px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; color: oklch(0.76 0.16 25); cursor: pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15"></path></svg></button></div>
+                  <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap"><span style="font-size: 12px; color: oklch(0.58 0 0); width: 70px">Dauer</span><sc-for list="{{e.durPresets}}" as="p" hint-placeholder-count="4"><button type="button" onClick="{{p.pick}}" style="{{p.style}}">{{p.m}} Min.</button></sc-for><label class="sk" for="{{e.durId}}">Eigene Dauer in Minuten</label><span style="position: relative; display: inline-flex"><input id="{{e.durId}}" class="ctl" type="number" inputmode="numeric" min="5" max="600" step="5" placeholder="Andere" value="{{e.durCustom}}" onInput="{{e.setDur}}" style="{{e.durCustomStyle}}"><span aria-hidden="true" style="position: absolute; right: 10px; top: 8px; font-size: 12px; color: oklch(0.58 0 0); pointer-events: none">Min.</span></span></div>
+                  <div style="display: flex; align-items: center; gap: 6px"><span style="font-size: 12px; color: oklch(0.58 0 0); width: 70px">Ankunft</span>
+                    <label class="sk" for="ein-from">Früheste Ankunft</label><input id="ein-from" class="ctl" type="time" value="{{e.from}}" style="width: 110px; height: 34px">
+                    <span style="color: oklch(0.58 0 0)">–</span><label class="sk" for="ein-to">Späteste Ankunft</label><input id="ein-to" class="ctl" type="time" value="{{e.to}}" style="width: 110px; height: 34px">
+                    <span class="rv" title="Optional. Andere Startzeiten bleiben möglich." style="color: oklch(0.58 0 0); display: inline-flex"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 16v-4M12 8h.01"></path></svg></span></div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px"><label class="lb" for="k-note">Notizen</label><textarea id="k-note" class="ctl" rows="3" placeholder="Hinweise für Mitarbeitende">Einige Notizen.</textarea></div>
+          </div>
+          <div style="padding: 14px 20px; border-top: 1px solid #ffffff12; display: flex; justify-content: flex-end; gap: 8px"><button type="button" class="qb" onClick="{{closeSheet}}" style="height: 38px; padding: 0 14px; border-radius: 12px; border: 1px solid #ffffff1f; background: transparent; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; color: oklch(0.985 0 0)">Abbrechen</button><button type="button" class="pb" onClick="{{saveClient}}" style="height: 38px; padding: 0 16px; border-radius: 12px; border: 0; background: oklch(0.424 0.199 265.638); color: oklch(0.97 0.014 254.604); font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; cursor: pointer">Speichern</button></div>
+        </aside>
+      </div></sc-if></main>
+      
+    </div>
+  </div>
+  <sc-if value="{{toastOn}}" hint-placeholder-val="{{false}}">
+    <div role="status" style="position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 60; padding: 10px 8px 10px 16px; border-radius: 12px; background: oklch(0.985 0 0); color: oklch(0.2 0.016 255); display: flex; align-items: center; gap: 12px; font-size: 14px; box-shadow: 0 10px 15px -3px #00000066, 0 4px 6px -4px #00000066">{{toastText}}
+      <button type="button" class="ghost" onClick="{{hideToast}}" aria-label="Meldung schliessen" style="width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button></div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = Object.assign({ col: false, toast: '' }, { q: '', mode: 'Liste', sheet: true, cname: 'Klient 1', addrQ: 'Mariabergstrasse 5, 9400 Rorschach', sugg: false, ed: { days: [1, 1, 1, 1, 1, 1, 1], ein: [{ name: 'Einsatz', dur: '30', from: '11:30', to: '12:00' }] } }); }
+  renderVals() {
+    const ACTIVE = 'Klienten';
+    const st = this.state;
+
+    const P = {home: 'M3 10 12 3l9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z', app: 'M3 5h18v14H3ZM3 9h18M7 7h.01', boxes: 'M12 2 3 7l9 5 9-5-9-5ZM3 17l9 5 9-5M3 12l9 5 9-5', building: 'M4 21V3h10v18M14 9h6v12M8 7h2M8 11h2M8 15h2M2 21h20', users: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8', brief: 'M3 7h18v13H3ZM8 7V4h8v3M3 13h18', shield: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z', mail: 'M2 4h20v16H2ZM22 6l-10 7L2 6', chart: 'M3 3v18h18M7 16v-4M12 16V8M17 16v-7', card: 'M2 5h20v14H2ZM2 10h20', search: 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM20 20l-3.5-3.5', plus: 'M12 5v14M5 12h14', arrow: 'M7 17 17 7M8 7h9v9', chev: 'm9 18 6-6-6-6', chevd: 'm6 9 6 6 6-6', updown: 'm7 15 5 5 5-5M7 9l5-5 5 5', bell: 'M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0', panel: 'M3 3h18v18H3ZM9 3v18', filter: 'M4 6h16M7 12h10M10 18h4', more: 'M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM19 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM5 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z', alert: 'M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z', check: 'M20 6 9 17l-5-5', circle: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z', lock: 'M5 11h14v10H5ZM8 11V7a4 4 0 0 1 8 0v4', copy: 'M8 8h12v12H8ZM16 8V4H4v12h4', user: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4 21a8 8 0 0 1 16 0', userplus: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM19 8v6M22 11h-6', calendar: 'M3 5h18v16H3ZM3 10h18M8 3v4M16 3v4', trend: 'M3 17l6-6 4 4 8-8M15 7h6v6', pin: 'M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0ZM12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z', clip: 'M9 4h6v3H9ZM6 6h12v15H6ZM9 12h6M9 16h4', flow: 'M5 3h4v4H5ZM15 3h4v4h-4ZM10 17h4v4h-4ZM7 7v4h10V7M12 11v6', refresh: 'M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5', save: 'M5 3h11l3 3v15H5ZM8 3v5h7M8 21v-7h8v7', x: 'M18 6 6 18M6 6l12 12', send: 'm22 2-7 20-4-9-9-4 20-7Z', ext: 'M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6', grid: 'M3 3h7v7H3ZM14 3h7v7h-7ZM3 14h7v7H3ZM14 14h7v7h-7Z', list: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01', info: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 16v-4M12 8h.01', outbox: 'M22 12h-6l-2 3h-4l-2-3H2M5.5 5h13L22 12v7H2v-7ZM12 2v7M9 5l3-3 3 3', draft: 'M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z', clock: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 7v5l3 2', megaphone: 'M3 11v2a1 1 0 0 0 1 1h3l6 4V6L7 10H4a1 1 0 0 0-1 1ZM17 9a4 4 0 0 1 0 6M20 6a8 8 0 0 1 0 12', layout: 'M3 3h18v18H3ZM3 9h18M9 9v12', target: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10ZM12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z', badgecheck: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM8 12l3 3 5-6', zap: 'M13 2 3 14h9l-1 8 10-12h-9l1-8Z', db: 'M12 8c4.4 0 8-1.3 8-3s-3.6-3-8-3-8 1.3-8 3 3.6 3 8 3ZM4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3', sliders: 'M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6', paperclip: 'm21 11-9 9a5.7 5.7 0 0 1-8-8l9-9a3.8 3.8 0 0 1 5.4 5.4l-9 9a1.9 1.9 0 0 1-2.7-2.7l8.3-8.3', back: 'm15 18-6-6 6-6', type: 'M4 7V4h16v3M9 20h6M12 4v16', braces: 'M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1M16 3h1a2 2 0 0 1 2 2v5a2 2 0 0 0 2 2 2 2 0 0 0-2 2v5a2 2 0 0 1-2 2h-1', pointer: 'M3 3h18v8H3ZM12 15l2 6 1.5-2.5L18 21l1-1-2.5-2.5L19 16Z', image: 'M3 3h18v18H3ZM9 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM21 15l-5-5L5 21', minus: 'M5 12h14', trash: 'M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15', monitor: 'M2 4h20v13H2ZM8 21h8M12 17v4', phone: 'M7 2h10v20H7ZM11 18h2', link: 'M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7', star: 'm12 2 3 6.5 7 .9-5.1 4.8 1.3 7L12 17.8 5.8 21.2l1.3-7L2 9.4l7-.9Z', grid4: 'M3 3h7v9H3ZM14 3h7v5h-7ZM14 12h7v9h-7ZM3 16h7v5H3Z', key: 'M15 7a2 2 0 1 1 0 .01M21 2l-9.6 9.6a5.5 5.5 0 1 1-1.4-1.4L19 1M16 5l3 3', wrench: 'M14.7 6.3a4 4 0 0 0 5 5L22 14l-8 8-2.3-2.3a4 4 0 0 0-5-5L2 10l8-8 2.3 2.3a4 4 0 0 0 2.4 2Z', gear: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0-1.2-2.9H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 2.9-1.2V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0 1.2 2.9H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z', activity: 'M22 12h-4l-3 9L9 3l-3 9H2', play: 'm6 3 14 9-14 9Z', pause: 'M6 4h4v16H6ZM14 4h4v16h-4Z', download: 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3', globe: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20ZM2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20', eye: 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12ZM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z', server: 'M3 3h18v7H3ZM3 14h18v7H3ZM7 6.5h.01M7 17.5h.01', ban: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20ZM4.9 4.9l14.2 14.2', external: 'M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6', switch: 'M17 3l4 4-4 4M3 7h18M7 21l-4-4 4-4M21 17H3', bold: 'M6 4h8a4 4 0 0 1 0 8H6ZM6 12h9a4 4 0 0 1 0 8H6Z', italic: 'M19 4h-9M14 20H5M15 4 9 20', listul: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01', calendar2: 'M3 5h18v16H3ZM3 10h18M8 3v4M16 3v4', calclock: 'M21 10V5H3v16h7M3 10h18M8 3v4M16 3v4M17 14v3l2 1M22 17a5 5 0 1 1-10 0 5 5 0 0 1 10 0Z', printer: 'M6 9V3h12v6M6 18H4v-7h16v7h-2M6 14h12v7H6Z', sidebarR: 'M3 3h18v18H3ZM15 3v18', grip: 'M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01', pencil: 'M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z', note: 'M4 4h16v12l-4 4H4ZM16 20v-4h4'};
+    const col = !!st.col;
+    const groups = [['Planung', [['Planung', 'calendar2', '#'], ['Einsatzplan', 'calclock', '#']]], ['Klienten', [['Klientenübersicht', 'clip', 'PlnWoche.dc.html'], ['Klienten', 'users', 'PlnKlienten.dc.html']]]].map(([label, items]) => ({ label, show: !col, items: items.map(([l, icon, href]) => {
+      const on = l === ACTIVE;
+      return { label: l, icon: P[icon], href, show: !col, current: on ? 'page' : 'false',
+        style: 'height: 38px; border-radius: 10px; display: flex; align-items: center; gap: 10px; font-size: 14px; text-decoration: none; ' + (col ? 'justify-content: center; padding: 0; ' : 'padding: 0 10px; ') + 'font-weight: ' + (on ? 600 : 400) + '; color: ' + (on ? 'oklch(0.985 0 0)' : 'oklch(0.78 0 0)') + '; background: ' + (on ? 'oklch(0.2731 0.0358 265.638)' : 'transparent') };
+    }) }));
+    const SH = { groups, expanded: !col, toggleCol: () => this.setState({ col: !col }), colLabel: col ? 'Seitenleiste ausklappen' : 'Seitenleiste einklappen',
+      asideStyle: (col ? 'flex: 0 0 68px; max-width: 68px' : 'flex: 0 0 236px; max-width: 236px') + '; min-height: 100vh; background: oklch(0.17 0 0); border-right: 1px solid #ffffff14; display: flex; flex-direction: column',
+      stop: (e) => e.stopPropagation(), toastOn: !!st.toast, toastText: st.toast || '', hideToast: () => this.setState({ toast: '' }) };
+
+
+    const clients = [
+      { id: 'k1', name: 'Klient 1', addr: 'Mariabergstrasse 5, 9400 Rorschach', note: 'Einige Notizen.' },
+      { id: 'k2', name: 'Klient 1 Kopie', addr: 'Mariabergstrasse 5, 9400 Rorschach', note: 'Einige Notizen.' }
+    ];
+    const emps = [{ id: 'hp', name: 'Hans Peter', role: 'Physiotherapeut', initials: 'HP', color: 'oklch(0.7 0.14 264)' }];
+    const wd = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+    const week = [16, 17, 18, 19, 20, 21, 22].map((d, i) => ({ d, wd: wd[i], long: wd[i] + ', ' + d + '.11.' }));
+    const asg = st.asg;
+    const empOn = (id) => !(st.hidden || {})[id];
+    const t2m = (t) => { const [h, m] = (t || '0:0').split(':').map(Number); return h * 60 + m; };
+    const m2t = (m) => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+
+    const dayPills = (on) => wd.map((w, i) => ({ w, style: 'width: 22px; height: 22px; border-radius: 9999px; font-size: 10px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; ' + (on[i] ? 'background: oklch(0.2731 0.0358 265.638); color: oklch(0.85 0.06 264)' : 'color: oklch(0.45 0 0)') }));
+    const list = clients.filter(c => !st.q || c.name.toLowerCase().indexOf(st.q.toLowerCase()) >= 0).map(c => ({ name: c.name, addr: c.addr, note: c.note, days: dayPills([1, 1, 1, 1, 1, 1, 1]),
+      einsatz: '1 Einsatz · 30 Min.', window: 'Ankunft 11:30–12:00', edit: () => this.setState({ sheet: true, cname: c.name }) }));
+    const ed = st.ed;
+    const V = {
+      list, empty: list.length === 0, isList: st.mode === 'Liste', isCards: st.mode === 'Karten', setQ: (e) => this.setState({ q: e.target.value }),
+      modes: ['Liste', 'Karten'].map(m => ({ label: m, pressed: st.mode === m ? 'true' : 'false', pick: () => this.setState({ mode: m }), icon: m === 'Liste' ? P.list : P.grid,
+        style: 'width: 32px; height: 30px; border: 0; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; background: ' + (st.mode === m ? 'oklch(0.3 0 0)' : 'transparent') + '; color: ' + (st.mode === m ? 'oklch(0.985 0 0)' : 'oklch(0.72 0 0)') })),
+      sheetOpen: !!st.sheet, closeSheet: () => this.setState({ sheet: false }), newClient: () => this.setState({ sheet: true, cname: '' }),
+      sheetTitle: st.cname ? st.cname + ' bearbeiten' : 'Neuer Klient', cname: st.cname,
+      edDays: wd.map((w, i) => { const on = ed.days[i]; return { w, pressed: on ? 'true' : 'false', toggle: () => { const d = ed.days.slice(); d[i] = !on; this.setState({ ed: Object.assign({}, ed, { days: d }) }); },
+        style: 'width: 38px; height: 38px; border-radius: 9999px; border: 1px solid ' + (on ? 'oklch(0.7 0.14 264)' : '#ffffff26') + '; background: ' + (on ? 'oklch(0.2731 0.0358 265.638)' : 'transparent') + '; color: ' + (on ? 'oklch(0.985 0 0)' : 'oklch(0.72 0 0)') + '; font-size: 12px; font-weight: 600; cursor: pointer' }; }),
+      daysAll: () => this.setState({ ed: Object.assign({}, ed, { days: [1, 1, 1, 1, 1, 0, 0] }) }), daysEvery: () => this.setState({ ed: Object.assign({}, ed, { days: [1, 1, 1, 1, 1, 1, 1] }) }),
+      einsaetze: ed.ein.map((e, i) => ({ n: String(i + 1), name: e.name, dur: e.dur, durId: 'ein-dur-' + i, durCustom: ['15', '30', '45', '60'].includes(e.dur) ? '' : e.dur, setDur: (ev) => { const a = ed.ein.slice(); a[i] = Object.assign({}, a[i], { dur: ev.target.value.replace(/[^0-9]/g, '') }); this.setState({ ed: Object.assign({}, ed, { ein: a }) }); }, durCustomStyle: 'width: 92px; height: 30px; padding: 0 34px 0 10px; font-size: 12px; border-radius: 8px; ' + (['15', '30', '45', '60'].includes(e.dur) ? '' : 'border-color: oklch(0.7 0.14 264); background: oklch(0.2731 0.0358 265.638);'), from: e.from, to: e.to,
+        remove: () => this.setState({ ed: Object.assign({}, ed, { ein: ed.ein.filter((_, j) => j !== i) }) }),
+        durPresets: [15, 30, 45, 60].map(m => ({ m: String(m), pick: () => { const a = ed.ein.slice(); a[i] = Object.assign({}, a[i], { dur: String(m) }); this.setState({ ed: Object.assign({}, ed, { ein: a }) }); },
+          style: 'height: 30px; padding: 0 10px; border-radius: 8px; border: 1px solid ' + (e.dur === String(m) ? 'oklch(0.7 0.14 264)' : '#ffffff1f') + '; background: ' + (e.dur === String(m) ? 'oklch(0.2731 0.0358 265.638)' : 'transparent') + '; font-size: 12px; cursor: pointer' })) })),
+      addEinsatz: () => this.setState({ ed: Object.assign({}, ed, { ein: ed.ein.concat({ name: 'Einsatz', dur: '30', from: '', to: '' }) }) }),
+      addrQ: st.addrQ, setAddr: (e) => this.setState({ addrQ: e.target.value, sugg: e.target.value.length > 2 }),
+      showSugg: !!st.sugg, pickSugg: () => this.setState({ addrQ: 'Mariabergstrasse 5, 9400 Rorschach', sugg: false }),
+      saveClient: () => this.setState({ sheet: false, toast: 'Klient gespeichert.' })
+    };
+
+    return Object.assign({}, SH, V);
+  }
+}
+</script>
+</body>
+</html>

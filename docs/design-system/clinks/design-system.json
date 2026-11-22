@@ -1,0 +1,121 @@
+{
+  "v": 3,
+  "assetGroups": {
+    "Flags": {
+      "files": {
+        "england.svg": {
+          "blob": "81840371677b4802bd05f7ee817203f6",
+          "name": "england.svg",
+          "size": 658,
+          "type": "image/svg+xml"
+        },
+        "france.svg": {
+          "blob": "ab963239d94712f4c7dc7228ae0f23af",
+          "name": "france.svg",
+          "size": 734,
+          "type": "image/svg+xml"
+        },
+        "italy.svg": {
+          "blob": "48636258359d7840a630c4b2444d67af",
+          "name": "italy.svg",
+          "size": 734,
+          "type": "image/svg+xml"
+        },
+        "spain.svg": {
+          "blob": "5b57e1976086c5defce133bb8f11d9f0",
+          "name": "spain.svg",
+          "size": 5261,
+          "type": "image/svg+xml"
+        },
+        "switzerland.svg": {
+          "blob": "1d498f8bd19ca10258990f5b8025c977",
+          "name": "switzerland.svg",
+          "size": 679,
+          "type": "image/svg+xml"
+        }
+      },
+      "name": "Flags",
+      "order": [
+        "switzerland.svg",
+        "england.svg",
+        "france.svg",
+        "italy.svg",
+        "spain.svg"
+      ],
+      "tile": "xs"
+    },
+    "Logos": {
+      "files": {
+        "clinks-galaxy-dark.webp": {
+          "blob": "956984fe663c4c23e8ba8c7b3bd0bcea",
+          "name": "clinks-galaxy-dark.webp",
+          "size": 176772,
+          "type": "image/webp"
+        },
+        "clinks-galaxy-light.webp": {
+          "blob": "1a97043debb9cf18d885c484989e41a5",
+          "name": "clinks-galaxy-light.webp",
+          "size": 158310,
+          "type": "image/webp"
+        },
+        "clinks-mark-dark.png": {
+          "blob": "56f51ae1ae4f0fc92e41353f91291f2b",
+          "name": "clinks-mark-dark.png",
+          "size": 264132,
+          "type": "image/png"
+        },
+        "clinks-mark.png": {
+          "blob": "ac322a5b3fb00884f211e7355ef41057",
+          "name": "clinks-mark.png",
+          "size": 401442,
+          "type": "image/png"
+        },
+        "clinks-wordmark-dark.png": {
+          "blob": "995725e9ebc9c14749cdff6b8c0500b3",
+          "name": "clinks-wordmark-dark.png",
+          "size": 192356,
+          "type": "image/png"
+        },
+        "clinks-wordmark.png": {
+          "blob": "0bdb29f096486efb2d95922e9f6cce4b",
+          "name": "clinks-wordmark.png",
+          "size": 250544,
+          "type": "image/png"
+        }
+      },
+      "name": "Logos",
+      "order": [
+        "clinks-wordmark.png",
+        "clinks-wordmark-dark.png",
+        "clinks-mark.png",
+        "clinks-mark-dark.png",
+        "clinks-galaxy-light.webp",
+        "clinks-galaxy-dark.webp"
+      ],
+      "tile": "l"
+    }
+  },
+  "blobs": {},
+  "createdOnFiles": {
+    "at": "2026-11-13T20:26:22Z",
+    "v": 1
+  },
+  "docs": {
+    "sections": []
+  },
+  "groups": [
+    "Logos",
+    "Flags"
+  ],
+  "lastChange": {
+    "by": "besart951",
+    "at": "2026-11-22T01:00:00Z",
+    "via": "Claude Code",
+    "note": "CalendarPage template and calendar styles: one calendar (day, week, month) and one drag-and-drop base for every app; entries move by drag, long press and arrow keys with a live preview, colour by tone as an edge and tint. Before that: Page templates like Stille: BoardPage (InfraLink projects by phase), TablePage and ActivityPage; segment control in the Toggle card; tabs focus as an inner outline. Before that, Stille sidebar: 240px without a fill of its own, a border line, 32px muted rows, neutral hover and selection, 28px group titles, counters and hover actions, 56px collapsed. Before that, simplified like Stille: README in Stille's structure (ground rules, content, colour, type, space, motion, touch, icons, use), 30 short component cards (Markup, Rules, Source) instead of 57; FormField and SearchField fold into Input, Sheet into Dialog, Table into DataTable, StaffNavigation becomes Sidebar; app-specific cards, index.d.ts and the unused Archivo, Martian Mono and Roboto fonts removed; token notes cut to one sentence. Earlier: aligned with Stille: Geist and Geist Mono everywhere, 30/36 page title, 4px spacing scale, 10px radius base (6/8/10/14), shadow-sm on cards and fields, shadow-md on floating layers, 36px controls (40px touch, 44px touch rows), Stille motion and status as dot plus word; PlanerLink, CaleLink and PhysioLink darkened for tint contrast; LokaLink text darkened to oklch(0.48 0.12 50) for active filter chips on the Loka background. One component per pattern: OtpField (40px cells, 44px touch) for every numeric code, CommandMenu with CommandMenuTrigger as the Portal and Admin search, LoadingStatus, Badge count variants with pulse, EmptyState block form, segmented ToggleGroup; Stille motion for icon hover, floating layers, toasts and Kanban FLIP."
+  },
+  "layout": "files",
+  "libraries": [],
+  "namespace": "CLinks",
+  "sections": {},
+  "title": "CLinks"
+}

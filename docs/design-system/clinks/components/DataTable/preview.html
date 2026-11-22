@@ -1,0 +1,27 @@
+<!-- @dsCard group="Data" height=332 subtitle="Toolbar, applied filter, compact rows, footer" -->
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<title>DataTable — preview</title>
+</head>
+<body>
+<div style="padding:var(--desktop-page);">
+  <div class="cl-data-table">
+    <div class="cl-dt-toolbar">
+      <div class="cl-search" style="max-width:280px"><label class="cl-sr" for="dt1">Suchen</label><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg><input class="cl-input cl-input--sm" id="dt1" type="search" placeholder="Suchen..."></div>
+      <button class="cl-btn cl-btn--outline cl-btn--icon-sm" type="button" aria-label="Filter"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 5h20"/><path d="M6 12h12"/><path d="M9 19h6"/></svg></button>
+      <div class="cl-dt-actions"><button class="cl-btn cl-btn--outline cl-btn--sm" type="button"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></svg>Exportieren</button><button class="cl-btn cl-btn--sm" type="button"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>Adresse ergänzen</button></div>
+    </div>
+    <div class="cl-filter-row"><div class="cl-filter-badge cl-filter-badge--active"><button class="cl-filter-remove" type="button" aria-label="Filter entfernen: Status"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg></button><button class="cl-filter-trigger" type="button"><span>Status</span><span class="cl-filter-value">Aktiv</span></button></div></div>
+    <div class="cl-card" style="padding:0;gap:0">
+      <table class="cl-table cl-table--compact">
+        <thead><tr><th><span class="cl-th-sort">Strasse<svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg></span></th><th>Ort</th><th>Quelle</th><th>Status</th><th style="text-align:right">Aktualisiert</th><th style="width:1%"><span class="cl-sr">Aktionen</span></th></tr></thead>
+        <tbody><tr class="reveal-parent" data-preview-hover><td>Hauptstrasse 12a</td><td>9400 Rorschach</td><td>CLinks-Adressbestand</td><td></td><td><span style="display:block;text-align:right">12.11.2026</span></td><td style="width:1%"><div class="cl-row-actions reveal-on-hover"><button class="cl-btn cl-btn--ghost cl-btn--icon-sm" type="button" aria-label="Bearbeiten"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg></button><button class="cl-btn cl-btn--ghost cl-btn--icon-sm" type="button" aria-label="Weitere Aktionen"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td></tr><tr class="reveal-parent"><td>Bahnhofstrasse 3</td><td>8001 Zürich</td><td>BEV – Adressregister</td><td></td><td><span style="display:block;text-align:right">10.11.2026</span></td><td style="width:1%"><div class="cl-row-actions reveal-on-hover"><button class="cl-btn cl-btn--ghost cl-btn--icon-sm" type="button" aria-label="Bearbeiten"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg></button><button class="cl-btn cl-btn--ghost cl-btn--icon-sm" type="button" aria-label="Weitere Aktionen"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td></tr><tr class="reveal-parent"><td>Seestrasse 41</td><td>6300 Zug</td><td>Google Maps</td><td><span class="cl-badge cl-badge--neutral">Gesperrt</span></td><td><span style="display:block;text-align:right">02.11.2026</span></td><td style="width:1%"><div class="cl-row-actions reveal-on-hover"><button class="cl-btn cl-btn--ghost cl-btn--icon-sm" type="button" aria-label="Bearbeiten"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg></button><button class="cl-btn cl-btn--ghost cl-btn--icon-sm" type="button" aria-label="Weitere Aktionen"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></td></tr></tbody>
+      </table>
+    </div>
+    <div class="cl-dt-footer"><span>3 von 132 Adressen</span><div><span>Zeilen pro Seite</span><select class="cl-input cl-input--sm" style="width:auto" aria-label="Zeilen pro Seite"><option>25</option></select><button class="cl-btn cl-btn--outline cl-btn--icon-sm" type="button" aria-label="Vorherige Seite" disabled><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><button class="cl-btn cl-btn--outline cl-btn--icon-sm" type="button" aria-label="Nächste Seite"><svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button></div></div>
+  </div>
+</div>
+</body>
+</html>

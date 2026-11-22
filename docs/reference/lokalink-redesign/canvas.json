@@ -1,0 +1,1060 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "AdmAdressen.dc.html": {
+      "expand": "fill",
+      "h": 860,
+      "is_interactive": true,
+      "page": "page-gxudd6",
+      "title": "Admin – Adressbestand",
+      "w": 1440,
+      "x": 4560,
+      "y": 3200
+    },
+    "AdmAnmeldung.dc.html": {
+      "expand": "fill",
+      "h": 700,
+      "is_interactive": true,
+      "page": "page-gxudd6",
+      "title": "Admin – Anmeldung: Clients",
+      "w": 1440,
+      "x": 1520,
+      "y": 2180
+    },
+    "AdmAnmeldungIdp.dc.html": {
+      "expand": "fill",
+      "h": 700,
+      "is_interactive": true,
+      "page": "page-gxudd6",
+      "title": "Admin – Anmeldung: Identitätsanbieter",
+      "w": 1440,
+      "x": 3040,
+      "y": 2180
+    },
+    "AdmAudit.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "page-gxudd6",
+      "title": "Admin – Audit-Protokoll",
+      "w": 1440,
+      "x": 3040,
+      "y": 3200
+    },
+    "AdmBenutzer.dc.html": {
+      "expand": "fill",
+      "h": 760,
+      "is_interactive": true,
+      "page": "page-gxudd6",
+      "title": "Admin – Benutzer",
+      "w": 1440,
+      "x": 3040,
+      "y": 900
+    },
+    "AdmEinstellungen.dc.html": {
+      "expand": "fill",
+      "h": 2600,
+      "is_interactive": true,
+      "page": "page-fso6ox",
+      "title": "Admin – Einstellungen",
+      "w": 1440,
+      "x": 880,
+      "y": 0
+    },
+    "AdmJobs.dc.html": {
+      "expand": "fill",
+      "h": 1160,
+      "is_interactive": true,
+      "page": "page-gxudd6",
+      "title": "Admin – Versand und Jobs",
+      "w": 1440,
+      "x": 1520,
+      "y": 3200
+    },
+    "AdmMandanten.dc.html": {
+      "expand": "fill",
+      "h": 760,
+      "is_interactive": true,
+      "page": "page-gxudd6",
+      "title": "Admin – Mandanten",
+      "w": 1440,
+      "x": 1520,
+      "y": 900
+    },
+    "AdmMitteilungen.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "page-gxudd6",
+      "title": "Admin – Systemmitteilungen",
+      "w": 1440,
+      "x": 0,
+      "y": 3200
+    },
+    "AdmPakete.dc.html": {
+      "expand": "fill",
+      "h": 760,
+      "is_interactive": true,
+      "page": "page-gxudd6",
+      "title": "Admin – Pakete",
+      "w": 1440,
+      "x": 4560,
+      "y": 900
+    },
+    "AdmRollen.dc.html": {
+      "expand": "fill",
+      "h": 760,
+      "is_interactive": true,
+      "page": "page-gxudd6",
+      "title": "Admin – Rollen",
+      "w": 1440,
+      "x": 0,
+      "y": 2180
+    },
+    "AdmSmtp.dc.html": {
+      "expand": "fill",
+      "h": 1060,
+      "is_interactive": true,
+      "page": "page-gxudd6",
+      "title": "Admin – E-Mail-Versand",
+      "w": 1440,
+      "x": 0,
+      "y": 4480
+    },
+    "AdmUebersicht.dc.html": {
+      "expand": "fill",
+      "h": 1160,
+      "is_interactive": true,
+      "page": "page-gxudd6",
+      "title": "Admin – Übersicht",
+      "w": 1440,
+      "x": 0,
+      "y": 900
+    },
+    "AdmVorlagen.dc.html": {
+      "expand": "fill",
+      "h": 960,
+      "is_interactive": true,
+      "page": "page-gxudd6",
+      "title": "Admin – E-Mail-Vorlagen",
+      "w": 1440,
+      "x": 1520,
+      "y": 4480
+    },
+    "AdmWartung.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "page-gxudd6",
+      "title": "Admin – Wartung",
+      "w": 1440,
+      "x": 4560,
+      "y": 2180
+    },
+    "AppHome.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "App – Suchen",
+      "w": 390,
+      "x": 0,
+      "y": 3320
+    },
+    "AppProfile.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "App – Firmenprofil",
+      "w": 390,
+      "x": 940,
+      "y": 3320
+    },
+    "AppResults.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "App – Ergebnisse mit Karte",
+      "w": 390,
+      "x": 470,
+      "y": 3320
+    },
+    "AppSaved.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 40,
+      "title": "App – Gemerkt",
+      "w": 390,
+      "x": 1410,
+      "y": 3320
+    },
+    "Artboard-6tkx.dc.html": {
+      "h": 600,
+      "handmade": true,
+      "page": "page-g1znk4",
+      "title": "Artboard 1",
+      "w": 800,
+      "x": 0,
+      "y": 0
+    },
+    "Artboard-8kpx.dc.html": {
+      "h": 600,
+      "handmade": true,
+      "page": "page-wczfr1",
+      "title": "Artboard 1",
+      "w": 800,
+      "x": 0,
+      "y": 0
+    },
+    "Artboard-emjm.dc.html": {
+      "h": 600,
+      "handmade": true,
+      "page": "page-ixv77n",
+      "title": "Artboard 1",
+      "w": 800,
+      "x": 0,
+      "y": 0
+    },
+    "Artboard-ve4u.dc.html": {
+      "h": 600,
+      "handmade": true,
+      "page": "page-wib3il",
+      "title": "Artboard 1",
+      "w": 800,
+      "x": 0,
+      "y": 0
+    },
+    "Artboard-wye6.dc.html": {
+      "h": 600,
+      "handmade": true,
+      "page": "page-gxudd6",
+      "title": "Artboard 1",
+      "w": 800,
+      "x": 0,
+      "y": 0
+    },
+    "Artboard-yws6.dc.html": {
+      "h": 600,
+      "handmade": true,
+      "page": "page-fso6ox",
+      "title": "Artboard 1",
+      "w": 800,
+      "x": 0,
+      "y": 0
+    },
+    "Business.dc.html": {
+      "expand": "fill",
+      "h": 2900,
+      "is_interactive": true,
+      "title": "Für Firmen",
+      "w": 1440,
+      "x": 1520,
+      "y": 0
+    },
+    "Dashboard.dc.html": {
+      "expand": "fill",
+      "h": 1180,
+      "is_interactive": true,
+      "title": "Firmenbereich – Profil verwalten",
+      "w": 1440,
+      "x": 0,
+      "y": 4584
+    },
+    "InfAlarme.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "page-ixv77n",
+      "title": "InfraLink – Alarme",
+      "w": 1440,
+      "x": 6960,
+      "y": 1120
+    },
+    "InfBacnetObjekt.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "page-ixv77n",
+      "title": "InfraLink – BACnet-Objekt bearbeiten",
+      "w": 1440,
+      "x": 2400,
+      "y": 1120
+    },
+    "InfFeldgeraete.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "page-ixv77n",
+      "title": "InfraLink – Feldgeräte",
+      "w": 1440,
+      "x": 3920,
+      "y": 0
+    },
+    "InfFeldgeraeteNeu.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "page-ixv77n",
+      "title": "InfraLink – Feldgeräte erzeugen",
+      "w": 1440,
+      "x": 5440,
+      "y": 0
+    },
+    "InfKataloge.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "page-ixv77n",
+      "title": "InfraLink – Kataloge: Anlagetypen",
+      "w": 1440,
+      "x": 3920,
+      "y": 1120
+    },
+    "InfKatalogeSys.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "page-ixv77n",
+      "title": "InfraLink – Kataloge: Systemtyp anlegen",
+      "w": 1440,
+      "x": 5440,
+      "y": 1120
+    },
+    "InfObjektdaten.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "page-ixv77n",
+      "title": "InfraLink – Objektdaten",
+      "w": 1440,
+      "x": 880,
+      "y": 1120
+    },
+    "InfProjekt.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "page-ixv77n",
+      "title": "InfraLink – Projekt: Struktur live",
+      "w": 1440,
+      "x": 3920,
+      "y": 2240
+    },
+    "InfProjektEinladen.dc.html": {
+      "expand": "fill",
+      "h": 960,
+      "is_interactive": true,
+      "page": "page-ixv77n",
+      "title": "InfraLink – Projekt: Einladen mit Rollen",
+      "w": 1440,
+      "x": 3920,
+      "y": 3360
+    },
+    "InfProjektNeu.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "page-ixv77n",
+      "title": "InfraLink – Neues Projekt",
+      "w": 1440,
+      "x": 2400,
+      "y": 2240
+    },
+    "InfProjektTeam.dc.html": {
+      "expand": "fill",
+      "h": 960,
+      "is_interactive": true,
+      "page": "page-ixv77n",
+      "title": "InfraLink – Projekt: Beteiligte einladen",
+      "w": 1440,
+      "x": 5440,
+      "y": 2240
+    },
+    "InfProjektVorlagen.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "page-ixv77n",
+      "title": "InfraLink – Projekt: Objektvorlagen",
+      "w": 1440,
+      "x": 6960,
+      "y": 2240
+    },
+    "InfProjekte.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "page-ixv77n",
+      "title": "InfraLink – Projekte",
+      "w": 1440,
+      "x": 880,
+      "y": 2240
+    },
+    "InfImport.dc.html": {
+      "expand": "fill",
+      "h": 960,
+      "is_interactive": true,
+      "page": "page-ixv77n",
+      "title": "InfraLink – Import: Zuordnen",
+      "w": 1440,
+      "x": 880,
+      "y": 4440
+    },
+    "InfFeldgeraeteProjekte.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "page-ixv77n",
+      "title": "InfraLink – Feldgeräte: Projekten zuweisen",
+      "w": 1440,
+      "x": 6960,
+      "y": 0
+    },
+    "InfImportKonflikte.dc.html": {
+      "expand": "fill",
+      "h": 960,
+      "is_interactive": true,
+      "page": "page-ixv77n",
+      "title": "InfraLink – Import: Konflikte lösen",
+      "w": 1440,
+      "x": 5440,
+      "y": 4440
+    },
+    "InfImportPruefen.dc.html": {
+      "expand": "fill",
+      "h": 960,
+      "is_interactive": true,
+      "page": "page-ixv77n",
+      "title": "InfraLink – Import: Prüfen",
+      "w": 1440,
+      "x": 2400,
+      "y": 4440
+    },
+    "InfExport.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "page-ixv77n",
+      "title": "InfraLink – Projekt: Exportieren",
+      "w": 1440,
+      "x": 3920,
+      "y": 4440
+    },
+    "InfRollen.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "page-ixv77n",
+      "title": "InfraLink – Rollen je Phase",
+      "w": 1440,
+      "x": 880,
+      "y": 3360
+    },
+    "InfRollenNeu.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "page-ixv77n",
+      "title": "InfraLink – Neue Rolle",
+      "w": 1440,
+      "x": 2400,
+      "y": 3360
+    },
+    "InfStruktur.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "page-ixv77n",
+      "title": "InfraLink – Anlagenstruktur",
+      "w": 1440,
+      "x": 880,
+      "y": 0
+    },
+    "InfStrukturNeu.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "page-ixv77n",
+      "title": "InfraLink – Struktur: Controller anlegen",
+      "w": 1440,
+      "x": 2400,
+      "y": 0
+    },
+    "Main.dc.html": {
+      "expand": "fill",
+      "h": 2560,
+      "is_interactive": true,
+      "title": "Startseite – Firma finden",
+      "w": 1440,
+      "x": 0,
+      "y": 0
+    },
+    "PbkMob1.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "page-g1znk4",
+      "radius": 40,
+      "title": "Powerful – Mobil 1 Training wählen",
+      "w": 390,
+      "x": 880,
+      "y": 1220
+    },
+    "PbkMob2.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "page-g1znk4",
+      "radius": 40,
+      "title": "Powerful – Mobil 2 Termin wählen",
+      "w": 390,
+      "x": 1350,
+      "y": 1220
+    },
+    "PbkMob3.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "page-g1znk4",
+      "radius": 40,
+      "title": "Powerful – Mobil 3 Angaben",
+      "w": 390,
+      "x": 1820,
+      "y": 1220
+    },
+    "PbkMob4.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "page-g1znk4",
+      "radius": 40,
+      "title": "Powerful – Mobil 4 Bestätigen",
+      "w": 390,
+      "x": 2290,
+      "y": 1220
+    },
+    "PbkMob5.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "page-g1znk4",
+      "radius": 40,
+      "title": "Powerful – Mobil 5 Gebucht",
+      "w": 390,
+      "x": 2760,
+      "y": 1220
+    },
+    "PbkStep1.dc.html": {
+      "expand": "fill",
+      "h": 1100,
+      "is_interactive": true,
+      "page": "page-g1znk4",
+      "title": "Powerful – Desktop 1 Training wählen",
+      "w": 1440,
+      "x": 880,
+      "y": 0
+    },
+    "PbkStep2.dc.html": {
+      "expand": "fill",
+      "h": 1100,
+      "is_interactive": true,
+      "page": "page-g1znk4",
+      "title": "Powerful – Desktop 2 Termin wählen",
+      "w": 1440,
+      "x": 2400,
+      "y": 0
+    },
+    "PbkStep3.dc.html": {
+      "expand": "fill",
+      "h": 1100,
+      "is_interactive": true,
+      "page": "page-g1znk4",
+      "title": "Powerful – Desktop 3 Angaben",
+      "w": 1440,
+      "x": 3920,
+      "y": 0
+    },
+    "PbkStep4.dc.html": {
+      "expand": "fill",
+      "h": 1100,
+      "is_interactive": true,
+      "page": "page-g1znk4",
+      "title": "Powerful – Desktop 4 Bestätigen",
+      "w": 1440,
+      "x": 5440,
+      "y": 0
+    },
+    "PbkStep5.dc.html": {
+      "expand": "fill",
+      "h": 1100,
+      "is_interactive": true,
+      "page": "page-g1znk4",
+      "title": "Powerful – Desktop 5 Gebucht",
+      "w": 1440,
+      "x": 6960,
+      "y": 0
+    },
+    "PlnExport.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "page-wczfr1",
+      "title": "PlanerLink – Einsatzplan exportieren",
+      "w": 1440,
+      "x": 2400,
+      "y": 1020
+    },
+    "PlnKlientEdit.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "page-wczfr1",
+      "title": "PlanerLink – Klient bearbeiten",
+      "w": 1440,
+      "x": 880,
+      "y": 2040
+    },
+    "PlnKlienten.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "page-wczfr1",
+      "title": "PlanerLink – Klienten",
+      "w": 1440,
+      "x": 3920,
+      "y": 1020
+    },
+    "PlnMobKlientEdit.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "page-wczfr1",
+      "radius": 40,
+      "title": "Mobil – Klient bearbeiten",
+      "w": 390,
+      "x": 2760,
+      "y": 3060
+    },
+    "PlnMobKlienten.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "page-wczfr1",
+      "radius": 40,
+      "title": "Mobil – Klienten",
+      "w": 390,
+      "x": 2290,
+      "y": 3060
+    },
+    "PlnMobTag.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "page-wczfr1",
+      "radius": 40,
+      "title": "Mobil – Übersicht Tag",
+      "w": 390,
+      "x": 880,
+      "y": 3060
+    },
+    "PlnMobWoche.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "page-wczfr1",
+      "radius": 40,
+      "title": "Mobil – Übersicht Woche",
+      "w": 390,
+      "x": 1820,
+      "y": 3060
+    },
+    "PlnMobZuweisen.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "page-wczfr1",
+      "radius": 40,
+      "title": "Mobil – Besuch zuweisen",
+      "w": 390,
+      "x": 1350,
+      "y": 3060
+    },
+    "PlnPlanung.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "page-wczfr1",
+      "title": "PlanerLink – Planung (Drag & Drop)",
+      "w": 1440,
+      "x": 2400,
+      "y": 2040
+    },
+    "PlnTag.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "page-wczfr1",
+      "title": "PlanerLink – Klientenübersicht: Tag",
+      "w": 1440,
+      "x": 2400,
+      "y": 0
+    },
+    "PlnTermin.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "page-wczfr1",
+      "title": "PlanerLink – Termin bearbeiten",
+      "w": 1440,
+      "x": 880,
+      "y": 1020
+    },
+    "PlnWoche.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "page-wczfr1",
+      "title": "PlanerLink – Klientenübersicht: Woche",
+      "w": 1440,
+      "x": 880,
+      "y": 0
+    },
+    "PlnZuweisen.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "page-wczfr1",
+      "title": "PlanerLink – Besuch zuweisen",
+      "w": 1440,
+      "x": 3920,
+      "y": 0
+    },
+    "WsBenutzer.dc.html": {
+      "expand": "fill",
+      "h": 760,
+      "is_interactive": true,
+      "page": "page-wib3il",
+      "title": "CLinks – Benutzer",
+      "w": 1440,
+      "x": 0,
+      "y": 2020
+    },
+    "WsDashboard.dc.html": {
+      "expand": "fill",
+      "h": 960,
+      "is_interactive": true,
+      "page": "page-wib3il",
+      "title": "CLinks – Dashboard",
+      "w": 1440,
+      "x": 0,
+      "y": 900
+    },
+    "WsKampagne.dc.html": {
+      "expand": "fill",
+      "h": 1100,
+      "is_interactive": true,
+      "page": "page-wib3il",
+      "title": "CLinks – Kampagne bearbeiten",
+      "w": 1440,
+      "x": 0,
+      "y": 4780
+    },
+    "WsKomEinstellungen.dc.html": {
+      "expand": "fill",
+      "h": 960,
+      "is_interactive": true,
+      "page": "page-wib3il",
+      "title": "CLinks – Kommunikation: Absender und Anhänge",
+      "w": 1440,
+      "x": 4560,
+      "y": 3700
+    },
+    "WsKomEinwilligungen.dc.html": {
+      "expand": "fill",
+      "h": 960,
+      "is_interactive": true,
+      "page": "page-wib3il",
+      "title": "CLinks – Kommunikation: Einwilligungen",
+      "w": 1440,
+      "x": 3040,
+      "y": 3700
+    },
+    "WsKomKampagnen.dc.html": {
+      "expand": "fill",
+      "h": 960,
+      "is_interactive": true,
+      "page": "page-wib3il",
+      "title": "CLinks – Kommunikation: Kampagnen",
+      "w": 1440,
+      "x": 1520,
+      "y": 3700
+    },
+    "WsKommunikation.dc.html": {
+      "expand": "fill",
+      "h": 960,
+      "is_interactive": true,
+      "page": "page-wib3il",
+      "title": "CLinks – Kommunikation: Postausgang",
+      "w": 1440,
+      "x": 0,
+      "y": 3700
+    },
+    "WsPartner.dc.html": {
+      "expand": "fill",
+      "h": 760,
+      "is_interactive": true,
+      "page": "page-wib3il",
+      "title": "CLinks – Geschäftspartner",
+      "w": 1440,
+      "x": 1520,
+      "y": 2020
+    },
+    "WsProdukte.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "page-wib3il",
+      "title": "CLinks – Produkte",
+      "w": 1440,
+      "x": 3040,
+      "y": 900
+    },
+    "WsProfil.dc.html": {
+      "expand": "fill",
+      "h": 1180,
+      "is_interactive": true,
+      "page": "page-wib3il",
+      "title": "CLinks – Profil",
+      "w": 1440,
+      "x": 4560,
+      "y": 2020
+    },
+    "WsProfilAdressen.dc.html": {
+      "expand": "fill",
+      "h": 760,
+      "is_interactive": true,
+      "page": "page-wib3il",
+      "title": "CLinks – Profil: Adressen",
+      "w": 1440,
+      "x": 1520,
+      "y": 4780
+    },
+    "WsProgramme.dc.html": {
+      "expand": "fill",
+      "h": 760,
+      "is_interactive": true,
+      "page": "page-wib3il",
+      "title": "CLinks – Programme",
+      "w": 1440,
+      "x": 1520,
+      "y": 900
+    },
+    "WsRollen.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "page-wib3il",
+      "title": "CLinks – Rollen und Berechtigungen",
+      "w": 1440,
+      "x": 3040,
+      "y": 2020
+    },
+    "WsWorkspaces.dc.html": {
+      "expand": "fill",
+      "h": 760,
+      "is_interactive": true,
+      "page": "page-wib3il",
+      "title": "CLinks – Workspaces",
+      "w": 1440,
+      "x": 4560,
+      "y": 900
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-11-16T15:32:00Z",
+    "v": 1
+  },
+  "designSystems": [
+    {
+      "artifact": "https://claude.ai/artifact/9FwhhhATBgZAMBQF5fRSf5",
+      "copiedAt": "2026-11-16T15:31:52Z",
+      "namespace": "clinks",
+      "title": "CLinks",
+      "version": null
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  },
+  "noteOrder": [
+    "title",
+    "appTitle",
+    "dashTitle",
+    "wsTitle",
+    "komTitle",
+    "admTitle"
+  ],
+  "notes": {
+    "admTitle": {
+      "kind": "title1",
+      "maxW": 6000,
+      "page": "page-gxudd6",
+      "text": "CLinks Admin – Redesign",
+      "w": 240,
+      "x": 0,
+      "y": 620
+    },
+    "appTitle": {
+      "kind": "title1",
+      "maxW": 1800,
+      "text": "Mobile App für Suchende",
+      "w": 240,
+      "x": 0,
+      "y": 3020
+    },
+    "dashTitle": {
+      "kind": "title1",
+      "maxW": 1440,
+      "text": "Firmenbereich",
+      "w": 240,
+      "x": 0,
+      "y": 4284
+    },
+    "komTitle": {
+      "kind": "title1",
+      "maxW": 6000,
+      "page": "page-wib3il",
+      "text": "Kommunikation, Kampagnen-Editor und Adressen",
+      "w": 240,
+      "x": 0,
+      "y": 3420
+    },
+    "title": {
+      "kind": "title1",
+      "maxW": 2960,
+      "text": "LokaLink – Redesign-Vorschlag",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "wsTitle": {
+      "kind": "title1",
+      "maxW": 6000,
+      "page": "page-wib3il",
+      "text": "CLinks Arbeitsbereich – Redesign",
+      "w": 240,
+      "x": 0,
+      "y": 620
+    }
+  },
+  "order": [
+    "PbkStep1.dc.html",
+    "PbkStep2.dc.html",
+    "PbkStep3.dc.html",
+    "PbkStep4.dc.html",
+    "PbkStep5.dc.html",
+    "PbkMob1.dc.html",
+    "PbkMob2.dc.html",
+    "PbkMob3.dc.html",
+    "PbkMob4.dc.html",
+    "PbkMob5.dc.html",
+    "PlnMobTag.dc.html",
+    "PlnMobZuweisen.dc.html",
+    "PlnMobWoche.dc.html",
+    "PlnMobKlienten.dc.html",
+    "PlnMobKlientEdit.dc.html",
+    "PlnWoche.dc.html",
+    "PlnTag.dc.html",
+    "PlnZuweisen.dc.html",
+    "PlnTermin.dc.html",
+    "PlnExport.dc.html",
+    "PlnKlienten.dc.html",
+    "PlnKlientEdit.dc.html",
+    "PlnPlanung.dc.html",
+    "Main.dc.html",
+    "Business.dc.html",
+    "AppHome.dc.html",
+    "AppResults.dc.html",
+    "AppProfile.dc.html",
+    "AppSaved.dc.html",
+    "Dashboard.dc.html",
+    "Artboard-ve4u.dc.html",
+    "WsDashboard.dc.html",
+    "WsProgramme.dc.html",
+    "WsProdukte.dc.html",
+    "WsWorkspaces.dc.html",
+    "WsBenutzer.dc.html",
+    "WsPartner.dc.html",
+    "WsRollen.dc.html",
+    "WsProfil.dc.html",
+    "WsKommunikation.dc.html",
+    "WsKomKampagnen.dc.html",
+    "WsKomEinwilligungen.dc.html",
+    "WsKomEinstellungen.dc.html",
+    "WsKampagne.dc.html",
+    "WsProfilAdressen.dc.html",
+    "Artboard-wye6.dc.html",
+    "AdmUebersicht.dc.html",
+    "AdmMandanten.dc.html",
+    "AdmBenutzer.dc.html",
+    "AdmPakete.dc.html",
+    "AdmRollen.dc.html",
+    "AdmAnmeldung.dc.html",
+    "AdmAnmeldungIdp.dc.html",
+    "AdmWartung.dc.html",
+    "AdmMitteilungen.dc.html",
+    "AdmJobs.dc.html",
+    "AdmAudit.dc.html",
+    "AdmAdressen.dc.html",
+    "AdmSmtp.dc.html",
+    "AdmVorlagen.dc.html",
+    "Artboard-yws6.dc.html",
+    "AdmEinstellungen.dc.html",
+    "Artboard-8kpx.dc.html",
+    "Artboard-6tkx.dc.html",
+    "Artboard-emjm.dc.html",
+    "InfImport.dc.html",
+    "InfFeldgeraeteProjekte.dc.html",
+    "InfImportKonflikte.dc.html",
+    "InfImportPruefen.dc.html",
+    "InfExport.dc.html",
+    "InfRollen.dc.html",
+    "InfRollenNeu.dc.html",
+    "InfProjektEinladen.dc.html",
+    "InfProjekte.dc.html",
+    "InfProjektNeu.dc.html",
+    "InfProjekt.dc.html",
+    "InfProjektTeam.dc.html",
+    "InfProjektVorlagen.dc.html",
+    "InfStruktur.dc.html",
+    "InfStrukturNeu.dc.html",
+    "InfFeldgeraete.dc.html",
+    "InfFeldgeraeteNeu.dc.html",
+    "InfObjektdaten.dc.html",
+    "InfBacnetObjekt.dc.html",
+    "InfKataloge.dc.html",
+    "InfKatalogeSys.dc.html",
+    "InfAlarme.dc.html"
+  ],
+  "pages": [
+    {
+      "id": "page-1",
+      "name": "LokaLink"
+    },
+    {
+      "id": "page-wib3il",
+      "name": "CLinks-Dashboard"
+    },
+    {
+      "id": "page-gxudd6",
+      "name": "CLinks-Admin"
+    },
+    {
+      "id": "page-fso6ox",
+      "name": "CLinks-Einstellungen"
+    },
+    {
+      "id": "page-wczfr1",
+      "name": "PlanerLink"
+    },
+    {
+      "id": "page-g1znk4",
+      "name": "Page 6"
+    },
+    {
+      "id": "page-ixv77n",
+      "name": "InfraLink"
+    }
+  ],
+  "title": "LokaLink – UI Redesign"
+}

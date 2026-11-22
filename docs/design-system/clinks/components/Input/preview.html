@@ -1,0 +1,19 @@
+<!-- @dsCard group="Forms" height=320 subtitle="Default, filled, invalid, disabled, compact, select, textarea" -->
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<title>Input — preview</title>
+</head>
+<body>
+<div style="padding:var(--desktop-page);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--form-gap);max-width:640px">
+  <input class="cl-input" placeholder="name@firma.ch" aria-label="E-Mail">
+  <input class="cl-input" value="Bahnhofstrasse 12" aria-label="Strasse">
+  <input class="cl-input" value="80" aria-invalid="true" aria-label="Postleitzahl">
+  <input class="cl-input" value="Gesperrt" disabled aria-label="Status">
+  <input class="cl-input cl-input--sm" placeholder="Kompakt, 32 px" aria-label="Kompakt">
+  <select class="cl-input" aria-label="Sprache"><option>Deutsch (Schweiz)</option><option>English</option></select>
+  <textarea class="cl-input" style="grid-column:1/-1" aria-label="Begründung">Mehrzeilige Begründungen verwenden Textarea.</textarea>
+</div>
+</body>
+</html>

@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<title>LokaLink – Firma finden</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400..700&amp;family=Roboto:wght@400..700&amp;family=Martian+Mono:wght@400..500&amp;display=swap">
+<style>
+body{margin:0;background:oklch(0.145 0 0);color:oklch(0.985 0 0);font-family:'Roboto',sans-serif;-webkit-font-smoothing:antialiased}
+a{color:oklch(0.7 0.14 264)}a:hover{color:oklch(0.8 0.1 264)}
+*{box-sizing:border-box}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid oklch(0.7 0.14 264);outline-offset:2px}
+.q-btn{transition:background-color .15s,border-color .15s}
+.q-btn:hover{background:oklch(0.269 0 0)}
+.p-btn{transition:background-color .15s}
+.p-btn:hover{background:oklch(0.3731 0.1751 265.638)}
+.chip{transition:background-color .15s,border-color .15s}
+.chip:hover{border-color:oklch(0.65 0 0)}
+.card{transition:border-color .15s,background-color .15s}
+.navlink{color:oklch(0.75 0 0);text-decoration:none}
+.navlink:hover{color:oklch(0.985 0 0)}
+.field{transition:border-color .15s}
+.field:hover{border-color:oklch(0.65 0 0)}
+.field:focus-within{border-color:oklch(0.7 0.14 264)}
+input::placeholder{color:oklch(0.65 0 0)}
+input:focus{outline:none}
+</style>
+</helmet>
+
+<div style="min-height: 100vh; background: oklch(0.145 0 0); color: oklch(0.985 0 0)">
+
+  <!-- Header -->
+  <header style="border-bottom: 1px solid #ffffff1f; background: oklch(0.145 0 0)">
+    <div style="max-width: 1376px; margin: 0 auto; padding: 0 24px; height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap">
+      <a href="#" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: oklch(0.985 0 0)">
+        <span style="width: 30px; height: 30px; border-radius: 8px; background: oklch(0.78 0.14 60); color: oklch(0.19 0.012 264); display: flex; align-items: center; justify-content: center; font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 17px">L</span>
+        <span style="font-family: 'Archivo', sans-serif; font-weight: 650; font-size: 19px; letter-spacing: -0.02em">LokaLink</span>
+      </a>
+      <nav aria-label="Hauptnavigation" style="display: flex; gap: 28px; font-size: 14px; font-weight: 500">
+        <a href="#" class="navlink" aria-current="page" style="color: oklch(0.985 0 0); padding: 22px 0 20px; border-bottom: 2px solid oklch(0.7 0.14 264)">Firma finden</a>
+        <a href="#so-gehts" class="navlink" style="padding: 22px 0 20px">So funktioniert’s</a>
+        <a href="Business.dc.html" class="navlink" style="padding: 22px 0 20px">Für Firmen</a>
+      </nav>
+      <div style="display: flex; align-items: center; gap: 8px">
+        <button class="q-btn" aria-label="Sprache: Deutsch (Schweiz)" style="height: 40px; padding: 0 10px; border: 0; background: transparent; border-radius: 10px; display: flex; align-items: center; gap: 6px; font-size: 13px; color: oklch(0.75 0 0); cursor: pointer">
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect width="16" height="16" rx="3" fill="#d52b1e"></rect><path d="M6.5 3.5h3v3h3v3h-3v3h-3v-3h-3v-3h3z" fill="#fff"></path></svg>
+          DE
+        </button>
+        <button class="q-btn" aria-label="Farbschema wechseln" style="width: 40px; height: 40px; border: 0; background: transparent; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: oklch(0.75 0 0); cursor: pointer">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
+        </button>
+        <a href="#" class="q-btn" style="height: 40px; padding: 0 16px; border: 1px solid #ffffff26; border-radius: 12px; display: flex; align-items: center; font-size: 14px; font-weight: 500; color: oklch(0.985 0 0); text-decoration: none">Anmelden</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section style="position: relative; border-bottom: 1px solid #ffffff1f; background-color: oklch(0.145 0 0); background-image: linear-gradient(#fafafa0d 1px, transparent 1px), linear-gradient(90deg, #fafafa0d 1px, transparent 1px); background-size: 32px 32px">
+    <div style="max-width: 1216px; margin: 0 auto; padding: 96px 24px 72px; display: flex; flex-direction: column; gap: 32px">
+      
+      <h1 style="margin: 0; max-width: 900px; font-family: 'Archivo', sans-serif; font-weight: 650; font-size: clamp(2.75rem, 6.4vw, 5rem); line-height: 0.98; letter-spacing: -0.04em; text-wrap: balance">Die passende Firma in deiner Nähe.</h1>
+      <p style="margin: 0; max-width: 620px; font-size: 18px; line-height: 30px; color: oklch(0.75 0 0)">Handwerk, Beratung und mehr. Entdecke lokale Firmen und sprich direkt mit der passenden.</p>
+
+      <form role="search" aria-label="Firmensuche" style="display: flex; flex-wrap: wrap; gap: 8px; padding: 8px; background: oklch(0.24 0 0); border: 1px solid #ffffff26; border-radius: 20px; max-width: 980px">
+        <label class="field" style="flex: 1 1 260px; min-width: 0; height: 56px; display: flex; align-items: center; gap: 10px; padding: 0 12px 0 16px; background: oklch(0.22 0.007 255); border: 1px solid oklch(0.4 0.008 255); border-radius: 12px; cursor: text">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="oklch(0.75 0 0)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          <span style="display: flex; flex-direction: column; flex: 1; min-width: 0">
+            <span style="font-size: 12px; font-weight: 500; color: oklch(0.75 0 0)">Wo</span>
+            <input type="text" value="6072 Sachseln" aria-label="Ort oder Postleitzahl" style="border: 0; background: transparent; padding: 0; font-size: 15px; width: 100%">
+          </span>
+          <button type="button" class="q-btn" aria-label="Meinen Standort verwenden" style="width: 36px; height: 36px; border: 0; background: transparent; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: oklch(0.7 0.14 264); cursor: pointer">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="7"></circle><circle cx="12" cy="12" r="2"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path></svg>
+          </button>
+        </label>
+        <label class="field" style="flex: 2 1 320px; min-width: 0; height: 56px; display: flex; align-items: center; gap: 10px; padding: 0 16px; background: oklch(0.22 0.007 255); border: 1px solid oklch(0.4 0.008 255); border-radius: 12px; cursor: text">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="oklch(0.75 0 0)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+          <span style="display: flex; flex-direction: column; flex: 1; min-width: 0">
+            <span style="font-size: 12px; font-weight: 500; color: oklch(0.75 0 0)">Was brauchst du?</span>
+            <input type="text" placeholder="Firma, Tätigkeit oder Fähigkeit" aria-label="Firma, Tätigkeit oder Fähigkeit" style="border: 0; background: transparent; padding: 0; font-size: 15px; width: 100%">
+          </span>
+        </label>
+        <button type="submit" class="p-btn" style="flex: 0 0 auto; height: 56px; padding: 0 28px; border: 0; border-radius: 12px; background: oklch(0.424 0.199 265.638); color: oklch(0.97 0.014 254.604); font-size: 15px; font-weight: 500; display: flex; align-items: center; gap: 8px; cursor: pointer">
+          Suchen
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+        </button>
+      </form>
+
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px">
+        <span style="font-size: 13px; color: oklch(0.75 0 0); margin-right: 4px">Häufig gesucht</span>
+        <sc-for list="{{suggestions}}" as="s" hint-placeholder-count="8">
+          <button type="button" class="chip" style="height: 36px; padding: 0 14px; border: 1px solid #ffffff26; background: oklch(0.145 0 0); border-radius: 9999px; font-size: 13px; display: flex; align-items: center; gap: 6px; cursor: pointer">{{s}}</button>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- Results -->
+  <section aria-labelledby="res-title" style="max-width: 1376px; margin: 0 auto; padding: 40px 24px 24px">
+    <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 20px">
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <h2 id="res-title" style="margin: 0; font-family: 'Archivo', sans-serif; font-weight: 640; font-size: 26px; letter-spacing: -0.02em">{{countLabel}} rund um Sachseln</h2>
+        <p style="margin: 0; font-size: 14px; color: oklch(0.75 0 0)">Sortiert nach Entfernung. Fahre über einen Eintrag, um ihn auf der Karte zu sehen.</p>
+      </div>
+      <div role="group" aria-label="Kategorie" style="display: flex; flex-wrap: wrap; gap: 6px; padding: 4px; background: oklch(0.2 0 0); border: 1px solid #ffffff1f; border-radius: 14px">
+        <sc-for list="{{filters}}" as="f" hint-placeholder-count="4">
+          <button type="button" onClick="{{f.pick}}" aria-pressed="{{f.pressed}}" style="{{f.style}}">{{f.label}}</button>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); gap: 16px; align-items: start">
+      <!-- List -->
+      <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; max-height: 640px; overflow-y: auto; padding-right: 4px">
+        <sc-for list="{{visible}}" as="item" hint-placeholder-count="6">
+          <li>
+            <article class="card" onMouseEnter="{{item.enter}}" onMouseLeave="{{leave}}" style="{{item.cardStyle}}">
+              <span aria-hidden="true" style="flex: 0 0 auto; width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: {{item.tint}}; color: {{item.tone}}">
+                <sc-if value="{{item.isFood}}" hint-placeholder-val="{{true}}">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3v7a3 3 0 0 0 6 0V3M7 3v18M17 3c-2 0-3 2-3 6s1 5 3 5v7"></path></svg>
+                </sc-if>
+                <sc-if value="{{item.isHotel}}" hint-placeholder-val="{{false}}">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20V6M2 16h20v4M22 16v-4a3 3 0 0 0-3-3h-8v7M6.5 12.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"></path></svg>
+                </sc-if>
+                <sc-if value="{{item.isHome}}" hint-placeholder-val="{{false}}">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z"></path></svg>
+                </sc-if>
+              </span>
+              <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+                <h3 style="margin: 0; font-size: 15px; font-weight: 600; line-height: 20px"><a href="#" style="color: oklch(0.985 0 0); text-decoration: none" onFocus="{{item.enter}}">{{item.name}}</a></h3>
+                <p style="margin: 0; font-size: 13px; line-height: 18px; color: oklch(0.75 0 0)">{{item.cat}} in {{item.place}}</p>
+                <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px">
+                  <span style="height: 22px; padding: 0 8px; border-radius: 9999px; background: oklch(0.269 0 0); font-size: 12px; display: inline-flex; align-items: center; gap: 4px; color: oklch(0.85 0 0)">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path></svg>
+                    {{item.dist}} entfernt
+                  </span>
+                  <sc-if value="{{item.season}}" hint-placeholder-val="{{false}}">
+                    <span style="height: 22px; padding: 0 8px; border-radius: 9999px; border: 1px solid #ffffff26; font-size: 12px; display: inline-flex; align-items: center; color: oklch(0.828 0.189 84.429)">Saisonbetrieb</span>
+                  </sc-if>
+                </div>
+              </div>
+              <div style="display: flex; gap: 4px; align-self: center">
+                <sc-if value="{{item.phone}}" hint-placeholder-val="{{true}}">
+                  <a href="#" class="q-btn" aria-label="{{item.callLabel}}" style="width: 40px; height: 40px; border-radius: 10px; border: 1px solid #ffffff26; display: flex; align-items: center; justify-content: center; color: oklch(0.985 0 0)">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"></path></svg>
+                  </a>
+                </sc-if>
+                <a href="#" class="q-btn" aria-label="{{item.routeLabel}}" style="width: 40px; height: 40px; border-radius: 10px; border: 1px solid #ffffff26; display: flex; align-items: center; justify-content: center; color: oklch(0.985 0 0)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 19-9-9 19-2-8-8-2Z"></path></svg>
+                </a>
+              </div>
+            </article>
+          </li>
+        </sc-for>
+      </ul>
+
+      <!-- Map -->
+      <div aria-label="Karte der Suchergebnisse (Beispiel)" style="position: relative; height: 640px; border-radius: 20px; overflow: hidden; border: 1px solid #ffffff26; background: oklch(0.2 0.006 255)">
+        <svg viewBox="0 0 800 640" preserveAspectRatio="xMidYMid slice" aria-hidden="true" style="position: absolute; inset: 0; width: 100%; height: 100%">
+          <g fill="none" stroke="oklch(0.26 0.008 255)" stroke-width="1">
+            <path d="M-20 120 C120 90 220 160 360 120 S600 60 820 110"></path>
+            <path d="M-20 200 C140 170 240 230 380 200 S620 140 820 190"></path>
+            <path d="M-20 470 C140 440 260 500 420 470 S640 420 820 460"></path>
+            <path d="M-20 550 C160 520 280 580 440 550 S660 500 820 540"></path>
+            <path d="M560 -20 C600 120 520 220 600 360 S640 560 600 660"></path>
+            <path d="M660 -20 C700 140 620 240 700 380 S740 560 700 660"></path>
+          </g>
+          <path d="M120 230 C170 190 250 200 290 250 C330 300 330 380 290 430 C250 470 180 470 150 420 C110 360 80 280 120 230Z" fill="oklch(0.27 0.035 240)"></path>
+          <path d="M470 380 C500 360 540 370 545 400 C548 430 515 445 490 438 C465 430 450 400 470 380Z" fill="oklch(0.27 0.035 240)"></path>
+          <g fill="none" stroke="oklch(0.33 0.01 255)" stroke-width="3" stroke-linecap="round">
+            <path d="M40 640 L110 470 C130 420 100 360 110 300 L150 120 L190 -10"></path>
+            <path d="M320 260 C380 280 430 300 470 340 C520 390 600 380 680 330 L820 300"></path>
+          </g>
+          <g fill="none" stroke="oklch(0.29 0.008 255)" stroke-width="2" stroke-linecap="round">
+            <path d="M110 300 C200 320 260 300 320 260"></path>
+            <path d="M470 340 L520 200 L640 150"></path>
+            <path d="M600 380 L620 520 L560 640"></path>
+          </g>
+          <g font-family="Roboto, sans-serif" font-size="12" fill="oklch(0.6 0 0)">
+            <text x="168" y="330">Sarnersee</text>
+            <text x="94" y="268">Sachseln</text>
+            <text x="560" y="140">Melchtal</text>
+            <text x="482" y="465">Melchsee-Frutt</text>
+          </g>
+        </svg>
+
+        <sc-for list="{{pins}}" as="p" hint-placeholder-count="6">
+          <div style="{{p.wrapStyle}}">
+            <sc-if value="{{p.active}}" hint-placeholder-val="{{false}}">
+              <div style="position: absolute; bottom: 44px; left: 50%; transform: translateX(-50%); white-space: nowrap; padding: 8px 12px; border-radius: 12px; background: oklch(0.24 0 0); border: 1px solid #fafafa1a; box-shadow: 0 4px 6px -1px #0000001a, 0 2px 4px -2px #0000001a; font-size: 13px; font-weight: 600">{{p.name}}<span style="display: block; font-size: 12px; font-weight: 400; color: oklch(0.75 0 0)">{{p.dist}} entfernt</span></div>
+            </sc-if>
+            <div style="{{p.dotStyle}}"></div>
+          </div>
+        </sc-for>
+
+        
+        <div style="position: absolute; right: 16px; top: 16px; display: flex; flex-direction: column; border-radius: 12px; overflow: hidden; border: 1px solid #ffffff26; background: oklch(0.24 0 0)">
+          <button type="button" class="q-btn" aria-label="Hineinzoomen" style="width: 40px; height: 40px; border: 0; background: transparent; border-bottom: 1px solid #ffffff26; cursor: pointer; font-size: 18px">+</button>
+          <button type="button" class="q-btn" aria-label="Herauszoomen" style="width: 40px; height: 40px; border: 0; background: transparent; cursor: pointer; font-size: 18px">−</button>
+        </div>
+        <button type="button" class="q-btn" style="position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%); height: 40px; padding: 0 16px; border-radius: 9999px; border: 1px solid #ffffff26; background: oklch(0.24 0 0); font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; cursor: pointer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"></path></svg>
+          In diesem Bereich suchen
+        </button>
+        
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section id="so-gehts" aria-labelledby="how-title" style="max-width: 1216px; margin: 0 auto; padding: 96px 24px">
+    
+    <h2 id="how-title" style="margin: 0 0 56px; max-width: 760px; font-family: 'Archivo', sans-serif; font-weight: 650; font-size: clamp(2.25rem, 4.8vw, 3.5rem); line-height: 1.02; letter-spacing: -0.035em; text-wrap: balance">Suchen. Vergleichen. Direkt anfragen.</h2>
+    <ol style="list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 32px; position: relative">
+      <li style="display: flex; flex-direction: column; gap: 12px; padding-top: 28px; border-top: 1px solid #fafafa3d; position: relative">
+        <span style="position: absolute; top: -5px; left: 0; width: 10px; height: 10px; border-radius: 2px; background: oklch(0.145 0 0); box-shadow: inset 0 0 0 1px #fafafa3d"></span>
+        <span style="font-family: 'Martian Mono', monospace; font-size: 12px; color: oklch(0.75 0 0)">01</span>
+        <h3 style="margin: 0; font-family: 'Archivo', sans-serif; font-weight: 640; font-size: 20px; letter-spacing: -0.01em">Suchen</h3>
+        <p style="margin: 0; font-size: 16px; line-height: 26px; color: oklch(0.75 0 0)">Gib deinen Ort und die gewünschte Leistung ein oder wähle eine Kategorie.</p>
+      </li>
+      <li style="display: flex; flex-direction: column; gap: 12px; padding-top: 28px; border-top: 1px solid #fafafa3d; position: relative">
+        <span style="position: absolute; top: -5px; left: 0; width: 10px; height: 10px; border-radius: 2px; background: oklch(0.145 0 0); box-shadow: inset 0 0 0 1px #fafafa3d"></span>
+        <span style="font-family: 'Martian Mono', monospace; font-size: 12px; color: oklch(0.75 0 0)">02</span>
+        <h3 style="margin: 0; font-family: 'Archivo', sans-serif; font-weight: 640; font-size: 20px; letter-spacing: -0.01em">Vergleichen</h3>
+        <p style="margin: 0; font-size: 16px; line-height: 26px; color: oklch(0.75 0 0)">Sieh dir Firmen, Angebote und Entfernungen in Liste und Karte an.</p>
+      </li>
+      <li style="display: flex; flex-direction: column; gap: 12px; padding-top: 28px; border-top: 1px solid #fafafa3d; position: relative">
+        <span style="position: absolute; top: -5px; left: 0; width: 10px; height: 10px; border-radius: 2px; background: oklch(0.26 0.06 264)"></span>
+        <span style="font-family: 'Martian Mono', monospace; font-size: 12px; color: oklch(0.75 0 0)">03</span>
+        <h3 style="margin: 0; font-family: 'Archivo', sans-serif; font-weight: 640; font-size: 20px; letter-spacing: -0.01em">Kontaktieren</h3>
+        <p style="margin: 0; font-size: 16px; line-height: 26px; color: oklch(0.75 0 0)">Ruf an, schreib eine E-Mail oder besuche die Website der Firma.</p>
+      </li>
+    </ol>
+  </section>
+
+  <!-- Business band -->
+  <section aria-labelledby="biz-title" style="padding: 0 24px 96px">
+    <div style="max-width: 1216px; margin: 0 auto; border-radius: 24px; padding: 64px 56px; background-color: oklch(0.26 0.06 264); background-image: linear-gradient(#fafafa0f 1px, transparent 1px), linear-gradient(90deg, #fafafa0f 1px, transparent 1px); background-size: 32px 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 32px">
+      <div style="display: flex; flex-direction: column; gap: 14px; max-width: 620px">
+        <span style="font-family: 'Martian Mono', monospace; font-size: 12px; letter-spacing: 0.02em; text-transform: uppercase; color: oklch(0.86 0.02 264)">Für Firmen</span>
+        <h2 id="biz-title" style="margin: 0; font-family: 'Archivo', sans-serif; font-weight: 650; font-size: clamp(2rem, 4vw, 3rem); line-height: 1.04; letter-spacing: -0.035em">Werde in deiner Region gefunden.</h2>
+        <p style="margin: 0; font-size: 17px; line-height: 28px; color: oklch(0.86 0.02 264)">Trage deine Firma ein oder übernimm deinen bestehenden Eintrag. Ohne Abonnement.</p>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 12px">
+        <a href="Business.dc.html" style="height: 48px; padding: 0 22px; border-radius: 12px; background: oklch(0.985 0 0); color: oklch(0.19 0.012 264); font-size: 15px; font-weight: 500; display: flex; align-items: center; gap: 8px; text-decoration: none">Firma eintragen
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+        </a>
+        <a href="Business.dc.html" style="height: 48px; padding: 0 22px; border-radius: 12px; border: 1px solid #fafafa3d; color: oklch(0.985 0 0); font-size: 15px; font-weight: 500; display: flex; align-items: center; text-decoration: none">Mehr erfahren</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer style="border-top: 1px solid #ffffff1f">
+    <div style="max-width: 1376px; margin: 0 auto; padding: 28px 24px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; font-size: 13px; color: oklch(0.75 0 0)">
+      <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap"><span style="font-family: Archivo, sans-serif; font-weight: 650; font-size: 16px; color: oklch(0.985 0 0)">LokaLink</span>
+        <span>Ein Produkt von CLinks.</span>
+      </div>
+      <nav aria-label="Fusszeile" style="display: flex; gap: 20px">
+        <a href="#" class="navlink">Impressum</a>
+        <a href="#" class="navlink">Datenschutz</a>
+        <a href="#" class="navlink">Kontakt</a>
+      </nav>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2560}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { hover: 1, filter: 'Alle' };
+  }
+  renderVals() {
+    const data = [
+      { id: 1, name: 'Berggasthaus Aelggialp', cat: 'Restaurant', place: 'Sachseln', dist: '1.1 km', x: 22, y: 30, phone: true },
+      { id: 2, name: 'Bärgbeizli Cheselen', cat: 'Restaurant', place: 'Sachseln', dist: '2.1 km', x: 34, y: 46, phone: true },
+      { id: 3, name: 'Waldhaus Stöckalp', cat: 'Restaurant', place: 'Stöckalp', dist: '2.2 km', x: 62, y: 30, phone: false },
+      { id: 4, name: 'Frutt Living', cat: 'Hotel', place: 'Melchsee-Frutt', dist: '3.0 km', x: 58, y: 64, phone: true },
+      { id: 5, name: 'Frutt o Bene', cat: 'Restaurant', place: 'Melchsee-Frutt', dist: '3.1 km', x: 66, y: 72, phone: false },
+      { id: 6, name: 'Hotel Posthuis', cat: 'Hotel', place: 'Melchsee-Frutt', dist: '3.2 km', x: 71, y: 62, phone: true },
+      { id: 7, name: 'Schneebar', cat: 'Restaurant', place: 'Melchsee-Frutt', dist: '3.2 km', x: 63, y: 79, phone: false, season: true },
+      { id: 8, name: 'Bärghuis Frutt', cat: 'Ferienunterkunft', place: 'Melchsee-Frutt', dist: '4.1 km', x: 76, y: 74, phone: true },
+      { id: 9, name: 'Juhui Melchtal', cat: 'Hotel', place: 'Melchtal', dist: '4.6 km', x: 80, y: 22, phone: true }
+    ];
+    const tones = {
+      Restaurant: { tone: 'oklch(0.78 0.14 60)', tint: 'oklch(0.78 0.14 60 / 0.12)' },
+      Hotel: { tone: 'oklch(0.8 0.1 225)', tint: 'oklch(0.8 0.1 225 / 0.12)' },
+      Ferienunterkunft: { tone: 'oklch(0.79 0.14 157)', tint: 'oklch(0.79 0.14 157 / 0.12)' }
+    };
+    const f = this.state.filter;
+    const hover = this.state.hover;
+    const vis = data.filter(d => f === 'Alle' || d.cat === f);
+    const visible = vis.map(d => {
+      const on = d.id === hover;
+      return Object.assign({}, d, tones[d.cat], {
+        isFood: d.cat === 'Restaurant', isHotel: d.cat === 'Hotel', isHome: d.cat === 'Ferienunterkunft',
+        callLabel: d.name + ' anrufen', routeLabel: 'Route zu ' + d.name,
+        enter: () => this.setState({ hover: d.id }),
+        cardStyle: 'display: flex; gap: 14px; padding: 14px; border-radius: 16px; background: ' + (on ? 'oklch(0.2731 0.0358 265.638)' : 'oklch(0.2 0 0)') + '; border: 1px solid ' + (on ? 'oklch(0.7 0.14 264)' : '#ffffff1f') + '; cursor: pointer'
+      });
+    });
+    const pins = vis.map(d => {
+      const on = d.id === hover;
+      const t = tones[d.cat];
+      return {
+        name: d.name, dist: d.dist, active: on,
+        wrapStyle: 'position: absolute; left: ' + d.x + '%; top: ' + d.y + '%; transform: translate(-50%, -50%); z-index: ' + (on ? 5 : 1),
+        dotStyle: on
+          ? 'width: 36px; height: 36px; border-radius: 9999px; background: oklch(0.424 0.199 265.638); border: 3px solid oklch(0.97 0.014 254.604); box-shadow: 0 0 0 6px oklch(0.424 0.199 265.638 / 0.3); transition: all .15s'
+          : 'width: 16px; height: 16px; border-radius: 9999px; background: ' + t.tone + '; border: 3px solid oklch(0.2 0.006 255); transition: all .15s'
+      };
+    });
+    const labels = ['Alle', 'Restaurant', 'Hotel', 'Ferienunterkunft'];
+    const filters = labels.map(l => ({
+      label: l, pressed: l === f ? 'true' : 'false',
+      pick: () => this.setState({ filter: l }),
+      style: 'height: 36px; padding: 0 14px; border: 0; border-radius: 10px; font-size: 13px; font-weight: 500; cursor: pointer; background: ' + (l === f ? 'oklch(0.985 0 0)' : 'transparent') + '; color: ' + (l === f ? 'oklch(0.19 0.012 264)' : 'oklch(0.85 0 0)')
+    }));
+    return {
+      suggestions: ['Elektriker', 'Sanitär', 'Maler', 'Schreiner', 'Garage', 'Treuhand', 'Coiffeur', 'Restaurant'],
+      visible, pins, filters,
+      countLabel: vis.length + (vis.length === 1 ? ' Firma' : ' Firmen'),
+      leave: () => {}
+    };
+  }
+}
+</script>
+</body>
+</html>

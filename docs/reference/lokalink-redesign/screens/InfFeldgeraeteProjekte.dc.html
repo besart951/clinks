@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<title>InfraLink – Feldgeräte</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400..700&amp;display=swap">
+<style>
+:root{color-scheme:dark}input::-webkit-calendar-picker-indicator{opacity:.85;cursor:pointer}
+body{margin:0;background:oklch(0.145 0 0);color:oklch(0.985 0 0);font-family:'Roboto',sans-serif;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+*{box-sizing:border-box}
+a{color:oklch(0.7 0.14 264)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid oklch(0.7 0.14 264);outline-offset:2px}
+.qb{transition:background-color .12s,color .12s}.qb:hover{background:oklch(0.269 0 0)}
+.pb{transition:background-color .12s}.pb:hover{background:oklch(0.3731 0.1751 265.638)}
+.nav:hover{background:oklch(0.25 0 0)}
+.hov .rv{opacity:0;transition:opacity .15s}
+.hov:hover .rv,.hov:focus-within .rv{opacity:1}
+.hov .more{max-height:0;opacity:0;overflow:hidden;transition:max-height .2s,opacity .15s}
+.hov:hover .more,.hov:focus-within .more{max-height:120px;opacity:1}
+@media (pointer:coarse){.hov .rv,.hov .more{opacity:1;max-height:none}}
+.chip-w{position:relative}
+.pop{display:none;position:absolute;left:0;top:calc(100% + 6px);z-index:30;width:248px;padding:12px;border-radius:12px;background:oklch(0.235 0 0);border:1px solid #ffffff1f;box-shadow:0 10px 15px -3px #00000066, 0 4px 6px -4px #00000066;text-align:left}
+.chip-w:hover .pop,.chip-w:focus-within .pop{display:block}
+.chip{transition:transform .1s,background-color .12s,border-color .12s}
+.chip:hover{transform:translateY(-1px)}
+.cell .add{opacity:0;transition:opacity .12s}
+.cell:hover .add{opacity:1}
+.ctl{width:100%;height:40px;padding:0 12px;border-radius:9.6px;background:oklch(0.22 0.007 255);border:1px solid oklch(0.42 0.008 255);font-size:14px}
+.ctl:hover{border-color:oklch(0.6 0 0)}
+.ctl:focus{outline:none;border-color:oklch(0.7 0.14 264);box-shadow:0 0 0 1px oklch(0.7 0.14 264)}
+textarea.ctl{height:auto;padding:10px 12px;line-height:20px;resize:vertical}
+input::placeholder,textarea::placeholder{color:oklch(0.55 0 0)}
+.lb{font-size:13px;font-weight:500;color:oklch(0.72 0 0)}
+.ghost{border:0;background:transparent}
+.seg-b{height:30px;padding:0 12px;border:0;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer}
+.dayhead:hover{color:oklch(0.985 0 0)}
+.sk{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+<style>
+.mono{font-family:ui-monospace,'SF Mono','Cascadia Mono',Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;letter-spacing:-0.01em}
+.row:hover{background:#ffffff08}
+.node{transition:background-color .1s}.node:hover{background:#ffffff0d}
+.node .add{opacity:0;transition:opacity .12s}.node:hover .add,.node:focus-within .add{opacity:1}
+.tab{height:40px;padding:0 2px;border:0;background:transparent;font-size:14px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab:hover{color:oklch(0.985 0 0)}
+.ochip{transition:border-color .12s,background-color .12s}.ochip:hover{border-color:oklch(0.6 0 0)}
+.tip{position:relative;display:inline-flex}.tip .tipbox{display:none;position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);z-index:40;width:240px;padding:8px 10px;border-radius:8px;background:oklch(0.985 0 0);color:oklch(0.2 0.016 255);font-size:12px;line-height:17px;font-weight:400;white-space:normal}
+.tip:hover .tipbox,.tip:focus-within .tipbox{display:block}
+@keyframes pulse{0%{box-shadow:0 0 0 0 oklch(0.723 0.219 149.579 / 0.6)}70%{box-shadow:0 0 0 6px oklch(0.723 0.219 149.579 / 0)}100%{box-shadow:0 0 0 0 oklch(0.723 0.219 149.579 / 0)}}
+.live{animation:pulse 2s infinite}
+@keyframes blink{0%,100%{opacity:.25}50%{opacity:1}}.typing span{animation:blink 1.2s infinite}.typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+.avs .av{margin-left:-8px}.avs .av:first-child{margin-left:0}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-button{display:none;width:0;height:0}::-webkit-scrollbar-thumb{background:#ffffff26;border-radius:9999px}::-webkit-scrollbar-track{background:transparent}
+</style>
+</helmet>
+
+<div style="min-height: 100vh; display: flex; background: oklch(0.145 0 0); color: oklch(0.985 0 0); position: relative">
+  <aside style="{{asideStyle}}">
+    <div style="height: 60px; padding: 0 12px; display: flex; align-items: center; gap: 10px">
+      <span aria-hidden="true" style="flex: 0 0 auto; width: 32px; height: 32px; border-radius: 9px; background: oklch(0.55 0.2 25 / 0.16); color: oklch(0.75 0.17 25); display: flex; align-items: center; justify-content: center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6v5H9ZM3 16h6v5H3ZM15 16h6v5h-6ZM12 8v4M6 16v-4h12v4"></path></svg></span>
+      <sc-if value="{{expanded}}" hint-placeholder-val="{{true}}"><span style="flex: 1; display: flex; flex-direction: column; line-height: 16px"><span style="font-size: 14px; font-weight: 600">InfraLink</span><span style="font-size: 12px; color: oklch(0.58 0 0)">CLinks</span></span>
+        <button type="button" class="qb ghost" aria-label="Anwendung wechseln" style="width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: oklch(0.58 0 0); cursor: pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5M7 9l5-5 5 5"></path></svg></button></sc-if>
+    </div>
+    <sc-if value="{{expanded}}" hint-placeholder-val="{{true}}"><div style="padding: 0 10px 6px">
+      <button type="button" class="qb" aria-label="Mandant wechseln, aktuell Besi-Test" style="width: 100%; height: 38px; padding: 0 10px; border-radius: 10px; border: 1px solid #ffffff1a; background: transparent; display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 9999px; background: oklch(0.723 0.219 149.579)"></span><span style="flex: 1; text-align: left">Besi-Test</span><span style="color: oklch(0.58 0 0)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span></button></div></sc-if>
+    <nav aria-label="Hauptnavigation" style="padding: 8px 10px; display: flex; flex-direction: column; gap: 14px; flex: 1">
+      <sc-for list="{{groups}}" as="g" hint-placeholder-count="5"><div style="display: flex; flex-direction: column; gap: 2px">
+        <sc-if value="{{g.show}}" hint-placeholder-val="{{true}}"><span style="padding: 0 10px 4px; font-size: 12px; color: oklch(0.58 0 0)">{{g.label}}</span></sc-if>
+        <sc-for list="{{g.items}}" as="it" hint-placeholder-count="2"><a href="{{it.href}}" class="nav" aria-current="{{it.current}}" aria-label="{{it.label}}" title="{{it.label}}" style="{{it.style}}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{it.icon}}"></path></svg>
+          <sc-if value="{{it.show}}" hint-placeholder-val="{{true}}"><span>{{it.label}}</span></sc-if></a></sc-for>
+      </div></sc-for>
+    </nav>
+    <div style="padding: 10px; border-top: 1px solid #ffffff14">
+      <a href="WsProfil.dc.html" class="nav" aria-label="Konto von Besart Morina" style="height: 44px; padding: 0 6px; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; color: oklch(0.985 0 0); text-decoration: none">
+        <span aria-hidden="true" style="flex: 0 0 auto; width: 30px; height: 30px; border-radius: 9999px; background: oklch(0.269 0 0); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600">BM</span>
+        <sc-if value="{{expanded}}" hint-placeholder-val="{{true}}"><span style="flex: 1; font-size: 13px">Besart Morina</span></sc-if></a>
+    </div>
+  </aside>
+  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+    <header style="height: 60px; padding: 0 16px 0 10px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #ffffff14">
+      <button type="button" class="qb ghost" onClick="{{toggleCol}}" aria-label="{{colLabel}}" title="{{colLabel}}" style="width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; color: oklch(0.58 0 0); cursor: pointer"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h18v18H3ZM9 3v18"></path></svg></button>
+      <h1 style="flex: 1; margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -0.01em">Feldgeräte</h1>
+      <button type="button" class="qb ghost" aria-label="Neu laden" title="Neu laden" style="width: 36px; height: 36px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; color: oklch(0.72 0 0); cursor: pointer; "><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"></path></svg></button><button type="button" class="qb ghost" aria-label="Exportieren" title="Exportieren" style="width: 36px; height: 36px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; color: oklch(0.72 0 0); cursor: pointer; "><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path></svg></button>
+      <button type="button" class="qb ghost" aria-label="Benachrichtigungen, 1 neu" title="Benachrichtigungen" style="position: relative; width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; color: oklch(0.72 0 0); cursor: pointer"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"></path></svg><span aria-hidden="true" style="position: absolute; top: 7px; right: 8px; width: 7px; height: 7px; border-radius: 9999px; background: oklch(0.7 0.14 264)"></span></button>
+    </header>
+    <div style="flex: 1; display: flex; min-height: 0">
+      <main style="flex: 1; min-width: 0; padding: 20px 24px 40px; display: flex; flex-direction: column; gap: 16px"><div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px">
+        <label class="sk" for="f-sys">SPS-System</label>
+        <div style="position: relative; width: 380px"><span style="position: absolute; left: 12px; top: 11px; color: oklch(0.7 0.14 264); pointer-events: none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 8l10 5 10-5ZM2 13l10 5 10-5M2 17.5l10 5 10-5"></path></svg></span><select id="f-sys" class="ctl mono" value="{{sysId}}" onChange="{{setSys}}" style="padding-left: 36px; font-size: 13px"><option value="y1">G100_1_AAA · 0001 Elektroanlage Brunnen</option><option value="y2">G100_1_AAA · 0002 Beleuchtung Halle</option><option value="y3">G100_1_AAA · 0100 Lüftung Technikraum</option></select></div>
+        <label style="position: relative; width: 260px"><span style="position: absolute; left: 12px; top: 11px; color: oklch(0.58 0 0)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM20 20l-3.5-3.5"></path></svg></span><input class="ctl" type="search" value="{{q}}" onInput="{{setQ}}" placeholder="Name, BMK oder Beschreibung" aria-label="Feldgeräte durchsuchen" style="padding-left: 36px"></label>
+        <label class="sk" for="f-at">Anlagetyp</label><select id="f-at" class="ctl" value="{{atF}}" onChange="{{setAtF}}" style="width: 170px"><option value="">Alle Anlagetypen</option><option value="PU">PU · Pumpe</option><option value="VE">VE · Ventil</option><option value="LU">LU · Lüfter</option></select>
+        <span style="flex: 1"></span>
+        <sc-if value="{{noSel}}" hint-placeholder-val="{{true}}"><span style="font-size: 13px; color: oklch(0.58 0 0)">{{count}}</span></sc-if>
+        <sc-if value="{{hasSel}}" hint-placeholder-val="{{false}}"><span style="display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 6px 0 12px; border-radius: 12px; background: oklch(0.2731 0.0358 265.638)">
+          <span style="font-size: 13px; font-weight: 600; margin-right: 4px">{{selText}}</span>
+          <button type="button" class="qb ghost" onClick="{{updSel}}" style="height: 30px; padding: 0 10px; border-radius: 8px; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"></path></svg>Auf neueste Vorlage</button>
+          <button type="button" class="qb ghost" onClick="{{assignSel}}" style="height: 30px; padding: 0 10px; border-radius: 8px; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h6l2 2h10v11H3Z"></path></svg>Projekten zuweisen</button>
+          <button type="button" class="qb ghost" onClick="{{delSel}}" style="height: 30px; padding: 0 10px; border-radius: 8px; font-size: 13px; color: oklch(0.76 0.16 25); cursor: pointer; display: inline-flex; align-items: center; gap: 6px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15"></path></svg>Löschen</button>
+          <button type="button" class="qb ghost" onClick="{{clearSel}}" aria-label="Auswahl aufheben" style="width: 30px; height: 30px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button></span></sc-if>
+        <button type="button" class="pb" onClick="{{openSheet}}" style="height: 38px; padding: 0 16px; border-radius: 12px; border: 0; background: oklch(0.424 0.199 265.638); color: oklch(0.97 0.014 254.604); font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Feldgeräte erzeugen</button>
+      </div><section style="border-radius: 14px; background: oklch(0.195 0 0); border: 1px solid #ffffff14; overflow: hidden">
+      <div role="row" style="display: grid; grid-template-columns: 36px 28px minmax(320px, 2fr) 120px 170px minmax(170px, 1.3fr) 76px; align-items: center; gap: 0 10px; height: 40px; padding: 0 10px; font-size: 12px; color: oklch(0.58 0 0)">
+        <button type="button" role="checkbox" aria-checked="{{allChecked}}" aria-label="Alle markieren" onClick="{{pickAll}}" style="{{allBox}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></button><span></span>
+        <span>BACnet-Bezeichnung <span style="font-weight: 400">· Anlagetyp, Apparat und Nummer anklickbar</span></span><span>BMK</span><span>Projekte</span><span>Beschreibung</span><span></span></div>
+      <div role="rowgroup">
+        <sc-for list="{{rows}}" as="r" hint-placeholder-count="8"><div role="row">
+          <div class="hov row" style="{{r.rowStyle}}">
+            <button type="button" role="checkbox" aria-checked="{{r.checked}}" aria-label="{{r.name}} markieren" onClick="{{r.pick}}" style="{{r.boxStyle}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></button>
+            <button type="button" onClick="{{r.toggle}}" aria-expanded="{{r.open}}" aria-label="BACnet-Objekte von {{r.name}}" style="{{r.chevStyle}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>
+            <span class="mono" style="position: relative; font-size: 13px; white-space: nowrap"><span style="color: oklch(0.58 0 0)">{{r.prefix}}</span><button type="button" onClick="{{r.editAt}}" title="{{r.atTip}}" aria-label="{{r.atTip}}" aria-expanded="{{r.editing}}" style="{{r.atStyle}}">{{r.segAt}}</button><button type="button" onClick="{{r.editAp}}" title="{{r.apTip}}" aria-label="{{r.apTip}}" style="{{r.apStyle}}">{{r.segAp}}</button><button type="button" onClick="{{r.editNr}}" title="{{r.nrTip}}" aria-label="{{r.nrTip}}" style="{{r.nrStyle}}">{{r.segNr}}</button>
+              <sc-if value="{{r.editing}}" hint-placeholder-val="{{false}}"><span role="dialog" aria-label="{{r.popTitle}}" style="position: absolute; left: 150px; top: calc(100% + 6px); z-index: 30; width: 240px; padding: 8px; border-radius: 12px; background: oklch(0.235 0 0); border: 1px solid #ffffff1f; box-shadow: 0 10px 15px -3px #00000066, 0 4px 6px -4px #00000066; display: flex; flex-direction: column; gap: 2px; font-family: Roboto, sans-serif; white-space: normal">
+                <span style="display: flex; align-items: center; justify-content: space-between; padding: 2px 4px 6px; font-size: 12px; color: oklch(0.58 0 0)">{{r.popTitle}}<button type="button" class="qb ghost" onClick="{{r.closeSeg}}" aria-label="Schliessen" style="width: 22px; height: 22px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button></span>
+                <sc-if value="{{r.notNrEdit}}" hint-placeholder-val="{{true}}"><span style="display: flex; flex-direction: column; gap: 2px"><sc-for list="{{r.opts}}" as="o" hint-placeholder-count="3"><button type="button" class="qb" onClick="{{o.pick}}" style="{{o.style}}"><span class="mono" style="width: 34px; font-weight: 600">{{o.k}}</span><span>{{o.l}}</span></button></sc-for></span></sc-if>
+                <sc-if value="{{r.isNrEdit}}" hint-placeholder-val="{{false}}"><span style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px"><sc-for list="{{r.opts}}" as="o" hint-placeholder-count="8"><button type="button" class="qb mono" onClick="{{o.pick}}" style="{{o.style}}; justify-content: center">{{o.k}}</button></sc-for></span></sc-if>
+              </span></sc-if></span>
+            <span class="mono" style="font-size: 12px; color: oklch(0.72 0 0)">{{r.bmk}}</span>
+            <button type="button" class="ghost tip" onClick="{{r.assign}}" aria-label="{{r.prTip}} Projekten zuweisen" style="padding: 0; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px; text-align: left; min-width: 0">
+              <sc-if value="{{r.shared}}" hint-placeholder-val="{{false}}"><span style="color: oklch(0.7 0.14 264); display: inline-flex"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"></path></svg></span></sc-if>
+              <span style="height: 22px; padding: 0 8px; border-radius: 9999px; background: #ffffff0f; display: inline-flex; align-items: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{r.prFirst}}</span>
+              <sc-if value="{{r.shared}}" hint-placeholder-val="{{false}}"><span style="height: 22px; padding: 0 7px; border-radius: 9999px; background: oklch(0.2731 0.0358 265.638); color: oklch(0.7 0.14 264); display: inline-flex; align-items: center">{{r.prMore}}</span></sc-if>
+              <span class="tipbox" role="tooltip">{{r.prTip}}</span></button>
+            <input type="text" class="qb" value="{{r.desc}}" onInput="{{r.setDesc}}" placeholder="Beschreibung hinzufügen" aria-label="Beschreibung von {{r.name}}" style="height: 30px; padding: 0 8px; margin-left: -8px; border: 1px solid transparent; border-radius: 8px; background: transparent; font-size: 13px; color: oklch(0.72 0 0)">
+            <span class="rv" style="display: flex; justify-content: flex-end"><button type="button" class="qb ghost" onClick="{{r.assign}}" aria-label="Projekten zuweisen" title="Projekten zuweisen" style="width: 36px; height: 36px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; color: oklch(0.72 0 0); cursor: pointer; "><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h6l2 2h10v11H3Z"></path></svg></button><button type="button" class="qb ghost" aria-label="Feldgerät bearbeiten" title="Feldgerät bearbeiten" style="width: 36px; height: 36px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; color: oklch(0.72 0 0); cursor: pointer; "><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg></button></span>
+          </div>
+          <sc-if value="{{r.open}}" hint-placeholder-val="{{false}}"><div style="margin: 0 10px 12px 74px; border-radius: 10px; border: 1px solid #ffffff12; background: oklch(0.17 0 0); overflow: hidden">
+        <div style="padding: 8px 12px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: oklch(0.72 0 0); border-bottom: 1px solid #ffffff0d"><span style="color: oklch(0.58 0 0)">Vorlage</span><span style="font-weight: 600; color: oklch(0.985 0 0)">{{r.tpl}}</span><span style="height: 20px; padding: 0 6px; border-radius: 6px; background: #ffffff10; display: inline-flex; align-items: center">{{r.ver}}</span><span style="color: oklch(0.58 0 0)">· {{r.objCount}} BACnet-Objekte</span><span style="flex: 1"></span>
+          <sc-if value="{{r.old}}" hint-placeholder-val="{{false}}"><button type="button" class="qb" onClick="{{r.updOne}}" style="height: 26px; padding: 0 10px; border-radius: 7px; border: 1px solid oklch(0.828 0.189 84.429 / 0.4); background: oklch(0.828 0.189 84.429 / 0.08); color: oklch(0.828 0.189 84.429); font-size: 12px; cursor: pointer">Auf {{r.newVer}} aktualisieren</button></sc-if></div>
+        <sc-if value="{{r.shared}}" hint-placeholder-val="{{false}}"><div style="padding: 8px 12px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: oklch(0.7 0.14 264); background: oklch(0.2731 0.0358 265.638 / 0.35); border-bottom: 1px solid #ffffff0d"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"></path></svg>{{r.sharedText}}</div></sc-if>
+        <div style="display: grid; grid-template-columns: 64px minmax(120px, 1fr) minmax(160px, 1.6fr) 130px 100px 60px minmax(160px, 1.4fr); gap: 0 12px; height: 34px; padding: 0 12px; align-items: center; font-size: 11px; color: oklch(0.58 0 0); border-bottom: 1px solid #ffffff0d"><span>Typ</span><span>Fixtext</span><span>Beschreibung</span><span>Zustandstext</span><span>Meldeklasse</span><span>Einheit</span><span>Alarm</span></div>
+        <sc-for list="{{r.objs}}" as="o" hint-placeholder-count="2"><div style="display: grid; grid-template-columns: 64px minmax(120px, 1fr) minmax(160px, 1.6fr) 130px 100px 60px minmax(160px, 1.4fr); gap: 0 12px; min-height: 36px; padding: 0 12px; align-items: center; font-size: 13px; border-top: 1px solid #ffffff08">
+          <span class="mono" style="font-weight: 600; color: oklch(0.7 0.14 264)">{{o.sw}}</span><span>{{o.fix}}</span><span style="color: oklch(0.72 0 0)">{{o.desc}}</span><span style="color: oklch(0.72 0 0)">{{o.zt}}</span><span style="color: oklch(0.72 0 0)">{{o.mk}}</span><span style="color: oklch(0.72 0 0)">{{o.unit}}</span>
+          <span style="display: inline-flex; align-items: center; gap: 6px; color: oklch(0.72 0 0); font-size: 12px"><sc-if value="{{o.hasAlarm}}" hint-placeholder-val="{{true}}"><span style="color: oklch(0.828 0.189 84.429); display: inline-flex"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"></path></svg></span></sc-if>{{o.alarm}}</span></div></sc-for>
+        <div style="padding: 6px 8px; border-top: 1px solid #ffffff08"><button type="button" class="qb ghost" style="height: 28px; padding: 0 8px; border-radius: 7px; font-size: 12px; color: oklch(0.72 0 0); display: inline-flex; align-items: center; gap: 6px; cursor: pointer"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Zusätzliches BACnet-Objekt nur für dieses Feldgerät</button></div>
+      </div></sc-if>
+        </div></sc-for>
+      </div>
+      <sc-if value="{{empty}}" hint-placeholder-val="{{false}}"><div style="padding: 48px 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center">
+        <span aria-hidden="true" style="color: oklch(0.58 0 0)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18M3 12l3-7h12l3 7v6H3ZM7 15h.01M11 15h.01"></path></svg></span><p style="margin: 0; font-size: 14px">Keine Feldgeräte in diesem SPS-System.</p><button type="button" class="qb" onClick="{{openSheet}}" style="height: 38px; padding: 0 14px; border-radius: 12px; border: 1px solid #ffffff1f; background: transparent; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; color: oklch(0.985 0 0)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Feldgeräte erzeugen</button></div></sc-if>
+    </section></main>
+    </div>
+  </div>
+  <sc-if value="{{sheet}}" hint-placeholder-val="{{false}}">
+      <div onClick="{{closeSheet}}" style="position: fixed; inset: 0; z-index: 50; background: #00000080; display: flex; justify-content: flex-end">
+        <aside role="dialog" aria-modal="true" aria-label="Feldgeräte erzeugen" onClick="{{stop}}" style="width: 560px; max-width: 100%; height: 100%; background: oklch(0.195 0 0); border-left: 1px solid #ffffff1f; display: flex; flex-direction: column; box-shadow: 0 10px 15px -3px #00000066, 0 4px 6px -4px #00000066">
+          <div style="padding: 18px 22px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; border-bottom: 1px solid #ffffff10">
+            <div><h2 style="margin: 0; font-size: 18px; font-weight: 600">Feldgeräte erzeugen</h2><p class="mono" style="margin: 4px 0 0; font-size: 12px; color: oklch(0.72 0 0)">{{sysLabel}}</p></div>
+            <button type="button" class="qb ghost" onClick="{{closeSheet}}" aria-label="Schliessen" title="Schliessen" style="width: 36px; height: 36px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; color: oklch(0.72 0 0); cursor: pointer; "><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button></div>
+          <div style="flex: 1; overflow-y: auto; padding: 18px 22px; display: flex; flex-direction: column; gap: 20px">
+            <div style="display: flex; flex-direction: column; gap: 8px"><span class="lb">1 · Anlagetyp</span><div role="group" aria-label="Anlagetyp" style="display: flex; flex-wrap: wrap; gap: 6px"><sc-for list="{{atChips}}" as="c" hint-placeholder-count="3"><button type="button" class="ochip" aria-pressed="{{c.pressed}}" onClick="{{c.pick}}" style="{{c.style}}">{{c.label}}</button></sc-for></div></div>
+            <div style="display: flex; flex-direction: column; gap: 8px"><span style="display: flex; align-items: center; gap: 6px"><span class="lb">2 · Apparat</span><span class="tip" tabindex="0" aria-label="Hilfe: Nur Apparate, die dem Anlagetyp zugeordnet sind." style="color: oklch(0.58 0 0)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 16v-4M12 8h.01"></path></svg><span class="tipbox" role="tooltip">Nur Apparate, die dem Anlagetyp zugeordnet sind.</span></span></span><div role="group" aria-label="Apparat" style="display: flex; flex-wrap: wrap; gap: 6px"><sc-for list="{{apChips}}" as="c" hint-placeholder-count="2"><button type="button" class="ochip" aria-pressed="{{c.pressed}}" onClick="{{c.pick}}" style="{{c.style}}">{{c.label}}</button></sc-for></div></div>
+            <div style="display: flex; flex-direction: column; gap: 8px"><span style="display: flex; align-items: center; gap: 6px"><span class="lb">3 · Objektdaten</span><span class="tip" tabindex="0" aria-label="Hilfe: Die Vorlage bestimmt, welche BACnet-Objekte jedes Feldgerät bekommt. Vorbelegt ist die aktuelle Version." style="color: oklch(0.58 0 0)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 16v-4M12 8h.01"></path></svg><span class="tipbox" role="tooltip">Die Vorlage bestimmt, welche BACnet-Objekte jedes Feldgerät bekommt. Vorbelegt ist die aktuelle Version.</span></span></span>
+              <sc-if value="{{hasOd}}" hint-placeholder-val="{{true}}"><div role="radiogroup" aria-label="Objektdaten" style="display: flex; flex-direction: column; gap: 6px"><sc-for list="{{odCards}}" as="o" hint-placeholder-count="1"><button type="button" role="radio" aria-checked="{{o.pressed}}" onClick="{{o.pick}}" style="{{o.style}}"><span aria-hidden="true" style="{{o.dot}}"></span><span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 14px; font-weight: 500">{{o.name}}</span><span style="font-size: 12px; color: oklch(0.58 0 0)">{{o.meta}}</span></span><span style="height: 22px; padding: 0 8px; border-radius: 6px; background: #ffffff10; font-size: 12px; display: inline-flex; align-items: center">{{o.ver}}</span></button></sc-for></div>
+                <div style="display: flex; align-items: center; gap: 8px"><label for="g-ver" style="font-size: 12px; color: oklch(0.58 0 0)">Version</label><select id="g-ver" class="ctl" value="{{verVal}}" onChange="{{setVer}}" style="width: 220px; height: 32px; font-size: 13px"><sc-for list="{{verOpts}}" as="v" hint-placeholder-count="2"><option value="{{v.v}}">{{v.label}}</option></sc-for></select></div></sc-if>
+              <sc-if value="{{noOd}}" hint-placeholder-val="{{false}}"><p style="margin: 0; font-size: 13px; color: oklch(0.828 0.189 84.429)">Für diesen Apparat gibt es noch keine aktiven Objektdaten. <a href="InfObjektdaten.dc.html">Objektdaten anlegen</a></p></sc-if>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px"><span class="lb">4 · Anzahl und Nummern</span>
+              <div style="display: flex; align-items: flex-end; gap: 14px">
+                <div style="display: inline-flex; align-items: center; height: 40px; border-radius: 10px; border: 1px solid oklch(0.42 0.008 255); background: oklch(0.22 0.007 255)">
+                  <button type="button" class="qb ghost" onClick="{{decN}}" aria-label="Weniger" style="width: 38px; height: 38px; border-radius: 9px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path></svg></button>
+                  <label class="sk" for="g-n">Anzahl</label><input id="g-n" type="text" inputmode="numeric" value="{{gN}}" onInput="{{setN}}" style="width: 44px; height: 38px; border: 0; background: transparent; text-align: center; font-size: 15px; font-weight: 600">
+                  <button type="button" class="qb ghost" onClick="{{incN}}" aria-label="Mehr" style="width: 38px; height: 38px; border-radius: 9px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button></div>
+                <div style="display: flex; flex-direction: column; gap: 6px"><label for="g-start" style="font-size: 12px; color: oklch(0.58 0 0)">ab Nummer</label><input id="g-start" class="ctl" type="number" min="1" max="99" value="{{gStart}}" onInput="{{setStart}}" style="width: 96px"></div>
+                <span style="flex: 1; padding-bottom: 10px; font-size: 12px; color: oklch(0.58 0 0)">{{freeText}}</span>
+              </div>
+              <sc-if value="{{tooMany}}" hint-placeholder-val="{{false}}"><p role="alert" style="margin: 0; font-size: 12px; color: oklch(0.76 0.16 25)">{{tooManyText}}</p></sc-if>
+            </div>
+            <div style="border-radius: 12px; border: 1px solid #ffffff14; background: oklch(0.17 0 0); overflow: hidden">
+              <div style="padding: 10px 14px; display: flex; justify-content: space-between; gap: 10px; font-size: 12px; color: oklch(0.58 0 0); border-bottom: 1px solid #ffffff0d"><span>Vorschau · {{numsText}}</span><span>{{pObjCount}}</span></div>
+              <ul style="list-style: none; margin: 0; padding: 6px 14px 10px; display: flex; flex-direction: column; gap: 2px"><sc-for list="{{preview}}" as="p" hint-placeholder-count="6"><li class="mono" style="font-size: 13px; line-height: 24px">{{p.name}}</li></sc-for>
+                <sc-if value="{{hasMore}}" hint-placeholder-val="{{false}}"><li style="font-size: 12px; color: oklch(0.58 0 0)">{{moreText}}</li></sc-if></ul>
+              <div style="padding: 8px 14px 12px; display: flex; flex-wrap: wrap; gap: 6px; border-top: 1px solid #ffffff0d"><sc-for list="{{pObjs}}" as="o" hint-placeholder-count="3"><span style="height: 24px; padding: 0 8px; border-radius: 6px; background: #ffffff0d; font-size: 12px; display: inline-flex; align-items: center; gap: 6px"><span class="mono" style="color: oklch(0.7 0.14 264)">{{o.sw}}</span>{{o.fix}}</span></sc-for></div>
+            </div>
+          </div>
+          <div style="padding: 14px 22px; border-top: 1px solid #ffffff10; display: flex; justify-content: flex-end; gap: 8px"><button type="button" class="qb" onClick="{{closeSheet}}" style="height: 38px; padding: 0 14px; border-radius: 12px; border: 1px solid #ffffff1f; background: transparent; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; color: oklch(0.985 0 0)">Abbrechen</button><button type="button" onClick="{{create}}" style="{{createStyle}}">{{createLabel}}</button></div>
+        </aside>
+      </div></sc-if><sc-if value="{{asgOpen}}" hint-placeholder-val="{{false}}">
+      <div onClick="{{closeAsg}}" style="position: fixed; inset: 0; z-index: 50; background: #00000099; display: flex; align-items: center; justify-content: center; padding: 16px">
+        <div role="dialog" aria-modal="true" aria-label="Projekten zuweisen" onClick="{{stop}}" style="width: 520px; max-width: 100%; max-height: 92vh; overflow-y: auto; border-radius: 18px; background: oklch(0.195 0 0); border: 1px solid #ffffff1f; box-shadow: 0 10px 15px -3px #00000066, 0 4px 6px -4px #00000066; display: flex; flex-direction: column">
+          <div style="padding: 20px 22px 4px; display: flex; justify-content: space-between; gap: 12px"><div><h2 style="margin: 0; font-size: 18px; line-height: 26px; font-weight: 600">Projekten zuweisen</h2><p style="margin: 2px 0 0; font-size: 13px; color: oklch(0.72 0 0)">{{asgTitle}}</p></div>
+            <button type="button" class="qb ghost" onClick="{{closeAsg}}" aria-label="Schliessen" style="width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: oklch(0.72 0 0); cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button></div>
+          <div style="padding: 14px 22px; display: flex; flex-direction: column; gap: 16px"><div role="group" aria-label="Projekte" style="border-radius: 12px; border: 1px solid #ffffff14; overflow: hidden">
+        <sc-for list="{{asgProj}}" as="p" hint-placeholder-count="3"><button type="button" role="checkbox" aria-checked="{{p.checked}}" aria-disabled="{{p.cannot}}" onClick="{{p.tog}}" class="row" style="width: 100%; padding: 10px 14px; border: 0; border-top: 1px solid #ffffff0a; background: transparent; display: flex; align-items: center; gap: 12px; text-align: left; cursor: pointer">
+          <span aria-hidden="true" style="{{p.box}}">{{p.mark}}</span>
+          <span style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14px">{{p.n}} <span style="font-size: 12px; color: oklch(0.58 0 0)">· {{p.ph}}</span></span>
+            <sc-if value="{{p.cannot}}" hint-placeholder-val="{{false}}"><span style="font-size: 12px; color: oklch(0.828 0.189 84.429)">{{p.why}}</span></sc-if></span>
+          <span style="font-size: 12px; color: oklch(0.72 0 0)">{{p.meta}}</span></button></sc-for></div>
+      <div style="display: flex; flex-direction: column; gap: 8px"><span class="lb">Art der Zuweisung</span><div role="radiogroup" aria-label="Art der Zuweisung" style="display: flex; gap: 8px"><sc-for list="{{modeCards}}" as="m" hint-placeholder-count="2"><button type="button" role="radio" aria-checked="{{m.pressed}}" onClick="{{m.pick}}" style="{{m.style}}"><span style="font-size: 14px; font-weight: 600">{{m.n}}</span><span style="font-size: 12px; line-height: 16px; color: oklch(0.72 0 0)">{{m.d}}</span></button></sc-for></div></div>
+      <span style="font-size: 12px; color: oklch(0.58 0 0)">Beim Verknüpfen bleibt die BACnet-Bezeichnung gleich. Was jemand darf, bestimmt seine Rolle im jeweiligen Projekt.</span></div>
+          <div style="padding: 10px 22px 20px; display: flex; align-items: center; gap: 8px"><span style="flex: 1"></span><button type="button" class="qb" onClick="{{closeAsg}}" style="height: 38px; padding: 0 14px; border-radius: 12px; border: 1px solid #ffffff1f; background: transparent; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; color: oklch(0.985 0 0)">Abbrechen</button><button type="button" class="pb" onClick="{{saveAsg}}" style="height: 38px; padding: 0 16px; border-radius: 12px; border: 0; background: oklch(0.424 0.199 265.638); color: oklch(0.97 0.014 254.604); font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; cursor: pointer">Übernehmen</button></div>
+        </div>
+      </div></sc-if>
+  <sc-if value="{{toastOn}}" hint-placeholder-val="{{false}}">
+    <div role="status" style="position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 60; padding: 10px 8px 10px 16px; border-radius: 12px; background: oklch(0.985 0 0); color: oklch(0.2 0.016 255); display: flex; align-items: center; gap: 12px; font-size: 14px; box-shadow: 0 10px 15px -3px #00000066, 0 4px 6px -4px #00000066">{{toastText}}
+      <button type="button" class="ghost" onClick="{{hideToast}}" aria-label="Meldung schliessen" style="width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button></div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = Object.assign({ col: false, toast: '' }, { sys: 'y1', q: '', at: '', exp: { 'y1-9': true }, sel: {}, sheet: false, g: { at: 'PU', ap: 'FUE', od: 'od1', ver: 0, n: 6, start: '' }, added: [], upd: {}, del: {}, asg: { ids: ["y1-1", "y1-2", "y1-5"], mode: "link", pick: null } }); }
+
+  renderVals() {
+    const ACTIVE = 'Feldgeräte';
+    const st = this.state;
+
+    const P = {home: 'M3 10 12 3l9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z', app: 'M3 5h18v14H3ZM3 9h18M7 7h.01', boxes: 'M12 2 3 7l9 5 9-5-9-5ZM3 17l9 5 9-5M3 12l9 5 9-5', building: 'M4 21V3h10v18M14 9h6v12M8 7h2M8 11h2M8 15h2M2 21h20', users: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8', brief: 'M3 7h18v13H3ZM8 7V4h8v3M3 13h18', shield: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z', mail: 'M2 4h20v16H2ZM22 6l-10 7L2 6', chart: 'M3 3v18h18M7 16v-4M12 16V8M17 16v-7', card: 'M2 5h20v14H2ZM2 10h20', search: 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM20 20l-3.5-3.5', plus: 'M12 5v14M5 12h14', arrow: 'M7 17 17 7M8 7h9v9', chev: 'm9 18 6-6-6-6', chevd: 'm6 9 6 6 6-6', updown: 'm7 15 5 5 5-5M7 9l5-5 5 5', bell: 'M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0', panel: 'M3 3h18v18H3ZM9 3v18', filter: 'M4 6h16M7 12h10M10 18h4', more: 'M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM19 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM5 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z', alert: 'M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z', check: 'M20 6 9 17l-5-5', circle: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z', lock: 'M5 11h14v10H5ZM8 11V7a4 4 0 0 1 8 0v4', copy: 'M8 8h12v12H8ZM16 8V4H4v12h4', user: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4 21a8 8 0 0 1 16 0', userplus: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM19 8v6M22 11h-6', calendar: 'M3 5h18v16H3ZM3 10h18M8 3v4M16 3v4', trend: 'M3 17l6-6 4 4 8-8M15 7h6v6', pin: 'M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0ZM12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z', clip: 'M9 4h6v3H9ZM6 6h12v15H6ZM9 12h6M9 16h4', flow: 'M5 3h4v4H5ZM15 3h4v4h-4ZM10 17h4v4h-4ZM7 7v4h10V7M12 11v6', refresh: 'M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5', save: 'M5 3h11l3 3v15H5ZM8 3v5h7M8 21v-7h8v7', x: 'M18 6 6 18M6 6l12 12', send: 'm22 2-7 20-4-9-9-4 20-7Z', ext: 'M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6', grid: 'M3 3h7v7H3ZM14 3h7v7h-7ZM3 14h7v7H3ZM14 14h7v7h-7Z', list: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01', info: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 16v-4M12 8h.01', outbox: 'M22 12h-6l-2 3h-4l-2-3H2M5.5 5h13L22 12v7H2v-7ZM12 2v7M9 5l3-3 3 3', draft: 'M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z', clock: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 7v5l3 2', megaphone: 'M3 11v2a1 1 0 0 0 1 1h3l6 4V6L7 10H4a1 1 0 0 0-1 1ZM17 9a4 4 0 0 1 0 6M20 6a8 8 0 0 1 0 12', layout: 'M3 3h18v18H3ZM3 9h18M9 9v12', target: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10ZM12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z', badgecheck: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM8 12l3 3 5-6', zap: 'M13 2 3 14h9l-1 8 10-12h-9l1-8Z', db: 'M12 8c4.4 0 8-1.3 8-3s-3.6-3-8-3-8 1.3-8 3 3.6 3 8 3ZM4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3', sliders: 'M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6', paperclip: 'm21 11-9 9a5.7 5.7 0 0 1-8-8l9-9a3.8 3.8 0 0 1 5.4 5.4l-9 9a1.9 1.9 0 0 1-2.7-2.7l8.3-8.3', back: 'm15 18-6-6 6-6', type: 'M4 7V4h16v3M9 20h6M12 4v16', braces: 'M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1M16 3h1a2 2 0 0 1 2 2v5a2 2 0 0 0 2 2 2 2 0 0 0-2 2v5a2 2 0 0 1-2 2h-1', pointer: 'M3 3h18v8H3ZM12 15l2 6 1.5-2.5L18 21l1-1-2.5-2.5L19 16Z', image: 'M3 3h18v18H3ZM9 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM21 15l-5-5L5 21', minus: 'M5 12h14', trash: 'M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15', monitor: 'M2 4h20v13H2ZM8 21h8M12 17v4', phone: 'M7 2h10v20H7ZM11 18h2', link: 'M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7', star: 'm12 2 3 6.5 7 .9-5.1 4.8 1.3 7L12 17.8 5.8 21.2l1.3-7L2 9.4l7-.9Z', grid4: 'M3 3h7v9H3ZM14 3h7v5h-7ZM14 12h7v9h-7ZM3 16h7v5H3Z', key: 'M15 7a2 2 0 1 1 0 .01M21 2l-9.6 9.6a5.5 5.5 0 1 1-1.4-1.4L19 1M16 5l3 3', wrench: 'M14.7 6.3a4 4 0 0 0 5 5L22 14l-8 8-2.3-2.3a4 4 0 0 0-5-5L2 10l8-8 2.3 2.3a4 4 0 0 0 2.4 2Z', gear: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0-1.2-2.9H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 2.9-1.2V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0 1.2 2.9H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z', activity: 'M22 12h-4l-3 9L9 3l-3 9H2', play: 'm6 3 14 9-14 9Z', pause: 'M6 4h4v16H6ZM14 4h4v16h-4Z', download: 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3', globe: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20ZM2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20', eye: 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12ZM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z', server: 'M3 3h18v7H3ZM3 14h18v7H3ZM7 6.5h.01M7 17.5h.01', ban: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20ZM4.9 4.9l14.2 14.2', external: 'M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6', switch: 'M17 3l4 4-4 4M3 7h18M7 21l-4-4 4-4M21 17H3', bold: 'M6 4h8a4 4 0 0 1 0 8H6ZM6 12h9a4 4 0 0 1 0 8H6Z', italic: 'M19 4h-9M14 20H5M15 4 9 20', listul: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01', calendar2: 'M3 5h18v16H3ZM3 10h18M8 3v4M16 3v4', calclock: 'M21 10V5H3v16h7M3 10h18M8 3v4M16 3v4M17 14v3l2 1M22 17a5 5 0 1 1-10 0 5 5 0 0 1 10 0Z', printer: 'M6 9V3h12v6M6 18H4v-7h16v7h-2M6 14h12v7H6Z', sidebarR: 'M3 3h18v18H3ZM15 3v18', grip: 'M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01', pencil: 'M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z', note: 'M4 4h16v12l-4 4H4ZM16 20v-4h4', cabinet: 'M5 3h14v18H5ZM12 3v18M9 11v2M15 11v2', cpu: 'M7 7h10v10H7ZM10 10h4v4h-4ZM10 2v3M14 2v3M10 19v3M14 19v3M2 10h3M2 14h3M19 10h3M19 14h3', layers: 'M12 3 2 8l10 5 10-5ZM2 13l10 5 10-5M2 17.5l10 5 10-5', hdd: 'M3 12h18M3 12l3-7h12l3 7v6H3ZM7 15h.01M11 15h.01', tree: 'M4 4h6v4H4ZM14 10h6v4h-6ZM14 18h6v4h-6ZM7 8v12h7M7 12h7', folder: 'M3 6h6l2 2h10v11H3Z', history: 'M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 2', fileimp: 'M14 3H6v18h12V7ZM14 3v4h4M9 13h6M9 17h4', network: 'M9 3h6v5H9ZM3 16h6v5H3ZM15 16h6v5h-6ZM12 8v4M6 16v-4h12v4', book: 'M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3ZM4 17a3 3 0 0 1 3-3h11', alarm: 'M12 21a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM12 9v4l2 2M5 3 2 6M19 3l3 3', chevr: 'M9 6l6 6-6 6', lockk: 'M6 11h12v10H6ZM8 11V7a4 4 0 0 1 8 0v4', dup: 'M8 8h12v12H8ZM16 8V4H4v12h4', arrowup: 'M12 19V5M5 12l7-7 7 7'};
+    const col = !!st.col;
+    const groups = [['Anlagen', [['Anlagenstruktur', 'tree', 'InfStruktur.dc.html'], ['Feldgeräte', 'hdd', 'InfFeldgeraete.dc.html']]], ['Vorlagen', [['Objektdaten', 'db', 'InfObjektdaten.dc.html']]], ['Stammdaten', [['Kataloge', 'book', 'InfKataloge.dc.html'], ['Alarme', 'alarm', 'InfAlarme.dc.html'], ['Rollen', 'shield', 'InfRollen.dc.html']]], ['Projekte', [['Alle Projekte', 'folder', 'InfProjekte.dc.html'], ['Projekt1', 'pin', 'InfProjekt.dc.html']]], ['Werkzeuge', [['Excel-Import', 'fileimp', 'InfImport.dc.html'], ['Historie', 'history', '#']]]].map(([label, items]) => ({ label, show: !col, items: items.map(([l, icon, href]) => {
+      const on = l === ACTIVE;
+      return { label: l, icon: P[icon], href, show: !col, current: on ? 'page' : 'false',
+        style: 'height: 36px; border-radius: 10px; display: flex; align-items: center; gap: 10px; font-size: 14px; text-decoration: none; ' + (col ? 'justify-content: center; padding: 0; ' : 'padding: 0 10px; ') + 'font-weight: ' + (on ? 600 : 400) + '; color: ' + (on ? 'oklch(0.985 0 0)' : 'oklch(0.78 0 0)') + '; background: ' + (on ? 'oklch(0.2731 0.0358 265.638)' : 'transparent') };
+    }) }));
+    const SH = { groups, expanded: !col, toggleCol: () => this.setState({ col: !col }), colLabel: col ? 'Seitenleiste ausklappen' : 'Seitenleiste einklappen',
+      asideStyle: (col ? 'flex: 0 0 68px; max-width: 68px' : 'flex: 0 0 240px; max-width: 240px') + '; min-height: 100vh; background: oklch(0.17 0 0); border-right: 1px solid #ffffff14; display: flex; flex-direction: column',
+      stop: (e) => e.stopPropagation(), toastOn: !!st.toast, toastText: st.toast || '', hideToast: () => this.setState({ toast: '' }) };
+
+
+    const SYSTYPES = [{ id: 'el', name: 'Elektro', from: 1, to: 99 }, { id: 'lu', name: 'Lüftung', from: 100, to: 199 }, { id: 'hz', name: 'Heizung', from: 200, to: 299 }];
+    const APPARATE = [{ k: 'FUE', n: 'Fühler' }, { k: 'MOT', n: 'Motor' }, { k: 'STA', n: 'Stellantrieb' }, { k: 'SCH', n: 'Schalter' }];
+    const ATYPES = [{ k: 'PU', n: 'Pumpe', ap: ['FUE', 'MOT'], used: 12 }, { k: 'VE', n: 'Ventil', ap: ['STA', 'FUE'], used: 4 }, { k: 'LU', n: 'Lüfter', ap: ['MOT', 'SCH'], used: 0 }];
+    const OBJ = (sw, fix, desc, zt, mk, unit, alarm, gms, opt) => ({ sw, fix, desc, zt, mk, unit, alarm, gms, opt });
+    const ODATA = [
+      { id: 'od1', name: 'Pumpenfühler', ap: ['FUE'], ver: 2, active: true, used: 12,
+        hist: [{ v: 1, date: '03.11.2026', n: 2 }, { v: 2, date: '17.11.2026', n: 3 }],
+        objs: [OBJ('AI01', 'Temperatur', 'Vorlauftemperatur Pumpe', '–', 'Messwert', '°C', 'Grenzwert analog · Vorlauf 20–80 °C', true, false),
+               OBJ('BI01', 'Störung', 'Sammelstörung Fühler', 'Normal / Störung', 'Störung', '–', 'Störmeldung digital', true, false),
+               OBJ('AV01', 'Sollwert', 'Sollwert Vorlauf', '–', 'Betrieb', '°C', '', false, true)] },
+      { id: 'od2', name: 'Pumpenmotor', ap: ['MOT'], ver: 1, active: true, used: 0, hist: [{ v: 1, date: '12.11.2026', n: 3 }],
+        objs: [OBJ('BI01', 'Betrieb', 'Rückmeldung Betrieb', 'Aus / Ein', 'Betrieb', '–', '', true, false),
+               OBJ('BI02', 'Störung', 'Motorschutz ausgelöst', 'Normal / Störung', 'Störung', '–', 'Störmeldung digital', true, false),
+               OBJ('BO01', 'Befehl', 'Freigabe Motor', 'Aus / Ein', 'Betrieb', '–', '', true, false)] },
+      { id: 'od3', name: 'Ventilstellung', ap: ['STA'], ver: 3, active: true, used: 4, hist: [{ v: 1, date: '20.10.2026', n: 1 }, { v: 2, date: '28.10.2026', n: 2 }, { v: 3, date: '05.11.2026', n: 2 }],
+        objs: [OBJ('AO01', 'Stellwert', 'Stellsignal 0–100 %', '–', 'Betrieb', '%', '', true, false), OBJ('AI01', 'Rückmeldung', 'Stellung Ist', '–', 'Messwert', '%', 'Abweichung Sollwert', true, false)] },
+      { id: 'od4', name: 'Raumfühler alt', ap: ['FUE'], ver: 1, active: false, used: 0, hist: [{ v: 1, date: '02.09.2026', n: 1 }],
+        objs: [OBJ('AI01', 'Temperatur', 'Raumtemperatur', '–', 'Messwert', '°C', '', true, false)] }];
+    const pad = (n, l) => String(n).padStart(l, '0');
+
+    const SYS = [{ id: 'y1', ctl: 'G100_1_AAA', nr: 1, doc: 'Elektroanlage Brunnen' }, { id: 'y2', ctl: 'G100_1_AAA', nr: 2, doc: 'Beleuchtung Halle' }, { id: 'y3', ctl: 'G100_1_AAA', nr: 100, doc: 'Lüftung Technikraum' }];
+    const sys = SYS.find(s => s.id === st.sys) || SYS[0];
+    const odById = (id) => ODATA.find(o => o.id === id);
+    const BASE = [];
+    for (let i = 1; i <= 12; i++) BASE.push({ id: 'y1-' + i, sys: 'y1', at: 'PU', ap: 'FUE', nr: i, bmk: i <= 4 ? '=PU' + pad(i, 2) + '-BT1' : '', od: 'od1', ver: i <= 8 ? 1 : 2, desc: i <= 4 ? 'Brunnenpumpe ' + i : '' });
+    for (let i = 1; i <= 4; i++) BASE.push({ id: 'y2-' + i, sys: 'y2', at: 'VE', ap: 'STA', nr: i, bmk: '', od: 'od3', ver: 3, desc: 'Ventil Halle ' + i });
+    const PROJ = [{ id: 'p1', n: 'Projekt1', ph: 'SIA 31', can: true }, { id: 'p2', n: 'Pumpwerk Nord', ph: 'SIA 51', can: true }, { id: 'p3', n: 'Reservoir Süd', ph: 'SIA 21', can: false, why: 'Deine Rolle darf in SIA 21 keine Feldgeräte anlegen' }];
+    BASE.forEach(d => { d.pr = d.sys === 'y1' && d.nr <= 4 ? ['p1', 'p2'] : ['p1']; });
+    const all = BASE.concat(st.added || []).map(d => Object.assign({ pr: ['p1'] }, d, (st.upd || {})[d.id] || {})).filter(d => !(st.del || {})[d.id]);
+    const devName = (d) => { const s = SYS.find(x => x.id === d.sys); const [g, sch, ga] = s.ctl.split('_'); return g + '_' + sch + '_' + pad(s.nr, 4) + '_' + ga + '_' + d.at + d.ap + pad(d.nr, 2); };
+    const q = (st.q || '').trim().toLowerCase();
+    const list = all.filter(d => d.sys === sys.id && (!st.at || d.at === st.at) && (!q || (devName(d) + ' ' + d.bmk + ' ' + d.desc).toLowerCase().includes(q))).sort((a, b) => (a.at + a.ap + pad(a.nr, 3)).localeCompare(b.at + b.ap + pad(b.nr, 3)));
+    const sel = st.sel || {};
+    const selIds = list.filter(d => sel[d.id]).map(d => d.id);
+    const atName = (k) => (ATYPES.find(a => a.k === k) || {}).n || k;
+    const apName = (k) => (APPARATE.find(a => a.k === k) || {}).n || k;
+    const objsOf = (od, v) => od.objs.slice(0, od.hist[v - 1] ? od.hist[v - 1].n : od.objs.length);
+    const segE = st.seg || null;
+    const segBtn = (on, color) => 'padding: 0 2px; border: 0; border-radius: 4px; cursor: pointer; font: inherit; color: ' + color + '; background: ' + (on ? 'oklch(0.2731 0.0358 265.638)' : 'transparent') + '; box-shadow: inset 0 -1px 0 ' + (on ? 'transparent' : color.replace(')', ' / 0.45)'));
+    const freeFor = (d, at, ap) => { const u = all.filter(x => x.id !== d.id && x.sys === d.sys && x.at === at && x.ap === ap).map(x => x.nr); const f = []; for (let i = 1; i <= 99; i++) if (!u.includes(i)) f.push(i); return f; };
+    const setDev = (d, p) => { const n = Object.assign({ at: d.at, ap: d.ap, nr: d.nr, od: d.od, ver: d.ver }, p); const at = ATYPES.find(a => a.k === n.at);
+      if (!at.ap.includes(n.ap)) n.ap = at.ap[0];
+      const free = freeFor(d, n.at, n.ap); if (!free.includes(n.nr)) n.nr = free[0];
+      let msg = devName(Object.assign({}, d, n)) + ' gespeichert.';
+      if (!odById(n.od).ap.includes(n.ap)) { const alt = ODATA.find(o => o.active && o.ap.includes(n.ap)); if (alt) { n.od = alt.id; n.ver = alt.ver; msg = 'Apparat geändert: Vorlage ist jetzt ' + alt.name + ' v' + alt.ver + ', die BACnet-Objekte wurden neu erzeugt.'; } }
+      this.setState({ upd: Object.assign({}, st.upd, { [d.id]: n }), seg: null, toast: msg }); };
+    const rows = list.map(d => { const od = odById(d.od); const old = d.ver < od.ver; const open = !!(st.exp || {})[d.id]; const objs = objsOf(od, d.ver);
+      const ed = segE && segE.id === d.id ? segE.k : '';
+      const parts = devName(d).split('_'); const prefix = parts.slice(0, 4).join('_') + '_';
+      const opts = ed === 'at' ? ATYPES.map(a => ({ k: a.k, l: a.n, on: a.k === d.at, pick: () => setDev(d, { at: a.k }) }))
+        : ed === 'ap' ? APPARATE.filter(a => ATYPES.find(t => t.k === d.at).ap.includes(a.k)).map(a => ({ k: a.k, l: a.n, on: a.k === d.ap, pick: () => setDev(d, { ap: a.k }) }))
+        : ed === 'nr' ? freeFor(d, d.at, d.ap).slice(0, 16).map(n => ({ k: pad(n, 2), l: '', on: n === d.nr, pick: () => setDev(d, { nr: n }) })) : [];
+      const optStyle = (on) => 'height: 30px; padding: 0 10px; border: 0; border-radius: 8px; display: flex; align-items: center; gap: 10px; text-align: left; cursor: pointer; font-size: 13px; background: ' + (on ? 'oklch(0.2731 0.0358 265.638)' : 'transparent');
+      return { id: d.id, name: devName(d), prefix, segAt: d.at, segAp: d.ap, segNr: pad(d.nr, 2), editing: !!ed, isNrEdit: ed === 'nr', notNrEdit: ed !== 'nr' && !!ed,
+        popTitle: ed === 'at' ? 'Anlagetyp' : ed === 'ap' ? 'Apparat (passend zu ' + d.at + ')' : 'Freie Nummern',
+        opts: opts.map(o => Object.assign(o, { style: optStyle(o.on) })), closeSeg: () => this.setState({ seg: null }),
+        editAt: () => this.setState({ seg: ed === 'at' ? null : { id: d.id, k: 'at' } }), editAp: () => this.setState({ seg: ed === 'ap' ? null : { id: d.id, k: 'ap' } }), editNr: () => this.setState({ seg: ed === 'nr' ? null : { id: d.id, k: 'nr' } }),
+        atStyle: segBtn(ed === 'at', 'oklch(0.78 0.15 150)'), apStyle: segBtn(ed === 'ap', 'oklch(0.82 0.13 80)'), nrStyle: segBtn(ed === 'nr', 'oklch(0.76 0.14 350)'),
+        atTip: 'Anlagetyp ' + d.at + ' · ' + atName(d.at) + ' ändern', apTip: 'Apparat ' + d.ap + ' · ' + apName(d.ap) + ' ändern', nrTip: 'Nummer ' + d.nr + ' ändern',
+        desc: d.desc || '', setDesc: (e) => this.setState({ upd: Object.assign({}, st.upd, { [d.id]: Object.assign({}, (st.upd || {})[d.id], { desc: e.target.value }) }) }),
+        prNames: d.pr.map(id => PROJ.find(p => p.id === id).n), prFirst: PROJ.find(p => p.id === d.pr[0]).n, prMore: d.pr.length > 1 ? '+' + (d.pr.length - 1) : '', shared: d.pr.length > 1, single: d.pr.length <= 1,
+        prTip: 'In ' + d.pr.map(id => PROJ.find(p => p.id === id).n).join(', ') + (d.pr.length > 1 ? '. Dasselbe Feldgerät, Änderungen gelten überall.' : ''),
+        sharedText: d.pr.length > 1 ? 'Geteilt mit ' + d.pr.filter(x => x !== 'p1').map(id => PROJ.find(p => p.id === id).n).join(', ') + ' · Änderungen an diesem Feldgerät und seinen BACnet-Objekten gelten in allen Projekten.' : '',
+        assign: () => this.setState({ asg: { ids: [d.id], mode: 'link', pick: null } }),
+        updOne: () => this.setState({ upd: Object.assign({}, st.upd, { [d.id]: Object.assign({}, (st.upd || {})[d.id], { ver: od.ver }) }), toast: devName(d) + ' nutzt jetzt ' + od.name + ' v' + od.ver + '.' }), newVer: 'v' + od.ver, nr: String(d.nr), bmk: d.bmk || '–', at: d.at + ' · ' + atName(d.at), ap: d.ap + ' · ' + apName(d.ap), tpl: od.name, ver: 'v' + d.ver, old, cur: !old,
+        oldTip: 'Vorlage v' + od.ver + ' ist neuer. Markieren und «Auf neueste Vorlage» wählen.', objCount: String(objs.length), open, isNew: !!d.isNew,
+        checked: sel[d.id] ? 'true' : 'false', boxStyle: 'width: 18px; height: 18px; border-radius: 5px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; ' + (sel[d.id] ? 'background: oklch(0.424 0.199 265.638); border: 0; color: white' : 'background: transparent; border: 1.5px solid oklch(0.5 0 0); color: transparent'),
+        rowStyle: 'display: grid; grid-template-columns: 36px 28px minmax(320px, 2fr) 120px 170px minmax(170px, 1.3fr) 76px; align-items: center; gap: 0 10px; min-height: 46px; padding: 0 10px; border-top: 1px solid #ffffff0d; ' + (d.isNew ? 'box-shadow: inset 3px 0 0 oklch(0.7 0.14 264);' : '') + (open ? 'background: #ffffff06;' : ''),
+        chevStyle: 'width: 24px; height: 24px; border: 0; border-radius: 6px; background: transparent; color: oklch(0.6 0 0); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transform: rotate(' + (open ? 90 : 0) + 'deg); transition: transform .12s',
+        toggle: () => this.setState({ exp: Object.assign({}, st.exp, { [d.id]: !open }) }),
+        pick: () => this.setState({ sel: Object.assign({}, sel, { [d.id]: !sel[d.id] }) }),
+        objs: objs.map(o => ({ sw: o.sw, fix: o.fix, desc: o.desc, zt: o.zt, mk: o.mk, unit: o.unit, alarm: o.alarm || '–', hasAlarm: !!o.alarm, noAlarm: !o.alarm })) }; });
+    const allOn = list.length > 0 && selIds.length === list.length;
+
+    // free numbers per system + Anlagetyp + Apparat
+    const g = st.g || { at: 'PU', ap: 'FUE', od: 'od1', ver: 0, n: 6, start: '' };
+    const used = all.filter(d => d.sys === sys.id && d.at === g.at && d.ap === g.ap).map(d => d.nr);
+    const freeList = []; for (let i = 1; i <= 99; i++) if (!used.includes(i)) freeList.push(i);
+    const ranges = []; freeList.forEach(n => { const r = ranges[ranges.length - 1]; if (r && r[1] === n - 1) r[1] = n; else ranges.push([n, n]); });
+    const freeText = freeList.length ? ranges.map(r => r[0] === r[1] ? String(r[0]) : r[0] + '–' + r[1]).join(', ') + ' frei' : 'Keine Nummer mehr frei';
+    const startN = g.start === '' ? (freeList[0] || 1) : parseInt(g.start, 10) || 1;
+    const nums = freeList.filter(x => x >= startN).slice(0, g.n);
+    const tooMany = nums.length < g.n;
+    const at = ATYPES.find(a => a.k === g.at);
+    const apOpts = APPARATE.filter(a => at.ap.includes(a.k));
+    const odOpts = ODATA.filter(o => o.active && o.ap.includes(g.ap));
+    const od = odById(g.od) && odOpts.some(o => o.id === g.od) ? odById(g.od) : odOpts[0];
+    const ver = od ? (g.ver && g.ver <= od.ver ? g.ver : od.ver) : 0;
+    const pObjs = od ? objsOf(od, ver) : [];
+    const setG = (p) => this.setState({ g: Object.assign({}, g, p) });
+    const chip = (on) => 'height: 34px; padding: 0 12px; border-radius: 9999px; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; border: 1px solid ' + (on ? 'oklch(0.7 0.14 264)' : '#ffffff24') + '; background: ' + (on ? 'oklch(0.2731 0.0358 265.638)' : 'transparent') + '; color: ' + (on ? 'oklch(0.985 0 0)' : 'oklch(0.85 0 0)');
+    const preview = nums.slice(0, 8).map(nr => ({ name: devName({ sys: sys.id, at: g.at, ap: g.ap, nr }) }));
+    const canCreate = !!od && nums.length > 0 && !tooMany;
+
+    const V = {
+      sysId: sys.id, setSys: (e) => this.setState({ sys: e.target.value, sel: {}, exp: {} }), sysLabel: sys.ctl + ' · ' + pad(sys.nr, 4) + ' ' + sys.doc,
+      q: st.q, setQ: (e) => this.setState({ q: e.target.value }), atF: st.at || '', setAtF: (e) => this.setState({ at: e.target.value }),
+      rows, empty: rows.length === 0, hasRows: rows.length > 0, count: rows.length + (rows.length === 1 ? ' Feldgerät' : ' Feldgeräte'),
+      hasSel: selIds.length > 0, noSel: selIds.length === 0, selText: selIds.length + ' ausgewählt',
+      allChecked: allOn ? 'true' : 'false', allBox: 'width: 18px; height: 18px; border-radius: 5px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; ' + (allOn ? 'background: oklch(0.424 0.199 265.638); border: 0; color: white' : 'background: transparent; border: 1.5px solid oklch(0.5 0 0); color: transparent'),
+      pickAll: () => { const o = {}; if (!allOn) list.forEach(d => { o[d.id] = true; }); this.setState({ sel: o }); },
+      clearSel: () => this.setState({ sel: {} }),
+      updSel: () => { const u = Object.assign({}, st.upd); let c = 0; list.filter(d => sel[d.id]).forEach(d => { const o = odById(d.od); if (d.ver < o.ver) { u[d.id] = Object.assign({}, u[d.id], { ver: o.ver }); c++; } });
+        this.setState({ upd: u, sel: {}, toast: c ? c + ' Feldgeräte auf die neueste Vorlage aktualisiert.' : 'Alle markierten Feldgeräte sind schon aktuell.' }); },
+      assignSel: () => this.setState({ asg: { ids: selIds.slice(), mode: 'link', pick: null } }),
+      asgOpen: !!st.asg, closeAsg: () => this.setState({ asg: null }),
+      asgTitle: st.asg ? (st.asg.ids.length === 1 ? devName(all.find(d => d.id === st.asg.ids[0]) || all[0]) : st.asg.ids.length + ' Feldgeräte') : '',
+      asgProj: st.asg ? PROJ.map(p => { const devs = all.filter(d => st.asg.ids.includes(d.id)); const base = devs.filter(d => d.pr.includes(p.id)).length; const pk = st.asg.pick || {}; const val = pk[p.id] !== undefined ? pk[p.id] : (base === devs.length ? 'all' : base === 0 ? 'none' : 'some');
+        const isCur = p.id === 'p1';
+        return { n: p.n, ph: p.ph, cur: isCur, notCur: !isCur, state: val, can: p.can && !isCur, cannot: !p.can, why: p.why || '', checked: val === 'all' ? 'true' : val === 'some' ? 'mixed' : 'false',
+          meta: isCur ? 'Aktuelles Projekt' : val === 'some' ? base + ' von ' + devs.length + ' schon zugewiesen' : val === 'all' && base === devs.length ? 'Schon zugewiesen' : val === 'all' ? 'Wird zugewiesen' : base > 0 ? 'Wird entfernt' : '',
+          box: 'width: 18px; height: 18px; flex: 0 0 auto; border-radius: 5px; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; ' + (val === 'all' ? 'background: oklch(0.424 0.199 265.638); color: white' : val === 'some' ? 'background: oklch(0.424 0.199 265.638 / 0.5); color: white' : 'box-shadow: inset 0 0 0 1.5px oklch(0.5 0 0); color: transparent') + ((!p.can || isCur) ? '; opacity: 0.45' : ''),
+          mark: val === 'some' ? '–' : '✓',
+          tog: () => { if (!p.can || isCur) return; this.setState({ asg: Object.assign({}, st.asg, { pick: Object.assign({}, pk, { [p.id]: val === 'all' ? 'none' : 'all' }) }) }); } }; }) : [],
+      asgLink: st.asg && st.asg.mode === 'link', asgCopy: st.asg && st.asg.mode === 'copy',
+      modeCards: st.asg ? [['link', 'Verknüpfen', 'Dasselbe Feldgerät in mehreren Projekten. Änderungen gelten überall.'], ['copy', 'Als Kopie', 'Eigenständiges Feldgerät im Zielprojekt, ab dann unabhängig.']].map(([k, n, d]) => { const on = st.asg.mode === k; return { n, d, pressed: on ? 'true' : 'false', pick: () => this.setState({ asg: Object.assign({}, st.asg, { mode: k }) }),
+        style: 'flex: 1; padding: 10px 12px; border-radius: 12px; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 3px; border: 1px solid ' + (on ? 'oklch(0.7 0.14 264)' : '#ffffff1f') + '; background: ' + (on ? 'oklch(0.2731 0.0358 265.638 / 0.6)' : 'transparent') }; }) : [],
+      saveAsg: () => { const a = st.asg; const pk = a.pick || {}; const u = Object.assign({}, st.upd); let add = 0, rem = 0;
+        all.filter(d => a.ids.includes(d.id)).forEach(d => { let pr = d.pr.slice(); Object.keys(pk).forEach(pid => { if (pk[pid] === 'all' && !pr.includes(pid)) { if (a.mode === 'link') pr.push(pid); add++; } if (pk[pid] === 'none' && pr.includes(pid)) { pr = pr.filter(x => x !== pid); rem++; } }); u[d.id] = Object.assign({}, u[d.id], { pr }); });
+        this.setState({ upd: u, asg: null, sel: {}, toast: add || rem ? (add ? add + (a.mode === 'link' ? ' Zuweisungen verknüpft' : ' Kopien angelegt') : '') + (add && rem ? ', ' : '') + (rem ? rem + ' entfernt' : '') + '.' : 'Nichts geändert.' }); },
+      delSel: () => { const dd = Object.assign({}, st.del); selIds.forEach(id => { dd[id] = true; }); this.setState({ del: dd, sel: {}, toast: selIds.length + ' Feldgeräte gelöscht.' }); },
+      openSheet: () => this.setState({ sheet: true }), closeSheet: () => this.setState({ sheet: false }), sheet: !!st.sheet,
+      atChips: ATYPES.map(a => ({ label: a.k + ' · ' + a.n, pressed: g.at === a.k ? 'true' : 'false', style: chip(g.at === a.k), pick: () => setG({ at: a.k, ap: a.ap[0], od: '', ver: 0, start: '' }) })),
+      apChips: apOpts.map(a => ({ label: a.k + ' · ' + a.n, pressed: g.ap === a.k ? 'true' : 'false', style: chip(g.ap === a.k), pick: () => setG({ ap: a.k, od: '', ver: 0, start: '' }) })),
+      odCards: odOpts.map(o => { const on = od && od.id === o.id; return { name: o.name, meta: o.objs.length + ' BACnet-Objekte', ver: 'v' + o.ver, pressed: on ? 'true' : 'false', pick: () => setG({ od: o.id, ver: 0 }),
+        style: 'padding: 10px 12px; border-radius: 12px; text-align: left; cursor: pointer; display: flex; align-items: center; gap: 10px; border: 1px solid ' + (on ? 'oklch(0.7 0.14 264)' : '#ffffff1f') + '; background: ' + (on ? 'oklch(0.2731 0.0358 265.638 / 0.6)' : 'transparent'),
+        dot: 'width: 16px; height: 16px; border-radius: 9999px; flex: 0 0 auto; ' + (on ? 'border: 5px solid oklch(0.7 0.14 264)' : 'border: 1.5px solid oklch(0.5 0 0)') }; }),
+      noOd: odOpts.length === 0, hasOd: odOpts.length > 0,
+      verOpts: od ? od.hist.slice().reverse().map(h => ({ v: String(h.v), label: 'v' + h.v + ' · ' + h.date + (h.v === od.ver ? ' (aktuell)' : '') })) : [], verVal: String(ver), setVer: (e) => setG({ ver: parseInt(e.target.value, 10) }),
+      gN: String(g.n), decN: () => setG({ n: Math.max(1, g.n - 1) }), incN: () => setG({ n: Math.min(50, g.n + 1) }), setN: (e) => setG({ n: Math.max(1, Math.min(50, parseInt(e.target.value, 10) || 1)) }),
+      gStart: g.start === '' ? String(startN) : g.start, setStart: (e) => setG({ start: e.target.value }), freeText,
+      numsText: nums.length ? (nums.length === 1 ? 'Nummer ' + nums[0] : 'Nummern ' + nums[0] + (nums[nums.length - 1] - nums[0] === nums.length - 1 ? '–' + nums[nums.length - 1] : ' bis ' + nums[nums.length - 1] + ' (Lücken werden übersprungen)')) : '',
+      tooMany, tooManyText: 'Ab ' + startN + ' sind nur ' + nums.length + ' Nummern frei.',
+      preview, moreText: nums.length > 8 ? '… und ' + (nums.length - 8) + ' weitere' : '', hasMore: nums.length > 8,
+      pObjs: pObjs.map(o => ({ sw: o.sw, fix: o.fix })), pObjCount: pObjs.length + ' BACnet-Objekte je Feldgerät',
+      createLabel: g.n + (g.n === 1 ? ' Feldgerät' : ' Feldgeräte') + ' erzeugen',
+      createStyle: 'height: 40px; padding: 0 18px; border-radius: 12px; border: 0; font-size: 14px; font-weight: 500; cursor: ' + (canCreate ? 'pointer' : 'not-allowed') + '; background: ' + (canCreate ? 'oklch(0.424 0.199 265.638); color: oklch(0.97 0.014 254.604)' : 'oklch(0.26 0 0); color: oklch(0.6 0 0)'),
+      create: () => { if (!canCreate) return; const add = (st.added || []).map(d => Object.assign({}, d, { isNew: false })).concat(nums.map(nr => ({ id: sys.id + '-' + g.at + g.ap + nr + '-' + Date.now(), sys: sys.id, at: g.at, ap: g.ap, nr, bmk: '', od: od.id, ver, desc: '', isNew: true })));
+        this.setState({ added: add, sheet: false, at: '', q: '', toast: nums.length + ' Feldgeräte mit ' + od.name + ' v' + ver + ' erzeugt.' }); },
+    };
+
+    return Object.assign({}, SH, V);
+  }
+}
+</script>
+</body>
+</html>
