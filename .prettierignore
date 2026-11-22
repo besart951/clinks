@@ -14,3 +14,4 @@ pnpm-lock.yaml
 .claude/skills
 skills-lock.json
 packages/contracts/openapi.json
+packages/sync-schema/src/powersync-schema.generated.ts

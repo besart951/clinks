@@ -129,7 +129,12 @@ export interface RefreshTokenTable {
 	createdAt: Timestamp;
 }
 
+/** Synced tables are read and written generically through packages/sync-schema, so their rows stay loose. */
+export type SyncedRow = { id: string; tenantId: string; revision: Generated<number> } & { [column: string]: unknown };
+
 export interface Database {
+	contacts: SyncedRow;
+	appointments: SyncedRow;
 	tenants: TenantTable;
 	users: UserTable;
 	roles: RoleTable;

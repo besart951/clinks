@@ -3,6 +3,7 @@ import type { MembershipId, RoleId, TenantId, UserId } from '@clinks/domain/ids'
 import type { Membership, Permission, PlanCode, Role, Tenant, User } from '@clinks/domain/types';
 import type { ApiClient } from '../data/api-client.ts';
 import type { MockDatabase, Snapshot } from '../data/database.ts';
+import type { SyncEngine } from '../sync/sync-engine.svelte.ts';
 import type { AuthGateway, NewTenant, SignInStep } from './auth-gateway.ts';
 
 /**
@@ -13,12 +14,14 @@ export class RemoteAuthGateway implements AuthGateway {
 	readonly remote = true;
 	readonly #client: ApiClient;
 	readonly #db: MockDatabase;
+	readonly #sync: SyncEngine;
 	#challengeId: string | null = null;
 	#verificationId: string | null = null;
 
-	constructor(client: ApiClient, db: MockDatabase) {
+	constructor(client: ApiClient, db: MockDatabase, sync: SyncEngine) {
 		this.#client = client;
 		this.#db = db;
+		this.#sync = sync;
 	}
 
 	async resume() {
@@ -66,13 +69,17 @@ export class RemoteAuthGateway implements AuthGateway {
 		this.#verificationId = result.verificationId;
 	}
 
+	/** A token for the tenant, and sync of that tenant's data. */
 	async switchTenant(tenantId: TenantId) {
 		this.#client.adopt(await this.#client.request<SessionResponse>('POST', '/me/tenant', { tenantId }));
+		void this.#sync.reconnect();
 	}
 
+	/** Signs the device out and wipes the synced data from it. */
 	async signOut() {
 		await this.#client.request('POST', '/auth/sign-out', {}).catch(() => undefined);
 		this.#client.forget();
+		await this.#sync.clear();
 	}
 
 	requestPasswordReset(email: string) {
@@ -97,7 +104,13 @@ export class RemoteAuthGateway implements AuthGateway {
 		await Promise.allSettled(
 			invitations.map((email) => this.#client.request('POST', '/tenant/invitations', { email, roleId: userRole!.id })),
 		);
-		if (input.demoData) this.#db.merge(demoRows(tenantId));
+		if (input.demoData) {
+			// Synced tables get real (uploaded) demo rows; the rest stays local until it syncs too.
+			const { contacts, appointments, ...local } = demoRows(tenantId);
+			await this.#sync.insert('contacts', contacts ?? []);
+			await this.#sync.insert('appointments', appointments ?? []);
+			this.#db.merge(local);
+		}
 		return tenantId;
 	}
 

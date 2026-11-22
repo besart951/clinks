@@ -1,5 +1,6 @@
 import { newId, type UserId } from '@clinks/domain/ids';
-import type { AppNotification, Contact, NotificationKind } from '@clinks/domain/types';
+import type { Appointment, AppNotification, Contact, NotificationKind } from '@clinks/domain/types';
+import type { Repository } from '@clinks/contracts/repository';
 import { stamp, type MockDatabase } from './database.ts';
 import { TenantRepository, type RequestContext } from './repository.ts';
 import {
@@ -23,8 +24,8 @@ export function contactName(contact: Pick<Contact, 'kind' | 'firstName' | 'lastN
 
 /** Tenant data of the mock API. Every repository applies the caller's tenant and permissions. */
 export class WorkspaceApi {
-	readonly contacts: TenantRepository<'contacts'>;
-	readonly appointments: TenantRepository<'appointments'>;
+	readonly contacts: Repository<Contact>;
+	readonly appointments: Repository<Appointment>;
 	readonly folders: TenantRepository<'folders'>;
 	readonly documents: TenantRepository<'documents'>;
 	readonly invoices: TenantRepository<'invoices'>;
@@ -43,23 +44,32 @@ export class WorkspaceApi {
 	#db: MockDatabase;
 	#context: RequestContext;
 
-	constructor(db: MockDatabase, context: RequestContext) {
+	/** `synced` replaces the mock for the tables that already sync through PowerSync (real backend only). */
+	constructor(
+		db: MockDatabase,
+		context: RequestContext,
+		synced: { contacts: Repository<Contact>; appointments: Repository<Appointment> } | null = null,
+	) {
 		this.#db = db;
 		this.#context = context;
-		this.contacts = new TenantRepository<'contacts'>(db, context, {
-			table: 'contacts',
-			read: 'contacts.read',
-			write: 'contacts.write',
-			schema: contactSchema,
-			audit: { kind: 'contact', label: contactName },
-		});
-		this.appointments = new TenantRepository<'appointments'>(db, context, {
-			table: 'appointments',
-			read: 'calendar.read',
-			write: 'calendar.write',
-			schema: appointmentSchema,
-			audit: { kind: 'appointment', label: (row) => row.title },
-		});
+		this.contacts =
+			synced?.contacts ??
+			new TenantRepository<'contacts'>(db, context, {
+				table: 'contacts',
+				read: 'contacts.read',
+				write: 'contacts.write',
+				schema: contactSchema,
+				audit: { kind: 'contact', label: contactName },
+			});
+		this.appointments =
+			synced?.appointments ??
+			new TenantRepository<'appointments'>(db, context, {
+				table: 'appointments',
+				read: 'calendar.read',
+				write: 'calendar.write',
+				schema: appointmentSchema,
+				audit: { kind: 'appointment', label: (row) => row.title },
+			});
 		this.folders = new TenantRepository<'folders'>(db, context, {
 			table: 'folders',
 			read: 'documents.read',

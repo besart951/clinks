@@ -48,7 +48,9 @@
 			{form.busy ? workspace.t('ui.loading') : workspace.t('ui.sign_in')}
 		</Button>
 	</form>
-	<DemoAccounts onPick={pick} />
+	{#if !workspace.auth.remote}
+		<DemoAccounts onPick={pick} />
+	{/if}
 	{#snippet footer()}
 		{workspace.t('ui.no_account')}
 		<a class="text-foreground font-medium underline-offset-4 hover:underline" href={href('/signup')}>

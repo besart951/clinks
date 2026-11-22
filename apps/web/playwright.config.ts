@@ -13,5 +13,14 @@ export default defineConfig({
 		channel: process.env.PLAYWRIGHT_CHANNEL ?? 'chrome',
 		viewport: { width: 1400, height: 900 },
 	},
-	webServer: { command: 'pnpm dev --strictPort', port: 5176, reuseExistingServer: !remote },
+	// Against the API the production build runs: it checks the PowerSync workers and keeps loaded code
+	// available offline, which the dev server (modules on demand) cannot.
+	webServer: remote
+		? {
+				command: 'pnpm build && pnpm preview --port 5176 --strictPort',
+				port: 5176,
+				reuseExistingServer: false,
+				timeout: 180_000,
+			}
+		: { command: 'pnpm dev --strictPort', port: 5176, reuseExistingServer: true },
 });

@@ -1,13 +1,14 @@
 # clinks
 
 clinks is the CLinks SaaS: platform shell, contacts, calendar, tasks, mail and campaigns, documents, finance with
-Swiss QR bills, Physio and Spitex. Sign-in, accounts and tenants run on the real API; the screens behind them still
-use an in-browser mock until PowerSync takes over (phase 4). Details: [`apps/web`](apps/web/README.md).
+Swiss QR bills, Physio and Spitex. Sign-in, accounts and tenants run on the real API; contacts and the calendar sync
+through PowerSync (local SQLite, works offline); the other screens still use an in-browser mock until phase 4. Details: [`apps/web`](apps/web/README.md).
 
 ```
 apps/web        SvelteKit app (Svelte 5, Tailwind 4), mock API, tests
 apps/api        Hono API: own sign-in (argon2id, TOTP), EdDSA tokens + JWKS, tenants, invitations, OpenAPI
 packages/db           Kysely types, SQL migrations, row-level security, tenant-scoped transactions
+packages/sync-schema  the synced tables in one place: generates the PowerSync client schema, maps rows
 packages/ui           shadcn-svelte components and the CLinks UI kit
 packages/domain       pure business rules and types (money, QR bill, scheduling, permissions)
 packages/contracts    shared Zod schemas and repository interfaces
@@ -30,7 +31,8 @@ VITE_API_URL=http://localhost:8787 pnpm dev   # http://localhost:5176, signed in
 
 Without `VITE_API_URL` the app runs fully on the mock (demo sign-in `besi@stille.ch` / `demo1234`, code `000000`) –
 that is also what the single-file build and `pnpm test:e2e` use. With it, sign-up codes, reset links and invitations
-arrive in Mailpit. Outside production the API makes a signing key at start-up; for a stable one run
+arrive in Mailpit, and contacts and appointments sync through PowerSync (`VITE_POWERSYNC_URL`, default
+http://localhost:8080): writes go to the local database first and up through `POST /sync/write`. Outside production the API makes a signing key at start-up; for a stable one run
 `pnpm --filter @clinks/api keys` and put the line into `apps/api/.env` (see `apps/api/.env.example`).
 
 | Service     | URL                                                                                         |
@@ -56,7 +58,9 @@ pnpm --filter @clinks/web test:e2e:remote   # Playwright against the API (needs 
 ```
 
 After changing a route or a contract, run `pnpm --filter @clinks/api openapi` to refresh
-`packages/contracts/openapi.json`.
+`packages/contracts/openapi.json`. A new synced table means: a migration, an entry in
+`packages/sync-schema/src/tables.ts` (then `pnpm --filter @clinks/sync-schema generate`), a stream in
+`infra/powersync/sync-config.yaml` and a domain schema in the API's `SyncService`.
 
 After changing `localization/product-catalog.json` run `pnpm generate:translations`.
 

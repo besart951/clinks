@@ -132,6 +132,7 @@ export async function generatePrivateJwk(kid = `clinks-${new Date().toISOString(
 	return { ...(await exportJWK(privateKey)), kid, alg: algorithm };
 }
 
+/** A unique key id per start, so services that cache the JWKS (PowerSync) never mix up two keys. */
 async function generateSigningKey(): Promise<SigningKey> {
-	return importSigningKey(JSON.stringify(await generatePrivateJwk('clinks-ephemeral')));
+	return importSigningKey(JSON.stringify(await generatePrivateJwk(`clinks-ephemeral-${crypto.randomUUID()}`)));
 }
