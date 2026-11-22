@@ -4,25 +4,71 @@ on:
   pull_request:
   push:
     branches: [main]
-    tags: ["v*"]
 
 permissions:
   contents: read
 
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  quality:
+  verify:
+    name: Verify (format, lint, types, unit tests, build)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4 # version from packageManager in package.json
       - uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version-file: .node-version
           cache: pnpm
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10.28.2
-      - uses: actions/setup-go@v6
-        with:
-          go-version-file: server/go.mod
       - run: pnpm install --frozen-lockfile
-      - run: pnpm check && pnpm test && pnpm build && pnpm go:check
+      - run: pnpm verify
+
+  integration:
+    name: Integration (API + database)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18.7
+        env:
+          POSTGRES_USER: clinks
+          POSTGRES_PASSWORD: clinks-dev
+          POSTGRES_DB: clinks
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U clinks -d clinks"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # The API's login role (no owner, no superuser), as in the dev init script.
+      - run: psql postgres://clinks:clinks-dev@localhost:5432/clinks -v ON_ERROR_STOP=1 -f infra/postgres/init/02-api-role.sql
+      - run: pnpm test:integration
+
+  e2e:
+    name: Browser tests (mock)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:e2e
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          path: apps/web/test-results
+          retention-days: 7
