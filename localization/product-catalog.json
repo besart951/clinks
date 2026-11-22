@@ -2,46 +2,6 @@
   "defaultLocale": "de-CH",
   "translations": {
     "shared": {
-      "audit.invitation.accepted": {
-        "de-CH": "Einladung angenommen: {target}",
-        "en-US": "Invitation accepted: {target}"
-      },
-      "audit.invitation.created": {
-        "de-CH": "Einladung erstellt: {target}",
-        "en-US": "Invitation created: {target}"
-      },
-      "audit.localization.language_saved": {
-        "de-CH": "Sprache geändert: {target}",
-        "en-US": "Language changed: {target}"
-      },
-      "audit.localization.translation_saved": {
-        "de-CH": "Übersetzung geändert: {target}",
-        "en-US": "Translation changed: {target}"
-      },
-      "audit.localization.translation_override_saved": {
-        "de-CH": "Übersetzungs-Override geändert: {target}",
-        "en-US": "Translation override changed: {target}"
-      },
-      "audit.session.login": {
-        "de-CH": "Anmeldung erfolgreich: {target}",
-        "en-US": "Successful sign-in: {target}"
-      },
-      "audit.session.logout": {
-        "de-CH": "Abmeldung: {target}",
-        "en-US": "Sign-out: {target}"
-      },
-      "audit.tenant.created": {
-        "de-CH": "Mandant erstellt: {target}",
-        "en-US": "Tenant created: {target}"
-      },
-      "audit.tenant.registered": {
-        "de-CH": "Mandant registriert: {target}",
-        "en-US": "Tenant registered: {target}"
-      },
-      "audit.tenant.switch": {
-        "de-CH": "Mandant gewechselt: {target}",
-        "en-US": "Tenant switched: {target}"
-      },
       "error.email_taken": {
         "de-CH": "Diese E-Mail-Adresse wird bereits verwendet.",
         "en-US": "This email address is already in use."
@@ -106,113 +66,13 @@
         "de-CH": "Aktion",
         "en-US": "Action"
       },
-      "mail.invitation.body": {
-        "de-CH": "Du wurdest zu einem Clinks-Mandanten eingeladen.\n\nEinladung annehmen: {url}",
-        "en-US": "You have been invited to a Clinks tenant.\n\nAccept the invitation: {url}"
-      },
-      "mail.invitation.subject": {
-        "de-CH": "Clinks-Einladung",
-        "en-US": "Clinks invitation"
-      },
-      "ui.active_tenant": {
-        "de-CH": "Aktiver Mandant",
-        "en-US": "Active tenant"
-      },
-      "ui.application_infra_link": {
-        "de-CH": "Infrastruktur",
-        "en-US": "Infrastructure"
-      },
-      "ui.application_planer_link": {
-        "de-CH": "Planung",
-        "en-US": "Planning"
-      },
-      "ui.add_translation": {
-        "de-CH": "Override speichern",
-        "en-US": "Save override"
-      },
-      "ui.admin_login": {
-        "de-CH": "Admin-Anmeldung",
-        "en-US": "Administrator sign in"
-      },
-      "ui.actor_id": {
-        "de-CH": "Benutzer-ID",
-        "en-US": "User ID"
-      },
-      "ui.audit_default_range": {
-        "de-CH": "Standard: letzte 30 Tage.",
-        "en-US": "Default: last 30 days."
-      },
-      "ui.audit_description": {
-        "de-CH": "Beschreibung",
-        "en-US": "Description"
-      },
       "ui.audit_immutable": {
         "de-CH": "Ereignisse sind unveränderbar.",
         "en-US": "Events cannot be changed."
       },
-      "ui.audit_log": {
-        "de-CH": "Audit-Protokoll",
-        "en-US": "Audit log"
-      },
-      "ui.back_to_home": {
-        "de-CH": "Zurück zur Startseite",
-        "en-US": "Back to Home"
-      },
-      "ui.error_forbidden_desc": {
-        "de-CH": "Du verfügst nicht über die erforderlichen Rechte für diesen Bereich.",
-        "en-US": "You do not have permission to access this area."
-      },
-      "ui.error_forbidden_title": {
-        "de-CH": "Zugriff verweigert",
-        "en-US": "Access denied"
-      },
-      "ui.error_not_found_desc": {
-        "de-CH": "Die angeforderte Seite existiert nicht oder wurde verschoben.",
-        "en-US": "The requested page does not exist or has been moved."
-      },
-      "ui.error_not_found_title": {
-        "de-CH": "Seite nicht gefunden",
-        "en-US": "Page not found"
-      },
-      "ui.error_server_desc": {
-        "de-CH": "Beim Verarbeiten der Anfrage ist ein interner Serverfehler aufgetreten.",
-        "en-US": "An internal server error occurred while processing the request."
-      },
-      "ui.error_server_title": {
-        "de-CH": "Serverfehler",
-        "en-US": "Server error"
-      },
-      "ui.error_generic_desc": {
-        "de-CH": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut.",
-        "en-US": "An unexpected error occurred. Please try again."
-      },
-      "ui.error_generic_title": {
-        "de-CH": "Unerwarteter Fehler",
-        "en-US": "Unexpected error"
-      },
       "ui.try_again": {
         "de-CH": "Erneut versuchen",
         "en-US": "Try Again"
-      },
-      "ui.connected_to_tenant": {
-        "de-CH": "ist mit dem Mandanten verbunden.",
-        "en-US": "is connected to the tenant."
-      },
-      "ui.copy": {
-        "de-CH": "Kopieren",
-        "en-US": "Copy"
-      },
-      "ui.create_tenant": {
-        "de-CH": "Mandant erstellen",
-        "en-US": "Create tenant"
-      },
-      "ui.dashboard": {
-        "de-CH": "Dashboard",
-        "en-US": "Dashboard"
-      },
-      "ui.default": {
-        "de-CH": "Standard",
-        "en-US": "Default"
       },
       "ui.email": {
         "de-CH": "E-Mail-Adresse",
@@ -225,10 +85,6 @@
       "ui.from": {
         "de-CH": "Von",
         "en-US": "From"
-      },
-      "ui.invitation_link": {
-        "de-CH": "Einladungslink",
-        "en-US": "Invitation link"
       },
       "ui.invite_user": {
         "de-CH": "Benutzer einladen",
@@ -246,57 +102,17 @@
         "de-CH": "Wird geladen …",
         "en-US": "Loading …"
       },
-      "ui.locale": {
-        "de-CH": "Gebietsschema",
-        "en-US": "Locale"
-      },
-      "ui.no_tenants": {
-        "de-CH": "Noch keine Mandanten vorhanden.",
-        "en-US": "No tenants yet."
-      },
-      "ui.occurred_at": {
-        "de-CH": "Zeitpunkt",
-        "en-US": "Occurred at"
-      },
       "ui.password": {
         "de-CH": "Passwort",
         "en-US": "Password"
-      },
-      "ui.register": {
-        "de-CH": "Registrieren",
-        "en-US": "Register"
       },
       "ui.role": {
         "de-CH": "Rolle",
         "en-US": "Role"
       },
-      "ui.role_tenant_admin": {
-        "de-CH": "Mandantenadministrator",
-        "en-US": "Tenant administrator"
-      },
-      "ui.role_user": {
-        "de-CH": "Benutzer",
-        "en-US": "User"
-      },
       "ui.save": {
         "de-CH": "Speichern",
         "en-US": "Save"
-      },
-      "ui.scope_admin": {
-        "de-CH": "Administration",
-        "en-US": "Administration"
-      },
-      "ui.scope_infra_link": {
-        "de-CH": "Infrastruktur",
-        "en-US": "Infrastructure"
-      },
-      "ui.scope_planer_link": {
-        "de-CH": "Planung",
-        "en-US": "Planning"
-      },
-      "ui.scope_shared": {
-        "de-CH": "Übergreifend",
-        "en-US": "Shared"
       },
       "ui.sign_in": {
         "de-CH": "Anmelden",
@@ -309,14 +125,6 @@
       "ui.super_administrator": {
         "de-CH": "Super-Administrator",
         "en-US": "Super administrator"
-      },
-      "ui.status_code": {
-        "de-CH": "Status {code}",
-        "en-US": "Status {code}"
-      },
-      "ui.tenant_id": {
-        "de-CH": "Mandanten-ID",
-        "en-US": "Tenant ID"
       },
       "ui.tenant_name": {
         "de-CH": "Mandantenname",
@@ -346,109 +154,17 @@
         "de-CH": "Bis",
         "en-US": "To"
       },
-      "ui.translation_key": {
-        "de-CH": "Übersetzungsschlüssel",
-        "en-US": "Translation key"
-      },
-      "ui.translation_scope": {
-        "de-CH": "Bereich",
-        "en-US": "Scope"
-      },
-      "ui.translation_value": {
-        "de-CH": "Override-Text",
-        "en-US": "Override text"
-      },
-      "ui.translations": {
-        "de-CH": "Übersetzungs-Overrides",
-        "en-US": "Translation overrides"
-      },
-      "ui.welcome": {
-        "de-CH": "Willkommen",
-        "en-US": "Welcome"
-      },
       "ui.accept_invitation": {
         "de-CH": "Einladung annehmen",
         "en-US": "Accept invitation"
-      },
-      "ui.accept_invitation_description": {
-        "de-CH": "Tritt dem eingeladenen Mandanten mit deiner E-Mail-Adresse bei.",
-        "en-US": "Join the invited tenant with your email address."
       },
       "ui.already_have_account": {
         "de-CH": "Du hast bereits ein Konto?",
         "en-US": "Already have an account?"
       },
-      "ui.auth_eyebrow_infra_link": {
-        "de-CH": "Infrastruktur im richtigen Kontext",
-        "en-US": "Infrastructure in the right context"
-      },
-      "ui.auth_eyebrow_planer_link": {
-        "de-CH": "Planung mit einem klaren Zugang",
-        "en-US": "Planning with clear access"
-      },
-      "ui.auth_panel_description_infra_link": {
-        "de-CH": "Ein geschützter Arbeitsbereich für Teams, Mandanten und Infrastrukturabläufe.",
-        "en-US": "A protected workspace for teams, tenants, and infrastructure workflows."
-      },
-      "ui.auth_panel_description_planer_link": {
-        "de-CH": "Ein geschützter Arbeitsbereich für gemeinsame Planung in deinem aktiven Mandanten.",
-        "en-US": "A protected workspace for collaborative planning in your active tenant."
-      },
-      "ui.auth_panel_title_infra_link": {
-        "de-CH": "Sicher anmelden. Infrastruktur gemeinsam überblicken.",
-        "en-US": "Sign in securely. Keep infrastructure in view together."
-      },
-      "ui.auth_panel_title_planer_link": {
-        "de-CH": "Sicher anmelden. Gemeinsam verlässlich planen.",
-        "en-US": "Sign in securely. Plan reliably together."
-      },
-      "ui.checking_session": {
-        "de-CH": "Sitzung wird geprüft",
-        "en-US": "Checking session"
-      },
-      "ui.continue_with_google": {
-        "de-CH": "Mit Google fortfahren",
-        "en-US": "Continue with Google"
-      },
       "ui.create_account": {
         "de-CH": "Konto erstellen",
         "en-US": "Create account"
-      },
-      "ui.dashboard_description_infra_link": {
-        "de-CH": "Dein sicherer Einstieg in den Infrastruktur-Arbeitsbereich.",
-        "en-US": "Your secure entry point to the infrastructure workspace."
-      },
-      "ui.dashboard_description_planer_link": {
-        "de-CH": "Dein sicherer Einstieg in den Planungs-Arbeitsbereich.",
-        "en-US": "Your secure entry point to the planning workspace."
-      },
-      "ui.dashboard_ready_description_infra_link": {
-        "de-CH": "Die Grundstruktur für mandantenbezogene Infrastruktur-Funktionen ist bereit.",
-        "en-US": "The foundation for tenant-scoped infrastructure features is ready."
-      },
-      "ui.dashboard_ready_description_planer_link": {
-        "de-CH": "Die Grundstruktur für mandantenbezogene Planungsfunktionen ist bereit.",
-        "en-US": "The foundation for tenant-scoped planning features is ready."
-      },
-      "ui.dashboard_ready_title_infra_link": {
-        "de-CH": "Bereit für Infrastruktur",
-        "en-US": "Ready for infrastructure"
-      },
-      "ui.dashboard_ready_title_planer_link": {
-        "de-CH": "Bereit für Planung",
-        "en-US": "Ready for planning"
-      },
-      "ui.get_started": {
-        "de-CH": "Jetzt starten",
-        "en-US": "Get started"
-      },
-      "ui.google_authentication_failed": {
-        "de-CH": "Die Anmeldung mit Google ist fehlgeschlagen. Bitte versuche es erneut.",
-        "en-US": "Google authentication failed. Please try again."
-      },
-      "ui.invitation_meta_title": {
-        "de-CH": "Einladung annehmen | Clinks",
-        "en-US": "Accept invitation | Clinks"
       },
       "ui.invitation_replaces_session": {
         "de-CH": "Du bist bereits angemeldet. Wenn du diese Einladung annimmst, wird die aktuelle Browsersitzung durch die eingeladene Identität ersetzt.",
@@ -458,161 +174,17 @@
         "de-CH": "Erstelle eine zeitlich begrenzte Einladung für diesen Mandanten.",
         "en-US": "Create a time-limited invitation for this tenant."
       },
-      "ui.landing_description_infra_link": {
-        "de-CH": "Ein mandantenfähiger Arbeitsbereich, der Identität, Berechtigungen und Infrastrukturabläufe auf ein stabiles Fundament stellt.",
-        "en-US": "A multi-tenant workspace that puts identity, permissions, and infrastructure workflows on a dependable foundation."
-      },
-      "ui.landing_description_planer_link": {
-        "de-CH": "Ein mandantenfähiger Arbeitsbereich, der Identität, Berechtigungen und gemeinsame Planung auf ein stabiles Fundament stellt.",
-        "en-US": "A multi-tenant workspace that puts identity, permissions, and collaborative planning on a dependable foundation."
-      },
-      "ui.landing_eyebrow_infra_link": {
-        "de-CH": "Clinks Infrastruktur",
-        "en-US": "Clinks Infrastructure"
-      },
-      "ui.landing_eyebrow_planer_link": {
-        "de-CH": "Clinks Planung",
-        "en-US": "Clinks Planning"
-      },
-      "ui.landing_feature_first_description_infra_link": {
-        "de-CH": "Arbeite immer im aktiven Mandanten und halte Verantwortlichkeiten eindeutig.",
-        "en-US": "Always work in the active tenant and keep responsibilities explicit."
-      },
-      "ui.landing_feature_first_description_planer_link": {
-        "de-CH": "Arbeite immer im aktiven Mandanten und halte Planungskontexte eindeutig.",
-        "en-US": "Always work in the active tenant and keep planning contexts explicit."
-      },
-      "ui.landing_feature_first_title_infra_link": {
-        "de-CH": "Mandantenklarheit",
-        "en-US": "Tenant clarity"
-      },
-      "ui.landing_feature_first_title_planer_link": {
-        "de-CH": "Planung im Kontext",
-        "en-US": "Planning in context"
-      },
-      "ui.landing_feature_second_description_infra_link": {
-        "de-CH": "Rollen und Berechtigungen halten Infrastrukturzugriffe nachvollziehbar.",
-        "en-US": "Roles and permissions keep infrastructure access understandable."
-      },
-      "ui.landing_feature_second_description_planer_link": {
-        "de-CH": "Rollen und Berechtigungen geben Teams genau den benötigten Zugriff.",
-        "en-US": "Roles and permissions give teams exactly the access they need."
-      },
-      "ui.landing_feature_second_title_infra_link": {
-        "de-CH": "Kontrollierter Zugriff",
-        "en-US": "Controlled access"
-      },
-      "ui.landing_feature_second_title_planer_link": {
-        "de-CH": "Klare Zusammenarbeit",
-        "en-US": "Clear collaboration"
-      },
-      "ui.landing_feature_third_description_infra_link": {
-        "de-CH": "Ein verlässlicher Einstiegspunkt für kommende Infrastrukturmodule.",
-        "en-US": "A dependable entry point for upcoming infrastructure modules."
-      },
-      "ui.landing_feature_third_description_planer_link": {
-        "de-CH": "Ein verlässlicher Einstiegspunkt für kommende Planungsmodule.",
-        "en-US": "A dependable entry point for upcoming planning modules."
-      },
-      "ui.landing_feature_third_title_infra_link": {
-        "de-CH": "Erweiterbares Fundament",
-        "en-US": "Extensible foundation"
-      },
-      "ui.landing_feature_third_title_planer_link": {
-        "de-CH": "Bereit für den nächsten Schritt",
-        "en-US": "Ready for what comes next"
-      },
-      "ui.landing_features_title_infra_link": {
-        "de-CH": "Ein ruhiges Fundament für komplexe Infrastrukturarbeit.",
-        "en-US": "A calm foundation for complex infrastructure work."
-      },
-      "ui.landing_features_title_planer_link": {
-        "de-CH": "Ein klares Fundament für verlässliche Planung.",
-        "en-US": "A clear foundation for dependable planning."
-      },
-      "ui.landing_foundation": {
-        "de-CH": "Das Fundament",
-        "en-US": "The foundation"
-      },
-      "ui.landing_meta_title_infra_link": {
-        "de-CH": "Clinks Infrastruktur",
-        "en-US": "Clinks Infrastructure"
-      },
-      "ui.landing_meta_title_planer_link": {
-        "de-CH": "Clinks Planung",
-        "en-US": "Clinks Planning"
-      },
-      "ui.landing_preview_tenant_infra_link": {
-        "de-CH": "Infrastruktur Nord",
-        "en-US": "North Infrastructure"
-      },
-      "ui.landing_preview_tenant_planer_link": {
-        "de-CH": "Planung Zürich",
-        "en-US": "Zurich Planning"
-      },
-      "ui.landing_title_infra_link": {
-        "de-CH": "Infrastrukturarbeit beginnt mit einem klaren Zugang.",
-        "en-US": "Infrastructure work starts with clear access."
-      },
-      "ui.landing_title_planer_link": {
-        "de-CH": "Gute Planung beginnt mit einem klaren Arbeitsraum.",
-        "en-US": "Good planning starts with a clear workspace."
-      },
-      "ui.login_meta_title": {
-        "de-CH": "Anmelden | Clinks",
-        "en-US": "Sign in | Clinks"
-      },
       "ui.no_account": {
         "de-CH": "Du hast noch kein Konto?",
         "en-US": "Don't have an account?"
-      },
-      "ui.no_active_tenant": {
-        "de-CH": "Kein aktiver Mandant",
-        "en-US": "No active tenant"
-      },
-      "ui.no_role": {
-        "de-CH": "Keine Rolle",
-        "en-US": "No role"
-      },
-      "ui.open_dashboard": {
-        "de-CH": "Dashboard öffnen",
-        "en-US": "Open dashboard"
-      },
-      "ui.or_continue_with": {
-        "de-CH": "Oder fortfahren mit",
-        "en-US": "Or continue with"
-      },
-      "ui.password_requirements": {
-        "de-CH": "Verwende mindestens 12 Zeichen.",
-        "en-US": "Use at least 12 characters."
-      },
-      "ui.permission_aware": {
-        "de-CH": "Berechtigungsbewusst",
-        "en-US": "Permission-aware"
       },
       "ui.permissions": {
         "de-CH": "Berechtigungen",
         "en-US": "Permissions"
       },
-      "ui.retry_session": {
-        "de-CH": "Sitzung erneut prüfen",
-        "en-US": "Retry session check"
-      },
       "ui.send_invitation": {
         "de-CH": "Einladung senden",
         "en-US": "Send invitation"
-      },
-      "ui.session_unavailable": {
-        "de-CH": "Der Sitzungsstatus konnte nicht geladen werden. Die öffentliche Seite bleibt verfügbar.",
-        "en-US": "The session status could not be loaded. The public page remains available."
-      },
-      "ui.signup_meta_title": {
-        "de-CH": "Konto erstellen | Clinks",
-        "en-US": "Create account | Clinks"
-      },
-      "ui.single_workspace": {
-        "de-CH": "Du arbeitest derzeit in einem Mandanten.",
-        "en-US": "You currently work in one tenant."
       },
       "ui.tenant_name_help": {
         "de-CH": "Damit wird dein erster Mandant erstellt.",

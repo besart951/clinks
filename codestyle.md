@@ -1,23 +1,11 @@
 # Code style
 
-## Go
-
-- Use gofmt and Go 1.26.
-- Favor small focused functions, guard clauses, context-aware I/O, and typed IDs such as clinks.TenantID and clinks.Locale.
-- Keep packages flat and named for responsibilities. Do not introduce `domain`, `ports`, `service`, `controller`, or `repository` package layers.
-- Define interfaces in the consuming package and keep them to the methods that consumer needs. Return concrete types.
-- Keep exported API documentation concise. Do not return raw domain errors from an HTTP handler.
-- SQL uses positional arguments. Tenant queries must use WithTenantTx.
-- Use `new(expression)` for direct initialization of optional pointer values; do not introduce a temporary variable solely to take its address.
-- Keep structured logs on stdout by default. Use `slog.NewMultiHandler` only when each additional destination is explicitly configured and safe for the data being logged.
-- errors should always be written with tranlsations.
-
 ## Svelte 5 and Tailwind
 
 - Use Svelte 5 runes: `$state` and `$derived`; reserve `$effect` for external non-reactive integrations only.
 - Put shared controls in `packages/ui-shared`. Apps do not keep local error translation maps.
 - Use Tailwind utility classes and accessible labels, inputs, and live regions.
-- Frontends set `Accept-Language` on every API request and render API error messages verbatim.
+- API errors arrive already localized; screens render them verbatim and keep no local error translation maps.
 - **Test Directory Separation:** Do NOT write test files in the same folder as production code. Separate tests into a dedicated `test/` directory (keeping `src/` strictly for production code).
 
 ### Svelte 5 State & Effect Best Practices
@@ -38,22 +26,22 @@
 
     ```ts
     export class AuthViewModel {
-      email = $state("");
-      password = $state("");
-      busy = $state(false);
-      errorMessage = $state("");
+    	email = $state('');
+    	password = $state('');
+    	busy = $state(false);
+    	errorMessage = $state('');
 
-      constructor(private client: ApiClient) {}
+    	constructor(private client: ApiClient) {}
 
-      async submit() {
-        this.busy = true;
-        this.errorMessage = "";
-        try {
-          // domain logic
-        } finally {
-          this.busy = false;
-        }
-      }
+    	async submit() {
+    		this.busy = true;
+    		this.errorMessage = '';
+    		try {
+    			// domain logic
+    		} finally {
+    			this.busy = false;
+    		}
+    	}
     }
     ```
 

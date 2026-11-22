@@ -26,21 +26,21 @@ Codes in the prototype: email verification and password reset `000000`, two-fact
 
 ## How the mock backend works
 
-The UI never touches storage directly. Every screen talks to the same kind of API the Go server offers:
+The UI never touches storage directly. Every screen talks to a mock API shaped like a real backend would be:
 
 - `src/lib/data/database.ts` — `MockDatabase`: one in-browser data set persisted to `localStorage`. Each call goes
   through `request()`, which adds latency, can fail on purpose, reports `offline`, and rolls back when the browser
   storage is full.
 - `src/lib/data/repository.ts` — `TenantRepository`: tenant-scoped CRUD with permission checks, optimistic revisions
-  (stale writes return `conflict`), schema validation and an audit entry per change — the same rules as the API.
+  (stale writes return `conflict`), schema validation and an audit entry per change — the rules a real API would enforce.
 - `src/lib/data/account-api.ts` — the control plane: sign-in, sign-up, onboarding, memberships, invitations, roles
   (protected Administrator/User roles, last-administrator rule), billing and the platform view.
 - `src/lib/data/schemas.ts` — Zod schemas shared by mock server and forms. Error messages are translation keys and
   come back **already localized**, so screens render them verbatim like real API errors.
 - `src/lib/data/seed.ts` — deterministic demo data relative to today. Reset it in the developer menu (wrench button,
-  bottom left), where latency, failure rate and offline mode can also be simulated.
+  bottom right), where latency, failure rate and offline mode can also be simulated.
 
-Moving to the real backend means replacing these files with Connect-RPC calls from `@clinks/api-client`; screens and
+Moving to a real backend means replacing these files with API calls; screens and
 view models keep working because they only depend on the repository methods (`list`, `get`, `create`, `update`,
 `remove`, `restore`).
 
@@ -50,7 +50,7 @@ view models keep working because they only depend on the repository methods (`li
 src/lib/domain/      pure types and rules: money and VAT, QR bill, scheduling, plans, permissions
 src/lib/data/        mock API (see above)
 src/lib/session/     fake session with tenant switching and impersonation
-src/lib/i18n/        resolves localization/product-catalog.json (de-CH, en-US) like the server does
+src/lib/i18n/        resolves localization/product-catalog.json (de-CH, en-US) in the browser
 src/lib/state/       Resource (loading/empty/error/forbidden + live reload), theme
 src/lib/features/    view models per area (classes with Svelte runes)
 src/lib/components/  shell, shared building blocks, module components

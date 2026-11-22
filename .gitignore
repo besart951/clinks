@@ -20,12 +20,6 @@ coverage/
 playwright-report/
 test-results/
 
-# Go build and test artifacts
-server/clinks-server
-server/server.exe
-server/*.test
-server/coverage.out
-
 # Logs and local tooling
 *.log
 *.tsbuildinfo

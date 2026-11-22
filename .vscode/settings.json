@@ -1,11 +1,4 @@
 {
-  "[go]": {
-    "editor.defaultFormatter": "golang.go",
-    "editor.formatOnSave": true,
-    "editor.codeActionsOnSave": {
-      "source.organizeImports": "explicit"
-    }
-  },
   "[svelte]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true
@@ -25,12 +18,6 @@
   "[css]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true
-  },
-  "gopls": {
-    "formatting.gofumpt": true,
-    "formatting.local": "github.com/besartmorina/clinks/server",
-    "staticcheck": true,
-    "ui.semanticTokens": true
   },
   "css.lint.unknownAtRules": "ignore"
 }
