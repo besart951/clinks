@@ -83,7 +83,7 @@
 					<Search class="size-4" />
 				</Button>
 			</header>
-			<main class="mx-auto w-full max-w-[1440px] flex-1 px-4 py-5 sm:px-8 sm:py-7">
+			<main class="w-full min-w-0 flex-1 px-4 py-5 sm:px-6 sm:py-6">
 				{@render children()}
 			</main>
 		</SidebarInset>
