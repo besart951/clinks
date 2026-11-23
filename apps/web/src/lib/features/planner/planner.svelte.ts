@@ -1,9 +1,16 @@
 import type { TaskId } from '@clinks/domain/ids';
+import { orderAt, orderGap, spacedOrders } from '@clinks/domain/ordering';
 import { taskStatuses, type Contact, type Task, type TaskPriority, type TaskStatus } from '@clinks/domain/types';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 
 export type PlannerView = 'board' | 'list' | 'calendar';
+
+interface TaskPlacement {
+	id: TaskId;
+	status: TaskStatus;
+	order: number;
+}
 
 export interface PlannerData {
 	tasks: Task[];
@@ -59,30 +66,73 @@ export class PlannerModel {
 		return this.resource.data?.tasks.find((task) => task.id === id) ?? null;
 	}
 
-	/** Moves a task into a column before another task (or to the end) and renumbers that column. */
-	async moveTo(task: Task, status: TaskStatus, beforeId: TaskId | null) {
-		const others = this.column(status).filter((candidate) => candidate.id !== task.id);
-		const index = beforeId ? others.findIndex((candidate) => candidate.id === beforeId) : -1;
-		const ordered = [...others];
-		ordered.splice(index === -1 ? ordered.length : index, 0, { ...task, status });
-		const changes = ordered
-			.map((candidate, position) => ({ candidate, position }))
-			.filter(({ candidate, position }) => candidate.order !== position || candidate.id === task.id);
+	/**
+	 * Moves a task to `index` among the visible cards of a column. Only the moved task gets a new sort key unless
+	 * no integer fits between its neighbours; then the whole column is renumbered. Shows an undo toast when the
+	 * task changed column.
+	 */
+	async moveTo(task: Task, status: TaskStatus, index: number, announce = true) {
+		const from = { status: task.status, index: this.column(task.status).findIndex((row) => row.id === task.id) };
+		const changes = this.#placement(task, status, index);
+		if (changes.every((change) => this.#unchanged(change))) return;
+		this.#apply(changes);
+		const moved = announce && status !== task.status;
+		const result = await this.#workspace.run(() => this.#save(changes), {
+			success: moved ? 'ui.ws.planner.moved_to' : undefined,
+			successParams: { column: this.#workspace.t(`ui.ws.task.status.${status}`) },
+			undo: moved
+				? async () => {
+						const current = this.find(task.id);
+						if (current) await this.moveTo(current, from.status, from.index, false);
+					}
+				: undefined,
+		});
+		if (result === null) void this.resource.reload(true);
+	}
+
+	/** New status and sort key per task for placing `task` at `index` among the visible cards of `status`. */
+	#placement(task: Task, status: TaskStatus, index: number): TaskPlacement[] {
+		const all = (this.resource.data?.tasks ?? [])
+			.filter((row) => row.status === status && row.id !== task.id)
+			.sort((left, right) => left.order - right.order);
+		const visible = this.column(status).filter((row) => row.id !== task.id);
+		// Filters may hide cards: translate the visible position into a position in the whole column.
+		const anchor = visible[index];
+		const last = visible.at(-1);
+		const position = anchor ? all.indexOf(anchor) : last ? all.indexOf(last) + 1 : all.length;
+		const order = orderAt(
+			all.map((row) => row.order),
+			position,
+		);
+		if (order !== null) return [{ id: task.id, status, order }];
+		const ordered = [...all];
+		ordered.splice(position, 0, { ...task, status });
+		const keys = spacedOrders(ordered.length);
+		return ordered.map((row, place) => ({ id: row.id, status, order: keys[place] }));
+	}
+
+	#unchanged(change: TaskPlacement) {
+		const row = this.find(change.id);
+		return row !== null && row.status === change.status && row.order === change.order;
+	}
+
+	#apply(changes: TaskPlacement[]) {
 		this.resource.patch((data) => ({
 			...data,
 			tasks: data.tasks.map((row) => {
-				const change = changes.find(({ candidate }) => candidate.id === row.id);
-				return change ? { ...row, status: change.candidate.status, order: change.position } : row;
+				const change = changes.find((candidate) => candidate.id === row.id);
+				return change ? { ...row, status: change.status, order: change.order } : row;
 			}),
 		}));
+	}
+
+	async #save(changes: TaskPlacement[]) {
 		const api = this.#workspace.api.tasks;
-		const result = await this.#workspace.run(async () => {
-			for (const { candidate, position } of changes) {
-				const current = await api.get(candidate.id);
-				await api.update(current.id, current.revision, { status: candidate.status, order: position });
-			}
-		});
-		if (result === null) void this.resource.reload(true);
+		for (const change of changes) {
+			const current = await api.get(change.id);
+			if (current.status === change.status && current.order === change.order) continue;
+			await api.update(current.id, current.revision, { status: change.status, order: change.order });
+		}
 	}
 
 	async quickAdd(title: string, status: TaskStatus) {
@@ -97,11 +147,16 @@ export class PlannerModel {
 				assigneeIds: me ? [me] : [],
 				dueDate: null,
 				labels: [],
-				order: this.column(status).length,
+				order: this.#endOrder(status),
 				contactId: null,
 				checklist: [],
 			}),
 		);
+	}
+
+	#endOrder(status: TaskStatus) {
+		const orders = (this.resource.data?.tasks ?? []).filter((row) => row.status === status).map((row) => row.order);
+		return orders.length > 0 ? Math.max(...orders) + orderGap : 0;
 	}
 
 	async toggleDone(task: Task) {

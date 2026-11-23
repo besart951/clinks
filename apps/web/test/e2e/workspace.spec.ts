@@ -50,6 +50,41 @@ test('adds a task to the board', async ({ page }) => {
 	await expect(page.getByRole('region', { name: 'Zu erledigen' }).getByText('Prototyp testen')).toBeVisible();
 });
 
+test('drags a task to another column and undoes the move', async ({ page }) => {
+	await signIn(page);
+	await page.goto('/#/planner');
+	const todo = page.getByRole('region', { name: 'Zu erledigen' });
+	const doing = page.getByRole('region', { name: 'In Arbeit' });
+	const card = todo.getByRole('listitem').first();
+	const title = (await card.locator('.line-clamp-2').innerText()).trim();
+	const from = (await card.boundingBox())!;
+	const to = (await doing.getByRole('list').boundingBox())!;
+	await page.mouse.move(from.x + 20, from.y + 20);
+	await page.mouse.down();
+	await page.mouse.move(from.x + 40, from.y + 30, { steps: 4 });
+	await expect(card).toHaveAttribute('data-lifted', '');
+	await page.mouse.move(to.x + to.width / 2, to.y + 10, { steps: 12 });
+	await page.mouse.up();
+	await expect(doing.getByRole('button', { name: title })).toBeVisible();
+	await expect(todo.getByRole('button', { name: title })).toHaveCount(0);
+	await expect(page.getByText('Verschoben nach «In Arbeit»')).toBeVisible();
+	await page.getByRole('button', { name: 'Rückgängig' }).click();
+	await expect(todo.getByRole('button', { name: title })).toBeVisible();
+});
+
+test('moves a task with Alt + arrow keys', async ({ page }) => {
+	await signIn(page);
+	await page.goto('/#/planner');
+	const todo = page.getByRole('region', { name: 'Zu erledigen' });
+	const button = todo.getByRole('listitem').first().getByRole('button');
+	const title = (await button.locator('.line-clamp-2').innerText()).trim();
+	await button.focus();
+	await page.keyboard.press('Alt+ArrowRight');
+	const moved = page.getByRole('region', { name: 'In Arbeit' }).getByRole('button', { name: title });
+	await expect(moved).toBeFocused();
+	await expect(page.getByRole('status').filter({ hasText: `«${title}» in In Arbeit` })).toBeAttached();
+});
+
 test('issues an invoice with a QR payment part', async ({ page }) => {
 	await signIn(page);
 	await page.goto('/#/finance/invoices/new');
