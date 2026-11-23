@@ -1859,8 +1859,8 @@
         "en-US": "Type a title and press Enter"
       },
       "ui.ws.planner.keyboard_hint": {
-        "de-CH": "Karten ziehen oder mit Alt + Pfeiltasten verschieben.",
-        "en-US": "Drag cards or move them with Alt + arrow keys."
+        "de-CH": "Karten ziehen (auf Touch-Geräten kurz gedrückt halten) oder mit Alt + Pfeiltasten verschieben.",
+        "en-US": "Drag cards (on touch devices, press and hold first) or move them with Alt + arrow keys."
       },
       "ui.ws.planner.page_text": {
         "de-CH": "Aufgaben fürs ganze Team, mit Zuständigen, Fälligkeiten und Checklisten.",
@@ -4785,6 +4785,14 @@
       "ui.ws.storage.unavailable": {
         "de-CH": "Speicher-Einstellungen konnten nicht geladen werden",
         "en-US": "Storage settings could not be loaded"
+      },
+      "ui.ws.planner.moved_to": {
+        "de-CH": "Verschoben nach «{column}»",
+        "en-US": "Moved to “{column}”"
+      },
+      "ui.ws.planner.moved_announce": {
+        "de-CH": "«{title}» in {column}, Position {position} von {count}",
+        "en-US": "“{title}” in {column}, position {position} of {count}"
       }
     }
   }

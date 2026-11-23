@@ -17,7 +17,7 @@
 	import { priorityTone } from '#lib/components/common/tones';
 	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
 	import SharedBoard from '#lib/components/planner/SharedBoard.svelte';
-	import TaskBoard from '#lib/components/planner/TaskBoard.svelte';
+	import KanbanBoard from '#lib/components/planner/KanbanBoard.svelte';
 	import TaskMonth from '#lib/components/planner/TaskMonth.svelte';
 	import TaskSheet from '#lib/components/planner/TaskSheet.svelte';
 	import { PlannerModel, type PlannerView } from '#lib/features/planner/planner.svelte';
@@ -123,7 +123,7 @@
 
 	<AsyncView resource={model.resource} skeleton="cards">
 		{#if model.view === 'board'}
-			<TaskBoard {model} {people} onOpen={open} />
+			<KanbanBoard {model} {people} onOpen={open} />
 		{:else if model.view === 'list'}
 			<div class="rounded-xl border">
 				<Table.Root>
