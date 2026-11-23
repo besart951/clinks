@@ -220,6 +220,9 @@ test('connects an own Infomaniak bucket per tenant', async ({ page }) => {
 	await expect(page.getByText('Speicher-Einstellungen gespeichert.')).toBeVisible();
 	await expect(page.getByText('Gespeichert (endet auf 9876)')).toBeVisible();
 	await expect(page.getByLabel('Secret Access Key')).toHaveValue('');
+	// The toast sits over the action row at the bottom right and pauses while hovered: move away until it is gone.
+	await page.mouse.move(0, 0);
+	await expect(page.getByText('Speicher-Einstellungen gespeichert.')).toBeHidden({ timeout: 10_000 });
 	await page.getByRole('button', { name: 'Verbindung testen' }).click();
 	await expect(page.getByText('Verbindung zum Bucket funktioniert.')).toBeVisible();
 });
