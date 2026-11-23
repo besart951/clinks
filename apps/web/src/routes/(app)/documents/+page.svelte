@@ -21,10 +21,13 @@
 	import ConfirmDialog, { type ConfirmRequest } from '#lib/components/common/ConfirmDialog.svelte';
 	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
 	import { DocumentsModel } from '#lib/features/documents/documents.svelte';
+	import FolderTree, { type FolderTreeActions } from '#lib/components/documents/FolderTree.svelte';
+	import FolderMoveMenu from '#lib/components/documents/FolderMoveMenu.svelte';
+	import { carriesFiles, carriesItem, readItem, startItemDrag } from '#lib/components/documents/drag-item';
 	import { formatBytes } from '#lib/features/collaboration/attachments.svelte';
 	import { contactName } from '#lib/data/workspace-api';
 	import type { Folder as FolderRecord, StoredDocument } from '@clinks/domain/types';
-	import type { ContactId } from '@clinks/domain/ids';
+	import type { ContactId, FolderId } from '@clinks/domain/ids';
 	import { href } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
@@ -90,6 +93,32 @@
 		naming = null;
 	}
 
+	const treeActions: FolderTreeActions = {
+		create: (parentId: FolderId | null) =>
+			ask(workspace.t('ui.ws.documents.new_folder'), '', (name) => model.createFolder(name, parentId)),
+		rename: (folder) =>
+			ask(workspace.t('ui.ws.documents.rename'), folder.name, (name) => model.renameFolder(folder, name)),
+		remove: (folder) => deleteFolder(folder),
+	};
+	/** The folder tile a dragged file or folder is over. */
+	let overTile = $state<FolderId | null>(null);
+
+	function allowTile(event: DragEvent, folder: FolderRecord) {
+		if (!canWrite || !carriesItem(event)) return;
+		event.preventDefault();
+		event.stopPropagation();
+		overTile = folder.id;
+	}
+
+	function dropOnTile(event: DragEvent, folder: FolderRecord) {
+		const item = readItem(event);
+		overTile = null;
+		if (!item) return;
+		event.preventDefault();
+		event.stopPropagation();
+		void model.dropInto(item, folder.id);
+	}
+
 	function deleteFolder(folder: FolderRecord) {
 		confirm = {
 			title: workspace.t('ui.ws.documents.delete_folder_title', { name: folder.name }),
@@ -108,6 +137,7 @@
 	}
 
 	function drop(event: DragEvent) {
+		if (!carriesFiles(event)) return;
 		event.preventDefault();
 		dragging = false;
 		if (canWrite) void model.upload(event.dataTransfer?.files ?? null);
@@ -127,10 +157,7 @@
 	<PageHeader title={workspace.t('ui.ws.module.documents')} description={workspace.t('ui.ws.documents.description')}>
 		{#snippet actions()}
 			{#if canWrite}
-				<Button
-					variant="outline"
-					onclick={() => ask(workspace.t('ui.ws.documents.new_folder'), '', (name) => model.createFolder(name))}
-				>
+				<Button variant="outline" onclick={() => treeActions.create(model.folderId)}>
 					<FolderPlus class="size-4" />{workspace.t('ui.ws.documents.new_folder')}
 				</Button>
 				<Button onclick={() => fileInput?.click()} disabled={model.uploading}>
@@ -148,131 +175,65 @@
 	</PageHeader>
 
 	<AsyncView resource={model.resource}>
-		<div class="mb-4 flex flex-wrap items-center gap-2">
-			<nav aria-label={workspace.t('ui.ws.documents.path')} class="flex flex-wrap items-center gap-1 text-sm">
-				<button
-					class="hover:underline {model.folderId === null ? 'font-semibold' : ''}"
-					onclick={() => (model.folderId = null)}
-				>
-					{workspace.t('ui.ws.documents.all_files')}
-				</button>
-				{#each model.path as folder (folder.id)}
-					<ChevronRight class="text-muted-foreground size-3.5" />
-					<button
-						class="hover:underline {folder.id === model.folderId ? 'font-semibold' : ''}"
-						onclick={() => (model.folderId = folder.id)}
-					>
-						{folder.name}
-					</button>
-				{/each}
-			</nav>
-			<div class="flex-1"></div>
-			<SearchInput bind:value={model.search} label={workspace.t('ui.ws.documents.search')} class="w-full sm:w-64" />
-		</div>
-
-		<section
-			class="space-y-4 rounded-xl {dragging ? 'ring-primary ring-2 ring-offset-4' : ''}"
-			aria-label={workspace.t('ui.ws.documents.drop_zone')}
-			ondragover={(event) => {
-				if (!canWrite) return;
-				event.preventDefault();
-				dragging = true;
-			}}
-			ondragleave={() => (dragging = false)}
-			ondrop={drop}
-		>
-			{#if !model.search && model.children.length > 0}
-				<ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-					{#each model.children as folder (folder.id)}
-						<li class="hover:bg-muted/60 flex items-center gap-3 rounded-xl border p-3">
-							<Folder class="size-5 text-amber-500" />
-							<button class="min-w-0 flex-1 text-left" onclick={() => (model.folderId = folder.id)}>
-								<span class="block truncate text-sm font-medium">{folder.name}</span>
-								<span class="text-muted-foreground text-xs">
-									{workspace.t('ui.ws.documents.file_count', { count: model.count(folder.id) })}
-								</span>
+		<div class="grid items-start gap-6 lg:grid-cols-[16rem_minmax(0,1fr)]">
+			<aside class="bg-muted/30 hidden rounded-xl border p-2 lg:sticky lg:top-4 lg:block">
+				<FolderTree {model} actions={treeActions} />
+			</aside>
+			<div class="min-w-0">
+				<div class="mb-4 flex flex-wrap items-center gap-2">
+					<nav aria-label={workspace.t('ui.ws.documents.path')} class="flex flex-wrap items-center gap-1 text-sm">
+						<button
+							class="hover:underline {model.folderId === null ? 'font-semibold' : ''}"
+							onclick={() => model.open(null)}
+						>
+							{workspace.t('ui.ws.documents.all_files')}
+						</button>
+						{#each model.path as folder (folder.id)}
+							<ChevronRight class="text-muted-foreground size-3.5" />
+							<button
+								class="hover:underline {folder.id === model.folderId ? 'font-semibold' : ''}"
+								onclick={() => model.open(folder.id)}
+							>
+								{folder.name}
 							</button>
-							{#if canWrite}
-								<DropdownMenu.Root>
-									<DropdownMenu.Trigger>
-										{#snippet child({ props })}<Button
-												{...props}
-												variant="ghost"
-												size="icon-xs"
-												aria-label={workspace.t('ui.ws.more_actions')}
-											>
-												<Ellipsis class="size-4" />
-											</Button>{/snippet}
-									</DropdownMenu.Trigger>
-									<DropdownMenu.Content align="end">
-										<DropdownMenu.Item
-											onclick={() =>
-												ask(workspace.t('ui.ws.documents.rename'), folder.name, (name) =>
-													model.renameFolder(folder, name),
-												)}
-										>
-											{workspace.t('ui.ws.documents.rename')}
-										</DropdownMenu.Item>
-										<DropdownMenu.Item variant="destructive" onclick={() => deleteFolder(folder)}>
-											{workspace.t('ui.ws.delete')}
-										</DropdownMenu.Item>
-									</DropdownMenu.Content>
-								</DropdownMenu.Root>
-							{/if}
-						</li>
-					{/each}
-				</ul>
-			{/if}
+						{/each}
+					</nav>
+					<div class="flex-1"></div>
+					<SearchInput bind:value={model.search} label={workspace.t('ui.ws.documents.search')} class="w-full sm:w-64" />
+				</div>
 
-			{#if model.files.length === 0}
-				<EmptyState
-					icon={FileText}
-					title={workspace.t('ui.ws.documents.empty_title')}
-					description={canWrite ? workspace.t('ui.ws.documents.empty_text') : undefined}
-				/>
-			{:else}
-				<div class="rounded-xl border">
-					<Table.Root>
-						<Table.Header>
-							<Table.Row>
-								<Table.Head>{workspace.t('ui.ws.contacts.name')}</Table.Head>
-								<Table.Head class="hidden md:table-cell">{workspace.t('ui.ws.documents.linked_to')}</Table.Head>
-								<Table.Head class="hidden sm:table-cell">{workspace.t('ui.ws.documents.size')}</Table.Head>
-								<Table.Head class="hidden lg:table-cell">{workspace.t('ui.ws.documents.uploaded_at')}</Table.Head>
-								<Table.Head class="w-10"><span class="sr-only">{workspace.t('ui.action')}</span></Table.Head>
-							</Table.Row>
-						</Table.Header>
-						<Table.Body>
-							{#each model.files as document (document.id)}
-								<Table.Row>
-									<Table.Cell>
-										<button
-											class="flex items-center gap-2 text-left font-medium hover:underline"
-											onclick={() => showPreview(document)}
-										>
-											{#if document.mimeType.startsWith('image/')}<FileImage
-													class="text-muted-foreground size-4"
-												/>{:else}<FileText class="text-muted-foreground size-4" />{/if}
-											{document.name}
-										</button>
-									</Table.Cell>
-									<Table.Cell class="hidden md:table-cell">
-										<div class="flex flex-wrap gap-1">
-											{#each linkedContacts(document) as contact (contact.id)}<a
-													class="bg-muted rounded-full px-2 py-0.5 text-xs hover:underline"
-													href={href(`/contacts/${contact.id}`)}
-												>
-													{contactName(contact)}
-												</a>{/each}
-										</div>
-									</Table.Cell>
-									<Table.Cell class="text-muted-foreground hidden sm:table-cell">
-										{formatBytes(document.size, (value) => workspace.i18n.number(value))}
-									</Table.Cell>
-									<Table.Cell class="text-muted-foreground hidden lg:table-cell">
-										{workspace.i18n.date(document.createdAt)}
-									</Table.Cell>
-									<Table.Cell>
+				<section
+					class="space-y-4 rounded-xl {dragging ? 'ring-primary ring-2 ring-offset-4' : ''}"
+					aria-label={workspace.t('ui.ws.documents.drop_zone')}
+					ondragover={(event) => {
+						if (!canWrite || !carriesFiles(event)) return;
+						event.preventDefault();
+						dragging = true;
+					}}
+					ondragleave={() => (dragging = false)}
+					ondrop={drop}
+				>
+					{#if !model.search && model.children.length > 0}
+						<ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+							{#each model.children as folder (folder.id)}
+								<li
+									class="hover:bg-muted/60 flex items-center gap-3 rounded-xl border p-3 {overTile === folder.id
+										? 'bg-primary/10 ring-primary/40 ring-1'
+										: ''}"
+									draggable={canWrite}
+									ondragstart={(event) => startItemDrag(event, { kind: 'folder', id: folder.id })}
+									ondragover={(event) => allowTile(event, folder)}
+									ondragleave={() => (overTile = null)}
+									ondrop={(event) => dropOnTile(event, folder)}
+								>
+									<Folder class="size-5 text-amber-500" />
+									<button class="min-w-0 flex-1 text-left" onclick={() => model.open(folder.id)}>
+										<span class="block truncate text-sm font-medium">{folder.name}</span>
+										<span class="text-muted-foreground text-xs">
+											{workspace.t('ui.ws.documents.file_count', { count: model.count(folder.id) })}
+										</span>
+									</button>
+									{#if canWrite}
 										<DropdownMenu.Root>
 											<DropdownMenu.Trigger>
 												{#snippet child({ props })}<Button
@@ -285,58 +246,136 @@
 													</Button>{/snippet}
 											</DropdownMenu.Trigger>
 											<DropdownMenu.Content align="end">
-												<DropdownMenu.Item onclick={() => showPreview(document)}>
-													{workspace.t('ui.ws.documents.preview')}
+												<DropdownMenu.Item
+													onclick={() =>
+														ask(workspace.t('ui.ws.documents.rename'), folder.name, (name) =>
+															model.renameFolder(folder, name),
+														)}
+												>
+													{workspace.t('ui.ws.documents.rename')}
 												</DropdownMenu.Item>
-												<DropdownMenu.Item onclick={() => workspace.run(() => workspace.documentFiles.save(document))}>
-													{workspace.t('ui.ws.documents.download')}
+												<FolderMoveMenu {model} {folder} />
+												<DropdownMenu.Separator />
+												<DropdownMenu.Item variant="destructive" onclick={() => deleteFolder(folder)}>
+													{workspace.t('ui.ws.delete')}
 												</DropdownMenu.Item>
-												{#if document.dataUrl.startsWith('version:')}
-													<DropdownMenu.Item onclick={() => showVersions(document)}>
-														{workspace.t('ui.ws.documents.versions')}
-													</DropdownMenu.Item>
-												{/if}
-												{#if canWrite}
-													<DropdownMenu.Item
-														onclick={() =>
-															ask(workspace.t('ui.ws.documents.rename'), document.name, (name) =>
-																model.rename(document, name),
-															)}
-													>
-														{workspace.t('ui.ws.documents.rename')}
-													</DropdownMenu.Item>
-													<DropdownMenu.Item onclick={() => (linking = document)}>
-														<Link2 class="size-4" />{workspace.t('ui.ws.documents.link_contact')}
-													</DropdownMenu.Item>
-													<DropdownMenu.Sub>
-														<DropdownMenu.SubTrigger>{workspace.t('ui.ws.documents.move_to')}</DropdownMenu.SubTrigger>
-														<DropdownMenu.SubContent>
-															<DropdownMenu.Item onclick={() => model.move(document, null)}>
-																{workspace.t('ui.ws.documents.all_files')}
-															</DropdownMenu.Item>
-															{#each model.folders as folder (folder.id)}<DropdownMenu.Item
-																	onclick={() => model.move(document, folder.id)}
-																>
-																	{folder.name}
-																</DropdownMenu.Item>{/each}
-														</DropdownMenu.SubContent>
-													</DropdownMenu.Sub>
-													<DropdownMenu.Separator />
-													<DropdownMenu.Item variant="destructive" onclick={() => model.remove(document)}>
-														{workspace.t('ui.ws.delete')}
-													</DropdownMenu.Item>
-												{/if}
 											</DropdownMenu.Content>
 										</DropdownMenu.Root>
-									</Table.Cell>
-								</Table.Row>
+									{/if}
+								</li>
 							{/each}
-						</Table.Body>
-					</Table.Root>
-				</div>
-			{/if}
-			{#if canWrite}<p class="text-muted-foreground text-xs">{workspace.t('ui.ws.documents.drop_page_hint')}</p>{/if}
-		</section>
+						</ul>
+					{/if}
+
+					{#if model.files.length === 0}
+						<EmptyState
+							icon={FileText}
+							title={workspace.t('ui.ws.documents.empty_title')}
+							description={canWrite ? workspace.t('ui.ws.documents.empty_text') : undefined}
+						/>
+					{:else}
+						<div class="rounded-xl border">
+							<Table.Root>
+								<Table.Header>
+									<Table.Row>
+										<Table.Head>{workspace.t('ui.ws.contacts.name')}</Table.Head>
+										<Table.Head class="hidden md:table-cell">{workspace.t('ui.ws.documents.linked_to')}</Table.Head>
+										<Table.Head class="hidden sm:table-cell">{workspace.t('ui.ws.documents.size')}</Table.Head>
+										<Table.Head class="hidden lg:table-cell">{workspace.t('ui.ws.documents.uploaded_at')}</Table.Head>
+										<Table.Head class="w-10"><span class="sr-only">{workspace.t('ui.action')}</span></Table.Head>
+									</Table.Row>
+								</Table.Header>
+								<Table.Body>
+									{#each model.files as document (document.id)}
+										<Table.Row>
+											<Table.Cell>
+												<button
+													class="flex items-center gap-2 text-left font-medium hover:underline"
+													draggable={canWrite}
+													ondragstart={(event) => startItemDrag(event, { kind: 'document', id: document.id })}
+													onclick={() => showPreview(document)}
+												>
+													{#if document.mimeType.startsWith('image/')}<FileImage
+															class="text-muted-foreground size-4"
+														/>{:else}<FileText class="text-muted-foreground size-4" />{/if}
+													{document.name}
+												</button>
+											</Table.Cell>
+											<Table.Cell class="hidden md:table-cell">
+												<div class="flex flex-wrap gap-1">
+													{#each linkedContacts(document) as contact (contact.id)}<a
+															class="bg-muted rounded-full px-2 py-0.5 text-xs hover:underline"
+															href={href(`/contacts/${contact.id}`)}
+														>
+															{contactName(contact)}
+														</a>{/each}
+												</div>
+											</Table.Cell>
+											<Table.Cell class="text-muted-foreground hidden sm:table-cell">
+												{formatBytes(document.size, (value) => workspace.i18n.number(value))}
+											</Table.Cell>
+											<Table.Cell class="text-muted-foreground hidden lg:table-cell">
+												{workspace.i18n.date(document.createdAt)}
+											</Table.Cell>
+											<Table.Cell>
+												<DropdownMenu.Root>
+													<DropdownMenu.Trigger>
+														{#snippet child({ props })}<Button
+																{...props}
+																variant="ghost"
+																size="icon-xs"
+																aria-label={workspace.t('ui.ws.more_actions')}
+															>
+																<Ellipsis class="size-4" />
+															</Button>{/snippet}
+													</DropdownMenu.Trigger>
+													<DropdownMenu.Content align="end">
+														<DropdownMenu.Item onclick={() => showPreview(document)}>
+															{workspace.t('ui.ws.documents.preview')}
+														</DropdownMenu.Item>
+														<DropdownMenu.Item
+															onclick={() => workspace.run(() => workspace.documentFiles.save(document))}
+														>
+															{workspace.t('ui.ws.documents.download')}
+														</DropdownMenu.Item>
+														{#if document.dataUrl.startsWith('version:')}
+															<DropdownMenu.Item onclick={() => showVersions(document)}>
+																{workspace.t('ui.ws.documents.versions')}
+															</DropdownMenu.Item>
+														{/if}
+														{#if canWrite}
+															<DropdownMenu.Item
+																onclick={() =>
+																	ask(workspace.t('ui.ws.documents.rename'), document.name, (name) =>
+																		model.rename(document, name),
+																	)}
+															>
+																{workspace.t('ui.ws.documents.rename')}
+															</DropdownMenu.Item>
+															<DropdownMenu.Item onclick={() => (linking = document)}>
+																<Link2 class="size-4" />{workspace.t('ui.ws.documents.link_contact')}
+															</DropdownMenu.Item>
+															<FolderMoveMenu {model} {document} />
+															<DropdownMenu.Separator />
+															<DropdownMenu.Item variant="destructive" onclick={() => model.remove(document)}>
+																{workspace.t('ui.ws.delete')}
+															</DropdownMenu.Item>
+														{/if}
+													</DropdownMenu.Content>
+												</DropdownMenu.Root>
+											</Table.Cell>
+										</Table.Row>
+									{/each}
+								</Table.Body>
+							</Table.Root>
+						</div>
+					{/if}
+					{#if canWrite}<p class="text-muted-foreground text-xs">
+							{workspace.t('ui.ws.documents.drop_page_hint')}
+						</p>{/if}
+				</section>
+			</div>
+		</div>
 	</AsyncView>
 </ModuleGate>
 
