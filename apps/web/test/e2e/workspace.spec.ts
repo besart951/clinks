@@ -112,6 +112,28 @@ test('builds a folder tree and moves a folder by drag & drop', async ({ page }) 
 	await expect(page.getByRole('navigation', { name: 'Ordnerpfad' })).toContainText('Offerten Gamma');
 });
 
+test('changes an appointment time by dragging its edge or with Alt + arrows', async ({ page }) => {
+	await page.setViewportSize({ width: 1440, height: 900 });
+	await signIn(page);
+	await page.goto('/#/calendar');
+	const appointment = page.locator('[data-grid-column] button').first();
+	const before = (await appointment.getAttribute('aria-label'))!;
+	const title = before.replace(/^\S+\s/, '');
+	const box = (await appointment.boundingBox())!;
+	await appointment.hover();
+	await page.mouse.move(box.x + box.width / 2, box.y + box.height - 2);
+	await page.mouse.down();
+	await page.mouse.move(box.x + box.width / 2, box.y + box.height + 80, { steps: 6 });
+	await page.mouse.up();
+	await expect(page.getByText(`Zeit von «${title}» geändert`)).toBeVisible();
+	const resized = page.getByRole('button', { name: title }).first();
+	await expect(resized).not.toHaveAttribute('aria-label', before);
+	const afterDrag = (await resized.getAttribute('aria-label'))!;
+	await resized.focus();
+	await page.keyboard.press('Alt+ArrowUp');
+	await expect(page.getByRole('button', { name: title }).first()).not.toHaveAttribute('aria-label', afterDrag);
+});
+
 test('issues an invoice with a QR payment part', async ({ page }) => {
 	await signIn(page);
 	await page.goto('/#/finance/invoices/new');
@@ -198,6 +220,9 @@ test('connects an own Infomaniak bucket per tenant', async ({ page }) => {
 	await expect(page.getByText('Speicher-Einstellungen gespeichert.')).toBeVisible();
 	await expect(page.getByText('Gespeichert (endet auf 9876)')).toBeVisible();
 	await expect(page.getByLabel('Secret Access Key')).toHaveValue('');
+	// The toast sits over the action row at the bottom right and pauses while hovered: move away until it is gone.
+	await page.mouse.move(0, 0);
+	await expect(page.getByText('Speicher-Einstellungen gespeichert.')).toBeHidden({ timeout: 10_000 });
 	await page.getByRole('button', { name: 'Verbindung testen' }).click();
 	await expect(page.getByText('Verbindung zum Bucket funktioniert.')).toBeVisible();
 });

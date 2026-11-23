@@ -1,3 +1,4 @@
+import { saveTimes, type AppointmentTimes } from './retime.ts';
 import { addDays, addMonths, monthGrid, startOfWeek, today, weekDays } from '@clinks/domain/dates';
 import type { AppointmentId, UserId } from '@clinks/domain/ids';
 import type { Appointment, AppointmentKind, CalendarDate, Contact } from '@clinks/domain/types';
@@ -123,5 +124,15 @@ export class CalendarModel {
 			},
 		);
 		if (saved === null) void this.resource.reload(true);
+	}
+
+	/** New start and end after resizing on the grid; shown at once, saved in the background. */
+	async retime(appointment: Appointment, times: AppointmentTimes) {
+		if (times.start === appointment.start && times.end === appointment.end) return;
+		this.resource.patch((data) => ({
+			...data,
+			appointments: data.appointments.map((row) => (row.id === appointment.id ? { ...row, ...times } : row)),
+		}));
+		if ((await saveTimes(this.#workspace, appointment, times)) === null) void this.resource.reload(true);
 	}
 }
