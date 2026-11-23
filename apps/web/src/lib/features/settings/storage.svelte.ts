@@ -24,6 +24,8 @@ interface R2Fields {
 export class StorageSettingsModel extends SettingsForm {
 	stored = $state.raw<StorageSettingsView | null>(null);
 	loaded = $state(false);
+	/** Set when the current settings could not be read; the form stays hidden so nothing is overwritten blindly. */
+	loadError = $state('');
 	provider = $state<StorageProvider>('clinks');
 	connection = $state<StorageConnection>(connectionDefaults('clinks'));
 	r2 = $state<R2Fields>({ accountId: '', jurisdiction: 'eu' });
@@ -51,10 +53,14 @@ export class StorageSettingsModel extends SettingsForm {
 	}
 
 	async load() {
-		// Wrapped, because `null` is a valid answer (CLinks storage) and `attempt` reports failures as null.
-		const result = await this.attempt(async () => ({ stored: await this.workspace.account.storageSettings() }));
-		if (result) this.#show(result.stored);
-		this.loaded = true;
+		try {
+			this.#show(await this.workspace.account.storageSettings());
+			this.loadError = '';
+		} catch (error) {
+			this.loadError = this.workspace.message(error);
+		} finally {
+			this.loaded = true;
+		}
 	}
 
 	/** Switching provider fills in its defaults, or the saved values if that provider is the saved one. */

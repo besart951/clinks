@@ -4781,6 +4781,10 @@
       "error.ws.storage_cloudflare_account": {
         "de-CH": "Die Konto-ID hat 32 Zeichen (0–9, a–f).",
         "en-US": "The account ID has 32 characters (0–9, a–f)."
+      },
+      "ui.ws.storage.unavailable": {
+        "de-CH": "Speicher-Einstellungen konnten nicht geladen werden",
+        "en-US": "Storage settings could not be loaded"
       }
     }
   }

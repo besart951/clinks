@@ -34,6 +34,15 @@
 	<PageHeader title={workspace.t('ui.ws.settings.storage')} description={workspace.t('ui.ws.storage.text')} />
 	{#if !model.loaded}
 		<Skeleton class="h-64 w-full" />
+	{:else if model.loadError}
+		<Alert.Root variant="destructive">
+			<ShieldAlert class="size-4" />
+			<Alert.Title>{workspace.t('ui.ws.storage.unavailable')}</Alert.Title>
+			<Alert.Description>{model.loadError}</Alert.Description>
+			<Button variant="outline" size="sm" class="mt-2 w-fit" onclick={() => model.load()}>
+				{workspace.t('ui.try_again')}
+			</Button>
+		</Alert.Root>
 	{:else}
 		<form class="space-y-4" aria-labelledby="storage-title" onsubmit={save} novalidate>
 			<Card.Root>
