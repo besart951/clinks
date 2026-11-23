@@ -138,3 +138,52 @@ html {
 		box-shadow: none;
 	}
 }
+
+/*
+ * Scrollbars inside the app (not the page's own): only a slim bar, no arrows and no track, that grows when
+ * the pointer is on it so it is easy to grab. Firefox gets the standard thin bar; Chromium and Safari use ::-webkit-scrollbar,
+ * because the standard properties cannot change thickness on hover. The scrollbar keeps a fixed 10px, only the
+ * painted thumb grows (via a transparent border), so content never shifts.
+ */
+:where(body *) {
+	--scrollbar-thumb: var(--muted-foreground);
+	--scrollbar-thumb-hover: var(--foreground);
+	scrollbar-width: thin;
+	scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+
+@supports selector(::-webkit-scrollbar) {
+	:where(body *) {
+		scrollbar-width: auto;
+		scrollbar-color: auto;
+	}
+	:where(body *)::-webkit-scrollbar {
+		width: 10px;
+		height: 10px;
+		background: transparent;
+	}
+	:where(body *)::-webkit-scrollbar-button {
+		display: none;
+	}
+	:where(body *)::-webkit-scrollbar-track,
+	:where(body *)::-webkit-scrollbar-corner {
+		background: transparent;
+	}
+	:where(body *)::-webkit-scrollbar-thumb {
+		border: 3px solid transparent;
+		border-radius: 9999px;
+		background: var(--scrollbar-thumb) padding-box;
+	}
+	/* Pointing at the bar makes it thicker and darker, so it is easy to grab. */
+	:where(body *)::-webkit-scrollbar-thumb:hover,
+	:where(body *)::-webkit-scrollbar-thumb:active {
+		border-width: 1px;
+		background-color: var(--scrollbar-thumb-hover);
+	}
+}
+
+@media (forced-colors: active) {
+	:where(body *) {
+		scrollbar-color: auto;
+	}
+}
