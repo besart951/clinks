@@ -9,6 +9,8 @@ export interface CommandEntry {
 	label: string;
 	detail: string;
 	path: string;
+	/** Opens a create sheet on the current page instead of going to `path`. */
+	create?: 'appointment' | 'task' | 'mail';
 }
 
 /** Collects everything the command palette can jump to; each source respects the caller's rights. */
@@ -27,15 +29,22 @@ export class CommandSearch {
 		const session = w.session;
 		const actions = (
 			[
-				['new-contact', 'ui.ws.command.new_contact', '/contacts?new=1', 'contacts'],
-				['new-appointment', 'ui.ws.command.new_appointment', '/calendar?new=1', 'calendar'],
-				['new-task', 'ui.ws.command.new_task', '/planner?new=1', 'planner'],
-				['new-mail', 'ui.ws.command.new_mail', '/mail?compose=1', 'mail'],
-				['new-invoice', 'ui.ws.command.new_invoice', '/finance/invoices/new', 'finance'],
+				['new-contact', 'ui.ws.command.new_contact', '/contacts?new=1', 'contacts', undefined],
+				['new-appointment', 'ui.ws.command.new_appointment', '/calendar?new=1', 'calendar', 'appointment'],
+				['new-task', 'ui.ws.command.new_task', '/planner?new=1', 'planner', 'task'],
+				['new-mail', 'ui.ws.command.new_mail', '/mail?compose=1', 'mail', 'mail'],
+				['new-invoice', 'ui.ws.command.new_invoice', '/finance/invoices/new', 'finance', undefined],
 			] as const
 		)
 			.filter(([, , , module]) => session.hasModule(module))
-			.map(([id, label, path]) => ({ id, group: 'actions' as const, label: w.t(label), detail: '', path }));
+			.map(([id, label, path, , create]) => ({
+				id,
+				group: 'actions' as const,
+				label: w.t(label),
+				detail: '',
+				path,
+				create,
+			}));
 		const pages = allNavigationItems
 			.filter(
 				(item) =>

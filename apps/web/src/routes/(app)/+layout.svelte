@@ -14,12 +14,16 @@
 	import { allNavigationItems } from '#lib/features/shell/navigation-items';
 	import { navigate } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
+	import QuickCreateSheets from '#lib/components/shell/QuickCreateSheets.svelte';
+	import { QuickCreate, setQuickCreate } from '#lib/features/shell/quick-create.svelte';
 
 	let { children }: { children: Snippet } = $props();
 	const workspace = useWorkspace();
 	const session = workspace.session;
 	const ready = $derived(session.status === 'authenticated' && session.tenantId !== null);
 	let paletteOpen = $state(false);
+	const quick = new QuickCreate();
+	setQuickCreate(quick);
 	let shortcutsOpen = $state(false);
 	let leader = 0;
 
@@ -91,6 +95,7 @@
 		<CommandPalette bind:open={paletteOpen} />
 		<ShortcutsDialog bind:open={shortcutsOpen} />
 		<DevPanel />
+		<QuickCreateSheets {quick} />
 	</SidebarProvider>
 {:else}
 	<div class="mx-auto max-w-2xl p-10"><SkeletonRows /></div>

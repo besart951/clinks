@@ -23,14 +23,15 @@
 	import SideCard from '@clinks/ui/kit/SideCard.svelte';
 	import PastToggle from '@clinks/ui/kit/PastToggle.svelte';
 	import { minutesBetween } from '@clinks/domain/dates';
-	import { navigate } from '#lib/navigation';
 	import { DashboardModel } from '#lib/features/dashboard/dashboard.svelte';
 	import { contactName } from '#lib/data/workspace-api';
 	import { today } from '@clinks/domain/dates';
 	import { href } from '#lib/navigation';
+	import { useQuickCreate } from '#lib/features/shell/quick-create.svelte';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
+	const quick = useQuickCreate();
 	const session = workspace.session;
 	const model = new DashboardModel(workspace);
 	let actors = $state(new Map<string, Actor>());
@@ -73,7 +74,7 @@
 		</p>
 	</div>
 	{#if session.hasModule('calendar') && session.can('calendar.write')}
-		<Button onclick={() => navigate('/calendar?new=1')}>
+		<Button onclick={() => quick.appointment()}>
 			<Plus class="size-4" />{workspace.t('ui.ws.command.new_appointment')}
 		</Button>
 	{/if}
@@ -292,7 +293,7 @@
 						count: data.myTasks.length,
 						addLabel: workspace.t('ui.ws.command.new_task'),
 					}}
-					onadd={session.can('planner.write') ? () => navigate('/planner?new=1') : undefined}
+					onadd={session.can('planner.write') ? () => quick.task() : undefined}
 				>
 					{#if data.myTasks.length === 0}
 						<p class="text-muted-foreground px-1 text-[13px]">{workspace.t('ui.ws.dashboard.no_tasks')}</p>

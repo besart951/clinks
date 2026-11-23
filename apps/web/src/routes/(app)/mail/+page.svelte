@@ -27,10 +27,12 @@
 	import { contactName } from '#lib/data/workspace-api';
 	import { mailFolders, type MailFolder, type MailMessage } from '@clinks/domain/types';
 	import type { MailId } from '@clinks/domain/ids';
-	import { href, navigate, routeQuery, setQuery } from '#lib/navigation';
+	import { href, routeQuery, setQuery } from '#lib/navigation';
+	import { useQuickCreate } from '#lib/features/shell/quick-create.svelte';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
+	const quick = useQuickCreate();
 	const model = new MailboxModel(workspace);
 	const canWrite = $derived(workspace.session.can('mail.write'));
 	let compose: ComposeSheet;
@@ -65,9 +67,9 @@
 		void setQuery(page.url, { message: mail.id });
 	}
 
-	async function toTask(mail: MailMessage) {
-		const task = await model.toTask(mail);
-		if (task) await navigate(`/planner?task=${task.id}`);
+	/** Creates the task and stays in the mailbox; the toast confirms it. */
+	function toTask(mail: MailMessage) {
+		void model.toTask(mail);
 	}
 </script>
 
@@ -213,7 +215,7 @@
 							{#if workspace.session.can('calendar.write')}<Button
 									variant="outline"
 									size="sm"
-									onclick={() => navigate(`/calendar?new=1${contact ? `&contact=${contact.id}` : ''}`)}
+									onclick={() => quick.appointment({ contactId: contact?.id ?? null })}
 								>
 									<CalendarPlus class="size-4" />{workspace.t('ui.ws.mail.to_appointment')}
 								</Button>{/if}

@@ -30,9 +30,11 @@
 	import { today } from '@clinks/domain/dates';
 	import type { InvoiceId } from '@clinks/domain/ids';
 	import { href, navigate } from '#lib/navigation';
+	import { useQuickCreate } from '#lib/features/shell/quick-create.svelte';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
+	const quick = useQuickCreate();
 	const model = new InvoiceDetailModel(workspace, page.params.id as InvoiceId);
 	const people = new PeopleDirectory(workspace);
 	const canWrite = $derived(workspace.session.can('finance.write'));
@@ -61,13 +63,11 @@
 	function sendByMail() {
 		const data = model.resource.value;
 		const to = data.contact?.email ?? '';
-		const subject = encodeURIComponent(
-			workspace.t('ui.ws.invoice.mail_subject', {
-				number: data.invoice.number,
-				company: workspace.session.tenant?.name ?? '',
-			}),
-		);
-		void navigate(`/mail?compose=1&to=${encodeURIComponent(to)}&subject=${subject}`);
+		const subject = workspace.t('ui.ws.invoice.mail_subject', {
+			number: data.invoice.number,
+			company: workspace.session.tenant?.name ?? '',
+		});
+		quick.mail({ to: to ? [to] : [], subject });
 	}
 
 	function askCancel() {
