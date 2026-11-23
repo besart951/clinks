@@ -1,3 +1,4 @@
+import { saveTimes, type AppointmentTimes } from '../calendar/retime.ts';
 import { toast } from 'svelte-sonner';
 import {
 	addDays,
@@ -99,6 +100,16 @@ export class PlanningModel {
 			},
 		);
 		if (saved === null) void this.resource.reload(true);
+	}
+
+	/** New start and end after resizing on the grid; shown at once, saved in the background. */
+	async retime(visit: Appointment, times: AppointmentTimes) {
+		if (times.start === visit.start && times.end === visit.end) return;
+		this.resource.patch((data) => ({
+			...data,
+			visits: data.visits.map((row) => (row.id === visit.id ? { ...row, ...times } : row)),
+		}));
+		if ((await saveTimes(this.#workspace, visit, times)) === null) void this.resource.reload(true);
 	}
 
 	async autoAssign(staff: readonly Person[]) {

@@ -83,6 +83,7 @@
 				new Date(atTime(date, minutesToTime(minutes))),
 				assigneeId === undefined ? appointment.assigneeId : assigneeId,
 			),
+		resize: (appointment, times) => model.retime(appointment, times),
 		color: (appointment) => people.get(appointment.assigneeId)?.avatarColor ?? '#a1a1aa',
 		subtitle: (appointment) =>
 			people.get(appointment.assigneeId)?.name.split(' ')[0] ?? workspace.t('ui.ws.calendar.open'),

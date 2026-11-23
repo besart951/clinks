@@ -1787,8 +1787,8 @@
         "en-US": "Team"
       },
       "ui.ws.calendar.hint": {
-        "de-CH": "Klicke in eine freie Zeit für einen neuen Termin. Ziehe Termine, um sie zu verschieben.",
-        "en-US": "Click a free slot for a new appointment. Drag appointments to move them."
+        "de-CH": "Klicke in eine freie Zeit für einen neuen Termin. Ziehe Termine, um sie zu verschieben, oder ihren oberen und unteren Rand, um die Zeit zu ändern (Tastatur: Alt + ↑/↓ für den Beginn, Alt + Shift + ↑/↓ für das Ende).",
+        "en-US": "Click a free slot for a new appointment. Drag appointments to move them, or their top and bottom edge to change the time (keyboard: Alt + ↑/↓ for the start, Alt + Shift + ↑/↓ for the end)."
       },
       "ui.ws.planner.completed": {
         "de-CH": "«{title}» erledigt",
@@ -3127,8 +3127,8 @@
         "en-US": "No open visits for this day."
       },
       "ui.ws.spitex.board_hint": {
-        "de-CH": "Ziehe Einsätze zwischen den Spalten. In «Offene Einsätze» abgelegt, wird die Zuweisung aufgehoben.",
-        "en-US": "Drag visits between columns. Dropped on “Open visits”, the assignment is removed."
+        "de-CH": "Ziehe Einsätze zwischen den Spalten. In «Offene Einsätze» abgelegt, wird die Zuweisung aufgehoben. Den oberen oder unteren Rand ziehen ändert die Zeit.",
+        "en-US": "Drag visits between columns. Dropped on “Open visits”, the assignment is removed. Drag the top or bottom edge to change the time."
       },
       "ui.ws.spitex.week_load": {
         "de-CH": "Einsatzzeit pro Person und Tag (Stunden:Minuten)",
@@ -4825,6 +4825,10 @@
       "ui.ws.documents.folder_moved": {
         "de-CH": "Ordner «{name}» verschoben",
         "en-US": "Folder “{name}” moved"
+      },
+      "ui.ws.calendar.retimed": {
+        "de-CH": "Zeit von «{title}» geändert",
+        "en-US": "Changed the time of “{title}”"
       }
     }
   }

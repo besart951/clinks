@@ -60,6 +60,7 @@
 		create: () => canWrite && createVisit(),
 		drop: (appointment, _date, minutes, assigneeId) =>
 			model.assign(appointment, assigneeId ?? null, assigneeId === null ? null : minutes),
+		resize: (appointment, times) => model.retime(appointment, times),
 		color: (appointment) => people.get(appointment.assigneeId)?.avatarColor ?? '#a1a1aa',
 		subtitle: (appointment) => (appointment.service ? workspace.t(`ui.ws.spitex.service.${appointment.service}`) : ''),
 	};
