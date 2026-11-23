@@ -37,10 +37,12 @@
 	import { ageOn, today } from '@clinks/domain/dates';
 	import { physioServices, physioTariffs, type Prescription } from '@clinks/domain/types';
 	import type { ContactId } from '@clinks/domain/ids';
-	import { href, navigate } from '#lib/navigation';
+	import { href } from '#lib/navigation';
+	import { useQuickCreate } from '#lib/features/shell/quick-create.svelte';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
+	const quick = useQuickCreate();
 	const session = workspace.session;
 	const id = page.params.id as ContactId;
 	const model = new PatientRecordModel(workspace, id);
@@ -306,7 +308,7 @@
 							count: upcoming.length,
 							addLabel: workspace.t('ui.ws.command.new_appointment'),
 						}}
-						onadd={session.can('calendar.write') ? () => navigate(`/calendar?new=1&contact=${patient.id}`) : undefined}
+						onadd={session.can('calendar.write') ? () => quick.appointment({ contactId: patient.id }) : undefined}
 					>
 						<div class="grid">
 							{#each upcoming as appointment, index (appointment.id)}<AppointmentRow {appointment} {index} />{:else}

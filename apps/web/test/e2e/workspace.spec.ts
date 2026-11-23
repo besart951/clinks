@@ -134,6 +134,16 @@ test('changes an appointment time by dragging its edge or with Alt + arrows', as
 	await expect(page.getByRole('button', { name: title }).first()).not.toHaveAttribute('aria-label', afterDrag);
 });
 
+test('adds an appointment from the start page without leaving it', async ({ page }) => {
+	await signIn(page);
+	await page.getByRole('button', { name: 'Neuer Termin' }).click();
+	const sheet = page.getByRole('dialog');
+	await sheet.getByLabel('Titel').fill('Rückruf Versicherung');
+	await sheet.getByRole('button', { name: 'Speichern' }).click();
+	await expect(sheet).toBeHidden();
+	await expect(page).toHaveURL(/#\/dashboard/);
+});
+
 test('issues an invoice with a QR payment part', async ({ page }) => {
 	await signIn(page);
 	await page.goto('/#/finance/invoices/new');

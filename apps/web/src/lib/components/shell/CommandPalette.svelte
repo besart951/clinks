@@ -2,11 +2,13 @@
 	import * as Command from '@clinks/ui/components/ui/command';
 	import { CommandSearch, type CommandEntry } from '#lib/features/shell/command-search.svelte';
 	import { navigate } from '#lib/navigation';
+	import { useQuickCreate } from '#lib/features/shell/quick-create.svelte';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { open = $bindable(false) }: { open: boolean } = $props();
 	const workspace = useWorkspace();
 	const search = new CommandSearch(workspace);
+	const quick = useQuickCreate();
 	const groups: CommandEntry['group'][] = [
 		'actions',
 		'pages',
@@ -24,7 +26,8 @@
 
 	async function choose(entry: CommandEntry) {
 		open = false;
-		await navigate(entry.path);
+		if (entry.create) quick[entry.create]();
+		else await navigate(entry.path);
 	}
 </script>
 

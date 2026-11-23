@@ -38,9 +38,11 @@
 	import { today } from '@clinks/domain/dates';
 	import type { ContactId } from '@clinks/domain/ids';
 	import { href, navigate } from '#lib/navigation';
+	import { useQuickCreate } from '#lib/features/shell/quick-create.svelte';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
+	const quick = useQuickCreate();
 	const session = workspace.session;
 	const id = page.params.id as ContactId;
 	const model = new ContactDetailModel(workspace, id);
@@ -156,7 +158,7 @@
 					{#if session.can('calendar.write')}<Button
 							variant="outline"
 							size="sm"
-							onclick={() => navigate(`/calendar?new=1&contact=${contact.id}`)}
+							onclick={() => quick.appointment({ contactId: contact.id })}
 						>
 							<CalendarPlus class="size-4" />{workspace.t('ui.ws.command.new_appointment')}
 						</Button>{/if}
@@ -179,7 +181,7 @@
 						</DropdownMenu.Trigger>
 						<DropdownMenu.Content align="end">
 							{#if session.can('mail.write') && session.hasModule('mail') && contact.email}<DropdownMenu.Item
-									onclick={() => navigate(`/mail?compose=1&to=${encodeURIComponent(contact.email)}`)}
+									onclick={() => quick.mail({ to: [contact.email] })}
 								>
 									<Send class="size-4" />{workspace.t('ui.ws.command.new_mail')}
 								</DropdownMenu.Item>{/if}
@@ -252,9 +254,7 @@
 								count: upcoming.length,
 								addLabel: workspace.t('ui.ws.command.new_appointment'),
 							}}
-							onadd={session.can('calendar.write')
-								? () => navigate(`/calendar?new=1&contact=${contact.id}`)
-								: undefined}
+							onadd={session.can('calendar.write') ? () => quick.appointment({ contactId: contact.id }) : undefined}
 						>
 							<div class="grid">
 								{#each upcoming as appointment, index (appointment.id)}<AppointmentRow {appointment} {index} />{:else}
@@ -298,7 +298,7 @@
 								count: openTasks.length,
 								addLabel: workspace.t('ui.ws.command.new_task'),
 							}}
-							onadd={session.can('planner.write') ? () => navigate(`/planner?new=1&contact=${contact.id}`) : undefined}
+							onadd={session.can('planner.write') ? () => quick.task({ contactId: contact.id }) : undefined}
 						>
 							<div class="grid">
 								{#each openTasks as task (task.id)}{@render taskRow(task)}{:else}
@@ -319,9 +319,7 @@
 								count: mails.length,
 								addLabel: workspace.t('ui.ws.command.new_mail'),
 							}}
-							onadd={session.can('mail.write') && contact.email
-								? () => navigate(`/mail?compose=1&to=${encodeURIComponent(contact.email)}`)
-								: undefined}
+							onadd={session.can('mail.write') && contact.email ? () => quick.mail({ to: [contact.email] }) : undefined}
 						>
 							<div class="grid">
 								{#each mails.slice(0, 3) as mail (mail.id)}{@render mailRow(mail)}{:else}
