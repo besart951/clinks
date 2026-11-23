@@ -19,7 +19,7 @@ import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 import { maxUploadBytes } from '../collaboration/attachments.svelte.ts';
 
-abstract class SettingsForm {
+export abstract class SettingsForm {
 	busy = $state(false);
 	fields = $state<{ [field: string]: string }>({});
 	protected workspace: Workspace;

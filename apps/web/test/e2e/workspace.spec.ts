@@ -120,3 +120,22 @@ test('edits master data in place and collapses sections', async ({ page }) => {
 	await page.reload();
 	await expect(page.getByRole('button', { name: 'Stammdaten' })).toHaveAttribute('aria-expanded', 'false');
 });
+
+test('connects an own Infomaniak bucket per tenant', async ({ page }) => {
+	await signIn(page);
+	await page.goto('/#/settings/storage');
+	await expect(page.getByRole('heading', { level: 1, name: 'Dokumentenspeicher' })).toBeVisible();
+	await expect(page.getByRole('radio', { name: 'CLinks-Speicher' })).toBeChecked();
+	await page.getByRole('radio', { name: 'Infomaniak Object Storage' }).check();
+	await page.getByRole('button', { name: 'Speichern' }).click();
+	await expect(page.getByRole('textbox', { name: 'Bucket' })).toBeFocused();
+	await page.getByRole('textbox', { name: 'Bucket' }).fill('stille-physio-docs');
+	await page.getByLabel('Access Key ID').fill('EC2ACCESS');
+	await page.getByLabel('Secret Access Key').fill('top-secret-9876');
+	await page.getByRole('button', { name: 'Speichern' }).click();
+	await expect(page.getByText('Speicher-Einstellungen gespeichert.')).toBeVisible();
+	await expect(page.getByText('Gespeichert (endet auf 9876)')).toBeVisible();
+	await expect(page.getByLabel('Secret Access Key')).toHaveValue('');
+	await page.getByRole('button', { name: 'Verbindung testen' }).click();
+	await expect(page.getByText('Verbindung zum Bucket funktioniert.')).toBeVisible();
+});

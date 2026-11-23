@@ -25,7 +25,15 @@ import { MockApiError, stamp, type WorkspaceCache, type Snapshot, type TableName
 import { appendAudit, validationError } from './repository.ts';
 import { demoPassword } from './seed.ts';
 import type { NewTenant } from '../session/auth-gateway.ts';
-import { invitationSchema, roleSchema } from '@clinks/contracts/schemas';
+import { invitationSchema, roleSchema, storageSettingsSchema } from '@clinks/contracts/schemas';
+import {
+	dataLocation,
+	needsLocationConsent,
+	type StorageCheck,
+	type StorageSettings,
+	type StorageSettingsInput,
+	type StorageSettingsView,
+} from '@clinks/domain/storage';
 
 export interface Caller {
 	userId(): UserId | null;
@@ -565,6 +573,77 @@ export class AccountApi {
 		});
 	}
 
+	/** The tenant's own bucket, or null while documents stay in CLinks storage. The secret never comes back. */
+	storageSettings(): Promise<StorageSettingsView | null> {
+		return this.#db.request(() => {
+			const row = this.#storageRow(this.#authorize('settings.manage'));
+			return row ? storageView(row) : null;
+		});
+	}
+
+	saveStorageSettings(input: StorageSettingsInput): Promise<StorageSettingsView | null> {
+		return this.#db.request(() => {
+			const tenantId = this.#authorize('settings.manage');
+			const tenant = this.#db.table('tenants').find((row) => row.id === tenantId)!;
+			const current = this.#storageRow(tenantId);
+			const others = this.#db.table('storageSettings').filter((row) => row.tenantId !== tenantId);
+			if (input.provider === 'clinks') {
+				this.#db.replace('storageSettings', others);
+				this.#audit(tenantId, 'tenant.storage_changed', 'tenant', tenantId, tenant.name);
+				return null;
+			}
+			// A stored secret belongs to one access key on one provider; anything else needs the secret again.
+			const keepsSecret =
+				current !== undefined &&
+				current.provider === input.provider &&
+				current.accessKeyId === input.accessKeyId.trim();
+			const consent = needsLocationConsent(dataLocation(input.provider, input.endpoint), tenant.enabledModules);
+			const error = validationError(
+				storageSettingsSchema({ requireSecret: !keepsSecret, requireAcknowledgement: consent }),
+				input,
+				(key) => this.#localize(key),
+			);
+			if (error) throw error;
+			const now = new Date().toISOString();
+			const fields = {
+				provider: input.provider,
+				endpoint: input.endpoint.trim().replace(/\/$/, ''),
+				region: input.region.trim(),
+				bucket: input.bucket.trim(),
+				accessKeyId: input.accessKeyId.trim(),
+				secretAccessKey: input.secretAccessKey || current!.secretAccessKey,
+				pathStyle: input.pathStyle,
+				locationAcknowledgedAt: consent ? (current?.locationAcknowledgedAt ?? now) : null,
+				lastCheck: null,
+			};
+			const next: StorageSettings = current
+				? { ...current, ...fields, revision: current.revision + 1, updatedAt: now }
+				: stamp<StorageSettings>({ id: newId(), tenantId, ...fields });
+			this.#db.replace('storageSettings', [...others, next]);
+			this.#audit(tenantId, 'tenant.storage_changed', 'tenant', tenantId, tenant.name);
+			return storageView(next);
+		}, ['storageSettings', 'audit']);
+	}
+
+	/**
+	 * Checks that the stored bucket answers. The mock cannot reach a bucket, so it only checks that the settings
+	 * are complete; the real API will put, read and delete a probe object.
+	 */
+	testStorageConnection(): Promise<StorageCheck> {
+		return this.#db.request(() => {
+			const tenantId = this.#authorize('settings.manage');
+			const current = this.#storageRow(tenantId);
+			const check: StorageCheck = { at: new Date().toISOString(), ok: true };
+			if (!current) return check;
+			const next = { ...current, lastCheck: check, revision: current.revision + 1, updatedAt: check.at };
+			this.#db.replace(
+				'storageSettings',
+				this.#db.table('storageSettings').map((row) => (row.id === current.id ? next : row)),
+			);
+			return check;
+		}, ['storageSettings']);
+	}
+
 	exportTenantData(): Promise<{ [table: string]: unknown[] }> {
 		return this.#db.request(() => {
 			const tenantId = this.#authorize('settings.manage');
@@ -575,6 +654,9 @@ export class AccountApi {
 				if (owned.length > 0) result[name] = owned;
 			}
 			result.tenant = snapshot.tenants.filter((row) => row.id === tenantId);
+			// Access keys stay out of exports.
+			if (result.storageSettings)
+				result.storageSettings = (result.storageSettings as StorageSettings[]).map(storageView);
 			return result;
 		});
 	}
@@ -649,6 +731,10 @@ export class AccountApi {
 			);
 			return next;
 		}, ['tenants']);
+	}
+
+	#storageRow(tenantId: TenantId) {
+		return this.#db.table('storageSettings').find((row) => row.tenantId === tenantId);
 	}
 
 	#localize(key: string) {
@@ -754,4 +840,8 @@ export class AccountApi {
 		const actorId = actor ?? this.#caller.userId();
 		if (actorId) appendAudit(this.#db, { tenantId, actorId, action, target: { kind, id, label } });
 	}
+}
+
+function storageView({ secretAccessKey, ...rest }: StorageSettings): StorageSettingsView {
+	return { ...rest, secretHint: secretAccessKey ? secretAccessKey.slice(-4) : null };
 }

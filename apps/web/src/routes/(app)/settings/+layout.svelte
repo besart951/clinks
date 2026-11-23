@@ -7,6 +7,7 @@
 	import ShieldCheck from '@lucide/svelte/icons/shield-check';
 	import CreditCard from '@lucide/svelte/icons/credit-card';
 	import Lock from '@lucide/svelte/icons/lock';
+	import HardDrive from '@lucide/svelte/icons/hard-drive';
 	import type { Permission } from '@clinks/domain/types';
 	import { href, routePath } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
@@ -16,6 +17,7 @@
 	const items: { path: string; label: string; icon: typeof UserRound; permission?: Permission }[] = [
 		{ path: '/settings/profile', label: 'ui.ws.settings.profile', icon: UserRound },
 		{ path: '/settings', label: 'ui.ws.settings.company', icon: Building2, permission: 'settings.manage' },
+		{ path: '/settings/storage', label: 'ui.ws.settings.storage', icon: HardDrive, permission: 'settings.manage' },
 		{ path: '/settings/team', label: 'ui.ws.settings.team', icon: Users, permission: 'team.manage' },
 		{ path: '/settings/roles', label: 'ui.ws.settings.roles', icon: ShieldCheck, permission: 'roles.manage' },
 		{ path: '/settings/billing', label: 'ui.ws.settings.billing', icon: CreditCard, permission: 'billing.manage' },

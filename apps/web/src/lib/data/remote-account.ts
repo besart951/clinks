@@ -1,6 +1,7 @@
 import type { DeviceSessionDto, TeamResponse } from '@clinks/contracts/auth';
 import type { InvitationId, MembershipId, RoleId, SessionId, UserId } from '@clinks/domain/ids';
 import type { Invitation, Membership, Role } from '@clinks/domain/types';
+import type { StorageCheck, StorageSettingsInput, StorageSettingsView } from '@clinks/domain/storage';
 import { roleGrants } from '@clinks/domain/permissions';
 import type { RemoteAuthGateway } from '../session/remote-auth.ts';
 import { AccountApi, roleFor, type Caller, type Member } from './account-api.ts';
@@ -108,5 +109,16 @@ export class RemoteAccountApi extends AccountApi {
 	override async deleteRole(id: RoleId) {
 		await this.#client.request('DELETE', '/tenant/roles/' + id);
 		this.#db.touch('roles');
+	}
+
+	/** Storage settings and the secret live only on the server; nothing of them is cached in the browser. */
+	override storageSettings() {
+		return this.#client.request<StorageSettingsView | null>('GET', '/tenant/storage');
+	}
+	override saveStorageSettings(input: StorageSettingsInput) {
+		return this.#client.request<StorageSettingsView | null>('POST', '/tenant/storage', input);
+	}
+	override testStorageConnection() {
+		return this.#client.request<StorageCheck>('POST', '/tenant/storage/test');
 	}
 }

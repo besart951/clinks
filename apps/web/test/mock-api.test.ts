@@ -225,3 +225,69 @@ describe('account API', () => {
 		assert.equal((await env.account.platformTenants()).length, 2);
 	});
 });
+
+describe('storage settings', () => {
+	const infomaniak = {
+		provider: 'infomaniak' as const,
+		endpoint: 'https://s3.pub1.infomaniak.cloud',
+		region: 'dc3-a',
+		bucket: 'stille-physio-docs',
+		accessKeyId: 'EC2ACCESS',
+		secretAccessKey: '',
+		pathStyle: true,
+		acknowledgeLocation: false,
+	};
+
+	it('keeps the secret on the server and asks for it again for a new key', async () => {
+		const env = setup();
+		env.as('besi@stille.ch', 'Stille Physio');
+		assert.equal(await env.account.storageSettings(), null);
+		await assert.rejects(
+			env.account.saveStorageSettings(infomaniak),
+			(error: MockApiError) => error.fields.secretAccessKey === '[error.ws.required]',
+		);
+		const saved = await env.account.saveStorageSettings({ ...infomaniak, secretAccessKey: 'top-secret-9876' });
+		assert.equal(saved?.secretHint, '9876');
+		assert.equal('secretAccessKey' in saved!, false);
+		const kept = await env.account.saveStorageSettings({ ...infomaniak, bucket: 'stille-physio-archive' });
+		assert.equal(kept?.secretHint, '9876');
+		await assert.rejects(env.account.saveStorageSettings({ ...infomaniak, accessKeyId: 'OTHER' }));
+		const exported = JSON.stringify(await env.account.exportTenantData());
+		assert.equal(exported.includes('top-secret-9876'), false);
+	});
+
+	it('requires consent before health data leaves Switzerland', async () => {
+		const env = setup();
+		env.as('besi@stille.ch', 'Stille Physio');
+		const r2 = {
+			...infomaniak,
+			provider: 'cloudflare' as const,
+			endpoint: 'https://0123456789abcdef0123456789abcdef.eu.r2.cloudflarestorage.com',
+			region: 'auto',
+			secretAccessKey: 'r2-secret',
+		};
+		await assert.rejects(
+			env.account.saveStorageSettings({ ...r2, endpoint: 'https://.eu.r2.cloudflarestorage.com' }),
+			(error: MockApiError) => error.fields.endpoint === '[error.ws.storage_cloudflare_account]',
+		);
+		await assert.rejects(
+			env.account.saveStorageSettings(r2),
+			(error: MockApiError) => error.fields.acknowledgeLocation === '[error.ws.storage_location_consent]',
+		);
+		const saved = await env.account.saveStorageSettings({ ...r2, acknowledgeLocation: true });
+		assert.ok(saved?.locationAcknowledgedAt);
+		assert.equal((await env.account.testStorageConnection()).ok, true);
+		assert.equal(await env.account.saveStorageSettings({ ...infomaniak, provider: 'clinks' }), null);
+		assert.equal(await env.account.storageSettings(), null);
+	});
+
+	it('is per tenant and only for administrators', async () => {
+		const env = setup();
+		env.as('besi@stille.ch', 'Stille Physio');
+		await env.account.saveStorageSettings({ ...infomaniak, secretAccessKey: 'physio-only' });
+		env.as('besi@stille.ch', 'Stille Spitex Seeland');
+		assert.equal(await env.account.storageSettings(), null);
+		env.as('jonas.keller@stille.ch');
+		await assert.rejects(env.account.storageSettings(), (error: MockApiError) => error.code === 'unauthorized');
+	});
+});
