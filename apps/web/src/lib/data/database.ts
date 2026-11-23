@@ -24,6 +24,7 @@ import type {
 	TimeEntry,
 	User,
 } from '@clinks/domain/types';
+import type { StorageSettings } from '@clinks/domain/storage';
 
 export interface Tables {
 	tenants: Tenant;
@@ -48,6 +49,7 @@ export interface Tables {
 	timeEntries: TimeEntry;
 	notifications: AppNotification;
 	audit: AuditEntry;
+	storageSettings: StorageSettings;
 }
 
 export type TableName = keyof Tables;
@@ -76,6 +78,7 @@ export const tableNames: readonly TableName[] = [
 	'timeEntries',
 	'notifications',
 	'audit',
+	'storageSettings',
 ];
 
 export type ErrorCode =

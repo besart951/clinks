@@ -174,6 +174,7 @@ function emptySnapshot(): Snapshot {
 		timeEntries: [],
 		notifications: [],
 		audit: [],
+		storageSettings: [],
 	};
 }
 

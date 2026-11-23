@@ -4561,6 +4561,226 @@
       "error.ws.sync.switch_pending": {
         "de-CH": "Warte auf die Synchronisierung der Änderungen, bevor du den Mandanten wechselst.",
         "en-US": "Wait for pending changes to sync before switching workspaces."
+      },
+      "ui.ws.settings.storage": {
+        "de-CH": "Dokumentenspeicher",
+        "en-US": "Document storage"
+      },
+      "ui.ws.storage.text": {
+        "de-CH": "Lege fest, wo die Dokumente dieses Mandanten gespeichert werden. Jeder Mandant hat seine eigene Einstellung.",
+        "en-US": "Choose where this tenant's documents are stored. Every tenant has its own setting."
+      },
+      "ui.ws.storage.location": {
+        "de-CH": "Speicherort",
+        "en-US": "Storage location"
+      },
+      "ui.ws.storage.location_text": {
+        "de-CH": "Standard ist der CLinks-Speicher in der Schweiz. Alternativ verbindest du einen eigenen S3-kompatiblen Bucket.",
+        "en-US": "The default is CLinks storage in Switzerland. Alternatively, connect your own S3-compatible bucket."
+      },
+      "ui.ws.storage.provider": {
+        "de-CH": "Anbieter",
+        "en-US": "Provider"
+      },
+      "ui.ws.storage.provider_clinks": {
+        "de-CH": "CLinks-Speicher",
+        "en-US": "CLinks storage"
+      },
+      "ui.ws.storage.provider_clinks_text": {
+        "de-CH": "Von CLinks betrieben, in der Schweiz, versioniert und verschlüsselt. Keine Einrichtung nötig.",
+        "en-US": "Run by CLinks in Switzerland, versioned and encrypted. No setup needed."
+      },
+      "ui.ws.storage.provider_infomaniak": {
+        "de-CH": "Infomaniak Object Storage",
+        "en-US": "Infomaniak Object Storage"
+      },
+      "ui.ws.storage.provider_infomaniak_text": {
+        "de-CH": "Eigener Bucket in der Infomaniak Public Cloud, Rechenzentren in der Schweiz.",
+        "en-US": "Your own bucket in the Infomaniak Public Cloud, data centres in Switzerland."
+      },
+      "ui.ws.storage.provider_cloudflare": {
+        "de-CH": "Cloudflare R2",
+        "en-US": "Cloudflare R2"
+      },
+      "ui.ws.storage.provider_cloudflare_text": {
+        "de-CH": "Eigener R2-Bucket. Speicherort höchstens auf die EU beschränkbar, nicht auf die Schweiz.",
+        "en-US": "Your own R2 bucket. Location can be limited to the EU at most, not to Switzerland."
+      },
+      "ui.ws.storage.provider_custom": {
+        "de-CH": "Anderer S3-Anbieter",
+        "en-US": "Other S3 provider"
+      },
+      "ui.ws.storage.provider_custom_text": {
+        "de-CH": "Beliebiger S3-kompatibler Speicher mit eigener Endpoint-URL.",
+        "en-US": "Any S3-compatible storage with its own endpoint URL."
+      },
+      "ui.ws.storage.location_switzerland": {
+        "de-CH": "Schweiz",
+        "en-US": "Switzerland"
+      },
+      "ui.ws.storage.location_eu": {
+        "de-CH": "EU",
+        "en-US": "EU"
+      },
+      "ui.ws.storage.location_unknown": {
+        "de-CH": "Standort offen",
+        "en-US": "Location open"
+      },
+      "ui.ws.storage.connection": {
+        "de-CH": "Verbindung",
+        "en-US": "Connection"
+      },
+      "ui.ws.storage.connection_infomaniak": {
+        "de-CH": "Zugangsdaten aus der Infomaniak Public Cloud (EC2-Zugangsdaten aus OpenStack, nicht Swiss Backup).",
+        "en-US": "Credentials from the Infomaniak Public Cloud (EC2 credentials from OpenStack, not Swiss Backup)."
+      },
+      "ui.ws.storage.connection_cloudflare": {
+        "de-CH": "Ein R2-API-Token mit Lese- und Schreibrecht auf den Bucket.",
+        "en-US": "An R2 API token with read and write access to the bucket."
+      },
+      "ui.ws.storage.connection_custom": {
+        "de-CH": "Endpoint, Region und Zugangsschlüssel deines Anbieters.",
+        "en-US": "Your provider's endpoint, region and access keys."
+      },
+      "ui.ws.storage.datacenter": {
+        "de-CH": "Rechenzentrum",
+        "en-US": "Data centre"
+      },
+      "ui.ws.storage.cloudflare_account": {
+        "de-CH": "Cloudflare-Konto-ID",
+        "en-US": "Cloudflare account ID"
+      },
+      "ui.ws.storage.cloudflare_account_hint": {
+        "de-CH": "32 Zeichen, im Cloudflare-Dashboard unter R2.",
+        "en-US": "32 characters, in the Cloudflare dashboard under R2."
+      },
+      "ui.ws.storage.cloudflare_jurisdiction": {
+        "de-CH": "Rechtsraum",
+        "en-US": "Jurisdiction"
+      },
+      "ui.ws.storage.cloudflare_jurisdiction_eu": {
+        "de-CH": "EU",
+        "en-US": "EU"
+      },
+      "ui.ws.storage.cloudflare_jurisdiction_default": {
+        "de-CH": "Standard (weltweit)",
+        "en-US": "Default (worldwide)"
+      },
+      "ui.ws.storage.endpoint": {
+        "de-CH": "Endpoint-URL",
+        "en-US": "Endpoint URL"
+      },
+      "ui.ws.storage.endpoint_hint": {
+        "de-CH": "Mit https://, ohne Bucket-Namen.",
+        "en-US": "With https://, without the bucket name."
+      },
+      "ui.ws.storage.region": {
+        "de-CH": "Region",
+        "en-US": "Region"
+      },
+      "ui.ws.storage.path_style": {
+        "de-CH": "Path-Style-URLs",
+        "en-US": "Path-style URLs"
+      },
+      "ui.ws.storage.bucket": {
+        "de-CH": "Bucket",
+        "en-US": "Bucket"
+      },
+      "ui.ws.storage.bucket_hint": {
+        "de-CH": "Kleinbuchstaben, Zahlen, Punkt und Bindestrich. Versionierung im Bucket einschalten.",
+        "en-US": "Lower-case letters, digits, dots and hyphens. Turn on versioning for the bucket."
+      },
+      "ui.ws.storage.access_key": {
+        "de-CH": "Access Key ID",
+        "en-US": "Access key ID"
+      },
+      "ui.ws.storage.secret_key": {
+        "de-CH": "Secret Access Key",
+        "en-US": "Secret access key"
+      },
+      "ui.ws.storage.secret_hint": {
+        "de-CH": "Wird verschlüsselt gespeichert und nie wieder angezeigt.",
+        "en-US": "Stored encrypted and never shown again."
+      },
+      "ui.ws.storage.secret_kept": {
+        "de-CH": "Gespeichert (endet auf {hint}). Leer lassen, um ihn zu behalten.",
+        "en-US": "Stored (ends in {hint}). Leave empty to keep it."
+      },
+      "ui.ws.storage.show_secret": {
+        "de-CH": "Anzeigen",
+        "en-US": "Show"
+      },
+      "ui.ws.storage.hide_secret": {
+        "de-CH": "Verbergen",
+        "en-US": "Hide"
+      },
+      "ui.ws.storage.health_title": {
+        "de-CH": "Gesundheitsdaten ausserhalb der Schweiz",
+        "en-US": "Health data outside Switzerland"
+      },
+      "ui.ws.storage.health_text": {
+        "de-CH": "Dieser Mandant nutzt Physio oder Spitex. Dokumente mit Gesundheitsdaten lägen dann nicht mehr nachweislich in der Schweiz. Prüfe Berufsgeheimnis, Auftragsbearbeitungsvertrag und Bearbeitungsverzeichnis, bevor du speicherst.",
+        "en-US": "This tenant uses Physio or Spitex. Documents with health data would no longer be provably stored in Switzerland. Check professional secrecy, the data processing agreement and the record of processing before saving."
+      },
+      "ui.ws.storage.health_consent": {
+        "de-CH": "Ich bestätige, dass dieser Speicherort für unsere Gesundheitsdaten rechtlich geprüft ist.",
+        "en-US": "I confirm that this location has been legally cleared for our health data."
+      },
+      "ui.ws.storage.outside_ch": {
+        "de-CH": "Dieser Speicherort liegt nicht nachweislich in der Schweiz. Halte ihn im Bearbeitungsverzeichnis fest.",
+        "en-US": "This location is not provably in Switzerland. Record it in your record of processing."
+      },
+      "ui.ws.storage.clinks_details": {
+        "de-CH": "Dokumente liegen im CLinks-Speicher bei Infomaniak in der Schweiz, mit Versionierung und Aufbewahrungssperre.",
+        "en-US": "Documents are kept in CLinks storage at Infomaniak in Switzerland, with versioning and object lock."
+      },
+      "ui.ws.storage.test": {
+        "de-CH": "Verbindung testen",
+        "en-US": "Test connection"
+      },
+      "ui.ws.storage.test_ok": {
+        "de-CH": "Verbindung zum Bucket funktioniert.",
+        "en-US": "The bucket connection works."
+      },
+      "ui.ws.storage.test_failed": {
+        "de-CH": "Der Bucket antwortet nicht. Prüfe Endpoint, Bucket und Schlüssel.",
+        "en-US": "The bucket does not answer. Check endpoint, bucket and keys."
+      },
+      "ui.ws.storage.last_check_ok": {
+        "de-CH": "Zuletzt erfolgreich getestet: {time}",
+        "en-US": "Last tested successfully: {time}"
+      },
+      "ui.ws.storage.last_check_failed": {
+        "de-CH": "Letzter Test fehlgeschlagen: {time}",
+        "en-US": "Last test failed: {time}"
+      },
+      "ui.ws.storage.saved": {
+        "de-CH": "Speicher-Einstellungen gespeichert.",
+        "en-US": "Storage settings saved."
+      },
+      "ui.ws.storage.preview_note": {
+        "de-CH": "Uploads verwenden diese Einstellung, sobald die Dateiablage auf dem Server läuft (Phase 5).",
+        "en-US": "Uploads use this setting once file storage runs on the server (phase 5)."
+      },
+      "ui.ws.audit.tenant.storage_changed": {
+        "de-CH": "hat den Dokumentenspeicher geändert",
+        "en-US": "changed the document storage"
+      },
+      "error.ws.storage_endpoint": {
+        "de-CH": "Gib eine https://-Adresse ohne Leerzeichen ein.",
+        "en-US": "Enter an https:// address without spaces."
+      },
+      "error.ws.storage_bucket": {
+        "de-CH": "3–63 Zeichen: Kleinbuchstaben, Zahlen, Punkt und Bindestrich.",
+        "en-US": "3–63 characters: lower-case letters, digits, dots and hyphens."
+      },
+      "error.ws.storage_location_consent": {
+        "de-CH": "Bestätige den Speicherort, um zu speichern.",
+        "en-US": "Confirm the location to save."
+      },
+      "error.ws.storage_cloudflare_account": {
+        "de-CH": "Die Konto-ID hat 32 Zeichen (0–9, a–f).",
+        "en-US": "The account ID has 32 characters (0–9, a–f)."
       }
     }
   }
