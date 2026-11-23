@@ -28,7 +28,31 @@
 
 	let { columns, handlers, editable }: { columns: GridColumn[]; handlers: GridHandlers; editable: boolean } = $props();
 	const workspace = useWorkspace();
-	const pixelsPerMinute = 0.9;
+	/** Never smaller than this, so short appointments stay readable; grows to fill the window's height. */
+	const minPixelsPerMinute = 0.9;
+	const range = dayEndMinutes - dayStartMinutes;
+	let frame: HTMLElement;
+	let header = $state(44);
+	let available = $state(0);
+	const pixelsPerMinute = $derived(Math.max(minPixelsPerMinute, (available - header) / range));
+
+	/** Measures the space from the grid's top to the bottom of the window (DOM measurement only). */
+	$effect(() => {
+		const measure = () => {
+			// Position in the document, so a scrolled page measures the same as an unscrolled one.
+			const top = frame.getBoundingClientRect().top + scrollY;
+			available = Math.max(0, innerHeight - top - Number(frame.dataset.reserve ?? 0));
+			header = frame.querySelector<HTMLElement>('[data-grid-head]')?.offsetHeight ?? 44;
+		};
+		measure();
+		const observer = new ResizeObserver(measure);
+		observer.observe(document.documentElement);
+		addEventListener('resize', measure);
+		return () => {
+			observer.disconnect();
+			removeEventListener('resize', measure);
+		};
+	});
 	const hours = Array.from(
 		{ length: (dayEndMinutes - dayStartMinutes) / 60 },
 		(_, index) => dayStartMinutes / 60 + index,
@@ -70,11 +94,13 @@
 	}
 </script>
 
-<div class="overflow-x-auto rounded-xl border">
+<!-- Reserves room below for the hint line and the page padding. -->
+<div bind:this={frame} data-reserve="64" class="overflow-x-auto rounded-xl border">
 	<div class="grid min-w-[640px]" style:grid-template-columns="3.5rem repeat({columns.length}, minmax(7rem, 1fr))">
 		<div class="bg-background sticky top-0 z-10 border-b"></div>
 		{#each columns as column (column.key)}
 			<div
+				data-grid-head
 				class="bg-background sticky top-0 z-10 border-b border-l px-2 py-2 text-center text-sm {column.highlight
 					? 'text-primary font-semibold'
 					: ''}"
@@ -83,7 +109,7 @@
 				{#if column.sublabel}<p class="text-muted-foreground truncate text-xs font-normal">{column.sublabel}</p>{/if}
 			</div>
 		{/each}
-		<div class="relative" style:height="{(dayEndMinutes - dayStartMinutes) * pixelsPerMinute}px">
+		<div class="relative" style:height="{range * pixelsPerMinute}px">
 			{#each hours as hour (hour)}
 				<span
 					class="text-muted-foreground absolute right-2 -translate-y-1/2 text-[11px] tabular-nums"
@@ -97,7 +123,7 @@
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<div
 				class="relative border-l {editable ? 'cursor-copy' : ''}"
-				style:height="{(dayEndMinutes - dayStartMinutes) * pixelsPerMinute}px"
+				style:height="{range * pixelsPerMinute}px"
 				style:background-image="repeating-linear-gradient(to bottom, var(--border) 0, var(--border) 1px, transparent
 				1px, transparent {60 * pixelsPerMinute}px)"
 				role="grid"

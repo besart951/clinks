@@ -4793,6 +4793,14 @@
       "ui.ws.planner.moved_announce": {
         "de-CH": "«{title}» in {column}, Position {position} von {count}",
         "en-US": "“{title}” in {column}, position {position} of {count}"
+      },
+      "ui.ws.shell.collapse_sidebar": {
+        "de-CH": "Navigation einklappen",
+        "en-US": "Collapse navigation"
+      },
+      "ui.ws.shell.expand_sidebar": {
+        "de-CH": "Navigation ausklappen",
+        "en-US": "Expand navigation"
       }
     }
   }

@@ -37,6 +37,13 @@ this file says _what_ the product needs, the plan says _when_ it is built.
 
 **Order:** tenants + billing → contacts + calendar → notifications + search → offline sync.
 
+## From prototype review (23.11.2026)
+
+- Documents: build any folder structure as a tree (nested folders, move by drag & drop).
+- Spitex dispatch: assign open visits to staff by drag & drop.
+- Calendar and dispatch grid: on hover, resize an appointment's time and drag it to another staff member.
+- Calendar views: switch the time axis between horizontal and vertical, and between month, week and day.
+
 ## UI prototype without backend — done
 
 Done on 21.11.2026 ([PR #1](https://github.com/besart951/clinks/pull/1)); the prototype is now `apps/web`. Its
