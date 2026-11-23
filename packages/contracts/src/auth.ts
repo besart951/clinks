@@ -61,6 +61,39 @@ export const signInResponse = z.discriminatedUnion('status', [
 
 export const verificationResponse = z.object({ verificationId: uuid });
 
+const image = z
+	.string()
+	.max(1_350_000)
+	.regex(/^data:image\/(png|jpeg|gif|webp);base64,[A-Za-z0-9+/]+=*$/u)
+	.nullable();
+const address = z.object({ street: z.string().max(256), zip: z.string().max(24), city: z.string().max(128) });
+const preferences = z.object({
+	inApp: z.boolean(),
+	email: z.boolean(),
+	push: z.boolean(),
+	digest: z.enum(['never', 'daily', 'weekly']),
+});
+export const profileUpdate = z
+	.strictObject({
+		firstName: name,
+		lastName: name,
+		locale: z.enum(['de-CH', 'en-US']),
+		avatarDataUrl: image,
+		notificationPreferences: preferences,
+	})
+	.partial();
+export const companyUpdate = z
+	.strictObject({
+		name: z.string().trim().min(1).max(200),
+		logoDataUrl: image,
+		address,
+		vatNumber: z.string().max(50),
+		iban: z.string().max(36),
+		brandColor: z.string().regex(/^#[a-f0-9]{6}$/iu),
+		locale: z.enum(['de-CH', 'en-US']),
+		timeZone: z.enum(['Europe/Zurich', 'Europe/Berlin', 'Europe/Vienna']),
+	})
+	.partial();
 export const userDto = z.object({
 	id: uuid,
 	email: z.string(),
@@ -68,6 +101,8 @@ export const userDto = z.object({
 	lastName: z.string(),
 	avatarColor: z.string(),
 	locale: z.string(),
+	avatarDataUrl: image,
+	notificationPreferences: preferences,
 	globalRole: z.literal('super_administrator').nullable(),
 	emailVerified: z.boolean(),
 	twoFactorEnabled: z.boolean(),
@@ -82,6 +117,10 @@ export const tenantDto = z.object({
 	timeZone: z.string(),
 	plan: z.string(),
 	billingCycle: z.enum(['monthly', 'yearly']),
+	logoDataUrl: image,
+	address,
+	vatNumber: z.string(),
+	iban: z.string(),
 	trialEndsAt: z.iso.datetime().nullable(),
 	enabledModules: z.array(z.enum(moduleKeys)),
 	featureFlags: z.array(z.string()),
@@ -105,6 +144,31 @@ export const membershipDto = z.object({
 	jobTitle: z.string(),
 });
 
+export const memberUpdate = z
+	.strictObject({ roleId: uuid, status: z.enum(['active', 'inactive']), jobTitle: z.string().max(128) })
+	.partial();
+export const roleUpdate = z.strictObject({
+	id: uuid.nullable(),
+	name: z.string().trim().min(1).max(128),
+	permissions: z.array(z.enum(permissions)).max(permissions.length),
+});
+export const teamResponse = z.object({
+	roles: z.array(roleDto),
+	people: z.array(
+		z.object({
+			membership: membershipDto,
+			user: userDto.pick({
+				id: true,
+				email: true,
+				firstName: true,
+				lastName: true,
+				avatarColor: true,
+				avatarDataUrl: true,
+			}),
+		}),
+	),
+});
+export type TeamResponse = z.infer<typeof teamResponse>;
 export const meResponse = z.object({
 	user: userDto,
 	tenantId: uuid.nullable(),
@@ -125,6 +189,8 @@ export const twoFactorSetupResponse = z.object({ secret: z.string(), otpauthUri:
 export const recoveryCodesResponse = z.object({ recoveryCodes: z.array(z.string()) });
 
 export const invitationDto = z.object({
+	invitedBy: uuid,
+	createdAt: z.iso.datetime(),
 	id: uuid,
 	email: z.string(),
 	roleId: uuid,

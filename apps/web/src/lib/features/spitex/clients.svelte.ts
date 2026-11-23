@@ -83,15 +83,6 @@ export class ClientFileModel {
 		return this.#workspace.patch(this.#workspace.api.contacts, client, contactPatch(key, value), label);
 	}
 
-	saveNote(
-		note: ClinicalNote,
-		field: 'subjective' | 'objective' | 'assessment' | 'plan',
-		value: string,
-		label: string,
-	) {
-		return this.#workspace.patch(this.#workspace.api.spitexNotes, note, { [field]: value }, label);
-	}
-
 	async addNote(): Promise<boolean> {
 		if (!Object.values(this.draft).some((value) => value.trim())) return false;
 		this.busy = true;

@@ -185,3 +185,188 @@ describe('sync write endpoint', () => {
 		assert.equal((await write(token, [{ op: 'PUT', table: 'contacts', id: uuid(), data: contact() }])).status, 403);
 	});
 });
+
+describe('module uploads', () => {
+	it('imports linked receipts atomically, preserves later edits on retry, and refuses foreign recipients', async () => {
+		const owner = await api.administrator('modules-owner@example.ch', 'Module AG');
+		const other = await api.administrator('modules-other@example.ch', 'Other AG');
+		const member = await api.owner
+			.selectFrom('memberships')
+			.select('userId')
+			.where('tenantId', '=', owner.tenantId)
+			.executeTakeFirstOrThrow();
+		const stranger = await api.owner
+			.selectFrom('memberships')
+			.select('userId')
+			.where('tenantId', '=', other.tenantId)
+			.executeTakeFirstOrThrow();
+		const document = uuid(),
+			expense = uuid();
+		const ops = [
+			{
+				op: 'PUT',
+				table: 'documents',
+				id: document,
+				data: {
+					name: 'Beleg',
+					mime_type: 'text/plain',
+					size: 4,
+					data_url: 'data:text/plain;base64,VGVzdA==',
+					targets: JSON.stringify([{ kind: 'expense', id: expense }]),
+					uploaded_by: member.userId,
+				},
+			},
+			{
+				op: 'PUT',
+				table: 'expenses',
+				id: expense,
+				data: {
+					date: '2026-11-22',
+					description: 'Papier',
+					supplier: 'Laden',
+					category: 'material',
+					amount: 1500,
+					vat_rate: 810,
+					receipt_id: document,
+					status: 'open',
+				},
+			},
+		];
+		const migrate = () => owner.browser.call('POST', '/sync/import', { token: owner.token, body: { ops } });
+		assert.equal((await migrate()).status, 200);
+		assert.equal(
+			(await write(owner.token, [{ op: 'PATCH', table: 'expenses', id: expense, data: { description: 'Papier A4' } }]))
+				.status,
+			200,
+		);
+		assert.equal((await migrate()).status, 200);
+		const stored = await api.owner
+			.selectFrom('expenses')
+			.selectAll()
+			.where('id', '=', expense)
+			.executeTakeFirstOrThrow();
+		assert.equal(stored.description, 'Papier A4');
+		assert.equal(stored.receiptId, document);
+		assert.equal(stored.revision, 2);
+		assert.equal(
+			(
+				await write(owner.token, [
+					{
+						op: 'PUT',
+						table: 'notifications',
+						id: uuid(),
+						data: {
+							user_id: stranger.userId,
+							kind: 'assignment',
+							message: JSON.stringify({ key: 'ui.ws.notification.assigned', params: { target: 'Aufgabe' } }),
+							href: '/planner',
+							is_read: 0,
+						},
+					},
+				])
+			).status,
+			400,
+		);
+		assert.equal(
+			(await write(other.token, [{ op: 'PUT', table: 'expenses', id: uuid(), data: ops[1].data }])).status,
+			400,
+		);
+	});
+
+	it('reserves invoice numbers across concurrent devices, edits and restores', async () => {
+		const owner = await api.administrator('numbers@example.ch', 'Numbers');
+		const contactId = uuid();
+		await write(owner.token, [{ op: 'PUT', table: 'contacts', id: contactId, data: contact() }]);
+		const data = {
+			number: 'forged',
+			kind: 'invoice',
+			contact_id: contactId,
+			issue_date: '2026-11-22',
+			due_date: '2026-12-22',
+			status: 'open',
+			lines: JSON.stringify([{ description: 'Service', quantity: 1, unitPrice: 1000, vatRate: 0 }]),
+			payments: '[]',
+			reminder_level: 0,
+			notes: '',
+			appointment_ids: '[]',
+		};
+		const ops = [uuid(), uuid()].map((id) => ({ op: 'PUT', table: 'invoices', id, data }));
+		for (const result of await Promise.all(ops.map((op) => write(owner.token, [op]))))
+			assert.equal(result.status, 200, JSON.stringify(result.body));
+		const rows = () =>
+			api.owner
+				.selectFrom('invoices')
+				.select(['id', 'number'])
+				.where('tenantId', '=', owner.tenantId)
+				.orderBy('id')
+				.execute();
+		const original = await rows();
+		assert.deepEqual(original.map((row) => row.number).sort(), ['2026-0001', '2026-0002']);
+		assert.equal(
+			(await write(owner.token, [{ op: 'PATCH', table: 'invoices', id: ops[0].id, data: { number: 'edit' } }])).status,
+			200,
+		);
+		assert.equal((await write(owner.token, [{ op: 'DELETE', table: 'invoices', id: ops[1].id }])).status, 200);
+		assert.equal((await write(owner.token, [ops[1]])).status, 200);
+		assert.deepEqual(await rows(), original);
+	});
+	it('validates the clinical note kind and the permission of its module', async () => {
+		const owner = await api.administrator('clinical@example.ch', 'Praxis');
+		const contactId = uuid();
+		const member = await api.owner
+			.selectFrom('memberships')
+			.select(['userId', 'roleId'])
+			.where('tenantId', '=', owner.tenantId)
+			.executeTakeFirstOrThrow();
+		const noteId = uuid();
+		const data = {
+			kind: 'physio',
+			contact_id: contactId,
+			date: '2026-11-22',
+			author_id: member.userId,
+			subjective: '',
+			objective: '',
+			assessment: '',
+			plan: '',
+		};
+		assert.equal(
+			(
+				await write(owner.token, [
+					{ op: 'PUT', table: 'contacts', id: contactId, data: contact() },
+					{ op: 'PUT', table: 'physio_notes', id: noteId, data },
+				])
+			).status,
+			200,
+		);
+		assert.equal((await write(owner.token, [{ op: 'PUT', table: 'physio_notes', id: noteId, data }])).status, 200);
+		for (const op of ['PATCH', 'PUT', 'DELETE']) {
+			assert.equal(
+				(
+					await write(owner.token, [
+						{ op, table: 'physio_notes', id: noteId, data: { ...data, assessment: 'changed' } },
+					])
+				).status,
+				403,
+			);
+		}
+		assert.equal((await write(owner.token, [{ op: 'PUT', table: 'spitex_notes', id: uuid(), data }])).status, 400);
+		const roleId = uuid();
+		await api.owner
+			.insertInto('roles')
+			.values({
+				id: roleId,
+				tenantId: owner.tenantId,
+				kind: 'custom',
+				name: 'Spitex',
+				permissions: ['spitex.read', 'spitex.write'],
+			})
+			.execute();
+		await api.owner.updateTable('memberships').set({ roleId }).where('tenantId', '=', owner.tenantId).execute();
+		assert.equal((await write(owner.token, [{ op: 'PUT', table: 'physio_notes', id: uuid(), data }])).status, 403);
+		assert.equal(
+			(await write(owner.token, [{ op: 'PUT', table: 'spitex_notes', id: uuid(), data: { ...data, kind: 'spitex' } }]))
+				.status,
+			200,
+		);
+	});
+});

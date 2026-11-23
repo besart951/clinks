@@ -1,3 +1,5 @@
+import type { Billing } from './billing.ts';
+import type { ObjectStore } from '../object-store.ts';
 import type { Db } from '@clinks/db/client';
 import type { Config } from '../config.ts';
 import type { Mailer } from '../mailer.ts';
@@ -7,6 +9,8 @@ import type { TokenService } from '../tokens.ts';
 /** Everything the services need, built once in main.ts (or per test). */
 export interface Services {
 	db: Db;
+	objects?: ObjectStore;
+	billing?: Billing;
 	tokens: TokenService;
 	mailer: Mailer;
 	limiter: RateLimiter;

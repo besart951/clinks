@@ -50,7 +50,6 @@
 	let confirm = $state<ConfirmRequest | null>(null);
 
 	onMount(() => {
-		void people.load();
 		return model.resource.connect();
 	});
 

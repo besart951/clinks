@@ -1,3 +1,4 @@
+import { activeRole } from './permissions.ts';
 import type { CreateTenantRequest, InvitationDetails, MeResponse } from '@clinks/contracts/auth';
 import { administratorPermissions, roleGrants, userPermissions } from '@clinks/domain/permissions';
 import type { Permission } from '@clinks/domain/types';
@@ -74,6 +75,7 @@ export class TenantService {
 					id: tenantId,
 					name: input.name,
 					industry: input.industry,
+					plan: 'business',
 					enabledModules: [...new Set(input.modules)],
 					trialEndsAt: new Date(now.getTime() + trialDays * 86_400_000),
 					onboardingCompleted: true,
@@ -121,15 +123,21 @@ export class TenantService {
 	}
 
 	async invite(claims: AccessClaims, input: { email: string; roleId: string }, caller: Caller) {
-		const { now, mailer, config } = this.#services;
+		const { now } = this.#services;
 		const { invitation, token, tenantName } = await this.#asManager(claims, async (tx, tenantId) => {
 			const role = await tx
 				.selectFrom('roles')
-				.select('id')
+				.select(['id', 'permissions', 'kind'])
 				.where('id', '=', input.roleId)
 				.where('tenantId', '=', tenantId)
 				.executeTakeFirst();
 			if (!role) throw new ApiError(404, 'error.role_not_found', { roleId: 'error.role_not_found' });
+			const actor = await activeRole(tx, tenantId, claims.sub);
+			if (
+				actor?.kind !== 'administrator' &&
+				(role.kind === 'administrator' || role.permissions.some((p) => !roleGrants(actor, p as Permission)))
+			)
+				throw forbidden();
 			const member = await tx
 				.selectFrom('memberships')
 				.innerJoin('users', 'users.id', 'memberships.userId')
@@ -156,15 +164,48 @@ export class TenantService {
 			await audit(tx, { action: 'invitation.created', actorId: claims.sub, tenantId, target: id }, caller);
 			return { invitation: row, token: link.token, tenantName: tenant.name };
 		});
-		await mailer.send({
-			to: input.email,
+		await this.#sendInvitation(input.email, tenantName, token, caller);
+		return invitationDto(invitation);
+	}
+
+	async resend(claims: AccessClaims, id: string, caller: Caller) {
+		const { email, tenantName, token } = await this.#asManager(claims, async (tx, tenantId) => {
+			const row = await tx
+				.updateTable('invitations')
+				.set({ expiresAt: new Date(this.#services.now().getTime() + lifetimes.invitation) })
+				.where('tenantId', '=', tenantId)
+				.where('id', '=', id)
+				.where('status', '=', 'pending')
+				.returning('email')
+				.executeTakeFirst();
+			if (!row) throw new ApiError(404, 'error.invitation_invalid');
+			await tx
+				.updateTable('auth.oneTimeTokens')
+				.set({ usedAt: this.#services.now() })
+				.where('invitationId', '=', id)
+				.where('usedAt', 'is', null)
+				.execute();
+			const link = await issueLink(tx, {
+				purpose: 'invitation',
+				invitationId: id,
+				tenantId,
+				now: this.#services.now(),
+			});
+			const tenant = await tx.selectFrom('tenants').select('name').where('id', '=', tenantId).executeTakeFirstOrThrow();
+			await audit(tx, { tenantId, actorId: claims.sub, action: 'invitation.resent', target: id }, caller);
+			return { email: row.email, tenantName: tenant.name, token: link.token };
+		});
+		await this.#sendInvitation(email, tenantName, token, caller);
+	}
+	async #sendInvitation(email: string, tenantName: string, token: string, caller: Caller) {
+		await this.#services.mailer.send({
+			to: email,
 			subject: translate(caller.locale, 'mail.invitation.subject', { tenant: tenantName }),
 			text: translate(caller.locale, 'mail.invitation.body', {
 				tenant: tenantName,
-				link: `${config.WEB_ORIGIN}/#/invitation/${encodeURIComponent(token)}`,
+				link: `${this.#services.config.WEB_ORIGIN}/#/invitation/${encodeURIComponent(token)}`,
 			}),
 		});
-		return invitationDto(invitation);
 	}
 
 	async revokeInvitation(claims: AccessClaims, id: string, caller: Caller) {
@@ -313,6 +354,8 @@ function userDto(user: UserRow, twoFactorEnabled: boolean) {
 		avatarColor,
 		locale,
 		globalRole,
+		avatarDataUrl: user.avatarDataUrl,
+		notificationPreferences: user.notificationPreferences,
 		emailVerified: user.emailVerifiedAt !== null,
 		twoFactorEnabled,
 	};
@@ -324,6 +367,10 @@ function tenantDto(tenant: TenantRow): MeResponse['tenants'][number] {
 		name: tenant.name,
 		industry: tenant.industry,
 		brandColor: tenant.brandColor,
+		logoDataUrl: tenant.logoDataUrl,
+		address: tenant.address,
+		vatNumber: tenant.vatNumber,
+		iban: tenant.iban,
 		locale: tenant.locale,
 		timeZone: tenant.timeZone,
 		plan: tenant.plan,
@@ -348,6 +395,8 @@ function roleDto(role: RoleRow): MeResponse['roles'][number] {
 function invitationDto(row: InvitationRow) {
 	return {
 		id: row.id,
+		invitedBy: row.invitedBy,
+		createdAt: row.createdAt.toISOString(),
 		email: row.email,
 		roleId: row.roleId,
 		status: row.status,

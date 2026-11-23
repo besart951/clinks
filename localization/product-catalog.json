@@ -4505,6 +4505,62 @@
       "ui.ws.sync.last": {
         "de-CH": "Zuletzt synchronisiert um {time}",
         "en-US": "Last synced at {time}"
+      },
+      "ui.ws.documents.versions": {
+        "de-CH": "Versionen",
+        "en-US": "Versions"
+      },
+      "ui.ws.documents.restore_version": {
+        "de-CH": "Wiederherstellen",
+        "en-US": "Restore"
+      },
+      "ui.ws.documents.upload_version": {
+        "de-CH": "Neue Version hochladen",
+        "en-US": "Upload new version"
+      },
+      "ui.ws.planner.board_notes": {
+        "de-CH": "Gemeinsame Planungsnotizen",
+        "en-US": "Shared planning notes"
+      },
+      "ui.ws.planner.present": {
+        "de-CH": "Anwesend: {count}",
+        "en-US": "Present: {count}"
+      },
+      "ui.ws.invoice.awaiting_number": {
+        "de-CH": "Nummer ausstehend",
+        "en-US": "Number pending"
+      },
+      "error.billing.unavailable": {
+        "de-CH": "Die Abrechnung ist zurzeit nicht verfügbar.",
+        "en-US": "Billing is currently unavailable."
+      },
+      "ui.ws.billing.portal": {
+        "de-CH": "Abo und Rechnungen verwalten",
+        "en-US": "Manage subscription and invoices"
+      },
+      "ui.ws.mobile.existing": {
+        "de-CH": "Erstelle zuerst im Web einen Arbeitsbereich oder nimm eine Einladung an.",
+        "en-US": "Create a workspace on the web or accept an invitation first."
+      },
+      "ui.ws.mobile.config": {
+        "de-CH": "Die Serveradressen fehlen oder sind ungültig.",
+        "en-US": "The server addresses are missing or invalid."
+      },
+      "error.ws.unavailable": {
+        "de-CH": "Diese Aktion ist in diesem Arbeitsbereich nicht verfügbar.",
+        "en-US": "This action is unavailable in this workspace."
+      },
+      "ui.ws.settings.recovery_codes": {
+        "de-CH": "Bewahre diese einmaligen Wiederherstellungscodes sicher auf.",
+        "en-US": "Keep these single-use recovery codes in a safe place."
+      },
+      "ui.ws.sync.confirm_discard": {
+        "de-CH": "{count} Änderungen sind noch auf diesem Gerät. Beim Abmelden werden sie gelöscht. Trotzdem abmelden?",
+        "en-US": "{count} changes are still on this device. Signing out deletes them. Sign out anyway?"
+      },
+      "error.ws.sync.switch_pending": {
+        "de-CH": "Warte auf die Synchronisierung der Änderungen, bevor du den Mandanten wechselst.",
+        "en-US": "Wait for pending changes to sync before switching workspaces."
       }
     }
   }

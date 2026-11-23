@@ -1,4 +1,4 @@
-import { MockApiError, type MockDatabase, type TableName } from '../data/database.ts';
+import { MockApiError, type WorkspaceCache, type TableName } from '../data/database.ts';
 
 export type ResourceStatus = 'loading' | 'ready' | 'error' | 'forbidden';
 
@@ -12,10 +12,10 @@ export class Resource<T> {
 	error = $state('');
 	#load: () => Promise<T>;
 	#tables: readonly TableName[];
-	#db: MockDatabase;
+	#db: WorkspaceCache;
 	#request = 0;
 
-	constructor(db: MockDatabase, tables: readonly TableName[], load: () => Promise<T>) {
+	constructor(db: WorkspaceCache, tables: readonly TableName[], load: () => Promise<T>) {
 		this.#db = db;
 		this.#tables = tables;
 		this.#load = load;

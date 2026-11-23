@@ -3,9 +3,10 @@ import { MockApiError } from '../../data/database.ts';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 
-export const maxUploadBytes = 1_000_000;
+import { maxDocumentBytes } from '@clinks/contracts/workspace-schemas';
+export const maxUploadBytes = maxDocumentBytes;
 
-/** Uploads one browser file into the mock document store. */
+/** Uploads one browser file into the tenant document repository. */
 export async function uploadDocument(
 	workspace: Workspace,
 	file: File,

@@ -2,7 +2,7 @@ import type { ZodType } from 'zod';
 import { newId, type TenantId, type UserId } from '@clinks/domain/ids';
 import type { AuditEntry, AuditTargetKind, Permission, TenantRecord } from '@clinks/domain/types';
 import type { Draft, Patch, Repository } from '@clinks/contracts/repository';
-import { MockApiError, stamp, type MockDatabase, type TableName, type Tables } from './database.ts';
+import { MockApiError, stamp, type WorkspaceCache, type TableName, type Tables } from './database.ts';
 
 export type TenantTable = {
 	[Name in TableName]: Tables[Name] extends TenantRecord ? Name : never;
@@ -14,15 +14,16 @@ export type Row<Name extends TableName> = Tables[Name];
 export interface RequestContext {
 	tenantId(): TenantId | null;
 	actorId(): UserId | null;
-	can(permission: Permission): boolean;
+	can(permission: Permission | null): boolean;
 	localize(key: string): string;
 }
 
 export interface RepositoryConfig<T> {
 	table: TenantTable;
-	read: Permission;
-	write: Permission;
+	read: Permission | null;
+	write: Permission | null;
 	schema?: ZodType;
+	visible?: (row: T) => boolean;
 	audit?: { kind: AuditTargetKind; label(record: T): string };
 }
 
@@ -44,11 +45,11 @@ export function validationError(
 
 /** Tenant-scoped CRUD with permission checks, optimistic revisions and audit entries, like the real API. */
 export class TenantRepository<Name extends TenantTable> implements Repository<Row<Name>> {
-	#db: MockDatabase;
+	#db: WorkspaceCache;
 	#context: RequestContext;
 	#config: RepositoryConfig<Row<Name>>;
 
-	constructor(db: MockDatabase, context: RequestContext, config: RepositoryConfig<Row<Name>>) {
+	constructor(db: WorkspaceCache, context: RequestContext, config: RepositoryConfig<Row<Name>>) {
 		this.#db = db;
 		this.#context = context;
 		this.#config = config;
@@ -57,7 +58,9 @@ export class TenantRepository<Name extends TenantTable> implements Repository<Ro
 	list(where: (row: Row<Name>) => boolean = () => true): Promise<Row<Name>[]> {
 		return this.#db.request(() => {
 			const tenantId = this.#authorize(this.#config.read);
-			return this.#rows().filter((row) => row.tenantId === tenantId && where(row));
+			return this.#rows().filter(
+				(row) => row.tenantId === tenantId && (this.#config.visible?.(row) ?? true) && where(row),
+			);
 		});
 	}
 
@@ -111,6 +114,7 @@ export class TenantRepository<Name extends TenantTable> implements Repository<Ro
 			const tenantId = this.#authorize(this.#config.write);
 			if (record.tenantId !== tenantId)
 				throw new MockApiError('unauthorized', this.#context.localize('error.unauthorized'));
+			this.#validate(record);
 			this.#rows().push(record);
 			this.#record('restored', record);
 			return record;
@@ -125,7 +129,7 @@ export class TenantRepository<Name extends TenantTable> implements Repository<Ro
 		return this.#config.audit ? [this.#config.table, 'audit'] : [this.#config.table];
 	}
 
-	#authorize(permission: Permission): TenantId {
+	#authorize(permission: Permission | null): TenantId {
 		const tenantId = this.#context.tenantId();
 		if (!tenantId || !this.#context.can(permission)) {
 			throw new MockApiError('unauthorized', this.#context.localize('error.unauthorized'));
@@ -134,7 +138,10 @@ export class TenantRepository<Name extends TenantTable> implements Repository<Ro
 	}
 
 	#find(id: string, tenantId: TenantId): Row<Name> {
-		const row = this.#rows().find((candidate) => candidate.id === id && candidate.tenantId === tenantId);
+		const row = this.#rows().find(
+			(candidate) =>
+				candidate.id === id && candidate.tenantId === tenantId && (this.#config.visible?.(candidate) ?? true),
+		);
 		if (!row) throw new MockApiError('not_found', this.#context.localize('error.ws.not_found'));
 		return row;
 	}
@@ -158,6 +165,6 @@ export class TenantRepository<Name extends TenantTable> implements Repository<Ro
 	}
 }
 
-export function appendAudit(db: MockDatabase, entry: Draft<AuditEntry> & { tenantId: TenantId }) {
+export function appendAudit(db: WorkspaceCache, entry: Draft<AuditEntry> & { tenantId: TenantId }) {
 	db.table('audit').push(stamp<AuditEntry>({ ...entry, id: newId() }));
 }

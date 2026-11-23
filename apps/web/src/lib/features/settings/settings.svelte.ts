@@ -1,3 +1,4 @@
+import { RemoteAuthGateway } from '../../session/remote-auth.ts';
 import type { InlineFieldSpec } from '@clinks/ui/kit/inline-edit';
 import { isValidSwissIban } from '@clinks/domain/qr-bill';
 import { toast } from 'svelte-sonner';
@@ -166,6 +167,8 @@ export class ProfileModel extends SettingsForm {
 	currentPassword = $state('');
 	newPassword = $state('');
 	twoFactorCode = $state('');
+	twoFactorSecret = $state('');
+	recoveryCodes = $state<string[]>([]);
 	readonly sessions: Resource<BrowserSession[]>;
 
 	constructor(workspace: Workspace) {
@@ -223,7 +226,36 @@ export class ProfileModel extends SettingsForm {
 		}
 	}
 
+	async startTwoFactor() {
+		const client = this.workspace.remote;
+		if (!client) return true;
+		const result = await this.attempt(() => client.request<{ secret: string }>('POST', '/me/two-factor/setup'));
+		this.twoFactorSecret = result?.secret ?? '';
+		return Boolean(result);
+	}
 	async setTwoFactor(enabled: boolean) {
+		const client = this.workspace.remote;
+		if (client) {
+			const saved = await this.attempt(
+				async () => {
+					if (enabled)
+						this.recoveryCodes = (
+							await client.request<{ recoveryCodes: string[] }>('POST', '/me/two-factor/enable', {
+								code: this.twoFactorCode,
+							})
+						).recoveryCodes;
+					else await client.request('POST', '/me/two-factor/disable', { code: this.twoFactorCode });
+					const auth = this.workspace.auth;
+					if (auth instanceof RemoteAuthGateway) await auth.loadAccount();
+					await this.workspace.session.refresh();
+					this.twoFactorSecret = '';
+					this.twoFactorCode = '';
+					return true;
+				},
+				enabled ? 'ui.ws.settings.two_factor_enabled' : 'ui.ws.settings.two_factor_disabled',
+			);
+			return Boolean(saved);
+		}
 		const saved = await this.attempt(
 			() => this.workspace.account.setTwoFactor(enabled, this.twoFactorCode),
 			enabled ? 'ui.ws.settings.two_factor_enabled' : 'ui.ws.settings.two_factor_disabled',
@@ -378,7 +410,16 @@ export class BillingModel extends SettingsForm {
 		this.cycle = workspace.session.tenant?.billingCycle ?? 'monthly';
 	}
 
+	async openBilling(input?: { plan: PlanCode; cycle: 'monthly' | 'yearly' }) {
+		const client = this.workspace.remote;
+		if (!client) return;
+		const result = await this.attempt(() =>
+			client.request<{ url: string }>('POST', input ? '/billing/checkout' : '/billing/portal', input),
+		);
+		if (result) location.assign(result.url);
+	}
 	async choosePlan(plan: PlanCode) {
+		if (this.workspace.remote) return this.openBilling({ plan, cycle: this.cycle });
 		const saved = await this.attempt(
 			() => this.workspace.account.changePlan(plan, this.cycle),
 			'ui.ws.billing.plan_changed',
@@ -426,7 +467,10 @@ export class PrivacyModel extends SettingsForm {
 	password = $state('');
 
 	async exportData() {
-		const data = await this.attempt(() => this.workspace.account.exportTenantData(), 'ui.ws.privacy.exported');
+		const data = await this.attempt(
+			async () => this.workspace.api.exportTenantData(await this.workspace.account.exportTenantData()),
+			'ui.ws.privacy.exported',
+		);
 		if (!data) return;
 		this.workspace.platform.files.save(
 			new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }),

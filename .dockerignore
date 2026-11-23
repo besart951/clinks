@@ -1,0 +1,15 @@
+.git
+**/.env
+**/.env.*
+**/node_modules
+**/.svelte-kit
+**/build
+**/build-artifact
+**/test-results
+**/target
+apps/mobile
+apps/desktop
+docs
+.agents
+**/.terraform
+**/*.tfstate*

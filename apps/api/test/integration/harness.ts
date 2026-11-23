@@ -1,3 +1,4 @@
+import type { Billing } from '../../src/services/billing.ts';
 import { createDb, type Db } from '@clinks/db/client';
 import { createTestDatabase, type TestDatabase } from '@clinks/db/testing';
 import { generateTOTP } from '@oslojs/otp';
@@ -10,7 +11,7 @@ import { TokenService } from '../../src/tokens.ts';
 export const password = 'correct-horse-battery';
 
 /** The API on a fresh database, with mails kept in memory and a clock tests can move. */
-export async function startApi() {
+export async function startApi(billing?: Billing) {
 	const database: TestDatabase = await createTestDatabase();
 	const db: Db = createDb(database.appUrl, { max: 4 });
 	const owner: Db = createDb(database.ownerUrl, { max: 2 });
@@ -18,6 +19,7 @@ export async function startApi() {
 	const mailer = new MemoryMailer();
 	const clock = { offset: 0 };
 	const services = {
+		billing,
 		db,
 		tokens,
 		mailer,
@@ -88,7 +90,7 @@ export async function startApi() {
 		const { browser, token } = await signedUp(email);
 		const created = await browser.call('POST', '/tenants', {
 			token,
-			body: { name: tenantName, industry: 'physio', modules: ['finance'] },
+			body: { name: tenantName, industry: 'physio', modules: ['finance', 'planner', 'mail', 'physio', 'spitex'] },
 		});
 		const switched = await browser.call('POST', '/me/tenant', { token, body: { tenantId: created.body.tenantId } });
 		return { browser, token: switched.body.accessToken as string, tenantId: created.body.tenantId as string };

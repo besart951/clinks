@@ -1,31 +1,50 @@
+import type { Preferences } from '../platform/types.ts';
 import type { InvitationDetails, MeResponse, SessionResponse, SignInResponse } from '@clinks/contracts/auth';
 import type { MembershipId, RoleId, TenantId, UserId } from '@clinks/domain/ids';
 import type { Membership, Permission, PlanCode, Role, Tenant, User } from '@clinks/domain/types';
+import { importWorkspace } from '../data/import-workspace.ts';
 import type { ApiClient } from '../data/api-client.ts';
-import type { MockDatabase, Snapshot } from '../data/database.ts';
+import type { WorkspaceCache, Snapshot } from '../data/database.ts';
 import type { SyncEngine } from '../sync/sync-engine.svelte.ts';
 import type { AuthGateway, NewTenant, SignInStep } from './auth-gateway.ts';
 
 /**
  * Sign-in against the CLinks API. After each sign-in the account (user, tenants, roles, memberships) is
- * copied into the local database, because the other screens still read from it until phase 4.
+ * copied into the local database, for the account settings and the session snapshot.
  */
 export class RemoteAuthGateway implements AuthGateway {
 	readonly remote = true;
 	readonly #client: ApiClient;
-	readonly #db: MockDatabase;
+	#activeTenant: string | null = null;
+	readonly #db: WorkspaceCache;
 	readonly #sync: SyncEngine;
+	readonly #legacy: () => WorkspaceCache;
+	readonly #preferences: Preferences;
+	#userId: UserId | null = null;
 	#challengeId: string | null = null;
 	#verificationId: string | null = null;
 
-	constructor(client: ApiClient, db: MockDatabase, sync: SyncEngine) {
+	constructor(
+		client: ApiClient,
+		db: WorkspaceCache,
+		sync: SyncEngine,
+		legacy: () => WorkspaceCache,
+		preferences: Preferences,
+	) {
+		this.#preferences = preferences;
+		this.#legacy = legacy;
 		this.#client = client;
 		this.#db = db;
 		this.#sync = sync;
 	}
 
 	async resume() {
-		if (!(await this.#client.refresh())) return null;
+		if (this.#preferences.read('clinks.signedOut', false)) return null;
+		if (!(await this.#client.refresh())) {
+			if (this.#db.table('users').length) await this.#sync.clear();
+			this.#db.clear();
+			return null;
+		}
 		return { userId: await this.#mirror(), verified: true };
 	}
 
@@ -71,15 +90,33 @@ export class RemoteAuthGateway implements AuthGateway {
 
 	/** A token for the tenant, and sync of that tenant's data. */
 	async switchTenant(tenantId: TenantId) {
+		if (
+			this.#activeTenant &&
+			tenantId !== this.#activeTenant &&
+			(await (await this.#sync.database()).getUploadQueueStats()).count
+		) {
+			throw this.#client.localError('error.ws.sync.switch_pending');
+		}
 		this.#client.adopt(await this.#client.request<SessionResponse>('POST', '/me/tenant', { tenantId }));
-		void this.#sync.reconnect();
+		this.#activeTenant = tenantId;
+		await this.#sync.reconnect();
+		if (this.#userId) {
+			try {
+				await importWorkspace(this.#client, this.#legacy(), tenantId, this.#userId, this.#db);
+			} catch (error) {
+				this.#sync.reportImportError(error);
+			}
+		}
 	}
 
 	/** Signs the device out and wipes the synced data from it. */
 	async signOut() {
+		this.#preferences.write('clinks.signedOut', true);
 		await this.#client.request('POST', '/auth/sign-out', {}).catch(() => undefined);
 		this.#client.forget();
 		await this.#sync.clear();
+		this.#activeTenant = null;
+		this.#db.clear();
 	}
 
 	requestPasswordReset(email: string) {
@@ -97,7 +134,7 @@ export class RemoteAuthGateway implements AuthGateway {
 			modules: input.modules,
 		});
 		await this.switchTenant(tenantId);
-		const me = await this.#loadAccount();
+		const me = await this.loadAccount();
 		const userRole = me.roles.find((role) => role.tenantId === tenantId && role.kind === 'user');
 		// The tenant exists now; a failed invitation must not fail onboarding (it can be sent again in settings).
 		const invitations = userRole ? input.invites : [];
@@ -105,11 +142,11 @@ export class RemoteAuthGateway implements AuthGateway {
 			invitations.map((email) => this.#client.request('POST', '/tenant/invitations', { email, roleId: userRole!.id })),
 		);
 		if (input.demoData) {
-			// Synced tables get real (uploaded) demo rows; the rest stays local until it syncs too.
-			const { contacts, appointments, ...local } = demoRows(tenantId);
+			// Insert contacts before records that reference them.
+			const { contacts, appointments, tasks } = demoRows(tenantId);
 			await this.#sync.insert('contacts', contacts ?? []);
 			await this.#sync.insert('appointments', appointments ?? []);
-			this.#db.merge(local);
+			await this.#sync.insert('tasks', tasks ?? []);
 		}
 		return tenantId;
 	}
@@ -125,29 +162,36 @@ export class RemoteAuthGateway implements AuthGateway {
 			input,
 		);
 		if (result.session) return { tenantId: result.tenantId, signedInAs: await this.#adopt(result.session) };
-		await this.#loadAccount();
+		await this.loadAccount();
 		return { tenantId: result.tenantId, signedInAs: null };
 	}
 
 	async #adopt(session: SessionResponse): Promise<UserId> {
+		this.#preferences.remove('clinks.signedOut');
 		this.#client.adopt(session);
 		return this.#mirror();
 	}
 
 	async #mirror(): Promise<UserId> {
-		return (await this.#loadAccount()).user.id as UserId;
+		return (await this.loadAccount()).user.id as UserId;
 	}
 
 	/** Reads the account from the API and copies it into the local database. */
-	async #loadAccount(): Promise<MeResponse> {
+	async loadAccount(): Promise<MeResponse> {
 		const me = await this.#client.request<MeResponse>('GET', '/me');
-		this.#db.merge(localRows(this.#db, me));
+		const oldUsers = this.#db.table('users');
+		if (oldUsers.length && !oldUsers.some((user) => user.id === me.user.id)) await this.#sync.clear();
+		this.#activeTenant = me.tenantId;
+		this.#userId = me.user.id as UserId;
+		const rows = localRows(this.#db, me);
+		this.#db.clear();
+		this.#db.merge(rows);
 		return me;
 	}
 }
 
 /** The API's account as rows of the local database, keeping local-only fields (logo, address, …). */
-function localRows(db: MockDatabase, me: MeResponse): Partial<Snapshot> {
+function localRows(db: WorkspaceCache, me: MeResponse): Partial<Snapshot> {
 	const now = new Date().toISOString();
 	const stamps = (existing: { revision: number; createdAt: string } | undefined) => ({
 		revision: (existing?.revision ?? 0) + 1,
@@ -156,9 +200,7 @@ function localRows(db: MockDatabase, me: MeResponse): Partial<Snapshot> {
 	});
 	const localUser = db.table('users').find((row) => row.id === me.user.id);
 	const user: User = {
-		avatarDataUrl: null,
 		password: '',
-		notificationPreferences: { inApp: true, email: true, push: false, digest: 'daily' },
 		...localUser,
 		...me.user,
 		id: me.user.id as UserId,
@@ -167,10 +209,6 @@ function localRows(db: MockDatabase, me: MeResponse): Partial<Snapshot> {
 	const tenants = me.tenants.map((tenant): Tenant => {
 		const local = db.table('tenants').find((row) => row.id === tenant.id);
 		return {
-			logoDataUrl: null,
-			address: { street: '', zip: '', city: '' },
-			vatNumber: '',
-			iban: '',
 			cancelledAt: null,
 			paymentMethod: null,
 			...local,

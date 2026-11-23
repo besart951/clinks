@@ -1,6 +1,7 @@
 import type { AbstractPowerSyncDatabase, SyncStatus } from '@powersync/web';
 import { recordToRow } from '@clinks/sync-schema/mapping';
-import { syncedTableNames, type SyncedTableName } from '@clinks/sync-schema/tables';
+import { localTableNames, type LocalTableName, type SyncedTableName } from '@clinks/sync-schema/tables';
+import { MockApiError } from '../data/database.ts';
 import type { ApiClient } from '../data/api-client.ts';
 import { ApiConnector } from './connector.ts';
 
@@ -20,14 +21,14 @@ export class SyncEngine {
 
 	readonly #client: ApiClient;
 	readonly #endpoint: string;
-	readonly #changed: (table: SyncedTableName) => void;
+	readonly #changed: (table: LocalTableName) => void;
 	readonly #rejected: (message: string) => void;
 	#database: Promise<AbstractPowerSyncDatabase> | null = null;
 
 	constructor(
 		client: ApiClient,
 		endpoint: string,
-		events: { changed: (table: SyncedTableName) => void; rejected: (message: string) => void },
+		events: { changed: (table: LocalTableName) => void; rejected: (message: string) => void },
 	) {
 		this.#client = client;
 		this.#endpoint = endpoint;
@@ -42,6 +43,8 @@ export class SyncEngine {
 
 	/** Starts syncing with the current access token (and so the current tenant). */
 	async connect() {
+		if (typeof navigator !== 'undefined' && navigator.storage?.persist)
+			void navigator.storage.persist().catch(() => false);
 		const database = await this.database();
 		await database.connect(new ApiConnector(this.#client, this.#endpoint, this.#rejected));
 	}
@@ -71,11 +74,15 @@ export class SyncEngine {
 
 	/** Signs the device out of sync and deletes every synced row from it. */
 	async clear() {
-		if (!this.#database) return;
-		const database = await this.#database;
+		const database = await this.database();
 		await database.disconnectAndClear();
 		this.pendingWrites = 0;
 		this.lastSyncedAt = null;
+	}
+
+	reportImportError(error: unknown) {
+		if (error instanceof MockApiError) this.#rejected(error.message);
+		else throw error;
 	}
 
 	async #open(): Promise<AbstractPowerSyncDatabase> {
@@ -90,11 +97,11 @@ export class SyncEngine {
 				onChange: (event) => {
 					// Synced rows land in PowerSync's internal tables (ps_data__contacts); local writes in the views.
 					const tables = new Set(event.changedTables.map((table) => table.replace(/^ps_data(_local)?__/, '')));
-					for (const table of syncedTableNames) if (tables.has(table)) this.#changed(table);
+					for (const table of localTableNames) if (tables.has(table)) this.#changed(table);
 					void this.#countPending(database);
 				},
 			},
-			{ tables: syncedTableNames, throttleMs: 50 },
+			{ tables: localTableNames, throttleMs: 50 },
 		);
 		await database.init();
 		await this.#countPending(database);

@@ -20,9 +20,9 @@ export function permissionAreas(): { area: string; read: Permission | null; writ
 	return [...areas.entries()].map(([area, entry]) => ({ area, ...entry }));
 }
 
-export function roleGrants(role: Pick<Role, 'permissions' | 'kind'> | null, permission: Permission): boolean {
+export function roleGrants(role: Pick<Role, 'permissions' | 'kind'> | null, permission: Permission | null): boolean {
 	if (!role) return false;
-	if (role.kind === 'administrator') return true;
+	if (permission === null || role.kind === 'administrator') return true;
 	return role.permissions.includes(permission);
 }
 

@@ -108,6 +108,8 @@ export class ExpensesModel {
 	async receiptUrl(expense: Expense): Promise<string | null> {
 		if (!expense.receiptId) return null;
 		const document = await this.#workspace.api.documents.get(expense.receiptId).catch(() => null);
-		return document?.dataUrl ?? null;
+		return document
+			? ((await this.#workspace.run(() => this.#workspace.documentFiles.preview(document)))?.dataUrl ?? null)
+			: null;
 	}
 }

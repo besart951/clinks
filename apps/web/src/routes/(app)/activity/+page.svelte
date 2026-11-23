@@ -18,7 +18,6 @@
 	const model = new ActivityModel(workspace);
 	const people = new PeopleDirectory(workspace);
 	onMount(() => {
-		void people.load();
 		return model.resource.connect();
 	});
 </script>

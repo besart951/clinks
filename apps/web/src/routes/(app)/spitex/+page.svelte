@@ -35,7 +35,6 @@
 	if (query.get('date')) model.date = query.get('date')!;
 
 	onMount(() => {
-		void people.load();
 		const stop = model.resource.connect();
 		const stopShortcut = workspace.registerNewAction(() => canWrite && createVisit());
 		return () => {

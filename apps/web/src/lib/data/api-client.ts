@@ -31,6 +31,10 @@ export class ApiClient {
 		this.#localize = localize;
 	}
 
+	localError(key: string) {
+		return new MockApiError('validation', this.#localize(key));
+	}
+
 	get signedIn(): boolean {
 		return this.#accessToken !== null;
 	}

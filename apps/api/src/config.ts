@@ -16,6 +16,13 @@ const environment = z.object({
 	SIGNING_KEY: z.string().optional(),
 	/** Public JWKs of keys being rotated out (JSON array), still accepted until their tokens expire. */
 	PREVIOUS_PUBLIC_KEYS: z.string().default('[]'),
+	STRIPE_SECRET_KEY: z.string().min(1).optional(),
+	STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
+	STRIPE_PRICES: z.string().optional(),
+	STRIPE_TAX: boolean.default(false),
+	S3_ENDPOINT: z.url().optional(),
+	S3_BUCKET: z.string().min(1).optional(),
+	S3_REGION: z.string().default('us-east-1'),
 	SMTP_URL: z.string().default('smtp://localhost:1025'),
 	MAIL_FROM: z.string().default('CLinks <no-reply@clinks.ch>'),
 	/** Secure cookies need HTTPS; browsers treat http://localhost as secure too. */
@@ -29,5 +36,7 @@ export type Config = z.infer<typeof environment>;
 export function loadConfig(source: NodeJS.ProcessEnv = process.env): Config {
 	const config = environment.parse(source);
 	if (config.NODE_ENV === 'production' && !config.SIGNING_KEY) throw new Error('SIGNING_KEY is required in production');
+	if (config.NODE_ENV === 'production' && (!config.S3_BUCKET || !config.S3_ENDPOINT))
+		throw new Error('A private versioned S3 bucket and endpoint are required in production');
 	return config;
 }

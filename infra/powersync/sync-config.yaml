@@ -19,16 +19,183 @@ streams:
     auto_subscribe: true
     query: |
       SELECT * FROM contacts WHERE tenant_id IN (
-        SELECT m.tenant_id FROM memberships m INNER JOIN roles r ON r.id = m.role_id
-        WHERE m.user_id = auth.user_id() AND m.tenant_id = auth.parameter('tenant_id') AND m.status = 'active'
-          AND 'contacts.read' IN r.permissions
+        SELECT tenant_id FROM sync_access
+        WHERE user_id = auth.user_id() AND tenant_id = auth.parameter('tenant_id')
+          AND 'contacts.read' IN read_permissions
       )
 
   appointments:
     auto_subscribe: true
     query: |
       SELECT * FROM appointments WHERE tenant_id IN (
-        SELECT m.tenant_id FROM memberships m INNER JOIN roles r ON r.id = m.role_id
-        WHERE m.user_id = auth.user_id() AND m.tenant_id = auth.parameter('tenant_id') AND m.status = 'active'
-          AND 'calendar.read' IN r.permissions
+        SELECT tenant_id FROM sync_access
+        WHERE user_id = auth.user_id() AND tenant_id = auth.parameter('tenant_id')
+          AND 'calendar.read' IN read_permissions
       )
+
+  folders:
+    auto_subscribe: true
+    query: |
+      SELECT * FROM folders WHERE tenant_id IN (
+        SELECT tenant_id FROM sync_access
+        WHERE user_id = auth.user_id() AND tenant_id = auth.parameter('tenant_id')
+          AND 'documents.read' IN read_permissions
+      )
+
+  documents:
+    auto_subscribe: true
+    query: |
+      SELECT * FROM documents WHERE tenant_id IN (
+        SELECT tenant_id FROM sync_access
+        WHERE user_id = auth.user_id() AND tenant_id = auth.parameter('tenant_id')
+          AND 'documents.read' IN read_permissions
+      )
+
+  invoices:
+    auto_subscribe: true
+    query: |
+      SELECT * FROM invoices WHERE tenant_id IN (
+        SELECT tenant_id FROM sync_access
+        WHERE user_id = auth.user_id() AND tenant_id = auth.parameter('tenant_id')
+          AND 'finance.read' IN read_permissions
+      )
+
+  expenses:
+    auto_subscribe: true
+    query: |
+      SELECT * FROM expenses WHERE tenant_id IN (
+        SELECT tenant_id FROM sync_access
+        WHERE user_id = auth.user_id() AND tenant_id = auth.parameter('tenant_id')
+          AND 'finance.read' IN read_permissions
+      )
+
+  tasks:
+    auto_subscribe: true
+    query: |
+      SELECT * FROM tasks WHERE tenant_id IN (
+        SELECT tenant_id FROM sync_access
+        WHERE user_id = auth.user_id() AND tenant_id = auth.parameter('tenant_id')
+          AND 'planner.read' IN read_permissions
+      )
+
+  contact_comments:
+    auto_subscribe: true
+    query: |
+      SELECT * FROM contact_comments WHERE tenant_id IN (
+        SELECT tenant_id FROM sync_access
+        WHERE user_id = auth.user_id() AND tenant_id = auth.parameter('tenant_id')
+          AND 'contacts.read' IN read_permissions
+      )
+
+  task_comments:
+    auto_subscribe: true
+    query: |
+      SELECT * FROM task_comments WHERE tenant_id IN (
+        SELECT tenant_id FROM sync_access
+        WHERE user_id = auth.user_id() AND tenant_id = auth.parameter('tenant_id')
+          AND 'planner.read' IN read_permissions
+      )
+
+  invoice_comments:
+    auto_subscribe: true
+    query: |
+      SELECT * FROM invoice_comments WHERE tenant_id IN (
+        SELECT tenant_id FROM sync_access
+        WHERE user_id = auth.user_id() AND tenant_id = auth.parameter('tenant_id')
+          AND 'finance.read' IN read_permissions
+      )
+
+  mails:
+    auto_subscribe: true
+    query: |
+      SELECT * FROM mails WHERE tenant_id IN (
+        SELECT tenant_id FROM sync_access
+        WHERE user_id = auth.user_id() AND tenant_id = auth.parameter('tenant_id')
+          AND 'mail.read' IN read_permissions
+      )
+
+  templates:
+    auto_subscribe: true
+    query: |
+      SELECT * FROM templates WHERE tenant_id IN (
+        SELECT tenant_id FROM sync_access
+        WHERE user_id = auth.user_id() AND tenant_id = auth.parameter('tenant_id')
+          AND 'mail.read' IN read_permissions
+      )
+
+  campaigns:
+    auto_subscribe: true
+    query: |
+      SELECT * FROM campaigns WHERE tenant_id IN (
+        SELECT tenant_id FROM sync_access
+        WHERE user_id = auth.user_id() AND tenant_id = auth.parameter('tenant_id')
+          AND 'mail.read' IN read_permissions
+      )
+
+  prescriptions:
+    auto_subscribe: true
+    query: |
+      SELECT * FROM prescriptions WHERE tenant_id IN (
+        SELECT tenant_id FROM sync_access
+        WHERE user_id = auth.user_id() AND tenant_id = auth.parameter('tenant_id')
+          AND 'physio.read' IN read_permissions
+      )
+
+  physio_notes:
+    auto_subscribe: true
+    query: |
+      SELECT * FROM physio_notes WHERE tenant_id IN (
+        SELECT tenant_id FROM sync_access
+        WHERE user_id = auth.user_id() AND tenant_id = auth.parameter('tenant_id')
+          AND 'physio.read' IN read_permissions
+      )
+
+  spitex_notes:
+    auto_subscribe: true
+    query: |
+      SELECT * FROM spitex_notes WHERE tenant_id IN (
+        SELECT tenant_id FROM sync_access
+        WHERE user_id = auth.user_id() AND tenant_id = auth.parameter('tenant_id')
+          AND 'spitex.read' IN read_permissions
+      )
+
+  time_entries:
+    auto_subscribe: true
+    query: |
+      SELECT * FROM time_entries WHERE tenant_id IN (
+        SELECT tenant_id FROM sync_access
+        WHERE user_id = auth.user_id() AND tenant_id = auth.parameter('tenant_id')
+          AND 'spitex.read' IN read_permissions
+      )
+
+  notifications:
+    auto_subscribe: true
+    query: |
+      SELECT * FROM notifications WHERE user_id = auth.user_id() AND tenant_id IN (
+        SELECT tenant_id FROM sync_access
+        WHERE user_id = auth.user_id() AND tenant_id = auth.parameter('tenant_id')
+      )
+
+  audit:
+    auto_subscribe: true
+    query: |
+      SELECT id, tenant_id, actor_id, action, target, created_at FROM audit WHERE tenant_id IN (
+        SELECT tenant_id FROM sync_access
+        WHERE user_id = auth.user_id() AND tenant_id = auth.parameter('tenant_id')
+          AND 'audit.read' IN read_permissions
+      )
+
+  directory:
+    auto_subscribe: true
+    queries:
+      - |
+        SELECT id, tenant_id, user_id, job_title FROM memberships WHERE status = 'active' AND tenant_id IN (
+          SELECT tenant_id FROM memberships WHERE user_id = auth.user_id()
+            AND tenant_id = auth.parameter('tenant_id') AND status = 'active'
+        )
+      - |
+        SELECT id, first_name, last_name, email, avatar_color FROM users WHERE id IN (
+          SELECT m.user_id FROM memberships m INNER JOIN memberships caller ON caller.tenant_id = m.tenant_id
+          WHERE caller.user_id = auth.user_id() AND caller.tenant_id = auth.parameter('tenant_id')
+            AND m.tenant_id = auth.parameter('tenant_id') AND caller.status = 'active' AND m.status = 'active'
+        )

@@ -10,10 +10,11 @@ import type { SyncEngine } from './sync-engine.svelte.ts';
 
 type Synced = VersionedRecord & { tenantId: TenantId; updatedAt: string };
 
-export interface SyncedRepositoryConfig {
+interface SyncedRepositoryConfig<Row> {
+	visible?: (row: Row) => boolean;
 	table: SyncedTableName;
-	read: Permission;
-	write: Permission;
+	read: Permission | null;
+	write: Permission | null;
 	schema: ZodType;
 }
 
@@ -24,9 +25,9 @@ export interface SyncedRepositoryConfig {
 export class SyncedRepository<Row extends Synced> implements Repository<Row> {
 	readonly #engine: SyncEngine;
 	readonly #context: RequestContext;
-	readonly #config: SyncedRepositoryConfig;
+	readonly #config: SyncedRepositoryConfig<Row>;
 
-	constructor(engine: SyncEngine, context: RequestContext, config: SyncedRepositoryConfig) {
+	constructor(engine: SyncEngine, context: RequestContext, config: SyncedRepositoryConfig<Row>) {
 		this.#engine = engine;
 		this.#context = context;
 		this.#config = config;
@@ -38,13 +39,16 @@ export class SyncedRepository<Row extends Synced> implements Repository<Row> {
 		const rows = await database.getAll<SqliteRow>(`SELECT * FROM ${this.#config.table} WHERE tenant_id = ?`, [
 			tenantId,
 		]);
-		return rows.map((row) => rowToRecord<Row>(this.#config.table, row)).filter(where);
+		return rows
+			.map((row) => rowToRecord<Row>(this.#config.table, row))
+			.filter((row) => (this.#config.visible?.(row) ?? true) && where(row));
 	}
 
 	async get(id: Row['id']): Promise<Row> {
 		const tenantId = this.#authorize(this.#config.read);
 		const row = await this.#find(id, tenantId);
-		if (!row) throw new MockApiError('not_found', this.#context.localize('error.ws.not_found'));
+		if (!row || this.#config.visible?.(row) === false)
+			throw new MockApiError('not_found', this.#context.localize('error.ws.not_found'));
 		return row;
 	}
 
@@ -59,26 +63,35 @@ export class SyncedRepository<Row extends Synced> implements Repository<Row> {
 
 	async update(id: Row['id'], revision: number, patch: Patch<Row>): Promise<Row> {
 		const tenantId = this.#authorize(this.#config.write);
-		const current = await this.get(id);
-		if (current.revision !== revision) throw new MockApiError('conflict', this.#context.localize('error.conflict'));
-		const next = {
-			...current,
-			...patch,
-			id,
-			tenantId,
-			revision: revision + 1,
-			updatedAt: new Date().toISOString(),
-		} as Row;
-		this.#validate(next);
-		// Only the changed fields go into the upload, so a concurrent edit of other fields survives.
-		const changes = recordToRow(this.#config.table, { ...patch, revision: next.revision, updatedAt: next.updatedAt });
-		const columns = Object.keys(changes);
 		const database = await this.#engine.database();
-		await database.execute(
-			`UPDATE ${this.#config.table} SET ${columns.map((column) => `${column} = ?`).join(', ')} WHERE id = ? AND tenant_id = ?`,
-			[...Object.values(changes), id, tenantId],
-		);
-		return next;
+		return database.writeTransaction(async (tx) => {
+			const row = await tx.getOptional<SqliteRow>(
+				`SELECT * FROM ${this.#config.table} WHERE id = ? AND tenant_id = ?`,
+				[id, tenantId],
+			);
+			if (!row) throw new MockApiError('not_found', this.#context.localize('error.ws.not_found'));
+			const current = rowToRecord<Row>(this.#config.table, row);
+			if (this.#config.visible?.(current) === false)
+				throw new MockApiError('not_found', this.#context.localize('error.ws.not_found'));
+			if (current.revision !== revision) throw new MockApiError('conflict', this.#context.localize('error.conflict'));
+			const next = {
+				...current,
+				...patch,
+				id,
+				tenantId,
+				revision: revision + 1,
+				updatedAt: new Date().toISOString(),
+			} as Row;
+			this.#validate(next);
+			// Only the changed fields go into the upload, so a concurrent edit of other fields survives.
+			const changes = recordToRow(this.#config.table, { ...patch, revision: next.revision, updatedAt: next.updatedAt });
+			const columns = Object.keys(changes);
+			await tx.execute(
+				`UPDATE ${this.#config.table} SET ${columns.map((column) => `${column} = ?`).join(', ')} WHERE id = ? AND tenant_id = ?`,
+				[...Object.values(changes), id, tenantId],
+			);
+			return next;
+		});
 	}
 
 	async remove(id: Row['id']): Promise<void> {
@@ -92,6 +105,7 @@ export class SyncedRepository<Row extends Synced> implements Repository<Row> {
 		const tenantId = this.#authorize(this.#config.write);
 		if (record.tenantId !== tenantId)
 			throw new MockApiError('unauthorized', this.#context.localize('error.unauthorized'));
+		this.#validate(record);
 		await this.#insert(record);
 		return record;
 	}
@@ -109,7 +123,7 @@ export class SyncedRepository<Row extends Synced> implements Repository<Row> {
 		return row ? rowToRecord<Row>(this.#config.table, row) : null;
 	}
 
-	#authorize(permission: Permission): TenantId {
+	#authorize(permission: Permission | null): TenantId {
 		const tenantId = this.#context.tenantId();
 		if (!tenantId || !this.#context.can(permission))
 			throw new MockApiError('unauthorized', this.#context.localize('error.unauthorized'));

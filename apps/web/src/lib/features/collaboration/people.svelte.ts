@@ -1,3 +1,5 @@
+import { onMount } from 'svelte';
+import { Resource } from '../../state/resource.svelte.ts';
 import type { UserId } from '@clinks/domain/ids';
 import type { Workspace } from '../../workspace.svelte.ts';
 
@@ -10,21 +12,15 @@ export interface Person {
 	jobTitle: string;
 }
 
-/** Staff of the active tenant, loaded once per screen for assignees, mentions and avatars. */
+/** Staff of the active tenant, including updates arriving after the screen opens. */
 export class PeopleDirectory {
-	people = $state.raw<Person[]>([]);
-	#workspace: Workspace;
-
+	readonly #resource: Resource<Person[]>;
 	constructor(workspace: Workspace) {
-		this.#workspace = workspace;
+		this.#resource = new Resource(workspace.db, ['users', 'memberships'], () => workspace.api.people());
+		onMount(() => this.#resource.connect());
 	}
-
-	async load() {
-		try {
-			this.people = await this.#workspace.api.people();
-		} catch {
-			this.people = [];
-		}
+	get people(): Person[] {
+		return this.#resource.data ?? [];
 	}
 
 	get(id: string | null | undefined): Person | undefined {

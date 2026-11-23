@@ -36,7 +36,6 @@
 	else if (window.innerWidth < 768) model.view = 'day';
 
 	onMount(() => {
-		void people.load();
 		const stop = model.resource.connect();
 		const stopShortcut = workspace.registerNewAction(() => canWrite && create(model.anchor, 9 * 60, session.user?.id));
 		void openFromQuery();

@@ -1,0 +1,11 @@
+{
+  "name": "@clinks/desktop",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "desktop:build": "tauri build"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.12.6"
+  }
+}

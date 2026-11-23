@@ -52,10 +52,10 @@ export class InvoiceDetailModel {
 		const api = this.#workspace.api.invoices;
 		return this.#workspace.run(
 			async () => {
-				const all = await api.list();
+				const all = this.#workspace.sync ? [] : await api.list();
 				return api.create({
 					...invoice,
-					number: nextInvoiceNumber(all, new Date().getFullYear()),
+					number: this.#workspace.sync ? '' : nextInvoiceNumber(all, new Date().getFullYear()),
 					status: 'draft',
 					issueDate: today(),
 					dueDate: invoice.dueDate,

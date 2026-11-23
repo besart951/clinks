@@ -25,9 +25,11 @@ export class CommentThreadModel {
 		this.#label = context.label;
 		this.#path = context.path;
 		this.resource = new Resource(workspace.db, ['comments'], async () =>
-			(await workspace.api.comments.list((row) => row.target.kind === target.kind && row.target.id === target.id)).sort(
-				(left, right) => left.createdAt.localeCompare(right.createdAt),
-			),
+			(
+				await workspace.api
+					.commentsFor(target.kind)
+					.list((row) => row.target.kind === target.kind && row.target.id === target.id)
+			).sort((left, right) => left.createdAt.localeCompare(right.createdAt)),
 		);
 	}
 
@@ -38,7 +40,7 @@ export class CommentThreadModel {
 		const mentions = mentionedPeople(body, people);
 		const author = this.#workspace.session.user!;
 		const created = await this.#workspace.run(async () => {
-			const comment = await this.#workspace.api.comments.create({
+			const comment = await this.#workspace.api.commentsFor(this.#target.kind).create({
 				target: this.#target,
 				authorId: author.id,
 				body,
@@ -62,7 +64,7 @@ export class CommentThreadModel {
 	}
 
 	async remove(comment: Comment) {
-		const api = this.#workspace.api.comments;
+		const api = this.#workspace.api.commentsFor(this.#target.kind);
 		await this.#workspace.run(() => api.remove(comment.id), {
 			success: 'ui.ws.comments.deleted',
 			undo: () => api.restore(comment),

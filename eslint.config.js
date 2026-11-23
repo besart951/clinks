@@ -7,6 +7,10 @@ export default ts.config(
 	{
 		ignores: [
 			'**/node_modules/',
+			'apps/mobile/.dart_tool/',
+			'apps/mobile/android/',
+			'apps/mobile/ios/',
+			'apps/desktop/src-tauri/target/',
 			'**/.svelte-kit/',
 			'**/build/',
 			'**/build-artifact/',

@@ -29,9 +29,13 @@
 		{#each model.resource.data ?? [] as document (document.id)}
 			<li class="flex items-center gap-3 px-3 py-2 text-sm">
 				<FileText class="text-muted-foreground size-4 shrink-0" />
-				<a class="min-w-0 flex-1 truncate font-medium hover:underline" href={document.dataUrl} download={document.name}>
+				<button
+					type="button"
+					class="min-w-0 flex-1 truncate text-left font-medium hover:underline"
+					onclick={() => workspace.run(() => workspace.documentFiles.save(document))}
+				>
 					{document.name}
-				</a>
+				</button>
 				<span class="text-muted-foreground shrink-0 text-xs">
 					{formatBytes(document.size, (value) => workspace.i18n.number(value))}
 				</span>

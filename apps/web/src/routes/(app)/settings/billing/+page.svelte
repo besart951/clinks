@@ -32,7 +32,7 @@
 			.members()
 			.then((data) => (memberCount = data.members.filter((member) => member.membership.status === 'active').length))
 			.catch(() => undefined);
-		return model.history.connect();
+		if (!workspace.remote) return model.history.connect();
 	});
 
 	async function saveCard(event: SubmitEvent) {
@@ -103,7 +103,7 @@
 								<Check class="size-4 text-emerald-600" />{workspace.t(`ui.ws.module.${module}`)}
 							</li>{/each}
 					</ul>
-					{#if !current || tenant.billingCycle !== model.cycle}<Button
+					{#if workspace.remote || !current || tenant.billingCycle !== model.cycle}<Button
 							class="w-full"
 							variant={current ? 'outline' : 'default'}
 							disabled={model.busy}
@@ -116,83 +116,89 @@
 		{/each}
 	</div>
 
-	<div class="grid gap-6 lg:grid-cols-2">
-		<Card.Root>
-			<Card.Header>
-				<Card.Title>{workspace.t('ui.ws.billing.modules')}</Card.Title><Card.Description>
-					{workspace.t('ui.ws.billing.modules_text')}
-				</Card.Description>
-			</Card.Header>
-			<Card.Content>
-				<ul class="space-y-2">
-					{#each moduleKeys.filter((module) => !coreModules.includes(module)) as module (module)}
-						{@const included = planIncludes(tenant.plan, module)}
-						<li
-							class="flex items-center justify-between gap-3 text-sm {module === highlight
-								? 'bg-sky-500/10 -mx-2 rounded-md px-2 py-1'
-								: ''}"
-						>
-							<label for="mod-{module}" class="flex-1">
-								{workspace.t(`ui.ws.module.${module}`)}{#if !included}<span class="text-muted-foreground block text-xs">
-										{workspace.t('ui.ws.billing.not_in_plan')}
-									</span>{/if}
-							</label>
-							<Switch
-								id="mod-{module}"
-								checked={tenant.enabledModules.includes(module) && included}
-								disabled={!included || model.busy}
-								onCheckedChange={(checked) => model.toggleModule(module, checked)}
-							/>
-						</li>
-					{/each}
-				</ul>
-			</Card.Content>
-		</Card.Root>
-		<div class="space-y-6">
+	{#if workspace.remote}<Button variant="outline" disabled={model.busy} onclick={() => model.openBilling()}>
+			{workspace.t('ui.ws.billing.portal')}
+		</Button>{:else}
+		<div class="grid gap-6 lg:grid-cols-2">
 			<Card.Root>
-				<Card.Header><Card.Title>{workspace.t('ui.ws.billing.payment_method')}</Card.Title></Card.Header>
-				<Card.Content class="flex items-center gap-3">
-					<CreditCard class="text-muted-foreground size-5" />
-					<p class="flex-1 text-sm">
-						{tenant.paymentMethod
-							? workspace.t('ui.ws.billing.card', {
-									brand: tenant.paymentMethod.brand,
-									last: tenant.paymentMethod.last4,
-									expires: tenant.paymentMethod.expires,
-								})
-							: workspace.t('ui.ws.billing.no_card')}
-					</p>
-					<Button variant="outline" size="sm" onclick={() => (cardOpen = true)}>
-						{tenant.paymentMethod ? workspace.t('ui.ws.edit') : workspace.t('ui.ws.billing.add_card')}
-					</Button>
-				</Card.Content>
-			</Card.Root>
-			<Card.Root>
-				<Card.Header><Card.Title>{workspace.t('ui.ws.billing.history')}</Card.Title></Card.Header>
+				<Card.Header>
+					<Card.Title>{workspace.t('ui.ws.billing.modules')}</Card.Title><Card.Description>
+						{workspace.t('ui.ws.billing.modules_text')}
+					</Card.Description>
+				</Card.Header>
 				<Card.Content>
-					<ul class="divide-y text-sm">
-						{#each model.history.data ?? [] as invoice (invoice.number)}
-							<li class="flex items-center gap-3 py-2">
-								<span class="flex-1">{invoice.number}</span><span class="text-muted-foreground">
-									{workspace.i18n.date(invoice.date)}
-								</span><span class="tabular-nums">{workspace.i18n.money(invoice.amount)}</span><StatusBadge
-									tone={invoice.status === 'paid' ? 'success' : 'info'}
-									label={workspace.t(`ui.ws.invoice.status.${invoice.status}`)}
+					<ul class="space-y-2">
+						{#each moduleKeys.filter((module) => !coreModules.includes(module)) as module (module)}
+							{@const included = planIncludes(tenant.plan, module)}
+							<li
+								class="flex items-center justify-between gap-3 text-sm {module === highlight
+									? 'bg-sky-500/10 -mx-2 rounded-md px-2 py-1'
+									: ''}"
+							>
+								<label for="mod-{module}" class="flex-1">
+									{workspace.t(`ui.ws.module.${module}`)}{#if !included}<span
+											class="text-muted-foreground block text-xs"
+										>
+											{workspace.t('ui.ws.billing.not_in_plan')}
+										</span>{/if}
+								</label>
+								<Switch
+									id="mod-{module}"
+									checked={tenant.enabledModules.includes(module) && included}
+									disabled={!included || model.busy}
+									onCheckedChange={(checked) => model.toggleModule(module, checked)}
 								/>
 							</li>
 						{/each}
 					</ul>
 				</Card.Content>
 			</Card.Root>
-			<div class="flex justify-end">
-				{#if tenant.cancelledAt}<Button onclick={() => model.resume()}>
-						{workspace.t('ui.ws.billing.resume')}
-					</Button>{:else}<Button variant="ghost" class="text-destructive" onclick={askCancel}>
-						{workspace.t('ui.ws.billing.cancel')}
-					</Button>{/if}
+			<div class="space-y-6">
+				<Card.Root>
+					<Card.Header><Card.Title>{workspace.t('ui.ws.billing.payment_method')}</Card.Title></Card.Header>
+					<Card.Content class="flex items-center gap-3">
+						<CreditCard class="text-muted-foreground size-5" />
+						<p class="flex-1 text-sm">
+							{tenant.paymentMethod
+								? workspace.t('ui.ws.billing.card', {
+										brand: tenant.paymentMethod.brand,
+										last: tenant.paymentMethod.last4,
+										expires: tenant.paymentMethod.expires,
+									})
+								: workspace.t('ui.ws.billing.no_card')}
+						</p>
+						<Button variant="outline" size="sm" onclick={() => (cardOpen = true)}>
+							{tenant.paymentMethod ? workspace.t('ui.ws.edit') : workspace.t('ui.ws.billing.add_card')}
+						</Button>
+					</Card.Content>
+				</Card.Root>
+				<Card.Root>
+					<Card.Header><Card.Title>{workspace.t('ui.ws.billing.history')}</Card.Title></Card.Header>
+					<Card.Content>
+						<ul class="divide-y text-sm">
+							{#each model.history.data ?? [] as invoice (invoice.number)}
+								<li class="flex items-center gap-3 py-2">
+									<span class="flex-1">{invoice.number}</span><span class="text-muted-foreground">
+										{workspace.i18n.date(invoice.date)}
+									</span><span class="tabular-nums">{workspace.i18n.money(invoice.amount)}</span><StatusBadge
+										tone={invoice.status === 'paid' ? 'success' : 'info'}
+										label={workspace.t(`ui.ws.invoice.status.${invoice.status}`)}
+									/>
+								</li>
+							{/each}
+						</ul>
+					</Card.Content>
+				</Card.Root>
+				<div class="flex justify-end">
+					{#if tenant.cancelledAt}<Button onclick={() => model.resume()}>
+							{workspace.t('ui.ws.billing.resume')}
+						</Button>{:else}<Button variant="ghost" class="text-destructive" onclick={askCancel}>
+							{workspace.t('ui.ws.billing.cancel')}
+						</Button>{/if}
+				</div>
 			</div>
 		</div>
-	</div>
+	{/if}
 </ModuleGate>
 
 <Dialog.Root bind:open={cardOpen}>

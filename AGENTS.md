@@ -82,11 +82,7 @@ Details, gates and sub-items: [docs/plan.md](docs/plan.md). Product scope: [docs
 - [x] **1 · Migrate prototype** — SvelteKit 3, packages split, repository + platform interfaces
 - [x] **2 · Own login and tenants** — argon2id, TOTP, EdDSA JWT + JWKS, invitations, RLS tests
 - [x] **3 · Sync core** — contacts + appointments on PowerSync, `/sync/write`, sync status
-- [ ] **4 · All modules on sync** — tasks, comments, notifications, mail metadata, campaigns; finance with server
-      invoice numbers; Physio/Spitex (prescriptions, append-only notes, visits, time entries); remove `MockDatabase`,
-      keep seed as demo tenant
-- [ ] **5 · Files and collaboration** — versioned bucket + signed URLs, attachment queue, `apps/collab` (Hocuspocus),
-      presence, Yjs + Tiptap
-- [ ] **6 · Production, billing, pilot** — Infomaniak, Caddy, backups, Stripe (CHF, TWINT, Tax, webhooks),
-      monitoring, pilot tenant (`TRUST_PROXY=true` in production)
-- [ ] **7 · Later** — Tauri shell, Flutter app
+- [x] **4 · All modules on sync** — server-issued invoice numbers, append-only clinical notes and all eight workspace modules. The standalone demo keeps its seed and isolated mock.
+- [x] **5 · Files and collaboration** — versioned objects, offline uploads, restore, planning-board presence and shared notes.
+- [ ] **6 · Production, billing, pilot** — deployment, backups, restore drills, monitoring probes and Stripe integration implemented. Provider setup, commercial configuration, alert delivery, security review and real pilot remain open.
+- [x] **7 · Native clients** — Tauri desktop shell and Flutter contact directory. Native signing, iOS validation and distribution remain release steps.

@@ -16,6 +16,7 @@
 	import PersonAvatar from '#lib/components/common/PersonAvatar.svelte';
 	import { priorityTone } from '#lib/components/common/tones';
 	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
+	import SharedBoard from '#lib/components/planner/SharedBoard.svelte';
 	import TaskBoard from '#lib/components/planner/TaskBoard.svelte';
 	import TaskMonth from '#lib/components/planner/TaskMonth.svelte';
 	import TaskSheet from '#lib/components/planner/TaskSheet.svelte';
@@ -27,6 +28,7 @@
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
+	const collabUrl = import.meta.env.VITE_COLLAB_URL as string | undefined;
 	const model = new PlannerModel(workspace);
 	const people = new PeopleDirectory(workspace);
 	const canWrite = $derived(workspace.session.can('planner.write'));
@@ -35,7 +37,6 @@
 	if (query.get('view')) model.view = query.get('view') as PlannerView;
 
 	onMount(() => {
-		void people.load();
 		const stop = model.resource.connect();
 		const stopShortcut = workspace.registerNewAction(() => canWrite && sheet.show(null));
 		void openFromQuery();
@@ -71,6 +72,11 @@
 		{/snippet}
 	</PageHeader>
 
+	{#if collabUrl && workspace.remote && workspace.session.tenantId}{#key workspace.session.tenantId}<SharedBoard
+				endpoint={collabUrl}
+				tenantId={workspace.session.tenantId}
+				writable={canWrite}
+			/>{/key}{/if}
 	<div class="mb-4 flex flex-wrap items-center gap-2">
 		<SearchInput bind:value={model.search} label={workspace.t('ui.ws.planner.search')} class="w-full sm:w-64" />
 		<Choice
