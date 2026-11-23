@@ -85,6 +85,33 @@ test('moves a task with Alt + arrow keys', async ({ page }) => {
 	await expect(page.getByRole('status').filter({ hasText: `«${title}» in In Arbeit` })).toBeAttached();
 });
 
+test('builds a folder tree and moves a folder by drag & drop', async ({ page }) => {
+	await page.setViewportSize({ width: 1440, height: 900 });
+	await signIn(page);
+	await page.goto('/#/documents');
+	const tree = page.getByRole('navigation', { name: 'Ordner' });
+	for (const name of ['Projekt Alpha', 'Ablage Beta']) {
+		await page.getByRole('button', { name: 'Neuer Ordner' }).first().click();
+		await page.getByRole('dialog').getByRole('textbox').fill(name);
+		await page.getByRole('dialog').getByRole('button', { name: 'Speichern' }).click();
+		await expect(tree.getByRole('button', { name: name, exact: true })).toBeVisible();
+	}
+	await tree.getByRole('button', { name: 'Unterordner in «Projekt Alpha» anlegen' }).click();
+	await page.getByRole('dialog').getByRole('textbox').fill('Offerten Gamma');
+	await page.getByRole('dialog').getByRole('button', { name: 'Speichern' }).click();
+	await expect(tree.getByRole('button', { name: 'Ordner «Projekt Alpha» zuklappen' })).toBeVisible();
+	await expect(tree.getByRole('button', { name: 'Offerten Gamma', exact: true })).toBeVisible();
+	await tree
+		.getByRole('listitem')
+		.filter({ has: page.getByRole('button', { name: 'Ablage Beta', exact: true }) })
+		.locator('[draggable="true"]')
+		.dragTo(tree.getByRole('button', { name: 'Offerten Gamma', exact: true }));
+	await expect(page.getByText('Ordner «Ablage Beta» verschoben')).toBeVisible();
+	await tree.getByRole('button', { name: 'Ablage Beta', exact: true }).click();
+	await expect(page.getByRole('navigation', { name: 'Ordnerpfad' })).toContainText('Projekt Alpha');
+	await expect(page.getByRole('navigation', { name: 'Ordnerpfad' })).toContainText('Offerten Gamma');
+});
+
 test('issues an invoice with a QR payment part', async ({ page }) => {
 	await signIn(page);
 	await page.goto('/#/finance/invoices/new');

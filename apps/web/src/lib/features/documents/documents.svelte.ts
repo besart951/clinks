@@ -3,6 +3,8 @@ import type { Contact, Folder, StoredDocument } from '@clinks/domain/types';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 import { uploadDocument } from '../collaboration/attachments.svelte.ts';
+import { canMoveFolder, folderPath } from '@clinks/domain/folders';
+import { SvelteSet } from 'svelte/reactivity';
 
 export interface DocumentsData {
 	folders: Folder[];
@@ -16,6 +18,8 @@ export class DocumentsModel {
 	folderId = $state<FolderId | null>(null);
 	search = $state('');
 	uploading = $state(false);
+	/** Open branches of the folder tree. */
+	readonly expanded = new SvelteSet<FolderId>();
 	#workspace: Workspace;
 
 	constructor(workspace: Workspace) {
@@ -35,17 +39,51 @@ export class DocumentsModel {
 	}
 
 	get path(): Folder[] {
-		const path: Folder[] = [];
-		let current = this.folders.find((folder) => folder.id === this.folderId);
-		while (current) {
-			path.unshift(current);
-			current = this.folders.find((folder) => folder.id === current!.parentId);
-		}
-		return path;
+		return folderPath(this.folders, this.folderId);
 	}
 
 	get children(): Folder[] {
-		return this.folders.filter((folder) => folder.parentId === this.folderId);
+		return this.childrenOf(this.folderId);
+	}
+
+	childrenOf(parentId: FolderId | null): Folder[] {
+		return this.folders.filter((folder) => folder.parentId === parentId);
+	}
+
+	/** Opens a folder and unfolds the tree down to it. */
+	open(folderId: FolderId | null) {
+		this.folderId = folderId;
+		this.search = '';
+		for (const folder of folderPath(this.folders, folderId)) this.expanded.add(folder.id);
+	}
+
+	toggle(folderId: FolderId) {
+		if (this.expanded.has(folderId)) this.expanded.delete(folderId);
+		else this.expanded.add(folderId);
+	}
+
+	canMoveFolder(folder: Folder, parentId: FolderId | null) {
+		return canMoveFolder(this.folders, folder.id, parentId);
+	}
+
+	async moveFolder(folder: Folder, parentId: FolderId | null) {
+		if (!this.canMoveFolder(folder, parentId)) return;
+		const result = await this.#workspace.run(
+			() => this.#workspace.api.folders.update(folder.id, folder.revision, { parentId }),
+			{ success: 'ui.ws.documents.folder_moved', successParams: { name: folder.name } },
+		);
+		if (result !== null && parentId) this.expanded.add(parentId);
+	}
+
+	/** Moves a dragged file or folder (by id) into a folder of the tree. */
+	async dropInto(item: { kind: 'document' | 'folder'; id: string }, parentId: FolderId | null) {
+		if (item.kind === 'folder') {
+			const folder = this.folders.find((candidate) => candidate.id === item.id);
+			if (folder) await this.moveFolder(folder, parentId);
+			return;
+		}
+		const document = this.resource.data?.documents.find((candidate) => candidate.id === item.id);
+		if (document && document.folderId !== parentId) await this.move(document, parentId);
 	}
 
 	get files(): StoredDocument[] {
@@ -71,11 +109,13 @@ export class DocumentsModel {
 		this.uploading = false;
 	}
 
-	async createFolder(name: string) {
-		return this.#workspace.run(
-			() => this.#workspace.api.folders.create({ name: name.trim(), parentId: this.folderId }),
+	async createFolder(name: string, parentId: FolderId | null = this.folderId) {
+		const result = await this.#workspace.run(
+			() => this.#workspace.api.folders.create({ name: name.trim(), parentId }),
 			{ success: 'ui.ws.documents.folder_created' },
 		);
+		if (result !== null && parentId) this.expanded.add(parentId);
+		return result;
 	}
 
 	async renameFolder(folder: Folder, name: string) {
@@ -89,8 +129,11 @@ export class DocumentsModel {
 		const contained = (this.resource.data?.documents ?? []).filter((document) => document.folderId === folder.id);
 		const result = await this.#workspace.run(
 			async () => {
+				// Files and subfolders move up one level, so deleting a folder never loses anything.
 				for (const document of contained)
 					await api.documents.update(document.id, document.revision, { folderId: folder.parentId });
+				for (const child of this.childrenOf(folder.id))
+					await api.folders.update(child.id, child.revision, { parentId: folder.parentId });
 				await api.folders.remove(folder.id);
 			},
 			{ success: 'ui.ws.documents.folder_deleted', successParams: { name: folder.name } },

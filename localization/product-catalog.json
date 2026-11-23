@@ -2331,8 +2331,8 @@
         "en-US": "Delete folder “{name}”?"
       },
       "ui.ws.documents.delete_folder_text": {
-        "de-CH": "Die Dateien darin werden in den übergeordneten Ordner verschoben.",
-        "en-US": "The files inside are moved to the parent folder."
+        "de-CH": "Dateien und Unterordner darin werden in den übergeordneten Ordner verschoben.",
+        "en-US": "Files and subfolders inside are moved to the parent folder."
       },
       "ui.ws.documents.empty_title": {
         "de-CH": "Keine Dateien",
@@ -2371,8 +2371,8 @@
         "en-US": "Move to"
       },
       "ui.ws.documents.drop_page_hint": {
-        "de-CH": "Tipp: Dateien direkt auf diese Seite ziehen. Im Prototyp bleiben sie im Browser gespeichert.",
-        "en-US": "Tip: drop files directly on this page. In the prototype they stay stored in the browser."
+        "de-CH": "Tipp: Dateien vom Computer auf diese Seite ziehen. Dateien und Ordner in den Ordnerbaum oder auf einen Ordner ziehen, um sie zu verschieben.",
+        "en-US": "Tip: drop files from your computer on this page. Drag files and folders onto the folder tree or a folder to move them."
       },
       "ui.ws.documents.no_preview": {
         "de-CH": "Für diesen Dateityp gibt es keine Vorschau.",
@@ -4801,6 +4801,30 @@
       "ui.ws.shell.expand_sidebar": {
         "de-CH": "Navigation ausklappen",
         "en-US": "Expand navigation"
+      },
+      "ui.ws.documents.tree": {
+        "de-CH": "Ordner",
+        "en-US": "Folders"
+      },
+      "ui.ws.documents.expand_folder": {
+        "de-CH": "Ordner «{name}» aufklappen",
+        "en-US": "Expand folder “{name}”"
+      },
+      "ui.ws.documents.collapse_folder": {
+        "de-CH": "Ordner «{name}» zuklappen",
+        "en-US": "Collapse folder “{name}”"
+      },
+      "ui.ws.documents.new_subfolder": {
+        "de-CH": "Unterordner in «{name}» anlegen",
+        "en-US": "New subfolder in “{name}”"
+      },
+      "ui.ws.documents.folder_actions": {
+        "de-CH": "Aktionen für «{name}»",
+        "en-US": "Actions for “{name}”"
+      },
+      "ui.ws.documents.folder_moved": {
+        "de-CH": "Ordner «{name}» verschoben",
+        "en-US": "Folder “{name}” moved"
       }
     }
   }
