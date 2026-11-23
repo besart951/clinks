@@ -19,6 +19,7 @@
 	import AsyncView from '#lib/components/common/AsyncView.svelte';
 	import SearchInput from '#lib/components/common/SearchInput.svelte';
 	import EmptyState from '#lib/components/common/EmptyState.svelte';
+	import { fillViewport } from '#lib/components/common/fill-viewport';
 	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
 	import MailNav from '#lib/components/mail/MailNav.svelte';
 	import ComposeSheet from '#lib/components/mail/ComposeSheet.svelte';
@@ -84,8 +85,14 @@
 
 	<AsyncView resource={model.resource} skeleton="detail">
 		{@const selected = model.selected}
-		<div class="grid min-h-[60vh] gap-4 lg:grid-cols-[13rem_minmax(18rem,24rem)_1fr]">
-			<nav class="flex gap-1 overflow-x-auto lg:flex-col" aria-label={workspace.t('ui.ws.mail.folders')}>
+		<div
+			class="grid gap-4 lg:grid-cols-[13rem_minmax(18rem,24rem)_1fr] lg:grid-rows-[minmax(0,1fr)]"
+			{@attach fillViewport()}
+		>
+			<nav
+				class="flex gap-1 overflow-x-auto lg:flex-col lg:overflow-y-auto"
+				aria-label={workspace.t('ui.ws.mail.folders')}
+			>
 				{#each mailFolders as folder (folder)}
 					{@const Icon = icons[folder]}
 					<button
@@ -108,11 +115,11 @@
 			</nav>
 
 			<section
-				class="flex min-w-0 flex-col gap-2 {selected ? 'hidden lg:flex' : ''}"
+				class="flex min-h-0 min-w-0 flex-col gap-2 {selected ? 'hidden lg:flex' : ''}"
 				aria-label={workspace.t(`ui.ws.mail.folder.${model.folder}`)}
 			>
 				<SearchInput bind:value={model.search} label={workspace.t('ui.ws.mail.search')} />
-				<ul class="divide-y overflow-hidden rounded-xl border">
+				<ul class="min-h-0 flex-1 divide-y overflow-y-auto rounded-xl border">
 					{#each model.messages as mail (mail.id)}
 						<li>
 							<button
@@ -149,10 +156,13 @@
 				</ul>
 			</section>
 
-			<article class="min-w-0 rounded-xl border {selected ? '' : 'hidden lg:block'}" aria-live="polite">
+			<article
+				class="flex min-h-0 min-w-0 flex-col overflow-y-auto rounded-xl border {selected ? '' : 'hidden lg:flex'}"
+				aria-live="polite"
+			>
 				{#if selected}
 					{@const contact = model.contactFor(selected)}
-					<div class="flex flex-wrap items-center gap-1 border-b p-2">
+					<div class="bg-background sticky top-0 z-[1] flex flex-wrap items-center gap-1 border-b p-2">
 						<Button
 							variant="ghost"
 							size="icon-sm"
@@ -238,7 +248,10 @@
 						<p class="text-sm leading-relaxed whitespace-pre-wrap">{selected.body}</p>
 					</div>
 				{:else}
-					<EmptyState icon={Inbox} title={workspace.t('ui.ws.mail.nothing_selected')} />
+					<!-- The pane already has a border: the empty state fills it without a second, dashed one. -->
+					<div class="grid flex-1 place-items-center [&>div]:border-0">
+						<EmptyState icon={Inbox} title={workspace.t('ui.ws.mail.nothing_selected')} />
+					</div>
 				{/if}
 			</article>
 		</div>
