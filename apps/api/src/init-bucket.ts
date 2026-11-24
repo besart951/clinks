@@ -20,7 +20,7 @@ const env = z
 		S3_RETENTION_DAYS: z.coerce.number().int().positive(),
 	})
 	.parse(process.env);
-const { client, bucket } = new ObjectStore(env.S3_BUCKET, env.S3_ENDPOINT, env.S3_REGION);
+const { client, bucket } = new ObjectStore({ bucket: env.S3_BUCKET, endpoint: env.S3_ENDPOINT, region: env.S3_REGION });
 try {
 	await client.send(new HeadBucketCommand({ Bucket: bucket }));
 } catch (error) {

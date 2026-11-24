@@ -215,6 +215,13 @@ test('edits master data in place and collapses sections', async ({ page }) => {
 	await expect(page.getByRole('button', { name: 'Stammdaten' })).toHaveAttribute('aria-expanded', 'false');
 });
 
+/** A toast sits over the action row at the bottom right and pauses while hovered: move away until it is gone. */
+async function waitForToastGone(page: Page, text: string) {
+	await expect(page.getByText(text)).toBeVisible();
+	await page.mouse.move(0, 0);
+	await expect(page.getByText(text)).toBeHidden({ timeout: 10_000 });
+}
+
 test('connects an own Infomaniak bucket per tenant', async ({ page }) => {
 	await signIn(page);
 	await page.goto('/#/settings/storage');
@@ -223,6 +230,7 @@ test('connects an own Infomaniak bucket per tenant', async ({ page }) => {
 	await page.getByRole('radio', { name: 'Infomaniak Object Storage' }).check();
 	await page.getByRole('button', { name: 'Speichern' }).click();
 	await expect(page.getByRole('textbox', { name: 'Bucket' })).toBeFocused();
+	await waitForToastGone(page, 'Bitte überprüfe die eingegebenen Daten.');
 	await page.getByRole('textbox', { name: 'Bucket' }).fill('stille-physio-docs');
 	await page.getByLabel('Access Key ID').fill('EC2ACCESS');
 	await page.getByLabel('Secret Access Key').fill('top-secret-9876');
@@ -230,9 +238,7 @@ test('connects an own Infomaniak bucket per tenant', async ({ page }) => {
 	await expect(page.getByText('Speicher-Einstellungen gespeichert.')).toBeVisible();
 	await expect(page.getByText('Gespeichert (endet auf 9876)')).toBeVisible();
 	await expect(page.getByLabel('Secret Access Key')).toHaveValue('');
-	// The toast sits over the action row at the bottom right and pauses while hovered: move away until it is gone.
-	await page.mouse.move(0, 0);
-	await expect(page.getByText('Speicher-Einstellungen gespeichert.')).toBeHidden({ timeout: 10_000 });
+	await waitForToastGone(page, 'Speicher-Einstellungen gespeichert.');
 	await page.getByRole('button', { name: 'Verbindung testen' }).click();
 	await expect(page.getByText('Verbindung zum Bucket funktioniert.')).toBeVisible();
 });

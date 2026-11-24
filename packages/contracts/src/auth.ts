@@ -1,4 +1,5 @@
 import { industries, moduleKeys, permissions } from '@clinks/domain/types';
+import { storageProblems, storageProviders } from '@clinks/domain/storage';
 import { z } from 'zod';
 
 /**
@@ -228,3 +229,38 @@ export type DeviceSessionDto = z.infer<typeof deviceSessionDto>;
 export type InvitationDetails = z.infer<typeof invitationDetailsResponse>;
 export type CreateTenantRequest = z.input<typeof createTenantRequest>;
 export type ErrorResponse = z.infer<typeof errorResponse>;
+
+/** A tenant's document storage. Shapes only; the rules (secret kept, consent) are checked by the API. */
+export const storageInput = z.strictObject({
+	provider: z.enum(storageProviders),
+	endpoint: z.string().max(500),
+	region: z.string().max(100),
+	bucket: z.string().max(100),
+	accessKeyId: z.string().max(200),
+	secretAccessKey: z.string().max(500),
+	pathStyle: z.boolean(),
+	acknowledgeLocation: z.boolean(),
+});
+
+export const storageCheck = z.object({
+	at: z.iso.datetime(),
+	ok: z.boolean(),
+	problems: z.array(z.enum(storageProblems)).optional(),
+});
+
+export const storageView = z.object({
+	id: z.uuid(),
+	tenantId: z.uuid(),
+	revision: z.int(),
+	createdAt: z.iso.datetime(),
+	updatedAt: z.iso.datetime(),
+	provider: z.enum(storageProviders),
+	endpoint: z.string(),
+	region: z.string(),
+	bucket: z.string(),
+	accessKeyId: z.string(),
+	pathStyle: z.boolean(),
+	locationAcknowledgedAt: z.iso.datetime().nullable(),
+	lastCheck: storageCheck.pick({ at: true, ok: true }).nullable(),
+	secretHint: z.string().nullable(),
+});

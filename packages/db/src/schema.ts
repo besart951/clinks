@@ -126,6 +126,27 @@ export interface OneTimeTokenTable {
 	createdAt: Timestamp;
 }
 
+/** A tenant's own bucket (auth schema): the secret is AES-GCM ciphertext, see apps/api `SecretBox`. */
+export interface StorageConfigTable {
+	id: string;
+	tenantId: string;
+	provider: 'infomaniak' | 'cloudflare' | 'custom';
+	endpoint: string;
+	region: string;
+	bucket: string;
+	accessKeyId: string;
+	secretCiphertext: string;
+	secretHint: string;
+	pathStyle: boolean;
+	locationAcknowledgedAt: Date | null;
+	active: Defaulted<boolean>;
+	lastCheckAt: Date | null;
+	lastCheckOk: boolean | null;
+	createdBy: string;
+	createdAt: Timestamp;
+	updatedAt: Timestamp;
+}
+
 export interface RefreshTokenTable {
 	id: string;
 	familyId: string;
@@ -157,6 +178,8 @@ export interface Database {
 		size: number;
 		mimeType: string;
 		authorId: string;
+		/** The tenant's bucket the bytes live in; null for CLinks storage. */
+		storageId: ColumnType<string | null, string | null | undefined, string | null>;
 		createdAt: Timestamp;
 	};
 	folders: SyncedRow;
@@ -187,6 +210,7 @@ export interface Database {
 	'auth.recoveryCodes': RecoveryCodeTable;
 	'auth.oneTimeTokens': OneTimeTokenTable;
 	'auth.refreshTokens': RefreshTokenTable;
+	'auth.storageConfigs': StorageConfigTable;
 }
 
 export type TenantRow = Selectable<TenantTable>;

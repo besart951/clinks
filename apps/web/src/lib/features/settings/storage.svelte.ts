@@ -8,6 +8,7 @@ import {
 	r2Endpoint,
 	type R2Jurisdiction,
 	type StorageConnection,
+	type StorageProblem,
 	type StorageProvider,
 	type StorageSettingsView,
 } from '@clinks/domain/storage';
@@ -32,6 +33,8 @@ export class StorageSettingsModel extends SettingsForm {
 	secret = $state('');
 	acknowledgeLocation = $state(false);
 	testing = $state(false);
+	/** What the last connection check found wrong; shown under the actions until the next check or save. */
+	problems = $state<StorageProblem[]>([]);
 
 	readonly endpoint = $derived(
 		this.provider === 'cloudflare' ? r2Endpoint(this.r2.accountId, this.r2.jurisdiction) : this.connection.endpoint,
@@ -103,7 +106,8 @@ export class StorageSettingsModel extends SettingsForm {
 		this.testing = true;
 		try {
 			const check = await this.workspace.account.testStorageConnection();
-			if (this.stored) this.stored = { ...this.stored, lastCheck: check };
+			this.problems = check.problems ?? [];
+			if (this.stored) this.stored = { ...this.stored, lastCheck: { at: check.at, ok: check.ok } };
 			if (check.ok) toast.success(this.workspace.t('ui.ws.storage.test_ok'));
 			else toast.error(this.workspace.t('ui.ws.storage.test_failed'));
 		} catch (error) {
@@ -115,6 +119,7 @@ export class StorageSettingsModel extends SettingsForm {
 
 	#show(stored: StorageSettingsView | null) {
 		this.stored = stored;
+		this.problems = [];
 		this.provider = stored?.provider ?? 'clinks';
 		this.connection = stored
 			? {

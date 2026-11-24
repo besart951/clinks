@@ -30,9 +30,23 @@ export interface StorageConnection {
 	pathStyle: boolean;
 }
 
+/** What a connection check found wrong; each has a catalog text `ui.ws.storage.problem_<name>`. */
+export const storageProblems = [
+	'unreachable',
+	'credentials',
+	'bucket',
+	'versioning',
+	'write',
+	'cors',
+	'secret',
+] as const;
+export type StorageProblem = (typeof storageProblems)[number];
+
 export interface StorageCheck {
 	at: Timestamp;
 	ok: boolean;
+	/** Empty when ok. */
+	problems?: StorageProblem[];
 }
 
 /** One row per tenant. The secret never leaves the server; clients only see `StorageSettingsView`. */

@@ -4758,10 +4758,6 @@
         "de-CH": "Speicher-Einstellungen gespeichert.",
         "en-US": "Storage settings saved."
       },
-      "ui.ws.storage.preview_note": {
-        "de-CH": "Uploads verwenden diese Einstellung, sobald die Dateiablage auf dem Server läuft (Phase 5).",
-        "en-US": "Uploads use this setting once file storage runs on the server (phase 5)."
-      },
       "ui.ws.audit.tenant.storage_changed": {
         "de-CH": "hat den Dokumentenspeicher geändert",
         "en-US": "changed the document storage"
@@ -4829,6 +4825,42 @@
       "ui.ws.calendar.retimed": {
         "de-CH": "Zeit von «{title}» geändert",
         "en-US": "Changed the time of “{title}”"
+      },
+      "error.ws.storage_secret": {
+        "de-CH": "Der gespeicherte Secret Access Key lässt sich nicht mehr lesen. Bitte gib ihn in den Speicher-Einstellungen neu ein.",
+        "en-US": "The stored secret access key can no longer be read. Enter it again in the storage settings."
+      },
+      "ui.ws.storage.problem_unreachable": {
+        "de-CH": "Der Endpoint antwortet nicht. Prüfe die Endpoint-URL.",
+        "en-US": "The endpoint does not answer. Check the endpoint URL."
+      },
+      "ui.ws.storage.problem_credentials": {
+        "de-CH": "Zugriff verweigert. Prüfe Access Key ID und Secret.",
+        "en-US": "Access denied. Check the access key ID and secret."
+      },
+      "ui.ws.storage.problem_bucket": {
+        "de-CH": "Diesen Bucket gibt es nicht. Prüfe den Namen und die Region.",
+        "en-US": "This bucket does not exist. Check its name and region."
+      },
+      "ui.ws.storage.problem_versioning": {
+        "de-CH": "Die Versionierung ist im Bucket nicht eingeschaltet. Ohne sie gehen alte Dateiversionen verloren.",
+        "en-US": "Versioning is not enabled on the bucket. Without it, old file versions are lost."
+      },
+      "ui.ws.storage.problem_write": {
+        "de-CH": "In den Bucket kann nicht geschrieben werden. Der Schlüssel braucht Lese- und Schreibrecht.",
+        "en-US": "Cannot write to the bucket. The key needs read and write access."
+      },
+      "ui.ws.storage.problem_cors": {
+        "de-CH": "Der Bucket erlaubt keine Uploads aus dem Browser (CORS). Erlaube PUT für die Adresse von CLinks.",
+        "en-US": "The bucket does not allow uploads from the browser (CORS). Allow PUT for the CLinks address."
+      },
+      "ui.ws.storage.problem_secret": {
+        "de-CH": "Der gespeicherte Secret Access Key lässt sich nicht mehr lesen. Gib ihn neu ein.",
+        "en-US": "The stored secret access key can no longer be read. Enter it again."
+      },
+      "error.ws.storage_endpoint_internal": {
+        "de-CH": "Diese Adresse zeigt in ein internes Netz. Gib den öffentlichen HTTPS-Endpoint deines Anbieters ein.",
+        "en-US": "This address points into an internal network. Enter your provider's public HTTPS endpoint."
       }
     }
   }

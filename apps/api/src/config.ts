@@ -23,6 +23,10 @@ const environment = z.object({
 	S3_ENDPOINT: z.url().optional(),
 	S3_BUCKET: z.string().min(1).optional(),
 	S3_REGION: z.string().default('us-east-1'),
+	/** 32 random bytes (base64) that encrypt tenants' own S3 secrets. Generated per start outside production. */
+	STORAGE_SECRET_KEY: z.string().optional(),
+	/** Development only: lets tenants point their storage at internal hosts such as the local RustFS. */
+	STORAGE_ALLOW_INTERNAL: boolean.default(false),
 	SMTP_URL: z.string().default('smtp://localhost:1025'),
 	MAIL_FROM: z.string().default('CLinks <no-reply@clinks.ch>'),
 	/** Secure cookies need HTTPS; browsers treat http://localhost as secure too. */
@@ -36,6 +40,10 @@ export type Config = z.infer<typeof environment>;
 export function loadConfig(source: NodeJS.ProcessEnv = process.env): Config {
 	const config = environment.parse(source);
 	if (config.NODE_ENV === 'production' && !config.SIGNING_KEY) throw new Error('SIGNING_KEY is required in production');
+	if (config.NODE_ENV === 'production' && config.STORAGE_ALLOW_INTERNAL)
+		throw new Error('STORAGE_ALLOW_INTERNAL must stay off in production');
+	if (config.NODE_ENV === 'production' && !config.STORAGE_SECRET_KEY)
+		throw new Error('STORAGE_SECRET_KEY is required in production');
 	if (config.NODE_ENV === 'production' && (!config.S3_BUCKET || !config.S3_ENDPOINT))
 		throw new Error('A private versioned S3 bucket and endpoint are required in production');
 	return config;

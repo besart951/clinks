@@ -137,7 +137,7 @@ export class SyncService {
 			table === 'documents' &&
 			(fields.dataUrl !== undefined || fields.size !== undefined || fields.mimeType !== undefined)
 		)
-			Object.assign(values, await storeDocument(tx, this.#services.objects, scope, op.id, merged, existing?.dataUrl));
+			Object.assign(values, await storeDocument(tx, this.#services, scope, op.id, merged, existing?.dataUrl));
 		if (existing) {
 			await tx
 				.updateTable(table)
