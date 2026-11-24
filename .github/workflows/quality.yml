@@ -72,3 +72,50 @@ jobs:
           name: playwright-results
           path: apps/web/test-results
           retention-days: 7
+
+  e2e-remote:
+    name: Browser tests (API, PowerSync, S3)
+    runs-on: ubuntu-latest
+    env:
+      S3_ENDPOINT: http://localhost:9000
+      S3_BUCKET: clinks-e2e-documents
+      S3_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: clinks
+      AWS_SECRET_ACCESS_KEY: clinks-dev-secret
+      WEB_ORIGIN: http://localhost:5176
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # The dev stack; PowerSync starts after the migrations so its sync streams find their tables.
+      - run: docker compose -f infra/compose.dev.yml up -d --wait postgres objects mail
+      - run: pnpm db:migrate
+      - run: docker compose -f infra/compose.dev.yml up -d --wait powersync
+      - name: Create the versioned bucket
+        working-directory: apps/api
+        run: node src/init-bucket.ts
+        env:
+          S3_LOCK_MODE: GOVERNANCE
+          S3_RETENTION_DAYS: '1'
+      - name: Start the API
+        working-directory: apps/api
+        run: |
+          nohup node src/main.ts > "$RUNNER_TEMP/api.log" 2>&1 &
+          for attempt in $(seq 1 30); do curl -sf http://localhost:8787/health && exit 0; sleep 1; done
+          cat "$RUNNER_TEMP/api.log"
+          exit 1
+      - run: pnpm --filter @clinks/web test:e2e:remote
+      - if: failure()
+        run: |
+          cat "$RUNNER_TEMP/api.log"
+          docker compose -f infra/compose.dev.yml logs --no-color --tail 200 powersync
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-remote-results
+          path: apps/web/test-results
+          retention-days: 7
