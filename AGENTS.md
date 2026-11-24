@@ -85,5 +85,5 @@ Details, gates and sub-items: [docs/plan.md](docs/plan.md). Product scope: [docs
 - [x] **3 · Sync core** — contacts + appointments on PowerSync, `/sync/write`, sync status
 - [x] **4 · All modules on sync** — server-issued invoice numbers, append-only clinical notes and all eight workspace modules. The standalone demo keeps its seed and isolated mock.
 - [x] **5 · Files and collaboration** — versioned objects, offline uploads, restore, planning-board presence and shared notes.
-- [ ] **6 · Production, billing, pilot** — deployment, backups, restore drills, monitoring probes and Stripe integration implemented. Internal security review done ([docs/security-review.md](docs/security-review.md)). Provider setup, commercial configuration, alert delivery, external penetration test and real pilot remain open.
+- [ ] **6 · Production, billing, pilot** — deployment, backups, restore drills, monitoring probes and Stripe integration implemented. Internal security review done ([docs/security-review.md](docs/security-review.md)). Provider setup ([docs/ops/livegang.md](docs/ops/livegang.md)), commercial configuration, alert delivery, external penetration test and real pilot remain open.
 - [x] **7 · Native clients** — Tauri desktop shell and Flutter contact directory. Native signing, iOS validation and distribution remain release steps.
