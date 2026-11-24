@@ -1,20 +1,37 @@
+# Headers for every host: HTTPS only from the first visit on, no MIME sniffing, no full URLs to other sites.
+(security) {
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+}
+
 {$WEB_HOST} {
 	root * /srv
 	encode zstd gzip
 	header /_app/immutable/* Cache-Control "public, max-age=31536000, immutable"
 	header /service-worker.js Cache-Control "no-cache"
-	header X-Content-Type-Options nosniff
+	import security
+	# The page's own policy is a <meta> tag from the build; framing can only be forbidden by a header.
+	header Content-Security-Policy "frame-ancestors 'none'"
+	header X-Frame-Options DENY
+	header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
 	try_files {path} /index.html
 	file_server
 }
 {$API_HOST} {
+	import security
 	reverse_proxy api:8787
 }
 {$SYNC_HOST} {
+	import security
 	@control path /api/* /probes/*
 	respond @control 404
 	reverse_proxy powersync:8080
 }
 {$COLLAB_HOST} {
+	import security
 	reverse_proxy collab:1234
 }

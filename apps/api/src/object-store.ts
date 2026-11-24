@@ -11,6 +11,7 @@ import {
 import type { StorageProblem } from '@clinks/domain/storage';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { createHash } from 'node:crypto';
+import type { Agent } from 'node:https';
 import { ApiError } from './errors.ts';
 
 export interface ObjectStoreOptions {
@@ -21,6 +22,8 @@ export interface ObjectStoreOptions {
 	pathStyle?: boolean;
 	/** A tenant's own keys; without them the SDK reads the API's AWS_* environment. */
 	credentials?: { accessKeyId: string; secretAccessKey: string };
+	/** Connection pool for HTTPS; tenants' buckets get one that refuses internal addresses on connect. */
+	httpsAgent?: Agent;
 }
 
 const probeKey = '_clinks/connection-check';
@@ -38,6 +41,7 @@ export class ObjectStore {
 			credentials: options.credentials,
 			requestChecksumCalculation: 'WHEN_REQUIRED',
 			maxAttempts: 2,
+			...(options.httpsAgent && { requestHandler: { httpsAgent: options.httpsAgent } }),
 		});
 	}
 
