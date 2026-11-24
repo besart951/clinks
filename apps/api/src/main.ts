@@ -1,6 +1,7 @@
 import Stripe from 'stripe';
 import { priceBook } from './services/billing.ts';
 import { ObjectStore } from './object-store.ts';
+import { SecretBox } from './crypto.ts';
 import { createDb } from '@clinks/db/client';
 import { serve } from '@hono/node-server';
 import { createApp } from './app.ts';
@@ -32,7 +33,10 @@ const app = createApp({
 	services: {
 		billing,
 		db,
-		objects: config.S3_BUCKET ? new ObjectStore(config.S3_BUCKET, config.S3_ENDPOINT, config.S3_REGION) : undefined,
+		objects: config.S3_BUCKET
+			? new ObjectStore({ bucket: config.S3_BUCKET, endpoint: config.S3_ENDPOINT, region: config.S3_REGION })
+			: undefined,
+		secrets: config.STORAGE_SECRET_KEY ? SecretBox.fromBase64(config.STORAGE_SECRET_KEY) : SecretBox.ephemeral(),
 		tokens,
 		mailer: smtpMailer(config.SMTP_URL, config.MAIL_FROM),
 		limiter: new RateLimiter(),

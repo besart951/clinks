@@ -1,4 +1,5 @@
 import { SettingsService } from './services/settings.ts';
+import { StorageService } from './services/storage.ts';
 import { BillingService, checkoutRequest } from './services/billing.ts';
 import * as contract from '@clinks/contracts/auth';
 import { syncImportRequest, syncWriteRequest } from '@clinks/contracts/sync';
@@ -572,6 +573,44 @@ export function createApp({ services, config }: AppOptions) {
 			await settings.company(c.var.claims, c.req.valid('json'));
 			return c.body(null, 204);
 		},
+	);
+	const storage = new StorageService(services);
+	me.openapi(
+		route(
+			{
+				method: 'get',
+				path: '/tenant/storage',
+				tags: ['tenants'],
+				responses: { 200: json(contract.storageView.nullable()) },
+			},
+			true,
+		),
+		async (c) => c.json(await storage.get(c.var.claims), 200),
+	);
+	me.openapi(
+		route(
+			{
+				method: 'post',
+				path: '/tenant/storage',
+				tags: ['tenants'],
+				request: body(contract.storageInput),
+				responses: { 200: json(contract.storageView.nullable()) },
+			},
+			true,
+		),
+		async (c) => c.json(await storage.save(c.var.claims, c.req.valid('json')), 200),
+	);
+	me.openapi(
+		route(
+			{
+				method: 'post',
+				path: '/tenant/storage/test',
+				tags: ['tenants'],
+				responses: { 200: json(contract.storageCheck) },
+			},
+			true,
+		),
+		async (c) => c.json(await storage.test(c.var.claims), 200),
 	);
 	me.openapi(
 		route(

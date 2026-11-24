@@ -112,7 +112,19 @@
 					<Button type="submit" disabled={model.busy}>{workspace.t('ui.save')}</Button>
 				{/if}
 			</div>
-			<p class="text-muted-foreground text-xs">{workspace.t('ui.ws.storage.preview_note')}</p>
+			{#if model.problems.length > 0}
+				<Alert.Root variant="destructive">
+					<ShieldAlert class="size-4" />
+					<Alert.Title>{workspace.t('ui.ws.storage.test_failed')}</Alert.Title>
+					<Alert.Description>
+						<ul class="list-disc ps-4">
+							{#each model.problems as problem (problem)}<li>
+									{workspace.t(`ui.ws.storage.problem_${problem}`)}
+								</li>{/each}
+						</ul>
+					</Alert.Description>
+				</Alert.Root>
+			{/if}
 		</form>
 	{/if}
 </ModuleGate>

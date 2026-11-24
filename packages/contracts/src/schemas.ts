@@ -111,7 +111,12 @@ const bucketName = /^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/;
  * The tenant's own S3 bucket. CLinks storage needs no fields; every other provider needs a bucket, an HTTPS
  * endpoint, a region and an access key. An empty secret keeps the stored one (`requireSecret` is false then).
  */
-export function storageSettingsSchema(options: { requireSecret: boolean; requireAcknowledgement: boolean }) {
+export function storageSettingsSchema(options: {
+	requireSecret: boolean;
+	requireAcknowledgement: boolean;
+	/** Development only: lets a local http:// endpoint (RustFS) through. */
+	allowHttp?: boolean;
+}) {
 	return z
 		.object({
 			provider: z.enum(storageProviders),
@@ -128,7 +133,10 @@ export function storageSettingsSchema(options: { requireSecret: boolean; require
 			const issue = (path: string, message: string) => context.addIssue({ code: 'custom', path: [path], message });
 			if (value.provider === 'cloudflare' && !parseR2Endpoint(value.endpoint))
 				issue('endpoint', 'error.ws.storage_cloudflare_account');
-			else if (!/^https:\/\/[^\s/]+(\/\S*)?$/.test(value.endpoint)) issue('endpoint', 'error.ws.storage_endpoint');
+			else if (
+				!(options.allowHttp ? /^https?:\/\/[^\s/]+(\/\S*)?$/ : /^https:\/\/[^\s/]+(\/\S*)?$/).test(value.endpoint)
+			)
+				issue('endpoint', 'error.ws.storage_endpoint');
 			if (!value.region) issue('region', 'error.ws.required');
 			if (!bucketName.test(value.bucket)) issue('bucket', 'error.ws.storage_bucket');
 			if (!value.accessKeyId) issue('accessKeyId', 'error.ws.required');

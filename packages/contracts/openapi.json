@@ -4945,6 +4945,678 @@
 				}
 			}
 		},
+		"/tenant/storage": {
+			"get": {
+				"tags": [
+					"tenants"
+				],
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": [
+										"object",
+										"null"
+									],
+									"properties": {
+										"id": {
+											"type": "string",
+											"format": "uuid"
+										},
+										"tenantId": {
+											"type": "string",
+											"format": "uuid"
+										},
+										"revision": {
+											"type": "integer"
+										},
+										"createdAt": {
+											"type": "string",
+											"format": "date-time"
+										},
+										"updatedAt": {
+											"type": "string",
+											"format": "date-time"
+										},
+										"provider": {
+											"type": "string",
+											"enum": [
+												"clinks",
+												"infomaniak",
+												"cloudflare",
+												"custom"
+											]
+										},
+										"endpoint": {
+											"type": "string"
+										},
+										"region": {
+											"type": "string"
+										},
+										"bucket": {
+											"type": "string"
+										},
+										"accessKeyId": {
+											"type": "string"
+										},
+										"pathStyle": {
+											"type": "boolean"
+										},
+										"locationAcknowledgedAt": {
+											"type": [
+												"string",
+												"null"
+											],
+											"format": "date-time"
+										},
+										"lastCheck": {
+											"type": [
+												"object",
+												"null"
+											],
+											"properties": {
+												"at": {
+													"type": "string",
+													"format": "date-time"
+												},
+												"ok": {
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"at",
+												"ok"
+											]
+										},
+										"secretHint": {
+											"type": [
+												"string",
+												"null"
+											]
+										}
+									},
+									"required": [
+										"id",
+										"tenantId",
+										"revision",
+										"createdAt",
+										"updatedAt",
+										"provider",
+										"endpoint",
+										"region",
+										"bucket",
+										"accessKeyId",
+										"pathStyle",
+										"locationAcknowledgedAt",
+										"lastCheck",
+										"secretHint"
+									]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Not signed in",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Not allowed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"tags": [
+					"tenants"
+				],
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"provider": {
+										"type": "string",
+										"enum": [
+											"clinks",
+											"infomaniak",
+											"cloudflare",
+											"custom"
+										]
+									},
+									"endpoint": {
+										"type": "string",
+										"maxLength": 500
+									},
+									"region": {
+										"type": "string",
+										"maxLength": 100
+									},
+									"bucket": {
+										"type": "string",
+										"maxLength": 100
+									},
+									"accessKeyId": {
+										"type": "string",
+										"maxLength": 200
+									},
+									"secretAccessKey": {
+										"type": "string",
+										"maxLength": 500
+									},
+									"pathStyle": {
+										"type": "boolean"
+									},
+									"acknowledgeLocation": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"provider",
+									"endpoint",
+									"region",
+									"bucket",
+									"accessKeyId",
+									"secretAccessKey",
+									"pathStyle",
+									"acknowledgeLocation"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": [
+										"object",
+										"null"
+									],
+									"properties": {
+										"id": {
+											"type": "string",
+											"format": "uuid"
+										},
+										"tenantId": {
+											"type": "string",
+											"format": "uuid"
+										},
+										"revision": {
+											"type": "integer"
+										},
+										"createdAt": {
+											"type": "string",
+											"format": "date-time"
+										},
+										"updatedAt": {
+											"type": "string",
+											"format": "date-time"
+										},
+										"provider": {
+											"type": "string",
+											"enum": [
+												"clinks",
+												"infomaniak",
+												"cloudflare",
+												"custom"
+											]
+										},
+										"endpoint": {
+											"type": "string"
+										},
+										"region": {
+											"type": "string"
+										},
+										"bucket": {
+											"type": "string"
+										},
+										"accessKeyId": {
+											"type": "string"
+										},
+										"pathStyle": {
+											"type": "boolean"
+										},
+										"locationAcknowledgedAt": {
+											"type": [
+												"string",
+												"null"
+											],
+											"format": "date-time"
+										},
+										"lastCheck": {
+											"type": [
+												"object",
+												"null"
+											],
+											"properties": {
+												"at": {
+													"type": "string",
+													"format": "date-time"
+												},
+												"ok": {
+													"type": "boolean"
+												}
+											},
+											"required": [
+												"at",
+												"ok"
+											]
+										},
+										"secretHint": {
+											"type": [
+												"string",
+												"null"
+											]
+										}
+									},
+									"required": [
+										"id",
+										"tenantId",
+										"revision",
+										"createdAt",
+										"updatedAt",
+										"provider",
+										"endpoint",
+										"region",
+										"bucket",
+										"accessKeyId",
+										"pathStyle",
+										"locationAcknowledgedAt",
+										"lastCheck",
+										"secretHint"
+									]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Not signed in",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Not allowed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/tenant/storage/test": {
+			"post": {
+				"tags": [
+					"tenants"
+				],
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"at": {
+											"type": "string",
+											"format": "date-time"
+										},
+										"ok": {
+											"type": "boolean"
+										},
+										"problems": {
+											"type": "array",
+											"items": {
+												"type": "string",
+												"enum": [
+													"unreachable",
+													"credentials",
+													"bucket",
+													"versioning",
+													"write",
+													"cors",
+													"secret"
+												]
+											}
+										}
+									},
+									"required": [
+										"at",
+										"ok"
+									]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Not signed in",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Not allowed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/me/profile": {
 			"post": {
 				"tags": [

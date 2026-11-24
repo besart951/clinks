@@ -7,11 +7,12 @@ import { createApp } from '../../src/app.ts';
 import { MemoryMailer } from '../../src/mailer.ts';
 import { RateLimiter } from '../../src/rate-limit.ts';
 import { TokenService } from '../../src/tokens.ts';
+import { SecretBox } from '../../src/crypto.ts';
 
 export const password = 'correct-horse-battery';
 
 /** The API on a fresh database, with mails kept in memory and a clock tests can move. */
-export async function startApi(billing?: Billing) {
+export async function startApi(billing?: Billing, options: { allowInternalStorage?: boolean } = {}) {
 	const database: TestDatabase = await createTestDatabase();
 	const db: Db = createDb(database.appUrl, { max: 4 });
 	const owner: Db = createDb(database.ownerUrl, { max: 2 });
@@ -24,7 +25,10 @@ export async function startApi(billing?: Billing) {
 		tokens,
 		mailer,
 		limiter: new RateLimiter(),
-		config: { WEB_ORIGIN: 'http://web.test' },
+		secrets: SecretBox.ephemeral(),
+		// Fixed DNS: provider hosts resolve to a public address, one name points inside.
+		resolveHost: async (host: string) => (host === 'internal.example.com' ? ['10.1.2.3'] : ['185.10.20.30']),
+		config: { WEB_ORIGIN: 'http://web.test', STORAGE_ALLOW_INTERNAL: options.allowInternalStorage ?? false },
 		now: () => new Date(Date.now() + clock.offset),
 	};
 	const app = createApp({
