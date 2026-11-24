@@ -3107,8 +3107,8 @@
         "en-US": "All assigned"
       },
       "ui.ws.spitex.open_text": {
-        "de-CH": "Ziehe einen Einsatz in die Spalte einer Person oder wähle «Zuweisen».",
-        "en-US": "Drag a visit into a person's column or choose “Assign”."
+        "de-CH": "Ziehe einen Einsatz am Griff auf eine Person im Plan oder wähle «Zuweisen».",
+        "en-US": "Drag a visit by its handle onto a person in the plan or choose “Assign”."
       },
       "ui.ws.spitex.window": {
         "de-CH": "Ankunft {window}",
@@ -4861,6 +4861,30 @@
       "error.ws.storage_endpoint_internal": {
         "de-CH": "Diese Adresse zeigt in ein internes Netz. Gib den öffentlichen HTTPS-Endpoint deines Anbieters ein.",
         "en-US": "This address points into an internal network. Enter your provider's public HTTPS endpoint."
+      },
+      "ui.ws.calendar.axis": {
+        "de-CH": "Zeitachse",
+        "en-US": "Time axis"
+      },
+      "ui.ws.calendar.axis_vertical": {
+        "de-CH": "Zeit von oben nach unten",
+        "en-US": "Time from top to bottom"
+      },
+      "ui.ws.calendar.axis_horizontal": {
+        "de-CH": "Zeit von links nach rechts",
+        "en-US": "Time from left to right"
+      },
+      "ui.ws.calendar.hint_horizontal": {
+        "de-CH": "Klicke in eine freie Zeit für einen neuen Termin. Ziehe Termine, um sie zu verschieben, oder ihren linken und rechten Rand, um die Zeit zu ändern (Tastatur: Alt + ←/→ für den Beginn, Alt + Shift + ←/→ für das Ende).",
+        "en-US": "Click a free slot for a new appointment. Drag appointments to move them, or their left and right edge to change the time (keyboard: Alt + ←/→ for the start, Alt + Shift + ←/→ for the end)."
+      },
+      "ui.ws.spitex.board_hint_horizontal": {
+        "de-CH": "Ziehe Einsätze zwischen den Zeilen. In «Offene Einsätze» abgelegt, wird die Zuweisung aufgehoben. Den linken oder rechten Rand ziehen ändert die Zeit.",
+        "en-US": "Drag visits between rows. Dropped on “Open visits”, the assignment is removed. Drag the left or right edge to change the time."
+      },
+      "ui.ws.spitex.drag_visit": {
+        "de-CH": "Ziehen, um «{title}» zuzuweisen",
+        "en-US": "Drag to assign “{title}”"
       }
     }
   }

@@ -11,7 +11,12 @@
 	import PageHeader from '#lib/components/common/PageHeader.svelte';
 	import AsyncView from '#lib/components/common/AsyncView.svelte';
 	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
-	import TimeGrid, { type GridColumn, type GridHandlers } from '#lib/components/calendar/TimeGrid.svelte';
+	import TimeGrid, {
+		type GridColumn,
+		type GridHandlers,
+		type TimeAxis,
+	} from '#lib/components/calendar/TimeGrid.svelte';
+	import AxisToggle from '#lib/components/calendar/AxisToggle.svelte';
 	import MonthGrid from '#lib/components/calendar/MonthGrid.svelte';
 	import AppointmentSheet from '#lib/components/calendar/AppointmentSheet.svelte';
 	import { CalendarModel, type CalendarView } from '#lib/features/calendar/calendar.svelte';
@@ -34,6 +39,7 @@
 	if (query.get('date')) model.anchor = query.get('date')!;
 	if (query.get('view')) model.view = query.get('view') as CalendarView;
 	else if (window.innerWidth < 768) model.view = 'day';
+	let axis = $state<TimeAxis>(query.get('axis') === 'horizontal' ? 'horizontal' : 'vertical');
 
 	onMount(() => {
 		const stop = model.resource.connect();
@@ -137,6 +143,11 @@
 		void setQuery(page.url, { view });
 	}
 
+	function changeAxis(next: TimeAxis) {
+		axis = next;
+		void setQuery(page.url, { axis: next === 'horizontal' ? next : null });
+	}
+
 	function openDay(date: string) {
 		model.setAnchor(date);
 		changeView('day');
@@ -209,6 +220,7 @@
 				{/each}
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>
+		{#if model.view !== 'month'}<AxisToggle {axis} onchange={changeAxis} />{/if}
 		<Tabs.Root value={model.view} onValueChange={changeView}>
 			<Tabs.List>
 				<Tabs.Trigger value="day">{workspace.t('ui.ws.calendar.view_day')}</Tabs.Trigger>
@@ -232,8 +244,10 @@
 				}}
 			/>
 		{:else}
-			<TimeGrid {columns} {handlers} editable={canWrite} />
-			{#if canWrite}<p class="text-muted-foreground mt-2 text-xs">{workspace.t('ui.ws.calendar.hint')}</p>{/if}
+			<TimeGrid {columns} {handlers} {axis} editable={canWrite} />
+			{#if canWrite}<p class="text-muted-foreground mt-2 text-xs">
+					{workspace.t(axis === 'horizontal' ? 'ui.ws.calendar.hint_horizontal' : 'ui.ws.calendar.hint')}
+				</p>{/if}
 		{/if}
 	</AsyncView>
 </ModuleGate>

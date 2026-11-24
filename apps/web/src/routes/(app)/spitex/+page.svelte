@@ -14,7 +14,13 @@
 	import AsyncView from '#lib/components/common/AsyncView.svelte';
 	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
 	import SpitexNav from '#lib/components/spitex/SpitexNav.svelte';
-	import TimeGrid, { type GridColumn, type GridHandlers } from '#lib/components/calendar/TimeGrid.svelte';
+	import TimeGrid, {
+		type GridColumn,
+		type GridHandlers,
+		type TimeAxis,
+	} from '#lib/components/calendar/TimeGrid.svelte';
+	import AxisToggle from '#lib/components/calendar/AxisToggle.svelte';
+	import Grip from '@lucide/svelte/icons/grip-vertical';
 	import AppointmentSheet from '#lib/components/calendar/AppointmentSheet.svelte';
 	import { PlanningModel } from '#lib/features/spitex/planning.svelte';
 	import { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
@@ -22,7 +28,7 @@
 	import { firstFreeStart } from '@clinks/domain/scheduling';
 	import type { Appointment } from '@clinks/domain/types';
 	import type { UserId } from '@clinks/domain/ids';
-	import { routeQuery } from '#lib/navigation';
+	import { routeQuery, setQuery } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
@@ -33,6 +39,22 @@
 	let sheet: AppointmentSheet;
 	const query = routeQuery(page.url);
 	if (query.get('date')) model.date = query.get('date')!;
+	let axis = $state<TimeAxis>(query.get('axis') === 'horizontal' ? 'horizontal' : 'vertical');
+	/** The visit being dragged, from the list or inside the plan. */
+	let dragging = $state<Appointment | null>(null);
+
+	function changeAxis(next: TimeAxis) {
+		axis = next;
+		void setQuery(page.url, { axis: next === 'horizontal' ? next : null });
+	}
+
+	/** Drags the whole card, not just the handle, so the drag image shows what is being assigned. */
+	function startDrag(event: DragEvent, visit: Appointment) {
+		const card = (event.currentTarget as HTMLElement).closest('li');
+		if (card) event.dataTransfer?.setDragImage(card, 16, 16);
+		event.dataTransfer?.setData('text/plain', visit.id);
+		dragging = visit;
+	}
 
 	onMount(() => {
 		const stop = model.resource.connect();
@@ -144,6 +166,7 @@
 		<h2 class="font-semibold capitalize" aria-live="polite">
 			{workspace.i18n.format(model.date, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
 		</h2>
+		<div class="ms-auto print:hidden"><AxisToggle {axis} onchange={changeAxis} /></div>
 	</div>
 
 	<AsyncView resource={model.resource} skeleton="detail">
@@ -179,7 +202,24 @@
 				<Card.Content>
 					<ul class="space-y-2">
 						{#each model.open as visit (visit.id)}
-							<li class="rounded-lg border border-dashed p-2 text-sm">
+							<li
+								class="bg-background relative rounded-lg border border-dashed p-2 text-sm {canWrite
+									? 'ps-7'
+									: ''} {dragging?.id === visit.id ? 'opacity-40' : ''}"
+							>
+								{#if canWrite}
+									<!-- Pointer only; «Zuweisen» below is the keyboard and screen-reader way to do the same. -->
+									<span
+										draggable="true"
+										aria-hidden="true"
+										title={workspace.t('ui.ws.spitex.drag_visit', { title: visit.title })}
+										class="text-muted-foreground hover:bg-muted hover:text-foreground absolute inset-y-1 start-1 flex w-5 cursor-grab items-center justify-center rounded select-none active:cursor-grabbing"
+										ondragstart={(event) => startDrag(event, visit)}
+										ondragend={() => (dragging = null)}
+									>
+										<Grip class="size-4" />
+									</span>
+								{/if}
 								<p class="font-medium">{visit.title}</p>
 								<p class="text-muted-foreground text-xs">
 									{workspace.t('ui.ws.spitex.window', { window: windowLabel(visit) })} · {visit.service
@@ -217,8 +257,10 @@
 				</Card.Content>
 			</Card.Root>
 			<div class="min-w-0 space-y-3">
-				<TimeGrid {columns} {handlers} editable={canWrite} />
-				<p class="text-muted-foreground text-xs print:hidden">{workspace.t('ui.ws.spitex.board_hint')}</p>
+				<TimeGrid {columns} {handlers} {axis} bind:dragging editable={canWrite} />
+				<p class="text-muted-foreground text-xs print:hidden">
+					{workspace.t(axis === 'horizontal' ? 'ui.ws.spitex.board_hint_horizontal' : 'ui.ws.spitex.board_hint')}
+				</p>
 				<div class="overflow-x-auto rounded-xl border">
 					<table class="w-full text-sm">
 						<caption class="text-muted-foreground px-3 py-2 text-left text-xs">
