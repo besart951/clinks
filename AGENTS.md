@@ -20,6 +20,7 @@ pnpm test:integration    # API + DB against real Postgres (needs dev:services)
 pnpm test:e2e            # Playwright on the mock
 pnpm --filter @clinks/web test:e2e:remote   # Playwright against the API (needs dev:services + dev:api)
 pnpm format              # Prettier write
+pnpm ops:check -- --config-dir /etc/clinks   # go-live preflight of the private env files and services (German output)
 ```
 
 ## Map

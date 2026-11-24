@@ -14,6 +14,7 @@
     "dev:services": "docker compose -f infra/compose.dev.yml up -d",
     "dev:services:down": "docker compose -f infra/compose.dev.yml down",
     "db:migrate": "DATABASE_OWNER_URL=${DATABASE_OWNER_URL:-postgres://clinks:clinks-dev@localhost:5432/clinks} pnpm --filter @clinks/db migrate",
+    "ops:check": "pnpm --filter @clinks/api ops:check",
     "check": "pnpm -r check",
     "lint": "eslint .",
     "test": "pnpm -r test",

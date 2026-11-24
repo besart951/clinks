@@ -38,7 +38,9 @@ const environment = z.object({
 export type Config = z.infer<typeof environment>;
 
 export function loadConfig(source: NodeJS.ProcessEnv = process.env): Config {
-	const config = environment.parse(source);
+	// An empty line such as `STRIPE_SECRET_KEY=` in an env file means "not set", not an empty value.
+	const set = Object.fromEntries(Object.entries(source).filter(([, value]) => value !== ''));
+	const config = environment.parse(set);
 	if (config.NODE_ENV === 'production' && !config.SIGNING_KEY) throw new Error('SIGNING_KEY is required in production');
 	if (config.NODE_ENV === 'production' && config.STORAGE_ALLOW_INTERNAL)
 		throw new Error('STORAGE_ALLOW_INTERNAL must stay off in production');
