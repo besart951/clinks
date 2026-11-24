@@ -97,7 +97,8 @@ export function createApp({ services, config }: AppOptions) {
 	}
 
 	function caller(c: Context): Caller {
-		const forwarded = config.TRUST_PROXY ? c.req.header('X-Forwarded-For')?.split(',')[0]?.trim() : undefined;
+		// The last entry is the one Caddy appended; earlier ones come from the client and can be made up.
+		const forwarded = config.TRUST_PROXY ? c.req.header('X-Forwarded-For')?.split(',').at(-1)?.trim() : undefined;
 		let ip = forwarded ?? null;
 		if (!ip) {
 			try {

@@ -14,7 +14,7 @@ import type { Selectable } from 'kysely';
 import { uuid } from '../crypto.ts';
 import { ApiError, forbidden } from '../errors.ts';
 import { ObjectStore } from '../object-store.ts';
-import { assertPublicEndpoint } from '../endpoint-guard.ts';
+import { assertPublicEndpoint, publicAgent } from '../endpoint-guard.ts';
 import type { AccessClaims } from '../tokens.ts';
 import { audit } from './audit.ts';
 import type { Services } from './context.ts';
@@ -59,11 +59,8 @@ export class TenantStores {
 		const cached = this.#cache.get(row.id);
 		if (cached) return cached;
 		// Checked again before use: the host's addresses may have changed since it was saved.
-		await assertPublicEndpoint(
-			row.endpoint,
-			this.#services.config.STORAGE_ALLOW_INTERNAL === true,
-			this.#services.resolveHost,
-		);
+		const allowInternal = this.#services.config.STORAGE_ALLOW_INTERNAL === true;
+		await assertPublicEndpoint(row.endpoint, allowInternal, this.#services.resolveHost);
 		let secretAccessKey: string;
 		try {
 			secretAccessKey = await this.#services.secrets.open(row.secretCiphertext, row.tenantId);
@@ -77,6 +74,7 @@ export class TenantStores {
 			region: row.region,
 			pathStyle: row.pathStyle,
 			credentials: { accessKeyId: row.accessKeyId, secretAccessKey },
+			httpsAgent: allowInternal ? undefined : publicAgent(),
 		});
 		this.#cache.set(row.id, store);
 		return store;

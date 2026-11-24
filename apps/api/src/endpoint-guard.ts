@@ -1,4 +1,7 @@
+import { lookup as lookupCallback, type LookupAddress } from 'node:dns';
 import { lookup } from 'node:dns/promises';
+import { Agent } from 'node:https';
+import type { LookupFunction } from 'node:net';
 import { BlockList, isIP } from 'node:net';
 import { ApiError } from './errors.ts';
 
@@ -56,4 +59,30 @@ export async function assertPublicEndpoint(
 		throw new ApiError(400, 'error.validation', { endpoint: 'ui.ws.storage.problem_unreachable' });
 	if (addresses.some(isInternalAddress))
 		throw new ApiError(400, 'error.validation', { endpoint: 'error.ws.storage_endpoint_internal' });
+}
+
+/**
+ * DNS lookup for the connection itself: refuses internal addresses at the moment the socket opens, so a host
+ * that answered with a public address during the check cannot switch to an internal one later (DNS rebinding).
+ */
+export function publicLookup(resolve: typeof lookupCallback = lookupCallback): LookupFunction {
+	return (hostname, options, callback) => {
+		resolve(hostname, { ...options, all: true }, (error, addresses: LookupAddress[]) => {
+			if (error) return callback(error, '', 0);
+			const internal = addresses.find((entry) => isInternalAddress(entry.address));
+			if (internal || addresses.length === 0)
+				return callback(
+					Object.assign(new Error(`${hostname} resolves to an internal address`), { code: 'EINTERNAL' }),
+					'',
+					0,
+				);
+			if (options.all) return callback(null, addresses as unknown as string);
+			callback(null, addresses[0].address, addresses[0].family);
+		});
+	};
+}
+
+/** HTTPS agent for a tenant's bucket; see `publicLookup`. */
+export function publicAgent(): Agent {
+	return new Agent({ keepAlive: true, lookup: publicLookup() });
 }

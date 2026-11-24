@@ -141,7 +141,8 @@ A phase ends only when its gate passes; the weeks are my estimate for one full-t
 - [ ] Swiss Backup as second copy (database dumps, config); restore test documented
 - [ ] Stripe: products and prices in CHF per plan and module, Stripe Checkout + Customer Portal, TWINT and cards, Stripe Tax for Swiss VAT
 - [x] Stripe webhooks (`checkout.session.completed`, `customer.subscription.*`, `invoice.payment_failed`) update plan and modules of the tenant; idempotent, signature checked
-- [ ] Monitoring and alerts; security review against the table below
+- [x] Internal security review against the table below ([security-review.md](security-review.md)): CSP, security headers, SSRF and DNS-rebinding guard, RLS regression test
+- [ ] Monitoring alerts delivered to a person; external penetration test before the pilot
 - [ ] Pilot tenant onboarded with real users
 
 ### Phase 7 · Later

@@ -1,4 +1,7 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
+import { failOnCspViolations } from './csp-guard.ts';
+
+failOnCspViolations();
 
 async function signIn(page: Page, email = 'besi@stille.ch') {
 	await page.goto('/');

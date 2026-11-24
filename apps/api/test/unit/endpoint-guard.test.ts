@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { isInternalAddress } from '../../src/endpoint-guard.ts';
+import type { lookup } from 'node:dns';
+import { Agent } from 'node:https';
+import { ObjectStore } from '../../src/object-store.ts';
+import { isInternalAddress, publicLookup } from '../../src/endpoint-guard.ts';
 
 describe('isInternalAddress', () => {
 	it('lets public addresses through', () => {
@@ -24,5 +27,50 @@ describe('isInternalAddress', () => {
 			'not-an-ip',
 		])
 			expect(isInternalAddress(address), address).toBe(true);
+	});
+});
+
+describe('publicLookup', () => {
+	const fake = (...addresses: string[]) =>
+		((
+			_host: string,
+			_options: unknown,
+			callback: (error: null, entries: { address: string; family: number }[]) => void,
+		) =>
+			callback(
+				null,
+				addresses.map((address) => ({ address, family: address.includes(':') ? 6 : 4 })),
+			)) as unknown as typeof lookup;
+	const run = (resolve: typeof lookup, all = false) =>
+		new Promise<{ error: Error | null; address: unknown }>((done) =>
+			publicLookup(resolve)('bucket.example.com', { all }, (error, address) => done({ error, address })),
+		);
+
+	it('connects to public addresses', async () => {
+		expect(await run(fake('185.10.20.30'))).toEqual({ error: null, address: '185.10.20.30' });
+		expect((await run(fake('185.10.20.30', '2a00:1450:4001::1'), true)).address).toHaveLength(2);
+	});
+	it('refuses a host that now points inside the network (DNS rebinding)', async () => {
+		expect((await run(fake('185.10.20.30', '10.0.0.7'))).error?.message).toMatch(/internal/);
+		expect((await run(fake('169.254.169.254'))).error).toBeTruthy();
+	});
+});
+
+describe('tenant buckets', () => {
+	it('open their connections through the guarded lookup', async () => {
+		const seen: string[] = [];
+		const resolve = ((host: string, _options: unknown, callback: (error: null, entries: unknown[]) => void) => {
+			seen.push(host);
+			callback(null, [{ address: '127.0.0.1', family: 4 }]);
+		}) as unknown as typeof lookup;
+		const store = new ObjectStore({
+			bucket: 'docs',
+			endpoint: 'https://s3.example.com',
+			region: 'us-east-1',
+			credentials: { accessKeyId: 'a', secretAccessKey: 'b' },
+			httpsAgent: new Agent({ lookup: publicLookup(resolve) }),
+		});
+		expect(await store.check('https://app.example.com')).toEqual(['unreachable']);
+		expect(seen).toContain('s3.example.com');
 	});
 });
