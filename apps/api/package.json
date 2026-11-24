@@ -8,6 +8,7 @@
     "start": "node src/main.ts",
     "keys": "node src/generate-key.ts",
     "openapi": "node src/openapi.ts",
+    "ops:check": "node src/ops-check.ts",
     "check": "tsc --noEmit -p .",
     "test": "vitest run --project unit",
     "test:integration": "vitest run --project integration"
