@@ -1,17 +1,7 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
+import { failOnCspViolations } from './csp-guard.ts';
 
-/** The build ships a Content Security Policy; anything it blocks fails the test. */
-const blocked = new WeakMap<Page, string[]>();
-test.beforeEach(({ page }) => {
-	const messages: string[] = [];
-	blocked.set(page, messages);
-	page.on('console', (message) => {
-		if (/Content Security Policy/i.test(message.text())) messages.push(message.text());
-	});
-});
-test.afterEach(({ page }) => {
-	expect(blocked.get(page)).toEqual([]);
-});
+failOnCspViolations();
 
 async function signIn(page: Page, email = 'besi@stille.ch') {
 	await page.goto('/');

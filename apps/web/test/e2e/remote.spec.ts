@@ -1,5 +1,8 @@
 import { newId } from '@clinks/domain/ids';
 import { expect, test, type Browser, type Page } from '@playwright/test';
+import { failOnCspViolations } from './csp-guard.ts';
+
+failOnCspViolations();
 
 const mailpit = process.env.MAILPIT_URL ?? 'http://localhost:8025';
 const password = 'correct-horse-battery';
