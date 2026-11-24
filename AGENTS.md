@@ -61,7 +61,7 @@ pnpm format              # Prettier write
 4. Self-review the diff for smells (dead code, long methods, duplicated branches, primitive IDs where a domain type
    fits) without gold-plating.
 5. Tick the item in `docs/plan.md` and in [Phases](#phases) below in the same PR.
-6. Merge only when CI (`verify`, `integration`, `e2e`) is green.
+6. Merge only when CI (`verify`, `integration`, `e2e`, `e2e-remote`) is green.
 
 Workflow files under `.github/workflows` are maintained by hand (agents in sandboxes may be unable to push them).
 

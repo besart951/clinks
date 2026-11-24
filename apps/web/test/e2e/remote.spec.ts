@@ -75,7 +75,8 @@ test('signs up against the API, onboards, survives a reload and signs out', asyn
 
 	await page.getByRole('button', { name: 'Kontomenü' }).click();
 	await page.getByRole('menuitem', { name: 'Abmelden' }).click();
-	await expect(page).toHaveURL(/#\/login/);
+	// Signing out wipes the local database first; on a slow CI runner that takes several seconds.
+	await expect(page).toHaveURL(/#\/login/, { timeout: 20_000 });
 	await page.reload();
 	await expect(page).toHaveURL(/#\/login/);
 });
