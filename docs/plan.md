@@ -150,7 +150,7 @@ A phase ends only when its gate passes; the weeks are my estimate for one full-t
 - [x] Tauri 2.12 shell around the same build (PowerSync Tauri plugin once out of alpha)
 - [x] Flutter app with the PowerSync Dart SDK, models generated from the OpenAPI file
 
-The production templates and operator procedures are in [infra/production](../infra/production/README.md). The Swiss provider project, managed replication approval, offsite restore, live payment setup, external security review and real pilot remain open. Local acceptance used versioned RustFS, two independent browsers, encrypted restic backup/restore and PostgreSQL WAL replay. Billing tests use a signed event and test transport. Plan entitlements are bundled. Independently priced add-ons need commercial rates.
+The production templates and operator procedures are in [infra/production](../infra/production/README.md); the German step-by-step go-live guide is [ops/livegang.md](ops/livegang.md), checked by `pnpm ops:check`. The Swiss provider project, managed replication approval, offsite restore, live payment setup, external security review and real pilot remain open. Local acceptance used versioned RustFS, two independent browsers, encrypted restic backup/restore and PostgreSQL WAL replay. Billing tests use a signed event and test transport. Plan entitlements are bundled. Independently priced add-ons need commercial rates.
 
 The [Tauri shell](../apps/desktop/README.md) uses the web workspace. The [Flutter client](../apps/mobile/README.md) implements the account, tenant and contact flows. Native store signing and iOS acceptance remain open.
 

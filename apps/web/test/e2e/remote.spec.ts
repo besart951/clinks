@@ -73,10 +73,15 @@ test('signs up against the API, onboards, survives a reload and signs out', asyn
 	await expect(page).toHaveURL(/#\/dashboard/);
 	await expect(page.getByText('E2E Praxis').first()).toBeVisible();
 
+	// With changes still waiting for upload, signing out asks first (and the test browser would cancel that):
+	// wait until everything is saved, as a careful user would.
+	await expect(page.getByRole('status', { name: 'Sync-Status' })).toContainText('Alles gespeichert', {
+		timeout: 30_000,
+	});
 	await page.getByRole('button', { name: 'Kontomenü' }).click();
 	await page.getByRole('menuitem', { name: 'Abmelden' }).click();
-	// Signing out wipes the local database first; on a slow CI runner that takes several seconds.
-	await expect(page).toHaveURL(/#\/login/, { timeout: 20_000 });
+	// Signing out wipes the local database first, which takes a moment on a slow runner.
+	await expect(page).toHaveURL(/#\/login/, { timeout: 15_000 });
 	await page.reload();
 	await expect(page).toHaveURL(/#\/login/);
 });
