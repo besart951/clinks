@@ -131,7 +131,7 @@ A phase ends only when its gate passes; the weeks are my estimate for one full-t
 - [x] Offline attachment upload through the durable PowerSync CRUD queue; `documents` + `document_versions`; restore = new version
 - [x] `apps/collab` with Hocuspocus 4.9 + database extension; JWT check on connect
 - [x] Live presence on planning boards; Yjs + Tiptap for shared texts
-- [ ] Per-tenant storage (CLinks, Infomaniak, Cloudflare R2, other S3): API endpoints, secret encrypted in the `auth` schema, real connection test, tenant-specific `ObjectStore` — the settings UI (`/settings/storage`) is done
+- [x] Per-tenant storage (CLinks, Infomaniak, Cloudflare R2, other S3): `/tenant/storage` endpoints, secret sealed with jose JWE (`STORAGE_SECRET_KEY`) in `auth.storage_configs`, connection test that names what a bucket lacks, SSRF guard on endpoints, `document_versions.storage_id` keeps old versions readable after a switch (PR #17)
 
 ### Phase 6 · Production, billing and pilot
 

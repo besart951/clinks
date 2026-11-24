@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 
 async function signIn(page: Page, email = 'besi@stille.ch') {
 	await page.goto('/');
@@ -241,4 +241,49 @@ test('connects an own Infomaniak bucket per tenant', async ({ page }) => {
 	await waitForToastGone(page, 'Speicher-Einstellungen gespeichert.');
 	await page.getByRole('button', { name: 'Verbindung testen' }).click();
 	await expect(page.getByText('Verbindung zum Bucket funktioniert.')).toBeVisible();
+});
+
+/** Native drag and drop in small steps, like a real mouse; a direct jump does not always start the drag. */
+async function dragOnto(page: Page, source: Locator, target: Locator) {
+	const from = (await source.boundingBox())!;
+	const to = (await target.boundingBox())!;
+	await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+	await page.mouse.down();
+	await page.mouse.move(from.x + from.width / 2 + 10, from.y + from.height / 2 + 10, { steps: 5 });
+	await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2, { steps: 10 });
+	await page.mouse.up();
+}
+
+test('moves Spitex visits by drag and drop, from the list and with time running left to right', async ({ page }) => {
+	await signIn(page);
+	await page.getByRole('button', { name: 'Arbeitsbereich' }).click();
+	await page.getByRole('menuitem', { name: 'Stille Spitex Seeland' }).click();
+	await page.goto('/#/spitex');
+	const list = page.getByRole('list').filter({ has: page.getByTitle(/zuzuweisen/) });
+	const open = page.getByRole('grid', { name: /Offene Einsätze/ });
+	const fatma = page.getByRole('grid', { name: /Fatma Yilmaz/ });
+
+	await page.getByRole('button', { name: 'Zeit von links nach rechts' }).click();
+	await expect(page).toHaveURL(/axis=horizontal/);
+	await expect(page.getByRole('button', { name: 'Zeit von links nach rechts' })).toHaveAttribute(
+		'aria-pressed',
+		'true',
+	);
+	// Along a row: back to the open visits removes the assignment.
+	const visit = fatma.getByRole('button').first();
+	const title = (await visit.locator('span').first().textContent())!.trim();
+	const inList = list.getByText(title, { exact: true });
+	const listed = await inList.count();
+	await dragOnto(page, visit, open);
+	await expect(inList).toHaveCount(listed + 1);
+
+	// From the list, by its handle, onto a person.
+	await page.getByRole('button', { name: 'Zeit von oben nach unten' }).click();
+	await expect(page).not.toHaveURL(/axis=/);
+	const daniel = page.getByRole('grid', { name: /Daniel Moser/ });
+	const planned = daniel.getByRole('button', { name: new RegExp(title) });
+	const before = await planned.count();
+	await dragOnto(page, page.getByTitle(`Ziehen, um «${title}» zuzuweisen`).first(), daniel);
+	await expect(planned).toHaveCount(before + 1);
+	await expect(inList).toHaveCount(listed);
 });

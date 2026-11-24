@@ -37,12 +37,14 @@ this file says _what_ the product needs, the plan says _when_ it is built.
 
 **Order:** tenants + billing → contacts + calendar → notifications + search → offline sync.
 
-## From prototype review (23.11.2026)
+## From prototype review (23.11.2026) — done
 
-- Documents: build any folder structure as a tree (nested folders, move by drag & drop).
-- Spitex dispatch: assign open visits to staff by drag & drop.
-- Calendar and dispatch grid: on hover, resize an appointment's time and drag it to another staff member.
-- Calendar views: switch the time axis between horizontal and vertical, and between month, week and day.
+- [x] Documents: build any folder structure as a tree (nested folders, move by drag & drop) — PR #12
+- [x] Spitex dispatch: assign open visits to staff by drag & drop, from the list and inside the plan — PR #18
+- [x] Calendar and dispatch grid: resize an appointment by its edges and drag it to another staff member — PR #13
+- [x] Calendar views: time axis horizontal or vertical (PR #18); month, week and day already existed
+- [x] Also from the review: Kanban board (PR #10), full width and height with collapsible sidebar (PR #11), stable
+      mail layout (PR #14), creating without leaving the page (PR #15), slim scrollbars (PR #16)
 
 ## UI prototype without backend — done
 
