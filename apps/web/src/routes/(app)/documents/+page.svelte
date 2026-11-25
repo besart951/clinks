@@ -1,4 +1,5 @@
 <script lang="ts">
+	import FileButton from '#lib/components/common/FileButton.svelte';
 	import { onMount } from 'svelte';
 	import { MediaQuery } from 'svelte/reactivity';
 	import Folder from '@lucide/svelte/icons/folder';
@@ -480,12 +481,10 @@
 							</Button>{/if}
 					</li>{/each}
 			</ul>
-			{#if canWrite}<label>
-					{workspace.t('ui.ws.documents.upload_version')}<input
-						type="file"
-						onchange={(event) => replace(doc, event.currentTarget.files?.[0])}
-					/>
-				</label>{/if}
+			{#if canWrite}<FileButton
+					label={workspace.t('ui.ws.documents.upload_version')}
+					onpick={(files) => replace(doc, files[0])}
+				/>{/if}
 		{/if}
 	</Dialog.Content>
 </Dialog.Root>

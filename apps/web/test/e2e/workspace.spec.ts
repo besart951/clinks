@@ -721,3 +721,17 @@ test('fits every page into a phone screen', async ({ page }) => {
 	}
 	expect(tooWide).toEqual([]);
 });
+
+test('gives fingers big enough targets on a touch screen', async ({ browser }) => {
+	const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+	const page = await context.newPage();
+	await signIn(page);
+	await page.goto('/#/finance/expenses');
+	await page.getByRole('button', { name: 'Neue Ausgabe' }).click();
+	const sheet = page.getByRole('dialog', { name: 'Neue Ausgabe' });
+	for (const target of [sheet.getByLabel('Beschreibung'), sheet.getByRole('button', { name: 'Speichern' })])
+		expect((await target.boundingBox())!.height).toBeGreaterThanOrEqual(40);
+	// The receipt is picked with our own button, not the browser's «Choose File» field.
+	await expect(sheet.getByRole('button', { name: 'Beleg wählen' })).toBeVisible();
+	await context.close();
+});

@@ -463,7 +463,10 @@
 								{#each ['start', 'end'] as const as edge (edge)}
 									<span
 										aria-hidden="true"
-										class="handle absolute flex touch-none items-center justify-center opacity-0 group-hover/appointment:opacity-100 group-focus-visible/appointment:opacity-100 [@media(hover:none)]:opacity-100 {horizontal
+										class="handle absolute flex touch-none items-center justify-center opacity-0 group-hover/appointment:opacity-100 group-focus-visible/appointment:opacity-100 {selectedId ===
+											appointment.id || live
+											? 'opacity-100'
+											: '[@media(hover:none)]:pointer-events-none'} {horizontal
 											? `inset-y-0 w-2 cursor-ew-resize ${edge === 'start' ? 'left-0' : 'right-0'}`
 											: `inset-x-0 h-2 cursor-ns-resize ${edge === 'start' ? 'top-0' : 'bottom-0'}`} {live
 											? 'opacity-100'

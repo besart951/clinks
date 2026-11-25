@@ -23,7 +23,7 @@
 	const workspace = useWorkspace();
 </script>
 
-<div class="grid gap-3 {narrow ? 'grid-cols-2' : 'grid-cols-3'}">
+<div class="grid gap-3 {narrow ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3'}">
 	<FormField id="t-status" label={workspace.t('ui.ws.status')}>
 		<Choice
 			id="t-status"
