@@ -40,6 +40,8 @@ export interface InlineFieldSpec {
 	display?: string;
 	/** Muted suffix after the display value, e.g. the age after a birth date. */
 	hint?: string;
+	/** A place to open in a map next to the value, e.g. an address. */
+	place?: string;
 	options?: InlineOption[];
 	/** The inputs of a `group` field; its `value` is `groupValue(parts)` and `display` the formatted whole. */
 	parts?: InlinePart[];

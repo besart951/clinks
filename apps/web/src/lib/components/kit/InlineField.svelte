@@ -1,4 +1,5 @@
 <script lang="ts">
+	import MapLink from '#lib/components/common/MapLink.svelte';
 	import { untrack } from 'svelte';
 	import Eye from '@lucide/svelte/icons/eye';
 	import EyeOff from '@lucide/svelte/icons/eye-off';
@@ -195,6 +196,9 @@
 			>
 				<X class="size-3.5" />
 			</button>
+		{:else if field.place}
+			<!-- Beside the value, not inside it: the value is itself a button that starts editing. -->
+			<MapLink place={field.place} />
 		{:else}<span></span>{/if}
 	{/if}
 </div>
