@@ -73,7 +73,7 @@
 	</DetailHeader>
 
 	<AsyncView resource={model.resource} skeleton="detail">
-		<div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+		<div class="grid grid-cols-[minmax(0,1fr)] items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
 			<div class="grid min-w-0 gap-6">
 				<section class="bg-card grid gap-3 rounded-xl border p-5 shadow-[var(--shadow-sm)]">
 					<header class="flex flex-wrap items-center gap-2">
@@ -157,7 +157,7 @@
 					</section>
 				{/if}
 			</div>
-			<aside class="grid gap-4 lg:sticky lg:top-4">
+			<aside class="grid min-w-0 gap-4 lg:sticky lg:top-4">
 				<SideCard card={{ title: workspace.t('ui.ws.person.load') }}>
 					<p class="text-muted-foreground text-xs">
 						{workspace.t('ui.ws.person.load_total', { time: minutesToTime(weekMinutes) })}

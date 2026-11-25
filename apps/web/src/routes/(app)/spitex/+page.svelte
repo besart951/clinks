@@ -221,7 +221,7 @@
 <ModuleGate module="spitex" permission="spitex.read">
 	<PageHeader title={workspace.t('ui.ws.module.spitex')}>
 		{#snippet actions()}
-			<Button variant="outline" onclick={() => workspace.platform.files.print()}>
+			<Button variant="outline" class="hidden md:inline-flex" onclick={() => workspace.platform.files.print()}>
 				<Printer class="size-4" />{workspace.t('ui.ws.spitex.print_plan')}
 			</Button>
 			{#if canWrite}
@@ -342,11 +342,23 @@
 							onclick={() => model.setDate(day)}
 							aria-pressed={day === model.date}
 						>
-							<span class="block font-medium">{workspace.i18n.format(day, { weekday: 'short', day: 'numeric' })}</span>
+							<!-- Phones: weekday over the date, and the state as a number or a tick. -->
+							<span class="block font-medium sm:hidden">
+								{workspace.i18n.format(day, { weekday: 'short' })}<br /><span class="text-sm tabular-nums">
+									{Number(day.slice(8))}
+								</span>
+							</span>
+							<span class="hidden font-medium sm:block">
+								{workspace.i18n.format(day, { weekday: 'short', day: 'numeric' })}
+							</span>
 							{#if open > 0}<span class="text-amber-700 dark:text-amber-400">
-									{workspace.t('ui.ws.spitex.open_count', { count: open })}
+									<span class="sm:hidden" aria-hidden="true">{open}</span><span class="max-sm:sr-only">
+										{workspace.t('ui.ws.spitex.open_count', { count: open })}
+									</span>
 								</span>{:else}<span class="text-muted-foreground inline-flex items-center gap-1">
-									<CircleCheck class="size-3" />{workspace.t('ui.ws.spitex.all_assigned')}
+									<CircleCheck class="size-3" /><span class="max-sm:sr-only">
+										{workspace.t('ui.ws.spitex.all_assigned')}
+									</span>
 								</span>{/if}
 						</button>
 					{/each}

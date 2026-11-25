@@ -1,6 +1,7 @@
 <script lang="ts">
 	import WifiOff from '@lucide/svelte/icons/wifi-off';
 	import Clock from '@lucide/svelte/icons/clock';
+	import X from '@lucide/svelte/icons/x';
 	import UserCog from '@lucide/svelte/icons/user-cog';
 	import RefreshCw from '@lucide/svelte/icons/refresh-cw';
 	import { Button } from '@clinks/ui/components/ui/button';
@@ -49,14 +50,19 @@
 	</div>
 {/if}
 {#if trialDays !== null && !trialHidden && session.can('billing.manage')}
-	<div class="bg-muted flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-4 py-1.5 text-sm" role="status">
-		<Clock class="size-4" />
-		{workspace.t('ui.ws.banner.trial', { days: trialDays })}
-		<a class="font-medium underline underline-offset-4" href={href('/settings/billing')}>
+	<!-- One line also on a phone: the hide button is an icon there. -->
+	<div class="bg-muted flex items-center justify-center gap-x-3 px-4 py-1 text-sm" role="status">
+		<Clock class="size-4 shrink-0" />
+		<span class="min-w-0 truncate">{workspace.t('ui.ws.banner.trial', { days: trialDays })}</span>
+		<a class="shrink-0 font-medium underline underline-offset-4" href={href('/settings/billing')}>
 			{workspace.t('ui.ws.banner.choose_plan')}
 		</a>
-		<button class="text-muted-foreground hover:text-foreground text-xs" onclick={() => (trialHidden = true)}>
-			{workspace.t('ui.ws.banner.hide')}
+		<button
+			class="text-muted-foreground hover:text-foreground grid min-h-8 min-w-8 shrink-0 place-items-center rounded-md text-xs sm:min-w-0"
+			aria-label={workspace.t('ui.ws.banner.hide')}
+			onclick={() => (trialHidden = true)}
+		>
+			<X class="size-4 sm:hidden" /><span class="hidden sm:inline">{workspace.t('ui.ws.banner.hide')}</span>
 		</button>
 	</div>
 {/if}

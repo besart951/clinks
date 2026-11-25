@@ -88,31 +88,41 @@
 			<Table.Root>
 				<Table.Header>
 					<Table.Row>
-						<Table.Head>{workspace.t('ui.ws.calendar.date')}</Table.Head>
+						<Table.Head class="hidden sm:table-cell">{workspace.t('ui.ws.calendar.date')}</Table.Head>
 						<Table.Head>{workspace.t('ui.ws.planner.description')}</Table.Head>
 						<Table.Head class="hidden md:table-cell">{workspace.t('ui.ws.expense.category')}</Table.Head>
 						<Table.Head class="text-right">{workspace.t('ui.ws.invoice.amount')}</Table.Head>
 						<Table.Head class="hidden text-right lg:table-cell">{workspace.t('ui.ws.expense.input_vat')}</Table.Head>
-						<Table.Head>{workspace.t('ui.ws.status')}</Table.Head>
+						<Table.Head class="hidden sm:table-cell">{workspace.t('ui.ws.status')}</Table.Head>
 						<Table.Head class="w-10"><span class="sr-only">{workspace.t('ui.action')}</span></Table.Head>
 					</Table.Row>
 				</Table.Header>
 				<Table.Body>
 					{#each model.rows as expense (expense.id)}
 						<Table.Row>
-							<Table.Cell>{workspace.i18n.date(expense.date)}</Table.Cell>
-							<Table.Cell>
+							<Table.Cell class="hidden sm:table-cell">{workspace.i18n.date(expense.date)}</Table.Cell>
+							<Table.Cell class="whitespace-normal">
 								<p class="font-medium">{expense.description}</p>
-								<p class="text-muted-foreground text-xs">{expense.supplier}</p>
+								<p class="text-muted-foreground text-xs">
+									<span class="sm:hidden">{workspace.i18n.date(expense.date)} · </span>{expense.supplier}
+								</p>
 							</Table.Cell>
 							<Table.Cell class="hidden md:table-cell">
 								{workspace.t(`ui.ws.expense.category_${expense.category}`)}
 							</Table.Cell>
-							<Table.Cell class="text-right tabular-nums">{workspace.i18n.money(expense.amount)}</Table.Cell>
+							<Table.Cell class="text-right tabular-nums">
+								{workspace.i18n.money(expense.amount)}
+								<span class="mt-1 block sm:hidden">
+									<StatusBadge
+										tone={expense.status === 'booked' ? 'success' : 'warning'}
+										label={workspace.t(`ui.ws.expense.status_${expense.status}`)}
+									/>
+								</span>
+							</Table.Cell>
 							<Table.Cell class="text-muted-foreground hidden text-right tabular-nums lg:table-cell">
 								{workspace.i18n.money(vatFromGross(expense.amount, expense.vatRate))}
 							</Table.Cell>
-							<Table.Cell>
+							<Table.Cell class="hidden sm:table-cell">
 								<div class="flex items-center gap-1">
 									<StatusBadge
 										tone={expense.status === 'booked' ? 'success' : 'warning'}

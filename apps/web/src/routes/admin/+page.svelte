@@ -51,15 +51,17 @@
 
 <svelte:head><title>{workspace.t('ui.ws.admin.title')} · CLinks</title></svelte:head>
 
-<header class="flex h-14 items-center gap-3 border-b px-4">
-	<span class="bg-foreground text-background grid size-8 place-items-center rounded-lg"><Link2 class="size-4" /></span>
-	<span class="font-semibold">{workspace.t('ui.ws.admin.title')}</span>
-	<Badge variant="secondary">{workspace.t('ui.super_administrator')}</Badge>
+<header class="flex h-14 items-center gap-2 border-b px-4 sm:gap-3">
+	<span class="bg-foreground text-background grid size-8 shrink-0 place-items-center rounded-lg">
+		<Link2 class="size-4" />
+	</span>
+	<span class="min-w-0 truncate font-semibold">{workspace.t('ui.ws.admin.title')}</span>
+	<Badge variant="secondary" class="hidden sm:inline-flex">{workspace.t('ui.super_administrator')}</Badge>
 	<div class="flex-1"></div>
 	<LocaleSwitch />
 	<Button variant="outline" size="sm" onclick={signOut}>{workspace.t('ui.sign_out')}</Button>
 </header>
-<main class="mx-auto max-w-6xl space-y-6 p-6">
+<main class="mx-auto max-w-6xl space-y-6 p-4 sm:p-6">
 	{#if ready && !session.isSuperAdministrator}
 		<Forbidden />
 	{:else if ready}

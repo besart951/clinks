@@ -28,7 +28,7 @@
 </script>
 
 <div class="grid gap-6 lg:grid-cols-[13rem_1fr]">
-	<nav class="flex gap-1 overflow-x-auto lg:flex-col" aria-label={workspace.t('ui.ws.nav.settings')}>
+	<nav class="flex flex-wrap gap-1 lg:flex-col lg:flex-nowrap" aria-label={workspace.t('ui.ws.nav.settings')}>
 		{#each visible as item (item.path)}
 			<a
 				href={href(item.path)}
