@@ -105,6 +105,12 @@ html {
 }
 
 @layer base {
+	/* A fieldset is as wide as its widest content by default (min-inline-size: min-content), so a form in a
+	   narrow sheet scrolled sideways on phones. Let it shrink like any other block. */
+	fieldset {
+		min-inline-size: 0;
+	}
+
 	[data-slot='card'] {
 		box-shadow: var(--shadow-sm);
 	}

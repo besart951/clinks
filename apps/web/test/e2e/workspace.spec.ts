@@ -614,3 +614,31 @@ test('shows staff only their own visits, and a week only once it is released', a
 	const bar = page.getByRole('navigation', { name: 'Schnellnavigation' });
 	await expect(bar.getByRole('link')).toHaveText(['Start', 'Meine Einsätze']);
 });
+
+test('keeps side sheets inside a phone screen without sideways scrolling', async ({ page }) => {
+	await signIn(page);
+	await page.setViewportSize({ width: 390, height: 800 });
+	/** Elements of the open sheet that scroll sideways. */
+	const sideways = () =>
+		page.evaluate(() =>
+			[...document.querySelectorAll('[data-slot="sheet-content"]')].flatMap((sheet) =>
+				[sheet, ...sheet.querySelectorAll('*')]
+					.filter(
+						(element) =>
+							element.scrollWidth > element.clientWidth + 1 &&
+							['auto', 'scroll'].includes(getComputedStyle(element).overflowX),
+					)
+					.map((element) => element.className),
+			),
+		);
+	await page.goto('/#/calendar?view=day');
+	await page.getByRole('grid').first().getByRole('button').first().click();
+	const sheet = page.getByRole('dialog', { name: 'Termin bearbeiten' });
+	await expect(sheet.getByLabel('Titel')).toBeVisible();
+	expect(Math.round((await sheet.boundingBox())?.width ?? 0)).toBe(390);
+	expect(await sideways()).toEqual([]);
+	await expect(sheet.getByRole('button', { name: 'Speichern' })).toBeInViewport({ ratio: 1 });
+	await page.goto('/#/contacts?new=1');
+	await expect(page.getByLabel('Vorname')).toBeVisible();
+	expect(await sideways()).toEqual([]);
+});

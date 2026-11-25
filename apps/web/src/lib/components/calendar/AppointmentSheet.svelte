@@ -219,8 +219,9 @@
 					onchange={(value) => (form.value.assigneeId = (value || null) as AppointmentFields['assigneeId'])}
 				/>
 			</FormField>
-			<div class="grid grid-cols-[1fr_6rem_6rem] gap-3">
-				<FormField id="a-date" label={workspace.t('ui.ws.calendar.date')}>
+			<!-- On a phone the date takes its own row, so the times have room for «07:30». -->
+			<div class="grid grid-cols-2 gap-3 sm:grid-cols-[minmax(0,1fr)_6.5rem_6.5rem]">
+				<FormField id="a-date" label={workspace.t('ui.ws.calendar.date')} class="col-span-2 sm:col-span-1">
 					<Input id="a-date" type="date" bind:value={form.value.date} />
 				</FormField>
 				<FormField id="a-start" label={workspace.t('ui.from')}>
