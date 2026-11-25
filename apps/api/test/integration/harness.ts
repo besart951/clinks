@@ -1,7 +1,7 @@
 import type { Billing } from '../../src/services/billing.ts';
 import { createDb, type Db } from '@clinks/db/client';
 import { createTestDatabase, type TestDatabase } from '@clinks/db/testing';
-import { generateTOTP } from '@oslojs/otp';
+import { generateHOTP } from '@oslojs/otp';
 import { decodeBase32IgnorePadding } from '@oslojs/encoding';
 import { createApp } from '../../src/app.ts';
 import { MemoryMailer } from '../../src/mailer.ts';
@@ -120,7 +120,8 @@ export async function startApi(billing?: Billing, options: { allowInternalStorag
 		administrator,
 		codeIn,
 		linkTokenIn,
-		totp: (secret: string) => generateTOTP(decodeBase32IgnorePadding(secret), 30, 6),
+		totp: (secret: string) =>
+			generateHOTP(decodeBase32IgnorePadding(secret), BigInt(Math.floor((Date.now() + clock.offset) / 30_000)), 6),
 		async stop() {
 			await db.destroy();
 			await owner.destroy();

@@ -152,4 +152,41 @@ describe('invitations', () => {
 			.call('POST', '/tenant/invitations', { token: owner.token, body: { email: 'twice@example.ch', roleId } });
 		assert.equal(result.status, 409);
 	});
+
+	it('invalidates the invitation link on revoke and prevents concurrent double acceptance', async () => {
+		const owner = await api.administrator('race-owner@example.ch', 'Race Praxis');
+		const roleId = (await api.client().call('GET', '/me', { token: owner.token })).body.roles[0].id;
+
+		const revocable = await api
+			.client()
+			.call('POST', '/tenant/invitations', { token: owner.token, body: { email: 'revoked@example.ch', roleId } });
+		const revokedLink = api.linkTokenIn('revoked@example.ch');
+		assert.equal(
+			(await api.client().call('DELETE', `/tenant/invitations/${revocable.body.id}`, { token: owner.token })).status,
+			204,
+		);
+		assert.equal((await api.client().call('GET', `/invitations/${revokedLink}`)).status, 404);
+		const openTokens = await api.owner
+			.selectFrom('auth.oneTimeTokens')
+			.select('usedAt')
+			.where('invitationId', '=', revocable.body.id)
+			.execute();
+		assert.ok(openTokens.every((row) => row.usedAt !== null));
+
+		await api
+			.client()
+			.call('POST', '/tenant/invitations', { token: owner.token, body: { email: 'concurrent@example.ch', roleId } });
+		const raceLink = api.linkTokenIn('concurrent@example.ch');
+		const [first, second] = await Promise.all([
+			api.client().call('POST', `/invitations/${raceLink}/accept`, {
+				body: { firstName: 'Anna', lastName: 'Race', password },
+			}),
+			api.client().call('POST', `/invitations/${raceLink}/accept`, {
+				body: { firstName: 'Anna', lastName: 'Race', password },
+			}),
+		]);
+		const statuses = [first.status, second.status].sort((a, b) => a - b);
+		assert.equal(statuses[0], 200);
+		assert.ok(statuses[1] === 404 || statuses[1] === 409);
+	});
 });

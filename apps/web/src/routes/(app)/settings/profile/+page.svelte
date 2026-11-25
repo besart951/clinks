@@ -36,8 +36,16 @@
 		void model.changePassword();
 	}
 
-	async function confirmTwoFactor() {
+	async function confirmTwoFactor(event: SubmitEvent) {
+		event.preventDefault();
 		if (await model.setTwoFactor(!user?.twoFactorEnabled)) enabling = false;
+	}
+
+	function cancelTwoFactor() {
+		enabling = false;
+		model.twoFactorCode = '';
+		model.twoFactorPassword = '';
+		model.fields = {};
 	}
 </script>
 
@@ -183,21 +191,53 @@
 				{#if model.recoveryCodes.length}<p>{workspace.t('ui.ws.settings.recovery_codes')}</p>
 					<pre>{model.recoveryCodes.join('\n')}</pre>{/if}
 				{#if enabling}
-					<div class="bg-muted/50 flex flex-wrap items-end gap-3 rounded-lg border p-3">
-						<p class="text-sm sm:basis-full">
-							{workspace.remote ? model.twoFactorSecret : workspace.t('ui.ws.settings.two_factor_setup')}
-						</p>
+					<form
+						class="bg-muted/50 flex flex-wrap items-end gap-3 rounded-lg border p-3"
+						onsubmit={confirmTwoFactor}
+						novalidate
+					>
+						{#if !user?.twoFactorEnabled}
+							<p class="text-sm sm:basis-full">
+								{workspace.remote ? model.twoFactorSecret : workspace.t('ui.ws.settings.two_factor_setup')}
+							</p>
+						{:else if workspace.remote}
+							<FormField
+								id="tf-password"
+								label={workspace.t('ui.ws.settings.current_password')}
+								error={model.fields.password}
+							>
+								<Input
+									id="tf-password"
+									name="password"
+									type="password"
+									autocomplete="current-password"
+									required
+									bind:value={model.twoFactorPassword}
+								/>
+							</FormField>
+						{/if}
 						<FormField
 							id="tf-code"
 							label={workspace.t('ui.ws.auth.code')}
 							error={model.fields.code}
 							hint={workspace.remote ? undefined : workspace.t('ui.ws.auth.two_factor_demo_hint')}
 						>
-							<Input id="tf-code" inputmode="numeric" maxlength={6} bind:value={model.twoFactorCode} />
+							<Input
+								id="tf-code"
+								name="code"
+								inputmode={user?.twoFactorEnabled ? 'text' : 'numeric'}
+								autocomplete="one-time-code"
+								autocorrect="off"
+								autocapitalize="none"
+								spellcheck={false}
+								maxlength={user?.twoFactorEnabled ? 20 : 6}
+								required
+								bind:value={model.twoFactorCode}
+							/>
 						</FormField>
-						<Button onclick={confirmTwoFactor}>{workspace.t('ui.ws.auth.verify_submit')}</Button>
-						<Button variant="ghost" onclick={() => (enabling = false)}>{workspace.t('ui.ws.cancel')}</Button>
-					</div>
+						<Button type="submit" disabled={model.busy}>{workspace.t('ui.ws.auth.verify_submit')}</Button>
+						<Button type="button" variant="ghost" onclick={cancelTwoFactor}>{workspace.t('ui.ws.cancel')}</Button>
+					</form>
 				{/if}
 			</div>
 			<div class="space-y-2 border-t pt-4">

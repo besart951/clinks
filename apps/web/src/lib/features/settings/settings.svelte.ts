@@ -168,6 +168,7 @@ export class ProfileModel extends SettingsForm {
 	currentPassword = $state('');
 	newPassword = $state('');
 	twoFactorCode = $state('');
+	twoFactorPassword = $state('');
 	twoFactorSecret = $state('');
 	recoveryCodes = $state<string[]>([]);
 	readonly sessions: Resource<BrowserSession[]>;
@@ -245,12 +246,17 @@ export class ProfileModel extends SettingsForm {
 								code: this.twoFactorCode,
 							})
 						).recoveryCodes;
-					else await client.request('POST', '/me/two-factor/disable', { code: this.twoFactorCode });
+					else
+						await client.request('POST', '/me/two-factor/disable', {
+							code: this.twoFactorCode,
+							password: this.twoFactorPassword,
+						});
 					const auth = this.workspace.auth;
 					if (auth instanceof RemoteAuthGateway) await auth.loadAccount();
 					await this.workspace.session.refresh();
 					this.twoFactorSecret = '';
 					this.twoFactorCode = '';
+					this.twoFactorPassword = '';
 					return true;
 				},
 				enabled ? 'ui.ws.settings.two_factor_enabled' : 'ui.ws.settings.two_factor_disabled',

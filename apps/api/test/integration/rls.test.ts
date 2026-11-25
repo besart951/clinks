@@ -46,4 +46,15 @@ describe('row-level security', () => {
 			WHERE table_name = 'schema_migrations' AND grantee = 'clinks_app'`.execute(api.owner);
 		assert.deepEqual(rows, []);
 	});
+
+	it('grants only append privileges (SELECT, INSERT) on audit to the app role', async () => {
+		const { rows } = await sql<{ privilege: string }>`
+			SELECT privilege_type AS privilege FROM information_schema.role_table_grants
+			WHERE table_schema = 'public' AND table_name = 'audit' AND grantee = 'clinks_app'
+			ORDER BY 1`.execute(api.owner);
+		assert.deepEqual(
+			rows.map((row) => row.privilege),
+			['INSERT', 'SELECT'],
+		);
+	});
 });

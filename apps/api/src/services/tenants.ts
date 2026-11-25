@@ -8,6 +8,7 @@ import { uuid } from '../crypto.ts';
 import { ApiError, forbidden, unauthorized } from '../errors.ts';
 import { translate } from '../i18n.ts';
 import { hashPassword } from '../passwords.ts';
+import { enforceRateLimit } from '../rate-limit.ts';
 import type { AccessClaims } from '../tokens.ts';
 import { audit } from './audit.ts';
 import type { Caller, Services } from './context.ts';
@@ -123,8 +124,10 @@ export class TenantService {
 	}
 
 	async invite(claims: AccessClaims, input: { email: string; roleId: string }, caller: Caller) {
+		this.#limit(`invite:user:${claims.sub}`, 20);
 		const { now } = this.#services;
 		const { invitation, token, tenantName } = await this.#asManager(claims, async (tx, tenantId) => {
+			this.#limit(`invite:tenant:${tenantId}`, 30);
 			const role = await tx
 				.selectFrom('roles')
 				.select(['id', 'permissions', 'kind'])
@@ -169,6 +172,8 @@ export class TenantService {
 	}
 
 	async resend(claims: AccessClaims, id: string, caller: Caller) {
+		this.#limit(`invite:user:${claims.sub}`, 20);
+		this.#limit(`invite:resend:${id}`, 5);
 		const { email, tenantName, token } = await this.#asManager(claims, async (tx, tenantId) => {
 			const row = await tx
 				.updateTable('invitations')
@@ -210,14 +215,21 @@ export class TenantService {
 
 	async revokeInvitation(claims: AccessClaims, id: string, caller: Caller) {
 		await this.#asManager(claims, async (tx, tenantId) => {
+			const current = this.#services.now();
 			const revoked = await tx
 				.updateTable('invitations')
-				.set({ status: 'revoked', updatedAt: this.#services.now() })
+				.set({ status: 'revoked', updatedAt: current })
 				.where('id', '=', id)
 				.where('tenantId', '=', tenantId)
 				.where('status', '=', 'pending')
 				.executeTakeFirst();
 			if (revoked.numUpdatedRows === 0n) throw new ApiError(404, 'error.invitation_invalid');
+			await tx
+				.updateTable('auth.oneTimeTokens')
+				.set({ usedAt: current })
+				.where('invitationId', '=', id)
+				.where('usedAt', 'is', null)
+				.execute();
 			await audit(tx, { action: 'invitation.revoked', actorId: claims.sub, tenantId, target: id }, caller);
 		});
 	}
@@ -256,7 +268,16 @@ export class TenantService {
 			throw new ApiError(400, 'error.validation', { password: 'error.ws.password_too_short' });
 		const userId = existing?.id ?? uuid();
 		const passwordHash = existing ? null : await hashPassword(input.password!);
-		await db.transaction().execute(async (tx) => {
+		await inScope(db, { tenantId: invitation.tenantId, userId }, async (tx) => {
+			const current = now();
+			if (!(await useUp(tx, linkId, current))) throw new ApiError(409, 'error.invitation_used');
+			const accepted = await tx
+				.updateTable('invitations')
+				.set({ status: 'accepted', updatedAt: current })
+				.where('id', '=', invitation.id)
+				.where('status', '=', 'pending')
+				.executeTakeFirst();
+			if (accepted.numUpdatedRows === 0n) throw new ApiError(409, 'error.invitation_used');
 			if (passwordHash) {
 				await tx
 					.insertInto('users')
@@ -267,7 +288,7 @@ export class TenantService {
 						lastName: input.lastName,
 						locale: caller.locale,
 						globalRole: null,
-						emailVerifiedAt: now(),
+						emailVerifiedAt: current,
 					})
 					.execute();
 				await tx
@@ -275,17 +296,9 @@ export class TenantService {
 					.values({ userId, passwordHash, totpSecret: null, totpEnabledAt: null, lockedUntil: null })
 					.execute();
 			}
-			await useUp(tx, linkId, now());
-		});
-		await inScope(db, { tenantId: invitation.tenantId, userId }, async (tx) => {
 			await tx
 				.insertInto('memberships')
 				.values({ id: uuid(), tenantId: invitation.tenantId, userId, roleId: invitation.roleId })
-				.execute();
-			await tx
-				.updateTable('invitations')
-				.set({ status: 'accepted', updatedAt: now() })
-				.where('id', '=', invitation.id)
 				.execute();
 			await audit(
 				tx,
@@ -296,6 +309,10 @@ export class TenantService {
 		return existing
 			? { tenantId: invitation.tenantId }
 			: { tenantId: invitation.tenantId, session: await this.#sessions.open(userId, caller, invitation.tenantId) };
+	}
+
+	#limit(key: string, limit: number) {
+		enforceRateLimit(this.#services.limiter, key, limit);
 	}
 
 	/** Runs `work` in the caller's tenant, if their membership there may manage the team. */

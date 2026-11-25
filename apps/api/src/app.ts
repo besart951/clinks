@@ -128,9 +128,13 @@ export function createApp({ services, config }: AppOptions) {
 		return session;
 	}
 
+	function requireClientHeader(c: Context) {
+		if (!c.req.header('X-Clinks-Client')) throw unauthorized();
+	}
+
 	/** The refresh token from the body (native) or the cookie (web). A custom header keeps forms of other sites out. */
 	function presentedRefreshToken(c: Context, body: { refreshToken?: string }): string {
-		if (!c.req.header('X-Clinks-Client')) throw unauthorized();
+		requireClientHeader(c);
 		const token = body.refreshToken ?? getCookie(c, refreshCookie);
 		if (!token) throw unauthorized();
 		return token;
@@ -279,6 +283,7 @@ export function createApp({ services, config }: AppOptions) {
 			responses: { 204: empty() },
 		}),
 		async (c) => {
+			requireClientHeader(c);
 			// The refresh token identifies the device even when the access token has already expired.
 			const claims = await claimsOf(c);
 			if (claims) await sessions.revokeFamily(claims.sub, claims.sid);
@@ -363,13 +368,13 @@ export function createApp({ services, config }: AppOptions) {
 				method: 'post',
 				path: '/me/two-factor/disable',
 				tags: ['account'],
-				request: body(contract.twoFactorCodeRequest),
+				request: body(contract.disableTwoFactorRequest),
 				responses: { 204: empty() },
 			},
 			true,
 		),
 		async (c) => {
-			await auth.disableTwoFactor(c.var.claims, c.req.valid('json').code, caller(c));
+			await auth.disableTwoFactor(c.var.claims, c.req.valid('json'), caller(c));
 			return c.body(null, 204);
 		},
 	);

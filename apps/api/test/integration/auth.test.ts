@@ -103,6 +103,20 @@ describe('sign-up and sign-in', () => {
 		});
 		assert.equal(verified.status, 200);
 	});
+
+	it('limits verification resend per account even as verification ids rotate', async () => {
+		const signUp = await api.client().call('POST', '/auth/sign-up', {
+			body: { firstName: 'R', lastName: 'S', email: 'resend-limit@example.ch', password },
+		});
+		let verificationId = signUp.body.verificationId as string;
+		for (let i = 0; i < 3; i++) {
+			const res = await api.client().call('POST', '/auth/verify-email/resend', { body: { verificationId } });
+			assert.equal(res.status, 200);
+			verificationId = res.body.verificationId as string;
+		}
+		const blocked = await api.client().call('POST', '/auth/verify-email/resend', { body: { verificationId } });
+		assert.equal(blocked.status, 429);
+	});
 });
 
 describe('tokens', () => {
@@ -131,10 +145,15 @@ describe('tokens', () => {
 		);
 	});
 
-	it('refuses a refresh without the client header (no cross-site forms)', async () => {
+	it('refuses refresh and sign-out without the client header (no cross-site forms)', async () => {
 		const { browser } = await api.signedUp('csrf@example.ch');
-		const result = await browser.call('POST', '/auth/refresh', { body: {}, headers: { 'X-Clinks-Client': '' } });
-		assert.equal(result.status, 401);
+		const refreshResult = await browser.call('POST', '/auth/refresh', { body: {}, headers: { 'X-Clinks-Client': '' } });
+		assert.equal(refreshResult.status, 401);
+		const signOutResult = await browser.call('POST', '/auth/sign-out', {
+			body: {},
+			headers: { 'X-Clinks-Client': '' },
+		});
+		assert.equal(signOutResult.status, 401);
 	});
 
 	it('rejects tampered, expired, foreign and revoked access tokens', async () => {
@@ -194,10 +213,22 @@ describe('tokens', () => {
 });
 
 describe('two-factor sign-in', () => {
-	it('needs a TOTP code or a recovery code, each recovery code once', async () => {
+	it('encrypts secrets at rest, prevents TOTP replay within a step and requires password to disable', async () => {
 		const { token } = await api.signedUp('totp@example.ch');
 		const setup = await api.client().call('POST', '/me/two-factor/setup', { token });
 		assert.match(setup.body.otpauthUri, /^otpauth:\/\/totp\//);
+
+		const storedSecret = await api.owner
+			.selectFrom('auth.credentials')
+			.innerJoin('users', 'users.id', 'auth.credentials.userId')
+			.select('totpSecret')
+			.where('users.email', '=', 'totp@example.ch')
+			.executeTakeFirstOrThrow();
+		assert.ok(
+			storedSecret.totpSecret && storedSecret.totpSecret.length > 20,
+			'secret is JWE ciphertext, not raw bytes',
+		);
+
 		const enabled = await api
 			.client()
 			.call('POST', '/me/two-factor/enable', { token, body: { code: api.totp(setup.body.secret) } });
@@ -207,18 +238,29 @@ describe('two-factor sign-in', () => {
 		const signIn = await browser.call('POST', '/auth/sign-in', { body: { email: 'totp@example.ch', password } });
 		assert.equal(signIn.body.status, 'two_factor');
 		assert.equal(browser.cookie, null, 'no session before the second factor');
+
+		// Reusing the enrollment code in the same 30s time step is blocked against replay.
+		const replaySameStep = await browser.call('POST', '/auth/two-factor', {
+			body: { challengeId: signIn.body.challengeId, code: api.totp(setup.body.secret) },
+		});
+		assert.equal(replaySameStep.status, 400);
+
+		api.clock.offset += 30_000;
+		const freshChallenge = await api
+			.client()
+			.call('POST', '/auth/sign-in', { body: { email: 'totp@example.ch', password } });
 		const wrong = await browser.call('POST', '/auth/two-factor', {
-			body: { challengeId: signIn.body.challengeId, code: '123456' },
+			body: { challengeId: freshChallenge.body.challengeId, code: '123456' },
 		});
 		assert.equal(wrong.status, 400);
 		const ok = await browser.call('POST', '/auth/two-factor', {
-			body: { challengeId: signIn.body.challengeId, code: api.totp(setup.body.secret) },
+			body: { challengeId: freshChallenge.body.challengeId, code: api.totp(setup.body.secret) },
 		});
 		assert.equal(ok.status, 200);
-		const replay = await browser.call('POST', '/auth/two-factor', {
-			body: { challengeId: signIn.body.challengeId, code: api.totp(setup.body.secret) },
+		const replayChallenge = await browser.call('POST', '/auth/two-factor', {
+			body: { challengeId: freshChallenge.body.challengeId, code: api.totp(setup.body.secret) },
 		});
-		assert.equal(replay.status, 400, 'a challenge works once');
+		assert.equal(replayChallenge.status, 400, 'a challenge works once');
 
 		const recovery = enabled.body.recoveryCodes[0];
 		const second = await api.client().call('POST', '/auth/sign-in', { body: { email: 'totp@example.ch', password } });
@@ -239,6 +281,32 @@ describe('two-factor sign-in', () => {
 			).status,
 			400,
 		);
+
+		api.clock.offset += 30_000;
+		const wrongPw = await api.client().call('POST', '/me/two-factor/disable', {
+			token,
+			body: { code: api.totp(setup.body.secret), password: 'wrong-password' },
+		});
+		assert.equal(wrongPw.status, 400);
+		assert.ok(wrongPw.body.error.fields.password);
+
+		const disabled = await api.client().call('POST', '/me/two-factor/disable', {
+			token,
+			body: { code: api.totp(setup.body.secret), password },
+		});
+		assert.equal(disabled.status, 204);
+
+		// Repeated disable attempts hit the per-user rate limit (5 attempts / 15 min).
+		let lastDisableStatus = 0;
+		for (let i = 0; i < 4; i++) {
+			lastDisableStatus = (
+				await api.client().call('POST', '/me/two-factor/disable', {
+					token,
+					body: { code: '000000', password: 'wrong' },
+				})
+			).status;
+		}
+		assert.equal(lastDisableStatus, 429);
 	});
 });
 
@@ -278,5 +346,21 @@ describe('password reset', () => {
 			.call('POST', '/auth/password-reset', { body: { token, password: 'a-brand-new-password' } });
 		assert.equal(reset.status, 400);
 		assert.equal(reset.body.error.code, 'error.reset_link_invalid');
+	});
+});
+
+describe('session expiration and token pruning', () => {
+	it('rejects sessions whose refresh token expired and prunes expired tokens', async () => {
+		const { pruneExpiredTokens } = await import('../../src/services/sessions.ts');
+		const { token } = await api.signedUp('expire-session@example.ch');
+		const claims = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString());
+		await api.owner
+			.updateTable('auth.refreshTokens')
+			.set({ expiresAt: new Date(Date.now() + api.clock.offset - 1_000) })
+			.where('familyId', '=', claims.sid)
+			.execute();
+		assert.equal((await api.client().call('GET', '/me', { token })).status, 401);
+		const pruned = await pruneExpiredTokens(api.owner, new Date(Date.now() + api.clock.offset));
+		assert.ok(pruned.refreshTokens >= 1);
 	});
 });

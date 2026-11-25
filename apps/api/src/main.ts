@@ -8,6 +8,7 @@ import { createApp } from './app.ts';
 import { loadConfig } from './config.ts';
 import { smtpMailer } from './mailer.ts';
 import { RateLimiter } from './rate-limit.ts';
+import { pruneExpiredTokens } from './services/sessions.ts';
 import { TokenService } from './tokens.ts';
 
 const config = loadConfig();
@@ -50,8 +51,18 @@ const server = serve({ fetch: app.fetch, port: config.PORT }, (info) =>
 	console.log(`CLinks API on http://localhost:${info.port}`),
 );
 
+const pruneTimer = setInterval(() => {
+	void pruneExpiredTokens(db, new Date()).catch((error: unknown) =>
+		console.error(
+			JSON.stringify({ event: 'auth.prune_failed', message: error instanceof Error ? error.message : String(error) }),
+		),
+	);
+}, 60 * 60_000);
+pruneTimer.unref();
+
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
 	process.on(signal, () => {
+		clearInterval(pruneTimer);
 		server.close();
 		void db.destroy();
 	});
