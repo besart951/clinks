@@ -24,6 +24,9 @@
 	import DateJump from '#lib/components/calendar/DateJump.svelte';
 	import Grip from '@lucide/svelte/icons/grip-vertical';
 	import Users from '@lucide/svelte/icons/users';
+	import EyeOff from '@lucide/svelte/icons/eye-off';
+	import Send from '@lucide/svelte/icons/send';
+	import ConfirmDialog, { type ConfirmRequest } from '#lib/components/common/ConfirmDialog.svelte';
 	import { personBadge } from '@clinks/ui/kit/avatar';
 	import AppointmentSheet from '#lib/components/calendar/AppointmentSheet.svelte';
 	import ContactFormSheet from '#lib/components/contacts/ContactFormSheet.svelte';
@@ -32,7 +35,7 @@
 	import { contactName } from '#lib/data/workspace-api';
 	import { PlanningModel } from '#lib/features/spitex/planning.svelte';
 	import { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
-	import { addDays, minutesToTime, today } from '@clinks/domain/dates';
+	import { addDays, isoWeek, minutesToTime, toCalendarDate, today } from '@clinks/domain/dates';
 	import { firstFreeStart } from '@clinks/domain/scheduling';
 	import type { Appointment, Contact } from '@clinks/domain/types';
 	import type { UserId } from '@clinks/domain/ids';
@@ -44,6 +47,44 @@
 	const people = new PeopleDirectory(workspace);
 	const canWrite = $derived(workspace.session.can('spitex.write') && workspace.session.can('calendar.write'));
 	const canAddClient = $derived(canWrite && workspace.session.can('contacts.write'));
+	const canRelease = $derived(workspace.session.can('spitex.release'));
+	const week = $derived(isoWeek(model.date));
+	let confirm = $state<ConfirmRequest | null>(null);
+	const releaseHint = $derived(
+		model.release
+			? workspace.t('ui.ws.spitex.release.status_released_hint', {
+					date: workspace.i18n.format(toCalendarDate(model.release.createdAt), { day: 'numeric', month: 'long' }),
+					name: people.get(model.release.releasedBy)?.name ?? '–',
+				})
+			: workspace.t('ui.ws.spitex.release.status_draft_hint'),
+	);
+
+	function askRelease() {
+		const { visits, people: count, open } = model.weekSummary;
+		confirm = {
+			title: workspace.t('ui.ws.spitex.release.release_title', { week }),
+			description: workspace.t(
+				open > 0 ? 'ui.ws.spitex.release.release_text_open' : 'ui.ws.spitex.release.release_text',
+				{
+					visits,
+					people: count,
+					open,
+				},
+			),
+			confirmLabel: workspace.t('ui.ws.spitex.release.release'),
+			onConfirm: () => model.releaseWeek(week),
+		};
+	}
+
+	function askWithdraw() {
+		confirm = {
+			title: workspace.t('ui.ws.spitex.release.withdraw_title', { week }),
+			description: workspace.t('ui.ws.spitex.release.withdraw_text'),
+			confirmLabel: workspace.t('ui.ws.spitex.release.withdraw'),
+			destructive: true,
+			onConfirm: () => model.withdrawRelease(week),
+		};
+	}
 	let clientSheet: ContactFormSheet;
 	const staff = $derived(people.people);
 	/** Staff shown as columns; the menu «Mitarbeitende» hides the others. */
@@ -114,6 +155,8 @@
 		color: (appointment) => people.get(appointment.assigneeId)?.avatarColor ?? '#a1a1aa',
 		assignee: (appointment) => people.get(appointment.assigneeId)?.name ?? null,
 		subtitle: (appointment) => (appointment.service ? workspace.t(`ui.ws.spitex.service.${appointment.service}`) : ''),
+		mark: (appointment) =>
+			model.changedSinceRelease(appointment) ? workspace.t('ui.ws.spitex.release.changed') : null,
 	};
 
 	const columns = $derived<GridColumn[]>([
@@ -185,9 +228,24 @@
 				<Button variant="outline" disabled={model.open.length === 0} onclick={() => model.autoAssign(shown)}>
 					<Wand class="size-4" />{workspace.t('ui.ws.spitex.auto_assign')}
 				</Button>
-				<Button onclick={createVisit} aria-keyshortcuts="N">
+				<Button
+					variant={model.release || !canRelease ? 'default' : 'outline'}
+					onclick={createVisit}
+					aria-keyshortcuts="N"
+				>
 					<Plus class="size-4" />{workspace.t('ui.ws.spitex.new_visit')}
 				</Button>
+			{/if}
+			{#if canRelease && model.resource.data}
+				{#if model.release}
+					<Button variant="outline" onclick={askWithdraw}>
+						<EyeOff class="size-4" />{workspace.t('ui.ws.spitex.release.withdraw')}
+					</Button>
+				{:else}
+					<Button onclick={askRelease}>
+						<Send class="size-4" />{workspace.t('ui.ws.spitex.release.release')}
+					</Button>
+				{/if}
 			{/if}
 		{/snippet}
 	</PageHeader>
@@ -217,6 +275,23 @@
 		<h2 class="font-semibold capitalize" aria-live="polite">
 			{workspace.i18n.format(model.date, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
 		</h2>
+		{#if model.resource.data}
+			<!-- Text and icon carry the state, not the colour alone; a change is announced. -->
+			<span
+				role="status"
+				class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium {model.release
+					? 'border-emerald-600/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300'
+					: 'border-amber-600/30 bg-amber-500/10 text-amber-800 dark:text-amber-300'}"
+				title={releaseHint}
+			>
+				{#if model.release}<CircleCheck class="size-3.5" />{:else}<EyeOff class="size-3.5" />{/if}
+				{workspace.t('ui.ws.spitex.release.week', { week })} ·
+				{workspace.t(model.release ? 'ui.ws.spitex.release.status_released' : 'ui.ws.spitex.release.status_draft')}
+				<span class="sr-only">
+					{releaseHint}
+				</span>
+			</span>
+		{/if}
 		<div class="ms-auto flex items-center gap-2 print:hidden">
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>
@@ -448,3 +523,4 @@
 	</div>
 </ModuleGate>
 <ContactFormSheet bind:this={clientSheet} onSaved={planFirstVisit} />
+<ConfirmDialog bind:request={confirm} />
