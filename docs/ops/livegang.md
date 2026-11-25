@@ -188,6 +188,8 @@ pnpm ops:check -- --config-dir /etc/clinks
 - [ ] **Externer Penetrationstest** (siehe [security-review.md](../security-review.md) – die interne Prüfung ist
       gemacht).
 - [ ] Pilot-Mandant mit echten Benutzern einrichten, Einladungen verschicken, eine Woche begleiten.
+- [ ] Spitex: Mitarbeitenden die Rolle mit nur «eigene Einsätze» geben und eine Woche freigeben
+      (siehe [spitex-freigabe.md](../product/spitex-freigabe.md)).
 - [ ] `docs/plan.md` Phase 6 abhaken.
 
 ## Wenn etwas nicht geht

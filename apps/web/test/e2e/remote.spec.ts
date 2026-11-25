@@ -224,3 +224,179 @@ test('shows board presence and stores shared planning notes', async ({ page, bro
 	await other.locator('summary').filter({ hasText: 'Gemeinsame Planungsnotizen' }).click();
 	await expect(other.locator('[contenteditable=true]')).toHaveText('Gemeinsamer Wochenplan');
 });
+
+const apiUrl = process.env.VITE_API_URL ?? 'http://localhost:8787';
+
+/** One call to the API, as a script would make it: the token goes in, JSON comes back. */
+async function api<T>(method: string, path: string, options: { token?: string; body?: unknown } = {}): Promise<T> {
+	const response = await fetch(`${apiUrl}${path}`, {
+		method,
+		headers: {
+			'X-Clinks-Client': 'web',
+			...(options.body === undefined ? {} : { 'Content-Type': 'application/json' }),
+			...(options.token ? { Authorization: `Bearer ${options.token}` } : {}),
+		},
+		body: options.body === undefined ? undefined : JSON.stringify(options.body),
+	});
+	const text = await response.text();
+	if (!response.ok) throw new Error(`${method} ${path}: ${response.status} ${text}`);
+	return (text ? JSON.parse(text) : null) as T;
+}
+
+/** The newest mail to `email` whose subject matches, with its full text. */
+async function mailFor(email: string, subject: RegExp): Promise<string> {
+	for (let attempt = 0; attempt < 40; attempt++) {
+		const response = await fetch(`${mailpit}/api/v1/search?query=${encodeURIComponent(`to:${email}`)}`);
+		const { messages } = (await response.json()) as { messages: { ID: string; Subject: string }[] };
+		const match = messages.find((message) => subject.test(message.Subject));
+		if (match) {
+			const message = (await (await fetch(`${mailpit}/api/v1/message/${match.ID}`)).json()) as { Text: string };
+			return message.Text;
+		}
+		await new Promise((resolve) => setTimeout(resolve, 250));
+	}
+	throw new Error(`no mail «${subject}» to ${email}`);
+}
+
+test('releases the Spitex plan: staff get their own visits on their device, and lose them again', async ({
+	browser,
+}) => {
+	test.setTimeout(180_000);
+	const stamp = Date.now();
+	const plannerEmail = `plan-${stamp}@example.ch`;
+	const staffEmail = `staff-${stamp}@example.ch`;
+	const write = (token: string, ops: unknown[]) => api('POST', '/sync/write', { token, body: { ops } });
+
+	// A planner with a Spitex tenant, a role that only sees its own visits, and one staff member in it.
+	const signUp = await api<{ verificationId: string }>('POST', '/auth/sign-up', {
+		body: { firstName: 'Paula', lastName: 'Planerin', email: plannerEmail, password },
+	});
+	const verified = await api<{ accessToken: string }>('POST', '/auth/verify-email', {
+		body: { verificationId: signUp.verificationId, code: await codeFor(plannerEmail) },
+	});
+	const tenant = await api<{ tenantId: string }>('POST', '/tenants', {
+		token: verified.accessToken,
+		body: { name: 'Spitex Freigabe', industry: 'spitex', modules: ['spitex', 'planner'] },
+	});
+	const planner = (
+		await api<{ accessToken: string }>('POST', '/me/tenant', {
+			token: verified.accessToken,
+			body: { tenantId: tenant.tenantId },
+		})
+	).accessToken;
+	const plannerId = (await api<{ user: { id: string } }>('GET', '/me', { token: planner })).user.id;
+	const role = await api<{ id: string }>('POST', '/tenant/roles', {
+		token: planner,
+		body: { id: null, name: 'Spitex-Mitarbeitende', permissions: ['spitex.own.read'] },
+	});
+	await api('POST', '/tenant/invitations', { token: planner, body: { email: staffEmail, roleId: role.id } });
+	const invitation = /invitation\/([A-Za-z0-9_%-]+)/.exec(await mailFor(staffEmail, /Einladung/))![1];
+	await api('POST', `/invitations/${invitation}/accept`, {
+		body: { firstName: 'Stefan', lastName: 'Staff', password },
+	});
+	const staffToken = (
+		await api<{ session: { accessToken: string } }>('POST', '/auth/sign-in', { body: { email: staffEmail, password } })
+	).session.accessToken;
+	const staffId = (await api<{ user: { id: string } }>('GET', '/me', { token: staffToken })).user.id;
+
+	// Next week: one client and one visit for the staff member, still a draft.
+	const monday = new Date();
+	monday.setUTCDate(monday.getUTCDate() + ((8 - monday.getUTCDay()) % 7 || 7));
+	const weekStart = monday.toISOString().slice(0, 10);
+	const tuesday = new Date(`${weekStart}T09:00:00.000Z`);
+	tuesday.setUTCDate(tuesday.getUTCDate() + 1);
+	const [clientId, visitId, releaseId] = [newId<string>(), newId<string>(), newId<string>()];
+	await write(planner, [
+		{
+			op: 'PUT',
+			table: 'contacts',
+			id: clientId,
+			data: {
+				kind: 'person',
+				first_name: 'Rosa',
+				last_name: 'Klientin',
+				company_name: '',
+				email: 'rosa@example.ch',
+				phone: '+41 32 555 01 01',
+				address: JSON.stringify({ street: 'Seeweg', houseNumber: '5', zip: '3250', city: 'Lyss' }),
+				insurer: 'Geheime Kasse',
+				tags: JSON.stringify(['Klient:in']),
+				notes: 'Nur für die Planung',
+				archived: 0,
+			},
+		},
+		{
+			op: 'PUT',
+			table: 'appointments',
+			id: visitId,
+			data: {
+				title: 'Rosa Klientin',
+				kind: 'spitex',
+				status: 'planned',
+				contact_id: clientId,
+				assignee_id: staffId,
+				starts_at: tuesday.toISOString(),
+				ends_at: new Date(tuesday.getTime() + 45 * 60_000).toISOString(),
+				location: '',
+				notes: 'Schlüssel beim Nachbarn',
+				service: 'basic_care',
+			},
+		},
+	]);
+
+	const staff = await secondDevice(browser, staffEmail);
+	await staff.goto(`/#/visits?week=${weekStart}`);
+	const pending = staff.getByText(/Der Plan für KW \d+ ist noch in Arbeit/);
+	const visit = staff.getByRole('listitem').filter({ hasText: 'Rosa Klientin' });
+	await expect(pending).toBeVisible({ timeout: 30_000 });
+	await expect(staff.getByRole('status', { name: 'Sync-Status' })).toContainText('Alles gespeichert', {
+		timeout: 30_000,
+	});
+	await expect(visit).toHaveCount(0);
+
+	// The planner sees the draft in the plan.
+	const plan = await secondDevice(browser, plannerEmail);
+	await plan.goto(`/#/spitex?date=${tuesday.toISOString().slice(0, 10)}`);
+	const status = plan.getByRole('status').filter({ hasText: /KW \d+ ·/ });
+	await expect(status).toContainText('Entwurf', { timeout: 30_000 });
+	await expect(plan.getByRole('button', { name: /Rosa Klientin/ }).first()).toBeVisible({ timeout: 30_000 });
+
+	// Released: the visit arrives on the staff member's device with what they need of the client, and a mail goes out.
+	await write(planner, [
+		{
+			op: 'PUT',
+			table: 'spitex_week_releases',
+			id: releaseId,
+			data: { week_start: weekStart, released_by: plannerId },
+		},
+	]);
+	await expect(visit).toBeVisible({ timeout: 30_000 });
+	await expect(visit).toContainText('Seeweg 5, 3250 Lyss');
+	await expect(visit).toContainText('+41 32 555 01 01');
+	await expect(visit).toContainText('Schlüssel beim Nachbarn');
+	await expect(status).toContainText('Freigegeben', { timeout: 30_000 });
+	const mail = await mailFor(staffEmail, /Dein Einsatzplan für KW \d+ ist da/);
+	expect(mail).toContain(`/#/visits?week=${weekStart}`);
+	expect(mail).not.toContain('Rosa');
+	// Nothing else of the client reached the device: no contacts, no plan.
+	await staff.goto('/#/contacts');
+	await expect(staff.getByText('Kein Zugriff')).toBeVisible();
+	await staff.goto(`/#/visits?week=${weekStart}`);
+	await expect(visit).toBeVisible();
+
+	// Given to someone else, it leaves the device; given back, it returns.
+	await write(planner, [{ op: 'PATCH', table: 'appointments', id: visitId, data: { assignee_id: plannerId } }]);
+	await expect(staff.getByText('Keine Einsätze in dieser Woche')).toBeVisible({ timeout: 30_000 });
+	await write(planner, [{ op: 'PATCH', table: 'appointments', id: visitId, data: { assignee_id: staffId } }]);
+	await expect(visit).toBeVisible({ timeout: 30_000 });
+	await expect(visit).toContainText('Geändert');
+
+	// Withdrawn: the week is a draft again and gone from the device.
+	await write(planner, [{ op: 'DELETE', table: 'spitex_week_releases', id: releaseId }]);
+	await expect(pending).toBeVisible({ timeout: 30_000 });
+	await expect(visit).toHaveCount(0);
+	await expect(status).toContainText('Entwurf', { timeout: 30_000 });
+
+	await staff.context().close();
+	await plan.context().close();
+});

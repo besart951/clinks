@@ -172,6 +172,104 @@ describe('releasing the Spitex plan', () => {
 		assert.equal(sneaky.status, 400);
 	});
 
+	it('tells the people concerned in the app and by mail, once, and never names a client', async () => {
+		const staff = await member('plan-notify@example.ch', ['spitex.own.read']);
+		const quiet = await member('plan-quiet@example.ch', ['spitex.own.read']);
+		await api.owner
+			.updateTable('users')
+			.set({ notificationPreferences: { inApp: true, email: false, push: false, digest: 'never' } })
+			.where('id', '=', quiet.id)
+			.execute();
+		const notices = (userId: string) =>
+			api.owner
+				.selectFrom('notifications')
+				.select(['message', 'href', 'kind'])
+				.where('userId', '=', userId)
+				.orderBy('createdAt')
+				.execute()
+				.then((rows) => rows.map((row) => (row.message as { key: string }).key.replace('ui.ws.notification.', '')));
+		const mailsTo = (email: string) => api.mailer.sent.filter((mail) => mail.to === email);
+		const [first, second, mine, draft, releaseId] = [uuid(), uuid(), uuid(), uuid(), uuid()];
+		await write(admin.token, [
+			{
+				op: 'PUT',
+				table: 'appointments',
+				id: first,
+				data: visit(staff.id, '2027-03-02T08:00:00.000Z', { title: 'Frau Geheim' }),
+			},
+			{ op: 'PUT', table: 'appointments', id: second, data: visit(quiet.id, '2027-03-02T09:00:00.000Z') },
+			{ op: 'PUT', table: 'appointments', id: mine, data: visit(adminId, '2027-03-02T10:00:00.000Z') },
+			{ op: 'PUT', table: 'appointments', id: draft, data: visit(staff.id, '2027-03-09T08:00:00.000Z') },
+		]);
+		// Planning a draft concerns nobody yet.
+		assert.deepEqual(await notices(staff.id), []);
+
+		await write(admin.token, [
+			{ op: 'PUT', table: 'spitex_week_releases', id: releaseId, data: release('2027-03-01', adminId) },
+		]);
+		assert.deepEqual(await notices(staff.id), ['plan_released']);
+		assert.deepEqual(await notices(quiet.id), ['plan_released']);
+		// Whoever releases knows; whoever turned mails off gets none.
+		assert.deepEqual(await notices(adminId), []);
+		assert.equal(mailsTo('plan-quiet@example.ch').length, 1); // only the sign-up code
+		const mail = api.mailer.last('plan-notify@example.ch');
+		assert.match(mail.subject, /KW 9/);
+		assert.match(mail.text, /http:\/\/web\.test\/#\/visits\?week=2027-03-01/);
+		assert.match(mail.text, /1\. März bis 7\. März/);
+		assert.doesNotMatch(`${mail.subject} ${mail.text}`, /Geheim|Grundpflege/);
+		const row = await api.owner
+			.selectFrom('notifications')
+			.select(['kind', 'href'])
+			.where('userId', '=', staff.id)
+			.executeTakeFirstOrThrow();
+		assert.deepEqual(row, { kind: 'plan', href: '/visits?week=2027-03-01' });
+
+		// A change after the release: one notice, however often the visit is dragged around right after.
+		const sent = mailsTo('plan-notify@example.ch').length;
+		const move = (start: string) =>
+			write(admin.token, [
+				{
+					op: 'PATCH',
+					table: 'appointments',
+					id: first,
+					data: { starts_at: start, ends_at: new Date(Date.parse(start) + 45 * 60_000).toISOString() },
+				},
+			]);
+		await move('2027-03-02T11:00:00.000Z');
+		await move('2027-03-02T11:30:00.000Z');
+		// The same time spelled with an offset, and a new title, change nothing for the person.
+		await move('2027-03-02T12:30:00.000+01:00');
+		await write(admin.token, [{ op: 'PATCH', table: 'appointments', id: first, data: { title: 'Frau Geheim (neu)' } }]);
+		assert.deepEqual(await notices(staff.id), ['plan_released', 'plan_changed']);
+		assert.equal(mailsTo('plan-notify@example.ch').length, sent + 1);
+		assert.match(api.mailer.last('plan-notify@example.ch').subject, /geändert/);
+		// A draft week stays silent, and so does a change to someone else's visit.
+		await write(admin.token, [
+			{
+				op: 'PATCH',
+				table: 'appointments',
+				id: draft,
+				data: { starts_at: '2027-03-09T10:00:00.000Z', ends_at: '2027-03-09T10:45:00.000Z' },
+			},
+		]);
+		assert.equal(mailsTo('plan-notify@example.ch').length, sent + 1);
+
+		// Reassigned: the new person hears about it. Removing their other visit right after is the same news.
+		await write(admin.token, [{ op: 'PATCH', table: 'appointments', id: first, data: { assignee_id: quiet.id } }]);
+		assert.deepEqual(await notices(quiet.id), ['plan_released', 'plan_changed']);
+		assert.equal((await write(admin.token, [{ op: 'DELETE', table: 'appointments', id: second }])).status, 200);
+		assert.deepEqual(await notices(quiet.id), ['plan_released', 'plan_changed']);
+
+		await write(admin.token, [{ op: 'DELETE', table: 'spitex_week_releases', id: releaseId }]);
+		assert.deepEqual((await notices(quiet.id)).at(-1), 'plan_withdrawn');
+		assert.deepEqual(await notices(staff.id), ['plan_released', 'plan_changed']);
+		// Staff read and tick off their own notifications; the sender cannot read them back.
+		const seen = await inScope(api.db, { tenantId: admin.tenantId, userId: adminId }, (tx) =>
+			tx.selectFrom('notifications').select('id').where('kind', '=', 'plan').execute(),
+		);
+		assert.deepEqual(seen, []);
+	});
+
 	it('keeps Spitex visits to the planners: the calendar permission alone does not change them', async () => {
 		const reception = await member('plan-reception@example.ch', ['calendar.read', 'calendar.write']);
 		const id = uuid();
