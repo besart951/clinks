@@ -5217,6 +5217,10 @@
       "ui.ws.settings.change_photo": {
         "de-CH": "Foto wählen",
         "en-US": "Choose photo"
+      },
+      "ui.ws.expense.choose_receipt": {
+        "de-CH": "Beleg wählen",
+        "en-US": "Choose receipt"
       }
     }
   }

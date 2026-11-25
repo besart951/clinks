@@ -1,4 +1,5 @@
 <script lang="ts">
+	import FileButton from '#lib/components/common/FileButton.svelte';
 	import { onMount } from 'svelte';
 	import Plus from '@lucide/svelte/icons/plus';
 	import Paperclip from '@lucide/svelte/icons/paperclip';
@@ -220,11 +221,11 @@
 					? workspace.t('ui.ws.expense.receipt_present')
 					: workspace.t('ui.ws.documents.drop_hint')}
 			>
-				<Input
+				<FileButton
 					id="e-receipt"
-					type="file"
+					label={workspace.t('ui.ws.expense.choose_receipt')}
 					accept="image/*,application/pdf"
-					onchange={(event) => (model.receipt = event.currentTarget.files?.[0] ?? null)}
+					onpick={(files) => (model.receipt = files[0] ?? null)}
 				/>
 			</FormField>
 		</form>

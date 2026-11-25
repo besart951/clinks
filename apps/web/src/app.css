@@ -111,6 +111,27 @@ html {
 		min-inline-size: 0;
 	}
 
+	/* On touch screens a fingertip needs about 44px (WCAG 2.5.5); fields and the usual buttons grow to 40px,
+	   which keeps forms compact. The small `xs`/`sm` sizes stay for dense rows but get 32px at least. */
+	@media (pointer: coarse) {
+		[data-slot='input'],
+		[data-slot='select-trigger'][data-size='default'],
+		[data-slot='button']:is([data-size='default'], [data-size='lg']) {
+			min-block-size: 2.5rem;
+		}
+		[data-slot='button']:is([data-size='icon'], [data-size='icon-lg']) {
+			min-block-size: 2.5rem;
+			min-inline-size: 2.5rem;
+		}
+		[data-slot='button']:is([data-size='sm'], [data-size='xs']) {
+			min-block-size: 2rem;
+		}
+		[data-slot='button']:is([data-size='icon-sm'], [data-size='icon-xs']) {
+			min-block-size: 2rem;
+			min-inline-size: 2rem;
+		}
+	}
+
 	[data-slot='card'] {
 		box-shadow: var(--shadow-sm);
 	}
