@@ -15,7 +15,7 @@ import type { AuthGateway, NewTenant, SignInStep } from './auth-gateway.ts';
 export class RemoteAuthGateway implements AuthGateway {
 	readonly remote = true;
 	readonly #client: ApiClient;
-	#activeTenant: string | null = null;
+	#activeTenant: TenantId | null = null;
 	readonly #db: WorkspaceCache;
 	readonly #sync: SyncEngine;
 	readonly #legacy: () => WorkspaceCache;
@@ -90,16 +90,15 @@ export class RemoteAuthGateway implements AuthGateway {
 
 	/** A token for the tenant, and sync of that tenant's data. */
 	async switchTenant(tenantId: TenantId) {
-		if (
-			this.#activeTenant &&
-			tenantId !== this.#activeTenant &&
-			(await (await this.#sync.database()).getUploadQueueStats()).count
-		) {
-			throw this.#client.localError('error.ws.sync.switch_pending');
-		}
+		const switching = await this.#assertCanSwitch(tenantId);
 		this.#client.adopt(await this.#client.request<SessionResponse>('POST', '/me/tenant', { tenantId }));
 		this.#activeTenant = tenantId;
-		await this.#sync.reconnect();
+		if (switching) {
+			await this.#sync.clear();
+			await this.#sync.connect();
+		} else {
+			await this.#sync.reconnect();
+		}
 		if (this.#userId) {
 			try {
 				await importWorkspace(this.#client, this.#legacy(), tenantId, this.#userId, this.#db);
@@ -128,6 +127,7 @@ export class RemoteAuthGateway implements AuthGateway {
 	}
 
 	async createTenant(input: NewTenant, demoRows: (tenantId: TenantId) => Partial<Snapshot>): Promise<TenantId> {
+		await this.#assertCanSwitch();
 		const { tenantId } = await this.#client.request<{ tenantId: TenantId }>('POST', '/tenants', {
 			name: input.companyName,
 			industry: input.industry,
@@ -166,6 +166,14 @@ export class RemoteAuthGateway implements AuthGateway {
 		return { tenantId: result.tenantId, signedInAs: null };
 	}
 
+	async #assertCanSwitch(targetTenant?: TenantId): Promise<boolean> {
+		const leavingActive = this.#activeTenant !== null && this.#activeTenant !== targetTenant;
+		if (leavingActive && (await this.#sync.pendingCount()) > 0) {
+			throw this.#client.localError('error.ws.sync.switch_pending');
+		}
+		return leavingActive;
+	}
+
 	async #adopt(session: SessionResponse): Promise<UserId> {
 		this.#preferences.remove('clinks.signedOut');
 		this.#client.adopt(session);
@@ -181,7 +189,7 @@ export class RemoteAuthGateway implements AuthGateway {
 		const me = await this.#client.request<MeResponse>('GET', '/me');
 		const oldUsers = this.#db.table('users');
 		if (oldUsers.length && !oldUsers.some((user) => user.id === me.user.id)) await this.#sync.clear();
-		this.#activeTenant = me.tenantId;
+		this.#activeTenant = me.tenantId as TenantId | null;
 		this.#userId = me.user.id as UserId;
 		const rows = localRows(this.#db, me);
 		this.#db.clear();

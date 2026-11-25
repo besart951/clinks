@@ -56,6 +56,13 @@ export class SyncEngine {
 		await this.connect();
 	}
 
+	/** Live count of local writes waiting for upload (also refreshes reactive `pendingWrites`). */
+	async pendingCount(): Promise<number> {
+		const database = await this.database();
+		await this.#countPending(database);
+		return this.pendingWrites;
+	}
+
 	/** Writes records in one local transaction (uploaded as one), e.g. demo data at onboarding. */
 	async insert(table: SyncedTableName, records: readonly { id: string }[]) {
 		if (records.length === 0) return;
@@ -76,6 +83,10 @@ export class SyncEngine {
 	async clear() {
 		const database = await this.database();
 		await database.disconnectAndClear();
+		this.connected = false;
+		this.uploading = false;
+		this.downloading = false;
+		this.error = null;
 		this.pendingWrites = 0;
 		this.lastSyncedAt = null;
 	}

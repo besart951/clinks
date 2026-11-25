@@ -4546,6 +4546,10 @@
         "de-CH": "Bewahre diese einmaligen Wiederherstellungscodes sicher auf.",
         "en-US": "Keep these single-use recovery codes in a safe place."
       },
+      "ui.ws.sync.discard_title": {
+        "de-CH": "Nicht synchronisierte Änderungen",
+        "en-US": "Unsynced changes"
+      },
       "ui.ws.sync.confirm_discard": {
         "de-CH": "{count} Änderungen sind noch auf diesem Gerät. Beim Abmelden werden sie gelöscht. Trotzdem abmelden?",
         "en-US": "{count} changes are still on this device. Signing out deletes them. Sign out anyway?"

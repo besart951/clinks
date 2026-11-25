@@ -4,22 +4,19 @@
 	import Keyboard from '@lucide/svelte/icons/keyboard';
 	import LifeBuoy from '@lucide/svelte/icons/life-buoy';
 	import * as DropdownMenu from '@clinks/ui/components/ui/dropdown-menu';
+	import ConfirmDialog, { type ConfirmRequest } from '#lib/components/common/ConfirmDialog.svelte';
 	import PersonAvatar from '#lib/components/common/PersonAvatar.svelte';
+	import { requestSignOut } from '#lib/features/shell/sign-out';
 	import { navigate } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { onShortcuts }: { onShortcuts: () => void } = $props();
 	const workspace = useWorkspace();
 	const session = workspace.session;
+	let confirm = $state<ConfirmRequest | null>(null);
 
 	async function signOut() {
-		if (
-			workspace.sync?.pendingWrites &&
-			!window.confirm(workspace.t('ui.ws.sync.confirm_discard', { count: workspace.sync.pendingWrites }))
-		)
-			return;
-		await session.signOut();
-		await navigate('/login');
+		confirm = await requestSignOut(workspace, () => navigate('/login'));
 	}
 </script>
 
@@ -62,3 +59,4 @@
 		<DropdownMenu.Item onclick={signOut}><LogOut class="size-4" />{workspace.t('ui.sign_out')}</DropdownMenu.Item>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>
+<ConfirmDialog bind:request={confirm} />

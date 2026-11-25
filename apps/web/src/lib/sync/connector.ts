@@ -1,6 +1,8 @@
 import type { AbstractPowerSyncDatabase, PowerSyncBackendConnector } from '@powersync/web';
 import type { ApiClient } from '../data/api-client.ts';
-import { MockApiError } from '../data/database.ts';
+import { MockApiError, type ErrorCode } from '../data/database.ts';
+
+const permanentUploadErrors: ReadonlySet<ErrorCode> = new Set(['validation', 'forbidden', 'conflict', 'not_found']);
 
 /**
  * Connects the local database to the CLinks backend: PowerSync downloads with the API's access token,
@@ -23,8 +25,9 @@ export class ApiConnector implements PowerSyncBackendConnector {
 	}
 
 	/**
-	 * A rejected transaction (invalid, not allowed, conflicting) is dropped: retrying cannot fix it, and the
-	 * next sync puts the server's version back. Offline and server errors are retried by PowerSync.
+	 * A permanently rejected transaction (invalid, forbidden, conflicting, missing target) is dropped: retrying cannot
+	 * fix it, and the next sync puts the server's version back. Auth expiry (401), locks (423), rate limits (429),
+	 * offline errors and server errors are kept in the queue and retried by PowerSync.
 	 */
 	async uploadData(database: AbstractPowerSyncDatabase) {
 		for (
@@ -41,11 +44,7 @@ export class ApiConnector implements PowerSyncBackendConnector {
 			try {
 				await this.#client.request('POST', '/sync/write', { ops });
 			} catch (error) {
-				if (
-					!(error instanceof MockApiError) ||
-					!['validation', 'unauthorized', 'conflict', 'not_found'].includes(error.code)
-				)
-					throw error;
+				if (!(error instanceof MockApiError) || !permanentUploadErrors.has(error.code)) throw error;
 				this.#onRejected(error.message);
 			}
 			await transaction.complete();
