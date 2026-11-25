@@ -525,3 +525,33 @@ test('jumps to a day, week or month from the small calendar', async ({ page }) =
 	await picker.getByRole('button', { name: 'Montag, 30. November 2026' }).click();
 	await expect(page.getByRole('heading', { level: 2, name: 'Montag, 30. November 2026' })).toBeVisible();
 });
+
+test('releases a week of the Spitex plan to the staff and withdraws it again', async ({ page }) => {
+	await signIn(page);
+	await page.getByRole('button', { name: 'Arbeitsbereich' }).click();
+	await page.getByRole('menuitem', { name: 'Stille Spitex Seeland' }).click();
+	await page.goto('/#/spitex');
+	// The current week of the demo is released; next week is still a draft.
+	const status = page.getByRole('status').filter({ hasText: /KW \d+ ·/ });
+	await expect(status).toContainText('Freigegeben');
+	await page.getByRole('button', { name: 'Datum wählen' }).click();
+	await page.getByRole('dialog').getByRole('button', { name: 'Woche', exact: true }).click();
+	await page.getByRole('dialog').locator('[aria-pressed="true"][data-cell]').focus();
+	await page.keyboard.press('ArrowDown');
+	await page.keyboard.press('Enter');
+	await expect(status).toContainText('Entwurf');
+	await expect(status).toContainText('Mitarbeitende sehen diese Woche noch nicht.');
+
+	await page.getByRole('button', { name: 'Woche freigeben' }).click();
+	const dialog = page.getByRole('dialog', { name: /KW \d+/ });
+	await expect(dialog).toContainText(/\d+ Einsätze für \d+ Mitarbeitende werden sichtbar/);
+	await dialog.getByRole('button', { name: 'Woche freigeben' }).click();
+	await expect(page.getByText(/^KW \d+ freigegeben$/)).toBeVisible();
+	await expect(status).toContainText('Freigegeben');
+	await expect(status).toContainText('von Besi Morina');
+
+	await page.getByRole('button', { name: 'Freigabe entziehen' }).click();
+	await dialog.getByRole('button', { name: 'Freigabe entziehen' }).click();
+	await expect(status).toContainText('Entwurf');
+	await expect(page.getByRole('button', { name: 'Woche freigeben' })).toBeVisible();
+});

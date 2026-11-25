@@ -12,7 +12,7 @@ import {
 } from '@clinks/domain/dates';
 import type { UserId } from '@clinks/domain/ids';
 import { planAssignments, withinArrivalWindow } from '@clinks/domain/scheduling';
-import type { Appointment, CalendarDate, Contact } from '@clinks/domain/types';
+import type { Appointment, CalendarDate, Contact, WeekRelease } from '@clinks/domain/types';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 import type { Person } from '../collaboration/people.svelte.ts';
@@ -20,6 +20,8 @@ import type { Person } from '../collaboration/people.svelte.ts';
 export interface PlanningData {
 	visits: Appointment[];
 	contacts: Map<string, Contact>;
+	/** The release of the week on show, if it is released to the staff. */
+	release: WeekRelease | null;
 }
 
 /** The daily dispatch board for home-care visits. */
@@ -32,16 +34,21 @@ export class PlanningModel {
 
 	constructor(workspace: Workspace) {
 		this.#workspace = workspace;
-		this.resource = new Resource(workspace.db, ['appointments', 'contacts'], async () => {
+		this.resource = new Resource(workspace.db, ['appointments', 'contacts', 'weekReleases'], async () => {
 			const from = startOfWeek(this.date);
 			const to = addDays(from, 6);
-			const [visits, contacts] = await Promise.all([
+			const [visits, contacts, releases] = await Promise.all([
 				workspace.api.appointments.list(
 					(row) => row.kind === 'spitex' && toCalendarDate(row.start) >= from && toCalendarDate(row.start) <= to,
 				),
 				workspace.api.contacts.list(),
+				workspace.api.weekReleases.list((row) => row.weekStart === from),
 			]);
-			return { visits, contacts: new Map(contacts.map((contact) => [contact.id, contact])) };
+			return {
+				visits,
+				contacts: new Map(contacts.map((contact) => [contact.id, contact])),
+				release: releases[0] ?? null,
+			};
 		});
 	}
 
@@ -55,6 +62,50 @@ export class PlanningModel {
 		return this.day
 			.filter((row) => row.assigneeId === null)
 			.sort((left, right) => left.start.localeCompare(right.start));
+	}
+
+	get weekStart(): CalendarDate {
+		return startOfWeek(this.date);
+	}
+
+	get release(): WeekRelease | null {
+		return this.resource.data?.release ?? null;
+	}
+
+	/** What a release shows to whom: planned visits, the people they go to, and visits nobody has yet. */
+	get weekSummary(): { visits: number; people: number; open: number } {
+		const planned = (this.resource.data?.visits ?? []).filter((row) => row.status !== 'cancelled');
+		const assigned = planned.filter((row) => row.assigneeId !== null);
+		return {
+			visits: assigned.length,
+			people: new Set(assigned.map((row) => row.assigneeId)).size,
+			open: planned.length - assigned.length,
+		};
+	}
+
+	/** Planned or changed after the week was released: the person has seen an earlier plan. */
+	changedSinceRelease(visit: Appointment): boolean {
+		return this.release !== null && visit.updatedAt > this.release.createdAt;
+	}
+
+	/** Shows the week to the staff: everyone sees their own visits. */
+	async releaseWeek(week: number) {
+		const releasedBy = this.#workspace.session.user?.id;
+		if (!releasedBy || this.release) return;
+		await this.#workspace.run(
+			() => this.#workspace.api.weekReleases.create({ weekStart: this.weekStart, releasedBy }),
+			{ success: 'ui.ws.spitex.release.released', successParams: { week } },
+		);
+	}
+
+	/** Takes the week back: it is a draft again and leaves the staff's devices. */
+	async withdrawRelease(week: number) {
+		const release = this.release;
+		if (!release) return;
+		await this.#workspace.run(() => this.#workspace.api.weekReleases.remove(release.id), {
+			success: 'ui.ws.spitex.release.withdrawn',
+			successParams: { week },
+		});
 	}
 
 	togglePerson(id: UserId) {

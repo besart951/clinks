@@ -1,5 +1,5 @@
 import { streetLine } from '@clinks/domain/address';
-import { addDays, atTime, toCalendarDate } from '@clinks/domain/dates';
+import { addDays, atTime, startOfWeek, toCalendarDate } from '@clinks/domain/dates';
 import { newId, type ContactId, type FolderId, type RoleId, type TenantId } from '@clinks/domain/ids';
 import { invoiceTotals } from '@clinks/domain/money';
 import { administratorPermissions, userPermissions } from '@clinks/domain/permissions';
@@ -879,6 +879,27 @@ export function createSeed(now: Date = new Date(), seed = 20261121): Snapshot {
 		clients,
 		spitexTasks,
 	);
+
+	// Added last so the rows above keep their random values. Besi and Fatma plan; the others only see their own
+	// visits, and only of released weeks: the past two and the current one. Next week is still a draft.
+	const visiting = add(context, 'roles', {
+		tenantId: spitexId,
+		name: 'Spitex-Mitarbeitende',
+		kind: 'custom',
+		permissions: ['spitex.own.read'],
+	});
+	const visitors = new Set(spitexStaff.slice(2).map((member) => member.user.id));
+	for (const membership of context.snapshot.memberships)
+		if (membership.tenantId === spitexId && visitors.has(membership.userId)) membership.roleId = visiting.id;
+	for (const offset of [-14, -7, 0]) {
+		const release = add(context, 'weekReleases', {
+			tenantId: spitexId,
+			weekStart: startOfWeek(addDays(context.today, offset)),
+			releasedBy: besi.id,
+		});
+		// Released after the plan was made, so no seeded visit counts as changed since.
+		release.createdAt = release.updatedAt = now.toISOString();
+	}
 
 	add(context, 'sessions', {
 		userId: besi.id,

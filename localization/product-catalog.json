@@ -5053,6 +5053,66 @@
       "ui.ws.audit.plan.deleted": {
         "de-CH": "hat die Freigabe eines Wochenplans entzogen",
         "en-US": "withdrew the release of a weekly plan"
+      },
+      "ui.ws.spitex.release.status_draft": {
+        "de-CH": "Entwurf",
+        "en-US": "Draft"
+      },
+      "ui.ws.spitex.release.status_draft_hint": {
+        "de-CH": "Mitarbeitende sehen diese Woche noch nicht.",
+        "en-US": "Staff do not see this week yet."
+      },
+      "ui.ws.spitex.release.status_released": {
+        "de-CH": "Freigegeben",
+        "en-US": "Released"
+      },
+      "ui.ws.spitex.release.status_released_hint": {
+        "de-CH": "Freigegeben am {date} von {name}. Mitarbeitende sehen ihre eigenen Einsätze.",
+        "en-US": "Released on {date} by {name}. Staff see their own visits."
+      },
+      "ui.ws.spitex.release.week": {
+        "de-CH": "KW {week}",
+        "en-US": "Week {week}"
+      },
+      "ui.ws.spitex.release.release": {
+        "de-CH": "Woche freigeben",
+        "en-US": "Release week"
+      },
+      "ui.ws.spitex.release.withdraw": {
+        "de-CH": "Freigabe entziehen",
+        "en-US": "Withdraw release"
+      },
+      "ui.ws.spitex.release.release_title": {
+        "de-CH": "KW {week} freigeben?",
+        "en-US": "Release week {week}?"
+      },
+      "ui.ws.spitex.release.release_text": {
+        "de-CH": "{visits} Einsätze für {people} Mitarbeitende werden sichtbar. Jede Person sieht nur ihre eigenen Einsätze.",
+        "en-US": "{visits} visits for {people} staff become visible. Everyone sees only their own visits."
+      },
+      "ui.ws.spitex.release.release_text_open": {
+        "de-CH": "{visits} Einsätze für {people} Mitarbeitende werden sichtbar. Jede Person sieht nur ihre eigenen Einsätze. {open} Einsätze sind noch offen: Sie bleiben unsichtbar, bis sie zugewiesen sind.",
+        "en-US": "{visits} visits for {people} staff become visible. Everyone sees only their own visits. {open} visits are still open: they stay hidden until they are assigned."
+      },
+      "ui.ws.spitex.release.withdraw_title": {
+        "de-CH": "Freigabe für KW {week} entziehen?",
+        "en-US": "Withdraw the release of week {week}?"
+      },
+      "ui.ws.spitex.release.withdraw_text": {
+        "de-CH": "Die Mitarbeitenden sehen ihre Einsätze dieser Woche nicht mehr, bis du wieder freigibst.",
+        "en-US": "Staff no longer see their visits of this week until you release it again."
+      },
+      "ui.ws.spitex.release.released": {
+        "de-CH": "KW {week} freigegeben",
+        "en-US": "Week {week} released"
+      },
+      "ui.ws.spitex.release.withdrawn": {
+        "de-CH": "Freigabe für KW {week} entzogen",
+        "en-US": "Release of week {week} withdrawn"
+      },
+      "ui.ws.spitex.release.changed": {
+        "de-CH": "Seit der Freigabe geändert",
+        "en-US": "Changed since the release"
       }
     }
   }

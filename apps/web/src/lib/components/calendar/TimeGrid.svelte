@@ -26,6 +26,8 @@
 		/** Name of the person the appointment is assigned to, for the info card on hover. */
 		assignee(appointment: Appointment): string | null;
 		subtitle(appointment: Appointment): string;
+		/** A short note that marks an appointment, e.g. «changed since the release»; shown as a dot and read out. */
+		mark?(appointment: Appointment): string | null;
 	}
 
 	export type TimeAxis = 'vertical' | 'horizontal';
@@ -336,6 +338,11 @@
 			<dd class="line-clamp-3">{appointment.notes}</dd>
 		{/if}
 	</dl>
+	{#if handlers.mark?.(appointment)}
+		<p class="mt-3 flex items-center gap-1.5 text-xs text-amber-700 dark:text-amber-400">
+			<span class="size-1.5 rounded-full bg-amber-500" aria-hidden="true"></span>{handlers.mark(appointment)}
+		</p>
+	{/if}
 	<p class="text-muted-foreground mt-3 border-t pt-2 text-xs">{workspace.t('ui.ws.calendar.peek.open_hint')}</p>
 {/snippet}
 
@@ -382,6 +389,7 @@
 			{@const appointment = item.appointment}
 			{@const color = handlers.color(appointment)}
 			{@const live = resizing?.id === appointment.id ? resizing : null}
+			{@const mark = handlers.mark?.(appointment) ?? null}
 			{@const box = place(
 				live ? live.start - dayStartMinutes : item.top,
 				live ? live.end - live.start : item.height,
@@ -434,9 +442,14 @@
 							style:background-color="color-mix(in oklab, {color} 14%, var(--background))"
 							aria-label="{workspace.i18n.time(appointment.start)}–{workspace.i18n.time(
 								appointment.end,
-							)} {appointment.title}"
+							)} {appointment.title}{mark ? ` (${mark})` : ''}"
 						>
-							<span class="block truncate font-medium">{appointment.title}</span>
+							{#if mark}<span
+									class="absolute end-1 top-1 size-1.5 rounded-full bg-amber-500"
+									title={mark}
+									aria-hidden="true"
+								></span>{/if}
+							<span class="block truncate font-medium {mark ? 'pe-2.5' : ''}">{appointment.title}</span>
 							{#if live}
 								<span class="block truncate font-medium tabular-nums">{label(live.start)}–{label(live.end)}</span>
 							{:else if horizontal || item.height >= 30}<span class="text-muted-foreground block truncate">
