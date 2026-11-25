@@ -4901,6 +4901,18 @@
       "ui.ws.calendar.peek.open_hint": {
         "de-CH": "Klicken öffnet den Termin.",
         "en-US": "Click to open the appointment."
+      },
+      "ui.ws.documents.folder_name": {
+        "de-CH": "Ordnername",
+        "en-US": "Folder name"
+      },
+      "ui.ws.documents.new_folder_in": {
+        "de-CH": "Name des neuen Ordners in «{name}»",
+        "en-US": "Name of the new folder in “{name}”"
+      },
+      "ui.ws.documents.rename_folder": {
+        "de-CH": "Neuer Name für «{name}»",
+        "en-US": "New name for “{name}”"
       }
     }
   }

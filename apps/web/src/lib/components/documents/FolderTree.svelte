@@ -2,10 +2,8 @@
 	import type { Folder } from '@clinks/domain/types';
 	import type { FolderId } from '@clinks/domain/ids';
 
-	/** What the tree asks its page to do; the page owns the dialogs. */
+	/** What the tree asks its page to do; the page owns the confirmation dialog. */
 	export interface FolderTreeActions {
-		create(parentId: FolderId | null): void;
-		rename(folder: Folder): void;
 		remove(folder: Folder): void;
 	}
 </script>
@@ -17,6 +15,7 @@
 	import FolderPlus from '@lucide/svelte/icons/folder-plus';
 	import Files from '@lucide/svelte/icons/files';
 	import Ellipsis from '@lucide/svelte/icons/ellipsis';
+	import Check from '@lucide/svelte/icons/check';
 	import * as DropdownMenu from '@clinks/ui/components/ui/dropdown-menu';
 	import FolderMoveMenu from './FolderMoveMenu.svelte';
 	import { carriesItem, readItem, startItemDrag } from './drag-item';
@@ -28,6 +27,64 @@
 	const canWrite = $derived(workspace.session.can('documents.write'));
 	/** The folder (or 'root') a dragged item is over. */
 	let over = $state<string | null>(null);
+
+	/** A name being typed right in the tree: for a new folder under `parentId`, or for renaming `folder`. */
+	type Draft = { kind: 'create'; parentId: FolderId | null } | { kind: 'rename'; folder: Folder };
+	let draft = $state<Draft | null>(null);
+	let draftName = $state('');
+	let saving = false;
+
+	/** Opens an empty, focused name field where the new folder will appear. */
+	export function startCreate(parentId: FolderId | null) {
+		if (parentId) model.expanded.add(parentId);
+		draft = { kind: 'create', parentId };
+		draftName = '';
+	}
+
+	function startRename(folder: Folder) {
+		draft = { kind: 'rename', folder };
+		draftName = folder.name;
+	}
+
+	function parentName(parentId: FolderId | null) {
+		return parentId
+			? (model.folders.find((folder) => folder.id === parentId)?.name ?? '')
+			: workspace.t('ui.ws.documents.all_files');
+	}
+
+	function creatingIn(parentId: FolderId | null) {
+		return draft?.kind === 'create' && draft.parentId === parentId;
+	}
+
+	/** Enter (the form's own submit, so IME composition stays safe), the check button or leaving the field. */
+	async function commit() {
+		if (!draft || saving) return;
+		const name = draftName.trim();
+		if (!name || (draft.kind === 'rename' && name === draft.folder.name)) {
+			draft = null;
+			return;
+		}
+		saving = true;
+		const saved =
+			draft.kind === 'create'
+				? await model.createFolder(name, draft.parentId)
+				: await model.renameFolder(draft.folder, name);
+		saving = false;
+		// On failure the toast says why and the field stays, so the name can be corrected.
+		if (saved !== null) draft = null;
+	}
+
+	function onDraftKey(event: KeyboardEvent) {
+		if (event.key !== 'Escape') return;
+		event.preventDefault();
+		draft = null;
+	}
+
+	/** Focuses the field once it appears; a rename selects the old name. */
+	function focusName(input: HTMLInputElement) {
+		input.focus();
+		input.select();
+	}
 
 	function allow(event: DragEvent, key: string) {
 		if (!canWrite || !carriesItem(event)) return;
@@ -81,7 +138,7 @@
 						type="button"
 						class="text-muted-foreground hover:text-foreground hover:bg-background grid size-6 place-items-center rounded {reveal}"
 						aria-label={workspace.t('ui.ws.documents.new_folder')}
-						onclick={() => actions.create(null)}
+						onclick={() => startCreate(null)}
 					>
 						<FolderPlus class="size-3.5" />
 					</button>
@@ -92,7 +149,46 @@
 	</ul>
 </nav>
 
+{#snippet nameField(label: string)}
+	<form
+		class="flex min-w-0 flex-1 items-center gap-1.5"
+		onsubmit={(event) => {
+			event.preventDefault();
+			void commit();
+		}}
+		onfocusout={(event) => {
+			// Leaving the field saves, like in a file manager; moving to the check button does not.
+			if (!event.currentTarget.contains(event.relatedTarget as Node | null)) void commit();
+		}}
+	>
+		<FolderIcon class="size-4 shrink-0 text-amber-500" />
+		<input
+			{@attach focusName}
+			bind:value={draftName}
+			class="border-input bg-background focus-visible:ring-ring/50 focus-visible:border-ring h-7 w-0 min-w-0 flex-1 rounded-md border px-2 text-sm outline-none focus-visible:ring-2"
+			aria-label={label}
+			placeholder={workspace.t('ui.ws.documents.folder_name')}
+			maxlength="120"
+			onkeydown={onDraftKey}
+		/>
+		<button
+			type="submit"
+			class="text-muted-foreground hover:text-foreground hover:bg-background grid size-6 shrink-0 place-items-center rounded"
+			aria-label={workspace.t('ui.save')}
+		>
+			<Check class="size-3.5" />
+		</button>
+	</form>
+{/snippet}
+
 {#snippet branch(parentId: FolderId | null, depth: number)}
+	{#if creatingIn(parentId)}
+		<li>
+			<div class="flex h-8 items-center gap-1 pe-1" style:padding-inline-start="{depth * 14 + 24}px">
+				{@render nameField(workspace.t('ui.ws.documents.new_folder_in', { name: parentName(parentId) }))}
+			</div>
+		</li>
+	{/if}
 	{#each model.childrenOf(parentId) as folder (folder.id)}
 		{@const children = model.childrenOf(folder.id)}
 		{@const open = model.expanded.has(folder.id)}
@@ -124,24 +220,28 @@
 				{:else}
 					<span class="size-6 shrink-0"></span>
 				{/if}
-				<button
-					type="button"
-					class="flex min-w-0 flex-1 items-center gap-2 text-left {current ? 'font-medium' : ''}"
-					aria-current={current ? 'true' : undefined}
-					onclick={() => model.open(folder.id)}
-				>
-					{#if current}<FolderOpen class="size-4 shrink-0 text-amber-500" />{:else}<FolderIcon
-							class="size-4 shrink-0 text-amber-500"
-						/>{/if}
-					<span class="truncate">{folder.name}</span>
-					<span class="text-muted-foreground ms-auto text-xs tabular-nums">{model.count(folder.id) || ''}</span>
-				</button>
-				{#if canWrite}
+				{#if draft?.kind === 'rename' && draft.folder.id === folder.id}
+					{@render nameField(workspace.t('ui.ws.documents.rename_folder', { name: folder.name }))}
+				{:else}
+					<button
+						type="button"
+						class="flex min-w-0 flex-1 items-center gap-2 text-left {current ? 'font-medium' : ''}"
+						aria-current={current ? 'true' : undefined}
+						onclick={() => model.open(folder.id)}
+					>
+						{#if current}<FolderOpen class="size-4 shrink-0 text-amber-500" />{:else}<FolderIcon
+								class="size-4 shrink-0 text-amber-500"
+							/>{/if}
+						<span class="truncate">{folder.name}</span>
+						<span class="text-muted-foreground ms-auto text-xs tabular-nums">{model.count(folder.id) || ''}</span>
+					</button>
+				{/if}
+				{#if canWrite && !(draft?.kind === 'rename' && draft.folder.id === folder.id)}
 					<button
 						type="button"
 						class="text-muted-foreground hover:text-foreground hover:bg-background grid size-6 shrink-0 place-items-center rounded {reveal}"
 						aria-label={workspace.t('ui.ws.documents.new_subfolder', { name: folder.name })}
-						onclick={() => actions.create(folder.id)}
+						onclick={() => startCreate(folder.id)}
 					>
 						<FolderPlus class="size-3.5" />
 					</button>
@@ -157,7 +257,7 @@
 								</button>{/snippet}
 						</DropdownMenu.Trigger>
 						<DropdownMenu.Content align="end">
-							<DropdownMenu.Item onclick={() => actions.rename(folder)}>
+							<DropdownMenu.Item onclick={() => startRename(folder)}>
 								{workspace.t('ui.ws.documents.rename')}
 							</DropdownMenu.Item>
 							<FolderMoveMenu {model} {folder} />
@@ -169,7 +269,7 @@
 					</DropdownMenu.Root>
 				{/if}
 			</div>
-			{#if open && children.length > 0}
+			{#if open && (children.length > 0 || creatingIn(folder.id))}
 				<ul class="grid gap-0.5">{@render branch(folder.id, depth + 1)}</ul>
 			{/if}
 		</li>
