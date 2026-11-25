@@ -3106,10 +3106,6 @@
         "de-CH": "Alles zugewiesen",
         "en-US": "All assigned"
       },
-      "ui.ws.spitex.open_text": {
-        "de-CH": "Ziehe einen Einsatz am Griff auf eine Person im Plan oder wähle «Zuweisen».",
-        "en-US": "Drag a visit by its handle onto a person in the plan or choose “Assign”."
-      },
       "ui.ws.spitex.window": {
         "de-CH": "Ankunft {window}",
         "en-US": "Arrival {window}"

@@ -281,9 +281,7 @@
 					<div class="space-y-4">
 						<Card.Root class="group/open h-fit print:hidden">
 							<Card.Header>
-								<Card.Title>{workspace.t('ui.ws.spitex.open_visits')}</Card.Title><Card.Description>
-									{workspace.t('ui.ws.spitex.open_text')}
-								</Card.Description>
+								<Card.Title>{workspace.t('ui.ws.spitex.open_visits')}</Card.Title>
 								{#if canAddClient}
 									<Card.Action>
 										<!-- Shown on hover and keyboard focus; always on touch screens, which cannot hover. -->
