@@ -6,6 +6,7 @@
 	import CalendarDays from '@lucide/svelte/icons/calendar-days';
 	import ChevronLeft from '@lucide/svelte/icons/chevron-left';
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
+	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import * as Popover from '@clinks/ui/components/ui/popover';
 	import { Button } from '@clinks/ui/components/ui/button';
 	import { addMonths, isoWeek, monthGrid, startOfMonth, startOfWeek, today } from '@clinks/domain/dates';
@@ -20,11 +21,14 @@
 		value,
 		units,
 		initial = 'day',
+		label,
 		onpick,
 	}: {
 		value: CalendarDate;
 		units: Exclude<JumpUnit, 'year'>[];
 		initial?: JumpUnit;
+		/** Shown on the trigger, e.g. the date on show; without it the trigger is an icon. */
+		label?: string;
 		onpick: (unit: Exclude<JumpUnit, 'year'>, date: CalendarDate) => void;
 	} = $props();
 
@@ -164,15 +168,29 @@
 <Popover.Root bind:open onOpenChange={opened}>
 	<Popover.Trigger>
 		{#snippet child({ props })}
-			<Button
-				{...props}
-				variant="ghost"
-				size="icon-sm"
-				aria-label={workspace.t('ui.ws.calendar.jump')}
-				title={workspace.t('ui.ws.calendar.jump')}
-			>
-				<CalendarDays class="size-4" />
-			</Button>
+			{#if label}
+				<Button
+					{...props}
+					variant="ghost"
+					class="h-10 min-w-0 gap-2 px-2 text-base font-semibold capitalize"
+					title={workspace.t('ui.ws.calendar.jump')}
+				>
+					<CalendarDays class="size-4 shrink-0" />
+					<span class="truncate" aria-live="polite">{label}</span>
+					<ChevronDown class="text-muted-foreground size-4 shrink-0" />
+					<span class="sr-only">– {workspace.t('ui.ws.calendar.jump')}</span>
+				</Button>
+			{:else}
+				<Button
+					{...props}
+					variant="ghost"
+					size="icon-sm"
+					aria-label={workspace.t('ui.ws.calendar.jump')}
+					title={workspace.t('ui.ws.calendar.jump')}
+				>
+					<CalendarDays class="size-4" />
+				</Button>
+			{/if}
 		{/snippet}
 	</Popover.Trigger>
 	<Popover.Content

@@ -62,8 +62,6 @@
 	} = $props();
 	const workspace = useWorkspace();
 	const horizontal = $derived(axis === 'horizontal');
-	/** Never smaller than this, so short appointments stay readable; grows to fill the window. */
-	const minPixelsPerMinute = $derived(horizontal ? 1.2 : 0.9);
 	/** Width of the row labels in the horizontal layout. */
 	const labelWidth = 160;
 	const range = dayEndMinutes - dayStartMinutes;
@@ -71,6 +69,11 @@
 	let header = $state(44);
 	let available = $state(0);
 	let width = $state(0);
+	/**
+	 * Never smaller than this, so short appointments stay readable; grows to fill the window. On a phone a
+	 * half-hour visit needs room for two lines it can be tapped on.
+	 */
+	const minPixelsPerMinute = $derived(horizontal ? 1.2 : width > 0 && width < 640 ? 1.5 : 0.9);
 	const pixelsPerMinute = $derived(
 		Math.max(minPixelsPerMinute, horizontal ? (width - labelWidth) / range : (available - header) / range),
 	);
@@ -514,7 +517,7 @@
 			{/each}
 		</div>
 	{:else}
-		<div class="grid min-w-[640px]" style:grid-template-columns="3.5rem repeat({columns.length}, minmax(7rem, 1fr))">
+		<div class="grid min-w-0" style:grid-template-columns="3.5rem repeat({columns.length}, minmax(7rem, 1fr))">
 			<div class="bg-background sticky top-0 z-10 border-b"></div>
 			{#each columns as column (column.key)}
 				<div

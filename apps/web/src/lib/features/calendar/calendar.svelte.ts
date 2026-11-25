@@ -1,5 +1,14 @@
 import { saveTimes, type AppointmentTimes } from './retime.ts';
-import { addDays, addMonths, isoWeekday, monthGrid, startOfWeek, today, weekDays } from '@clinks/domain/dates';
+import {
+	addDays,
+	addMonths,
+	isoWeekday,
+	minutesBetween,
+	monthGrid,
+	startOfWeek,
+	today,
+	weekDays,
+} from '@clinks/domain/dates';
 import type { AppointmentId, UserId } from '@clinks/domain/ids';
 import type { Appointment, AppointmentKind, CalendarDate, Contact } from '@clinks/domain/types';
 import { Resource } from '../../state/resource.svelte.ts';
@@ -30,7 +39,7 @@ export class CalendarModel {
 	constructor(workspace: Workspace) {
 		this.#workspace = workspace;
 		this.resource = new Resource(workspace.db, ['appointments', 'contacts'], async () => {
-			const [from, to] = this.range;
+			const [from, to] = this.loadedRange;
 			const [appointments, contacts] = await Promise.all([
 				workspace.api.appointments.list(
 					(row) => row.start.slice(0, 10) >= addDays(from, -1) && row.start.slice(0, 10) <= addDays(to, 1),
@@ -64,6 +73,25 @@ export class CalendarModel {
 		return [days[0], days[days.length - 1]];
 	}
 
+	/** What is loaded: the whole week in day and team view, so moving to another day of it is instant. */
+	get loadedRange(): [CalendarDate, CalendarDate] {
+		if (this.view === 'day' || this.view === 'resources') {
+			const monday = startOfWeek(this.anchor);
+			return [monday, addDays(monday, 6)];
+		}
+		return this.range;
+	}
+
+	/** At a glance for one day: appointments, booked time and visits nobody has yet. */
+	daySummary(date: CalendarDate): { count: number; minutes: number; open: number } {
+		const rows = this.on(date).filter((row) => row.status !== 'cancelled');
+		return {
+			count: rows.length,
+			minutes: rows.reduce((sum, row) => sum + minutesBetween(row.start, row.end), 0),
+			open: rows.filter((row) => row.assigneeId === null).length,
+		};
+	}
+
 	get visible(): Appointment[] {
 		return (this.resource.data?.appointments ?? []).filter(
 			(row) =>
@@ -93,8 +121,11 @@ export class CalendarModel {
 	}
 
 	setAnchor(date: CalendarDate) {
+		const [loadedFrom, loadedTo] = this.loadedRange;
 		this.anchor = date;
-		void this.resource.reload(true);
+		// Another day of the loaded week needs nothing new; a new month grid or week does.
+		const [from, to] = this.loadedRange;
+		if (from < loadedFrom || to > loadedTo) void this.resource.reload(true);
 	}
 
 	togglePerson(id: UserId) {

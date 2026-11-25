@@ -5185,6 +5185,34 @@
       "mail.plan.changed.body": {
         "de-CH": "Hallo {name}\n\nIn deinem Einsatzplan von {tenant} für KW {week} ({from} bis {to}) hat sich etwas geändert. Den aktuellen Stand findest du hier:\n\n{link}",
         "en-US": "Hello {name}\n\nSomething changed in your plan of {tenant} for week {week} ({from} to {to}). You find the current plan here:\n\n{link}"
+      },
+      "ui.ws.calendar.views": {
+        "de-CH": "Ansicht",
+        "en-US": "View"
+      },
+      "ui.ws.calendar.filters_active": {
+        "de-CH": "aktive Filter",
+        "en-US": "active filters"
+      },
+      "ui.ws.calendar.summary_count": {
+        "de-CH": "Termine",
+        "en-US": "Appointments"
+      },
+      "ui.ws.calendar.summary_time": {
+        "de-CH": "Geplante Zeit",
+        "en-US": "Booked time"
+      },
+      "ui.ws.calendar.summary_open": {
+        "de-CH": "Offen",
+        "en-US": "Open"
+      },
+      "ui.ws.calendar.hours": {
+        "de-CH": "{hours} h",
+        "en-US": "{hours} h"
+      },
+      "ui.ws.calendar.page_text": {
+        "de-CH": "Termine, Einsätze und wer wann eingeteilt ist.",
+        "en-US": "Appointments, visits and who is booked when."
       }
     }
   }

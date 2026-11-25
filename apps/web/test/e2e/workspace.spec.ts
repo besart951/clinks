@@ -615,6 +615,31 @@ test('shows staff only their own visits, and a week only once it is released', a
 	await expect(bar.getByRole('link')).toHaveText(['Start', 'Meine Einsätze']);
 });
 
+test('finds the way around the calendar on a phone', async ({ page }) => {
+	await signIn(page);
+	await page.setViewportSize({ width: 390, height: 844 });
+	await page.goto('/#/calendar');
+	// Day view by default, the date in the middle, the week to pick a day from.
+	const views = page.getByRole('group', { name: 'Ansicht' });
+	await expect(views.getByRole('button', { name: 'Tag' })).toHaveAttribute('aria-pressed', 'true');
+	const week = page.getByRole('group', { name: 'Woche' });
+	await expect(week.getByRole('button')).toHaveCount(7);
+	const tomorrow = week.locator('[aria-pressed="true"] + button');
+	const name = await tomorrow.getAttribute('aria-label');
+	await tomorrow.click();
+	await expect(week.getByRole('button', { name: name! })).toHaveAttribute('aria-pressed', 'true');
+	await expect(page.getByRole('button', { name: 'Heute', exact: true })).toBeVisible();
+	await expect(page.getByRole('term').filter({ hasText: 'Geplante Zeit' })).toBeVisible();
+	// Nothing scrolls sideways, and a new appointment is a thumb away.
+	expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+	await page.getByRole('button', { name: 'Neuer Termin' }).click();
+	await expect(page.getByRole('dialog', { name: 'Neuer Termin' })).toBeVisible();
+	await page.keyboard.press('Escape');
+	await views.getByRole('button', { name: 'Woche' }).click();
+	await expect(page).toHaveURL(/view=week/);
+	await expect(week).toHaveCount(0);
+});
+
 test('keeps side sheets inside a phone screen without sideways scrolling', async ({ page }) => {
 	await signIn(page);
 	await page.setViewportSize({ width: 390, height: 800 });

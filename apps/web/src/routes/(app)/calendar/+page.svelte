@@ -6,6 +6,11 @@
 	import Plus from '@lucide/svelte/icons/plus';
 	import Filter from '@lucide/svelte/icons/filter';
 	import Eye from '@lucide/svelte/icons/eye';
+	import CalendarDays from '@lucide/svelte/icons/calendar-days';
+	import CalendarRange from '@lucide/svelte/icons/calendar-range';
+	import Columns3 from '@lucide/svelte/icons/columns-3';
+	import UsersIcon from '@lucide/svelte/icons/users';
+	import LocateFixed from '@lucide/svelte/icons/locate-fixed';
 	import * as Tabs from '@clinks/ui/components/ui/tabs';
 	import * as DropdownMenu from '@clinks/ui/components/ui/dropdown-menu';
 	import { Button } from '@clinks/ui/components/ui/button';
@@ -24,7 +29,16 @@
 	import { CalendarModel, type CalendarView } from '#lib/features/calendar/calendar.svelte';
 	import { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
 	import { contactName } from '#lib/data/workspace-api';
-	import { addDays, atTime, isoWeekday, minutesToTime, startOfWeek, today } from '@clinks/domain/dates';
+	import {
+		addDays,
+		atTime,
+		isoWeek,
+		isoWeekday,
+		minutesToTime,
+		startOfWeek,
+		today,
+		weekDays,
+	} from '@clinks/domain/dates';
 	import { appointmentKinds, type Appointment, type CalendarDate } from '@clinks/domain/types';
 	import type { ContactId } from '@clinks/domain/ids';
 	import { href, routeQuery, setQuery } from '#lib/navigation';
@@ -190,24 +204,179 @@
 		void setQuery(page.url, { axis: next === 'horizontal' ? next : null });
 	}
 
+	const views = [
+		{ value: 'day', label: 'ui.ws.calendar.view_day', icon: CalendarDays },
+		{ value: 'week', label: 'ui.ws.calendar.view_week', icon: Columns3 },
+		{ value: 'month', label: 'ui.ws.calendar.view_month', icon: CalendarRange },
+		{ value: 'resources', label: 'ui.ws.calendar.view_resources', icon: UsersIcon },
+	] as const;
+
+	/** The title on phones: short enough for one line. */
+	const mobileLabel = $derived(
+		model.view === 'month'
+			? workspace.i18n.format(model.anchor, { month: 'long', year: 'numeric' })
+			: model.view === 'week'
+				? `${workspace.i18n.format(model.anchor, { month: 'short', year: 'numeric' })} · ${workspace.t('ui.ws.spitex.release.week', { week: isoWeek(model.anchor) })}`
+				: workspace.i18n.format(model.anchor, { weekday: 'short', day: 'numeric', month: 'long' }),
+	);
+
+	/** Filters that hide something, for the badge on the button. */
+	const filterCount = $derived(model.hiddenPeople.length + model.hiddenKinds.length + (model.showOpen ? 0 : 1));
+
 	function openDay(date: string) {
 		model.setAnchor(date);
 		changeView('day');
 	}
 </script>
 
+{#snippet filterMenu()}
+	<DropdownMenu.Root>
+		<DropdownMenu.Trigger>
+			{#snippet child({ props })}<Button {...props} variant="outline" size="sm">
+					<Filter class="size-4" />{workspace.t('ui.filter')}{#if filterCount > 0}<span
+							class="bg-primary text-primary-foreground grid min-w-5 place-items-center rounded-full px-1 text-[11px] tabular-nums"
+						>
+							{filterCount}<span class="sr-only">{workspace.t('ui.ws.calendar.filters_active')}</span>
+						</span>{/if}
+				</Button>{/snippet}
+		</DropdownMenu.Trigger>
+		<DropdownMenu.Content align="end" class="w-60">
+			<DropdownMenu.Label>{workspace.t('ui.ws.calendar.people')}</DropdownMenu.Label>
+			{#each people.people as person (person.id)}
+				<DropdownMenu.CheckboxItem
+					checked={!model.hiddenPeople.includes(person.id)}
+					onCheckedChange={() => model.togglePerson(person.id)}
+					closeOnSelect={false}
+				>
+					<span class="size-2.5 rounded-full" style:background-color={person.avatarColor}></span>{person.name}
+				</DropdownMenu.CheckboxItem>
+			{/each}
+			<DropdownMenu.CheckboxItem bind:checked={model.showOpen} closeOnSelect={false}>
+				{workspace.t('ui.ws.calendar.open')}
+			</DropdownMenu.CheckboxItem>
+			<DropdownMenu.Separator />
+			<DropdownMenu.Label>{workspace.t('ui.ws.calendar.kind')}</DropdownMenu.Label>
+			{#each appointmentKinds as kind (kind)}
+				<DropdownMenu.CheckboxItem
+					checked={!model.hiddenKinds.includes(kind)}
+					onCheckedChange={() => model.toggleKind(kind)}
+					closeOnSelect={false}
+				>
+					{workspace.t(`ui.ws.calendar.kind_${kind}`)}
+				</DropdownMenu.CheckboxItem>
+			{/each}
+		</DropdownMenu.Content>
+	</DropdownMenu.Root>
+{/snippet}
+
 <svelte:head><title>{workspace.t('ui.ws.module.calendar')} · CLinks</title></svelte:head>
 
 <ModuleGate permission="calendar.read">
-	<PageHeader title={workspace.t('ui.ws.module.calendar')}>
+	<PageHeader title={workspace.t('ui.ws.module.calendar')} description={workspace.t('ui.ws.calendar.page_text')}>
 		{#snippet actions()}
-			{#if canWrite}<Button onclick={() => create(model.anchor, 9 * 60, session.user?.id)} aria-keyshortcuts="N">
+			{#if canWrite}<Button
+					class="hidden md:inline-flex"
+					onclick={() => create(model.anchor, 9 * 60, session.user?.id)}
+					aria-keyshortcuts="N"
+				>
 					<Plus class="size-4" />{workspace.t('ui.ws.command.new_appointment')}
 				</Button>{/if}
 		{/snippet}
 	</PageHeader>
 
-	<div class="mb-4 flex flex-wrap items-center gap-2">
+	<!-- Phones: views across the width, the date to tap in the middle, the week to pick a day from. -->
+	<div class="mb-3 space-y-3 md:hidden">
+		<div
+			class="bg-muted grid grid-cols-4 gap-1 rounded-xl p-1"
+			role="group"
+			aria-label={workspace.t('ui.ws.calendar.views')}
+		>
+			{#each views as view (view.value)}
+				<button
+					type="button"
+					class="flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-lg text-xs font-medium transition-colors {model.view ===
+					view.value
+						? 'bg-background text-foreground shadow-sm'
+						: 'text-muted-foreground hover:text-foreground'}"
+					aria-pressed={model.view === view.value}
+					onclick={() => changeView(view.value)}
+				>
+					<view.icon class="size-4" />{workspace.t(view.label)}
+				</button>
+			{/each}
+		</div>
+		<div class="flex items-center gap-1">
+			<Button
+				variant="outline"
+				size="icon"
+				class="size-11 shrink-0"
+				onclick={() => model.go(-1)}
+				aria-label={workspace.t('ui.ws.calendar.previous')}
+			>
+				<ChevronLeft class="size-5" />
+			</Button>
+			<div class="flex min-w-0 flex-1 justify-center">
+				<DateJump
+					value={model.anchor}
+					units={['day', 'week', 'month']}
+					initial={model.view === 'month' ? 'month' : model.view === 'week' ? 'week' : 'day'}
+					label={mobileLabel}
+					onpick={jumpTo}
+				/>
+			</div>
+			<Button
+				variant="outline"
+				size="icon"
+				class="size-11 shrink-0"
+				onclick={() => model.go(1)}
+				aria-label={workspace.t('ui.ws.calendar.next')}
+			>
+				<ChevronRight class="size-5" />
+			</Button>
+		</div>
+		{#if model.view === 'day' || model.view === 'resources'}
+			<div class="grid grid-cols-7 gap-1" role="group" aria-label={workspace.t('ui.ws.calendar.view_week')}>
+				{#each weekDays(startOfWeek(model.anchor), 7) as day (day)}
+					{@const selected = day === model.anchor}
+					{@const busy = model.on(day).length > 0}
+					<button
+						type="button"
+						class="flex min-h-14 flex-col items-center justify-center rounded-xl border text-xs transition-colors {selected
+							? 'border-primary bg-primary text-primary-foreground'
+							: day === today()
+								? 'border-primary/50 text-primary'
+								: 'hover:bg-accent'} {isoWeekday(day) >= 6 && !selected ? 'text-muted-foreground' : ''}"
+						aria-pressed={selected}
+						aria-current={day === today() ? 'date' : undefined}
+						aria-label={workspace.i18n.format(day, { weekday: 'long', day: 'numeric', month: 'long' })}
+						onclick={() => model.setAnchor(day)}
+					>
+						<span>{workspace.i18n.format(day, { weekday: 'short' })}</span>
+						<span class="text-sm font-semibold tabular-nums">{Number(day.slice(8))}</span>
+						<span
+							class="size-1 rounded-full {busy ? (selected ? 'bg-primary-foreground' : 'bg-primary') : ''}"
+							aria-hidden="true"
+						></span>
+					</button>
+				{/each}
+			</div>
+		{/if}
+		<div class="flex items-center gap-2">
+			{@render filterMenu()}
+			{#if model.view !== 'day' || model.anchor !== today()}
+				<Button variant="ghost" size="sm" onclick={() => model.go(0)}>
+					<LocateFixed class="size-4" />{workspace.t('ui.ws.calendar.today')}
+				</Button>
+			{/if}
+			{#if model.hiddenWeekdays.length > 0 && (model.view === 'week' || model.view === 'month')}
+				<Button variant="ghost" size="sm" class="text-muted-foreground ms-auto" onclick={showAllDays}>
+					<Eye class="size-4" />{workspace.t('ui.ws.calendar.hidden_days', { days: hiddenDayNames })}
+				</Button>
+			{/if}
+		</div>
+	</div>
+
+	<div class="mb-4 hidden flex-wrap items-center gap-2 md:flex">
 		<Button variant="outline" size="sm" onclick={() => model.go(0)}>{workspace.t('ui.ws.calendar.today')}</Button>
 		<div class="flex">
 			<Button
@@ -246,39 +415,7 @@
 				<Eye class="size-4" />{workspace.t('ui.ws.calendar.hidden_days', { days: hiddenDayNames })}
 			</Button>
 		{/if}
-		<DropdownMenu.Root>
-			<DropdownMenu.Trigger>
-				{#snippet child({ props })}<Button {...props} variant="outline" size="sm">
-						<Filter class="size-4" />{workspace.t('ui.filter')}
-					</Button>{/snippet}
-			</DropdownMenu.Trigger>
-			<DropdownMenu.Content align="end" class="w-60">
-				<DropdownMenu.Label>{workspace.t('ui.ws.calendar.people')}</DropdownMenu.Label>
-				{#each people.people as person (person.id)}
-					<DropdownMenu.CheckboxItem
-						checked={!model.hiddenPeople.includes(person.id)}
-						onCheckedChange={() => model.togglePerson(person.id)}
-						closeOnSelect={false}
-					>
-						<span class="size-2.5 rounded-full" style:background-color={person.avatarColor}></span>{person.name}
-					</DropdownMenu.CheckboxItem>
-				{/each}
-				<DropdownMenu.CheckboxItem bind:checked={model.showOpen} closeOnSelect={false}>
-					{workspace.t('ui.ws.calendar.open')}
-				</DropdownMenu.CheckboxItem>
-				<DropdownMenu.Separator />
-				<DropdownMenu.Label>{workspace.t('ui.ws.calendar.kind')}</DropdownMenu.Label>
-				{#each appointmentKinds as kind (kind)}
-					<DropdownMenu.CheckboxItem
-						checked={!model.hiddenKinds.includes(kind)}
-						onCheckedChange={() => model.toggleKind(kind)}
-						closeOnSelect={false}
-					>
-						{workspace.t(`ui.ws.calendar.kind_${kind}`)}
-					</DropdownMenu.CheckboxItem>
-				{/each}
-			</DropdownMenu.Content>
-		</DropdownMenu.Root>
+		{@render filterMenu()}
 		{#if model.view !== 'month'}<AxisToggle {axis} onchange={changeAxis} />{/if}
 		<Tabs.Root value={model.view} onValueChange={changeView}>
 			<Tabs.List>
@@ -308,7 +445,34 @@
 					/>
 				{:else}
 					<TimeGrid {columns} {handlers} {axis} {selectedId} editable={canWrite} />
-					{#if canWrite}<p class="text-muted-foreground mt-2 text-xs">
+					{#if model.view === 'day' || model.view === 'resources'}
+						{@const summary = model.daySummary(model.anchor)}
+						<dl class="bg-card mt-3 grid grid-cols-3 divide-x rounded-xl border py-3 text-center">
+							<div class="px-2">
+								<dt class="text-muted-foreground text-xs">{workspace.t('ui.ws.calendar.summary_count')}</dt>
+								<dd class="text-lg font-semibold tabular-nums">{summary.count}</dd>
+							</div>
+							<div class="px-2">
+								<dt class="text-muted-foreground text-xs">{workspace.t('ui.ws.calendar.summary_time')}</dt>
+								<dd class="text-lg font-semibold tabular-nums">
+									{workspace.t('ui.ws.calendar.hours', {
+										hours: (summary.minutes / 60).toLocaleString(workspace.i18n.locale, { maximumFractionDigits: 1 }),
+									})}
+								</dd>
+							</div>
+							<div class="px-2">
+								<dt class="text-muted-foreground text-xs">{workspace.t('ui.ws.calendar.summary_open')}</dt>
+								<dd
+									class="text-lg font-semibold tabular-nums {summary.open > 0
+										? 'text-amber-700 dark:text-amber-400'
+										: ''}"
+								>
+									{summary.open}
+								</dd>
+							</div>
+						</dl>
+					{/if}
+					{#if canWrite}<p class="text-muted-foreground mt-2 hidden text-xs md:block">
 							{workspace.t(axis === 'horizontal' ? 'ui.ws.calendar.hint_horizontal' : 'ui.ws.calendar.hint')}
 						</p>{/if}
 				{/if}
@@ -323,4 +487,16 @@
 			appointments={model.resource.data?.appointments ?? []}
 		/>
 	</div>
+	{#if canWrite}
+		<!-- Phones: always in reach of the thumb, above the bar at the bottom. -->
+		<Button
+			size="icon"
+			class="fixed end-4 z-20 size-14 rounded-full shadow-lg md:hidden"
+			style="bottom: calc(4.5rem + env(safe-area-inset-bottom))"
+			aria-label={workspace.t('ui.ws.command.new_appointment')}
+			onclick={() => create(model.anchor, 9 * 60, session.user?.id)}
+		>
+			<Plus class="size-6" />
+		</Button>
+	{/if}
 </ModuleGate>
