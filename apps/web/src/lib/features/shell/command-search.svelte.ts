@@ -104,7 +104,7 @@ export class CommandSearch {
 				group: 'tasks' as const,
 				label: row.title,
 				detail: '',
-				path: `/planner?task=${row.id}`,
+				path: `/planner/${row.id}`,
 			})),
 			...mails.map((row) => ({
 				id: row.id,

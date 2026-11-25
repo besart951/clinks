@@ -103,7 +103,7 @@
 			{#snippet taskRow(task: (typeof tasks)[number])}
 				<a
 					class="hover:bg-accent flex h-9 items-center gap-2 rounded-md px-1 text-[13px]"
-					href={href(`/planner?task=${task.id}`)}
+					href={href(`/planner/${task.id}`)}
 				>
 					<span
 						class="size-2 shrink-0 rounded-full {task.status === 'done' ? 'bg-success' : 'bg-input'}"

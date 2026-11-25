@@ -30,7 +30,7 @@ export function auditPath(entry: Pick<AuditEntry, 'target' | 'action'>): string 
 		case 'invoice':
 			return `/finance/invoices/${id}`;
 		case 'task':
-			return `/planner?task=${id}`;
+			return `/planner/${id}`;
 		case 'campaign':
 			return `/mail/campaigns/${id}`;
 		case 'appointment':

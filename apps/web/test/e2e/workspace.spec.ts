@@ -344,3 +344,27 @@ test('opens appointments in a panel beside the calendar, which stays usable', as
 	await panel.getByRole('button', { name: 'Schliessen' }).click();
 	await expect(panel).toBeHidden();
 });
+
+test('opens a task on its own page and edits it there', async ({ page }) => {
+	await signIn(page);
+	await page.goto('/#/planner?view=list');
+	const row = page.getByRole('table').getByRole('button').first();
+	const title = (await row.textContent())!.trim();
+	await row.click();
+	await expect(page).toHaveURL(/#\/planner\/[0-9a-f-]+$/);
+	const taskUrl = page.url();
+	await expect(page.getByRole('heading', { level: 1, name: title })).toBeVisible();
+	await expect(page.getByRole('dialog')).toHaveCount(0);
+	const save = page.getByRole('button', { name: 'Speichern' });
+	await expect(save).toBeDisabled();
+	await page.getByLabel('Beschreibung').fill('Mehr Platz für die Details.');
+	await save.click();
+	await expect(page.getByText('Aufgabe gespeichert', { exact: true })).toBeVisible();
+	await expect(save).toBeDisabled();
+	await page.getByRole('link', { name: 'Aufgaben' }).first().click();
+	await expect(page).toHaveURL(/#\/planner(\?|$)/);
+	// Older links with ?task= lead to the page as well.
+	await page.goto(`/#/planner?task=${taskUrl.split('/').pop()}`);
+	await expect(page).toHaveURL(taskUrl);
+	await expect(page.getByLabel('Beschreibung')).toHaveValue('Mehr Platz für die Details.');
+});

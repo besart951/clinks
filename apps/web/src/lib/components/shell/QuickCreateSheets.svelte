@@ -58,7 +58,7 @@
 			task: async (preset) => {
 				await workspace.run(() => load({}));
 				const me = workspace.session.user?.id;
-				taskSheet.show(null, { contactId: preset.contactId ?? null, assigneeIds: me ? [me] : [] });
+				taskSheet.show({ contactId: preset.contactId ?? null, assigneeIds: me ? [me] : [] });
 			},
 			mail: async (preset) => {
 				await workspace.run(() => load({ templates: true }));

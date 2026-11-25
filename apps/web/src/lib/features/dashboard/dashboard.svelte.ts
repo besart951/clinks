@@ -56,7 +56,7 @@ export function dashboardHints(sources: HintSources): DashboardHint[] {
 			title: task.title,
 			key: 'ui.ws.dashboard.hint_task_late',
 			params: { days: daysBetween(task.dueDate!, day) },
-			path: `/planner?task=${task.id}`,
+			path: `/planner/${task.id}`,
 		}));
 	const openVisits: DashboardHint[] = sources.appointments
 		.filter((entry) => entry.kind === 'spitex' && entry.assigneeId === null && entry.start >= sources.now.toISOString())

@@ -751,17 +751,11 @@ function seedActivity(context: SeedContext, tenantId: TenantId, staff: User[], c
 	notify(
 		'ui.ws.notification.mentioned',
 		{ name: `${staff[1].firstName} ${staff[1].lastName}`, target: tasks[1].title },
-		`/planner?task=${tasks[1].id}`,
+		`/planner/${tasks[1].id}`,
 		'mention',
 		false,
 	);
-	notify(
-		'ui.ws.notification.assigned',
-		{ target: tasks[3].title },
-		`/planner?task=${tasks[3].id}`,
-		'assignment',
-		false,
-	);
+	notify('ui.ws.notification.assigned', { target: tasks[3].title }, `/planner/${tasks[3].id}`, 'assignment', false);
 	notify(
 		'ui.ws.notification.invoice_overdue',
 		{ number: `${context.now.getFullYear()}-0003` },

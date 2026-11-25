@@ -24,7 +24,7 @@
 	import { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
 	import { today } from '@clinks/domain/dates';
 	import type { Task } from '@clinks/domain/types';
-	import { routeQuery, setQuery } from '#lib/navigation';
+	import { navigate, routeQuery, setQuery } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
@@ -38,7 +38,7 @@
 
 	onMount(() => {
 		const stop = model.resource.connect();
-		const stopShortcut = workspace.registerNewAction(() => canWrite && sheet.show(null));
+		const stopShortcut = workspace.registerNewAction(() => canWrite && sheet.show());
 		void openFromQuery();
 		return () => {
 			stop();
@@ -48,16 +48,13 @@
 
 	async function openFromQuery() {
 		const taskId = query.get('task');
-		if (query.get('new') === '1' && canWrite) sheet.show(null);
-		else if (taskId) {
-			const task = await workspace.api.tasks.get(taskId as Task['id']).catch(() => null);
-			if (task) sheet.show(task);
-		}
+		if (query.get('new') === '1' && canWrite) sheet.show();
+		// Older links (`/planner?task=…`) lead to the task's own page.
+		else if (taskId) await navigate(`/planner/${taskId}`, { replace: true });
 	}
 
 	function open(task: Task) {
-		sheet.show(task);
-		void setQuery(page.url, { task: task.id });
+		void navigate(`/planner/${task.id}`);
 	}
 </script>
 
@@ -66,7 +63,7 @@
 <ModuleGate module="planner" permission="planner.read">
 	<PageHeader title={workspace.t('ui.ws.module.planner')} description={workspace.t('ui.ws.planner.page_text')}>
 		{#snippet actions()}
-			{#if canWrite}<Button onclick={() => sheet.show(null)} aria-keyshortcuts="N">
+			{#if canWrite}<Button onclick={() => sheet.show()} aria-keyshortcuts="N">
 					<Plus class="size-4" />{workspace.t('ui.ws.command.new_task')}
 				</Button>{/if}
 		{/snippet}
@@ -196,5 +193,5 @@
 	bind:this={sheet}
 	contacts={model.resource.data?.contacts ?? []}
 	{people}
-	onClose={() => setQuery(page.url, { task: null, new: null })}
+	onClose={() => setQuery(page.url, { new: null })}
 />
