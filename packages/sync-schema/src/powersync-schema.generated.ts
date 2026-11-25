@@ -351,4 +351,14 @@ export const memberships = new Table({
 	job_title: column.text,
 });
 
-export const powerSyncSchema = new Schema({ contacts, appointments, folders, documents, invoices, expenses, tasks, contact_comments, task_comments, invoice_comments, mails, templates, campaigns, prescriptions, physio_notes, spitex_notes, time_entries, spitex_week_releases, notifications, audit, users, memberships });
+export const visit_clients = new Table({
+	tenant_id: column.text,
+	kind: column.text,
+	first_name: column.text,
+	last_name: column.text,
+	company_name: column.text,
+	phone: column.text,
+	address: column.text,
+});
+
+export const powerSyncSchema = new Schema({ contacts, appointments, folders, documents, invoices, expenses, tasks, contact_comments, task_comments, invoice_comments, mails, templates, campaigns, prescriptions, physio_notes, spitex_notes, time_entries, spitex_week_releases, notifications, audit, users, memberships, visit_clients });

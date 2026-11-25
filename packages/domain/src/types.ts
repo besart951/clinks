@@ -401,6 +401,19 @@ export interface TimeEntry extends TenantRecord<TimeEntryId> {
 	description: string;
 }
 
+/** What staff see of a client they visit: enough to get there and call, not the client's record. */
+export type VisitClient = Pick<
+	Contact,
+	'id' | 'tenantId' | 'kind' | 'firstName' | 'lastName' | 'companyName' | 'phone' | 'address'
+>;
+
+/** A staff member's own plan: their visits in released weeks, the clients of those visits and the releases. */
+export interface MyVisits {
+	visits: Appointment[];
+	clients: VisitClient[];
+	releases: WeekRelease[];
+}
+
 /**
  * A released week of the Spitex plan: while the record exists, staff see their own visits of that week.
  * `createdAt` is when it was released.

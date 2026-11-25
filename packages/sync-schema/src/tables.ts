@@ -287,7 +287,15 @@ export const readOnlyColumns = {
 	audit: ['tenant_id', 'actor_id', 'action', 'target', 'created_at'],
 	users: ['first_name', 'last_name', 'email', 'avatar_color'],
 	memberships: ['tenant_id', 'user_id', 'job_title'],
+	/** The part of a client's contact that staff get for their released visits. */
+	visit_clients: ['tenant_id', 'kind', 'first_name', 'last_name', 'company_name', 'phone', 'address'],
 } as const;
 
 export type LocalTableName = SyncedTableName | keyof typeof readOnlyColumns;
-export const localTableNames: LocalTableName[] = [...syncedTableNames, 'audit', 'users', 'memberships'];
+export const localTableNames: LocalTableName[] = [
+	...syncedTableNames,
+	'audit',
+	'users',
+	'memberships',
+	'visit_clients',
+];
