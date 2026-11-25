@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { MediaQuery } from 'svelte/reactivity';
 	import Folder from '@lucide/svelte/icons/folder';
 	import FolderPlus from '@lucide/svelte/icons/folder-plus';
 	import Upload from '@lucide/svelte/icons/upload';
@@ -93,11 +94,16 @@
 		naming = null;
 	}
 
+	let tree = $state<FolderTree>();
+	/** Wide screens name the new folder right in the tree; without the tree (narrow screens) a dialog asks. */
+	const showsTree = new MediaQuery('min-width: 64rem');
+
+	function newFolder() {
+		if (tree && showsTree.current) tree.startCreate(model.folderId);
+		else ask(workspace.t('ui.ws.documents.new_folder'), '', (name) => model.createFolder(name, model.folderId));
+	}
+
 	const treeActions: FolderTreeActions = {
-		create: (parentId: FolderId | null) =>
-			ask(workspace.t('ui.ws.documents.new_folder'), '', (name) => model.createFolder(name, parentId)),
-		rename: (folder) =>
-			ask(workspace.t('ui.ws.documents.rename'), folder.name, (name) => model.renameFolder(folder, name)),
 		remove: (folder) => deleteFolder(folder),
 	};
 	/** The folder tile a dragged file or folder is over. */
@@ -157,7 +163,7 @@
 	<PageHeader title={workspace.t('ui.ws.module.documents')} description={workspace.t('ui.ws.documents.description')}>
 		{#snippet actions()}
 			{#if canWrite}
-				<Button variant="outline" onclick={() => treeActions.create(model.folderId)}>
+				<Button variant="outline" onclick={newFolder}>
 					<FolderPlus class="size-4" />{workspace.t('ui.ws.documents.new_folder')}
 				</Button>
 				<Button onclick={() => fileInput?.click()} disabled={model.uploading}>
@@ -177,7 +183,7 @@
 	<AsyncView resource={model.resource}>
 		<div class="grid items-start gap-6 lg:grid-cols-[16rem_minmax(0,1fr)]">
 			<aside class="bg-muted/30 hidden rounded-xl border p-2 lg:sticky lg:top-4 lg:block">
-				<FolderTree {model} actions={treeActions} />
+				<FolderTree bind:this={tree} {model} actions={treeActions} />
 			</aside>
 			<div class="min-w-0">
 				<div class="mb-4 flex flex-wrap items-center gap-2">

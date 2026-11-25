@@ -88,29 +88,46 @@ test('moves a task with Alt + arrow keys', async ({ page }) => {
 	await expect(page.getByRole('status').filter({ hasText: `«${title}» in In Arbeit` })).toBeAttached();
 });
 
-test('builds a folder tree and moves a folder by drag & drop', async ({ page }) => {
+test('names new folders right in the tree and moves a folder by drag & drop', async ({ page }) => {
 	await page.setViewportSize({ width: 1440, height: 900 });
 	await signIn(page);
 	await page.goto('/#/documents');
 	const tree = page.getByRole('navigation', { name: 'Ordner' });
+	// «Neuer Ordner» opens a name field in the tree, not a dialog; Enter creates the folder.
 	for (const name of ['Projekt Alpha', 'Ablage Beta']) {
 		await page.getByRole('button', { name: 'Neuer Ordner' }).first().click();
-		await page.getByRole('dialog').getByRole('textbox').fill(name);
-		await page.getByRole('dialog').getByRole('button', { name: 'Speichern' }).click();
+		const field = tree.getByRole('textbox', { name: 'Name des neuen Ordners in «Alle Dateien»' });
+		await expect(field).toBeFocused();
+		await expect(page.getByRole('dialog')).toHaveCount(0);
+		await field.fill(name);
+		await field.press('Enter');
 		await expect(tree.getByRole('button', { name: name, exact: true })).toBeVisible();
+		await expect(field).toHaveCount(0);
 	}
+	// A subfolder: the field appears under its parent, which opens; Escape cancels.
 	await tree.getByRole('button', { name: 'Unterordner in «Projekt Alpha» anlegen' }).click();
-	await page.getByRole('dialog').getByRole('textbox').fill('Offerten Gamma');
-	await page.getByRole('dialog').getByRole('button', { name: 'Speichern' }).click();
+	await tree.getByRole('textbox').press('Escape');
+	await expect(tree.getByRole('textbox')).toHaveCount(0);
+	await tree.getByRole('button', { name: 'Unterordner in «Projekt Alpha» anlegen' }).click();
+	await tree.getByRole('textbox', { name: 'Name des neuen Ordners in «Projekt Alpha»' }).fill('Offerten Gamma');
+	await tree.getByRole('button', { name: 'Speichern' }).click();
 	await expect(tree.getByRole('button', { name: 'Ordner «Projekt Alpha» zuklappen' })).toBeVisible();
 	await expect(tree.getByRole('button', { name: 'Offerten Gamma', exact: true })).toBeVisible();
+	// Renaming works the same way, from the folder's menu.
+	await tree.getByRole('button', { name: 'Aktionen für «Ablage Beta»' }).click();
+	await page.getByRole('menuitem', { name: 'Umbenennen' }).click();
+	const rename = tree.getByRole('textbox', { name: 'Neuer Name für «Ablage Beta»' });
+	await expect(rename).toHaveValue('Ablage Beta');
+	await rename.fill('Ablage Delta');
+	await rename.press('Enter');
+	await expect(tree.getByRole('button', { name: 'Ablage Delta', exact: true })).toBeVisible();
 	await tree
 		.getByRole('listitem')
-		.filter({ has: page.getByRole('button', { name: 'Ablage Beta', exact: true }) })
+		.filter({ has: page.getByRole('button', { name: 'Ablage Delta', exact: true }) })
 		.locator('[draggable="true"]')
 		.dragTo(tree.getByRole('button', { name: 'Offerten Gamma', exact: true }));
-	await expect(page.getByText('Ordner «Ablage Beta» verschoben')).toBeVisible();
-	await tree.getByRole('button', { name: 'Ablage Beta', exact: true }).click();
+	await expect(page.getByText('Ordner «Ablage Delta» verschoben')).toBeVisible();
+	await tree.getByRole('button', { name: 'Ablage Delta', exact: true }).click();
 	await expect(page.getByRole('navigation', { name: 'Ordnerpfad' })).toContainText('Projekt Alpha');
 	await expect(page.getByRole('navigation', { name: 'Ordnerpfad' })).toContainText('Offerten Gamma');
 });
