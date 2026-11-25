@@ -22,7 +22,7 @@
 	import { personBadge } from '@clinks/ui/kit/avatar';
 	import { ClientFileModel } from '#lib/features/spitex/clients.svelte';
 	import { insuranceFields, patientMasterFields } from '#lib/features/physio/patient-fields';
-	import { formatAddress } from '#lib/features/contacts/contact-fields';
+	import { formatAddress } from '@clinks/domain/address';
 	import { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
 	import { contactName } from '#lib/data/workspace-api';
 	import { ageOn, today } from '@clinks/domain/dates';

@@ -18,6 +18,7 @@ export const contactSchema = z
 		phone: z.string().regex(/^[+\d\s()/-]*$/, { error: 'error.ws.invalid_phone' }),
 		address: z.object({
 			street: z.string(),
+			houseNumber: z.string().default(''),
 			zip: z.string().regex(/^(\d{4,5})?$/, { error: 'error.ws.invalid_zip' }),
 			city: z.string(),
 		}),

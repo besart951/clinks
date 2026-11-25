@@ -7,6 +7,7 @@ import { effectiveStatus, invoiceTotals, nextInvoiceNumber, roundToFiveRappen, v
 import { moduleBooked, roleGrants } from '../src/permissions.ts';
 import { planFor, priceFor } from '../src/plans.ts';
 import { isValidSwissIban, qrBillPayload } from '../src/qr-bill.ts';
+import { formatAddress, splitStreet, streetLine } from '../src/address.ts';
 import { conflictsFor, planAssignments, seriesSlots, withinArrivalWindow } from '../src/scheduling.ts';
 import type { Appointment, Invoice } from '../src/types.ts';
 
@@ -97,16 +98,40 @@ describe('qr bill', () => {
 	it('builds an SPC 0200 payload with amount and message', () => {
 		const payload = qrBillPayload({
 			iban: 'CH93 0076 2011 6238 5295 7',
-			creditor: { name: 'Stille Physio', address: { street: 'Zentralplatz 1', zip: '2502', city: 'Biel/Bienne' } },
+			creditor: {
+				name: 'Stille Physio',
+				address: { street: 'Zentralplatz', houseNumber: '1', zip: '2502', city: 'Biel/Bienne' },
+			},
 			debtor: null,
 			amount: 21310,
 			message: 'Rechnung 2026-0001',
 		}).split('\n');
 		assert.equal(payload[0], 'SPC');
 		assert.equal(payload[3], 'CH9300762011623852957');
+		// Structured address: street and building number in their own lines.
+		assert.deepEqual(payload.slice(4, 11), ['S', 'Stille Physio', 'Zentralplatz', '1', '2502', 'Biel/Bienne', 'CH']);
 		assert.ok(payload.includes('213.10'));
 		assert.equal(payload.at(-2), 'Rechnung 2026-0001');
 		assert.equal(payload.at(-1), 'EPD');
+	});
+});
+
+describe('addresses', () => {
+	it('splits a house number off the street', () => {
+		assert.deepEqual(splitStreet('Bahnhofstrasse 57'), { street: 'Bahnhofstrasse', houseNumber: '57' });
+		assert.deepEqual(splitStreet('Rue du 1er Mars 12 b'), { street: 'Rue du 1er Mars', houseNumber: '12b' });
+		assert.deepEqual(splitStreet('Weg 3-5'), { street: 'Weg', houseNumber: '3-5' });
+		assert.deepEqual(splitStreet('Postfach'), { street: 'Postfach', houseNumber: '' });
+	});
+
+	it('formats addresses, also older ones without a house number', () => {
+		const address = { street: 'Kramgasse', houseNumber: '41', zip: '3011', city: 'Bern' };
+		assert.equal(formatAddress(address), 'Kramgasse 41, 3011 Bern');
+		assert.equal(
+			streetLine({ ...address, street: 'Kramgasse 41', houseNumber: undefined as unknown as string }),
+			'Kramgasse 41',
+		);
+		assert.equal(formatAddress({ ...address, street: '', houseNumber: '' }), '3011 Bern');
 	});
 });
 

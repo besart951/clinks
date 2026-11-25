@@ -13,7 +13,11 @@ it('persists company and profile edits, isolates the team and keeps an active ad
 	const b = await api.administrator('settings-b@example.ch', 'B');
 	const call = (method: string, path: string, body?: unknown) => a.browser.call(method, path, { token: a.token, body });
 	assert.equal(
-		(await call('POST', '/tenant/settings', { address: { street: 'Weg 8', zip: '6000', city: 'Luzern' } })).status,
+		(
+			await call('POST', '/tenant/settings', {
+				address: { street: 'Weg', houseNumber: '8', zip: '6000', city: 'Luzern' },
+			})
+		).status,
 		204,
 	);
 	assert.equal(

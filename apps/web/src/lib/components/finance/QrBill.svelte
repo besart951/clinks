@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { streetLine } from '@clinks/domain/address';
 	import QRCode from 'qrcode';
 	import { formatIban, isValidSwissIban, qrBillPayload } from '@clinks/domain/qr-bill';
 	import { contactName } from '#lib/data/workspace-api';
@@ -60,7 +61,7 @@
 		<div>
 			<dt class="font-bold">{workspace.t('ui.ws.invoice.account')}</dt>
 			<dd>
-				{formatIban(tenant.iban)}<br />{tenant.name}<br />{tenant.address.street}<br />{tenant.address.zip}
+				{formatIban(tenant.iban)}<br />{tenant.name}<br />{streetLine(tenant.address)}<br />{tenant.address.zip}
 				{tenant.address.city}
 			</dd>
 		</div>
@@ -70,7 +71,10 @@
 		</div>
 		{#if contact}<div>
 				<dt class="font-bold">{workspace.t('ui.ws.invoice.payable_by')}</dt>
-				<dd>{contactName(contact)}<br />{contact.address.street}<br />{contact.address.zip} {contact.address.city}</dd>
+				<dd>
+					{contactName(contact)}<br />{streetLine(contact.address)}<br />{contact.address.zip}
+					{contact.address.city}
+				</dd>
 			</div>{/if}
 	</dl>
 </section>

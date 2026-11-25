@@ -1,4 +1,29 @@
-export type InlineFieldKind = 'text' | 'email' | 'tel' | 'date' | 'number' | 'textarea' | 'select' | 'masked';
+export type InlineFieldKind = 'text' | 'email' | 'tel' | 'date' | 'number' | 'textarea' | 'select' | 'masked' | 'group';
+
+/** One input of a `group` field, e.g. the house number of an address. */
+export interface InlinePart {
+	key: string;
+	label: string;
+	value: string;
+	/** A short input, such as a house number or postal code. */
+	narrow?: boolean;
+	autocomplete?: AutoFill;
+	inputmode?: 'numeric' | 'text';
+}
+
+/** A `group` field's value: its parts as one JSON object, so it edits and saves as one unit. */
+export function groupValue(parts: InlinePart[]): string {
+	return JSON.stringify(Object.fromEntries(parts.map((part) => [part.key, part.value])));
+}
+
+export function readGroup(value: string): Record<string, string> {
+	try {
+		const parsed: unknown = JSON.parse(value);
+		return parsed && typeof parsed === 'object' ? (parsed as Record<string, string>) : {};
+	} catch {
+		return {};
+	}
+}
 
 export interface InlineOption {
 	value: string;
@@ -16,6 +41,8 @@ export interface InlineFieldSpec {
 	/** Muted suffix after the display value, e.g. the age after a birth date. */
 	hint?: string;
 	options?: InlineOption[];
+	/** The inputs of a `group` field; its `value` is `groupValue(parts)` and `display` the formatted whole. */
+	parts?: InlinePart[];
 	mono?: boolean;
 	readonly?: boolean;
 	/** Optional fields can be removed again and are offered under "Feld hinzufügen". */

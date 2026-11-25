@@ -22,7 +22,7 @@ const contact = (overrides: Record<string, unknown> = {}) => ({
 	company_name: '',
 	email: 'lea@example.ch',
 	phone: '',
-	address: JSON.stringify({ street: 'Weg 1', zip: '3000', city: 'Bern' }),
+	address: JSON.stringify({ street: 'Weg', houseNumber: '1', zip: '3000', city: 'Bern' }),
 	birth_date: '1980-05-01',
 	insurer: '',
 	tags: JSON.stringify(['vip']),

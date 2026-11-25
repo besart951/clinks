@@ -5,7 +5,13 @@
 	import X from '@lucide/svelte/icons/x';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import LoaderCircle from '@lucide/svelte/icons/loader-circle';
-	import { InlineEditor, maskValue, type InlineFieldSpec, type InlineSave } from '@clinks/ui/kit/inline-edit';
+	import {
+		InlineEditor,
+		maskValue,
+		readGroup,
+		type InlineFieldSpec,
+		type InlineSave,
+	} from '@clinks/ui/kit/inline-edit';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let {
@@ -27,6 +33,20 @@
 		if (kind === 'select') return field.options?.find((option) => option.value === field.value)?.label ?? field.value;
 		return field.display ?? field.value;
 	});
+	const filled = $derived(kind === 'group' ? shown !== '' : field.value !== '');
+	const groupDraft = $derived(kind === 'group' ? readGroup(editor.draft) : {});
+	const partId = $props.id();
+
+	function setPart(key: string, value: string) {
+		editor.draft = JSON.stringify({ ...groupDraft, [key]: value });
+	}
+
+	/** Moving between the inputs of a group keeps editing; leaving the group saves. */
+	function groupFocusOut(event: FocusEvent) {
+		const group = event.currentTarget as HTMLElement;
+		if (!group.contains(event.relatedTarget as Node | null)) void blurCommit();
+	}
+
 	const inputType = $derived(kind === 'masked' ? 'text' : kind === 'textarea' || kind === 'select' ? 'text' : kind);
 
 	untrack(() => {
@@ -61,7 +81,28 @@
 	<span class="text-muted-foreground truncate text-[13px]" title={field.label}>{field.label}</span>
 	{#if editor.editing}
 		<div class="min-w-0 py-0.5">
-			{#if kind === 'textarea'}
+			{#if kind === 'group'}
+				<div class="flex flex-wrap gap-x-1.5 gap-y-1" role="group" aria-label={field.label} onfocusout={groupFocusOut}>
+					{#each field.parts ?? [] as part, index (part.key)}
+						<div class="flex min-w-0 flex-col {part.narrow ? 'w-20 flex-none' : 'min-w-32 flex-[1_1_8rem]'}">
+							<label for="{partId}-{part.key}" class="text-muted-foreground text-[11px]">{part.label}</label>
+							<input
+								id="{partId}-{part.key}"
+								class="bg-field ring-ring h-7 w-full rounded-md px-1.5 text-sm ring-1 outline-none focus-visible:outline-none"
+								value={groupDraft[part.key] ?? ''}
+								autocomplete={part.autocomplete}
+								inputmode={part.inputmode}
+								aria-invalid={editor.error ? 'true' : undefined}
+								oninput={(event) => setPart(part.key, event.currentTarget.value)}
+								onkeydown={(event) => editor.keydown(event)}
+								{@attach (node) => {
+									if (index === 0) focusInput(node);
+								}}
+							/>
+						</div>
+					{/each}
+				</div>
+			{:else if kind === 'textarea'}
 				<textarea
 					class="bg-field ring-ring w-full resize-y rounded-md px-1.5 py-1 text-sm ring-1 outline-none focus-visible:outline-none"
 					rows="4"
@@ -118,7 +159,7 @@
 			onclick={begin}
 			onkeydown={activate}
 		>
-			{#if field.value}
+			{#if filled}
 				<span
 					class="min-w-0 {field.mono || kind === 'masked' ? 'font-mono text-[13px]' : ''} {kind === 'textarea'
 						? 'whitespace-pre-wrap'

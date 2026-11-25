@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { streetLine } from '@clinks/domain/address';
 	import QrBill from './QrBill.svelte';
 	import { invoiceTotals, lineNet } from '@clinks/domain/money';
 	import { contactName } from '#lib/data/workspace-api';
@@ -23,13 +24,13 @@
 					{tenant.name}
 				</p>{/if}
 			<p class="text-zinc-500">
-				{tenant.address.street}<br />{tenant.address.zip}
+				{streetLine(tenant.address)}<br />{tenant.address.zip}
 				{tenant.address.city}<br />{tenant.vatNumber}
 			</p>
 		</div>
 		{#if contact}
 			<address class="pt-8 not-italic">
-				{contactName(contact)}<br />{contact.address.street}<br />{contact.address.zip}
+				{contactName(contact)}<br />{streetLine(contact.address)}<br />{contact.address.zip}
 				{contact.address.city}
 			</address>
 		{/if}

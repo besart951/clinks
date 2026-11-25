@@ -31,7 +31,15 @@ export function formatIban(iban: string): string {
 }
 
 function addressLines(party: { name: string; address: Address }) {
-	return ['S', party.name, party.address.street, '', party.address.zip, party.address.city, 'CH'];
+	return [
+		'S',
+		party.name,
+		party.address.street,
+		party.address.houseNumber ?? '',
+		party.address.zip,
+		party.address.city,
+		'CH',
+	];
 }
 
 /** Builds the Swiss Payment Standards payload (SPC 0200) for the QR code of a QR bill. */

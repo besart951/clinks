@@ -1372,6 +1372,11 @@
 																"type": "string",
 																"maxLength": 256
 															},
+															"houseNumber": {
+																"type": "string",
+																"maxLength": 16,
+																"default": ""
+															},
 															"zip": {
 																"type": "string",
 																"maxLength": 24
@@ -4781,6 +4786,11 @@
 											"street": {
 												"type": "string",
 												"maxLength": 256
+											},
+											"houseNumber": {
+												"type": "string",
+												"maxLength": 16,
+												"default": ""
 											},
 											"zip": {
 												"type": "string",

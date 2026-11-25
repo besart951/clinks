@@ -16,7 +16,7 @@ describe('row mapping', () => {
 			companyName: '',
 			email: '',
 			phone: '',
-			address: { street: 'Weg 1', zip: '3000', city: 'Bern' },
+			address: { street: 'Weg', houseNumber: '1', zip: '3000', city: 'Bern' },
 			birthDate: null,
 			insurer: '',
 			tags: ['vip'],
@@ -25,7 +25,7 @@ describe('row mapping', () => {
 		};
 		const row: SqliteRow = { id: 'c1', ...recordToRow('contacts', record) };
 		assert.equal(row.archived, 1);
-		assert.equal(row.address, '{"street":"Weg 1","zip":"3000","city":"Bern"}');
+		assert.equal(row.address, '{"street":"Weg","houseNumber":"1","zip":"3000","city":"Bern"}');
 		assert.deepEqual(rowToRecord('contacts', row), record);
 	});
 

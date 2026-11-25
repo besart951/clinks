@@ -1,3 +1,4 @@
+import { splitStreet } from '@clinks/domain/address';
 import type { Contact } from '@clinks/domain/types';
 import type { Draft } from '@clinks/contracts/repository';
 import { emptyContact } from './empty-contact.ts';
@@ -42,6 +43,7 @@ const columnAliases: { [field: string]: string[] } = {
 	email: ['e-mail', 'email', 'mail'],
 	phone: ['telefon', 'phone', 'tel', 'mobile', 'handy'],
 	street: ['strasse', 'adresse', 'street', 'address'],
+	houseNumber: ['hausnummer', 'hausnr', 'nr', 'nr.', 'house number', 'number', 'numéro'],
 	zip: ['plz', 'zip', 'postleitzahl'],
 	city: ['ort', 'city', 'stadt', 'wohnort'],
 };
@@ -63,7 +65,14 @@ export function contactsFromCsv(rows: string[][]): Draft<Contact>[] {
 			companyName: company,
 			email: value(row, 'email'),
 			phone: value(row, 'phone'),
-			address: { street: value(row, 'street'), zip: value(row, 'zip'), city: value(row, 'city') },
+			address: {
+				// One «Adresse» column with the number in it is split as well.
+				...(value(row, 'houseNumber')
+					? { street: value(row, 'street'), houseNumber: value(row, 'houseNumber') }
+					: splitStreet(value(row, 'street'))),
+				zip: value(row, 'zip'),
+				city: value(row, 'city'),
+			},
 			tags: ['Import'],
 		};
 	});

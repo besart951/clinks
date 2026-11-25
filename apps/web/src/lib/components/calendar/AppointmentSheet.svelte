@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { streetLine } from '@clinks/domain/address';
 	import TriangleAlert from '@lucide/svelte/icons/triangle-alert';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import ReceiptText from '@lucide/svelte/icons/receipt-text';
@@ -138,7 +139,7 @@
 	function pickContact(picked: Contact | null) {
 		if (picked && !form.value.title) form.value.title = contactName(picked);
 		if (picked && form.value.kind === 'spitex' && !form.value.location)
-			form.value.location = `${picked.address.street}, ${picked.address.city}`;
+			form.value.location = `${streetLine(picked.address)}, ${picked.address.city}`;
 	}
 
 	const serviceOptions = $derived(

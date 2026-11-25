@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
 import { InlineEditor, maskValue } from '@clinks/ui/kit/inline-edit';
-import { contactPatch, parseAddress, formatAddress } from '../src/lib/features/contacts/contact-fields.ts';
+import { addressField, contactPatch } from '../src/lib/features/contacts/contact-fields.ts';
 import { validAhv } from '../src/lib/features/physio/patient-fields.ts';
 import { badgeCounts } from '../src/lib/features/shell/nav-badges.svelte.ts';
 import { visitWeekdays } from '../src/lib/features/spitex/clients.svelte.ts';
@@ -63,17 +63,35 @@ describe('inline editor', () => {
 });
 
 describe('contact fields', () => {
-	it('parses and formats Swiss addresses', () => {
-		assert.deepEqual(parseAddress('Kramgasse 41, 3011 Bern'), { street: 'Kramgasse 41', zip: '3011', city: 'Bern' });
-		assert.deepEqual(parseAddress('2502 Biel/Bienne'), { street: '', zip: '2502', city: 'Biel/Bienne' });
-		assert.deepEqual(parseAddress('Bahnhofstrasse 1'), { street: 'Bahnhofstrasse 1', zip: '', city: '' });
-		assert.equal(formatAddress({ street: 'Kramgasse 41', zip: '3011', city: 'Bern' }), 'Kramgasse 41, 3011 Bern');
+	it('edits the address as street, house number, postal code and city', () => {
+		const text = { t: (key: string) => key, date: String };
+		const field = addressField({ street: 'Kramgasse', houseNumber: '41', zip: '3011', city: 'Bern' }, text);
+		assert.equal(field.display, 'Kramgasse 41, 3011 Bern');
+		assert.deepEqual(
+			field.parts?.map((part) => part.key),
+			['street', 'houseNumber', 'zip', 'city'],
+		);
+		assert.equal(field.validate?.(JSON.stringify({ zip: '30' })), 'error.ws.invalid_zip');
+		assert.equal(field.validate?.(field.value), null);
 	});
 
 	it('turns edited rows into patches', () => {
 		assert.deepEqual(contactPatch('birthDate', ''), { birthDate: null });
 		assert.deepEqual(contactPatch('phone', '079 1'), { phone: '079 1' });
-		assert.equal(contactPatch('address', 'Weg 2, 2500 Biel').address?.city, 'Biel');
+		assert.deepEqual(
+			contactPatch('address', JSON.stringify({ street: ' Weg ', houseNumber: '2', zip: '2500', city: 'Biel' })).address,
+			{
+				street: 'Weg',
+				houseNumber: '2',
+				zip: '2500',
+				city: 'Biel',
+			},
+		);
+		// A number left in the street moves to the house number.
+		assert.equal(
+			contactPatch('address', JSON.stringify({ street: 'Weg 2', zip: '', city: '' })).address?.houseNumber,
+			'2',
+		);
 	});
 
 	it('validates AHV numbers and computes ages', () => {
