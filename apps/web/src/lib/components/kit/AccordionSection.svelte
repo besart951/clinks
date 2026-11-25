@@ -57,7 +57,8 @@
 			: 'grid-rows-[0fr]'}"
 		inert={!open}
 	>
-		<div class="overflow-hidden">
+		<!-- Clips for the open/close animation, but 4px wider than the content, so focus rings stay whole. -->
+		<div class="-mx-1 -mt-1 overflow-hidden px-1 pt-1">
 			<div
 				class="pb-3 transition-[opacity,transform] duration-300 ease-[var(--ease-out)] {open
 					? 'translate-y-0 opacity-100 delay-75'

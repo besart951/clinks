@@ -4989,6 +4989,14 @@
       "ui.ws.view.cards": {
         "de-CH": "Karten",
         "en-US": "Cards"
+      },
+      "ui.ws.inline.tag_suggestions": {
+        "de-CH": "Vorhandene Schlagwörter",
+        "en-US": "Existing tags"
+      },
+      "ui.ws.inline.tag_new": {
+        "de-CH": "«{tag}» neu anlegen",
+        "en-US": "Create “{tag}”"
       }
     }
   }
