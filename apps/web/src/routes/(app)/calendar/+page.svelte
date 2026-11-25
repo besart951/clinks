@@ -23,6 +23,8 @@
 		type TimeAxis,
 	} from '#lib/components/calendar/TimeGrid.svelte';
 	import DateJump from '#lib/components/calendar/DateJump.svelte';
+	import PeriodNav from '#lib/components/calendar/PeriodNav.svelte';
+	import FloatingAddButton from '#lib/components/common/FloatingAddButton.svelte';
 	import AxisToggle from '#lib/components/calendar/AxisToggle.svelte';
 	import MonthGrid from '#lib/components/calendar/MonthGrid.svelte';
 	import AppointmentSheet from '#lib/components/calendar/AppointmentSheet.svelte';
@@ -305,35 +307,14 @@
 				</button>
 			{/each}
 		</div>
-		<div class="flex items-center gap-1">
-			<Button
-				variant="outline"
-				size="icon"
-				class="size-11 shrink-0"
-				onclick={() => model.go(-1)}
-				aria-label={workspace.t('ui.ws.calendar.previous')}
-			>
-				<ChevronLeft class="size-5" />
-			</Button>
-			<div class="flex min-w-0 flex-1 justify-center">
-				<DateJump
-					value={model.anchor}
-					units={['day', 'week', 'month']}
-					initial={model.view === 'month' ? 'month' : model.view === 'week' ? 'week' : 'day'}
-					label={mobileLabel}
-					onpick={jumpTo}
-				/>
-			</div>
-			<Button
-				variant="outline"
-				size="icon"
-				class="size-11 shrink-0"
-				onclick={() => model.go(1)}
-				aria-label={workspace.t('ui.ws.calendar.next')}
-			>
-				<ChevronRight class="size-5" />
-			</Button>
-		</div>
+		<PeriodNav
+			value={model.anchor}
+			label={mobileLabel}
+			units={['day', 'week', 'month']}
+			initial={model.view === 'month' ? 'month' : model.view === 'week' ? 'week' : 'day'}
+			onstep={(direction) => model.go(direction)}
+			onpick={jumpTo}
+		/>
 		{#if model.view === 'day' || model.view === 'resources'}
 			<div class="grid grid-cols-7 gap-1" role="group" aria-label={workspace.t('ui.ws.calendar.view_week')}>
 				{#each weekDays(startOfWeek(model.anchor), 7) as day (day)}
@@ -488,15 +469,9 @@
 		/>
 	</div>
 	{#if canWrite}
-		<!-- Phones: always in reach of the thumb, above the bar at the bottom. -->
-		<Button
-			size="icon"
-			class="fixed end-4 z-20 size-14 rounded-full shadow-lg md:hidden"
-			style="bottom: calc(4.5rem + env(safe-area-inset-bottom))"
-			aria-label={workspace.t('ui.ws.command.new_appointment')}
+		<FloatingAddButton
+			label={workspace.t('ui.ws.command.new_appointment')}
 			onclick={() => create(model.anchor, 9 * 60, session.user?.id)}
-		>
-			<Plus class="size-6" />
-		</Button>
+		/>
 	{/if}
 </ModuleGate>
