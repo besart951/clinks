@@ -1,4 +1,5 @@
 import type { DeviceSessionDto, SessionResponse } from '@clinks/contracts/auth';
+import type { Db } from '@clinks/db/client';
 import { inScope, type Tx } from '@clinks/db/scope';
 import { hashSecret, randomToken, uuid } from '../crypto.ts';
 import { unauthorized } from '../errors.ts';
@@ -78,6 +79,7 @@ export class SessionService {
 			.where('familyId', '=', claims.sid)
 			.where('userId', '=', claims.sub)
 			.where('revokedAt', 'is', null)
+			.where('expiresAt', '>', this.#services.now())
 			.executeTakeFirst();
 		return row !== undefined;
 	}
@@ -186,4 +188,12 @@ export class SessionService {
 		);
 		return row?.tenantId ?? null;
 	}
+}
+
+export async function pruneExpiredTokens(db: Db, now: Date): Promise<{ refreshTokens: number; oneTimeTokens: number }> {
+	const [refresh, oneTime] = await Promise.all([
+		db.deleteFrom('auth.refreshTokens').where('expiresAt', '<=', now).executeTakeFirst(),
+		db.deleteFrom('auth.oneTimeTokens').where('expiresAt', '<=', now).executeTakeFirst(),
+	]);
+	return { refreshTokens: Number(refresh.numDeletedRows), oneTimeTokens: Number(oneTime.numDeletedRows) };
 }

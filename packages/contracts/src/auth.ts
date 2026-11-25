@@ -34,6 +34,11 @@ export const refreshRequest = z.object({ refreshToken: z.string().min(20).max(20
 export const switchTenantRequest = z.object({ tenantId: uuid });
 export const changePasswordRequest = z.object({ currentPassword: z.string().min(1).max(200), newPassword: password });
 export const twoFactorCodeRequest = z.object({ code });
+export const disableTwoFactorRequest = z.object({
+	/** A 6-digit TOTP code or a recovery code (xxxx-xxxx-xxxx). */
+	code: z.string().trim().min(6).max(20),
+	password: z.string().min(1).max(200),
+});
 export const createTenantRequest = z.object({
 	name: z.string().trim().min(1).max(200),
 	industry: z.enum(industries),

@@ -1,11 +1,13 @@
 import type { SignInResponse } from '@clinks/contracts/auth';
 import { encodeBase32UpperCaseNoPadding } from '@oslojs/encoding';
-import { createTOTPKeyURI, verifyTOTPWithGracePeriod } from '@oslojs/otp';
+import { createTOTPKeyURI, verifyHOTP } from '@oslojs/otp';
+import { sql } from 'kysely';
 import { randomBytes } from 'node:crypto';
 import { hashSecret, recoveryCode, sameBytes, uuid } from '../crypto.ts';
-import { ApiError, invalidCredentials, rateLimited } from '../errors.ts';
+import { ApiError, invalidCredentials } from '../errors.ts';
 import { translate } from '../i18n.ts';
 import { hashPassword, unknownUserHash, verifyPassword } from '../passwords.ts';
+import { enforceRateLimit } from '../rate-limit.ts';
 import type { AccessClaims } from '../tokens.ts';
 import { audit } from './audit.ts';
 import type { Caller, Services } from './context.ts';
@@ -18,7 +20,6 @@ export type SignInResult =
 
 const lockAfter = 5;
 const lockFor = 15 * 60_000;
-const limitWindow = 15 * 60_000;
 const recoveryCodeCount = 10;
 
 /** Sign-up, sign-in with optional TOTP, email verification, password reset and two-factor setup. */
@@ -74,7 +75,6 @@ export class AuthService {
 				'users.emailVerifiedAt',
 				'passwordHash',
 				'totpEnabledAt',
-				'failedAttempts',
 				'lockedUntil',
 			])
 			.where('users.email', '=', input.email)
@@ -85,7 +85,7 @@ export class AuthService {
 		}
 		if (account.lockedUntil && account.lockedUntil > now()) throw new ApiError(423, 'error.account_locked');
 		if (!(await verifyPassword(account.passwordHash, input.password))) {
-			await this.#countFailure(account.id, account.failedAttempts, caller);
+			await this.#countFailure(account.id, caller);
 			throw invalidCredentials();
 		}
 		await db
@@ -106,6 +106,7 @@ export class AuthService {
 	}
 
 	async confirmTwoFactor(input: { challengeId: string; code: string }, caller: Caller): Promise<OpenedSession> {
+		this.#limit(`two-factor:ip:${caller.ip}`, 20);
 		const challenge = await openChallenge(this.#services.db, input.challengeId, this.#services.now());
 		if (!(await this.#checkSecondFactor(challenge.userId, input.code)))
 			throw new ApiError(400, 'error.ws.invalid_code');
@@ -133,17 +134,19 @@ export class AuthService {
 
 	/** A fresh code for the same sign-up; the old verification id stops working. */
 	async resendVerification(verificationId: string, caller: Caller) {
-		this.#limit(`verify:${verificationId}`, 3);
+		this.#limit(`verify:ip:${caller.ip}`, 10);
 		const { db, now } = this.#services;
+		const current = now();
 		const row = await db
 			.selectFrom('auth.oneTimeTokens')
 			.innerJoin('users', 'users.id', 'auth.oneTimeTokens.userId')
-			.select(['users.id', 'users.email', 'users.emailVerifiedAt'])
+			.select(['users.id', 'users.email', 'users.emailVerifiedAt', 'auth.oneTimeTokens.usedAt'])
 			.where('auth.oneTimeTokens.id', '=', verificationId)
 			.where('purpose', '=', 'verify_email')
 			.executeTakeFirst();
-		if (!row || row.emailVerifiedAt) throw new ApiError(400, 'error.ws.invalid_code');
-		await useUp(db, verificationId, now());
+		if (!row || row.usedAt || row.emailVerifiedAt) throw new ApiError(400, 'error.ws.invalid_code');
+		this.#limit(`verify:user:${row.id}`, 3);
+		if (!(await useUp(db, verificationId, current))) throw new ApiError(400, 'error.ws.invalid_code');
 		return { verificationId: await this.#sendVerification(row.id, row.email, caller.locale) };
 	}
 
@@ -174,20 +177,21 @@ export class AuthService {
 		const userId = link.userId;
 		const passwordHash = await hashPassword(input.password);
 		await db.transaction().execute(async (tx) => {
-			await useUp(tx, link.id, now());
+			const current = now();
+			if (!(await useUp(tx, link.id, current))) throw new ApiError(400, 'error.reset_link_invalid');
 			await tx
 				.updateTable('auth.credentials')
-				.set({ passwordHash, passwordChangedAt: now(), failedAttempts: 0, lockedUntil: null })
+				.set({ passwordHash, passwordChangedAt: current, failedAttempts: 0, lockedUntil: null })
 				.where('userId', '=', userId)
 				.execute();
 			await tx
 				.updateTable('users')
-				.set((eb) => ({ emailVerifiedAt: eb.fn.coalesce('emailVerifiedAt', eb.val(now())) }))
+				.set((eb) => ({ emailVerifiedAt: eb.fn.coalesce('emailVerifiedAt', eb.val(current)) }))
 				.where('id', '=', userId)
 				.execute();
 			await this.#sessions.revokeAll(userId, null, tx);
+			await audit(tx, { action: 'auth.password_reset', actorId: userId }, caller);
 		});
-		await audit(db, { action: 'auth.password_reset', actorId: userId }, caller);
 	}
 
 	async changePassword(claims: AccessClaims, input: { currentPassword: string; newPassword: string }, caller: Caller) {
@@ -197,23 +201,26 @@ export class AuthService {
 		if (!(await verifyPassword(credentials.passwordHash, input.currentPassword)))
 			throw new ApiError(400, 'error.ws.wrong_password', { currentPassword: 'error.ws.wrong_password' });
 		const passwordHash = await hashPassword(input.newPassword);
-		await db
-			.updateTable('auth.credentials')
-			.set({ passwordHash, passwordChangedAt: now() })
-			.where('userId', '=', claims.sub)
-			.execute();
-		await this.#sessions.revokeAll(claims.sub, claims.sid);
-		await audit(db, { action: 'auth.password_changed', actorId: claims.sub }, caller);
+		await db.transaction().execute(async (tx) => {
+			await tx
+				.updateTable('auth.credentials')
+				.set({ passwordHash, passwordChangedAt: now() })
+				.where('userId', '=', claims.sub)
+				.execute();
+			await this.#sessions.revokeAll(claims.sub, claims.sid, tx);
+			await audit(tx, { action: 'auth.password_changed', actorId: claims.sub }, caller);
+		});
 	}
 
-	/** Stores a new secret that becomes active once a code from it is confirmed. */
+	/** Stores a new encrypted secret that becomes active once a code from it is confirmed. */
 	async setUpTwoFactor(claims: AccessClaims) {
 		const credentials = await this.#credentials(claims.sub);
 		if (credentials.totpEnabledAt) throw new ApiError(409, 'error.two_factor_enabled');
 		const secret = randomBytes(20);
+		const sealed = await this.#sealTotpSecret(claims.sub, secret);
 		await this.#services.db
 			.updateTable('auth.credentials')
-			.set({ totpSecret: secret })
+			.set({ totpSecret: sealed, totpLastStep: null })
 			.where('userId', '=', claims.sub)
 			.execute();
 		const user = await this.#services.db
@@ -228,14 +235,19 @@ export class AuthService {
 	}
 
 	async enableTwoFactor(claims: AccessClaims, code: string, caller: Caller) {
+		this.#limit(`two-factor:enable:${claims.sub}`, 10);
 		const credentials = await this.#credentials(claims.sub);
-		if (!credentials.totpSecret || credentials.totpEnabledAt || !totpMatches(credentials.totpSecret, code))
+		if (!credentials.totpSecret || credentials.totpEnabledAt)
 			throw new ApiError(400, 'error.ws.invalid_code', { code: 'error.ws.invalid_code' });
+		const secret = await this.#decodeTotpSecret(claims.sub, credentials.totpSecret);
+		const current = this.#services.now();
+		const step = matchingTotpStep(secret, code, current);
+		if (step === null) throw new ApiError(400, 'error.ws.invalid_code', { code: 'error.ws.invalid_code' });
 		const codes = Array.from({ length: recoveryCodeCount }, recoveryCode);
 		await this.#services.db.transaction().execute(async (tx) => {
 			await tx
 				.updateTable('auth.credentials')
-				.set({ totpEnabledAt: this.#services.now() })
+				.set({ totpEnabledAt: current, totpLastStep: String(step) })
 				.where('userId', '=', claims.sub)
 				.execute();
 			await tx.deleteFrom('auth.recoveryCodes').where('userId', '=', claims.sub).execute();
@@ -243,23 +255,27 @@ export class AuthService {
 				.insertInto('auth.recoveryCodes')
 				.values(codes.map((value) => ({ id: uuid(), userId: claims.sub, codeHash: hashSecret(value), usedAt: null })))
 				.execute();
+			await audit(tx, { action: 'auth.two_factor_enabled', actorId: claims.sub }, caller);
 		});
-		await audit(this.#services.db, { action: 'auth.two_factor_enabled', actorId: claims.sub }, caller);
 		return { recoveryCodes: codes };
 	}
 
-	async disableTwoFactor(claims: AccessClaims, code: string, caller: Caller) {
-		if (!(await this.#checkSecondFactor(claims.sub, code)))
+	async disableTwoFactor(claims: AccessClaims, input: { code: string; password: string }, caller: Caller) {
+		this.#limit(`two-factor:disable:${claims.sub}`, 5);
+		const credentials = await this.#credentials(claims.sub);
+		if (!(await verifyPassword(credentials.passwordHash, input.password)))
+			throw new ApiError(400, 'error.ws.wrong_password', { password: 'error.ws.wrong_password' });
+		if (!(await this.#checkSecondFactor(claims.sub, input.code)))
 			throw new ApiError(400, 'error.ws.invalid_code', { code: 'error.ws.invalid_code' });
 		await this.#services.db.transaction().execute(async (tx) => {
 			await tx
 				.updateTable('auth.credentials')
-				.set({ totpSecret: null, totpEnabledAt: null })
+				.set({ totpSecret: null, totpEnabledAt: null, totpLastStep: null })
 				.where('userId', '=', claims.sub)
 				.execute();
 			await tx.deleteFrom('auth.recoveryCodes').where('userId', '=', claims.sub).execute();
+			await audit(tx, { action: 'auth.two_factor_disabled', actorId: claims.sub }, caller);
 		});
-		await audit(this.#services.db, { action: 'auth.two_factor_disabled', actorId: claims.sub }, caller);
 	}
 
 	async #signedIn(userId: string, caller: Caller): Promise<SignInResult & { status: 'authenticated' }> {
@@ -282,12 +298,24 @@ export class AuthService {
 		return id;
 	}
 
-	/** A TOTP code, or an unused recovery code (which is then used up). */
+	/** A TOTP code (accepted at most once per 30s step), or an unused recovery code (consumed once). */
 	async #checkSecondFactor(userId: string, code: string): Promise<boolean> {
 		const credentials = await this.#credentials(userId);
 		if (!credentials.totpSecret || !credentials.totpEnabledAt) return false;
-		if (/^[0-9]{6}$/.test(code)) return totpMatches(credentials.totpSecret, code);
-		const hash = hashSecret(code.trim().toLowerCase());
+		const trimmed = code.trim();
+		if (/^[0-9]{6}$/.test(trimmed)) {
+			const secret = await this.#decodeTotpSecret(userId, credentials.totpSecret);
+			const step = matchingTotpStep(secret, trimmed, this.#services.now());
+			if (step === null) return false;
+			const claimed = await this.#services.db
+				.updateTable('auth.credentials')
+				.set({ totpLastStep: String(step) })
+				.where('userId', '=', userId)
+				.where((eb) => eb.or([eb('totpLastStep', 'is', null), eb('totpLastStep', '<', String(step))]))
+				.executeTakeFirst();
+			return claimed.numUpdatedRows === 1n;
+		}
+		const hash = hashSecret(trimmed.toLowerCase());
 		const recovery = await this.#services.db
 			.selectFrom('auth.recoveryCodes')
 			.select(['id', 'codeHash'])
@@ -305,19 +333,32 @@ export class AuthService {
 		return spent.numUpdatedRows === 1n;
 	}
 
-	async #countFailure(userId: string, failedAttempts: number, caller: Caller) {
-		const attempts = failedAttempts + 1;
-		const locked = attempts >= lockAfter;
-		await this.#services.db
+	async #countFailure(userId: string, caller: Caller) {
+		const now = this.#services.now();
+		const lockUntil = new Date(now.getTime() + lockFor);
+		const updated = await this.#services.db
 			.updateTable('auth.credentials')
-			.set(
-				locked
-					? { failedAttempts: 0, lockedUntil: new Date(this.#services.now().getTime() + lockFor) }
-					: { failedAttempts: attempts },
-			)
+			.set({
+				failedAttempts: sql<number>`CASE WHEN failed_attempts + 1 >= ${lockAfter} THEN 0 ELSE failed_attempts + 1 END`,
+				lockedUntil: sql<Date | null>`CASE WHEN failed_attempts + 1 >= ${lockAfter} THEN ${lockUntil.toISOString()}::timestamptz ELSE locked_until END`,
+			})
 			.where('userId', '=', userId)
-			.execute();
+			.returning('lockedUntil')
+			.executeTakeFirst();
+		const locked = updated?.lockedUntil != null && updated.lockedUntil.getTime() >= lockUntil.getTime();
 		await audit(this.#services.db, { action: locked ? 'auth.locked' : 'auth.sign_in_failed', actorId: userId }, caller);
+	}
+
+	async #sealTotpSecret(userId: string, secret: Uint8Array): Promise<Buffer> {
+		const sealed = await this.#services.secrets.seal(Buffer.from(secret).toString('base64'), `totp:${userId}`);
+		return Buffer.from(sealed, 'utf8');
+	}
+
+	async #decodeTotpSecret(userId: string, raw: Uint8Array): Promise<Uint8Array> {
+		// Unsealed 20-byte rows created before encryption at rest remain readable until re-enrolled.
+		if (raw.length === 20) return raw;
+		const base64 = await this.#services.secrets.open(Buffer.from(raw).toString('utf8'), `totp:${userId}`);
+		return Buffer.from(base64, 'base64');
 	}
 
 	async #credentials(userId: string) {
@@ -329,10 +370,15 @@ export class AuthService {
 	}
 
 	#limit(key: string, limit: number) {
-		if (!this.#services.limiter.attempt(key, limit, limitWindow)) throw rateLimited();
+		enforceRateLimit(this.#services.limiter, key, limit);
 	}
 }
 
-function totpMatches(secret: Uint8Array, code: string): boolean {
-	return verifyTOTPWithGracePeriod(secret, 30, 6, code.trim(), 30);
+function matchingTotpStep(secret: Uint8Array, code: string, now: Date): number | null {
+	const trimmed = code.trim();
+	const current = Math.floor(now.getTime() / 30_000);
+	for (const step of [current - 1, current, current + 1]) {
+		if (step >= 0 && verifyHOTP(secret, BigInt(step), 6, trimmed)) return step;
+	}
+	return null;
 }

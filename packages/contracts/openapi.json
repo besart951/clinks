@@ -2324,11 +2324,18 @@
 								"properties": {
 									"code": {
 										"type": "string",
-										"pattern": "^[0-9]{6}$"
+										"minLength": 6,
+										"maxLength": 20
+									},
+									"password": {
+										"type": "string",
+										"minLength": 1,
+										"maxLength": 200
 									}
 								},
 								"required": [
-									"code"
+									"code",
+									"password"
 								]
 							}
 						}

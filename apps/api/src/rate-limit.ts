@@ -1,3 +1,7 @@
+import { rateLimited } from './errors.ts';
+
+export const defaultLimitWindow = 15 * 60_000;
+
 /**
  * Fixed-window counters in memory. Enough for one API instance; with several instances behind the
  * proxy the same interface moves to Postgres or Redis.
@@ -30,4 +34,13 @@ export class RateLimiter {
 	#sweep(now: number) {
 		for (const [key, window] of this.#windows) if (window.resetAt <= now) this.#windows.delete(key);
 	}
+}
+
+export function enforceRateLimit(
+	limiter: RateLimiter,
+	key: string,
+	limit: number,
+	windowMs = defaultLimitWindow,
+): void {
+	if (!limiter.attempt(key, limit, windowMs)) throw rateLimited();
 }

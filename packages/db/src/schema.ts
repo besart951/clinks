@@ -99,6 +99,7 @@ export interface CredentialTable {
 	passwordHash: string;
 	totpSecret: Uint8Array | null;
 	totpEnabledAt: Date | null;
+	totpLastStep: ColumnType<string | null, number | string | null | undefined, number | string | null>;
 	failedAttempts: Defaulted<number>;
 	lockedUntil: Date | null;
 	passwordChangedAt: Timestamp;

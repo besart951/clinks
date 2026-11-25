@@ -114,8 +114,15 @@ export async function findLink(db: Db | Tx, purpose: OneTimePurpose, token: stri
 	return row && !row.usedAt && row.expiresAt > now ? row : null;
 }
 
-export async function useUp(db: Db | Tx, id: string, now: Date) {
-	await db.updateTable('auth.oneTimeTokens').set({ usedAt: now }).where('id', '=', id).execute();
+export async function useUp(db: Db | Tx, id: string, now: Date): Promise<boolean> {
+	const updated = await db
+		.updateTable('auth.oneTimeTokens')
+		.set({ usedAt: now })
+		.where('id', '=', id)
+		.where('usedAt', 'is', null)
+		.where('expiresAt', '>', now)
+		.executeTakeFirst();
+	return updated.numUpdatedRows === 1n;
 }
 
 function codeHash(id: string, code: string): Buffer {
