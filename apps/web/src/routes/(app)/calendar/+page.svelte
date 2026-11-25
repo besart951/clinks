@@ -17,6 +17,7 @@
 		type GridHandlers,
 		type TimeAxis,
 	} from '#lib/components/calendar/TimeGrid.svelte';
+	import DateJump from '#lib/components/calendar/DateJump.svelte';
 	import AxisToggle from '#lib/components/calendar/AxisToggle.svelte';
 	import MonthGrid from '#lib/components/calendar/MonthGrid.svelte';
 	import AppointmentSheet from '#lib/components/calendar/AppointmentSheet.svelte';
@@ -24,7 +25,7 @@
 	import { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
 	import { contactName } from '#lib/data/workspace-api';
 	import { addDays, atTime, isoWeekday, minutesToTime, startOfWeek, today } from '@clinks/domain/dates';
-	import { appointmentKinds, type Appointment } from '@clinks/domain/types';
+	import { appointmentKinds, type Appointment, type CalendarDate } from '@clinks/domain/types';
 	import type { ContactId } from '@clinks/domain/ids';
 	import { href, routeQuery, setQuery } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
@@ -173,6 +174,12 @@
 			.join(', '),
 	);
 
+	/** A day keeps the team view; otherwise the view follows what was picked. */
+	function jumpTo(unit: 'day' | 'week' | 'month', date: CalendarDate) {
+		model.setAnchor(date);
+		if (!(unit === 'day' && model.view === 'resources') && unit !== model.view) changeView(unit);
+	}
+
 	function changeView(view: string) {
 		model.setView(view as CalendarView);
 		void setQuery(page.url, { view });
@@ -220,6 +227,12 @@
 				<ChevronRight class="size-4" />
 			</Button>
 		</div>
+		<DateJump
+			value={model.anchor}
+			units={['day', 'week', 'month']}
+			initial={model.view === 'month' ? 'month' : model.view === 'week' ? 'week' : 'day'}
+			onpick={jumpTo}
+		/>
 		<h2 class="min-w-0 text-base font-semibold capitalize" aria-live="polite">{rangeLabel}</h2>
 		<div class="flex-1"></div>
 		{#if model.hiddenWeekdays.length > 0 && (model.view === 'week' || model.view === 'month')}

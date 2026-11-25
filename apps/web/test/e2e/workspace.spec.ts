@@ -484,3 +484,34 @@ test('hides weekdays in week and month view and brings them back', async ({ page
 	await expect(page.getByRole('button', { name: '«So» ausblenden' })).toBeAttached();
 	await expect(restore).toBeHidden();
 });
+
+test('jumps to a day, week or month from the small calendar', async ({ page }) => {
+	await signIn(page);
+	await page.goto('/#/calendar?view=week');
+	await page.getByRole('button', { name: 'Datum wählen' }).click();
+	const picker = page.getByRole('dialog');
+	// A year leads on to its months; a month opens the month view.
+	await picker.getByRole('button', { name: 'Jahr', exact: true }).click();
+	await picker.getByRole('button', { name: '2027', exact: true }).click();
+	await picker.getByRole('button', { name: 'Februar 2027' }).click();
+	await expect(picker).toBeHidden();
+	await expect(page.getByRole('heading', { level: 2, name: 'Februar 2027' })).toBeVisible();
+	await expect(page).toHaveURL(/view=month/);
+
+	// A week opens the week view; arrow keys move between the weeks.
+	await page.getByRole('button', { name: 'Datum wählen' }).click();
+	await picker.getByRole('button', { name: 'Woche', exact: true }).click();
+	await picker.getByRole('button', { name: /^KW 6,/ }).focus();
+	await page.keyboard.press('ArrowDown');
+	await expect(picker.getByRole('button', { name: /^KW 7,/ })).toBeFocused();
+	await page.keyboard.press('Enter');
+	await expect(page.getByRole('heading', { level: 2, name: '15. Feb. – 21. Feb. 2027' })).toBeVisible();
+
+	// The Spitex day planning jumps to the picked day.
+	await page.getByRole('button', { name: 'Arbeitsbereich' }).click();
+	await page.getByRole('menuitem', { name: 'Stille Spitex Seeland' }).click();
+	await page.goto('/#/spitex');
+	await page.getByRole('button', { name: 'Datum wählen' }).click();
+	await picker.getByRole('button', { name: 'Montag, 30. November 2026' }).click();
+	await expect(page.getByRole('heading', { level: 2, name: 'Montag, 30. November 2026' })).toBeVisible();
+});

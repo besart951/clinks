@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
-import { addDays, atTime, isoWeekday, monthGrid, startOfWeek } from '../src/dates.ts';
+import { addDays, atTime, isoWeek, isoWeekday, monthGrid, startOfWeek } from '../src/dates.ts';
 import { newId, type AppointmentId, type UserId } from '../src/ids.ts';
 import { layoutDay } from '../src/layout.ts';
 import { effectiveStatus, invoiceTotals, nextInvoiceNumber, roundToFiveRappen, vatFromGross } from '../src/money.ts';
@@ -113,6 +113,15 @@ describe('qr bill', () => {
 		assert.ok(payload.includes('213.10'));
 		assert.equal(payload.at(-2), 'Rechnung 2026-0001');
 		assert.equal(payload.at(-1), 'EPD');
+	});
+});
+
+describe('iso weeks', () => {
+	it('numbers weeks from the one with the first Thursday', () => {
+		assert.equal(isoWeek('2026-11-25'), 48);
+		assert.equal(isoWeek('2026-01-01'), 1);
+		assert.equal(isoWeek('2027-01-01'), 53);
+		assert.equal(isoWeek('2024-12-30'), 1);
 	});
 });
 

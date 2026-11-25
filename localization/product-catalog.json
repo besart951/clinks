@@ -5013,6 +5013,22 @@
       "ui.ws.field.house_number": {
         "de-CH": "Nr.",
         "en-US": "No."
+      },
+      "ui.ws.calendar.jump": {
+        "de-CH": "Datum wählen",
+        "en-US": "Choose a date"
+      },
+      "ui.ws.calendar.view_year": {
+        "de-CH": "Jahr",
+        "en-US": "Year"
+      },
+      "ui.ws.calendar.week_short": {
+        "de-CH": "KW",
+        "en-US": "Wk"
+      },
+      "ui.ws.calendar.week_of": {
+        "de-CH": "KW {week}, ab {from}",
+        "en-US": "Week {week}, from {from}"
       }
     }
   }
