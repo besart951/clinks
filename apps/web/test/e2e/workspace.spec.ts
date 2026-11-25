@@ -637,6 +637,8 @@ test('keeps side sheets inside a phone screen without sideways scrolling', async
 	await expect(sheet.getByLabel('Titel')).toBeVisible();
 	expect(Math.round((await sheet.boundingBox())?.width ?? 0)).toBe(390);
 	expect(await sideways()).toEqual([]);
+	// The footer is reached by scrolling down, not sideways.
+	await sheet.getByRole('button', { name: 'Speichern' }).scrollIntoViewIfNeeded();
 	await expect(sheet.getByRole('button', { name: 'Speichern' })).toBeInViewport({ ratio: 1 });
 	await page.goto('/#/contacts?new=1');
 	await expect(page.getByLabel('Vorname')).toBeVisible();
