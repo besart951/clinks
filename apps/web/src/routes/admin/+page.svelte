@@ -8,11 +8,13 @@
 	import { Switch } from '@clinks/ui/components/ui/switch';
 	import { Badge } from '@clinks/ui/components/ui/badge';
 	import AsyncView from '#lib/components/common/AsyncView.svelte';
+	import ConfirmDialog, { type ConfirmRequest } from '#lib/components/common/ConfirmDialog.svelte';
 	import SearchInput from '#lib/components/common/SearchInput.svelte';
 	import Forbidden from '#lib/components/common/Forbidden.svelte';
 	import LocaleSwitch from '#lib/components/shell/LocaleSwitch.svelte';
 	import { AdminModel, featureFlags } from '#lib/features/admin/admin.svelte';
 	import { landingPath } from '#lib/features/auth/auth-forms.svelte';
+	import { requestSignOut } from '#lib/features/shell/sign-out';
 	import { navigate } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
@@ -20,6 +22,7 @@
 	const session = workspace.session;
 	const model = new AdminModel(workspace);
 	let ready = $state(false);
+	let confirm = $state<ConfirmRequest | null>(null);
 
 	onMount(() => {
 		let stop = () => {};
@@ -39,13 +42,7 @@
 	}
 
 	async function signOut() {
-		if (
-			workspace.sync?.pendingWrites &&
-			!window.confirm(workspace.t('ui.ws.sync.confirm_discard', { count: workspace.sync.pendingWrites }))
-		)
-			return;
-		await session.signOut();
-		await navigate('/login');
+		confirm = await requestSignOut(workspace, () => navigate('/login'));
 	}
 </script>
 
@@ -135,3 +132,4 @@
 		</AsyncView>
 	{/if}
 </main>
+<ConfirmDialog bind:request={confirm} />

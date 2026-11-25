@@ -10,8 +10,8 @@
 
 	// With the real backend the synced database reports; on the mock the simulated network does.
 	const offline = $derived(sync ? !sync.connected : network.offline);
-	const busy = $derived(sync ? sync.uploading || sync.downloading : network.pending > 0);
 	const pending = $derived(sync?.pendingWrites ?? 0);
+	const busy = $derived(sync ? sync.uploading || sync.downloading || pending > 0 : network.pending > 0);
 	const label = $derived(offline ? 'ui.ws.sync.offline' : busy ? 'ui.ws.sync.syncing' : 'ui.ws.sync.saved');
 	const details = $derived(
 		[

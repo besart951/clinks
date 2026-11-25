@@ -37,7 +37,9 @@
 				<Dialog.Description>{request.description}</Dialog.Description>
 			</Dialog.Header>
 			<Dialog.Footer>
-				<Button variant="outline" onclick={() => (request = null)}>{workspace.t('ui.ws.cancel')}</Button>
+				<Button variant="outline" autofocus={request.destructive ? true : undefined} onclick={() => (request = null)}>
+					{workspace.t('ui.ws.cancel')}
+				</Button>
 				<Button variant={request.destructive ? 'destructive' : 'default'} disabled={busy} onclick={confirm}>
 					{request.confirmLabel}
 				</Button>

@@ -37,7 +37,10 @@ export class Resource<T> {
 			if (request !== this.#request) return;
 			if (quiet && this.data !== null) return;
 			this.error = error instanceof Error ? error.message : String(error);
-			this.status = error instanceof MockApiError && error.code === 'unauthorized' ? 'forbidden' : 'error';
+			this.status =
+				error instanceof MockApiError && (error.code === 'unauthorized' || error.code === 'forbidden')
+					? 'forbidden'
+					: 'error';
 		}
 	}
 

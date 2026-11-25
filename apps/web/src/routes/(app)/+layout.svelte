@@ -67,9 +67,7 @@
 {#if ready}
 	<SidebarProvider>
 		{#key session.tenantId}
-			{#key session.tenantId}
-				<AppSidebar actions={{ search: () => (paletteOpen = true), shortcuts: () => (shortcutsOpen = true) }} />
-			{/key}
+			<AppSidebar actions={{ search: () => (paletteOpen = true), shortcuts: () => (shortcutsOpen = true) }} />
 		{/key}
 		<SidebarInset class="flex min-h-dvh min-w-0 flex-col pb-16 md:pb-0">
 			<Banners />
@@ -94,7 +92,9 @@
 		<MobileNav />
 		<CommandPalette bind:open={paletteOpen} />
 		<ShortcutsDialog bind:open={shortcutsOpen} />
-		<DevPanel />
+		{#if !workspace.remote}
+			<DevPanel />
+		{/if}
 		<QuickCreateSheets {quick} />
 	</SidebarProvider>
 {:else}

@@ -85,7 +85,16 @@ export const tableNames: readonly TableName[] = [
 ];
 
 export type ErrorCode =
-	'validation' | 'not_found' | 'conflict' | 'unauthorized' | 'offline' | 'storage_full' | 'internal';
+	| 'validation'
+	| 'not_found'
+	| 'conflict'
+	| 'unauthorized'
+	| 'forbidden'
+	| 'locked'
+	| 'rate_limited'
+	| 'offline'
+	| 'storage_full'
+	| 'internal';
 
 /** Carries a message that is already localized, like errors from the real API. */
 export class MockApiError extends Error {

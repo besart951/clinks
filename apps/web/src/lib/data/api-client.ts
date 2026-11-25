@@ -4,13 +4,13 @@ import { MockApiError, type ErrorCode } from './database.ts';
 const statusCodes: { [status: number]: ErrorCode } = {
 	400: 'validation',
 	401: 'unauthorized',
-	403: 'unauthorized',
+	403: 'forbidden',
 	404: 'not_found',
 	409: 'conflict',
 	410: 'validation',
 	413: 'validation',
-	423: 'unauthorized',
-	429: 'validation',
+	423: 'locked',
+	429: 'rate_limited',
 };
 
 /**
@@ -99,7 +99,7 @@ export class ApiClient {
 }
 
 async function toError(response: Response): Promise<MockApiError> {
-	const parsed = (await response.json().catch(() => null)) as ErrorResponse | null;
+	const parsed = (await response.json().catch(() => null)) as Partial<ErrorResponse> | null;
 	const code = statusCodes[response.status] ?? 'internal';
-	return new MockApiError(code, parsed?.error.message ?? response.statusText, parsed?.error.fields ?? {});
+	return new MockApiError(code, parsed?.error?.message ?? response.statusText, parsed?.error?.fields ?? {});
 }
