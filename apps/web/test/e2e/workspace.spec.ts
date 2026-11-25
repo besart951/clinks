@@ -403,6 +403,7 @@ test('switches the Spitex client list between table and cards', async ({ page })
 	await expect(page.getByRole('button', { name: 'Karten' })).toHaveAttribute('aria-pressed', 'true');
 	await card.click();
 	await expect(page).toHaveURL(/#\/spitex\/clients\/[0-9a-f-]+/);
+});
 
 test('suggests existing tags and keeps a contact’s tags a set', async ({ page }) => {
 	await signIn(page);
