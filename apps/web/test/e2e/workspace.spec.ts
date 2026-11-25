@@ -670,31 +670,70 @@ test('keeps side sheets inside a phone screen without sideways scrolling', async
 	expect(await sideways()).toEqual([]);
 });
 
-test('fits every page into a phone screen', async ({ page }) => {
-	test.setTimeout(240_000);
+test('fits every page into a phone screen, with touch-sized targets', async ({ browser }) => {
+	test.setTimeout(300_000);
+	const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+	const page = await context.newPage();
+	const tooWide: string[] = [];
+	const check = async (path: string) => {
+		await page.goto(`/#${path}`);
+		await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
+		// Some pages settle with a redirect (e.g. to their first tab); measure once that is done.
+		await page.waitForLoadState('networkidle');
+		await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth).catch(() => -1)).not.toBe(-1);
+		const width = await page.evaluate(() => document.documentElement.scrollWidth);
+		if (width > 390) tooWide.push(`${path}: ${width}px`);
+	};
+	/** The first link on a page that leads to a record, e.g. a contact. */
+	const firstRecord = async (path: string, pattern: RegExp) => {
+		await page.goto(`/#${path}`);
+		await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
+		let link: string | undefined;
+		await expect
+			.poll(async () => {
+				link = await page
+					.evaluate(
+						(source) =>
+							[...document.querySelectorAll('a[href]')]
+								.map((a) => a.getAttribute('href')!)
+								.find((value) => new RegExp(source).test(value)),
+						pattern.source,
+					)
+					.catch(() => undefined);
+				return link;
+			})
+			.toBeTruthy();
+		return link ? link.slice(link.indexOf('#') + 1).split('?')[0] : null;
+	};
+
+	await page.goto('/');
+	await page.evaluate(() => localStorage.clear());
+	for (const path of ['/login', '/signup', '/forgot-password']) await check(path);
+
 	await signIn(page);
-	await page.getByRole('button', { name: 'Arbeitsbereich' }).click();
-	await page.getByRole('menuitem', { name: 'Stille Spitex Seeland' }).click();
-	await page.goto('/#/finance');
-	const invoice = await page.locator('a[href*="/finance/invoices/"]').first().getAttribute('href');
-	await page.setViewportSize({ width: 390, height: 844 });
-	const pages = [
+	const details = [
+		await firstRecord('/contacts', /\/contacts\/[0-9a-f-]{36}/),
+		await firstRecord('/physio', /\/physio\/[0-9a-f-]{36}/),
+		await firstRecord('/dashboard', /\/planner\/[0-9a-f-]{36}/),
+		await firstRecord('/mail/campaigns', /\/campaigns\/[0-9a-f-]{36}/),
+		await firstRecord('/finance', /\/finance\/invoices\/[0-9a-f-]{36}/),
+		await firstRecord('/calendar?view=resources', /\/team\/[0-9a-f-]{36}/),
+	];
+	for (const path of [
 		'/dashboard',
 		'/contacts',
 		'/calendar',
+		'/calendar?view=week',
+		'/calendar?view=month',
 		'/planner',
 		'/mail',
 		'/mail/campaigns',
 		'/mail/templates',
 		'/documents',
-		'/spitex',
-		'/spitex/clients',
-		'/spitex/time',
-		'/visits',
+		'/physio',
 		'/finance',
 		'/finance/expenses',
 		'/finance/reports',
-		invoice!.slice(invoice!.indexOf('#') + 1),
 		'/finance/invoices/new',
 		'/activity',
 		'/notifications',
@@ -706,20 +745,20 @@ test('fits every page into a phone screen', async ({ page }) => {
 		'/settings/billing',
 		'/settings/privacy',
 		'/settings/storage',
-	];
-	const tooWide: string[] = [];
-	for (const path of pages) {
-		await page.goto(`/#${path}`);
-		await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
-		// Some pages settle with a redirect (e.g. to their first tab); measure once that is done.
-		await page.waitForLoadState('networkidle');
-		const width = await expect
-			.poll(() => page.evaluate(() => document.documentElement.scrollWidth).catch(() => -1))
-			.not.toBe(-1)
-			.then(() => page.evaluate(() => document.documentElement.scrollWidth));
-		if (width > 390) tooWide.push(`${path}: ${width}px`);
-	}
+		'/onboarding',
+		...(details as string[]),
+	])
+		await check(path);
+
+	await page.goto('/#/dashboard');
+	await page.getByRole('button', { name: 'Mehr' }).click();
+	await page.getByRole('button', { name: 'Arbeitsbereich' }).click();
+	await page.getByRole('menuitem', { name: 'Stille Spitex Seeland' }).click();
+	const client = await firstRecord('/spitex/clients', /\/spitex\/clients\/[0-9a-f-]{36}/);
+	for (const path of ['/spitex', '/spitex/clients', '/spitex/clients?view=cards', '/spitex/time', '/visits', client!])
+		await check(path);
 	expect(tooWide).toEqual([]);
+	await context.close();
 });
 
 test('gives fingers big enough targets on a touch screen', async ({ browser }) => {

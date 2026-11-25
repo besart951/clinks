@@ -9,7 +9,10 @@
 	import Lock from '@lucide/svelte/icons/lock';
 	import HardDrive from '@lucide/svelte/icons/hard-drive';
 	import type { Permission } from '@clinks/domain/types';
-	import { href, routePath } from '#lib/navigation';
+	import ChevronDown from '@lucide/svelte/icons/chevron-down';
+	import Check from '@lucide/svelte/icons/check';
+	import * as DropdownMenu from '@clinks/ui/components/ui/dropdown-menu';
+	import { href, navigate, routePath } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	let { children }: { children: Snippet } = $props();
@@ -25,10 +28,37 @@
 	];
 	const visible = $derived(items.filter((item) => !item.permission || workspace.session.can(item.permission)));
 	const current = $derived(routePath(page.url));
+	const active = $derived(visible.find((item) => item.path === current));
 </script>
 
-<div class="grid gap-6 lg:grid-cols-[13rem_1fr]">
-	<nav class="flex flex-wrap gap-1 lg:flex-col lg:flex-nowrap" aria-label={workspace.t('ui.ws.nav.settings')}>
+<div class="grid gap-4 lg:grid-cols-[13rem_1fr] lg:gap-6">
+	<!-- Phones: one button with the current section opens the others, instead of three rows of links. -->
+	{#if active}
+		<DropdownMenu.Root>
+			<DropdownMenu.Trigger>
+				{#snippet child({ props })}
+					<button
+						{...props}
+						class="bg-muted flex min-h-11 w-full items-center gap-2 rounded-lg px-3 text-sm font-medium lg:hidden"
+					>
+						<active.icon class="size-4" />
+						<span class="text-muted-foreground font-normal">{workspace.t('ui.ws.nav.settings')} ·</span>
+						{workspace.t(active.label)}
+						<ChevronDown class="text-muted-foreground ms-auto size-4" />
+					</button>
+				{/snippet}
+			</DropdownMenu.Trigger>
+			<DropdownMenu.Content align="start">
+				{#each visible as item (item.path)}
+					<DropdownMenu.Item class="min-h-10" onclick={() => navigate(item.path)}>
+						<item.icon class="size-4" />{workspace.t(item.label)}
+						{#if item === active}<Check class="ms-auto size-4" />{/if}
+					</DropdownMenu.Item>
+				{/each}
+			</DropdownMenu.Content>
+		</DropdownMenu.Root>
+	{/if}
+	<nav class="hidden gap-1 lg:flex lg:flex-col" aria-label={workspace.t('ui.ws.nav.settings')}>
 		{#each visible as item (item.path)}
 			<a
 				href={href(item.path)}

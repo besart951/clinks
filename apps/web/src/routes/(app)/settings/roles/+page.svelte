@@ -18,6 +18,8 @@
 	const workspace = useWorkspace();
 	const model = new RolesModel(workspace);
 	const areas = permissionAreas();
+	/** The role shown on a phone. */
+	let phoneRole = $state<string | null>(null);
 	onMount(() => model.resource.connect());
 
 	async function save(event: SubmitEvent) {
@@ -36,7 +38,64 @@
 	</PageHeader>
 	<AsyncView resource={model.resource}>
 		{#snippet children({ roles })}
-			<Card.Root>
+			{@const shown = roles.find((role) => role.id === phoneRole) ?? roles[0]}
+			<!-- Phones: one role at a time, its areas as a list; the matrix needs the width of a wide screen. -->
+			<div class="space-y-3 md:hidden">
+				<div class="flex gap-1 overflow-x-auto" role="group" aria-label={workspace.t('ui.ws.settings.roles')}>
+					{#each roles as role (role.id)}
+						<button
+							type="button"
+							class="flex min-h-9 shrink-0 items-center gap-1 rounded-full border px-3 text-xs font-medium {shown?.id ===
+							role.id
+								? 'border-foreground bg-foreground text-background'
+								: 'text-muted-foreground'}"
+							aria-pressed={shown?.id === role.id}
+							onclick={() => (phoneRole = role.id)}
+						>
+							{role.name}{#if role.kind !== 'custom'}<Lock class="size-3" aria-hidden="true" />{/if}
+						</button>
+					{/each}
+				</div>
+				{#if shown}
+					<Card.Root>
+						<Card.Header>
+							<Card.Title>{shown.name}</Card.Title>
+							<Card.Description>
+								{[
+									workspace.t('ui.ws.roles.members', { count: model.usage(shown.id) }),
+									shown.kind === 'custom' ? '' : workspace.t('ui.ws.roles.protected'),
+								]
+									.filter(Boolean)
+									.join(' · ')}
+							</Card.Description>
+							{#if shown.kind === 'custom'}<Card.Action>
+									<Button variant="outline" size="sm" onclick={() => model.edit(shown)}>
+										{workspace.t('ui.ws.roles.edit')}
+									</Button>
+								</Card.Action>{/if}
+						</Card.Header>
+						<Card.Content>
+							<ul class="divide-y text-sm">
+								{#each areas as area (area.area)}
+									<li class="flex min-h-10 items-center justify-between gap-3">
+										<span>{workspace.t(`ui.ws.roles.area_${area.area}`)}</span>
+										{#if area.write && roleGrants(shown, area.write)}<span
+												class="rounded bg-emerald-500/10 px-1.5 py-0.5 text-xs text-emerald-700 dark:text-emerald-300"
+											>
+												{workspace.t(area.read ? 'ui.ws.roles.write' : 'ui.ws.roles.allowed')}
+											</span>{:else if area.read && roleGrants(shown, area.read)}<span
+												class="rounded bg-sky-500/10 px-1.5 py-0.5 text-xs text-sky-700 dark:text-sky-300"
+											>
+												{workspace.t('ui.ws.roles.read')}
+											</span>{:else}<span class="text-muted-foreground text-xs">–</span>{/if}
+									</li>
+								{/each}
+							</ul>
+						</Card.Content>
+					</Card.Root>
+				{/if}
+			</div>
+			<Card.Root class="hidden md:flex">
 				<Card.Content class="overflow-x-auto">
 					<table class="w-full min-w-[560px] text-sm">
 						<caption class="sr-only">{workspace.t('ui.ws.roles.matrix')}</caption>
@@ -85,7 +144,7 @@
 					</table>
 				</Card.Content>
 			</Card.Root>
-			<p class="text-muted-foreground mt-2 text-xs">{workspace.t('ui.ws.roles.hint')}</p>
+			<p class="text-muted-foreground mt-2 hidden text-xs md:block">{workspace.t('ui.ws.roles.hint')}</p>
 		{/snippet}
 	</AsyncView>
 </ModuleGate>
