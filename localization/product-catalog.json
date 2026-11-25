@@ -5113,6 +5113,42 @@
       "ui.ws.spitex.release.changed": {
         "de-CH": "Seit der Freigabe geändert",
         "en-US": "Changed since the release"
+      },
+      "ui.ws.visits.title": {
+        "de-CH": "Meine Einsätze",
+        "en-US": "My visits"
+      },
+      "ui.ws.visits.text": {
+        "de-CH": "Dein Plan, sobald die Woche freigegeben ist.",
+        "en-US": "Your plan, once the week is released."
+      },
+      "ui.ws.visits.this_week": {
+        "de-CH": "Diese Woche",
+        "en-US": "This week"
+      },
+      "ui.ws.visits.pending_title": {
+        "de-CH": "Der Plan für KW {week} ist noch in Arbeit",
+        "en-US": "The plan for week {week} is still in the works"
+      },
+      "ui.ws.visits.pending_text": {
+        "de-CH": "Sobald die Woche freigegeben ist, erscheinen deine Einsätze hier. Du bekommst eine Benachrichtigung.",
+        "en-US": "Your visits appear here as soon as the week is released. You will get a notification."
+      },
+      "ui.ws.visits.none_title": {
+        "de-CH": "Keine Einsätze in dieser Woche",
+        "en-US": "No visits this week"
+      },
+      "ui.ws.visits.new": {
+        "de-CH": "Neu",
+        "en-US": "New"
+      },
+      "ui.ws.visits.changed": {
+        "de-CH": "Geändert",
+        "en-US": "Changed"
+      },
+      "ui.ws.visits.cancelled": {
+        "de-CH": "Abgesagt",
+        "en-US": "Cancelled"
       }
     }
   }

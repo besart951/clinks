@@ -555,3 +555,61 @@ test('releases a week of the Spitex plan to the staff and withdraws it again', a
 	await expect(status).toContainText('Entwurf');
 	await expect(page.getByRole('button', { name: 'Woche freigeben' })).toBeVisible();
 });
+
+/** Another demo account in the same browser, keeping the demo data as it is. */
+async function switchAccount(page: Page, email: string) {
+	await page.getByRole('button', { name: 'Kontomenü' }).click();
+	await page.getByRole('menuitem', { name: 'Abmelden' }).click();
+	await expect(page).toHaveURL(/#\/login/);
+	await page.getByLabel('E-Mail-Adresse').fill(email);
+	await page.getByLabel('Passwort', { exact: true }).fill('demo1234');
+	await page.getByRole('button', { name: 'Anmelden' }).click();
+	await expect(page).toHaveURL(/#\/dashboard/);
+}
+
+test('shows staff only their own visits, and a week only once it is released', async ({ page }) => {
+	await signIn(page, 'daniel.moser@spitex-seeland.ch');
+	// No plan, no clients, no calendar: only the own visits.
+	const navigation = page.getByRole('navigation', { name: 'Hauptnavigation' });
+	await expect(navigation.getByRole('link', { name: 'Meine Einsätze' })).toBeVisible();
+	await expect(navigation.getByRole('link', { name: 'Spitex' })).toHaveCount(0);
+	await expect(navigation.getByRole('link', { name: 'Kontakte' })).toHaveCount(0);
+	await page.goto('/#/spitex');
+	await expect(page.getByText('Kein Zugriff')).toBeVisible();
+
+	await page.goto('/#/visits');
+	await expect(page.getByRole('heading', { level: 1, name: 'Meine Einsätze' })).toBeVisible();
+	const visits = page.getByRole('listitem').filter({ hasText: /\d+ min/ });
+	await expect(visits.first()).toBeVisible();
+	await expect(visits.first().getByRole('link', { name: /in Google Maps öffnen/ })).toBeVisible();
+	await expect(visits.first().getByRole('link', { name: /^\+41/ })).toHaveAttribute('href', /^tel:/);
+	// Next week is a draft: nothing of it shows.
+	await page.getByRole('button', { name: 'Weiter' }).click();
+	await expect(page.getByText(/Der Plan für KW \d+ ist noch in Arbeit/)).toBeVisible();
+	await expect(visits).toHaveCount(0);
+
+	// The planner releases next week …
+	await switchAccount(page, 'besi@stille.ch');
+	await page.getByRole('button', { name: 'Arbeitsbereich' }).click();
+	await page.getByRole('menuitem', { name: 'Stille Spitex Seeland' }).click();
+	await page.goto('/#/spitex');
+	for (let day = 0; day < 7; day++) await page.getByRole('button', { name: 'Weiter', exact: true }).click();
+	await page.getByRole('button', { name: 'Woche freigeben' }).click();
+	await page
+		.getByRole('dialog', { name: /KW \d+/ })
+		.getByRole('button', { name: 'Woche freigeben' })
+		.click();
+	await expect(page.getByText(/^KW \d+ freigegeben$/)).toBeVisible();
+
+	// … and it is there, read-only.
+	await switchAccount(page, 'daniel.moser@spitex-seeland.ch');
+	await page.goto('/#/visits');
+	await page.getByRole('button', { name: 'Weiter' }).click();
+	await expect(visits.first()).toBeVisible();
+	await expect(page.getByRole('button', { name: /freigeben|Zuweisen|Neuer Einsatz/ })).toHaveCount(0);
+
+	// On a phone the bar at the bottom offers only what the role may open.
+	await page.setViewportSize({ width: 390, height: 800 });
+	const bar = page.getByRole('navigation', { name: 'Schnellnavigation' });
+	await expect(bar.getByRole('link')).toHaveText(['Start', 'Meine Einsätze']);
+});

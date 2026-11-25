@@ -141,14 +141,17 @@ export class DashboardModel {
 		const can = (module: Parameters<typeof session.hasModule>[0], permission: Parameters<typeof session.can>[0]) =>
 			session.hasModule(module) && session.can(permission);
 		const [appointments, tasks, mails, invoices, activity, contacts, members, attention] = await Promise.all([
-			optional(
-				can('calendar', 'calendar.read'),
-				() =>
-					api.appointments.list(
-						(row) => row.start.slice(0, 10) >= addDays(day, -1) && row.start.slice(0, 10) <= addDays(day, 1),
-					),
-				[],
-			),
+			can('calendar', 'calendar.read')
+				? optional(
+						true,
+						() =>
+							api.appointments.list(
+								(row) => row.start.slice(0, 10) >= addDays(day, -1) && row.start.slice(0, 10) <= addDays(day, 1),
+							),
+						[],
+					)
+				: // Staff without the calendar still see their own released visits of today.
+					optional(can('spitex', 'spitex.own.read'), async () => (await api.myVisits()).visits, []),
 			optional(can('planner', 'planner.read'), () => api.tasks.list(), []),
 			optional(can('mail', 'mail.read'), () => api.mails.list((row) => row.folder === 'inbox'), []),
 			optional(can('finance', 'finance.read'), () => api.invoices.list(), []),

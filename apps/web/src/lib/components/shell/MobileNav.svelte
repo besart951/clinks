@@ -1,26 +1,31 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import LayoutDashboard from '@lucide/svelte/icons/layout-dashboard';
-	import CalendarDays from '@lucide/svelte/icons/calendar-days';
-	import Users from '@lucide/svelte/icons/users';
-	import SquareKanban from '@lucide/svelte/icons/square-kanban';
 	import Menu from '@lucide/svelte/icons/menu';
 	import { getSidebarContext } from '@clinks/ui/components/ui/sidebar';
+	import { allNavigationItems } from '#lib/features/shell/navigation-items';
 	import { href, routePath } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
+	const session = workspace.session;
 	const sidebar = getSidebarContext();
-	const items = [
+	/** The places most used on a phone, in this order; a role only gets the ones it may open. */
+	const preferred = ['/calendar', '/contacts', '/planner', '/visits', '/spitex', '/physio', '/mail', '/documents'];
+	const items = $derived([
 		{ path: '/dashboard', label: 'ui.ws.nav.dashboard', icon: LayoutDashboard },
-		{ path: '/calendar', label: 'ui.ws.module.calendar', icon: CalendarDays },
-		{ path: '/contacts', label: 'ui.ws.module.contacts', icon: Users },
-		{ path: '/planner', label: 'ui.ws.module.planner', icon: SquareKanban },
-	];
+		...preferred
+			.flatMap((path) => allNavigationItems.filter((item) => item.path === path))
+			.filter(
+				(item) =>
+					(!item.permission || session.can(item.permission)) && (!item.module || session.hasModule(item.module)),
+			)
+			.slice(0, 3),
+	]);
 </script>
 
 <nav
-	class="bg-background/95 fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 border-t pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
+	class="bg-background/95 fixed inset-x-0 bottom-0 z-20 grid auto-cols-fr grid-flow-col border-t pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
 	aria-label={workspace.t('ui.ws.shell.mobile_navigation')}
 >
 	{#each items as item (item.path)}

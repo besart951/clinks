@@ -33,6 +33,8 @@
 	const workspace = useWorkspace();
 	const quick = useQuickCreate();
 	const session = workspace.session;
+	/** Where today's appointments lead: the calendar, or the own plan for staff without it. */
+	const agendaPath = $derived(session.can('calendar.read') ? '/calendar' : '/visits');
 	const model = new DashboardModel(workspace);
 	let actors = $state(new Map<string, Actor>());
 
@@ -209,8 +211,10 @@
 					<span class="text-muted-foreground text-sm">
 						{workspace.t('ui.ws.dashboard.appointment_count', { count: data.appointmentsToday.length })}
 					</span>
-					<Button variant="ghost" size="sm" class="ml-auto" href={href('/calendar')}>
-						{workspace.t('ui.ws.module.calendar')}<ChevronRight class="size-4" />
+					<Button variant="ghost" size="sm" class="ml-auto" href={href(agendaPath)}>
+						{workspace.t(session.can('calendar.read') ? 'ui.ws.module.calendar' : 'ui.ws.visits.title')}<ChevronRight
+							class="size-4"
+						/>
 					</Button>
 				</header>
 				{#if data.appointmentsToday.length === 0}
@@ -235,7 +239,11 @@
 									class="hover:bg-accent grid grid-cols-[3.5rem_3px_minmax(0,1fr)_auto] items-center gap-3 rounded-md px-1 py-2 {past
 										? 'opacity-60'
 										: ''}"
-									href={href(`/calendar?date=${today()}&appointment=${appointment.id}`)}
+									href={href(
+										session.can('calendar.read')
+											? `/calendar?date=${today()}&appointment=${appointment.id}`
+											: agendaPath,
+									)}
 								>
 									<span class="grid text-[13px] leading-tight">
 										<b class="font-semibold tabular-nums">{workspace.i18n.time(appointment.start)}</b><span

@@ -1281,6 +1281,15 @@ export const productDefaultTranslations = {
 	"ui.ws.view.cards": "Karten",
 	"ui.ws.view.label": "Ansicht",
 	"ui.ws.view.table": "Tabelle",
+	"ui.ws.visits.cancelled": "Abgesagt",
+	"ui.ws.visits.changed": "Geändert",
+	"ui.ws.visits.new": "Neu",
+	"ui.ws.visits.none_title": "Keine Einsätze in dieser Woche",
+	"ui.ws.visits.pending_text": "Sobald die Woche freigegeben ist, erscheinen deine Einsätze hier. Du bekommst eine Benachrichtigung.",
+	"ui.ws.visits.pending_title": "Der Plan für KW {week} ist noch in Arbeit",
+	"ui.ws.visits.text": "Dein Plan, sobald die Woche freigegeben ist.",
+	"ui.ws.visits.this_week": "Diese Woche",
+	"ui.ws.visits.title": "Meine Einsätze",
 } as const;
 
 export const productTranslationKeys = [
@@ -2562,6 +2571,15 @@ export const productTranslationKeys = [
 	"ui.ws.view.cards",
 	"ui.ws.view.label",
 	"ui.ws.view.table",
+	"ui.ws.visits.cancelled",
+	"ui.ws.visits.changed",
+	"ui.ws.visits.new",
+	"ui.ws.visits.none_title",
+	"ui.ws.visits.pending_text",
+	"ui.ws.visits.pending_title",
+	"ui.ws.visits.text",
+	"ui.ws.visits.this_week",
+	"ui.ws.visits.title",
 ] as const;
 
 export type ProductTranslationKey = (typeof productTranslationKeys)[number];
