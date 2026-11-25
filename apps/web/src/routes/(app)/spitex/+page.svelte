@@ -26,6 +26,7 @@
 	import Users from '@lucide/svelte/icons/users';
 	import EyeOff from '@lucide/svelte/icons/eye-off';
 	import Send from '@lucide/svelte/icons/send';
+	import LocateFixed from '@lucide/svelte/icons/locate-fixed';
 	import ConfirmDialog, { type ConfirmRequest } from '#lib/components/common/ConfirmDialog.svelte';
 	import { personBadge } from '@clinks/ui/kit/avatar';
 	import AppointmentSheet from '#lib/components/calendar/AppointmentSheet.svelte';
@@ -230,6 +231,7 @@
 				</Button>
 				<Button
 					variant={model.release || !canRelease ? 'default' : 'outline'}
+					class="hidden md:inline-flex"
 					onclick={createVisit}
 					aria-keyshortcuts="N"
 				>
@@ -251,13 +253,49 @@
 	</PageHeader>
 	<SpitexNav />
 
+	<!-- Phones: previous · the date to tap · next, like the calendar. -->
+	<div class="mb-3 flex items-center gap-1 md:hidden">
+		<Button
+			variant="outline"
+			size="icon"
+			class="size-11 shrink-0"
+			onclick={() => model.setDate(addDays(model.date, -1))}
+			aria-label={workspace.t('ui.ws.calendar.previous')}
+		>
+			<ChevronLeft class="size-5" />
+		</Button>
+		<div class="flex min-w-0 flex-1 justify-center">
+			<DateJump
+				value={model.date}
+				units={['day', 'week']}
+				label={workspace.i18n.format(model.date, { weekday: 'short', day: 'numeric', month: 'long' })}
+				onpick={(_unit, date) => model.setDate(date)}
+			/>
+		</div>
+		<Button
+			variant="outline"
+			size="icon"
+			class="size-11 shrink-0"
+			onclick={() => model.setDate(addDays(model.date, 1))}
+			aria-label={workspace.t('ui.ws.calendar.next')}
+		>
+			<ChevronRight class="size-5" />
+		</Button>
+	</div>
+
 	<div class="mb-4 flex flex-wrap items-center gap-2">
-		<Button variant="outline" size="sm" onclick={() => model.setDate(today())}>
+		<Button variant="outline" size="sm" class="hidden md:inline-flex" onclick={() => model.setDate(today())}>
 			{workspace.t('ui.ws.calendar.today')}
 		</Button>
+		{#if model.date !== today()}
+			<Button variant="ghost" size="sm" class="md:hidden" onclick={() => model.setDate(today())}>
+				<LocateFixed class="size-4" />{workspace.t('ui.ws.calendar.today')}
+			</Button>
+		{/if}
 		<Button
 			variant="ghost"
 			size="icon-sm"
+			class="hidden md:inline-flex"
 			onclick={() => model.setDate(addDays(model.date, -1))}
 			aria-label={workspace.t('ui.ws.calendar.previous')}
 		>
@@ -266,13 +304,16 @@
 		<Button
 			variant="ghost"
 			size="icon-sm"
+			class="hidden md:inline-flex"
 			onclick={() => model.setDate(addDays(model.date, 1))}
 			aria-label={workspace.t('ui.ws.calendar.next')}
 		>
 			<ChevronRight class="size-4" />
 		</Button>
-		<DateJump value={model.date} units={['day', 'week']} onpick={(_unit, date) => model.setDate(date)} />
-		<h2 class="font-semibold capitalize" aria-live="polite">
+		<span class="hidden md:contents">
+			<DateJump value={model.date} units={['day', 'week']} onpick={(_unit, date) => model.setDate(date)} />
+		</span>
+		<h2 class="sr-only font-semibold capitalize md:not-sr-only" aria-live="polite">
 			{workspace.i18n.format(model.date, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
 		</h2>
 		{#if model.resource.data}
@@ -322,7 +363,7 @@
 					{/if}
 				</DropdownMenu.Content>
 			</DropdownMenu.Root>
-			<AxisToggle {axis} onchange={changeAxis} />
+			<span class="hidden md:contents"><AxisToggle {axis} onchange={changeAxis} /></span>
 		</div>
 	</div>
 
@@ -365,8 +406,9 @@
 				</div>
 
 				<div class="grid gap-4 xl:grid-cols-[18rem_1fr]">
-					<div class="space-y-4">
-						<Card.Root class="group/open h-fit print:hidden">
+					<!-- Phones: open visits, then the plan, then the week's load; wide screens keep the side column. -->
+					<div class="space-y-4 max-xl:contents">
+						<Card.Root class="group/open h-fit max-xl:order-1 print:hidden">
 							<Card.Header>
 								<Card.Title>{workspace.t('ui.ws.spitex.open_visits')}</Card.Title>
 								{#if canAddClient}
@@ -461,7 +503,7 @@
 								</ul>
 							</Card.Content>
 						</Card.Root>
-						<Card.Root class="h-fit">
+						<Card.Root class="h-fit max-xl:order-3">
 							<Card.Header>
 								<Card.Title>{workspace.t('ui.ws.spitex.week_load_title')}</Card.Title>
 							</Card.Header>
@@ -516,7 +558,7 @@
 							</Card.Content>
 						</Card.Root>
 					</div>
-					<div class="min-w-0">
+					<div class="min-w-0 max-xl:order-2">
 						<TimeGrid {columns} {handlers} {axis} {selectedId} bind:dragging editable={canWrite} />
 					</div>
 				</div>
@@ -533,6 +575,17 @@
 			appointments={model.day}
 		/>
 	</div>
+	{#if canWrite}
+		<Button
+			size="icon"
+			class="fixed end-4 z-20 size-14 rounded-full shadow-lg md:hidden print:hidden"
+			style="bottom: calc(4.5rem + env(safe-area-inset-bottom))"
+			aria-label={workspace.t('ui.ws.spitex.new_visit')}
+			onclick={() => createVisit()}
+		>
+			<Plus class="size-6" />
+		</Button>
+	{/if}
 </ModuleGate>
 <ContactFormSheet bind:this={clientSheet} onSaved={planFirstVisit} />
 <ConfirmDialog bind:request={confirm} />
