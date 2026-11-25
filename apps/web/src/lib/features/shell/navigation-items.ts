@@ -8,6 +8,7 @@ import FolderOpen from '@lucide/svelte/icons/folder-open';
 import Wallet from '@lucide/svelte/icons/wallet';
 import HeartPulse from '@lucide/svelte/icons/heart-pulse';
 import House from '@lucide/svelte/icons/house';
+import ClipboardList from '@lucide/svelte/icons/clipboard-list';
 import History from '@lucide/svelte/icons/history';
 import Settings from '@lucide/svelte/icons/settings';
 import type { ModuleKey, Permission } from '@clinks/domain/types';
@@ -87,6 +88,13 @@ export const navigationGroups: NavigationGroup[] = [
 				module: 'spitex',
 				permission: 'spitex.read',
 				shortcut: 's',
+			},
+			{
+				path: '/visits',
+				label: 'ui.ws.visits.title',
+				icon: ClipboardList,
+				module: 'spitex',
+				permission: 'spitex.own.read',
 			},
 		],
 	},
