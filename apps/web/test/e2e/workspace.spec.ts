@@ -434,3 +434,20 @@ test('suggests existing tags and keeps a contact’s tags a set', async ({ page 
 	await field.press('Escape');
 	await expect(section.getByRole('button', { name: /^Schlagwörter/ })).toContainText('4');
 });
+
+test('adds a client from the open visits and plans their first visit', async ({ page }) => {
+	await signIn(page);
+	await page.getByRole('button', { name: 'Arbeitsbereich' }).click();
+	await page.getByRole('menuitem', { name: 'Stille Spitex Seeland' }).click();
+	await page.goto('/#/spitex');
+	const add = page.getByRole('button', { name: 'Neue:r Klient:in' }).last();
+	await expect(add).toHaveCSS('opacity', '0');
+	await page.getByText('Offene Einsätze', { exact: true }).first().hover();
+	await expect(add).toHaveCSS('opacity', '1');
+	await add.click();
+	await page.getByLabel('Vorname').fill('Rosa');
+	await page.getByLabel('Nachname').fill('Planbar');
+	await page.getByRole('button', { name: 'Speichern' }).click();
+	const visit = page.getByRole('dialog', { name: 'Neuer Termin' });
+	await expect(visit.getByLabel('Titel')).toHaveValue('Rosa Planbar');
+});
