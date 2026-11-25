@@ -62,6 +62,13 @@ export function monthGrid(value: CalendarDate): CalendarDate[] {
 	return weekDays(startOfWeek(startOfMonth(value)), 42);
 }
 
+/** ISO 8601 week number: week 1 holds the year's first Thursday. */
+export function isoWeek(value: CalendarDate): number {
+	const thursday = fromCalendarDate(addDays(startOfWeek(value), 3));
+	const firstThursday = fromCalendarDate(addDays(startOfWeek(`${thursday.getFullYear()}-01-04`), 3));
+	return Math.round((thursday.getTime() - firstThursday.getTime()) / (7 * 86_400_000)) + 1;
+}
+
 export function isoWeekday(value: CalendarDate): number {
 	return ((fromCalendarDate(value).getDay() + 6) % 7) + 1;
 }

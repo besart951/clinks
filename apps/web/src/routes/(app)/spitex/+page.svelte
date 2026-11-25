@@ -21,6 +21,7 @@
 		type TimeAxis,
 	} from '#lib/components/calendar/TimeGrid.svelte';
 	import AxisToggle from '#lib/components/calendar/AxisToggle.svelte';
+	import DateJump from '#lib/components/calendar/DateJump.svelte';
 	import Grip from '@lucide/svelte/icons/grip-vertical';
 	import Users from '@lucide/svelte/icons/users';
 	import { personBadge } from '@clinks/ui/kit/avatar';
@@ -201,6 +202,7 @@
 		>
 			<ChevronRight class="size-4" />
 		</Button>
+		<DateJump value={model.date} units={['day', 'week']} onpick={(_unit, date) => model.setDate(date)} />
 		<h2 class="font-semibold capitalize" aria-live="polite">
 			{workspace.i18n.format(model.date, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
 		</h2>
