@@ -5029,6 +5029,10 @@
       "ui.ws.calendar.week_of": {
         "de-CH": "KW {week}, ab {from}",
         "en-US": "Week {week}, from {from}"
+      },
+      "ui.ws.maps.open": {
+        "de-CH": "«{place}» in Google Maps öffnen (neuer Tab)",
+        "en-US": "Open “{place}” in Google Maps (new tab)"
       }
     }
   }

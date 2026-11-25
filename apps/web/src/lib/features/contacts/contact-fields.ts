@@ -30,6 +30,7 @@ export function addressField(address: Address, text: FieldText): InlineFieldSpec
 		parts,
 		value: groupValue(parts),
 		display: formatAddress(address),
+		place: formatAddress(address) || undefined,
 		validate: (value) => (/^(\d{4,5})?$/u.test(readAddress(value).zip) ? null : text.t('error.ws.invalid_zip')),
 	};
 }

@@ -232,6 +232,12 @@ test('edits master data in place and collapses sections', async ({ page }) => {
 	await page.keyboard.press('Enter');
 	await expect(page.getByRole('button', { name: 'Bahnhofstrasse 57, 3255 Rapperswil BE' })).toBeVisible();
 	await expect(page.getByText('Adresse gespeichert')).toBeVisible();
+	await expect(
+		page.getByRole('link', { name: '«Bahnhofstrasse 57, 3255 Rapperswil BE» in Google Maps öffnen (neuer Tab)' }),
+	).toHaveAttribute(
+		'href',
+		'https://www.google.com/maps/search/?api=1&query=Bahnhofstrasse%2057%2C%203255%20Rapperswil%20BE',
+	);
 
 	// Escape restores the value without saving.
 	await page.getByRole('button', { name: 'Direkt', exact: true }).click();
@@ -330,6 +336,7 @@ test('shows an info card when hovering an appointment and hides it on Escape', a
 	await expect(card).toBeVisible();
 	await expect(card.getByRole('term')).toContainText(['Art', 'Zuständig']);
 	await expect(card).toContainText('Klicken öffnet den Termin.');
+	await expect(card.getByRole('link', { name: /in Google Maps öffnen/ })).toHaveAttribute('target', '_blank');
 	// Described by the card while it is open, but the button keeps its own role: a click opens the appointment.
 	await expect(appointment).toHaveAttribute('aria-describedby', /^peek-/);
 	expect(await appointment.getAttribute('aria-expanded')).toBeNull();

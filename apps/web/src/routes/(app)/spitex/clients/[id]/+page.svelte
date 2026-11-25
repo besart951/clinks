@@ -1,4 +1,5 @@
 <script lang="ts">
+	import MapLink from '#lib/components/common/MapLink.svelte';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import KeyRound from '@lucide/svelte/icons/key-round';
@@ -107,6 +108,7 @@
 					{#if client.phone}<Button variant="ghost" size="icon-sm" href="tel:{client.phone}" aria-label={client.phone}>
 							<Phone class="size-4" />
 						</Button>{/if}
+					{#if formatAddress(client.address)}<MapLink place={formatAddress(client.address)} class="size-8" />{/if}
 					<Button variant="outline" size="sm" href={href(`/contacts/${client.id}`)}>
 						<UserRound class="size-4" />{workspace.t('ui.ws.physio.contact_card')}
 					</Button>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import MapLink from '#lib/components/common/MapLink.svelte';
 	import { streetLine } from '@clinks/domain/address';
 	import TriangleAlert from '@lucide/svelte/icons/triangle-alert';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
@@ -259,7 +260,10 @@
 				</div>
 			{/if}
 			<FormField id="a-location" label={workspace.t('ui.ws.calendar.location')}>
-				<Input id="a-location" bind:value={form.value.location} />
+				<div class="flex items-center gap-1">
+					<Input id="a-location" bind:value={form.value.location} />
+					{#if form.value.location.trim()}<MapLink place={form.value.location} class="size-8" />{/if}
+				</div>
 			</FormField>
 			<FormField id="a-notes" label={workspace.t('ui.ws.field.notes')}>
 				<Textarea id="a-notes" rows={3} bind:value={form.value.notes} />

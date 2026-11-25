@@ -32,6 +32,7 @@
 </script>
 
 <script lang="ts">
+	import MapLink from '#lib/components/common/MapLink.svelte';
 	import { layoutDay } from '@clinks/domain/layout';
 	import { atTime, minutesToTime, toCalendarDate } from '@clinks/domain/dates';
 	import { dayEndMinutes, dayStartMinutes } from '#lib/features/calendar/calendar.svelte';
@@ -325,7 +326,10 @@
 		{/if}
 		{#if appointment.location}
 			<dt class="text-muted-foreground">{workspace.t('ui.ws.calendar.location')}</dt>
-			<dd>{appointment.location}</dd>
+			<dd class="flex items-start gap-1">
+				<span class="min-w-0 pt-0.5">{appointment.location}</span>
+				<MapLink place={appointment.location} class="-my-0.5" />
+			</dd>
 		{/if}
 		{#if appointment.notes}
 			<dt class="text-muted-foreground">{workspace.t('ui.ws.calendar.peek.notes')}</dt>
