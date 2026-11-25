@@ -5033,6 +5033,26 @@
       "ui.ws.spitex.day_free": {
         "de-CH": "Noch nichts geplant",
         "en-US": "Nothing planned yet"
+      },
+      "ui.ws.roles.area_spitex_own": {
+        "de-CH": "Spitex: eigene Einsätze",
+        "en-US": "Spitex: own visits"
+      },
+      "ui.ws.roles.area_spitex_release": {
+        "de-CH": "Spitex: Plan freigeben",
+        "en-US": "Spitex: release the plan"
+      },
+      "ui.ws.activity.kind_plan": {
+        "de-CH": "Wochenplan",
+        "en-US": "Weekly plan"
+      },
+      "ui.ws.audit.plan.created": {
+        "de-CH": "hat einen Wochenplan der Spitex freigegeben",
+        "en-US": "released a weekly Spitex plan"
+      },
+      "ui.ws.audit.plan.deleted": {
+        "de-CH": "hat die Freigabe eines Wochenplans entzogen",
+        "en-US": "withdrew the release of a weekly plan"
       }
     }
   }

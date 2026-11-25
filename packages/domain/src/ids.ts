@@ -24,6 +24,7 @@ export type CampaignId = Id<'Campaign'>;
 export type PrescriptionId = Id<'Prescription'>;
 export type NoteId = Id<'Note'>;
 export type TimeEntryId = Id<'TimeEntry'>;
+export type WeekReleaseId = Id<'WeekRelease'>;
 export type NotificationId = Id<'Notification'>;
 export type AuditEntryId = Id<'AuditEntry'>;
 export type StorageSettingsId = Id<'StorageSettings'>;

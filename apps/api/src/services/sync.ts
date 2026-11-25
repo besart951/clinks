@@ -55,9 +55,11 @@ export class SyncService {
 				if (!role || !roleGrants(role, permission) || (permission && !modules.has(permission.split('.')[0])))
 					throw forbidden();
 				if (op.data?.tenant_id !== undefined && op.data.tenant_id !== tenantId) throw forbidden();
+				// Releasing touches every visit of the week, so it takes the whole plan in view.
+				if (table === 'spitex_week_releases' && !roleGrants(role, 'spitex.read')) throw forbidden();
 				const action = await this.#apply(
 					tx,
-					{ tenantId, userId: claims.sub },
+					{ tenantId, userId: claims.sub, planner: roleGrants(role, 'spitex.write') },
 					table,
 					op,
 					mode === 'import' ? deferred : null,
@@ -81,7 +83,7 @@ export class SyncService {
 
 	async #apply(
 		tx: Tx,
-		scope: { tenantId: string; userId: string },
+		scope: { tenantId: string; userId: string; planner: boolean },
 		table: SyncedTableName,
 		op: SyncWriteRequest['ops'][number],
 		deferred: { table: SyncedTableName; fields: Fields }[] | null,
@@ -90,7 +92,13 @@ export class SyncService {
 		const now = this.#services.now();
 		const clinical = table === 'physio_notes' || table === 'spitex_notes';
 		if (clinical && op.op !== 'PUT') throw forbidden();
+		// A release is given or withdrawn, never edited.
+		if (table === 'spitex_week_releases' && op.op === 'PATCH') throw forbidden();
 		if (op.op === 'DELETE') {
+			if (table === 'appointments' && !scope.planner) {
+				const visit = await tx.selectFrom(table).select('kind').where('id', '=', op.id).executeTakeFirst();
+				if (visit?.kind === 'spitex') throw forbidden();
+			}
 			const deleted = await tx.deleteFrom(table).where('id', '=', op.id).executeTakeFirst();
 			return deleted.numDeletedRows > 0n ? 'deleted' : null;
 		}
@@ -111,6 +119,13 @@ export class SyncService {
 			const saved = dbToFields(table, existing);
 			if (Object.entries(fields).some(([key, value]) => saved[key] !== value)) throw forbidden();
 			return null;
+		}
+		// Spitex visits belong to the plan: the calendar's write permission alone does not change them.
+		if (table === 'appointments' && !scope.planner && (merged.kind === 'spitex' || existing?.kind === 'spitex'))
+			throw forbidden();
+		if (table === 'spitex_week_releases') {
+			if (existing) return null;
+			if (fields.releasedBy !== userId) throw forbidden();
 		}
 		if (
 			(table.endsWith('_comments') || table.endsWith('_notes')) &&

@@ -136,9 +136,13 @@ export const workspaceSchemas = {
 		minutes: z.int().positive(),
 		description: text,
 	}),
+	spitex_week_releases: z.object({
+		weekStart: date.refine((value) => new Date(`${value}T00:00:00Z`).getUTCDay() === 1, { error: 'error.validation' }),
+		releasedBy: id,
+	}),
 	notifications: z.object({
 		userId: id,
-		kind: z.enum(['mention', 'assignment', 'invoice', 'appointment', 'system']),
+		kind: z.enum(['mention', 'assignment', 'invoice', 'appointment', 'plan', 'system']),
 		message: z.object({ key: text.startsWith('ui.ws.notification.'), params: z.record(text, text) }),
 		href: text.regex(/^\/(?![/\\])/),
 		read: z.boolean(),

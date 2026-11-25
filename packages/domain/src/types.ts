@@ -21,6 +21,7 @@ import type {
 	TemplateId,
 	TenantId,
 	TimeEntryId,
+	WeekReleaseId,
 	UserId,
 } from './ids.ts';
 
@@ -127,6 +128,10 @@ export const permissions = [
 	'physio.write',
 	'spitex.read',
 	'spitex.write',
+	/** Only the caller's own visits, and only in weeks that are released. `spitex.read` includes it. */
+	'spitex.own.read',
+	/** Release a week's plan to the staff, and withdraw it again. */
+	'spitex.release',
 	'team.manage',
 	'roles.manage',
 	'billing.manage',
@@ -396,7 +401,17 @@ export interface TimeEntry extends TenantRecord<TimeEntryId> {
 	description: string;
 }
 
-export type NotificationKind = 'mention' | 'assignment' | 'invoice' | 'appointment' | 'system';
+/**
+ * A released week of the Spitex plan: while the record exists, staff see their own visits of that week.
+ * `createdAt` is when it was released.
+ */
+export interface WeekRelease extends TenantRecord<WeekReleaseId> {
+	/** The Monday of the week. */
+	weekStart: CalendarDate;
+	releasedBy: UserId;
+}
+
+export type NotificationKind = 'mention' | 'assignment' | 'invoice' | 'appointment' | 'plan' | 'system';
 
 export interface AppNotification extends TenantRecord<NotificationId> {
 	userId: UserId;
@@ -422,6 +437,7 @@ export type AuditTargetKind =
 	| 'tenant'
 	| 'note'
 	| 'prescription'
+	| 'plan'
 	| 'session';
 
 export interface AuditEntry extends TenantRecord<AuditEntryId> {

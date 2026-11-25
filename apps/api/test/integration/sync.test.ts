@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { sql } from 'kysely';
-import { serverColumns, syncedTables } from '@clinks/sync-schema/tables';
+import { serverColumns, serverOnlyColumns, syncedTables, type SyncedTableName } from '@clinks/sync-schema/tables';
 import { afterAll, beforeAll, describe, it } from 'vitest';
 import { uuid } from '../../src/crypto.ts';
 import { password, startApi, type Api } from './harness.ts';
@@ -45,6 +45,7 @@ describe('sync schema', () => {
 				'id',
 				...serverColumns.map((column) => column.column),
 				...definition.columns.map((column) => column.column),
+				...(serverOnlyColumns[table as SyncedTableName] ?? []),
 			];
 			assert.deepEqual(rows.map((row) => row.columnName).sort(), expected.sort(), table);
 		}
