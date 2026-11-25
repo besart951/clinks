@@ -84,6 +84,7 @@
 			model.assign(appointment, assigneeId ?? null, assigneeId === null ? null : minutes),
 		resize: (appointment, times) => model.retime(appointment, times),
 		color: (appointment) => people.get(appointment.assigneeId)?.avatarColor ?? '#a1a1aa',
+		assignee: (appointment) => people.get(appointment.assigneeId)?.name ?? null,
 		subtitle: (appointment) => (appointment.service ? workspace.t(`ui.ws.spitex.service.${appointment.service}`) : ''),
 	};
 

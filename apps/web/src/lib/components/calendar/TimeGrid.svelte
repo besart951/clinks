@@ -19,6 +19,8 @@
 		/** New start and end after dragging the top or bottom edge of an appointment. */
 		resize(appointment: Appointment, times: { start: string; end: string }): void;
 		color(appointment: Appointment): string;
+		/** Name of the person the appointment is assigned to, for the info card on hover. */
+		assignee(appointment: Appointment): string | null;
 		subtitle(appointment: Appointment): string;
 	}
 
@@ -27,9 +29,10 @@
 
 <script lang="ts">
 	import { layoutDay } from '@clinks/domain/layout';
-	import { atTime, minutesToTime } from '@clinks/domain/dates';
+	import { atTime, minutesToTime, toCalendarDate } from '@clinks/domain/dates';
 	import { dayEndMinutes, dayStartMinutes } from '#lib/features/calendar/calendar.svelte';
 	import { useWorkspace } from '#lib/workspace.svelte';
+	import * as HoverCard from '@clinks/ui/components/ui/hover-card';
 
 	let {
 		columns,
@@ -84,6 +87,46 @@
 		(_, index) => dayStartMinutes / 60 + index,
 	);
 	let hover = $state<{ key: string; minutes: number } | null>(null);
+	/** The appointment whose info card is open; none while dragging or resizing. */
+	let peek = $state<string | null>(null);
+
+	function setPeek(id: string, open: boolean) {
+		if (open && (dragging || resizing)) return;
+		if (open) peek = id;
+		else if (peek === id) peek = null;
+	}
+
+	/**
+	 * The hover card's trigger props minus its button semantics: the appointment opens its sheet on click, so it
+	 * must not announce a popup or an expanded state. The card is described as a tooltip instead.
+	 */
+	function cardEvents(props: Record<string, unknown>) {
+		const {
+			role: _role,
+			'aria-haspopup': _popup,
+			'aria-expanded': _expanded,
+			'aria-controls': _controls,
+			...rest
+		} = props;
+		return rest;
+	}
+
+	/** «Behandlung», or «Behandlung · Erledigt» once it is no longer just planned. */
+	function kindLabel(appointment: Appointment) {
+		const kind = workspace.t(`ui.ws.calendar.kind_${appointment.kind}`);
+		return appointment.status === 'planned'
+			? kind
+			: `${kind} · ${workspace.t(`ui.ws.appointment.status.${appointment.status}`)}`;
+	}
+
+	function serviceLabel(appointment: Appointment) {
+		if (!appointment.service) return null;
+		return workspace.t(
+			appointment.kind === 'physio'
+				? (`ui.ws.physio.service.${appointment.service}` as const)
+				: (`ui.ws.spitex.service.${appointment.service}` as const),
+		);
+	}
 	const now = new Date();
 	const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
@@ -143,6 +186,7 @@
 		const element = handle.closest<HTMLElement>('[data-grid-column]');
 		if (!element) return;
 		handle.setPointerCapture(event.pointerId);
+		peek = null;
 		resize = { appointment, column, edge, element, pointerId: event.pointerId };
 		resizing = { id: appointment.id, start: minutesOf(appointment.start), end: minutesOf(appointment.end) };
 	}
@@ -219,6 +263,47 @@
 	onkeydown={(event) => event.key === 'Escape' && resize && endResize(null, true)}
 />
 
+{#snippet card(appointment: Appointment, color: string)}
+	{@const minutes = Math.round((new Date(appointment.end).getTime() - new Date(appointment.start).getTime()) / 60000)}
+	{@const service = serviceLabel(appointment)}
+	<div class="flex items-start gap-2">
+		<span class="mt-1.5 size-2.5 shrink-0 rounded-full" style:background-color={color}></span>
+		<div class="min-w-0">
+			<p class="leading-snug font-medium {appointment.status === 'cancelled' ? 'line-through' : ''}">
+				{appointment.title}
+			</p>
+			<p class="text-muted-foreground text-xs tabular-nums">
+				{workspace.i18n.format(toCalendarDate(appointment.start), { weekday: 'short', day: 'numeric', month: 'short' })} ·
+				{workspace.i18n.time(appointment.start)}–{workspace.i18n.time(appointment.end)} ·
+				{workspace.t('ui.ws.calendar.peek.duration', { minutes })}
+			</p>
+		</div>
+	</div>
+	<dl class="mt-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
+		<dt class="text-muted-foreground">{workspace.t('ui.ws.calendar.kind')}</dt>
+		<dd>{kindLabel(appointment)}</dd>
+		<dt class="text-muted-foreground">{workspace.t('ui.ws.calendar.assignee')}</dt>
+		<dd>{handlers.assignee(appointment) ?? workspace.t('ui.ws.calendar.open')}</dd>
+		{#if service}
+			<dt class="text-muted-foreground">{workspace.t('ui.ws.calendar.service')}</dt>
+			<dd>{service}</dd>
+		{/if}
+		{#if appointment.arrivalWindow}
+			<dt class="text-muted-foreground">{workspace.t('ui.ws.calendar.peek.arrival')}</dt>
+			<dd class="tabular-nums">{appointment.arrivalWindow.from}–{appointment.arrivalWindow.to}</dd>
+		{/if}
+		{#if appointment.location}
+			<dt class="text-muted-foreground">{workspace.t('ui.ws.calendar.location')}</dt>
+			<dd>{appointment.location}</dd>
+		{/if}
+		{#if appointment.notes}
+			<dt class="text-muted-foreground">{workspace.t('ui.ws.calendar.peek.notes')}</dt>
+			<dd class="line-clamp-3">{appointment.notes}</dd>
+		{/if}
+	</dl>
+	<p class="text-muted-foreground mt-3 border-t pt-2 text-xs">{workspace.t('ui.ws.calendar.peek.open_hint')}</p>
+{/snippet}
+
 {#snippet track(column: GridColumn)}
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<div
@@ -268,60 +353,86 @@
 				item.lane,
 				item.lanes,
 			)}
-			<button
-				type="button"
-				draggable={editable && !live}
-				ondragstart={(event) => {
-					dragging = appointment;
-					event.dataTransfer?.setData('text/plain', appointment.id);
-				}}
-				ondragend={() => {
-					dragging = null;
-					hover = null;
-				}}
-				onclick={() => !swallowClick && handlers.open(appointment)}
-				onkeydown={(event) => onAppointmentKey(event, appointment, column)}
-				aria-keyshortcuts={editable
-					? `Alt+${earlierKey} Alt+${laterKey} Alt+Shift+${earlierKey} Alt+Shift+${laterKey}`
-					: undefined}
-				class="group/appointment absolute z-[3] overflow-hidden rounded-md px-1.5 py-0.5 text-left text-[11px] leading-tight shadow-xs transition-opacity hover:z-[6] hover:shadow-md focus-visible:z-[6] {horizontal
-					? 'border-t-[3px]'
-					: 'border-l-[3px]'} {appointment.status === 'cancelled'
-					? 'line-through opacity-50'
-					: ''} {appointment.assigneeId === null ? 'border-dashed' : ''} {dragging?.id === appointment.id
-					? 'opacity-40'
-					: ''} {live ? 'z-[7] shadow-md ring-2 ring-[var(--ring)]' : ''}"
-				style:top={box.top}
-				style:left={box.left}
-				style:width={box.width}
-				style:height={box.height}
-				style:border-color={color}
-				style:background-color="color-mix(in oklab, {color} 14%, var(--background))"
-				aria-label="{workspace.i18n.time(appointment.start)}–{workspace.i18n.time(appointment.end)} {appointment.title}"
+			<HoverCard.Root
+				bind:open={() => peek === appointment.id, (open) => setPeek(appointment.id, open)}
+				openDelay={500}
+				closeDelay={100}
 			>
-				<span class="block truncate font-medium">{appointment.title}</span>
-				{#if live}
-					<span class="block truncate font-medium tabular-nums">{label(live.start)}–{label(live.end)}</span>
-				{:else if horizontal || item.height >= 30}<span class="text-muted-foreground block truncate">
-						{workspace.i18n.time(appointment.start)}–{workspace.i18n.time(appointment.end)}
-						{handlers.subtitle(appointment)}
-					</span>{/if}
-				{#if editable && appointment.status !== 'cancelled'}
-					{#each ['start', 'end'] as const as edge (edge)}
-						<span
-							aria-hidden="true"
-							class="handle absolute flex touch-none items-center justify-center opacity-0 group-hover/appointment:opacity-100 group-focus-visible/appointment:opacity-100 [@media(hover:none)]:opacity-100 {horizontal
-								? `inset-y-0 w-2 cursor-ew-resize ${edge === 'start' ? 'left-0' : 'right-0'}`
-								: `inset-x-0 h-2 cursor-ns-resize ${edge === 'start' ? 'top-0' : 'bottom-0'}`} {live
-								? 'opacity-100'
-								: ''}"
-							onpointerdown={(event) => startResize(event, appointment, column, edge)}
+				<HoverCard.Trigger>
+					{#snippet child({ props })}
+						<button
+							{...cardEvents(props)}
+							aria-describedby={peek === appointment.id ? `peek-${appointment.id}` : undefined}
+							type="button"
+							draggable={editable && !live}
+							ondragstart={(event) => {
+								peek = null;
+								dragging = appointment;
+								event.dataTransfer?.setData('text/plain', appointment.id);
+							}}
+							ondragend={() => {
+								dragging = null;
+								hover = null;
+							}}
+							onclick={() => {
+								peek = null;
+								if (!swallowClick) handlers.open(appointment);
+							}}
+							onkeydown={(event) => onAppointmentKey(event, appointment, column)}
+							aria-keyshortcuts={editable
+								? `Alt+${earlierKey} Alt+${laterKey} Alt+Shift+${earlierKey} Alt+Shift+${laterKey}`
+								: undefined}
+							class="group/appointment absolute z-[3] overflow-hidden rounded-md px-1.5 py-0.5 text-left text-[11px] leading-tight shadow-xs transition-opacity hover:z-[6] hover:shadow-md focus-visible:z-[6] {horizontal
+								? 'border-t-[3px]'
+								: 'border-l-[3px]'} {appointment.status === 'cancelled'
+								? 'line-through opacity-50'
+								: ''} {appointment.assigneeId === null ? 'border-dashed' : ''} {dragging?.id === appointment.id
+								? 'opacity-40'
+								: ''} {live ? 'z-[7] shadow-md ring-2 ring-[var(--ring)]' : ''}"
+							style:top={box.top}
+							style:left={box.left}
+							style:width={box.width}
+							style:height={box.height}
+							style:border-color={color}
+							style:background-color="color-mix(in oklab, {color} 14%, var(--background))"
+							aria-label="{workspace.i18n.time(appointment.start)}–{workspace.i18n.time(
+								appointment.end,
+							)} {appointment.title}"
 						>
-							<span class="rounded-full bg-current opacity-40 {horizontal ? 'h-6 w-1' : 'mt-0.5 h-1 w-6'}"></span>
-						</span>
-					{/each}
-				{/if}
-			</button>
+							<span class="block truncate font-medium">{appointment.title}</span>
+							{#if live}
+								<span class="block truncate font-medium tabular-nums">{label(live.start)}–{label(live.end)}</span>
+							{:else if horizontal || item.height >= 30}<span class="text-muted-foreground block truncate">
+									{workspace.i18n.time(appointment.start)}–{workspace.i18n.time(appointment.end)}
+									{handlers.subtitle(appointment)}
+								</span>{/if}
+							{#if editable && appointment.status !== 'cancelled'}
+								{#each ['start', 'end'] as const as edge (edge)}
+									<span
+										aria-hidden="true"
+										class="handle absolute flex touch-none items-center justify-center opacity-0 group-hover/appointment:opacity-100 group-focus-visible/appointment:opacity-100 [@media(hover:none)]:opacity-100 {horizontal
+											? `inset-y-0 w-2 cursor-ew-resize ${edge === 'start' ? 'left-0' : 'right-0'}`
+											: `inset-x-0 h-2 cursor-ns-resize ${edge === 'start' ? 'top-0' : 'bottom-0'}`} {live
+											? 'opacity-100'
+											: ''}"
+										onpointerdown={(event) => startResize(event, appointment, column, edge)}
+									>
+										<span class="rounded-full bg-current opacity-40 {horizontal ? 'h-6 w-1' : 'mt-0.5 h-1 w-6'}"></span>
+									</span>
+								{/each}
+							{/if}
+						</button>
+					{/snippet}
+				</HoverCard.Trigger>
+				<HoverCard.Content
+					id="peek-{appointment.id}"
+					role="tooltip"
+					side={horizontal ? 'bottom' : 'right'}
+					align="start"
+				>
+					{@render card(appointment, color)}
+				</HoverCard.Content>
+			</HoverCard.Root>
 		{/each}
 	</div>
 {/snippet}

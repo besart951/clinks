@@ -91,6 +91,7 @@
 			),
 		resize: (appointment, times) => model.retime(appointment, times),
 		color: (appointment) => people.get(appointment.assigneeId)?.avatarColor ?? '#a1a1aa',
+		assignee: (appointment) => people.get(appointment.assigneeId)?.name ?? null,
 		subtitle: (appointment) =>
 			people.get(appointment.assigneeId)?.name.split(' ')[0] ?? workspace.t('ui.ws.calendar.open'),
 	};

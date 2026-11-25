@@ -4885,6 +4885,22 @@
       "ui.ws.spitex.drag_visit": {
         "de-CH": "Ziehen, um «{title}» zuzuweisen",
         "en-US": "Drag to assign “{title}”"
+      },
+      "ui.ws.calendar.peek.duration": {
+        "de-CH": "{minutes} Min.",
+        "en-US": "{minutes} min"
+      },
+      "ui.ws.calendar.peek.arrival": {
+        "de-CH": "Ankunft",
+        "en-US": "Arrival"
+      },
+      "ui.ws.calendar.peek.notes": {
+        "de-CH": "Notiz",
+        "en-US": "Note"
+      },
+      "ui.ws.calendar.peek.open_hint": {
+        "de-CH": "Klicken öffnet den Termin.",
+        "en-US": "Click to open the appointment."
       }
     }
   }
