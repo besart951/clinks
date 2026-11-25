@@ -197,6 +197,7 @@ export interface Database {
 	physio_notes: SyncedRow;
 	spitex_notes: SyncedRow;
 	time_entries: SyncedRow;
+	spitex_week_releases: SyncedRow;
 	notifications: SyncedRow;
 	contacts: SyncedRow;
 	appointments: SyncedRow;

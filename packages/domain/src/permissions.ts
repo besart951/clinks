@@ -11,7 +11,11 @@ export const userPermissions: readonly Permission[] = permissions.filter(
 export function permissionAreas(): { area: string; read: Permission | null; write: Permission | null }[] {
 	const areas = new Map<string, { read: Permission | null; write: Permission | null }>();
 	for (const permission of permissions) {
-		const [area, action] = permission.split('.');
+		// `spitex.own.read` → area «spitex_own»; a permission that is its own right (`spitex.release`) is its own area.
+		const parts = permission.split('.');
+		const action = parts.at(-1)!;
+		const grouped = action === 'read' || action === 'write' || action === 'manage';
+		const area = (grouped ? parts.slice(0, -1) : parts).join('_');
 		const entry = areas.get(area) ?? { read: null, write: null };
 		if (action === 'read') entry.read = permission;
 		else entry.write = permission;
@@ -23,6 +27,8 @@ export function permissionAreas(): { area: string; read: Permission | null; writ
 export function roleGrants(role: Pick<Role, 'permissions' | 'kind'> | null, permission: Permission | null): boolean {
 	if (!role) return false;
 	if (permission === null || role.kind === 'administrator') return true;
+	// Who sees the whole plan also sees their own visits.
+	if (permission === 'spitex.own.read' && role.permissions.includes('spitex.read')) return true;
 	return role.permissions.includes(permission);
 }
 

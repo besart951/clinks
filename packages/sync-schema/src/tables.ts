@@ -237,6 +237,15 @@ export const syncedTables = {
 			text('description', 'description'),
 		],
 	},
+	spitex_week_releases: {
+		read: 'spitex.own.read',
+		write: 'spitex.release',
+		audit: 'plan',
+		columns: [
+			{ column: 'week_start', field: 'weekStart', type: 'date' },
+			{ column: 'released_by', field: 'releasedBy', type: 'uuid', references: 'users' },
+		],
+	},
 	notifications: {
 		read: null,
 		write: null,
@@ -262,6 +271,12 @@ export const serverColumns = [
 	{ column: 'created_at', field: 'createdAt', type: 'timestamp' },
 	{ column: 'updated_at', field: 'updatedAt', type: 'timestamp' },
 ] as const satisfies readonly Column[];
+
+/** Columns only the server keeps: they are neither uploaded nor part of the client schema. */
+export const serverOnlyColumns: { readonly [table in SyncedTableName]?: readonly string[] } = {
+	// Set by triggers from the week's release; sync streams and row-level security read it.
+	appointments: ['published'],
+};
 
 export function isSyncedTable(name: string): name is SyncedTableName {
 	return Object.hasOwn(syncedTables, name);

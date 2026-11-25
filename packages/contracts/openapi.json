@@ -1496,6 +1496,8 @@
 																"physio.write",
 																"spitex.read",
 																"spitex.write",
+																"spitex.own.read",
+																"spitex.release",
 																"team.manage",
 																"roles.manage",
 																"billing.manage",
@@ -4023,6 +4025,8 @@
 																"physio.write",
 																"spitex.read",
 																"spitex.write",
+																"spitex.own.read",
+																"spitex.release",
 																"team.manage",
 																"roles.manage",
 																"billing.manage",
@@ -4299,6 +4303,8 @@
 												"physio.write",
 												"spitex.read",
 												"spitex.write",
+												"spitex.own.read",
+												"spitex.release",
 												"team.manage",
 												"roles.manage",
 												"billing.manage",
@@ -4306,7 +4312,7 @@
 												"audit.read"
 											]
 										},
-										"maxItems": 21
+										"maxItems": 23
 									}
 								},
 								"required": [

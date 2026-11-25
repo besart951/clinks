@@ -5,6 +5,7 @@ const sharedTableNames = {
 	physio_notes: 'notes',
 	spitex_notes: 'notes',
 	time_entries: 'timeEntries',
+	spitex_week_releases: 'weekReleases',
 	contact_comments: 'comments',
 	task_comments: 'comments',
 	invoice_comments: 'comments',
