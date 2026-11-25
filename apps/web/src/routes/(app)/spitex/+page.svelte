@@ -15,6 +15,7 @@
 	import AsyncView from '#lib/components/common/AsyncView.svelte';
 	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
 	import SpitexNav from '#lib/components/spitex/SpitexNav.svelte';
+	import WeekRelease from '#lib/components/spitex/WeekRelease.svelte';
 	import TimeGrid, {
 		type GridColumn,
 		type GridHandlers,
@@ -22,12 +23,11 @@
 	} from '#lib/components/calendar/TimeGrid.svelte';
 	import AxisToggle from '#lib/components/calendar/AxisToggle.svelte';
 	import DateJump from '#lib/components/calendar/DateJump.svelte';
+	import PeriodNav from '#lib/components/calendar/PeriodNav.svelte';
+	import FloatingAddButton from '#lib/components/common/FloatingAddButton.svelte';
 	import Grip from '@lucide/svelte/icons/grip-vertical';
 	import Users from '@lucide/svelte/icons/users';
-	import EyeOff from '@lucide/svelte/icons/eye-off';
-	import Send from '@lucide/svelte/icons/send';
 	import LocateFixed from '@lucide/svelte/icons/locate-fixed';
-	import ConfirmDialog, { type ConfirmRequest } from '#lib/components/common/ConfirmDialog.svelte';
 	import { personBadge } from '@clinks/ui/kit/avatar';
 	import AppointmentSheet from '#lib/components/calendar/AppointmentSheet.svelte';
 	import ContactFormSheet from '#lib/components/contacts/ContactFormSheet.svelte';
@@ -36,7 +36,7 @@
 	import { contactName } from '#lib/data/workspace-api';
 	import { PlanningModel } from '#lib/features/spitex/planning.svelte';
 	import { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
-	import { addDays, isoWeek, minutesToTime, toCalendarDate, today } from '@clinks/domain/dates';
+	import { addDays, minutesToTime, today } from '@clinks/domain/dates';
 	import { firstFreeStart } from '@clinks/domain/scheduling';
 	import type { Appointment, Contact } from '@clinks/domain/types';
 	import type { UserId } from '@clinks/domain/ids';
@@ -49,43 +49,6 @@
 	const canWrite = $derived(workspace.session.can('spitex.write') && workspace.session.can('calendar.write'));
 	const canAddClient = $derived(canWrite && workspace.session.can('contacts.write'));
 	const canRelease = $derived(workspace.session.can('spitex.release'));
-	const week = $derived(isoWeek(model.date));
-	let confirm = $state<ConfirmRequest | null>(null);
-	const releaseHint = $derived(
-		model.release
-			? workspace.t('ui.ws.spitex.release.status_released_hint', {
-					date: workspace.i18n.format(toCalendarDate(model.release.createdAt), { day: 'numeric', month: 'long' }),
-					name: people.get(model.release.releasedBy)?.name ?? '–',
-				})
-			: workspace.t('ui.ws.spitex.release.status_draft_hint'),
-	);
-
-	function askRelease() {
-		const { visits, people: count, open } = model.weekSummary;
-		confirm = {
-			title: workspace.t('ui.ws.spitex.release.release_title', { week }),
-			description: workspace.t(
-				open > 0 ? 'ui.ws.spitex.release.release_text_open' : 'ui.ws.spitex.release.release_text',
-				{
-					visits,
-					people: count,
-					open,
-				},
-			),
-			confirmLabel: workspace.t('ui.ws.spitex.release.release'),
-			onConfirm: () => model.releaseWeek(week),
-		};
-	}
-
-	function askWithdraw() {
-		confirm = {
-			title: workspace.t('ui.ws.spitex.release.withdraw_title', { week }),
-			description: workspace.t('ui.ws.spitex.release.withdraw_text'),
-			confirmLabel: workspace.t('ui.ws.spitex.release.withdraw'),
-			destructive: true,
-			onConfirm: () => model.withdrawRelease(week),
-		};
-	}
 	let clientSheet: ContactFormSheet;
 	const staff = $derived(people.people);
 	/** Staff shown as columns; the menu «Mitarbeitende» hides the others. */
@@ -238,49 +201,19 @@
 					<Plus class="size-4" />{workspace.t('ui.ws.spitex.new_visit')}
 				</Button>
 			{/if}
-			{#if canRelease && model.resource.data}
-				{#if model.release}
-					<Button variant="outline" onclick={askWithdraw}>
-						<EyeOff class="size-4" />{workspace.t('ui.ws.spitex.release.withdraw')}
-					</Button>
-				{:else}
-					<Button onclick={askRelease}>
-						<Send class="size-4" />{workspace.t('ui.ws.spitex.release.release')}
-					</Button>
-				{/if}
-			{/if}
+			<WeekRelease {model} {people} part="actions" />
 		{/snippet}
 	</PageHeader>
 	<SpitexNav />
 
-	<!-- Phones: previous · the date to tap · next, like the calendar. -->
-	<div class="mb-3 flex items-center gap-1 md:hidden">
-		<Button
-			variant="outline"
-			size="icon"
-			class="size-11 shrink-0"
-			onclick={() => model.setDate(addDays(model.date, -1))}
-			aria-label={workspace.t('ui.ws.calendar.previous')}
-		>
-			<ChevronLeft class="size-5" />
-		</Button>
-		<div class="flex min-w-0 flex-1 justify-center">
-			<DateJump
-				value={model.date}
-				units={['day', 'week']}
-				label={workspace.i18n.format(model.date, { weekday: 'short', day: 'numeric', month: 'long' })}
-				onpick={(_unit, date) => model.setDate(date)}
-			/>
-		</div>
-		<Button
-			variant="outline"
-			size="icon"
-			class="size-11 shrink-0"
-			onclick={() => model.setDate(addDays(model.date, 1))}
-			aria-label={workspace.t('ui.ws.calendar.next')}
-		>
-			<ChevronRight class="size-5" />
-		</Button>
+	<div class="mb-3 md:hidden">
+		<PeriodNav
+			value={model.date}
+			label={workspace.i18n.format(model.date, { weekday: 'short', day: 'numeric', month: 'long' })}
+			units={['day', 'week']}
+			onstep={(direction) => model.setDate(addDays(model.date, direction))}
+			onpick={(_unit, date) => model.setDate(date)}
+		/>
 	</div>
 
 	<div class="mb-4 flex flex-wrap items-center gap-2">
@@ -316,23 +249,7 @@
 		<h2 class="sr-only font-semibold capitalize md:not-sr-only" aria-live="polite">
 			{workspace.i18n.format(model.date, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
 		</h2>
-		{#if model.resource.data}
-			<!-- Text and icon carry the state, not the colour alone; a change is announced. -->
-			<span
-				role="status"
-				class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium {model.release
-					? 'border-emerald-600/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300'
-					: 'border-amber-600/30 bg-amber-500/10 text-amber-800 dark:text-amber-300'}"
-				title={releaseHint}
-			>
-				{#if model.release}<CircleCheck class="size-3.5" />{:else}<EyeOff class="size-3.5" />{/if}
-				{workspace.t('ui.ws.spitex.release.week', { week })} ·
-				{workspace.t(model.release ? 'ui.ws.spitex.release.status_released' : 'ui.ws.spitex.release.status_draft')}
-				<span class="sr-only">
-					{releaseHint}
-				</span>
-			</span>
-		{/if}
+		<WeekRelease {model} {people} part="status" />
 		<div class="ms-auto flex items-center gap-2 print:hidden">
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>
@@ -576,16 +493,7 @@
 		/>
 	</div>
 	{#if canWrite}
-		<Button
-			size="icon"
-			class="fixed end-4 z-20 size-14 rounded-full shadow-lg md:hidden print:hidden"
-			style="bottom: calc(4.5rem + env(safe-area-inset-bottom))"
-			aria-label={workspace.t('ui.ws.spitex.new_visit')}
-			onclick={() => createVisit()}
-		>
-			<Plus class="size-6" />
-		</Button>
+		<FloatingAddButton label={workspace.t('ui.ws.spitex.new_visit')} onclick={() => createVisit()} />
 	{/if}
 </ModuleGate>
 <ContactFormSheet bind:this={clientSheet} onSaved={planFirstVisit} />
-<ConfirmDialog bind:request={confirm} />

@@ -1,9 +1,9 @@
-import { startOfWeek } from './dates.ts';
+import { startOfWeek, toCalendarDate } from './dates.ts';
 import type { UserId } from './ids.ts';
-import type { Appointment, CalendarDate, Contact, Timestamp, VisitClient, WeekRelease } from './types.ts';
+import type { Appointment, CalendarDate, Contact, MyVisits, Timestamp, VisitClient, WeekRelease } from './types.ts';
 
 /** The calendar date of a moment in a time zone, e.g. the tenant's, wherever the code runs. */
-export function calendarDateIn(value: Timestamp, timeZone: string): CalendarDate {
+function calendarDateIn(value: Timestamp, timeZone: string): CalendarDate {
 	// en-CA formats as YYYY-MM-DD.
 	return new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(
 		new Date(value),
@@ -38,6 +38,25 @@ export function ownReleasedVisits<T extends Pick<Appointment, 'kind' | 'assignee
 	return appointments
 		.filter((row) => row.kind === 'spitex' && row.assigneeId === userId && isReleased(releases, weekOf(row.start)))
 		.sort((left, right) => left.start.localeCompare(right.start));
+}
+
+/**
+ * A person's own plan out of what a device holds: their visits of released weeks, the clients of those visits
+ * and the releases. Weeks are counted in the device's time zone, like everything the app shows.
+ */
+export function myVisits(
+	data: { appointments: readonly Appointment[]; clients: readonly (Contact | VisitClient)[]; releases: WeekRelease[] },
+	userId: UserId,
+): MyVisits {
+	const visits = ownReleasedVisits(data.appointments, userId, data.releases, (start) =>
+		startOfWeek(toCalendarDate(start)),
+	);
+	const wanted = new Set(visits.map((visit) => visit.contactId));
+	return {
+		visits,
+		clients: data.clients.filter((client) => wanted.has(client.id)).map(visitClient),
+		releases: data.releases,
+	};
 }
 
 type Visit = Pick<Appointment, 'kind' | 'assigneeId' | 'start' | 'end' | 'status' | 'location' | 'contactId'>;

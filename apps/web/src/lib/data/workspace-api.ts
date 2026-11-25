@@ -1,19 +1,11 @@
 import type { UserId } from '@clinks/domain/ids';
-import type {
-	AppNotification,
-	CalendarDate,
-	Contact,
-	CommentTarget,
-	MyVisits,
-	NotificationKind,
-} from '@clinks/domain/types';
-import { isoWeek, startOfWeek, toCalendarDate } from '@clinks/domain/dates';
-import { newId } from '@clinks/domain/ids';
-import { changedVisitRecipients, isReleased, ownReleasedVisits, visitClient } from '@clinks/domain/spitex-release';
+import type { AppNotification, Contact, CommentTarget, MyVisits, NotificationKind } from '@clinks/domain/types';
+import { myVisits } from '@clinks/domain/spitex-release';
+import { MockPlanNotices } from './mock-plan-notices.ts';
 import type { Repository } from '@clinks/contracts/repository';
 import { workspaceSchemas } from '@clinks/contracts/workspace-schemas';
 import { syncedTables, type SyncedTableName } from '@clinks/sync-schema/tables';
-import { MockApiError, stamp, type WorkspaceCache, type Tables } from './database.ts';
+import { MockApiError, type WorkspaceCache, type Tables } from './database.ts';
 import { TenantRepository, type RequestContext, type RepositoryConfig } from './repository.ts';
 import type { SyncEngine } from '../sync/sync-engine.svelte.ts';
 import { SyncedRepository } from '../sync/synced-repository.ts';
@@ -51,115 +43,67 @@ export class WorkspaceApi {
 		this.#db = db;
 		this.#context = context;
 		this.#reads = engine ? new SyncedWorkspaceReads(engine, context) : null;
-		/**
-		 * The demo backend's stand-in for the server's plan notices (the API also mails them): the people concerned
-		 * hear about a release, its withdrawal and later changes, once while the notice is unread.
-		 */
-		function planNotice(userId: UserId, event: 'released' | 'withdrawn' | 'changed', weekStart: CalendarDate) {
-			const tenantId = context.tenantId();
-			if (!tenantId || userId === context.actorId()) return;
-			const key = `ui.ws.notification.plan_${event}`;
-			const href = `/visits?week=${weekStart}`;
-			const notifications = db.table('notifications');
-			if (
-				notifications.some((row) => row.userId === userId && !row.read && row.message.key === key && row.href === href)
-			)
-				return;
-			notifications.push(
-				stamp<AppNotification>({
-					id: newId(),
-					tenantId,
-					userId,
-					kind: 'plan',
-					message: { key, params: { week: String(isoWeek(weekStart)) } },
-					href,
-					read: false,
-				}),
-			);
-		}
+		const plan = new MockPlanNotices(db, context);
 		function repository<Name extends SyncedTableName>(
 			table: Name,
-			label?: (row: Tables[WorkspaceTable<Name>]) => string,
-			visible?: (row: Tables[WorkspaceTable<Name>]) => boolean,
-			after?: (before: Tables[WorkspaceTable<Name>] | null, after: Tables[WorkspaceTable<Name>] | null) => void,
+			options: {
+				label?: (row: Tables[WorkspaceTable<Name>]) => string;
+				visible?: (row: Tables[WorkspaceTable<Name>]) => boolean;
+				/** Demo backend only: runs inside the write, like a trigger on the server. */
+				after?: (before: Tables[WorkspaceTable<Name>] | null, after: Tables[WorkspaceTable<Name>] | null) => void;
+			} = {},
 		): Repository<Tables[WorkspaceTable<Name>]> {
+			const { label, visible, after } = options;
 			const { read, write, audit } = syncedTables[table];
 			const schema = workspaceSchemas[table];
 			if (engine) return new SyncedRepository(engine, context, { table, read, write, schema, visible });
-			const options: RepositoryConfig<Tables[WorkspaceTable<Name>]> = {
+			const config: RepositoryConfig<Tables[WorkspaceTable<Name>]> = {
 				table: workspaceTable(table),
 				read,
 				write,
 				schema,
 				visible,
 			};
-			if (audit && label) options.audit = { kind: audit, label };
-			if (after) options.after = { run: after, touches: ['notifications'] };
-			return new TenantRepository<WorkspaceTable<Name>>(db, context, options);
+			if (audit && label) config.audit = { kind: audit, label };
+			if (after) config.after = { run: after, touches: ['notifications'] };
+			return new TenantRepository<WorkspaceTable<Name>>(db, context, config);
 		}
-		this.contacts = repository('contacts', contactName);
+		this.contacts = repository('contacts', { label: contactName });
 		// Spitex visits are the plan: the calendar permission alone does not show them (see the sync streams).
-		this.appointments = repository(
-			'appointments',
-			(row) => row.title,
-			(row) => row.kind !== 'spitex' || context.can('spitex.read'),
-			(before, after) => {
-				const tenantId = context.tenantId();
-				const released = (start: string) =>
-					isReleased(
-						db.table('weekReleases').filter((row) => row.tenantId === tenantId),
-						startOfWeek(toCalendarDate(start)),
-					);
-				const weekStart = startOfWeek(toCalendarDate((after ?? before)!.start));
-				for (const userId of changedVisitRecipients(before, after, released)) planNotice(userId, 'changed', weekStart);
-			},
-		);
+		this.appointments = repository('appointments', {
+			label: (row) => row.title,
+			visible: (row) => row.kind !== 'spitex' || context.can('spitex.read'),
+			after: (before, after) => plan.visitChanged(before, after),
+		});
 		this.folders = repository('folders');
-		this.documents = repository('documents', (row) => row.name);
-		this.invoices = repository('invoices', (row) => row.number);
-		this.expenses = repository('expenses', (row) => row.description);
-		this.tasks = repository('tasks', (row) => row.title);
-		this.mails = repository('mails', (row) => row.subject);
+		this.documents = repository('documents', { label: (row) => row.name });
+		this.invoices = repository('invoices', { label: (row) => row.number });
+		this.expenses = repository('expenses', { label: (row) => row.description });
+		this.tasks = repository('tasks', { label: (row) => row.title });
+		this.mails = repository('mails', { label: (row) => row.subject });
 		this.templates = repository('templates');
-		this.campaigns = repository('campaigns', (row) => row.name);
-		this.prescriptions = repository('prescriptions', (row) => row.diagnosis);
-		this.physioNotes = repository(
-			'physio_notes',
-			(row) => row.date,
-			(row) => row.kind === 'physio',
-		);
-		this.spitexNotes = repository(
-			'spitex_notes',
-			(row) => row.date,
-			(row) => row.kind === 'spitex',
-		);
+		this.campaigns = repository('campaigns', { label: (row) => row.name });
+		this.prescriptions = repository('prescriptions', { label: (row) => row.diagnosis });
+		this.physioNotes = repository('physio_notes', {
+			label: (row) => row.date,
+			visible: (row) => row.kind === 'physio',
+		});
+		this.spitexNotes = repository('spitex_notes', {
+			label: (row) => row.date,
+			visible: (row) => row.kind === 'spitex',
+		});
 		this.timeEntries = repository('time_entries');
-		this.weekReleases = repository(
-			'spitex_week_releases',
-			(row) => row.weekStart,
-			undefined,
-			(before, after) => {
-				const release = (after ?? before)!;
-				const assignees = db
-					.table('appointments')
-					.filter(
-						(row) =>
-							row.tenantId === release.tenantId &&
-							row.kind === 'spitex' &&
-							row.status !== 'cancelled' &&
-							startOfWeek(toCalendarDate(row.start)) === release.weekStart,
-					)
-					.flatMap((row) => (row.assigneeId ? [row.assigneeId] : []));
-				for (const userId of new Set(assignees))
-					planNotice(userId, after ? 'released' : 'withdrawn', release.weekStart);
-			},
-		);
-		this.notifications = repository('notifications', undefined, (row) => row.userId === context.actorId());
+		this.weekReleases = repository('spitex_week_releases', {
+			label: (row) => row.weekStart,
+			after: (before, after) => plan.releaseChanged(before, after),
+		});
+		this.notifications = repository('notifications', { visible: (row) => row.userId === context.actorId() });
 		this.#comments = {
-			contact: repository('contact_comments', undefined, (row) => row.target.kind === 'contact'),
-			invoice: repository('invoice_comments', undefined, (row) => row.target.kind === 'invoice'),
-			task: repository('task_comments', undefined, (row) => row.target.kind === 'task'),
+			contact: repository('contact_comments', { visible: (row) => row.target.kind === 'contact' }),
+			invoice: repository('invoice_comments', { visible: (row) => row.target.kind === 'invoice' }),
+			task: repository('task_comments', { visible: (row) => row.target.kind === 'task' }),
 		};
+
 		const reads = this.#reads;
 		this.audit = reads
 			? { list: (where) => reads.activity(where) }
@@ -195,19 +139,15 @@ export class WorkspaceApi {
 			const actorId = this.#context.actorId();
 			if (!tenantId || !actorId || !this.#context.can('spitex.own.read'))
 				throw new MockApiError('unauthorized', this.#context.localize('error.unauthorized'));
-			const releases = this.#db.table('weekReleases').filter((row) => row.tenantId === tenantId);
-			const visits = ownReleasedVisits(
-				this.#db.table('appointments').filter((row) => row.tenantId === tenantId),
+			const own = <T extends { tenantId: string }>(rows: T[]) => rows.filter((row) => row.tenantId === tenantId);
+			return myVisits(
+				{
+					appointments: own(this.#db.table('appointments')),
+					clients: own(this.#db.table('contacts')),
+					releases: own(this.#db.table('weekReleases')),
+				},
 				actorId,
-				releases,
-				(start) => startOfWeek(toCalendarDate(start)),
 			);
-			const wanted = new Set(visits.map((visit) => visit.contactId));
-			const clients = this.#db
-				.table('contacts')
-				.filter((row) => row.tenantId === tenantId && wanted.has(row.id))
-				.map(visitClient);
-			return { visits, clients, releases };
 		});
 	}
 

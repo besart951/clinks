@@ -13,6 +13,7 @@
 	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
 	import { RolesModel } from '#lib/features/settings/settings.svelte';
 	import { permissionAreas, roleGrants } from '@clinks/domain/permissions';
+	import ChipChoice from '#lib/components/common/ChipChoice.svelte';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
@@ -41,21 +42,16 @@
 			{@const shown = roles.find((role) => role.id === phoneRole) ?? roles[0]}
 			<!-- Phones: one role at a time, its areas as a list; the matrix needs the width of a wide screen. -->
 			<div class="space-y-3 md:hidden">
-				<div class="flex gap-1 overflow-x-auto" role="group" aria-label={workspace.t('ui.ws.settings.roles')}>
-					{#each roles as role (role.id)}
-						<button
-							type="button"
-							class="flex min-h-9 shrink-0 items-center gap-1 rounded-full border px-3 text-xs font-medium {shown?.id ===
-							role.id
-								? 'border-foreground bg-foreground text-background'
-								: 'text-muted-foreground'}"
-							aria-pressed={shown?.id === role.id}
-							onclick={() => (phoneRole = role.id)}
-						>
-							{role.name}{#if role.kind !== 'custom'}<Lock class="size-3" aria-hidden="true" />{/if}
-						</button>
-					{/each}
-				</div>
+				<ChipChoice
+					items={roles.map((role) => ({ ...role, key: role.id }))}
+					selected={shown?.id ?? null}
+					label={workspace.t('ui.ws.settings.roles')}
+					onselect={(role) => (phoneRole = role.id)}
+				>
+					{#snippet chip(role)}
+						{role.name}{#if role.kind !== 'custom'}<Lock class="size-3" aria-hidden="true" />{/if}
+					{/snippet}
+				</ChipChoice>
 				{#if shown}
 					<Card.Root>
 						<Card.Header>

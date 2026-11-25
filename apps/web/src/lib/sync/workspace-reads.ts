@@ -1,13 +1,5 @@
-import type {
-	Appointment,
-	AuditEntry,
-	AuditTargetKind,
-	MyVisits,
-	VisitClient,
-	WeekRelease,
-} from '@clinks/domain/types';
-import { startOfWeek, toCalendarDate } from '@clinks/domain/dates';
-import { ownReleasedVisits } from '@clinks/domain/spitex-release';
+import type { Appointment, AuditEntry, AuditTargetKind, Contact, MyVisits, WeekRelease } from '@clinks/domain/types';
+import { myVisits } from '@clinks/domain/spitex-release';
 import { syncedTables, syncedTableNames } from '@clinks/sync-schema/tables';
 import { rowToRecord, type SqliteRow } from '@clinks/sync-schema/mapping';
 import { workspaceTable } from '../data/workspace-tables.ts';
@@ -93,34 +85,12 @@ export class SyncedWorkspaceReads {
 				[tenantId, actorId],
 			)
 		).map((row) => rowToRecord<Appointment>('appointments', row));
-		const visits = ownReleasedVisits(assigned, actorId, releases, (start) => startOfWeek(toCalendarDate(start)));
-		const wanted = new Set(visits.map((visit) => visit.contactId));
-		const columns = 'id, tenant_id, kind, first_name, last_name, company_name, phone, address';
-		const rows = await db.getAll<{
-			id: VisitClient['id'];
-			kind: VisitClient['kind'];
-			first_name: string;
-			last_name: string;
-			company_name: string;
-			phone: string;
-			address: string;
-		}>(
-			`SELECT ${columns} FROM visit_clients WHERE tenant_id = ? UNION SELECT ${columns} FROM contacts WHERE tenant_id = ?`,
-			[tenantId, tenantId],
-		);
-		const clients = rows
-			.filter((row) => wanted.has(row.id))
-			.map((row): VisitClient => ({
-				id: row.id,
-				tenantId,
-				kind: row.kind,
-				firstName: row.first_name,
-				lastName: row.last_name,
-				companyName: row.company_name,
-				phone: row.phone,
-				address: JSON.parse(row.address) as VisitClient['address'],
-			}));
-		return { visits, clients, releases };
+		// Staff have the reduced `visit_clients`, planners the full contacts; both map like a contact.
+		const clients = [
+			...(await db.getAll<SqliteRow>('SELECT * FROM visit_clients WHERE tenant_id = ?', [tenantId])),
+			...(await db.getAll<SqliteRow>('SELECT * FROM contacts WHERE tenant_id = ?', [tenantId])),
+		].map((row) => rowToRecord<Contact>('contacts', row));
+		return myVisits({ appointments: assigned, clients, releases }, actorId);
 	}
 	async people() {
 		const tenantId = this.#context.tenantId();

@@ -6,7 +6,8 @@ const remote = Boolean(process.env.VITE_API_URL);
 
 export default defineConfig({
 	testDir: 'test/e2e',
-	testMatch: remote ? 'remote.spec.ts' : 'workspace.spec.ts',
+	testMatch: '*.spec.ts',
+	testIgnore: remote ? ['workspace.spec.ts', 'mobile.spec.ts'] : 'remote.spec.ts',
 	timeout: 60_000,
 	use: {
 		baseURL: 'http://localhost:5176',

@@ -23,5 +23,3 @@ export function streetLine(address: Address): string {
 export function formatAddress(address: Address): string {
 	return [streetLine(address), `${address.zip} ${address.city}`.trim()].filter(Boolean).join(', ');
 }
-
-export const emptyAddress = (): Address => ({ street: '', houseNumber: '', zip: '', city: '' });

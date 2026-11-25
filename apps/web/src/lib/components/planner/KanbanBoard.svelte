@@ -2,6 +2,7 @@
 	import Plus from '@lucide/svelte/icons/plus';
 	import { Input } from '@clinks/ui/components/ui/input';
 	import TaskCard from './TaskCard.svelte';
+	import ChipChoice from '#lib/components/common/ChipChoice.svelte';
 	import { BoardDrag, flip, land, type DropTarget } from './board-drag.svelte';
 	import type { PlannerModel } from '#lib/features/planner/planner.svelte';
 	import type { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
@@ -95,7 +96,7 @@
 	function showColumn(index: number) {
 		board.scrollTo({ left: index * (columnWidth() + 12), behavior: 'smooth' });
 	}
-	let chips: HTMLElement;
+	let chips = $state<HTMLElement>();
 	function followScroll() {
 		const next = Math.round(board.scrollLeft / (columnWidth() + 12));
 		if (next === current) return;
@@ -109,26 +110,19 @@
 	}
 </script>
 
-<div
-	bind:this={chips}
-	class="mb-2 flex gap-1 overflow-x-auto md:hidden"
-	role="group"
-	aria-label={workspace.t('ui.ws.planner.columns')}
->
-	{#each model.columns as column, index (column.status)}
-		<button
-			type="button"
-			class="flex min-h-9 shrink-0 items-center gap-1.5 rounded-full border px-3 text-xs font-medium transition-colors {current ===
-			index
-				? 'border-foreground bg-foreground text-background'
-				: 'text-muted-foreground'}"
-			aria-pressed={current === index}
-			onclick={() => showColumn(index)}
-		>
+<div class="mb-2 md:hidden">
+	<ChipChoice
+		bind:ref={chips}
+		items={model.columns.map((column) => ({ ...column, key: column.status }))}
+		selected={model.columns[current]?.status ?? null}
+		label={workspace.t('ui.ws.planner.columns')}
+		onselect={(_column, index) => showColumn(index)}
+	>
+		{#snippet chip(column)}
 			{workspace.t(`ui.ws.task.status.${column.status}`)}
 			<span class="tabular-nums opacity-70">{column.tasks.length}</span>
-		</button>
-	{/each}
+		{/snippet}
+	</ChipChoice>
 </div>
 <div
 	bind:this={board}
