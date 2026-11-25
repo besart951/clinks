@@ -3126,10 +3126,6 @@
         "de-CH": "Für diesen Tag sind keine Einsätze offen.",
         "en-US": "No open visits for this day."
       },
-      "ui.ws.spitex.board_hint": {
-        "de-CH": "Ziehe Einsätze zwischen den Spalten. In «Offene Einsätze» abgelegt, wird die Zuweisung aufgehoben. Den oberen oder unteren Rand ziehen ändert die Zeit.",
-        "en-US": "Drag visits between columns. Dropped on “Open visits”, the assignment is removed. Drag the top or bottom edge to change the time."
-      },
       "ui.ws.spitex.week_load": {
         "de-CH": "Einsatzzeit pro Person und Tag (Stunden:Minuten)",
         "en-US": "Visit time per person and day (hours:minutes)"
@@ -4878,10 +4874,6 @@
         "de-CH": "Klicke in eine freie Zeit für einen neuen Termin. Ziehe Termine, um sie zu verschieben, oder ihren linken und rechten Rand, um die Zeit zu ändern (Tastatur: Alt + ←/→ für den Beginn, Alt + Shift + ←/→ für das Ende).",
         "en-US": "Click a free slot for a new appointment. Drag appointments to move them, or their left and right edge to change the time (keyboard: Alt + ←/→ for the start, Alt + Shift + ←/→ for the end)."
       },
-      "ui.ws.spitex.board_hint_horizontal": {
-        "de-CH": "Ziehe Einsätze zwischen den Zeilen. In «Offene Einsätze» abgelegt, wird die Zuweisung aufgehoben. Den linken oder rechten Rand ziehen ändert die Zeit.",
-        "en-US": "Drag visits between rows. Dropped on “Open visits”, the assignment is removed. Drag the left or right edge to change the time."
-      },
       "ui.ws.spitex.drag_visit": {
         "de-CH": "Ziehen, um «{title}» zuzuweisen",
         "en-US": "Drag to assign “{title}”"
@@ -5033,6 +5025,18 @@
       "ui.ws.maps.open": {
         "de-CH": "«{place}» in Google Maps öffnen (neuer Tab)",
         "en-US": "Open “{place}” in Google Maps (new tab)"
+      },
+      "ui.ws.spitex.week_load_title": {
+        "de-CH": "Auslastung der Woche",
+        "en-US": "Workload this week"
+      },
+      "ui.ws.spitex.day_load": {
+        "de-CH": "{time} h geplant",
+        "en-US": "{time} h planned"
+      },
+      "ui.ws.spitex.day_free": {
+        "de-CH": "Noch nichts geplant",
+        "en-US": "Nothing planned yet"
       }
     }
   }
