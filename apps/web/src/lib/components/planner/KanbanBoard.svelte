@@ -87,6 +87,22 @@
 		land(card);
 	}
 
+	/** Phones show one column at a time; the chips above jump between them and follow the swipe. */
+	let current = $state(0);
+	function columnWidth() {
+		return board.querySelector<HTMLElement>('[data-column]')?.offsetWidth ?? board.clientWidth;
+	}
+	function showColumn(index: number) {
+		board.scrollTo({ left: index * (columnWidth() + 12), behavior: 'smooth' });
+	}
+	let chips: HTMLElement;
+	function followScroll() {
+		const next = Math.round(board.scrollLeft / (columnWidth() + 12));
+		if (next === current) return;
+		current = next;
+		chips?.children[next]?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+	}
+
 	async function add(status: TaskStatus) {
 		await model.quickAdd(newTitle, status);
 		newTitle = '';
@@ -94,8 +110,31 @@
 </script>
 
 <div
+	bind:this={chips}
+	class="mb-2 flex gap-1 overflow-x-auto md:hidden"
+	role="group"
+	aria-label={workspace.t('ui.ws.planner.columns')}
+>
+	{#each model.columns as column, index (column.status)}
+		<button
+			type="button"
+			class="flex min-h-9 shrink-0 items-center gap-1.5 rounded-full border px-3 text-xs font-medium transition-colors {current ===
+			index
+				? 'border-foreground bg-foreground text-background'
+				: 'text-muted-foreground'}"
+			aria-pressed={current === index}
+			onclick={() => showColumn(index)}
+		>
+			{workspace.t(`ui.ws.task.status.${column.status}`)}
+			<span class="tabular-nums opacity-70">{column.tasks.length}</span>
+		</button>
+	{/each}
+</div>
+<div
 	bind:this={board}
-	class="-mx-1 flex items-start gap-3 overflow-x-auto px-1 pt-1 pb-4"
+	data-board
+	onscroll={followScroll}
+	class="-mx-1 flex snap-x snap-mandatory items-start gap-3 overflow-x-auto px-1 pt-1 pb-4 md:snap-none"
 	{@attach (node) => drag.attach(node)}
 >
 	{#each model.columns as column (column.status)}
@@ -103,7 +142,7 @@
 		<section
 			data-column={column.status}
 			aria-labelledby="column-{column.status}"
-			class="group/column flex w-[min(82vw,272px)] shrink-0 flex-col gap-2 rounded-xl p-2 transition-colors duration-200 {drag
+			class="group/column flex w-[88%] shrink-0 snap-start flex-col gap-2 rounded-xl p-2 sm:w-[272px] transition-colors duration-200 {drag
 				.target?.status === column.status && drag.liftedId
 				? 'bg-muted ring-border ring-1 ring-inset'
 				: 'bg-muted/40'}"
@@ -170,7 +209,7 @@
 		</section>
 	{/each}
 </div>
-{#if canWrite}<p id="board-hint" class="text-muted-foreground text-xs">
+{#if canWrite}<p id="board-hint" class="text-muted-foreground hidden text-xs md:block">
 		{workspace.t('ui.ws.planner.keyboard_hint')}
 	</p>{/if}
 <p role="status" class="sr-only">{announcement}</p>
@@ -207,6 +246,10 @@
 	:global(html[data-board-dragging]),
 	:global(html[data-board-dragging] *) {
 		cursor: grabbing !important;
+	}
+	/* Snapping would pull the board back to a column while a card is dragged towards the next one. */
+	:global(html[data-board-dragging] [data-board]) {
+		scroll-snap-type: none;
 	}
 	.count {
 		display: inline-block;
