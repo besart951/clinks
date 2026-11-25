@@ -4977,6 +4977,18 @@
       "ui.ws.spitex.show_all": {
         "de-CH": "Alle zeigen",
         "en-US": "Show all"
+      },
+      "ui.ws.view.label": {
+        "de-CH": "Ansicht",
+        "en-US": "View"
+      },
+      "ui.ws.view.table": {
+        "de-CH": "Tabelle",
+        "en-US": "Table"
+      },
+      "ui.ws.view.cards": {
+        "de-CH": "Karten",
+        "en-US": "Cards"
       }
     }
   }

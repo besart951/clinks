@@ -1247,6 +1247,9 @@ export const productDefaultTranslations = {
 	"ui.ws.unsaved.title": "Änderungen verwerfen?",
 	"ui.ws.update.available": "Eine neue Version von CLinks ist bereit.",
 	"ui.ws.update.reload": "Neu laden",
+	"ui.ws.view.cards": "Karten",
+	"ui.ws.view.label": "Ansicht",
+	"ui.ws.view.table": "Tabelle",
 } as const;
 
 export const productTranslationKeys = [
@@ -2494,6 +2497,9 @@ export const productTranslationKeys = [
 	"ui.ws.unsaved.title",
 	"ui.ws.update.available",
 	"ui.ws.update.reload",
+	"ui.ws.view.cards",
+	"ui.ws.view.label",
+	"ui.ws.view.table",
 ] as const;
 
 export type ProductTranslationKey = (typeof productTranslationKeys)[number];

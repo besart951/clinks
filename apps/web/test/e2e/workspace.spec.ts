@@ -387,3 +387,20 @@ test('hides staff in the Spitex plan and opens a staff member’s page', async (
 	await page.getByRole('link', { name: 'Zurück' }).click();
 	await expect(page).toHaveURL(/#\/spitex$/);
 });
+
+test('switches the Spitex client list between table and cards', async ({ page }) => {
+	await signIn(page);
+	await page.getByRole('button', { name: 'Arbeitsbereich' }).click();
+	await page.getByRole('menuitem', { name: 'Stille Spitex Seeland' }).click();
+	await page.goto('/#/spitex/clients');
+	await expect(page.getByRole('table')).toBeVisible();
+	await page.getByRole('button', { name: 'Karten' }).click();
+	await expect(page).toHaveURL(/view=cards/);
+	await expect(page.getByRole('table')).toHaveCount(0);
+	const card = page.getByRole('main').getByRole('listitem').first().getByRole('link');
+	await expect(card).toContainText('Letzte 7 Tage');
+	await page.reload();
+	await expect(page.getByRole('button', { name: 'Karten' })).toHaveAttribute('aria-pressed', 'true');
+	await card.click();
+	await expect(page).toHaveURL(/#\/spitex\/clients\/[0-9a-f-]+/);
+});
