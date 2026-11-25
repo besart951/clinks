@@ -669,3 +669,55 @@ test('keeps side sheets inside a phone screen without sideways scrolling', async
 	await expect(page.getByLabel('Vorname')).toBeVisible();
 	expect(await sideways()).toEqual([]);
 });
+
+test('fits every page into a phone screen', async ({ page }) => {
+	test.setTimeout(240_000);
+	await signIn(page);
+	await page.getByRole('button', { name: 'Arbeitsbereich' }).click();
+	await page.getByRole('menuitem', { name: 'Stille Spitex Seeland' }).click();
+	await page.goto('/#/finance');
+	const invoice = await page.locator('a[href*="/finance/invoices/"]').first().getAttribute('href');
+	await page.setViewportSize({ width: 390, height: 844 });
+	const pages = [
+		'/dashboard',
+		'/contacts',
+		'/calendar',
+		'/planner',
+		'/mail',
+		'/mail/campaigns',
+		'/mail/templates',
+		'/documents',
+		'/spitex',
+		'/spitex/clients',
+		'/spitex/time',
+		'/visits',
+		'/finance',
+		'/finance/expenses',
+		'/finance/reports',
+		invoice!.slice(invoice!.indexOf('#') + 1),
+		'/finance/invoices/new',
+		'/activity',
+		'/notifications',
+		'/help',
+		'/settings',
+		'/settings/profile',
+		'/settings/team',
+		'/settings/roles',
+		'/settings/billing',
+		'/settings/privacy',
+		'/settings/storage',
+	];
+	const tooWide: string[] = [];
+	for (const path of pages) {
+		await page.goto(`/#${path}`);
+		await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
+		// Some pages settle with a redirect (e.g. to their first tab); measure once that is done.
+		await page.waitForLoadState('networkidle');
+		const width = await expect
+			.poll(() => page.evaluate(() => document.documentElement.scrollWidth).catch(() => -1))
+			.not.toBe(-1)
+			.then(() => page.evaluate(() => document.documentElement.scrollWidth));
+		if (width > 390) tooWide.push(`${path}: ${width}px`);
+	}
+	expect(tooWide).toEqual([]);
+});

@@ -75,7 +75,7 @@
 							{@const isMe = member.user.id === workspace.session.user?.id}
 							<Table.Row class={member.membership.status === 'inactive' ? 'opacity-60' : ''}>
 								<Table.Cell>
-									<div class="flex items-center gap-2">
+									<div class="flex min-w-0 items-center gap-2">
 										<PersonAvatar
 											person={{
 												name: `${member.user.firstName} ${member.user.lastName}`,
@@ -84,13 +84,15 @@
 											}}
 											size="sm"
 										/>
-										<div>
-											<p class="font-medium">
+										<div class="min-w-0">
+											<p class="truncate font-medium">
 												{member.user.firstName}
 												{member.user.lastName}{#if isMe}
 													<span class="text-muted-foreground text-xs">({workspace.t('ui.ws.team.you')})</span>{/if}
 											</p>
-											<p class="text-muted-foreground text-xs">{member.user.email}</p>
+											<p class="text-muted-foreground max-w-[9rem] truncate text-xs sm:max-w-none">
+												{member.user.email}
+											</p>
 										</div>
 									</div>
 								</Table.Cell>
@@ -104,7 +106,7 @@
 								</Table.Cell>
 								<Table.Cell>
 									<Choice
-										class="w-40"
+										class="w-32 sm:w-40"
 										size="sm"
 										value={member.role.id}
 										label={workspace.t('ui.role')}

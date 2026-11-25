@@ -92,7 +92,7 @@
 			{@attach fillViewport()}
 		>
 			<nav
-				class="flex gap-1 overflow-x-auto lg:flex-col lg:overflow-y-auto"
+				class="flex flex-wrap gap-1 lg:flex-col lg:flex-nowrap lg:overflow-y-auto"
 				aria-label={workspace.t('ui.ws.mail.folders')}
 			>
 				{#each mailFolders as folder (folder)}

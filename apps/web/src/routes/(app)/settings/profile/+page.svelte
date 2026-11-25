@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Monitor from '@lucide/svelte/icons/monitor';
+	import Upload from '@lucide/svelte/icons/upload';
 	import * as Card from '@clinks/ui/components/ui/card';
 	import { Button } from '@clinks/ui/components/ui/button';
 	import { Input } from '@clinks/ui/components/ui/input';
@@ -19,6 +20,7 @@
 	const model = new ProfileModel(workspace);
 	const user = $derived(workspace.session.user);
 	let enabling = $state(false);
+	let avatarInput: HTMLInputElement;
 	onMount(() => {
 		model.load();
 		return model.sessions.connect();
@@ -56,14 +58,18 @@
 						}}
 						size="lg"
 					/>
-					<FormField id="avatar" label={workspace.t('ui.ws.settings.photo')}>
-						<Input
-							id="avatar"
-							type="file"
-							accept="image/*"
-							onchange={(event) => model.setAvatar(event.currentTarget.files?.[0])}
-						/>
-					</FormField>
+					<!-- The native file field reads «Choose File · No file chosen» in the browser's language; a button instead. -->
+					<input
+						bind:this={avatarInput}
+						id="avatar"
+						type="file"
+						accept="image/*"
+						hidden
+						onchange={(event) => model.setAvatar(event.currentTarget.files?.[0])}
+					/>
+					<Button type="button" variant="outline" size="sm" onclick={() => avatarInput.click()}>
+						<Upload class="size-4" />{workspace.t('ui.ws.settings.change_photo')}
+					</Button>
 				</div>
 				<FormField id="pf-first" label={workspace.t('ui.ws.field.first_name')} error={model.fields.firstName}>
 					<Input id="pf-first" bind:value={model.firstName} />

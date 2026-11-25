@@ -5213,6 +5213,10 @@
       "ui.ws.calendar.page_text": {
         "de-CH": "Termine, Einsätze und wer wann eingeteilt ist.",
         "en-US": "Appointments, visits and who is booked when."
+      },
+      "ui.ws.settings.change_photo": {
+        "de-CH": "Foto wählen",
+        "en-US": "Choose photo"
       }
     }
   }

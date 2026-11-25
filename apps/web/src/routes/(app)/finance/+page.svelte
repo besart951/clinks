@@ -94,7 +94,7 @@
 							<Table.Head class="hidden md:table-cell">{workspace.t('ui.ws.finance.due_date')}</Table.Head>
 							<Table.Head class="text-right">{workspace.t('ui.ws.invoice.amount')}</Table.Head>
 							<Table.Head class="hidden text-right lg:table-cell">{workspace.t('ui.ws.finance.balance')}</Table.Head>
-							<Table.Head>{workspace.t('ui.ws.status')}</Table.Head>
+							<Table.Head class="hidden sm:table-cell">{workspace.t('ui.ws.status')}</Table.Head>
 						</Table.Row>
 					</Table.Header>
 					<Table.Body>
@@ -112,13 +112,22 @@
 								<Table.Cell class="max-w-48 truncate">{row.contact ? contactName(row.contact) : '—'}</Table.Cell>
 								<Table.Cell class="hidden md:table-cell">{workspace.i18n.date(row.invoice.issueDate)}</Table.Cell>
 								<Table.Cell class="hidden md:table-cell">{workspace.i18n.date(row.invoice.dueDate)}</Table.Cell>
-								<Table.Cell class="text-right tabular-nums">{workspace.i18n.money(row.totals.gross)}</Table.Cell>
+								<Table.Cell class="text-right tabular-nums">
+									{workspace.i18n.money(row.totals.gross)}
+									<!-- Phones: the status under the amount, instead of its own column. -->
+									<span class="mt-1 block sm:hidden">
+										<StatusBadge
+											tone={invoiceTone[row.status]}
+											label={workspace.t(`ui.ws.invoice.status.${row.status}`)}
+										/>
+									</span>
+								</Table.Cell>
 								<Table.Cell class="hidden text-right tabular-nums lg:table-cell">
 									{row.totals.balance > 0 && row.status !== 'draft' && row.status !== 'cancelled'
 										? workspace.i18n.money(row.totals.balance)
 										: '—'}
 								</Table.Cell>
-								<Table.Cell>
+								<Table.Cell class="hidden sm:table-cell">
 									<StatusBadge
 										tone={invoiceTone[row.status]}
 										label={workspace.t(`ui.ws.invoice.status.${row.status}`)}

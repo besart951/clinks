@@ -38,11 +38,11 @@
 		{#snippet children({ roles })}
 			<Card.Root>
 				<Card.Content class="overflow-x-auto">
-					<table class="w-full min-w-[640px] text-sm">
+					<table class="w-full min-w-[560px] text-sm">
 						<caption class="sr-only">{workspace.t('ui.ws.roles.matrix')}</caption>
 						<thead>
 							<tr class="border-b">
-								<th class="py-2 pr-4 text-left font-medium">
+								<th class="bg-card sticky left-0 z-10 py-2 pr-4 text-left font-medium">
 									{workspace.t('ui.ws.roles.area')}
 								</th>{#each roles as role (role.id)}<th class="px-2 py-2 text-center font-medium">
 										<button
@@ -63,7 +63,7 @@
 						<tbody>
 							{#each areas as area (area.area)}
 								<tr class="border-b last:border-0">
-									<th scope="row" class="py-2 pr-4 text-left font-normal">
+									<th scope="row" class="bg-card sticky left-0 z-10 py-2 pr-4 text-left font-normal">
 										{workspace.t(`ui.ws.roles.area_${area.area}`)}
 									</th>
 									{#each roles as role (role.id)}
