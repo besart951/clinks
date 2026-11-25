@@ -323,3 +323,24 @@ test('shows an info card when hovering an appointment and hides it on Escape', a
 	await page.keyboard.press('Escape');
 	await expect(card).toBeHidden();
 });
+
+test('opens appointments in a panel beside the calendar, which stays usable', async ({ page }) => {
+	await signIn(page);
+	await page.goto('/#/calendar?view=week');
+	const first = page.getByRole('grid').first().getByRole('button').first();
+	await first.click();
+	const panel = page.getByRole('dialog', { name: 'Termin bearbeiten' });
+	await expect(panel.getByLabel('Titel')).toBeFocused();
+	const title = await panel.getByLabel('Titel').inputValue();
+	// Non-modal: another appointment opens in the same panel with one click.
+	const second = page.getByRole('grid').nth(1).getByRole('button').first();
+	await second.click();
+	await expect(panel.getByLabel('Titel')).not.toHaveValue(title);
+	// Unsaved edits are not dropped silently when switching.
+	await panel.getByLabel('Titel').fill('Geändert');
+	await first.click();
+	await page.getByRole('button', { name: 'Verwerfen' }).click();
+	await expect(panel.getByLabel('Titel')).toHaveValue(title);
+	await panel.getByRole('button', { name: 'Schliessen' }).click();
+	await expect(panel).toBeHidden();
+});
