@@ -290,3 +290,19 @@ test('moves Spitex visits by drag and drop, from the list and with time running 
 	await expect(planned).toHaveCount(before + 1);
 	await expect(inList).toHaveCount(listed);
 });
+
+test('shows an info card when hovering an appointment and hides it on Escape', async ({ page }) => {
+	await signIn(page);
+	await page.goto('/#/calendar?view=week');
+	const appointment = page.getByRole('grid').first().getByRole('button').first();
+	await appointment.hover();
+	const card = page.getByRole('tooltip');
+	await expect(card).toBeVisible();
+	await expect(card.getByRole('term')).toContainText(['Art', 'Zuständig']);
+	await expect(card).toContainText('Klicken öffnet den Termin.');
+	// Described by the card while it is open, but the button keeps its own role: a click opens the appointment.
+	await expect(appointment).toHaveAttribute('aria-describedby', /^peek-/);
+	expect(await appointment.getAttribute('aria-expanded')).toBeNull();
+	await page.keyboard.press('Escape');
+	await expect(card).toBeHidden();
+});
