@@ -16,6 +16,8 @@
 	import Files from '@lucide/svelte/icons/files';
 	import Ellipsis from '@lucide/svelte/icons/ellipsis';
 	import Check from '@lucide/svelte/icons/check';
+	import PenLine from '@lucide/svelte/icons/pen-line';
+	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import * as DropdownMenu from '@clinks/ui/components/ui/dropdown-menu';
 	import FolderMoveMenu from './FolderMoveMenu.svelte';
 	import { carriesItem, readItem, startItemDrag } from './drag-item';
@@ -256,14 +258,14 @@
 									<Ellipsis class="size-3.5" />
 								</button>{/snippet}
 						</DropdownMenu.Trigger>
-						<DropdownMenu.Content align="end">
+						<DropdownMenu.Content align="end" class="w-52">
 							<DropdownMenu.Item onclick={() => startRename(folder)}>
-								{workspace.t('ui.ws.documents.rename')}
+								<PenLine />{workspace.t('ui.ws.documents.rename')}
 							</DropdownMenu.Item>
 							<FolderMoveMenu {model} {folder} />
 							<DropdownMenu.Separator />
 							<DropdownMenu.Item variant="destructive" onclick={() => actions.remove(folder)}>
-								{workspace.t('ui.ws.delete')}
+								<Trash2 />{workspace.t('ui.ws.delete')}
 							</DropdownMenu.Item>
 						</DropdownMenu.Content>
 					</DropdownMenu.Root>

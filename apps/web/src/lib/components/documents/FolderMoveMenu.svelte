@@ -1,5 +1,8 @@
 <script lang="ts">
 	import * as DropdownMenu from '@clinks/ui/components/ui/dropdown-menu';
+	import FolderInput from '@lucide/svelte/icons/folder-input';
+	import FolderIcon from '@lucide/svelte/icons/folder';
+	import Files from '@lucide/svelte/icons/files';
 	import { folderPath } from '@clinks/domain/folders';
 	import type { FolderId } from '@clinks/domain/ids';
 	import type { Folder, StoredDocument } from '@clinks/domain/types';
@@ -36,10 +39,15 @@
 
 {#if targets.length > 0}
 	<DropdownMenu.Sub>
-		<DropdownMenu.SubTrigger>{workspace.t('ui.ws.documents.move_to')}</DropdownMenu.SubTrigger>
-		<DropdownMenu.SubContent class="max-h-80 overflow-y-auto">
+		<DropdownMenu.SubTrigger><FolderInput />{workspace.t('ui.ws.documents.move_to')}</DropdownMenu.SubTrigger>
+		<DropdownMenu.SubContent class="max-h-80 w-64 overflow-y-auto">
 			{#each targets as target (target.id ?? 'root')}
-				<DropdownMenu.Item onclick={() => moveTo(target.id)}>{target.label}</DropdownMenu.Item>
+				<DropdownMenu.Item onclick={() => moveTo(target.id)}>
+					{#if target.id === null}<Files class="text-muted-foreground" />{:else}<FolderIcon
+							class="text-amber-500"
+						/>{/if}
+					<span class="truncate">{target.label}</span>
+				</DropdownMenu.Item>
 			{/each}
 		</DropdownMenu.SubContent>
 	</DropdownMenu.Sub>

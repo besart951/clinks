@@ -21,6 +21,7 @@
 	} from '#lib/components/calendar/TimeGrid.svelte';
 	import AxisToggle from '#lib/components/calendar/AxisToggle.svelte';
 	import Grip from '@lucide/svelte/icons/grip-vertical';
+	import { personBadge } from '@clinks/ui/kit/avatar';
 	import AppointmentSheet from '#lib/components/calendar/AppointmentSheet.svelte';
 	import { PlanningModel } from '#lib/features/spitex/planning.svelte';
 	import { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
@@ -117,6 +118,15 @@
 		}
 		const date = new Date(start);
 		void model.assign(visit, assigneeId, date.getHours() * 60 + date.getMinutes());
+	}
+
+	/** Staff for «Zuweisen»: whoever has the earliest free start first, those without room last. */
+	function candidates(visit: Appointment) {
+		return staff
+			.map((person) => ({ person, slot: firstFreeStart(visit, model.date, person.id, model.day) }))
+			.sort((left, right) =>
+				left.slot && right.slot ? left.slot.localeCompare(right.slot) : left.slot ? -1 : right.slot ? 1 : 0,
+			);
 	}
 
 	function windowLabel(visit: Appointment) {
@@ -239,15 +249,32 @@
 															{workspace.t('ui.ws.spitex.assign')}
 														</Button>{/snippet}
 												</DropdownMenu.Trigger>
-												<DropdownMenu.Content align="start">
-													{#each staff as person (person.id)}
-														{@const slot = firstFreeStart(visit, model.date, person.id, model.day)}
-														<DropdownMenu.Item onclick={() => assignTo(visit, person.id)}>
-															<span class="size-2 rounded-full" style:background-color={person.avatarColor}></span>
-															<span class="flex-1">{person.name}</span>
-															<span class="text-muted-foreground text-xs">
-																{slot ? workspace.i18n.time(slot) : workspace.t('ui.ws.spitex.no_slot')}
+												<DropdownMenu.Content align="start" class="w-72">
+													<DropdownMenu.Label class="text-muted-foreground text-xs font-normal">
+														{workspace.t('ui.ws.spitex.assign_to', { title: visit.title })}
+													</DropdownMenu.Label>
+													{#each candidates(visit) as { person, slot } (person.id)}
+														<DropdownMenu.Item class="gap-2.5 py-1.5" onclick={() => assignTo(visit, person.id)}>
+															<span
+																class="grid size-7 shrink-0 place-items-center rounded-full text-[11px] font-semibold text-white"
+																style:background-color={person.avatarColor}
+																aria-hidden="true"
+															>
+																{personBadge(person.name).initials}
 															</span>
+															<span class="min-w-0 flex-1">
+																<span class="block truncate font-medium">{person.name}</span>
+																{#if person.jobTitle}<span class="text-muted-foreground block truncate text-xs">
+																		{person.jobTitle}
+																	</span>{/if}
+															</span>
+															{#if slot}
+																<span class="bg-muted rounded px-1.5 py-0.5 text-xs font-medium tabular-nums">
+																	{workspace.i18n.time(slot)}
+																</span>
+															{:else}
+																<span class="text-muted-foreground text-xs">{workspace.t('ui.ws.spitex.no_slot')}</span>
+															{/if}
 														</DropdownMenu.Item>
 													{/each}
 												</DropdownMenu.Content>
