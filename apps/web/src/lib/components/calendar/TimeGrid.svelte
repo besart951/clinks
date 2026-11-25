@@ -10,6 +10,8 @@
 		assigneeId?: UserId | null;
 		appointments: Appointment[];
 		highlight?: boolean;
+		/** Makes the label a link, e.g. to the staff member's page. */
+		href?: string;
 	}
 
 	export interface GridHandlers {
@@ -268,6 +270,15 @@
 	onkeydown={(event) => event.key === 'Escape' && resize && endResize(null, true)}
 />
 
+{#snippet columnLabel(column: GridColumn)}
+	{#if column.href}
+		<a class="block truncate hover:underline" href={column.href}>{column.label}</a>
+	{:else}
+		<p class="truncate">{column.label}</p>
+	{/if}
+	{#if column.sublabel}<p class="text-muted-foreground truncate text-xs font-normal">{column.sublabel}</p>{/if}
+{/snippet}
+
 {#snippet card(appointment: Appointment, color: string)}
 	{@const minutes = Math.round((new Date(appointment.end).getTime() - new Date(appointment.start).getTime()) / 60000)}
 	{@const service = serviceLabel(appointment)}
@@ -465,10 +476,7 @@
 						? 'text-primary font-semibold'
 						: ''}"
 				>
-					<p class="truncate">{column.label}</p>
-					{#if column.sublabel}<p class="text-muted-foreground truncate text-xs font-normal">
-							{column.sublabel}
-						</p>{/if}
+					{@render columnLabel(column)}
 				</div>
 				{@render track(column)}
 			{/each}
@@ -483,10 +491,7 @@
 						? 'text-primary font-semibold'
 						: ''}"
 				>
-					<p class="truncate">{column.label}</p>
-					{#if column.sublabel}<p class="text-muted-foreground truncate text-xs font-normal">
-							{column.sublabel}
-						</p>{/if}
+					{@render columnLabel(column)}
 				</div>
 			{/each}
 			<div class="relative" style:height="{range * pixelsPerMinute}px">

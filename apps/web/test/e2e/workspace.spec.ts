@@ -368,3 +368,22 @@ test('opens a task on its own page and edits it there', async ({ page }) => {
 	await expect(page).toHaveURL(taskUrl);
 	await expect(page.getByLabel('Beschreibung')).toHaveValue('Mehr Platz für die Details.');
 });
+
+test('hides staff in the Spitex plan and opens a staff member’s page', async ({ page }) => {
+	await signIn(page);
+	await page.getByRole('button', { name: 'Arbeitsbereich' }).click();
+	await page.getByRole('menuitem', { name: 'Stille Spitex Seeland' }).click();
+	await page.goto('/#/spitex');
+	await expect(page.getByRole('grid', { name: /Daniel Moser/ })).toBeVisible();
+	await page.getByRole('button', { name: /^Mitarbeitende/ }).click();
+	await page.getByRole('menuitemcheckbox', { name: 'Daniel Moser' }).click();
+	await page.keyboard.press('Escape');
+	await expect(page.getByRole('grid', { name: /Daniel Moser/ })).toHaveCount(0);
+	await expect(page.getByRole('button', { name: /^Mitarbeitende/ })).toContainText('4 von 5');
+	// The name in a column header leads to the person's page, and back.
+	await page.getByRole('grid').first().locator('..').getByRole('link', { name: 'Fatma Yilmaz' }).first().click();
+	await expect(page.getByRole('heading', { level: 1, name: 'Fatma Yilmaz' })).toBeVisible();
+	await expect(page.getByText('Auslastung')).toBeVisible();
+	await page.getByRole('link', { name: 'Zurück' }).click();
+	await expect(page).toHaveURL(/#\/spitex$/);
+});

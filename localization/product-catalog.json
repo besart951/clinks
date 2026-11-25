@@ -4917,6 +4917,66 @@
       "ui.ws.spitex.assign_to": {
         "de-CH": "«{title}» zuweisen an",
         "en-US": "Assign “{title}” to"
+      },
+      "ui.ws.person.back": {
+        "de-CH": "Zurück",
+        "en-US": "Back"
+      },
+      "ui.ws.person.appointments": {
+        "de-CH": "Termine",
+        "en-US": "Appointments"
+      },
+      "ui.ws.person.no_appointments": {
+        "de-CH": "Keine Termine in dieser Woche.",
+        "en-US": "No appointments this week."
+      },
+      "ui.ws.person.tasks": {
+        "de-CH": "Offene Aufgaben",
+        "en-US": "Open tasks"
+      },
+      "ui.ws.person.no_tasks": {
+        "de-CH": "Keine offenen Aufgaben.",
+        "en-US": "No open tasks."
+      },
+      "ui.ws.person.load": {
+        "de-CH": "Auslastung",
+        "en-US": "Workload"
+      },
+      "ui.ws.person.load_total": {
+        "de-CH": "{time} Std. in dieser Woche",
+        "en-US": "{time} h this week"
+      },
+      "ui.ws.person.contact": {
+        "de-CH": "Kontakt",
+        "en-US": "Contact"
+      },
+      "ui.ws.person.in_calendar": {
+        "de-CH": "Im Kalender zeigen",
+        "en-US": "Show in calendar"
+      },
+      "ui.ws.person.write_mail": {
+        "de-CH": "E-Mail schreiben",
+        "en-US": "Write an email"
+      },
+      "ui.ws.person.not_found": {
+        "de-CH": "Diese Person gehört nicht (mehr) zum Team.",
+        "en-US": "This person is not (or no longer) on the team."
+      },
+      "ui.ws.person.open": {
+        "de-CH": "Details zu {name}",
+        "en-US": "Details for {name}"
+      },
+      "ui.ws.spitex.staff": {
+        "de-CH": "Mitarbeitende",
+        "en-US": "Staff"
+      },
+      "ui.ws.spitex.staff_shown": {
+        "de-CH": "{shown} von {total}",
+        "en-US": "{shown} of {total}"
+      },
+      "ui.ws.spitex.show_all": {
+        "de-CH": "Alle zeigen",
+        "en-US": "Show all"
       }
     }
   }
