@@ -17,7 +17,7 @@ import { ObjectStore } from '../object-store.ts';
 import { assertPublicEndpoint, publicAgent } from '../endpoint-guard.ts';
 import type { AccessClaims } from '../tokens.ts';
 import { audit } from './audit.ts';
-import type { Services } from './context.ts';
+import type { Caller, Services } from './context.ts';
 import { requirePermission } from './permissions.ts';
 
 type StorageRow = Selectable<StorageConfigTable>;
@@ -146,7 +146,12 @@ export class StorageService {
 	}
 
 	/** Saving adds a new row: versions already stored keep pointing at the bucket they were written to. */
-	save(claims: AccessClaims, input: StorageSettingsInput): Promise<StorageSettingsView | null> {
+	save(
+		claims: AccessClaims,
+		input: StorageSettingsInput,
+		caller: Caller | null = null,
+	): Promise<StorageSettingsView | null> {
+		const now = this.#services.now();
 		return this.#tenant(claims, async (tx, tenantId) => {
 			const tenant = await tx
 				.selectFrom('tenants')
@@ -158,12 +163,12 @@ export class StorageService {
 			const deactivate = () =>
 				tx
 					.updateTable('auth.storageConfigs')
-					.set({ active: false, updatedAt: new Date() })
+					.set({ active: false, updatedAt: now })
 					.where('tenantId', '=', tenantId)
 					.where('active', '=', true)
 					.execute();
 			const record = () =>
-				audit(tx, { tenantId, actorId: claims.sub, action: 'tenant.storage_changed', target: tenantId }, null);
+				audit(tx, { tenantId, actorId: claims.sub, action: 'tenant.storage_changed', target: tenantId }, caller);
 			if (input.provider === 'clinks') {
 				await deactivate();
 				await record();
@@ -212,7 +217,7 @@ export class StorageService {
 					accessKeyId: input.accessKeyId.trim(),
 					...secret,
 					pathStyle: input.pathStyle,
-					locationAcknowledgedAt: consent ? (current?.locationAcknowledgedAt ?? new Date()) : null,
+					locationAcknowledgedAt: consent ? (current?.locationAcknowledgedAt ?? now) : null,
 					createdBy: claims.sub,
 				})
 				.returningAll()
@@ -226,7 +231,7 @@ export class StorageService {
 	test(claims: AccessClaims): Promise<StorageCheck> {
 		return this.#tenant(claims, async (tx, tenantId) => {
 			const row = await this.#active(tx, tenantId);
-			const at = new Date();
+			const at = this.#services.now();
 			if (!row) {
 				const problems = this.#services.objects
 					? await this.#services.objects.check(this.#services.config.WEB_ORIGIN)
@@ -238,7 +243,7 @@ export class StorageService {
 				problems = await (await tenantStores(this.#services).open(row)).check(this.#services.config.WEB_ORIGIN);
 			} catch (error) {
 				if (!(error instanceof ApiError)) throw error;
-				problems = ['secret'];
+				problems = [error.key === 'error.ws.storage_secret' ? 'secret' : 'unreachable'];
 			}
 			await tx
 				.updateTable('auth.storageConfigs')

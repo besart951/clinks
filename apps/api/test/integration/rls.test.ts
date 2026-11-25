@@ -57,4 +57,16 @@ describe('row-level security', () => {
 			['INSERT', 'SELECT'],
 		);
 	});
+
+	it('keeps clinks_sync read-only on public tables and completely out of auth and schema_migrations', async () => {
+		const { rows: nonSelectPublic } = await sql<{ table_name: string; privilege_type: string }>`
+			SELECT table_name, privilege_type FROM information_schema.role_table_grants
+			WHERE grantee = 'clinks_sync' AND table_schema = 'public' AND privilege_type <> 'SELECT'`.execute(api.owner);
+		assert.deepEqual(nonSelectPublic, []);
+
+		const { rows: sensitive } = await sql<{ table_schema: string; table_name: string }>`
+			SELECT table_schema, table_name FROM information_schema.role_table_grants
+			WHERE grantee = 'clinks_sync' AND (table_schema = 'auth' OR table_name = 'schema_migrations')`.execute(api.owner);
+		assert.deepEqual(sensitive, []);
+	});
 });

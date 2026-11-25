@@ -95,18 +95,9 @@ export class SyncService {
 		op: SyncWriteRequest['ops'][number],
 		deferred: { table: SyncedTableName; fields: Fields }[] | null,
 	) {
-		const { tenantId, userId } = scope;
-		const now = this.#services.now();
 		const clinical = table === 'physio_notes' || table === 'spitex_notes';
 		if (clinical && op.op !== 'PUT') throw forbidden();
-		if (op.op === 'DELETE') {
-			const row = await tx.selectFrom(table).selectAll().where('id', '=', op.id).executeTakeFirst();
-			const stored = row ? dbToFields(table, row) : null;
-			scope.plan.check(table, op.op, stored, null);
-			if (stored) await scope.plan.changing(tx, table, op.id, stored, null);
-			const deleted = await tx.deleteFrom(table).where('id', '=', op.id).executeTakeFirst();
-			return deleted.numDeletedRows > 0n ? 'deleted' : null;
-		}
+		if (op.op === 'DELETE') return this.#applyDelete(tx, scope.plan, table, op.id);
 		const { fields, unknown } = uploadToFields(table, op.data ?? {});
 		if (unknown.length)
 			throw new ApiError(
@@ -120,25 +111,49 @@ export class SyncService {
 		// PowerSync can omit null columns on insert.
 		const merged = { ...dbToFields(table, existing ?? {}), ...fields };
 		validate(table, merged);
-		if (clinical && existing) {
+		const check = this.#enforceWriteInvariants(scope, table, op.op, existing, fields, merged);
+		if (check === 'skip') return null;
+		if (deferred) deferred.push({ table, fields });
+		else await checkReferences(tx, scope.tenantId, table, fields);
+		return this.#persistRow(tx, scope, table, op, existing, fields, merged);
+	}
+
+	async #applyDelete(tx: Tx, plan: PlanWrites, table: SyncedTableName, id: string) {
+		const row = await tx.selectFrom(table).selectAll().where('id', '=', id).executeTakeFirst();
+		const stored = row ? dbToFields(table, row) : null;
+		plan.check(table, 'DELETE', stored, null);
+		if (stored) await plan.changing(tx, table, id, stored, null);
+		const deleted = await tx.deleteFrom(table).where('id', '=', id).executeTakeFirst();
+		return deleted.numDeletedRows > 0n ? 'deleted' : null;
+	}
+
+	#enforceWriteInvariants(
+		scope: { userId: string; plan: PlanWrites },
+		table: SyncedTableName,
+		op: SyncWriteRequest['ops'][number]['op'],
+		existing: Fields | undefined,
+		fields: Fields,
+		merged: Fields,
+	): 'apply' | 'skip' {
+		if ((table === 'physio_notes' || table === 'spitex_notes') && existing) {
 			const saved = dbToFields(table, existing);
 			if (Object.entries(fields).some(([key, value]) => saved[key] !== value)) throw forbidden();
-			return null;
+			return 'skip';
 		}
 		const stored = existing ? dbToFields(table, existing) : null;
-		scope.plan.check(table, op.op, stored, merged);
+		scope.plan.check(table, op, stored, merged);
 		// Putting a release that exists changes nothing.
-		if (table === 'spitex_week_releases' && existing) return null;
+		if (table === 'spitex_week_releases' && existing) return 'skip';
 		if (
 			(table.endsWith('_comments') || table.endsWith('_notes')) &&
 			fields.authorId !== undefined &&
-			fields.authorId !== (existing?.authorId ?? userId)
+			fields.authorId !== (existing?.authorId ?? scope.userId)
 		)
 			throw forbidden();
 		if (
 			table === 'documents' &&
 			fields.uploadedBy !== undefined &&
-			fields.uploadedBy !== (existing?.uploadedBy ?? userId)
+			fields.uploadedBy !== (existing?.uploadedBy ?? scope.userId)
 		)
 			throw forbidden();
 		if (
@@ -147,8 +162,20 @@ export class SyncService {
 			Object.keys(fields).some((key) => key !== 'read' && fields[key] !== dbToFields(table, existing)[key])
 		)
 			throw forbidden();
-		if (deferred) deferred.push({ table, fields });
-		else await checkReferences(tx, tenantId, table, fields);
+		return 'apply';
+	}
+
+	async #persistRow(
+		tx: Tx,
+		scope: { tenantId: string; userId: string; plan: PlanWrites },
+		table: SyncedTableName,
+		op: SyncWriteRequest['ops'][number],
+		existing: Fields | undefined,
+		fields: Fields,
+		merged: Fields,
+	) {
+		const now = this.#services.now();
+		const stored = existing ? dbToFields(table, existing) : null;
 		const values = fieldsToDb(table, op.op === 'PUT' ? merged : fields);
 		if (
 			table === 'documents' &&
@@ -167,7 +194,7 @@ export class SyncService {
 		try {
 			await tx
 				.insertInto(table)
-				.values({ ...values, id: op.id, tenantId, revision: 1, createdAt: now, updatedAt: now })
+				.values({ ...values, id: op.id, tenantId: scope.tenantId, revision: 1, createdAt: now, updatedAt: now })
 				.execute();
 		} catch (error) {
 			// The id exists, but row-level security hides it: it belongs to another tenant.

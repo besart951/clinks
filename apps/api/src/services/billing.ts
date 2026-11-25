@@ -30,59 +30,70 @@ export class BillingService {
 		if (!claims.tenant_id) throw forbidden();
 		const tenantId = claims.tenant_id;
 		const returnUrl = this.#services.config.WEB_ORIGIN + '/#/settings/billing';
-		return inScope(this.#services.db, { tenantId, userId: claims.sub }, async (tx) => {
+		const initial = await inScope(this.#services.db, { tenantId, userId: claims.sub }, async (tx) => {
 			await requirePermission(tx, tenantId, claims.sub, 'billing.manage');
-			const { stripe, prices, tax } = this.gateway;
-			await tx.selectFrom('tenants').select('id').where('id', '=', tenantId).forUpdate().executeTakeFirstOrThrow();
-			let account = await tx
+			const account = await tx
 				.selectFrom('billingAccounts')
-				.selectAll()
+				.select('customerId')
 				.where('tenantId', '=', tenantId)
 				.executeTakeFirst();
-			if (!account) {
-				const customer = await stripe.customers.create(
-					{ metadata: { clinks_tenant: tenantId } },
-					{ idempotencyKey: 'clinks-customer-' + tenantId },
-				);
-				account = await tx
-					.insertInto('billingAccounts')
-					.values({ tenantId, customerId: customer.id })
-					.returningAll()
-					.executeTakeFirstOrThrow();
-			}
-			const customer = account.customerId;
-			const subscriptions = input ? await stripe.subscriptions.list({ customer, status: 'all', limit: 100 }) : null;
-			if (!input || subscriptions?.data.some((s) => !['canceled', 'incomplete_expired'].includes(s.status))) {
-				const portal = await stripe.billingPortal.sessions.create({ customer, return_url: returnUrl });
-				return { url: portal.url };
-			}
-			const selected = prices[input.plan][input.cycle];
-			const existing = await stripe.checkout.sessions.list({ customer, status: 'open', limit: 1 });
-			const pending = existing.data[0];
-			if (pending?.url && pending.metadata?.price === selected) return { url: pending.url };
-			if (pending) await stripe.checkout.sessions.expire(pending.id);
-			const seats = await tx
-				.selectFrom('memberships')
-				.select((tx) => tx.fn.countAll().as('count'))
-				.where('tenantId', '=', tenantId)
-				.where('status', '=', 'active')
-				.executeTakeFirstOrThrow();
-			const checkout = await stripe.checkout.sessions.create({
-				mode: 'subscription',
-				currency: 'chf',
-				customer,
-				client_reference_id: tenantId,
-				metadata: { price: selected },
-				line_items: [{ price: selected, quantity: Number(seats.count) }],
-				automatic_tax: { enabled: tax },
-				billing_address_collection: 'required',
-				customer_update: { address: 'auto' },
-				success_url: returnUrl,
-				cancel_url: returnUrl,
-			});
-			if (!checkout.url) throw new ApiError(502, 'error.billing.unavailable');
-			return { url: checkout.url };
+			const seats = input
+				? await tx
+						.selectFrom('memberships')
+						.select((eb) => eb.fn.countAll().as('count'))
+						.where('tenantId', '=', tenantId)
+						.where('status', '=', 'active')
+						.executeTakeFirstOrThrow()
+				: null;
+			return { customerId: account?.customerId ?? null, seats: seats ? Number(seats.count) : 0 };
 		});
+		const { stripe, prices, tax } = this.gateway;
+		let customer = initial.customerId;
+		if (!customer) {
+			const created = await stripe.customers.create(
+				{ metadata: { clinks_tenant: tenantId } },
+				{ idempotencyKey: 'clinks-customer-' + tenantId },
+			);
+			customer = await inScope(this.#services.db, { tenantId, userId: null }, async (tx) => {
+				await tx
+					.insertInto('billingAccounts')
+					.values({ tenantId, customerId: created.id })
+					.onConflict((c) => c.column('tenantId').doNothing())
+					.execute();
+				return (
+					await tx
+						.selectFrom('billingAccounts')
+						.select('customerId')
+						.where('tenantId', '=', tenantId)
+						.executeTakeFirstOrThrow()
+				).customerId;
+			});
+		}
+		const subscriptions = input ? await stripe.subscriptions.list({ customer, status: 'all', limit: 100 }) : null;
+		if (!input || subscriptions?.data.some((s) => !['canceled', 'incomplete_expired'].includes(s.status))) {
+			const portal = await stripe.billingPortal.sessions.create({ customer, return_url: returnUrl });
+			return { url: portal.url };
+		}
+		const selected = prices[input.plan][input.cycle];
+		const existing = await stripe.checkout.sessions.list({ customer, status: 'open', limit: 1 });
+		const pending = existing.data[0];
+		if (pending?.url && pending.metadata?.price === selected) return { url: pending.url };
+		if (pending) await stripe.checkout.sessions.expire(pending.id);
+		const checkout = await stripe.checkout.sessions.create({
+			mode: 'subscription',
+			currency: 'chf',
+			customer,
+			client_reference_id: tenantId,
+			metadata: { price: selected },
+			line_items: [{ price: selected, quantity: initial.seats }],
+			automatic_tax: { enabled: tax },
+			billing_address_collection: 'required',
+			customer_update: { address: 'auto' },
+			success_url: returnUrl,
+			cancel_url: returnUrl,
+		});
+		if (!checkout.url) throw new ApiError(502, 'error.billing.unavailable');
+		return { url: checkout.url };
 	}
 	async webhook(raw: string, signature: string) {
 		const { stripe, secret, prices } = this.gateway;

@@ -7,7 +7,7 @@ import type { profileUpdate, companyUpdate, roleUpdate, memberUpdate, TeamRespon
 import { ApiError, forbidden } from '../errors.ts';
 import { uuid } from '../crypto.ts';
 import type { AccessClaims } from '../tokens.ts';
-import type { Services } from './context.ts';
+import type { Caller, Services } from './context.ts';
 import { activeRole } from './permissions.ts';
 import { audit } from './audit.ts';
 
@@ -35,30 +35,30 @@ export class SettingsService {
 			return work(tx, tenantId);
 		});
 	}
-	profile(claims: AccessClaims, input: z.infer<typeof profileUpdate>) {
+	profile(claims: AccessClaims, input: z.infer<typeof profileUpdate>, caller: Caller | null = null) {
 		return inScope(this.#services.db, { tenantId: claims.tenant_id, userId: claims.sub }, async (tx) => {
 			await tx
 				.updateTable('users')
-				.set((tx) => ({ ...input, revision: tx('revision', '+', 1), updatedAt: new Date() }))
+				.set((tx) => ({ ...input, revision: tx('revision', '+', 1), updatedAt: this.#services.now() }))
 				.where('id', '=', claims.sub)
 				.execute();
 			await audit(
 				tx,
 				{ tenantId: claims.tenant_id, actorId: claims.sub, action: 'user.updated', target: claims.sub },
-				null,
+				caller,
 			);
 		});
 	}
-	company(claims: AccessClaims, input: z.infer<typeof companyUpdate>) {
+	company(claims: AccessClaims, input: z.infer<typeof companyUpdate>, caller: Caller | null = null) {
 		if (input.iban && !isValidSwissIban(input.iban))
 			throw new ApiError(400, 'error.validation', { iban: 'ui.ws.settings.iban_invalid' });
 		return this.#tenant(claims, 'settings.manage', async (tx, tenantId) => {
 			await tx
 				.updateTable('tenants')
-				.set((tx) => ({ ...input, revision: tx('revision', '+', 1), updatedAt: new Date() }))
+				.set((tx) => ({ ...input, revision: tx('revision', '+', 1), updatedAt: this.#services.now() }))
 				.where('id', '=', tenantId)
 				.execute();
-			await audit(tx, { tenantId, actorId: claims.sub, action: 'tenant.updated', target: tenantId }, null);
+			await audit(tx, { tenantId, actorId: claims.sub, action: 'tenant.updated', target: tenantId }, caller);
 		});
 	}
 	team(claims: AccessClaims): Promise<TeamResponse> {
@@ -95,7 +95,7 @@ export class SettingsService {
 			};
 		});
 	}
-	member(claims: AccessClaims, id: string, input: z.infer<typeof memberUpdate>) {
+	member(claims: AccessClaims, id: string, input: z.infer<typeof memberUpdate>, caller: Caller | null = null) {
 		return this.#tenant(claims, 'team.manage', async (tx, tenantId) => {
 			const current = await tx
 				.selectFrom('memberships')
@@ -122,7 +122,7 @@ export class SettingsService {
 				throw forbidden();
 			await tx
 				.updateTable('memberships')
-				.set((tx) => ({ ...input, revision: tx('revision', '+', 1), updatedAt: new Date() }))
+				.set((tx) => ({ ...input, revision: tx('revision', '+', 1), updatedAt: this.#services.now() }))
 				.where('id', '=', id)
 				.execute();
 			const admin = await tx
@@ -134,10 +134,10 @@ export class SettingsService {
 				.where('roles.kind', '=', 'administrator')
 				.executeTakeFirst();
 			if (!admin) throw new ApiError(409, 'error.ws.last_administrator');
-			await audit(tx, { tenantId, actorId: claims.sub, action: 'membership.updated', target: id }, null);
+			await audit(tx, { tenantId, actorId: claims.sub, action: 'membership.updated', target: id }, caller);
 		});
 	}
-	role(claims: AccessClaims, id: string, input?: z.infer<typeof roleUpdate>) {
+	role(claims: AccessClaims, id: string, input?: z.infer<typeof roleUpdate>, caller: Caller | null = null) {
 		return this.#tenant(claims, 'roles.manage', async (tx, tenantId) => {
 			const saved = await tx
 				.selectFrom('roles')
@@ -164,7 +164,7 @@ export class SettingsService {
 						name: input.name,
 						permissions: input.permissions,
 						revision: tx('revision', '+', 1),
-						updatedAt: new Date(),
+						updatedAt: this.#services.now(),
 					}))
 					.where('id', '=', id)
 					.execute();
@@ -181,12 +181,12 @@ export class SettingsService {
 					action: input ? (saved ? 'role.updated' : 'role.created') : 'role.deleted',
 					target: id,
 				},
-				null,
+				caller,
 			);
 			return { id };
 		});
 	}
-	saveRole(claims: AccessClaims, input: z.infer<typeof roleUpdate>) {
-		return this.role(claims, input.id ?? uuid(), input);
+	saveRole(claims: AccessClaims, input: z.infer<typeof roleUpdate>, caller: Caller | null = null) {
+		return this.role(claims, input.id ?? uuid(), input, caller);
 	}
 }
