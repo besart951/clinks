@@ -25,6 +25,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm verify
+      - run: pnpm audit --prod --audit-level=high
 
   integration:
     name: Integration (API + database)
@@ -108,10 +109,27 @@ jobs:
           for attempt in $(seq 1 30); do curl -sf http://localhost:8787/health && exit 0; sleep 1; done
           cat "$RUNNER_TEMP/api.log"
           exit 1
+      - name: Start collaboration server
+        working-directory: apps/collab
+        run: |
+          DATABASE_URL=postgres://clinks_api:clinks-api-dev@localhost:5432/clinks \
+          JWKS_URL=http://localhost:8787/.well-known/jwks.json \
+          TOKEN_ISSUER=http://localhost:8787 \
+          PORT=1234 \
+          nohup node src/main.ts > "$RUNNER_TEMP/collab.log" 2>&1 &
+          for attempt in $(seq 1 30); do
+            node -e "const n=require('net');const s=n.connect(1234,'127.0.0.1',()=>process.exit(0));s.on('error',()=>process.exit(1));s.setTimeout(1000,()=>process.exit(1))" && exit 0
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/collab.log"
+          exit 1
       - run: pnpm --filter @clinks/web test:e2e:remote
+        env:
+          VITE_COLLAB_URL: ws://localhost:1234
       - if: failure()
         run: |
           cat "$RUNNER_TEMP/api.log"
+          cat "$RUNNER_TEMP/collab.log" || true
           docker compose -f infra/compose.dev.yml logs --no-color --tail 200 powersync
       - if: failure()
         uses: actions/upload-artifact@v4

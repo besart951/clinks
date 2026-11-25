@@ -15,18 +15,61 @@ services:
       NODE_ENV: production
       TRUST_PROXY: 'true'
       COOKIE_SECURE: 'true'
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:'+(process.env.PORT||8787)+'/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
   collab:
     <<: *workspace
     command: [node, apps/collab/src/main.ts]
     env_file: ${CONFIG_DIR}/collab.env
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "const n=require('net');const s=n.connect(Number(process.env.PORT||1234),'127.0.0.1',()=>process.exit(0));s.on('error',()=>process.exit(1));s.setTimeout(3000,()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
   powersync:
     image: journeyapps/powersync-service:1.29.1
     restart: unless-stopped
+    security_opt: [no-new-privileges:true]
     command: [start, -r, unified]
     env_file: ${CONFIG_DIR}/powersync.env
     environment:
       POWERSYNC_CONFIG_PATH: /config/service.yaml
       PS_PORT: '8080'
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:8080/probes/liveness').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
     volumes:
       - ./powersync.yaml:/config/service.yaml:ro
       - ../powersync/sync-config.yaml:/config/sync-config.yaml:ro
@@ -46,6 +89,14 @@ services:
       SYNC_HOST: ${SYNC_HOST}
       COLLAB_HOST: ${COLLAB_HOST}
     restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+    depends_on:
+      api:
+        condition: service_healthy
+      collab:
+        condition: service_healthy
+      powersync:
+        condition: service_healthy
     ports: ['80:80', '443:443']
     volumes: [caddy_data:/data, caddy_config:/config]
 volumes:

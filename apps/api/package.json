@@ -28,6 +28,7 @@
     "@oslojs/otp": "1.1.0",
     "hono": "4.13.19",
     "jose": "6.2.18",
+    "kysely": "0.29.9",
     "nodemailer": "10.6.1",
     "stripe": "23.2.0",
     "zod": "4.6.7"
@@ -35,7 +36,6 @@
   "devDependencies": {
     "@types/node": "26.6.6",
     "@types/nodemailer": "8.0.2",
-    "kysely": "0.29.9",
     "typescript": "6.0.3",
     "vitest": "5.1.1"
   }
