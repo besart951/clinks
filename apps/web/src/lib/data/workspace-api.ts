@@ -1,9 +1,11 @@
 import type { UserId } from '@clinks/domain/ids';
-import type { AppNotification, Contact, CommentTarget, NotificationKind } from '@clinks/domain/types';
+import type { AppNotification, Contact, CommentTarget, MyVisits, NotificationKind } from '@clinks/domain/types';
+import { startOfWeek, toCalendarDate } from '@clinks/domain/dates';
+import { ownReleasedVisits, visitClient } from '@clinks/domain/spitex-release';
 import type { Repository } from '@clinks/contracts/repository';
 import { workspaceSchemas } from '@clinks/contracts/workspace-schemas';
 import { syncedTables, type SyncedTableName } from '@clinks/sync-schema/tables';
-import type { WorkspaceCache, Tables } from './database.ts';
+import { MockApiError, type WorkspaceCache, type Tables } from './database.ts';
 import { TenantRepository, type RequestContext, type RepositoryConfig } from './repository.ts';
 import type { SyncEngine } from '../sync/sync-engine.svelte.ts';
 import { SyncedRepository } from '../sync/synced-repository.ts';
@@ -32,6 +34,7 @@ export class WorkspaceApi {
 	readonly physioNotes: Pick<Repository<Tables['notes']>, 'list' | 'get' | 'create'>;
 	readonly spitexNotes: Pick<Repository<Tables['notes']>, 'list' | 'get' | 'create'>;
 	readonly timeEntries;
+	readonly weekReleases;
 	readonly notifications;
 	readonly audit: Pick<Repository<Tables['audit']>, 'list'>;
 	readonly #comments;
@@ -59,7 +62,12 @@ export class WorkspaceApi {
 			return new TenantRepository<WorkspaceTable<Name>>(db, context, options);
 		}
 		this.contacts = repository('contacts', contactName);
-		this.appointments = repository('appointments', (row) => row.title);
+		// Spitex visits are the plan: the calendar permission alone does not show them (see the sync streams).
+		this.appointments = repository(
+			'appointments',
+			(row) => row.title,
+			(row) => row.kind !== 'spitex' || context.can('spitex.read'),
+		);
 		this.folders = repository('folders');
 		this.documents = repository('documents', (row) => row.name);
 		this.invoices = repository('invoices', (row) => row.number);
@@ -80,6 +88,7 @@ export class WorkspaceApi {
 			(row) => row.kind === 'spitex',
 		);
 		this.timeEntries = repository('time_entries');
+		this.weekReleases = repository('spitex_week_releases', (row) => row.weekStart);
 		this.notifications = repository('notifications', undefined, (row) => row.userId === context.actorId());
 		this.#comments = {
 			contact: repository('contact_comments', undefined, (row) => row.target.kind === 'contact'),
@@ -111,6 +120,30 @@ export class WorkspaceApi {
 			if (userId !== this.#context.actorId())
 				await this.notifications.create({ userId, kind, message, href, read: false });
 		}
+	}
+
+	/** The caller's own visits in released weeks, with what they need of the clients. */
+	myVisits(): Promise<MyVisits> {
+		if (this.#reads) return this.#reads.myVisits();
+		return this.#db.request(() => {
+			const tenantId = this.#context.tenantId();
+			const actorId = this.#context.actorId();
+			if (!tenantId || !actorId || !this.#context.can('spitex.own.read'))
+				throw new MockApiError('unauthorized', this.#context.localize('error.unauthorized'));
+			const releases = this.#db.table('weekReleases').filter((row) => row.tenantId === tenantId);
+			const visits = ownReleasedVisits(
+				this.#db.table('appointments').filter((row) => row.tenantId === tenantId),
+				actorId,
+				releases,
+				(start) => startOfWeek(toCalendarDate(start)),
+			);
+			const wanted = new Set(visits.map((visit) => visit.contactId));
+			const clients = this.#db
+				.table('contacts')
+				.filter((row) => row.tenantId === tenantId && wanted.has(row.id))
+				.map(visitClient);
+			return { visits, clients, releases };
+		});
 	}
 
 	/** Staff of the tenant that can be assigned or mentioned. */

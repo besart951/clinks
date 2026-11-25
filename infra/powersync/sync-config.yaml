@@ -24,14 +24,66 @@ streams:
           AND 'contacts.read' IN read_permissions
       )
 
+  # Spitex visits are the plan and follow its release (below), not the calendar permission.
   appointments:
     auto_subscribe: true
     query: |
-      SELECT * FROM appointments WHERE tenant_id IN (
+      SELECT * FROM appointments WHERE kind != 'spitex' AND tenant_id IN (
         SELECT tenant_id FROM sync_access
         WHERE user_id = auth.user_id() AND tenant_id = auth.parameter('tenant_id')
           AND 'calendar.read' IN read_permissions
       )
+
+  # Planners: the whole plan, drafts included.
+  spitex_planning:
+    auto_subscribe: true
+    query: |
+      SELECT * FROM appointments WHERE kind = 'spitex' AND tenant_id IN (
+        SELECT tenant_id FROM sync_access
+        WHERE user_id = auth.user_id() AND tenant_id = auth.parameter('tenant_id')
+          AND 'spitex.read' IN read_permissions
+      )
+
+  # Staff: their own visits of released weeks. `published` is set by triggers from spitex_week_releases, so
+  # withdrawing a release or reassigning a visit removes it from the device.
+  my_visits:
+    auto_subscribe: true
+    query: |
+      SELECT * FROM appointments WHERE kind = 'spitex' AND published AND assignee_id = auth.user_id()
+        AND tenant_id IN (
+          SELECT tenant_id FROM sync_access
+          WHERE user_id = auth.user_id() AND tenant_id = auth.parameter('tenant_id')
+            AND 'spitex.own.read' IN read_permissions
+        )
+
+  # What staff need of the clients they visit: name, address and phone, nothing else of the record. It lands
+  # in its own local table, so it never mixes with full contacts.
+  visit_clients:
+    auto_subscribe: true
+    query: |
+      SELECT id, tenant_id, kind, first_name, last_name, company_name, phone, address
+      FROM contacts AS visit_clients WHERE id IN (
+        SELECT a.contact_id FROM appointments a INNER JOIN sync_access s ON s.tenant_id = a.tenant_id
+        WHERE a.kind = 'spitex' AND a.published AND a.assignee_id = auth.user_id()
+          AND s.user_id = auth.user_id() AND s.tenant_id = auth.parameter('tenant_id')
+          AND 'spitex.own.read' IN s.read_permissions
+      )
+
+  spitex_week_releases:
+    auto_subscribe: true
+    queries:
+      - |
+        SELECT * FROM spitex_week_releases WHERE tenant_id IN (
+          SELECT tenant_id FROM sync_access
+          WHERE user_id = auth.user_id() AND tenant_id = auth.parameter('tenant_id')
+            AND 'spitex.read' IN read_permissions
+        )
+      - |
+        SELECT * FROM spitex_week_releases WHERE tenant_id IN (
+          SELECT tenant_id FROM sync_access
+          WHERE user_id = auth.user_id() AND tenant_id = auth.parameter('tenant_id')
+            AND 'spitex.own.read' IN read_permissions
+        )
 
   folders:
     auto_subscribe: true

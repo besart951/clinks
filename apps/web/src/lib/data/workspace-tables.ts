@@ -6,6 +6,7 @@ const sharedTableNames = {
 	spitex_notes: 'notes',
 	time_entries: 'timeEntries',
 	spitex_week_releases: 'weekReleases',
+	visit_clients: 'contacts',
 	contact_comments: 'comments',
 	task_comments: 'comments',
 	invoice_comments: 'comments',

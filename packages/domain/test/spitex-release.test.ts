@@ -2,7 +2,14 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 import type { UserId } from '../src/ids.ts';
 import { permissionAreas, roleGrants, userPermissions } from '../src/permissions.ts';
-import { changedVisitRecipients, isReleased, visitWeek } from '../src/spitex-release.ts';
+import {
+	changedVisitRecipients,
+	isReleased,
+	ownReleasedVisits,
+	visitClient,
+	visitWeek,
+} from '../src/spitex-release.ts';
+import type { Contact } from '../src/types.ts';
 
 const anna = 'anna' as UserId;
 const beat = 'beat' as UserId;
@@ -47,6 +54,46 @@ describe('releasing the Spitex plan', () => {
 			[anna],
 		);
 		assert.deepEqual(changedVisitRecipients({ ...visit(anna), kind: 'meeting' }, null, released), []);
+	});
+
+	it('gives a person their own visits of released weeks and the bare client', () => {
+		const rows = [
+			visit(anna, '2026-12-09T08:00:00.000Z'),
+			visit(anna, '2026-12-08T08:00:00.000Z'),
+			visit(beat),
+			visit(anna, '2026-12-15T08:00:00.000Z'),
+			{ ...visit(anna), kind: 'meeting' as const },
+		];
+		const own = ownReleasedVisits(rows, anna, [{ weekStart: '2026-12-07' }], (start) =>
+			visitWeek(start, 'Europe/Zurich'),
+		);
+		assert.deepEqual(
+			own.map((row) => row.start),
+			['2026-12-08T08:00:00.000Z', '2026-12-09T08:00:00.000Z'],
+		);
+		const contact = {
+			id: 'c',
+			tenantId: 't',
+			kind: 'person',
+			firstName: 'Lea',
+			lastName: 'Muster',
+			companyName: '',
+			phone: '032',
+			address: { street: 'Weg', houseNumber: '1', zip: '2500', city: 'Biel' },
+			insurer: 'Visana',
+			notes: 'vertraulich',
+			ahvNumber: '756',
+		} as unknown as Contact;
+		assert.deepEqual(Object.keys(visitClient(contact)).sort(), [
+			'address',
+			'companyName',
+			'firstName',
+			'id',
+			'kind',
+			'lastName',
+			'phone',
+			'tenantId',
+		]);
 	});
 
 	it('groups the new permissions into their own areas and lets the whole plan include the own visits', () => {
