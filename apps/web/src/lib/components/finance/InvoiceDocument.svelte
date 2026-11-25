@@ -11,7 +11,8 @@
 	const totals = $derived(invoiceTotals(invoice));
 	/** A4 at 96 dpi. Narrower screens show the whole page scaled down, as it will print. */
 	const pageWidth = 794;
-	let available = $state(pageWidth);
+	// Start from the window, so a phone does not draw one frame at full A4 width before measuring.
+	let available = $state(typeof innerWidth === 'number' ? Math.min(pageWidth, innerWidth) : pageWidth);
 	const fit = $derived(Math.min(1, available / pageWidth));
 </script>
 
