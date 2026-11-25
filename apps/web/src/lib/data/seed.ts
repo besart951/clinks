@@ -1,3 +1,4 @@
+import { streetLine } from '@clinks/domain/address';
 import { addDays, atTime, toCalendarDate } from '@clinks/domain/dates';
 import { newId, type ContactId, type FolderId, type RoleId, type TenantId } from '@clinks/domain/ids';
 import { invoiceTotals } from '@clinks/domain/money';
@@ -210,7 +211,7 @@ function tenant(context: SeedContext, seed: TenantSeed): { tenant: Tenant; roles
 		industry: seed.industry,
 		brandColor: seed.brandColor,
 		logoDataUrl: null,
-		address: { street: 'Zentralplatz 1', zip: seed.city[0], city: seed.city[1] },
+		address: { street: 'Zentralplatz', houseNumber: '1', zip: seed.city[0], city: seed.city[1] },
 		vatNumber: 'CHE-123.456.789 MWST',
 		iban: 'CH93 0076 2011 6238 5295 7',
 		locale: 'de-CH',
@@ -289,7 +290,7 @@ function person(context: SeedContext, tenantId: TenantId, tags: string[], extra:
 				.toLowerCase()
 				.replace(/[äöü]/g, (letter) => ({ ä: 'ae', ö: 'oe', ü: 'ue' })[letter] ?? letter) + '@example.ch',
 		phone: `+41 32 ${between(context, 300, 399)} ${between(context, 10, 99)} ${between(context, 10, 99)}`,
-		address: { street: `${pick(context, streets)} ${between(context, 1, 80)}`, zip, city },
+		address: { street: pick(context, streets), houseNumber: String(between(context, 1, 80)), zip, city },
 		birthDate: `${year}-${String(between(context, 1, 12)).padStart(2, '0')}-${String(between(context, 1, 28)).padStart(2, '0')}`,
 		insurer: pick(context, insurers),
 		tags,
@@ -309,7 +310,7 @@ function company(context: SeedContext, tenantId: TenantId, name: string, tags: s
 		companyName: name,
 		email: `info@${name.toLowerCase().replace(/[^a-z]+/g, '')}.ch`,
 		phone: `+41 32 ${between(context, 300, 399)} ${between(context, 10, 99)} 00`,
-		address: { street: `${pick(context, streets)} ${between(context, 1, 80)}`, zip, city },
+		address: { street: pick(context, streets), houseNumber: String(between(context, 1, 80)), zip, city },
 		birthDate: null,
 		insurer: '',
 		tags,
@@ -414,7 +415,8 @@ function seedCalendar(context: SeedContext, tenantId: TenantId, industry: Indust
 					assigneeId: open ? null : worker.id,
 					start,
 					end,
-					location: industry === 'spitex' ? `${client.address.street}, ${client.address.city}` : 'Behandlungsraum 1',
+					location:
+						industry === 'spitex' ? `${streetLine(client.address)}, ${client.address.city}` : 'Behandlungsraum 1',
 					notes: '',
 					seriesId: null,
 					service,

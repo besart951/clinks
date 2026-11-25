@@ -1,3 +1,4 @@
+import { splitStreet } from '@clinks/domain/address';
 import { toast } from 'svelte-sonner';
 import type { Contact } from '@clinks/domain/types';
 import { emptyContact } from './empty-contact.ts';
@@ -48,6 +49,8 @@ export class ContactFormModel {
 		try {
 			const api = this.#workspace.api.contacts;
 			const draft = $state.snapshot(this.value) as Draft<Contact>;
+			// «Bahnhofstrasse 57» typed or autofilled into the street gets its number moved over.
+			if (!draft.address.houseNumber) draft.address = { ...draft.address, ...splitStreet(draft.address.street) };
 			const saved = this.#original
 				? await api.update(this.#original.id, this.#original.revision, draft)
 				: await api.create(draft);

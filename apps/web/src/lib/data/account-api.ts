@@ -185,7 +185,7 @@ export class AccountApi {
 				industry: input.industry,
 				brandColor: input.industry === 'spitex' ? '#7c3aed' : '#0f766e',
 				logoDataUrl: null,
-				address: { street: '', zip: '', city: '' },
+				address: { street: '', houseNumber: '', zip: '', city: '' },
 				vatNumber: '',
 				iban: '',
 				locale: 'de-CH',

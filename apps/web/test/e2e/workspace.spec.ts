@@ -220,6 +220,19 @@ test('edits master data in place and collapses sections', async ({ page }) => {
 	await expect(page.getByRole('heading', { level: 1, name: 'Inline Direkt' })).toBeVisible();
 	await expect(page.getByText('Nachname gespeichert')).toBeVisible();
 
+	// The address edits as street, number, postal code and city; Tab moves between them without saving.
+	await page.getByText('Adresse', { exact: true }).locator('..').getByRole('button').click();
+	const address = page.getByRole('group', { name: 'Adresse' });
+	await address.getByLabel('Strasse').fill('Bahnhofstrasse');
+	await page.keyboard.press('Tab');
+	await expect(address.getByLabel('Nr.')).toBeFocused();
+	await address.getByLabel('Nr.').fill('57');
+	await address.getByLabel('PLZ').fill('3255');
+	await address.getByLabel('Ort').fill('Rapperswil BE');
+	await page.keyboard.press('Enter');
+	await expect(page.getByRole('button', { name: 'Bahnhofstrasse 57, 3255 Rapperswil BE' })).toBeVisible();
+	await expect(page.getByText('Adresse gespeichert')).toBeVisible();
+
 	// Escape restores the value without saving.
 	await page.getByRole('button', { name: 'Direkt', exact: true }).click();
 	await page.getByRole('textbox', { name: 'Nachname' }).fill('Verworfen');

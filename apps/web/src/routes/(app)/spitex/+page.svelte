@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { streetLine } from '@clinks/domain/address';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import ChevronLeft from '@lucide/svelte/icons/chevron-left';
@@ -99,7 +100,7 @@
 		createVisit({
 			contactId: client.id,
 			title: contactName(client),
-			location: [client.address.street, client.address.city].filter(Boolean).join(', '),
+			location: [streetLine(client.address), client.address.city].filter(Boolean).join(', '),
 		});
 	}
 

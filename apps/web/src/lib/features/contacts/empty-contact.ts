@@ -9,7 +9,7 @@ export function emptyContact(kind: ContactKind = 'person'): Draft<Contact> {
 		companyName: '',
 		email: '',
 		phone: '',
-		address: { street: '', zip: '', city: '' },
+		address: { street: '', houseNumber: '', zip: '', city: '' },
 		birthDate: null,
 		insurer: '',
 		tags: [],

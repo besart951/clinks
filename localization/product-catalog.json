@@ -1187,8 +1187,8 @@
         "en-US": "Phone"
       },
       "ui.ws.field.street": {
-        "de-CH": "Strasse und Nr.",
-        "en-US": "Street and number"
+        "de-CH": "Strasse",
+        "en-US": "Street"
       },
       "ui.ws.field.zip": {
         "de-CH": "PLZ",
@@ -4395,8 +4395,8 @@
         "en-US": "Default language for new members and time zone for appointments."
       },
       "ui.ws.settings.street": {
-        "de-CH": "Strasse und Nr.",
-        "en-US": "Street and no."
+        "de-CH": "Strasse",
+        "en-US": "Street"
       },
       "ui.ws.settings.tenant_name": {
         "de-CH": "Firmenname",
@@ -5009,6 +5009,10 @@
       "ui.ws.calendar.show_days": {
         "de-CH": "Alle Tage wieder einblenden",
         "en-US": "Show all days again"
+      },
+      "ui.ws.field.house_number": {
+        "de-CH": "Nr.",
+        "en-US": "No."
       }
     }
   }

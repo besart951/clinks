@@ -63,6 +63,8 @@ export type Industry = (typeof industries)[number];
 
 export interface Address {
 	street: string;
+	/** Kept apart from the street, as the QR bill's structured address asks. */
+	houseNumber: string;
 	zip: string;
 	city: string;
 }

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatAddress } from '@clinks/domain/address';
 	import * as Dialog from '@clinks/ui/components/ui/dialog';
 	import { Button } from '@clinks/ui/components/ui/button';
 	import { contactName } from '#lib/data/workspace-api';
@@ -49,8 +50,7 @@
 						<span class="block font-medium">{contactName(contact)}</span>
 						<span class="text-muted-foreground block">{contact.email || '—'} · {contact.phone || '—'}</span>
 						<span class="text-muted-foreground block">
-							{contact.address.street}, {contact.address.zip}
-							{contact.address.city}
+							{formatAddress(contact.address) || '—'}
 						</span>
 					</span>
 				</label>

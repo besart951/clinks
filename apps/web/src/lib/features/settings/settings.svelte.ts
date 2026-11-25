@@ -63,6 +63,7 @@ export class CompanySettingsModel {
 				validate: (value) => (value ? null : t('ui.ws.inline.required')),
 			},
 			{ key: 'street', label: t('ui.ws.settings.street'), value: tenant.address.street },
+			{ key: 'houseNumber', label: t('ui.ws.field.house_number'), value: tenant.address.houseNumber ?? '' },
 			{ key: 'zip', label: t('ui.ws.field.zip'), value: tenant.address.zip },
 			{ key: 'city', label: t('ui.ws.field.city'), value: tenant.address.city },
 			{ key: 'vatNumber', label: t('ui.ws.settings.vat_number'), value: tenant.vatNumber, mono: true },
@@ -101,7 +102,7 @@ export class CompanySettingsModel {
 
 	saveField(field: InlineFieldSpec, value: string) {
 		const tenant = this.#workspace.session.tenant!;
-		const address = ['street', 'zip', 'city'].includes(field.key);
+		const address = ['street', 'houseNumber', 'zip', 'city'].includes(field.key);
 		const patch: Partial<Tenant> = address
 			? { address: { ...tenant.address, [field.key]: value } }
 			: { [field.key]: value };

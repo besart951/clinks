@@ -113,20 +113,26 @@
 					<Input id="c-phone" type="tel" bind:value={form.value.phone} aria-invalid={!!form.fields.phone} />
 				</FormField>
 			</div>
-			<FormField id="c-street" label={workspace.t('ui.ws.field.street')}>
-				<Input id="c-street" bind:value={form.value.address.street} autocomplete="street-address" />
-			</FormField>
+			<div class="grid grid-cols-[1fr_6rem] gap-3">
+				<FormField id="c-street" label={workspace.t('ui.ws.field.street')}>
+					<Input id="c-street" bind:value={form.value.address.street} autocomplete="address-line1" />
+				</FormField>
+				<FormField id="c-house-number" label={workspace.t('ui.ws.field.house_number')}>
+					<Input id="c-house-number" bind:value={form.value.address.houseNumber} />
+				</FormField>
+			</div>
 			<div class="grid grid-cols-[7rem_1fr] gap-3">
 				<FormField id="c-zip" label={workspace.t('ui.ws.field.zip')} error={form.fields['address.zip']}>
 					<Input
 						id="c-zip"
 						bind:value={form.value.address.zip}
 						inputmode="numeric"
+						autocomplete="postal-code"
 						aria-invalid={!!form.fields['address.zip']}
 					/>
 				</FormField>
 				<FormField id="c-city" label={workspace.t('ui.ws.field.city')}>
-					<Input id="c-city" bind:value={form.value.address.city} />
+					<Input id="c-city" bind:value={form.value.address.city} autocomplete="address-level2" />
 				</FormField>
 			</div>
 			<FormField id="c-tags" label={workspace.t('ui.ws.field.tags')} hint={workspace.t('ui.ws.contacts.tags_hint')}>

@@ -6,7 +6,7 @@ type Timestamp = ColumnType<Date, Date | string | undefined, Date | string>;
 
 export interface TenantTable {
 	logoDataUrl: string | null;
-	address: Defaulted<{ street: string; zip: string; city: string }>;
+	address: Defaulted<{ street: string; houseNumber: string; zip: string; city: string }>;
 	vatNumber: Defaulted<string>;
 	iban: Defaulted<string>;
 	id: string;

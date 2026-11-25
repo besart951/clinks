@@ -23,7 +23,7 @@ describe('contacts import', () => {
 			firstName: 'Anna',
 			lastName: 'Meier',
 			companyName: '',
-			address: { street: '', zip: '', city: 'Lyss' },
+			address: { street: '', houseNumber: '', zip: '', city: 'Lyss' },
 		};
 		assert.equal(duplicateKey(base), duplicateKey({ ...base, firstName: 'anna' }));
 		assert.equal(duplicateKey({ ...base, email: 'A@x.ch' }), 'a@x.ch');

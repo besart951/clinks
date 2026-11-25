@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { streetLine } from '@clinks/domain/address';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import CalendarClock from '@lucide/svelte/icons/calendar-clock';
@@ -67,7 +68,7 @@
 							<span class="text-muted-foreground grid gap-1.5 text-xs">
 								<span class="flex items-center gap-2">
 									<MapPin class="size-3.5 shrink-0" />
-									<span class="truncate">{row.client.address.street}, {row.client.address.city}</span>
+									<span class="truncate">{streetLine(row.client.address)}, {row.client.address.city}</span>
 								</span>
 								<span class="flex items-center gap-2">
 									<CalendarClock class="size-3.5 shrink-0" />
@@ -122,7 +123,7 @@
 									</span>
 								</Table.Cell>
 								<Table.Cell class="hidden md:table-cell">
-									{row.client.address.street}, {row.client.address.city}
+									{streetLine(row.client.address)}, {row.client.address.city}
 								</Table.Cell>
 								<Table.Cell>{row.next ? workspace.i18n.dateTime(row.next.start) : '—'}</Table.Cell>
 								<Table.Cell class="hidden sm:table-cell">

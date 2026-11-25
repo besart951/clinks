@@ -67,7 +67,12 @@ const image = z
 	.max(1_350_000)
 	.regex(/^data:image\/(png|jpeg|gif|webp);base64,[A-Za-z0-9+/]+=*$/u)
 	.nullable();
-const address = z.object({ street: z.string().max(256), zip: z.string().max(24), city: z.string().max(128) });
+const address = z.object({
+	street: z.string().max(256),
+	houseNumber: z.string().max(16).default(''),
+	zip: z.string().max(24),
+	city: z.string().max(128),
+});
 const preferences = z.object({
 	inApp: z.boolean(),
 	email: z.boolean(),
