@@ -24,11 +24,15 @@
 	import Users from '@lucide/svelte/icons/users';
 	import { personBadge } from '@clinks/ui/kit/avatar';
 	import AppointmentSheet from '#lib/components/calendar/AppointmentSheet.svelte';
+	import ContactFormSheet from '#lib/components/contacts/ContactFormSheet.svelte';
+	import type { AppointmentFields } from '#lib/features/calendar/appointment-form.svelte';
+	import { clientTag } from '#lib/features/spitex/clients.svelte';
+	import { contactName } from '#lib/data/workspace-api';
 	import { PlanningModel } from '#lib/features/spitex/planning.svelte';
 	import { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
 	import { addDays, minutesToTime, today } from '@clinks/domain/dates';
 	import { firstFreeStart } from '@clinks/domain/scheduling';
-	import type { Appointment } from '@clinks/domain/types';
+	import type { Appointment, Contact } from '@clinks/domain/types';
 	import type { UserId } from '@clinks/domain/ids';
 	import { href, routeQuery, setQuery } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
@@ -37,6 +41,8 @@
 	const model = new PlanningModel(workspace);
 	const people = new PeopleDirectory(workspace);
 	const canWrite = $derived(workspace.session.can('spitex.write') && workspace.session.can('calendar.write'));
+	const canAddClient = $derived(canWrite && workspace.session.can('contacts.write'));
+	let clientSheet: ContactFormSheet;
 	const staff = $derived(people.people);
 	/** Staff shown as columns; the menu «Mitarbeitende» hides the others. */
 	const shown = $derived(staff.filter((person) => !model.hiddenPeople.includes(person.id)));
@@ -75,7 +81,7 @@
 		};
 	});
 
-	function createVisit() {
+	function createVisit(preset: Partial<AppointmentFields> = {}) {
 		sheet.show(null, {
 			kind: 'spitex',
 			date: model.date,
@@ -84,6 +90,16 @@
 			endTime: '08:30',
 			windowFrom: '08:00',
 			windowTo: '08:30',
+			...preset,
+		});
+	}
+
+	/** A new client from the open visits: right after saving, their first (still open) visit can be planned. */
+	function planFirstVisit(client: Contact) {
+		createVisit({
+			contactId: client.id,
+			title: contactName(client),
+			location: [client.address.street, client.address.city].filter(Boolean).join(', '),
 		});
 	}
 
@@ -248,11 +264,26 @@
 				</div>
 
 				<div class="grid gap-4 xl:grid-cols-[18rem_1fr]">
-					<Card.Root class="h-fit print:hidden">
+					<Card.Root class="group/open h-fit print:hidden">
 						<Card.Header>
 							<Card.Title>{workspace.t('ui.ws.spitex.open_visits')}</Card.Title><Card.Description>
 								{workspace.t('ui.ws.spitex.open_text')}
 							</Card.Description>
+							{#if canAddClient}
+								<Card.Action>
+									<!-- Shown on hover and keyboard focus; always on touch screens, which cannot hover. -->
+									<Button
+										variant="ghost"
+										size="icon-sm"
+										class="opacity-0 transition-opacity group-focus-within/open:opacity-100 group-hover/open:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100"
+										aria-label={workspace.t('ui.ws.spitex.new_client')}
+										title={workspace.t('ui.ws.spitex.new_client')}
+										onclick={() => clientSheet.show(null, { tags: [clientTag] })}
+									>
+										<Plus class="size-4" />
+									</Button>
+								</Card.Action>
+							{/if}
 						</Card.Header>
 						<Card.Content>
 							<ul class="space-y-2">
@@ -386,3 +417,4 @@
 		/>
 	</div>
 </ModuleGate>
+<ContactFormSheet bind:this={clientSheet} onSaved={planFirstVisit} />
