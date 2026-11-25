@@ -518,6 +518,9 @@ test('jumps to a day, week or month from the small calendar', async ({ page }) =
 	await page.getByRole('button', { name: 'Arbeitsbereich' }).click();
 	await page.getByRole('menuitem', { name: 'Stille Spitex Seeland' }).click();
 	await page.goto('/#/spitex');
+	// The week's load per person sits beside the plan; each column shows the day's load.
+	await expect(page.getByRole('table', { name: 'Einsatzzeit pro Person und Tag (Stunden:Minuten)' })).toBeVisible();
+	await expect(page.getByText(/h geplant$/).first()).toBeVisible();
 	await page.getByRole('button', { name: 'Datum wählen' }).click();
 	await picker.getByRole('button', { name: 'Montag, 30. November 2026' }).click();
 	await expect(page.getByRole('heading', { level: 2, name: 'Montag, 30. November 2026' })).toBeVisible();

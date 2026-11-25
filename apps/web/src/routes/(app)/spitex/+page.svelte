@@ -129,12 +129,23 @@
 			key: person.id,
 			label: person.name,
 			href: personHref(person.id),
-			sublabel: person.jobTitle,
+			sublabel: dayLoad(person.id),
 			date: model.date,
 			assigneeId: person.id,
 			appointments: model.day.filter((row) => row.assigneeId === person.id),
 		})),
 	]);
+
+	/** «4:45 h geplant» under each person's name, so the day's load shows where visits are planned. */
+	function dayLoad(userId: UserId) {
+		const minutes = model.minutesFor(userId, model.date);
+		return minutes
+			? workspace.t('ui.ws.spitex.day_load', { time: hours(minutes) })
+			: workspace.t('ui.ws.spitex.day_free');
+	}
+
+	/** «4:45» rather than «04:45», to fit the narrow week table. */
+	const hours = (minutes: number) => minutesToTime(minutes).replace(/^0/u, '');
 
 	function assignTo(visit: Appointment, assigneeId: UserId) {
 		const start = firstFreeStart(visit, model.date, assigneeId, model.day);
@@ -267,143 +278,161 @@
 				</div>
 
 				<div class="grid gap-4 xl:grid-cols-[18rem_1fr]">
-					<Card.Root class="group/open h-fit print:hidden">
-						<Card.Header>
-							<Card.Title>{workspace.t('ui.ws.spitex.open_visits')}</Card.Title><Card.Description>
-								{workspace.t('ui.ws.spitex.open_text')}
-							</Card.Description>
-							{#if canAddClient}
-								<Card.Action>
-									<!-- Shown on hover and keyboard focus; always on touch screens, which cannot hover. -->
-									<Button
-										variant="ghost"
-										size="icon-sm"
-										class="opacity-0 transition-opacity group-focus-within/open:opacity-100 group-hover/open:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100"
-										aria-label={workspace.t('ui.ws.spitex.new_client')}
-										title={workspace.t('ui.ws.spitex.new_client')}
-										onclick={() => clientSheet.show(null, { tags: [clientTag] })}
-									>
-										<Plus class="size-4" />
-									</Button>
-								</Card.Action>
-							{/if}
-						</Card.Header>
-						<Card.Content>
-							<ul class="space-y-2">
-								{#each model.open as visit (visit.id)}
-									<li
-										class="bg-background relative rounded-lg border border-dashed p-2 text-sm {canWrite
-											? 'ps-7'
-											: ''} {dragging?.id === visit.id ? 'opacity-40' : ''}"
-									>
-										{#if canWrite}
-											<!-- Pointer only; «Zuweisen» below is the keyboard and screen-reader way to do the same. -->
-											<span
-												draggable="true"
-												aria-hidden="true"
-												title={workspace.t('ui.ws.spitex.drag_visit', { title: visit.title })}
-												class="text-muted-foreground hover:bg-muted hover:text-foreground absolute inset-y-1 start-1 flex w-5 cursor-grab items-center justify-center rounded select-none active:cursor-grabbing"
-												ondragstart={(event) => startDrag(event, visit)}
-												ondragend={() => (dragging = null)}
-											>
-												<Grip class="size-4" />
-											</span>
-										{/if}
-										<p class="font-medium">{visit.title}</p>
-										<p class="text-muted-foreground text-xs">
-											{workspace.t('ui.ws.spitex.window', { window: windowLabel(visit) })} · {visit.service
-												? workspace.t(`ui.ws.spitex.service.${visit.service}`)
-												: ''}
-										</p>
-										{#if canWrite}
-											<DropdownMenu.Root>
-												<DropdownMenu.Trigger>
-													{#snippet child({ props })}<Button {...props} size="xs" variant="outline" class="mt-2">
-															{workspace.t('ui.ws.spitex.assign')}
-														</Button>{/snippet}
-												</DropdownMenu.Trigger>
-												<DropdownMenu.Content align="start" class="w-72">
-													<DropdownMenu.Label class="text-muted-foreground text-xs font-normal">
-														{workspace.t('ui.ws.spitex.assign_to', { title: visit.title })}
-													</DropdownMenu.Label>
-													{#each candidates(visit) as { person, slot } (person.id)}
-														<DropdownMenu.Item class="gap-2.5 py-1.5" onclick={() => assignTo(visit, person.id)}>
-															<span
-																class="grid size-7 shrink-0 place-items-center rounded-full text-[11px] font-semibold text-white"
-																style:background-color={person.avatarColor}
-																aria-hidden="true"
-															>
-																{personBadge(person.name).initials}
-															</span>
-															<span class="min-w-0 flex-1">
-																<span class="block truncate font-medium">{person.name}</span>
-																{#if person.jobTitle}<span class="text-muted-foreground block truncate text-xs">
-																		{person.jobTitle}
-																	</span>{/if}
-															</span>
-															{#if slot}
-																<span class="bg-muted rounded px-1.5 py-0.5 text-xs font-medium tabular-nums">
-																	{workspace.i18n.time(slot)}
-																</span>
-															{:else}
-																<span class="text-muted-foreground text-xs">{workspace.t('ui.ws.spitex.no_slot')}</span>
-															{/if}
-														</DropdownMenu.Item>
-													{/each}
-												</DropdownMenu.Content>
-											</DropdownMenu.Root>
-										{/if}
-									</li>
-								{:else}
-									<li class="text-muted-foreground flex items-center gap-2 text-sm">
-										<CircleCheck class="size-4 text-emerald-600" />{workspace.t('ui.ws.spitex.none_open')}
-									</li>
-								{/each}
-							</ul>
-						</Card.Content>
-					</Card.Root>
-					<div class="min-w-0 space-y-3">
-						<TimeGrid {columns} {handlers} {axis} {selectedId} bind:dragging editable={canWrite} />
-						<p class="text-muted-foreground text-xs print:hidden">
-							{workspace.t(axis === 'horizontal' ? 'ui.ws.spitex.board_hint_horizontal' : 'ui.ws.spitex.board_hint')}
-						</p>
-						<div class="overflow-x-auto rounded-xl border">
-							<table class="w-full text-sm">
-								<caption class="text-muted-foreground px-3 py-2 text-left text-xs">
-									{workspace.t('ui.ws.spitex.week_load')}
-								</caption>
-								<thead>
-									<tr class="border-y">
-										<th class="px-3 py-1.5 text-left font-medium">
-											{workspace.t('ui.ws.calendar.people')}
-										</th>{#each model.week as day (day)}<th class="px-2 py-1.5 font-medium">
-												{workspace.i18n.format(day, { weekday: 'short' })}
-											</th>{/each}
-									</tr>
-								</thead>
-								<tbody>
-									{#each shown as person (person.id)}
-										<tr class="border-b last:border-0">
-											<td class="px-3 py-1.5">
-												<a class="hover:underline" href={personHref(person.id)}>{person.name}</a>
-											</td>
-											{#each model.week as day (day)}
-												{@const minutes = model.minutesFor(person.id, day)}
-												<td
-													class="px-2 py-1.5 text-center tabular-nums {minutes > 8.5 * 60
-														? 'text-destructive font-medium'
-														: minutes === 0
-															? 'text-muted-foreground'
-															: ''}"
+					<div class="space-y-4">
+						<Card.Root class="group/open h-fit print:hidden">
+							<Card.Header>
+								<Card.Title>{workspace.t('ui.ws.spitex.open_visits')}</Card.Title><Card.Description>
+									{workspace.t('ui.ws.spitex.open_text')}
+								</Card.Description>
+								{#if canAddClient}
+									<Card.Action>
+										<!-- Shown on hover and keyboard focus; always on touch screens, which cannot hover. -->
+										<Button
+											variant="ghost"
+											size="icon-sm"
+											class="opacity-0 transition-opacity group-focus-within/open:opacity-100 group-hover/open:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100"
+											aria-label={workspace.t('ui.ws.spitex.new_client')}
+											title={workspace.t('ui.ws.spitex.new_client')}
+											onclick={() => clientSheet.show(null, { tags: [clientTag] })}
+										>
+											<Plus class="size-4" />
+										</Button>
+									</Card.Action>
+								{/if}
+							</Card.Header>
+							<Card.Content>
+								<ul class="space-y-2">
+									{#each model.open as visit (visit.id)}
+										<li
+											class="bg-background relative rounded-lg border border-dashed p-2 text-sm {canWrite
+												? 'ps-7'
+												: ''} {dragging?.id === visit.id ? 'opacity-40' : ''}"
+										>
+											{#if canWrite}
+												<!-- Pointer only; «Zuweisen» below is the keyboard and screen-reader way to do the same. -->
+												<span
+													draggable="true"
+													aria-hidden="true"
+													title={workspace.t('ui.ws.spitex.drag_visit', { title: visit.title })}
+													class="text-muted-foreground hover:bg-muted hover:text-foreground absolute inset-y-1 start-1 flex w-5 cursor-grab items-center justify-center rounded select-none active:cursor-grabbing"
+													ondragstart={(event) => startDrag(event, visit)}
+													ondragend={() => (dragging = null)}
 												>
-													{minutes ? minutesToTime(minutes) : '–'}
-												</td>
+													<Grip class="size-4" />
+												</span>
+											{/if}
+											<p class="font-medium">{visit.title}</p>
+											<p class="text-muted-foreground text-xs">
+												{workspace.t('ui.ws.spitex.window', { window: windowLabel(visit) })} · {visit.service
+													? workspace.t(`ui.ws.spitex.service.${visit.service}`)
+													: ''}
+											</p>
+											{#if canWrite}
+												<DropdownMenu.Root>
+													<DropdownMenu.Trigger>
+														{#snippet child({ props })}<Button {...props} size="xs" variant="outline" class="mt-2">
+																{workspace.t('ui.ws.spitex.assign')}
+															</Button>{/snippet}
+													</DropdownMenu.Trigger>
+													<DropdownMenu.Content align="start" class="w-72">
+														<DropdownMenu.Label class="text-muted-foreground text-xs font-normal">
+															{workspace.t('ui.ws.spitex.assign_to', { title: visit.title })}
+														</DropdownMenu.Label>
+														{#each candidates(visit) as { person, slot } (person.id)}
+															<DropdownMenu.Item class="gap-2.5 py-1.5" onclick={() => assignTo(visit, person.id)}>
+																<span
+																	class="grid size-7 shrink-0 place-items-center rounded-full text-[11px] font-semibold text-white"
+																	style:background-color={person.avatarColor}
+																	aria-hidden="true"
+																>
+																	{personBadge(person.name).initials}
+																</span>
+																<span class="min-w-0 flex-1">
+																	<span class="block truncate font-medium">{person.name}</span>
+																	{#if person.jobTitle}<span class="text-muted-foreground block truncate text-xs">
+																			{person.jobTitle}
+																		</span>{/if}
+																</span>
+																{#if slot}
+																	<span class="bg-muted rounded px-1.5 py-0.5 text-xs font-medium tabular-nums">
+																		{workspace.i18n.time(slot)}
+																	</span>
+																{:else}
+																	<span class="text-muted-foreground text-xs">
+																		{workspace.t('ui.ws.spitex.no_slot')}
+																	</span>
+																{/if}
+															</DropdownMenu.Item>
+														{/each}
+													</DropdownMenu.Content>
+												</DropdownMenu.Root>
+											{/if}
+										</li>
+									{:else}
+										<li class="text-muted-foreground flex items-center gap-2 text-sm">
+											<CircleCheck class="size-4 text-emerald-600" />{workspace.t('ui.ws.spitex.none_open')}
+										</li>
+									{/each}
+								</ul>
+							</Card.Content>
+						</Card.Root>
+						<Card.Root class="h-fit">
+							<Card.Header>
+								<Card.Title>{workspace.t('ui.ws.spitex.week_load_title')}</Card.Title>
+							</Card.Header>
+							<Card.Content>
+								<table class="w-full table-fixed text-[11px] tabular-nums">
+									<caption class="sr-only">{workspace.t('ui.ws.spitex.week_load')}</caption>
+									<thead>
+										<tr class="text-muted-foreground">
+											<th class="w-8 pb-1 text-left font-normal">
+												<span class="sr-only">{workspace.t('ui.ws.calendar.people')}</span>
+											</th>
+											{#each model.week as day (day)}
+												<th
+													class="pb-1 font-normal {day === model.date ? 'text-foreground font-semibold' : ''}"
+													aria-current={day === model.date ? 'date' : undefined}
+												>
+													{workspace.i18n.format(day, { weekday: 'narrow' })}
+												</th>
 											{/each}
 										</tr>
-									{/each}
-								</tbody>
-							</table>
-						</div>
+									</thead>
+									<tbody>
+										{#each shown as person (person.id)}
+											<tr>
+												<th scope="row" class="py-0.5 text-left font-normal">
+													<a
+														href={personHref(person.id)}
+														class="grid size-6 place-items-center rounded-full text-[10px] font-semibold text-white hover:ring-2 hover:ring-current/30"
+														style:background-color={person.avatarColor}
+														title={person.name}
+													>
+														<span aria-hidden="true">{personBadge(person.name).initials}</span>
+														<span class="sr-only">{person.name}</span>
+													</a>
+												</th>
+												{#each model.week as day (day)}
+													{@const minutes = model.minutesFor(person.id, day)}
+													<td
+														class="py-0.5 text-center {day === model.date ? 'bg-muted' : ''} {minutes > 8.5 * 60
+															? 'text-destructive font-semibold'
+															: minutes === 0
+																? 'text-muted-foreground/60'
+																: ''}"
+													>
+														{minutes ? hours(minutes) : '–'}
+													</td>
+												{/each}
+											</tr>
+										{/each}
+									</tbody>
+								</table>
+							</Card.Content>
+						</Card.Root>
+					</div>
+					<div class="min-w-0">
+						<TimeGrid {columns} {handlers} {axis} {selectedId} bind:dragging editable={canWrite} />
 					</div>
 				</div>
 			</AsyncView>
