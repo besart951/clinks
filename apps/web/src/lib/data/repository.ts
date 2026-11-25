@@ -25,6 +25,11 @@ export interface RepositoryConfig<T> {
 	schema?: ZodType;
 	visible?: (row: T) => boolean;
 	audit?: { kind: AuditTargetKind; label(record: T): string };
+	/**
+	 * Runs inside the write, like a trigger on the real server: `before` is `null` for a new record, `after`
+	 * for a removed one. `touches` names the other tables it writes to.
+	 */
+	after?: { run(before: T | null, after: T | null): void; touches: readonly TableName[] };
 }
 
 /** Localizes the first issue per field of a failed schema check. */
@@ -75,6 +80,7 @@ export class TenantRepository<Name extends TenantTable> implements Repository<Ro
 			const record = stamp<Row<Name>>({ ...draft, id: newId(), tenantId } as unknown as Row<Name>);
 			this.#rows().push(record);
 			this.#record('created', record);
+			this.#config.after?.run(null, record);
 			return record;
 		}, this.#changed());
 	}
@@ -95,6 +101,7 @@ export class TenantRepository<Name extends TenantTable> implements Repository<Ro
 			this.#validate(next);
 			this.#db.replace(this.#config.table, this.#rows().map((row) => (row.id === id ? next : row)) as never);
 			this.#record('updated', next);
+			this.#config.after?.run(current, next);
 			return next;
 		}, this.#changed());
 	}
@@ -105,6 +112,7 @@ export class TenantRepository<Name extends TenantTable> implements Repository<Ro
 			const current = this.#find(id, tenantId);
 			this.#db.replace(this.#config.table, this.#rows().filter((row) => row.id !== id) as never);
 			this.#record('deleted', current);
+			this.#config.after?.run(current, null);
 		}, this.#changed());
 	}
 
@@ -117,6 +125,7 @@ export class TenantRepository<Name extends TenantTable> implements Repository<Ro
 			this.#validate(record);
 			this.#rows().push(record);
 			this.#record('restored', record);
+			this.#config.after?.run(null, record);
 			return record;
 		}, this.#changed());
 	}
@@ -126,7 +135,11 @@ export class TenantRepository<Name extends TenantTable> implements Repository<Ro
 	}
 
 	#changed(): TableName[] {
-		return this.#config.audit ? [this.#config.table, 'audit'] : [this.#config.table];
+		return [
+			this.#config.table,
+			...(this.#config.audit ? (['audit'] as const) : []),
+			...(this.#config.after?.touches ?? []),
+		];
 	}
 
 	#authorize(permission: Permission | null): TenantId {

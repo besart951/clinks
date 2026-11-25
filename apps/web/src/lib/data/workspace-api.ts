@@ -1,11 +1,19 @@
 import type { UserId } from '@clinks/domain/ids';
-import type { AppNotification, Contact, CommentTarget, MyVisits, NotificationKind } from '@clinks/domain/types';
-import { startOfWeek, toCalendarDate } from '@clinks/domain/dates';
-import { ownReleasedVisits, visitClient } from '@clinks/domain/spitex-release';
+import type {
+	AppNotification,
+	CalendarDate,
+	Contact,
+	CommentTarget,
+	MyVisits,
+	NotificationKind,
+} from '@clinks/domain/types';
+import { isoWeek, startOfWeek, toCalendarDate } from '@clinks/domain/dates';
+import { newId } from '@clinks/domain/ids';
+import { changedVisitRecipients, isReleased, ownReleasedVisits, visitClient } from '@clinks/domain/spitex-release';
 import type { Repository } from '@clinks/contracts/repository';
 import { workspaceSchemas } from '@clinks/contracts/workspace-schemas';
 import { syncedTables, type SyncedTableName } from '@clinks/sync-schema/tables';
-import { MockApiError, type WorkspaceCache, type Tables } from './database.ts';
+import { MockApiError, stamp, type WorkspaceCache, type Tables } from './database.ts';
 import { TenantRepository, type RequestContext, type RepositoryConfig } from './repository.ts';
 import type { SyncEngine } from '../sync/sync-engine.svelte.ts';
 import { SyncedRepository } from '../sync/synced-repository.ts';
@@ -43,10 +51,37 @@ export class WorkspaceApi {
 		this.#db = db;
 		this.#context = context;
 		this.#reads = engine ? new SyncedWorkspaceReads(engine, context) : null;
+		/**
+		 * The demo backend's stand-in for the server's plan notices (the API also mails them): the people concerned
+		 * hear about a release, its withdrawal and later changes, once while the notice is unread.
+		 */
+		function planNotice(userId: UserId, event: 'released' | 'withdrawn' | 'changed', weekStart: CalendarDate) {
+			const tenantId = context.tenantId();
+			if (!tenantId || userId === context.actorId()) return;
+			const key = `ui.ws.notification.plan_${event}`;
+			const href = `/visits?week=${weekStart}`;
+			const notifications = db.table('notifications');
+			if (
+				notifications.some((row) => row.userId === userId && !row.read && row.message.key === key && row.href === href)
+			)
+				return;
+			notifications.push(
+				stamp<AppNotification>({
+					id: newId(),
+					tenantId,
+					userId,
+					kind: 'plan',
+					message: { key, params: { week: String(isoWeek(weekStart)) } },
+					href,
+					read: false,
+				}),
+			);
+		}
 		function repository<Name extends SyncedTableName>(
 			table: Name,
 			label?: (row: Tables[WorkspaceTable<Name>]) => string,
 			visible?: (row: Tables[WorkspaceTable<Name>]) => boolean,
+			after?: (before: Tables[WorkspaceTable<Name>] | null, after: Tables[WorkspaceTable<Name>] | null) => void,
 		): Repository<Tables[WorkspaceTable<Name>]> {
 			const { read, write, audit } = syncedTables[table];
 			const schema = workspaceSchemas[table];
@@ -59,6 +94,7 @@ export class WorkspaceApi {
 				visible,
 			};
 			if (audit && label) options.audit = { kind: audit, label };
+			if (after) options.after = { run: after, touches: ['notifications'] };
 			return new TenantRepository<WorkspaceTable<Name>>(db, context, options);
 		}
 		this.contacts = repository('contacts', contactName);
@@ -67,6 +103,16 @@ export class WorkspaceApi {
 			'appointments',
 			(row) => row.title,
 			(row) => row.kind !== 'spitex' || context.can('spitex.read'),
+			(before, after) => {
+				const tenantId = context.tenantId();
+				const released = (start: string) =>
+					isReleased(
+						db.table('weekReleases').filter((row) => row.tenantId === tenantId),
+						startOfWeek(toCalendarDate(start)),
+					);
+				const weekStart = startOfWeek(toCalendarDate((after ?? before)!.start));
+				for (const userId of changedVisitRecipients(before, after, released)) planNotice(userId, 'changed', weekStart);
+			},
 		);
 		this.folders = repository('folders');
 		this.documents = repository('documents', (row) => row.name);
@@ -88,7 +134,26 @@ export class WorkspaceApi {
 			(row) => row.kind === 'spitex',
 		);
 		this.timeEntries = repository('time_entries');
-		this.weekReleases = repository('spitex_week_releases', (row) => row.weekStart);
+		this.weekReleases = repository(
+			'spitex_week_releases',
+			(row) => row.weekStart,
+			undefined,
+			(before, after) => {
+				const release = (after ?? before)!;
+				const assignees = db
+					.table('appointments')
+					.filter(
+						(row) =>
+							row.tenantId === release.tenantId &&
+							row.kind === 'spitex' &&
+							row.status !== 'cancelled' &&
+							startOfWeek(toCalendarDate(row.start)) === release.weekStart,
+					)
+					.flatMap((row) => (row.assigneeId ? [row.assigneeId] : []));
+				for (const userId of new Set(assignees))
+					planNotice(userId, after ? 'released' : 'withdrawn', release.weekStart);
+			},
+		);
 		this.notifications = repository('notifications', undefined, (row) => row.userId === context.actorId());
 		this.#comments = {
 			contact: repository('contact_comments', undefined, (row) => row.target.kind === 'contact'),

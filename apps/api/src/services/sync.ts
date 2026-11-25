@@ -12,6 +12,16 @@ import { z } from 'zod';
 import { ApiError, forbidden } from '../errors.ts';
 import type { AccessClaims } from '../tokens.ts';
 import { audit } from './audit.ts';
+import { changedVisitRecipients, visitWeek } from '@clinks/domain/spitex-release';
+import type { Appointment } from '@clinks/domain/types';
+import {
+	changeWindow,
+	recordPlanNotices,
+	sendPlanMails,
+	weekAssignees,
+	type PlanMail,
+	type PlanNotice,
+} from './plan-notices.ts';
 import type { Caller, Services } from './context.ts';
 
 type Fields = { [field: string]: unknown };
@@ -39,12 +49,14 @@ export class SyncService {
 	): Promise<{ applied: number }> {
 		const tenantId = claims.tenant_id;
 		if (!tenantId) throw forbidden();
+		const mails: PlanMail[] = [];
 		await inScope(this.#services.db, { tenantId, userId: claims.sub }, async (tx) => {
+			const notices: PlanNotice[] = [];
 			const deferred: { table: SyncedTableName; fields: Fields }[] = [];
 			const role = await activeRole(tx, tenantId, claims.sub);
 			const entitlements = await tx
 				.selectFrom('tenants')
-				.select('enabledModules')
+				.select(['enabledModules', 'timeZone'])
 				.where('id', '=', tenantId)
 				.executeTakeFirst();
 			const modules = new Set([...coreModules, ...(entitlements?.enabledModules ?? [])]);
@@ -59,7 +71,13 @@ export class SyncService {
 				if (table === 'spitex_week_releases' && !roleGrants(role, 'spitex.read')) throw forbidden();
 				const action = await this.#apply(
 					tx,
-					{ tenantId, userId: claims.sub, planner: roleGrants(role, 'spitex.write') },
+					{
+						tenantId,
+						userId: claims.sub,
+						planner: roleGrants(role, 'spitex.write'),
+						timeZone: entitlements?.timeZone ?? 'Europe/Zurich',
+						notices,
+					},
 					table,
 					op,
 					mode === 'import' ? deferred : null,
@@ -72,18 +90,20 @@ export class SyncService {
 					);
 			}
 			for (const { table, fields } of deferred) await checkReferences(tx, tenantId, table, fields);
+			mails.push(...(await recordPlanNotices(tx, this.#services, { tenantId, userId: claims.sub }, notices)));
 		}).catch((error: unknown) => {
 			const code = (error as { code?: string }).code;
 			if (code === '23503') throw new ApiError(409, 'error.conflict');
 			if (code === '23502' || code === '23514' || code?.startsWith('22')) throw new ApiError(400, 'error.validation');
 			throw error;
 		});
+		await sendPlanMails(this.#services, mails);
 		return { applied: request.ops.length };
 	}
 
 	async #apply(
 		tx: Tx,
-		scope: { tenantId: string; userId: string; planner: boolean },
+		scope: { tenantId: string; userId: string; planner: boolean; timeZone: string; notices: PlanNotice[] },
 		table: SyncedTableName,
 		op: SyncWriteRequest['ops'][number],
 		deferred: { table: SyncedTableName; fields: Fields }[] | null,
@@ -95,9 +115,14 @@ export class SyncService {
 		// A release is given or withdrawn, never edited.
 		if (table === 'spitex_week_releases' && op.op === 'PATCH') throw forbidden();
 		if (op.op === 'DELETE') {
-			if (table === 'appointments' && !scope.planner) {
-				const visit = await tx.selectFrom(table).select('kind').where('id', '=', op.id).executeTakeFirst();
-				if (visit?.kind === 'spitex') throw forbidden();
+			if (table === 'appointments') {
+				const row = await tx.selectFrom(table).selectAll().where('id', '=', op.id).executeTakeFirst();
+				if (row?.kind === 'spitex' && !scope.planner) throw forbidden();
+				if (row) await this.#visitChanged(tx, scope, dbToFields(table, row) as VisitFields, null);
+			}
+			if (table === 'spitex_week_releases') {
+				const release = await tx.selectFrom(table).select('weekStart').where('id', '=', op.id).executeTakeFirst();
+				if (release) await this.#weekNotices(tx, scope, 'withdrawn', release.weekStart as string, op.id);
 			}
 			const deleted = await tx.deleteFrom(table).where('id', '=', op.id).executeTakeFirst();
 			return deleted.numDeletedRows > 0n ? 'deleted' : null;
@@ -153,6 +178,13 @@ export class SyncService {
 			(fields.dataUrl !== undefined || fields.size !== undefined || fields.mimeType !== undefined)
 		)
 			Object.assign(values, await storeDocument(tx, this.#services, scope, op.id, merged, existing?.dataUrl));
+		if (table === 'appointments')
+			await this.#visitChanged(
+				tx,
+				scope,
+				existing ? (dbToFields(table, existing) as VisitFields) : null,
+				merged as VisitFields,
+			);
 		if (existing) {
 			await tx
 				.updateTable(table)
@@ -171,9 +203,58 @@ export class SyncService {
 			if ((error as { code?: string }).code === '23505') throw new ApiError(409, 'error.conflict');
 			throw error;
 		}
+		if (table === 'spitex_week_releases')
+			await this.#weekNotices(tx, scope, 'released', fields.weekStart as string, op.id);
 		return 'created';
 	}
+
+	/** A release or its withdrawal concerns everyone with visits in that week. */
+	async #weekNotices(
+		tx: Tx,
+		scope: { tenantId: string; notices: PlanNotice[] },
+		event: 'released' | 'withdrawn',
+		weekStart: string,
+		releaseId: string,
+	) {
+		for (const userId of await weekAssignees(tx, scope.tenantId, weekStart))
+			scope.notices.push({ userId, event, weekStart, once: releaseId });
+	}
+
+	/** A visit of a released week was planned, changed, reassigned or removed: tell the people it concerns. */
+	async #visitChanged(
+		tx: Tx,
+		scope: { tenantId: string; timeZone: string; notices: PlanNotice[] },
+		stored: VisitFields | null,
+		uploaded: VisitFields | null,
+	) {
+		if (stored?.kind !== 'spitex' && uploaded?.kind !== 'spitex') return;
+		// The same moment can arrive spelled differently (offset, precision); compare instants.
+		const instants = (visit: VisitFields | null) =>
+			visit && { ...visit, start: new Date(visit.start).toISOString(), end: new Date(visit.end).toISOString() };
+		const before = instants(stored);
+		const after = instants(uploaded);
+		const weeks = [
+			...new Set([before, after].flatMap((visit) => (visit ? [visitWeek(visit.start, scope.timeZone)] : []))),
+		];
+		const released = new Set(
+			(
+				await tx
+					.selectFrom('spitex_week_releases')
+					.select('weekStart')
+					.where('tenantId', '=', scope.tenantId)
+					.where('weekStart', 'in', weeks)
+					.execute()
+			).map((row) => row.weekStart),
+		);
+		const isReleased = (start: string) => released.has(visitWeek(start, scope.timeZone));
+		const weekStart = visitWeek((after ?? before)!.start, scope.timeZone);
+		const once = changeWindow(this.#services.now());
+		for (const userId of changedVisitRecipients(before, after, isReleased))
+			scope.notices.push({ userId, event: 'changed', weekStart, once });
+	}
 }
+
+type VisitFields = Pick<Appointment, 'kind' | 'assigneeId' | 'start' | 'end' | 'status' | 'location' | 'contactId'>;
 
 /** A reference must point into the same tenant; foreign keys alone would accept another tenant's id. */
 async function checkReferences(tx: Tx, tenantId: string, table: SyncedTableName, fields: Fields) {

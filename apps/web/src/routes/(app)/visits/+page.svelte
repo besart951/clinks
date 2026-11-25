@@ -16,6 +16,8 @@
 	import { contactName } from '#lib/data/workspace-api';
 	import { formatAddress } from '@clinks/domain/address';
 	import { addDays, isoWeek, minutesBetween, today } from '@clinks/domain/dates';
+	import { page } from '$app/state';
+	import { routeQuery } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
@@ -24,6 +26,9 @@
 	const range = $derived(
 		`${workspace.i18n.format(model.week, { day: 'numeric', month: 'short' })} – ${workspace.i18n.format(addDays(model.week, 6), { day: 'numeric', month: 'short', year: 'numeric' })}`,
 	);
+	// A notification links to its week.
+	const linked = routeQuery(page.url).get('week');
+	if (linked && /^\d{4}-\d{2}-\d{2}$/.test(linked)) model.show(linked);
 	onMount(() => model.resource.connect());
 </script>
 

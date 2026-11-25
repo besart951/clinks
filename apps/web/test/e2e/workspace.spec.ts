@@ -601,10 +601,11 @@ test('shows staff only their own visits, and a week only once it is released', a
 		.click();
 	await expect(page.getByText(/^KW \d+ freigegeben$/)).toBeVisible();
 
-	// … and it is there, read-only.
+	// … and Daniel hears about it: the notification leads to the week, which is there, read-only.
 	await switchAccount(page, 'daniel.moser@spitex-seeland.ch');
-	await page.goto('/#/visits');
-	await page.getByRole('button', { name: 'Weiter' }).click();
+	await page.getByRole('button', { name: /Benachrichtigungen/ }).click();
+	await page.getByRole('button', { name: /Dein Einsatzplan für KW \d+ ist da\./ }).click();
+	await expect(page).toHaveURL(/#\/visits\?week=\d{4}-\d{2}-\d{2}/);
 	await expect(visits.first()).toBeVisible();
 	await expect(page.getByRole('button', { name: /freigeben|Zuweisen|Neuer Einsatz/ })).toHaveCount(0);
 

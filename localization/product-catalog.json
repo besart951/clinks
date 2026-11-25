@@ -5149,6 +5149,42 @@
       "ui.ws.visits.cancelled": {
         "de-CH": "Abgesagt",
         "en-US": "Cancelled"
+      },
+      "ui.ws.notification.plan_released": {
+        "de-CH": "Dein Einsatzplan für KW {week} ist da.",
+        "en-US": "Your plan for week {week} is ready."
+      },
+      "ui.ws.notification.plan_withdrawn": {
+        "de-CH": "Der Einsatzplan für KW {week} wird überarbeitet.",
+        "en-US": "The plan for week {week} is being revised."
+      },
+      "ui.ws.notification.plan_changed": {
+        "de-CH": "Dein Einsatzplan für KW {week} hat sich geändert.",
+        "en-US": "Your plan for week {week} has changed."
+      },
+      "mail.plan.released.subject": {
+        "de-CH": "Dein Einsatzplan für KW {week} ist da",
+        "en-US": "Your plan for week {week} is ready"
+      },
+      "mail.plan.released.body": {
+        "de-CH": "Hallo {name}\n\nDer Einsatzplan von {tenant} für KW {week} ({from} bis {to}) ist freigegeben. Deine Einsätze findest du hier:\n\n{link}",
+        "en-US": "Hello {name}\n\nThe plan of {tenant} for week {week} ({from} to {to}) has been released. You find your visits here:\n\n{link}"
+      },
+      "mail.plan.withdrawn.subject": {
+        "de-CH": "Der Einsatzplan für KW {week} wird überarbeitet",
+        "en-US": "The plan for week {week} is being revised"
+      },
+      "mail.plan.withdrawn.body": {
+        "de-CH": "Hallo {name}\n\nDer Einsatzplan von {tenant} für KW {week} ({from} bis {to}) wird überarbeitet und ist vorübergehend nicht sichtbar. Du bekommst eine Nachricht, sobald er wieder freigegeben ist.",
+        "en-US": "Hello {name}\n\nThe plan of {tenant} for week {week} ({from} to {to}) is being revised and is hidden for now. You will hear from us as soon as it is released again."
+      },
+      "mail.plan.changed.subject": {
+        "de-CH": "Dein Einsatzplan für KW {week} hat sich geändert",
+        "en-US": "Your plan for week {week} has changed"
+      },
+      "mail.plan.changed.body": {
+        "de-CH": "Hallo {name}\n\nIn deinem Einsatzplan von {tenant} für KW {week} ({from} bis {to}) hat sich etwas geändert. Den aktuellen Stand findest du hier:\n\n{link}",
+        "en-US": "Hello {name}\n\nSomething changed in your plan of {tenant} for week {week} ({from} to {to}). You find the current plan here:\n\n{link}"
       }
     }
   }
