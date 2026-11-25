@@ -21,6 +21,7 @@
 	} from '#lib/components/calendar/TimeGrid.svelte';
 	import AxisToggle from '#lib/components/calendar/AxisToggle.svelte';
 	import Grip from '@lucide/svelte/icons/grip-vertical';
+	import Users from '@lucide/svelte/icons/users';
 	import { personBadge } from '@clinks/ui/kit/avatar';
 	import AppointmentSheet from '#lib/components/calendar/AppointmentSheet.svelte';
 	import { PlanningModel } from '#lib/features/spitex/planning.svelte';
@@ -29,7 +30,7 @@
 	import { firstFreeStart } from '@clinks/domain/scheduling';
 	import type { Appointment } from '@clinks/domain/types';
 	import type { UserId } from '@clinks/domain/ids';
-	import { routeQuery, setQuery } from '#lib/navigation';
+	import { href, routeQuery, setQuery } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
@@ -37,6 +38,12 @@
 	const people = new PeopleDirectory(workspace);
 	const canWrite = $derived(workspace.session.can('spitex.write') && workspace.session.can('calendar.write'));
 	const staff = $derived(people.people);
+	/** Staff shown as columns; the menu «Mitarbeitende» hides the others. */
+	const shown = $derived(staff.filter((person) => !model.hiddenPeople.includes(person.id)));
+
+	function personHref(id: UserId) {
+		return href(`/team/${id}?from=${encodeURIComponent('/spitex')}`);
+	}
 	let sheet: AppointmentSheet;
 	/** The appointment open in the panel, highlighted in the grid. */
 	let selectedId = $state<string | null>(null);
@@ -100,9 +107,10 @@
 			assigneeId: null,
 			appointments: model.open,
 		},
-		...staff.map((person) => ({
+		...shown.map((person) => ({
 			key: person.id,
 			label: person.name,
+			href: personHref(person.id),
 			sublabel: person.jobTitle,
 			date: model.date,
 			assigneeId: person.id,
@@ -145,7 +153,7 @@
 				<Printer class="size-4" />{workspace.t('ui.ws.spitex.print_plan')}
 			</Button>
 			{#if canWrite}
-				<Button variant="outline" disabled={model.open.length === 0} onclick={() => model.autoAssign(staff)}>
+				<Button variant="outline" disabled={model.open.length === 0} onclick={() => model.autoAssign(shown)}>
 					<Wand class="size-4" />{workspace.t('ui.ws.spitex.auto_assign')}
 				</Button>
 				<Button onclick={createVisit} aria-keyshortcuts="N">
@@ -179,7 +187,38 @@
 		<h2 class="font-semibold capitalize" aria-live="polite">
 			{workspace.i18n.format(model.date, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
 		</h2>
-		<div class="ms-auto print:hidden"><AxisToggle {axis} onchange={changeAxis} /></div>
+		<div class="ms-auto flex items-center gap-2 print:hidden">
+			<DropdownMenu.Root>
+				<DropdownMenu.Trigger>
+					{#snippet child({ props })}<Button {...props} variant="outline" size="sm">
+							<Users class="size-4" />{workspace.t('ui.ws.spitex.staff')}
+							<span class="text-muted-foreground tabular-nums">
+								{workspace.t('ui.ws.spitex.staff_shown', { shown: shown.length, total: staff.length })}
+							</span>
+						</Button>{/snippet}
+				</DropdownMenu.Trigger>
+				<DropdownMenu.Content align="end" class="w-64">
+					<DropdownMenu.Label>{workspace.t('ui.ws.spitex.staff')}</DropdownMenu.Label>
+					{#each staff as person (person.id)}
+						<DropdownMenu.CheckboxItem
+							checked={!model.hiddenPeople.includes(person.id)}
+							onCheckedChange={() => model.togglePerson(person.id)}
+							closeOnSelect={false}
+						>
+							<span class="size-2.5 shrink-0 rounded-full" style:background-color={person.avatarColor}></span>
+							<span class="truncate">{person.name}</span>
+						</DropdownMenu.CheckboxItem>
+					{/each}
+					{#if model.hiddenPeople.length > 0}
+						<DropdownMenu.Separator />
+						<DropdownMenu.Item onclick={() => (model.hiddenPeople = [])}>
+							{workspace.t('ui.ws.spitex.show_all')}
+						</DropdownMenu.Item>
+					{/if}
+				</DropdownMenu.Content>
+			</DropdownMenu.Root>
+			<AxisToggle {axis} onchange={changeAxis} />
+		</div>
 	</div>
 
 	<!-- The appointment panel docks on the right on wide screens; the plan stays usable beside it. -->
@@ -309,9 +348,11 @@
 									</tr>
 								</thead>
 								<tbody>
-									{#each staff as person (person.id)}
+									{#each shown as person (person.id)}
 										<tr class="border-b last:border-0">
-											<td class="px-3 py-1.5">{person.name}</td>
+											<td class="px-3 py-1.5">
+												<a class="hover:underline" href={personHref(person.id)}>{person.name}</a>
+											</td>
 											{#each model.week as day (day)}
 												{@const minutes = model.minutesFor(person.id, day)}
 												<td

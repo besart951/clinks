@@ -25,7 +25,7 @@
 	import { atTime, minutesToTime, today } from '@clinks/domain/dates';
 	import { appointmentKinds, type Appointment } from '@clinks/domain/types';
 	import type { ContactId } from '@clinks/domain/ids';
-	import { routeQuery, setQuery } from '#lib/navigation';
+	import { href, routeQuery, setQuery } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
@@ -105,6 +105,7 @@
 				...staff.map((person) => ({
 					key: person.id,
 					label: person.name,
+					href: href(`/team/${person.id}?from=${encodeURIComponent('/calendar?view=resources')}`),
 					sublabel: person.jobTitle,
 					date: model.anchor,
 					assigneeId: person.id,

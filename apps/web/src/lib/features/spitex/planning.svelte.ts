@@ -26,6 +26,8 @@ export interface PlanningData {
 export class PlanningModel {
 	readonly resource: Resource<PlanningData>;
 	date = $state<CalendarDate>(today());
+	/** Staff columns hidden from the plan; their visits stay assigned. */
+	hiddenPeople = $state<UserId[]>([]);
 	#workspace: Workspace;
 
 	constructor(workspace: Workspace) {
@@ -53,6 +55,12 @@ export class PlanningModel {
 		return this.day
 			.filter((row) => row.assigneeId === null)
 			.sort((left, right) => left.start.localeCompare(right.start));
+	}
+
+	togglePerson(id: UserId) {
+		this.hiddenPeople = this.hiddenPeople.includes(id)
+			? this.hiddenPeople.filter((candidate) => candidate !== id)
+			: [...this.hiddenPeople, id];
 	}
 
 	get week(): CalendarDate[] {
