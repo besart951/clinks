@@ -124,8 +124,14 @@ html {
 	}
 }
 
+/* The QR bill's payment part needs A4 portrait (Swiss Payment Standards: a 210 × 105 mm strip at the bottom). */
+@page invoice {
+	size: A4 portrait;
+}
+
 @media print {
-	body * {
+	/* Only while an invoice is open: other pages, such as the Spitex plan, print as they are. */
+	body:has(.invoice-document) * {
 		visibility: hidden;
 	}
 	.invoice-document,
@@ -136,6 +142,7 @@ html {
 		position: absolute;
 		inset: 0;
 		box-shadow: none;
+		page: invoice;
 	}
 }
 
