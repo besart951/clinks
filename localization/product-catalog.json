@@ -5221,6 +5221,14 @@
       "ui.ws.expense.choose_receipt": {
         "de-CH": "Beleg wählen",
         "en-US": "Choose receipt"
+      },
+      "ui.ws.planner.columns": {
+        "de-CH": "Spalten",
+        "en-US": "Columns"
+      },
+      "ui.ws.planner.none_due": {
+        "de-CH": "In diesem Monat ist nichts fällig.",
+        "en-US": "Nothing is due this month."
       }
     }
   }

@@ -735,3 +735,17 @@ test('gives fingers big enough targets on a touch screen', async ({ browser }) =
 	await expect(sheet.getByRole('button', { name: 'Beleg wählen' })).toBeVisible();
 	await context.close();
 });
+
+test('shows one board column at a time on a phone', async ({ page }) => {
+	await signIn(page);
+	await page.setViewportSize({ width: 390, height: 844 });
+	await page.goto('/#/planner');
+	const columns = page.getByRole('group', { name: 'Spalten' });
+	await expect(columns.getByRole('button').first()).toHaveAttribute('aria-pressed', 'true');
+	await columns.getByRole('button', { name: /^In Arbeit/ }).click();
+	await expect(page.getByRole('heading', { level: 2, name: 'In Arbeit' })).toBeInViewport();
+	await expect(columns.getByRole('button', { name: /^In Arbeit/ })).toHaveAttribute('aria-pressed', 'true');
+	// The calendar is a list by day: seven narrow columns would not fit the titles.
+	await page.getByRole('tab', { name: 'Kalender' }).click();
+	await expect(page.locator('section[aria-labelledby^="due-"]').first()).toBeVisible();
+});
