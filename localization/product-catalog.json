@@ -4997,6 +4997,18 @@
       "ui.ws.inline.tag_new": {
         "de-CH": "«{tag}» neu anlegen",
         "en-US": "Create “{tag}”"
+      },
+      "ui.ws.calendar.hide_day": {
+        "de-CH": "«{day}» ausblenden",
+        "en-US": "Hide “{day}”"
+      },
+      "ui.ws.calendar.hidden_days": {
+        "de-CH": "{days} ausgeblendet",
+        "en-US": "{days} hidden"
+      },
+      "ui.ws.calendar.show_days": {
+        "de-CH": "Alle Tage wieder einblenden",
+        "en-US": "Show all days again"
       }
     }
   }

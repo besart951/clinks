@@ -5,6 +5,7 @@
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	import Plus from '@lucide/svelte/icons/plus';
 	import Filter from '@lucide/svelte/icons/filter';
+	import Eye from '@lucide/svelte/icons/eye';
 	import * as Tabs from '@clinks/ui/components/ui/tabs';
 	import * as DropdownMenu from '@clinks/ui/components/ui/dropdown-menu';
 	import { Button } from '@clinks/ui/components/ui/button';
@@ -22,7 +23,7 @@
 	import { CalendarModel, type CalendarView } from '#lib/features/calendar/calendar.svelte';
 	import { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
 	import { contactName } from '#lib/data/workspace-api';
-	import { atTime, minutesToTime, today } from '@clinks/domain/dates';
+	import { addDays, atTime, isoWeekday, minutesToTime, startOfWeek, today } from '@clinks/domain/dates';
 	import { appointmentKinds, type Appointment } from '@clinks/domain/types';
 	import type { ContactId } from '@clinks/domain/ids';
 	import { href, routeQuery, setQuery } from '#lib/navigation';
@@ -124,9 +125,18 @@
 					: []),
 			];
 		}
-		return model.days.map((day) => ({
+		return model.shownDays.map((day) => ({
 			key: day,
 			label: workspace.i18n.format(day, { weekday: 'short', day: 'numeric' }),
+			hide:
+				model.view === 'week' && model.shownDays.length > 1
+					? {
+							label: workspace.t('ui.ws.calendar.hide_day', {
+								day: workspace.i18n.format(day, { weekday: 'short' }),
+							}),
+							run: () => hideWeekday(isoWeekday(day)),
+						}
+					: undefined,
 			sublabel: model.view === 'day' ? workspace.i18n.format(day, { month: 'long', year: 'numeric' }) : undefined,
 			date: day,
 			appointments: model.on(day),
@@ -141,6 +151,27 @@
 			return `${workspace.i18n.format(from, { day: 'numeric', month: 'short' })} – ${workspace.i18n.format(to, { day: 'numeric', month: 'short', year: 'numeric' })}`;
 		return workspace.i18n.format(model.anchor, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 	});
+
+	/** Hidden weekdays are remembered in this browser, like the sidebar. */
+	const hiddenDaysKey = 'clinks.workspace.calendar.hiddenWeekdays';
+	model.hiddenWeekdays = workspace.platform.preferences.read<number[]>(hiddenDaysKey, []);
+
+	function hideWeekday(weekday: number) {
+		model.hideWeekday(weekday);
+		workspace.platform.preferences.write(hiddenDaysKey, model.hiddenWeekdays);
+	}
+
+	function showAllDays() {
+		model.hiddenWeekdays = [];
+		workspace.platform.preferences.write(hiddenDaysKey, []);
+	}
+
+	/** «Sa, So» for the button that brings hidden days back. */
+	const hiddenDayNames = $derived(
+		model.hiddenWeekdays
+			.map((weekday) => workspace.i18n.format(addDays(startOfWeek(today()), weekday - 1), { weekday: 'short' }))
+			.join(', '),
+	);
 
 	function changeView(view: string) {
 		model.setView(view as CalendarView);
@@ -191,6 +222,17 @@
 		</div>
 		<h2 class="min-w-0 text-base font-semibold capitalize" aria-live="polite">{rangeLabel}</h2>
 		<div class="flex-1"></div>
+		{#if model.hiddenWeekdays.length > 0 && (model.view === 'week' || model.view === 'month')}
+			<Button
+				variant="ghost"
+				size="sm"
+				class="text-muted-foreground"
+				title={workspace.t('ui.ws.calendar.show_days')}
+				onclick={showAllDays}
+			>
+				<Eye class="size-4" />{workspace.t('ui.ws.calendar.hidden_days', { days: hiddenDayNames })}
+			</Button>
+		{/if}
 		<DropdownMenu.Root>
 			<DropdownMenu.Trigger>
 				{#snippet child({ props })}<Button {...props} variant="outline" size="sm">
@@ -241,13 +283,14 @@
 			<AsyncView resource={model.resource} skeleton="detail">
 				{#if model.view === 'month'}
 					<MonthGrid
-						days={model.days}
+						days={model.shownDays}
 						month={model.anchor.slice(0, 7)}
 						handlers={{
 							appointmentsOn: (date) => model.on(date),
 							color: handlers.color,
 							open: handlers.open,
 							day: openDay,
+							hideWeekday,
 						}}
 					/>
 				{:else}
