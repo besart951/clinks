@@ -772,6 +772,11 @@ test('gives fingers big enough targets on a touch screen', async ({ browser }) =
 		expect((await target.boundingBox())!.height).toBeGreaterThanOrEqual(40);
 	// The receipt is picked with our own button, not the browser's «Choose File» field.
 	await expect(sheet.getByRole('button', { name: 'Beleg wählen' })).toBeVisible();
+	// Bigger buttons must still fit: the mail footer with three of them stays inside the screen.
+	await page.goto('/#/mail');
+	await page.getByRole('button', { name: 'Neue Mail' }).click();
+	const send = page.getByRole('button', { name: 'Senden' });
+	await expect(send).toBeInViewport({ ratio: 1 });
 	await context.close();
 });
 

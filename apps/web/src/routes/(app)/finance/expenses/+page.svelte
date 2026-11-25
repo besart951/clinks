@@ -229,7 +229,7 @@
 				/>
 			</FormField>
 		</form>
-		<Sheet.Footer class="flex-row justify-end">
+		<Sheet.Footer class="flex-row flex-wrap justify-end">
 			<Button variant="outline" onclick={() => (open = false)}>{workspace.t('ui.ws.cancel')}</Button><Button
 				type="submit"
 				form="expense-form"

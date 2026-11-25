@@ -161,7 +161,7 @@
 				<Textarea id="c-notes" rows={3} bind:value={form.value.notes} />
 			</FormField>
 		</form>
-		<Sheet.Footer class="flex-row justify-end">
+		<Sheet.Footer class="flex-row flex-wrap justify-end">
 			<Button variant="outline" onclick={() => requestClose(false)}>{workspace.t('ui.ws.cancel')}</Button>
 			<Button type="submit" form="contact-form" disabled={form.busy}>{workspace.t('ui.save')}</Button>
 		</Sheet.Footer>

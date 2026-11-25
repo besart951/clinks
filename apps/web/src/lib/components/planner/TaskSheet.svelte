@@ -68,7 +68,7 @@
 			<TaskMainFields {form} />
 			<TaskMetaFields {form} {people} {contacts} />
 		</form>
-		<Sheet.Footer class="flex-row items-center justify-end">
+		<Sheet.Footer class="flex-row flex-wrap items-center justify-end">
 			<Button variant="outline" onclick={() => close(false)}>{workspace.t('ui.ws.cancel')}</Button>
 			<Button type="submit" form="task-form" disabled={form.busy}>{workspace.t('ui.save')}</Button>
 		</Sheet.Footer>

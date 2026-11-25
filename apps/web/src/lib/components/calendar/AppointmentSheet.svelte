@@ -341,7 +341,7 @@
 				<Sheet.Description>{@render description()}</Sheet.Description>
 			</Sheet.Header>
 			{@render fields()}
-			<Sheet.Footer class="flex-row items-center">{@render actions()}</Sheet.Footer>
+			<Sheet.Footer class="flex-row flex-wrap items-center">{@render actions()}</Sheet.Footer>
 		</Sheet.Content>
 	</Sheet.Root>
 {/if}

@@ -139,12 +139,17 @@
 				<Textarea id="m-body" rows={14} bind:value={form.body} />
 			</FormField>
 		</form>
-		<Sheet.Footer class="flex-row items-center">
+		<Sheet.Footer class="flex-row flex-wrap items-center">
 			{#if templates.length > 0}
 				<DropdownMenu.Root>
 					<DropdownMenu.Trigger>
-						{#snippet child({ props })}<Button {...props} variant="ghost" class="mr-auto">
-								<FileText class="size-4" />{workspace.t('ui.ws.mail.templates')}
+						{#snippet child({ props })}<Button
+								{...props}
+								variant="ghost"
+								class="mr-auto"
+								title={workspace.t('ui.ws.mail.templates')}
+							>
+								<FileText class="size-4" /><span class="max-sm:sr-only">{workspace.t('ui.ws.mail.templates')}</span>
 							</Button>{/snippet}
 					</DropdownMenu.Trigger>
 					<DropdownMenu.Content align="start">
