@@ -7,6 +7,11 @@
 	import FileText from '@lucide/svelte/icons/file-text';
 	import FileImage from '@lucide/svelte/icons/file-image';
 	import Ellipsis from '@lucide/svelte/icons/ellipsis';
+	import Eye from '@lucide/svelte/icons/eye';
+	import Download from '@lucide/svelte/icons/download';
+	import History from '@lucide/svelte/icons/history';
+	import PenLine from '@lucide/svelte/icons/pen-line';
+	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	import Link2 from '@lucide/svelte/icons/link-2';
 	import * as Dialog from '@clinks/ui/components/ui/dialog';
@@ -246,24 +251,24 @@
 														{...props}
 														variant="ghost"
 														size="icon-xs"
-														aria-label={workspace.t('ui.ws.more_actions')}
+														aria-label={workspace.t('ui.ws.documents.folder_actions', { name: folder.name })}
 													>
 														<Ellipsis class="size-4" />
 													</Button>{/snippet}
 											</DropdownMenu.Trigger>
-											<DropdownMenu.Content align="end">
+											<DropdownMenu.Content align="end" class="w-52">
 												<DropdownMenu.Item
 													onclick={() =>
 														ask(workspace.t('ui.ws.documents.rename'), folder.name, (name) =>
 															model.renameFolder(folder, name),
 														)}
 												>
-													{workspace.t('ui.ws.documents.rename')}
+													<PenLine />{workspace.t('ui.ws.documents.rename')}
 												</DropdownMenu.Item>
 												<FolderMoveMenu {model} {folder} />
 												<DropdownMenu.Separator />
 												<DropdownMenu.Item variant="destructive" onclick={() => deleteFolder(folder)}>
-													{workspace.t('ui.ws.delete')}
+													<Trash2 />{workspace.t('ui.ws.delete')}
 												</DropdownMenu.Item>
 											</DropdownMenu.Content>
 										</DropdownMenu.Root>
@@ -330,41 +335,45 @@
 																{...props}
 																variant="ghost"
 																size="icon-xs"
-																aria-label={workspace.t('ui.ws.more_actions')}
+																aria-label={workspace.t('ui.ws.documents.folder_actions', { name: document.name })}
 															>
 																<Ellipsis class="size-4" />
 															</Button>{/snippet}
 													</DropdownMenu.Trigger>
-													<DropdownMenu.Content align="end">
+													<DropdownMenu.Content align="end" class="w-60">
+														<DropdownMenu.Label class="text-muted-foreground truncate text-xs font-normal">
+															{document.name}
+														</DropdownMenu.Label>
 														<DropdownMenu.Item onclick={() => showPreview(document)}>
-															{workspace.t('ui.ws.documents.preview')}
+															<Eye />{workspace.t('ui.ws.documents.preview')}
 														</DropdownMenu.Item>
 														<DropdownMenu.Item
 															onclick={() => workspace.run(() => workspace.documentFiles.save(document))}
 														>
-															{workspace.t('ui.ws.documents.download')}
+															<Download />{workspace.t('ui.ws.documents.download')}
 														</DropdownMenu.Item>
 														{#if document.dataUrl.startsWith('version:')}
 															<DropdownMenu.Item onclick={() => showVersions(document)}>
-																{workspace.t('ui.ws.documents.versions')}
+																<History />{workspace.t('ui.ws.documents.versions')}
 															</DropdownMenu.Item>
 														{/if}
 														{#if canWrite}
+															<DropdownMenu.Separator />
 															<DropdownMenu.Item
 																onclick={() =>
 																	ask(workspace.t('ui.ws.documents.rename'), document.name, (name) =>
 																		model.rename(document, name),
 																	)}
 															>
-																{workspace.t('ui.ws.documents.rename')}
+																<PenLine />{workspace.t('ui.ws.documents.rename')}
 															</DropdownMenu.Item>
 															<DropdownMenu.Item onclick={() => (linking = document)}>
-																<Link2 class="size-4" />{workspace.t('ui.ws.documents.link_contact')}
+																<Link2 />{workspace.t('ui.ws.documents.link_contact')}
 															</DropdownMenu.Item>
 															<FolderMoveMenu {model} {document} />
 															<DropdownMenu.Separator />
 															<DropdownMenu.Item variant="destructive" onclick={() => model.remove(document)}>
-																{workspace.t('ui.ws.delete')}
+																<Trash2 />{workspace.t('ui.ws.delete')}
 															</DropdownMenu.Item>
 														{/if}
 													</DropdownMenu.Content>

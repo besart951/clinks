@@ -4913,6 +4913,10 @@
       "ui.ws.documents.rename_folder": {
         "de-CH": "Neuer Name für «{name}»",
         "en-US": "New name for “{name}”"
+      },
+      "ui.ws.spitex.assign_to": {
+        "de-CH": "«{title}» zuweisen an",
+        "en-US": "Assign “{title}” to"
       }
     }
   }
