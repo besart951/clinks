@@ -404,3 +404,33 @@ test('switches the Spitex client list between table and cards', async ({ page })
 	await card.click();
 	await expect(page).toHaveURL(/#\/spitex\/clients\/[0-9a-f-]+/);
 });
+
+test('suggests existing tags and keeps a contact’s tags a set', async ({ page }) => {
+	await signIn(page);
+	await page.goto('/#/contacts');
+	await page
+		.getByRole('link')
+		.filter({ hasText: /Baumann/ })
+		.first()
+		.click();
+	const section = page.locator('section').filter({ has: page.getByRole('button', { name: /^Schlagwörter/ }) });
+	await section.getByRole('button', { name: 'Tag', exact: true }).click();
+	const field = section.getByRole('combobox', { name: 'Tag' });
+	await expect(field).toBeFocused();
+	// Known tags pop up right away under the field; arrow keys and Enter pick one.
+	const options = page.getByRole('listbox', { name: 'Vorhandene Schlagwörter' }).getByRole('option');
+	await expect(options.first()).toHaveText('Kostenträger');
+	await field.press('ArrowDown');
+	await expect(options.first()).toHaveAttribute('aria-selected', 'true');
+	await field.press('Enter');
+	await expect(section.getByText('Kostenträger', { exact: true })).toBeVisible();
+	// Typing a known tag in other case adds nothing twice; a new one is created.
+	await field.fill('newsletter');
+	await field.press('Enter');
+	await expect(section.getByText('Newsletter', { exact: true })).toHaveCount(1);
+	await field.fill('VIP');
+	await expect(options.last()).toHaveText('«VIP» neu anlegen');
+	await field.press('Enter');
+	await field.press('Escape');
+	await expect(section.getByRole('button', { name: /^Schlagwörter/ })).toContainText('4');
+});

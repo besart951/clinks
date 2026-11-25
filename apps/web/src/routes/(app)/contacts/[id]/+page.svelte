@@ -212,7 +212,12 @@
 					<AccordionSection
 						section={{ id: 'contact.tags', title: workspace.t('ui.ws.field.tags'), count: contact.tags.length }}
 					>
-						<TagEditor tags={contact.tags} readonly={!canWrite} onsave={(tags) => model.saveTags(contact, tags)} />
+						<TagEditor
+							tags={contact.tags}
+							suggestions={model.resource.value.knownTags}
+							readonly={!canWrite}
+							onsave={(tags) => model.saveTags(contact, tags)}
+						/>
 					</AccordionSection>
 					<AccordionSection section={{ id: 'contact.notes', title: workspace.t('ui.ws.field.notes') }}>
 						<InlineText

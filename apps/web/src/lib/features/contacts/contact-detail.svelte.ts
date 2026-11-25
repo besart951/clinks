@@ -10,6 +10,8 @@ export interface ContactDetail {
 	invoices: Invoice[];
 	mails: MailMessage[];
 	tasks: Task[];
+	/** Every tag used on a contact of the tenant, for suggestions while tagging. */
+	knownTags: string[];
 }
 
 async function optional<T>(enabled: boolean, load: () => Promise<T[]>): Promise<T[]> {
@@ -31,7 +33,7 @@ export class ContactDetailModel {
 		const { api, session } = workspace;
 		this.resource = new Resource(workspace.db, ['contacts', 'appointments', 'invoices', 'mails', 'tasks'], async () => {
 			const contact = await api.contacts.get(id);
-			const [appointments, invoices, mails, tasks] = await Promise.all([
+			const [appointments, invoices, mails, tasks, everyone] = await Promise.all([
 				optional(session.can('calendar.read'), () => api.appointments.list((row) => row.contactId === id)),
 				optional(session.can('finance.read') && session.hasModule('finance'), () =>
 					api.invoices.list((row) => row.contactId === id),
@@ -46,6 +48,7 @@ export class ContactDetailModel {
 				optional(session.can('planner.read') && session.hasModule('planner'), () =>
 					api.tasks.list((row) => row.contactId === id),
 				),
+				api.contacts.list(),
 			]);
 			return {
 				contact,
@@ -53,6 +56,9 @@ export class ContactDetailModel {
 				invoices: invoices.sort((left, right) => right.issueDate.localeCompare(left.issueDate)),
 				mails: mails.sort((left, right) => right.sentAt.localeCompare(left.sentAt)),
 				tasks,
+				knownTags: [...new Set(everyone.flatMap((row) => row.tags))].sort((left, right) =>
+					left.localeCompare(right, 'de'),
+				),
 			};
 		});
 	}
