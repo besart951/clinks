@@ -34,6 +34,8 @@
 	const people = new PeopleDirectory(workspace);
 	const canWrite = $derived(session.can('calendar.write'));
 	let sheet: AppointmentSheet;
+	/** The appointment open in the panel, highlighted in the grid. */
+	let selectedId = $state<string | null>(null);
 
 	const query = routeQuery(page.url);
 	if (query.get('date')) model.anchor = query.get('date')!;
@@ -232,30 +234,36 @@
 		</Tabs.Root>
 	</div>
 
-	<AsyncView resource={model.resource} skeleton="detail">
-		{#if model.view === 'month'}
-			<MonthGrid
-				days={model.days}
-				month={model.anchor.slice(0, 7)}
-				handlers={{
-					appointmentsOn: (date) => model.on(date),
-					color: handlers.color,
-					open: handlers.open,
-					day: openDay,
-				}}
-			/>
-		{:else}
-			<TimeGrid {columns} {handlers} {axis} editable={canWrite} />
-			{#if canWrite}<p class="text-muted-foreground mt-2 text-xs">
-					{workspace.t(axis === 'horizontal' ? 'ui.ws.calendar.hint_horizontal' : 'ui.ws.calendar.hint')}
-				</p>{/if}
-		{/if}
-	</AsyncView>
+	<!-- The appointment panel docks on the right on wide screens; the plan stays usable beside it. -->
+	<div class="flex items-start gap-4">
+		<div class="min-w-0 flex-1">
+			<AsyncView resource={model.resource} skeleton="detail">
+				{#if model.view === 'month'}
+					<MonthGrid
+						days={model.days}
+						month={model.anchor.slice(0, 7)}
+						handlers={{
+							appointmentsOn: (date) => model.on(date),
+							color: handlers.color,
+							open: handlers.open,
+							day: openDay,
+						}}
+					/>
+				{:else}
+					<TimeGrid {columns} {handlers} {axis} {selectedId} editable={canWrite} />
+					{#if canWrite}<p class="text-muted-foreground mt-2 text-xs">
+							{workspace.t(axis === 'horizontal' ? 'ui.ws.calendar.hint_horizontal' : 'ui.ws.calendar.hint')}
+						</p>{/if}
+				{/if}
+			</AsyncView>
+		</div>
+		<AppointmentSheet
+			bind:this={sheet}
+			bind:selectedId
+			docked
+			contacts={[...(model.resource.data?.contacts.values() ?? [])]}
+			people={people.people}
+			appointments={model.resource.data?.appointments ?? []}
+		/>
+	</div>
 </ModuleGate>
-
-<AppointmentSheet
-	bind:this={sheet}
-	contacts={[...(model.resource.data?.contacts.values() ?? [])]}
-	people={people.people}
-	appointments={model.resource.data?.appointments ?? []}
-/>

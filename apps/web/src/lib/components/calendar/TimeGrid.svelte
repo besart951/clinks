@@ -40,6 +40,7 @@
 		editable,
 		axis = 'vertical',
 		dragging = $bindable(null),
+		selectedId = null,
 	}: {
 		columns: GridColumn[];
 		handlers: GridHandlers;
@@ -48,6 +49,8 @@
 		axis?: TimeAxis;
 		/** The appointment being dragged; bindable so a list outside the grid can drag onto it. */
 		dragging?: Appointment | null;
+		/** The appointment open in the side panel. */
+		selectedId?: string | null;
 	} = $props();
 	const workspace = useWorkspace();
 	const horizontal = $derived(axis === 'horizontal');
@@ -76,6 +79,8 @@
 		measure();
 		const observer = new ResizeObserver(measure);
 		observer.observe(document.documentElement);
+		// The frame also narrows when a side panel opens beside it.
+		observer.observe(frame);
 		addEventListener('resize', measure);
 		return () => {
 			observer.disconnect();
@@ -388,7 +393,9 @@
 								? 'line-through opacity-50'
 								: ''} {appointment.assigneeId === null ? 'border-dashed' : ''} {dragging?.id === appointment.id
 								? 'opacity-40'
-								: ''} {live ? 'z-[7] shadow-md ring-2 ring-[var(--ring)]' : ''}"
+								: ''} {live ? 'z-[7] shadow-md ring-2 ring-[var(--ring)]' : ''} {selectedId === appointment.id
+								? 'ring-primary z-[6] ring-2'
+								: ''}"
 							style:top={box.top}
 							style:left={box.left}
 							style:width={box.width}
