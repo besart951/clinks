@@ -1,6 +1,16 @@
 import { z } from 'zod';
 
 const boolean = z.enum(['true', 'false']).transform((value) => value === 'true');
+const originList = z
+	.string()
+	.default('')
+	.transform((value) =>
+		value
+			.split(',')
+			.map((entry) => entry.trim())
+			.filter(Boolean),
+	)
+	.pipe(z.array(z.url()));
 
 const environment = z.object({
 	NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
@@ -9,6 +19,8 @@ const environment = z.object({
 	DATABASE_URL: z.url().default('postgres://clinks_api:clinks-api-dev@localhost:5432/clinks'),
 	/** The SPA's origin: allowed for CORS and used in links in mails. */
 	WEB_ORIGIN: z.url().default('http://localhost:5176'),
+	/** Optional comma-separated extra origins allowed for CORS (e.g. desktop app origin). */
+	ALLOWED_ORIGINS: originList,
 	/** Issuer of access tokens; PowerSync and Hocuspocus check it. */
 	TOKEN_ISSUER: z.string().default('http://localhost:8787'),
 	TOKEN_AUDIENCE: z.string().default('clinks'),

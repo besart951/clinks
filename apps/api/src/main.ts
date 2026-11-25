@@ -60,10 +60,19 @@ const pruneTimer = setInterval(() => {
 }, 60 * 60_000);
 pruneTimer.unref();
 
+let closing = false;
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
 	process.on(signal, () => {
+		if (closing) return;
+		closing = true;
 		clearInterval(pruneTimer);
-		server.close();
-		void db.destroy();
+		const timeout = setTimeout(() => {
+			void db.destroy().finally(() => process.exit(0));
+		}, 10_000);
+		timeout.unref();
+		server.close(() => {
+			clearTimeout(timeout);
+			void db.destroy();
+		});
 	});
 }

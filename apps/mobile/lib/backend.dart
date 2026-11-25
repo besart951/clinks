@@ -39,11 +39,20 @@ class MobileBackend extends PowerSyncBackendConnector {
                 ? http.get(url, headers: headers)
                 : http.post(url, headers: headers, body: jsonEncode(body)))
             .timeout(const Duration(seconds: 15));
-    final data = response.body.isEmpty
-        ? null
-        : jsonDecode(utf8.decode(response.bodyBytes));
+    dynamic data;
+    if (response.body.isNotEmpty) {
+      try {
+        data = jsonDecode(utf8.decode(response.bodyBytes));
+      } on FormatException {
+        data = null;
+      }
+    }
     if (response.statusCode >= 400) {
-      throw ApiFailure(data['error']['message'] as String, response.statusCode);
+      final error = data is Map ? data['error'] : null;
+      final message = error is Map && error['message'] is String
+          ? error['message'] as String
+          : (response.reasonPhrase ?? 'HTTP ${response.statusCode}');
+      throw ApiFailure(message, response.statusCode);
     }
     return data;
   }
@@ -110,6 +119,10 @@ class MobileBackend extends PowerSyncBackendConnector {
 
   Future<void> open(TenantSummary tenant, {String? databasePath}) async {
     await adopt(await request('/me/tenant', body: {'tenantId': tenant.id}));
+    final previous = database;
+    database = null;
+    await previous?.disconnectAndClear();
+    await previous?.close();
     final path =
         databasePath ??
         '${(await getApplicationSupportDirectory()).path}/workspace.db';
@@ -147,25 +160,31 @@ class MobileBackend extends PowerSyncBackendConnector {
           );
   }
 
+  static const _permanentSyncStatuses = {400, 403, 404, 409, 410, 413};
+
   @override
   Future<void> uploadData(PowerSyncDatabase database) async {
     final tx = await database.getNextCrudTransaction();
     if (tx == null) return;
     await fetchCredentials();
-    await request(
-      '/sync/write',
-      body: {
-        'ops': [
-          for (final op in tx.crud)
-            {
-              'op': op.op.json,
-              'table': op.table,
-              'id': op.id,
-              'data': op.opData,
-            },
-        ],
-      },
-    );
+    try {
+      await request(
+        '/sync/write',
+        body: {
+          'ops': [
+            for (final op in tx.crud)
+              {
+                'op': op.op.json,
+                'table': op.table,
+                'id': op.id,
+                'data': op.opData,
+              },
+          ],
+        },
+      );
+    } on ApiFailure catch (error) {
+      if (!_permanentSyncStatuses.contains(error.status)) rethrow;
+    }
     await tx.complete();
   }
 

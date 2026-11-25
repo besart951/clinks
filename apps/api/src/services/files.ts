@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { ApiError, forbidden } from '../errors.ts';
 import { uuid } from '../crypto.ts';
 import type { AccessClaims } from '../tokens.ts';
-import type { Services } from './context.ts';
+import type { Caller, Services } from './context.ts';
 import { requirePermission } from './permissions.ts';
 import { audit } from './audit.ts';
 import { tenantStores } from './storage.ts';
@@ -132,7 +132,7 @@ export class FileService {
 			};
 		});
 	}
-	commit(claims: AccessClaims, doc: string, id: string, source?: string) {
+	commit(claims: AccessClaims, doc: string, id: string, source?: string, caller: Caller | null = null) {
 		return this.withDocument(claims, doc, true, async (tx, scope) => {
 			if (await getVersion(tx, doc, id)) return { id };
 			const { store, storageId } = await tenantStores(this.#services).active(tx, scope.tenantId);
@@ -159,7 +159,12 @@ export class FileService {
 				.execute();
 			await tx
 				.updateTable('documents')
-				.set({ ...fields, dataUrl: 'version:' + id, revision: sql<number>`revision + 1`, updatedAt: new Date() })
+				.set({
+					...fields,
+					dataUrl: 'version:' + id,
+					revision: sql<number>`revision + 1`,
+					updatedAt: this.#services.now(),
+				})
 				.where('id', '=', doc)
 				.execute();
 			await audit(
@@ -170,7 +175,7 @@ export class FileService {
 					actorId: scope.userId,
 					target: doc,
 				},
-				null,
+				caller,
 			);
 			return { id };
 		});

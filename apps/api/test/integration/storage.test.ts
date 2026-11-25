@@ -84,6 +84,23 @@ describe('tenant storage', () => {
 		])
 			assert.equal((await call({ ...infomaniak, endpoint, secretAccessKey: 'x' })).status, 400, endpoint);
 	});
+
+	it('reports unreachable instead of secret when an already stored endpoint resolves internal on test', async () => {
+		const a = await api.administrator('storage-rebinding@example.ch', 'Storage Rebind');
+		const call = (method: string, path: string, body?: unknown) =>
+			a.browser.call(method, path, { token: a.token, body });
+		const saved = await call('POST', '/tenant/storage', { ...infomaniak, secretAccessKey: 'top-secret-1234' });
+		assert.equal(saved.status, 200);
+		await api.owner
+			.updateTable('auth.storageConfigs')
+			.set({ endpoint: 'https://internal.example.com' })
+			.where('id', '=', saved.body.id)
+			.execute();
+		const checked = await call('POST', '/tenant/storage/test');
+		assert.equal(checked.status, 200);
+		assert.equal(checked.body.ok, false);
+		assert.deepEqual(checked.body.problems, ['unreachable']);
+	});
 });
 
 /** Against the local RustFS (`pnpm dev:services`); set S3_TEST_ENDPOINT=http://localhost:9000 to run it. */

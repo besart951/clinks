@@ -42,4 +42,13 @@ it('persists company and profile edits, isolates the team and keeps an active ad
 		404,
 	);
 	assert.equal((await call('POST', '/tenant/settings', { plan: 'business' })).status, 400);
+
+	const auditRows = await api.owner
+		.selectFrom('audit')
+		.select(['action', 'ip'])
+		.where('tenantId', '=', a.tenantId)
+		.where('action', 'in', ['tenant.updated', 'user.updated'])
+		.execute();
+	assert.equal(auditRows.length, 2);
+	assert.ok(auditRows.every((row) => typeof row.ip === 'string' && row.ip.length > 0));
 });
