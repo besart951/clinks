@@ -19,7 +19,7 @@ export function emptyTask(): Draft<Task> {
 	};
 }
 
-/** Editing one task in the side panel. Saving notifies newly assigned people. */
+/** Creating or editing one task. Saving notifies newly assigned people. */
 export class TaskFormModel {
 	value = $state<Draft<Task>>(emptyTask());
 	original = $state.raw<Task | null>(null);
@@ -83,7 +83,7 @@ export class TaskFormModel {
 					added,
 					'assignment',
 					{ key: 'ui.ws.notification.assigned', params: { target: saved.title } },
-					`/planner?task=${saved.id}`,
+					`/planner/${saved.id}`,
 				);
 			}
 			this.original = saved;

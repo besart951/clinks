@@ -302,7 +302,7 @@
 						{#each data.myTasks as task (task.id)}
 							<a
 								class="hover:bg-accent flex h-9 items-center gap-2 rounded-md px-1 text-sm"
-								href={href(`/planner?task=${task.id}`)}
+								href={href(`/planner/${task.id}`)}
 							>
 								<span class="bg-input size-2 shrink-0 rounded-full"></span>
 								<span class="min-w-0 flex-1 truncate">{task.title}</span>
