@@ -12,6 +12,8 @@
 		highlight?: boolean;
 		/** Makes the label a link, e.g. to the staff member's page. */
 		href?: string;
+		/** A button shown on hover that hides this column, e.g. a weekday. */
+		hide?: { label: string; run: () => void };
 	}
 
 	export interface GridHandlers {
@@ -35,6 +37,7 @@
 	import { dayEndMinutes, dayStartMinutes } from '#lib/features/calendar/calendar.svelte';
 	import { useWorkspace } from '#lib/workspace.svelte';
 	import * as HoverCard from '@clinks/ui/components/ui/hover-card';
+	import EyeOff from '@lucide/svelte/icons/eye-off';
 
 	let {
 		columns,
@@ -271,6 +274,18 @@
 />
 
 {#snippet columnLabel(column: GridColumn)}
+	{#if column.hide}
+		<!-- Shown on hover and keyboard focus; always on touch screens, which cannot hover. -->
+		<button
+			type="button"
+			class="text-muted-foreground hover:text-foreground hover:bg-accent absolute end-1 top-1 grid size-6 place-items-center rounded-md opacity-0 transition-opacity group-hover/head:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100"
+			aria-label={column.hide.label}
+			title={column.hide.label}
+			onclick={column.hide.run}
+		>
+			<EyeOff class="size-3.5" />
+		</button>
+	{/if}
 	{#if column.href}
 		<a class="block truncate hover:underline" href={column.href}>{column.label}</a>
 	{:else}
@@ -472,7 +487,7 @@
 			</div>
 			{#each columns as column (column.key)}
 				<div
-					class="bg-background sticky left-0 z-10 flex flex-col justify-center border-t border-r px-3 text-sm {column.highlight
+					class="group/head bg-background sticky left-0 z-10 flex flex-col justify-center border-t border-r px-3 text-sm {column.highlight
 						? 'text-primary font-semibold'
 						: ''}"
 				>
@@ -487,7 +502,7 @@
 			{#each columns as column (column.key)}
 				<div
 					data-grid-head
-					class="bg-background sticky top-0 z-10 border-b border-l px-2 py-2 text-center text-sm {column.highlight
+					class="group/head bg-background sticky top-0 z-10 border-b border-l px-2 py-2 text-center text-sm {column.highlight
 						? 'text-primary font-semibold'
 						: ''}"
 				>

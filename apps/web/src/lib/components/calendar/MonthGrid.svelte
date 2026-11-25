@@ -6,23 +6,52 @@
 		color(appointment: Appointment): string;
 		open(appointment: Appointment): void;
 		day(date: CalendarDate): void;
+		/** Hides an ISO weekday (1 = Monday); the button shows when the weekday's header is hovered. */
+		hideWeekday?(weekday: number): void;
 	}
 </script>
 
 <script lang="ts">
+	import EyeOff from '@lucide/svelte/icons/eye-off';
 	import { isoWeekday, today } from '@clinks/domain/dates';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
+	/** `days` are the weeks of the month without hidden weekdays, so each row has as many days as there are columns. */
 	let { days, month, handlers }: { days: CalendarDate[]; month: string; handlers: MonthHandlers } = $props();
 	const workspace = useWorkspace();
-	const weekdayNames = $derived(days.slice(0, 7).map((day) => workspace.i18n.format(day, { weekday: 'short' })));
+	const weekdays = $derived([...new Set(days.map(isoWeekday))].sort());
+	const headers = $derived(
+		weekdays.map((weekday) => {
+			const sample = days.find((day) => isoWeekday(day) === weekday)!;
+			return { weekday, name: workspace.i18n.format(sample, { weekday: 'short' }) };
+		}),
+	);
 </script>
 
 <div class="overflow-hidden rounded-xl border">
-	<div class="grid grid-cols-7 border-b text-center text-xs font-medium">
-		{#each weekdayNames as name, index (index)}<div class="text-muted-foreground py-2">{name}</div>{/each}
+	<div
+		class="grid border-b text-center text-xs font-medium"
+		style:grid-template-columns="repeat({weekdays.length}, minmax(0, 1fr))"
+	>
+		{#each headers as header (header.weekday)}
+			<div class="group/head text-muted-foreground relative py-2">
+				{header.name}
+				{#if handlers.hideWeekday && weekdays.length > 1}
+					<!-- Shown on hover and keyboard focus; always on touch screens, which cannot hover. -->
+					<button
+						type="button"
+						class="hover:text-foreground hover:bg-accent absolute end-1 top-1/2 grid size-6 -translate-y-1/2 place-items-center rounded-md opacity-0 transition-opacity group-hover/head:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100"
+						aria-label={workspace.t('ui.ws.calendar.hide_day', { day: header.name })}
+						title={workspace.t('ui.ws.calendar.hide_day', { day: header.name })}
+						onclick={() => handlers.hideWeekday?.(header.weekday)}
+					>
+						<EyeOff class="size-3.5" />
+					</button>
+				{/if}
+			</div>
+		{/each}
 	</div>
-	<div class="grid grid-cols-7">
+	<div class="grid" style:grid-template-columns="repeat({weekdays.length}, minmax(0, 1fr))">
 		{#each days as day (day)}
 			{@const items = handlers.appointmentsOn(day)}
 			<div

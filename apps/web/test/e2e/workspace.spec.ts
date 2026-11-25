@@ -451,3 +451,23 @@ test('adds a client from the open visits and plans their first visit', async ({ 
 	const visit = page.getByRole('dialog', { name: 'Neuer Termin' });
 	await expect(visit.getByLabel('Titel')).toHaveValue('Rosa Planbar');
 });
+
+test('hides weekdays in week and month view and brings them back', async ({ page }) => {
+	await signIn(page);
+	await page.goto('/#/calendar?view=week');
+	const heads = page.locator('[data-grid-head]');
+	await expect(heads).toHaveCount(7);
+	await page.getByRole('button', { name: '«Sa» ausblenden' }).click();
+	await page.getByRole('button', { name: '«So» ausblenden' }).click();
+	await expect(heads).toHaveCount(5);
+	const restore = page.getByRole('button', { name: 'Sa, So ausgeblendet' });
+	await expect(restore).toBeVisible();
+
+	// The month view leaves out the same days.
+	await page.goto('/#/calendar?view=month');
+	await expect(page.getByRole('button', { name: '«Sa» ausblenden' })).toHaveCount(0);
+	await expect(page.getByRole('button', { name: '«Mo» ausblenden' })).toBeAttached();
+	await restore.click();
+	await expect(page.getByRole('button', { name: '«So» ausblenden' })).toBeAttached();
+	await expect(restore).toBeHidden();
+});

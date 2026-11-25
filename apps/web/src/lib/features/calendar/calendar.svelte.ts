@@ -1,5 +1,5 @@
 import { saveTimes, type AppointmentTimes } from './retime.ts';
-import { addDays, addMonths, monthGrid, startOfWeek, today, weekDays } from '@clinks/domain/dates';
+import { addDays, addMonths, isoWeekday, monthGrid, startOfWeek, today, weekDays } from '@clinks/domain/dates';
 import type { AppointmentId, UserId } from '@clinks/domain/ids';
 import type { Appointment, AppointmentKind, CalendarDate, Contact } from '@clinks/domain/types';
 import { Resource } from '../../state/resource.svelte.ts';
@@ -23,6 +23,8 @@ export class CalendarModel {
 	hiddenPeople = $state<UserId[]>([]);
 	hiddenKinds = $state<AppointmentKind[]>([]);
 	showOpen = $state(true);
+	/** ISO weekdays (1 = Monday … 7 = Sunday) left out of the week and month view, e.g. the weekend. */
+	hiddenWeekdays = $state<number[]>([]);
 	#workspace: Workspace;
 
 	constructor(workspace: Workspace) {
@@ -43,6 +45,18 @@ export class CalendarModel {
 		if (this.view === 'month') return monthGrid(this.anchor);
 		if (this.view === 'week') return weekDays(startOfWeek(this.anchor), 7);
 		return [this.anchor];
+	}
+
+	/** The days drawn: in week and month view without the hidden weekdays. */
+	get shownDays(): CalendarDate[] {
+		if (this.view !== 'week' && this.view !== 'month') return this.days;
+		return this.days.filter((day) => !this.hiddenWeekdays.includes(isoWeekday(day)));
+	}
+
+	/** Hides a weekday; at least one stays. */
+	hideWeekday(weekday: number) {
+		if (this.hiddenWeekdays.includes(weekday) || this.hiddenWeekdays.length >= 6) return;
+		this.hiddenWeekdays = [...this.hiddenWeekdays, weekday].sort();
 	}
 
 	get range(): [CalendarDate, CalendarDate] {
