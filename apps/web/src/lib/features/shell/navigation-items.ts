@@ -116,3 +116,20 @@ export const navigationGroups: NavigationGroup[] = [
 ];
 
 export const allNavigationItems = navigationGroups.flatMap((group) => group.items);
+
+/**
+ * What a person may do with a place in the app. `open`: go there. `locked`: not booked, and they may book it.
+ * `denied`: booked, but their role does not allow it. `hidden`: not booked, and they cannot change that.
+ * Navigation shows `open` and `locked` only, so staff are not confused by places they never use; the search also
+ * lists `denied`, as «Kein Zugriff».
+ */
+export type NavigationAccess = 'open' | 'locked' | 'denied' | 'hidden';
+
+export function navigationAccess(
+	item: Pick<NavigationItem, 'module' | 'permission'>,
+	session: { can(permission: Permission): boolean; hasModule(module: ModuleKey): boolean },
+): NavigationAccess {
+	if (item.module && !session.hasModule(item.module)) return session.can('billing.manage') ? 'locked' : 'hidden';
+	if (item.permission && !session.can(item.permission)) return 'denied';
+	return 'open';
+}

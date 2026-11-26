@@ -5369,6 +5369,10 @@
       "ui.ws.roles.none": {
         "de-CH": "Kein Zugriff",
         "en-US": "No access"
+      },
+      "ui.ws.gate.not_booked": {
+        "de-CH": "Nicht gebucht",
+        "en-US": "Not booked"
       }
     }
   }

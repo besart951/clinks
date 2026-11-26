@@ -145,12 +145,12 @@
 						>
 							<Phone class="size-4" />
 						</Button>{/if}
-					{#if contact.tags.includes('Patient:in') && session.hasModule('physio')}
+					{#if contact.tags.includes('Patient:in') && session.hasModule('physio') && session.can('physio.read')}
 						<Button variant="outline" size="sm" href={href(`/physio/${contact.id}`)}>
 							<HeartPulse class="size-4" />{workspace.t('ui.ws.physio.open_record')}
 						</Button>
 					{/if}
-					{#if contact.tags.includes('Klient:in') && session.hasModule('spitex')}
+					{#if contact.tags.includes('Klient:in') && session.hasModule('spitex') && session.can('spitex.read')}
 						<Button variant="outline" size="sm" href={href(`/spitex/clients/${contact.id}`)}>
 							<House class="size-4" />{workspace.t('ui.ws.spitex.open_client')}
 						</Button>
