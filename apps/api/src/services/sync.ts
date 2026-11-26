@@ -13,6 +13,7 @@ import { ApiError, forbidden } from '../errors.ts';
 import type { AccessClaims } from '../tokens.ts';
 import { audit } from './audit.ts';
 import { PlanWrites } from './plan-writes.ts';
+import { InvoiceArchive } from './invoice-archive.ts';
 import type { Caller, Services } from './context.ts';
 
 type Fields = { [field: string]: unknown };
@@ -27,9 +28,11 @@ type Fields = { [field: string]: unknown };
  */
 export class SyncService {
 	readonly #services: Services;
+	readonly #archive: InvoiceArchive;
 
 	constructor(services: Services) {
 		this.#services = services;
+		this.#archive = new InvoiceArchive(services);
 	}
 
 	async write(
@@ -189,19 +192,22 @@ export class SyncService {
 				.set({ ...values, revision: (existing.revision as number) + 1, updatedAt: now })
 				.where('id', '=', op.id)
 				.execute();
-			return 'updated';
+		} else {
+			try {
+				await tx
+					.insertInto(table)
+					.values({ ...values, id: op.id, tenantId: scope.tenantId, revision: 1, createdAt: now, updatedAt: now })
+					.execute();
+			} catch (error) {
+				// The id exists, but row-level security hides it: it belongs to another tenant.
+				if ((error as { code?: string }).code === '23505') throw new ApiError(409, 'error.conflict');
+				throw error;
+			}
 		}
-		try {
-			await tx
-				.insertInto(table)
-				.values({ ...values, id: op.id, tenantId: scope.tenantId, revision: 1, createdAt: now, updatedAt: now })
-				.execute();
-		} catch (error) {
-			// The id exists, but row-level security hides it: it belongs to another tenant.
-			if ((error as { code?: string }).code === '23505') throw new ApiError(409, 'error.conflict');
-			throw error;
-		}
-		return 'created';
+		// Issued now: the PDF/A is archived with the invoice, in the same transaction.
+		if (table === 'invoices' && (stored?.status ?? 'draft') === 'draft' && merged.status !== 'draft')
+			await this.#archive.issue(tx, scope, op.id);
+		return existing ? 'updated' : 'created';
 	}
 }
 

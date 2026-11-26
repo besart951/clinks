@@ -57,6 +57,7 @@ export function uploadToFields(
 	for (const [name, value] of Object.entries(data)) {
 		if (serverColumns.some((column) => column.column === name) || name === 'id') continue;
 		const column = byColumn.get(name);
+		if (column?.serverSet) continue;
 		if (!column) unknown.push(name);
 		else {
 			try {

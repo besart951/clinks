@@ -367,6 +367,8 @@ function invoiceFor(
 		appointmentIds: [],
 		serviceFrom: issueDate,
 		serviceTo: issueDate,
+		documentId: null,
+		pdfSha256: null,
 	});
 }
 
@@ -722,6 +724,7 @@ function seedDocuments(context: SeedContext, tenantId: TenantId, me: User, conta
 			dataUrl: `data:text/plain;charset=utf-8,${encodeURIComponent(text)}`,
 			targets: contactId ? [{ kind: 'contact', id: contactId }] : [],
 			uploadedBy: me.id,
+			locked: false,
 		});
 	file(
 		'Mietvertrag Praxis.txt',

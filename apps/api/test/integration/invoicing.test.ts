@@ -106,3 +106,56 @@ describe('payment details', () => {
 		assert.equal(refused.status, 400, JSON.stringify(refused.body));
 	});
 });
+
+describe('archive', () => {
+	it('archives the PDF/A once when the invoice is issued and keeps it from changing', async () => {
+		const contactId = uuid();
+		const id = uuid();
+		await call('POST', '/sync/write', { ops: [{ op: 'PUT', table: 'contacts', id: contactId, data: contactRow }] });
+		await call('POST', '/sync/write', { ops: [{ op: 'PUT', table: 'invoices', id, data: invoiceRow(contactId) }] });
+		assert.equal((await call('GET', `/finance/invoices/${id}/pdf`)).status, 404);
+
+		const issued = await call('POST', '/sync/write', {
+			ops: [{ op: 'PATCH', table: 'invoices', id, data: { status: 'open', document_id: uuid() } }],
+		});
+		assert.equal(issued.status, 200, JSON.stringify(issued.body));
+		const invoice = await api.owner
+			.selectFrom('invoices')
+			.select(['documentId', 'pdfSha256', 'number'])
+			.where('id', '=', id)
+			.executeTakeFirstOrThrow();
+		assert.match(String(invoice.pdfSha256), /^[0-9a-f]{64}$/);
+		const document = await api.owner
+			.selectFrom('documents')
+			.selectAll()
+			.where('id', '=', String(invoice.documentId))
+			.executeTakeFirstOrThrow();
+		assert.equal(document.locked, true);
+		assert.equal(document.mimeType, 'application/pdf');
+		assert.equal(document.name, `Rechnung ${invoice.number}.pdf`);
+		assert.deepEqual(document.targets, [{ kind: 'invoice', id }]);
+
+		const pdf = await call('GET', `/finance/invoices/${id}/pdf`);
+		assert.equal(pdf.status, 200);
+		assert.match(pdf.body.url, /^(data:application\/pdf;base64,|https?:)/);
+
+		// Issued: no changes to what it bills, no deleting, the file stays.
+		const patch = (data: Record<string, unknown>) =>
+			call('POST', '/sync/write', { ops: [{ op: 'PATCH', table: 'invoices', id, data }] });
+		assert.equal((await patch({ notes: 'später' })).status, 400);
+		assert.equal((await patch({ status: 'draft' })).status, 400);
+		assert.equal((await call('POST', '/sync/write', { ops: [{ op: 'DELETE', table: 'invoices', id }] })).status, 400);
+		assert.equal(
+			(await call('POST', '/sync/write', { ops: [{ op: 'DELETE', table: 'documents', id: document.id }] })).status,
+			400,
+		);
+		// Payments and cancelling still go.
+		assert.equal((await patch({ payments: JSON.stringify([{ date: '2026-12-01', amount: 1000 }]) })).status, 200);
+		const after = await api.owner
+			.selectFrom('invoices')
+			.select(['documentId', 'pdfSha256'])
+			.where('id', '=', id)
+			.executeTakeFirstOrThrow();
+		assert.deepEqual(after, { documentId: invoice.documentId, pdfSha256: invoice.pdfSha256 });
+	});
+});

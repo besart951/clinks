@@ -1,0 +1,27 @@
+{
+  "name": "@clinks/invoice-pdf",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Invoices and reminders as PDF/A-2b with the Swiss QR payment part; runs in Node (API) and in the browser (prototype).",
+  "exports": {
+    "./*": "./src/*.ts",
+    "./assets/*": "./assets/*"
+  },
+  "scripts": {
+    "check": "tsc --noEmit -p .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@clinks/domain": "workspace:*",
+    "@pdf-lib/fontkit": "1.1.1",
+    "pdf-lib": "1.17.1",
+    "qrcode": "1.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.6",
+    "@types/qrcode": "1.5.6",
+    "typescript": "6.0.3",
+    "vitest": "5.1.1"
+  }
+}

@@ -284,7 +284,8 @@ describe('module uploads', () => {
 			contact_id: contactId,
 			issue_date: '2026-11-22',
 			due_date: '2026-12-22',
-			status: 'open',
+			// Drafts: issued invoices can be neither deleted nor changed.
+			status: 'draft',
 			lines: JSON.stringify([{ description: 'Service', quantity: 1, unitPrice: 1000, vatRate: 0 }]),
 			payments: '[]',
 			reminder_level: 0,

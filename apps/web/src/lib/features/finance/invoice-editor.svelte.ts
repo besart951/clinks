@@ -189,6 +189,8 @@ export class InvoiceEditorModel {
 						kind: 'invoice',
 						payments: [],
 						reminderLevel: 0,
+						documentId: null,
+						pdfSha256: null,
 					});
 			if (issue) {
 				for (const appointment of data.appointments.filter((row) => this.appointmentIds.includes(row.id))) {

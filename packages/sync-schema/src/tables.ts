@@ -17,6 +17,8 @@ export interface Column {
 	readonly nullable?: boolean;
 	/** Another synced table this column points to; the API checks the target is in the same tenant. */
 	readonly references?: 'contacts' | 'appointments' | 'folders' | 'documents' | 'invoices' | 'users';
+	/** Set by the server only: synced down, but a client's value is ignored on upload. */
+	readonly serverSet?: boolean;
 }
 
 export interface SyncedTable {
@@ -114,6 +116,7 @@ export const syncedTables = {
 			text('data_url', 'dataUrl'),
 			{ column: 'targets', field: 'targets', type: 'json' },
 			{ column: 'uploaded_by', field: 'uploadedBy', type: 'uuid', references: 'users' },
+			{ column: 'locked', field: 'locked', type: 'boolean', serverSet: true },
 		],
 	},
 	invoices: {
@@ -134,6 +137,8 @@ export const syncedTables = {
 			{ column: 'appointment_ids', field: 'appointmentIds', type: 'json' },
 			{ column: 'service_from', field: 'serviceFrom', type: 'date', nullable: true },
 			{ column: 'service_to', field: 'serviceTo', type: 'date', nullable: true },
+			{ column: 'document_id', field: 'documentId', type: 'uuid', nullable: true, serverSet: true },
+			{ column: 'pdf_sha256', field: 'pdfSha256', type: 'text', nullable: true, serverSet: true },
 		],
 	},
 	expenses: {

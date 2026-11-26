@@ -167,6 +167,23 @@ test('issues an invoice with a QR payment part', async ({ page }) => {
 	// Stille Physio has a QR-IBAN: the bill carries a 27-digit QR reference, grouped in fives.
 	await expect(bill.getByText('CH44 3199 9123 0008 8901 2')).toBeVisible();
 	await expect(bill.getByText(/^\d{2}( \d{5}){5}$/)).toBeVisible();
+
+	// Issued: the PDF/A is archived and downloads as a file; it lies locked in «Rechnungen».
+	await expect(page.getByText('PDF/A archiviert')).toBeVisible();
+	const number = (await page.getByRole('heading', { level: 1 }).innerText()).replace('Rechnung ', '');
+	const download = page.waitForEvent('download');
+	await page.getByRole('button', { name: 'PDF herunterladen' }).click();
+	expect((await download).suggestedFilename()).toBe(`${number}.pdf`);
+	await page.goto('/#/documents');
+	await page
+		.getByRole('button', { name: /^Rechnungen/ })
+		.first()
+		.click();
+	const row = page.getByRole('row').filter({ hasText: `Rechnung ${number}.pdf` });
+	await expect(row).toContainText('Archiviert');
+	await row.getByRole('button', { name: /^Aktionen für/ }).click();
+	await expect(page.getByRole('menuitem', { name: 'Löschen' })).toHaveCount(0);
+	await expect(page.getByRole('menuitem', { name: 'Umbenennen' })).toHaveCount(0);
 });
 
 test('sets the QR-IBAN and the payment term for invoices', async ({ page }) => {

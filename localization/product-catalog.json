@@ -5441,6 +5441,78 @@
       "ui.ws.invoice.service_invalid": {
         "de-CH": "Das Ende liegt vor dem Beginn.",
         "en-US": "The end lies before the start."
+      },
+      "ui.ws.pdf.page": {
+        "de-CH": "Seite {page} von {count}",
+        "en-US": "Page {page} of {count}"
+      },
+      "ui.ws.pdf.reminder": {
+        "de-CH": "{level}. Mahnung",
+        "en-US": "Reminder {level}"
+      },
+      "ui.ws.pdf.reminder_intro": {
+        "de-CH": "Unsere Rechnung {number} vom {date} war am {due} fällig und ist noch offen. Falls die Zahlung inzwischen unterwegs ist, betrachten Sie dieses Schreiben bitte als gegenstandslos.",
+        "en-US": "Our invoice {number} of {date} was due on {due} and is still open. If you have paid it in the meantime, please disregard this letter."
+      },
+      "ui.ws.pdf.reminder_open": {
+        "de-CH": "Offener Betrag Rechnung {number}",
+        "en-US": "Open amount of invoice {number}"
+      },
+      "ui.ws.pdf.reminder_fee": {
+        "de-CH": "Mahngebühr",
+        "en-US": "Reminder fee"
+      },
+      "ui.ws.pdf.reminder_due": {
+        "de-CH": "Bitte begleichen Sie den Betrag bis {due}.",
+        "en-US": "Please pay the amount by {due}."
+      },
+      "ui.ws.pdf.receipt": {
+        "de-CH": "Empfangsschein",
+        "en-US": "Receipt"
+      },
+      "ui.ws.pdf.payable_by_blank": {
+        "de-CH": "Zahlbar durch (Name/Adresse)",
+        "en-US": "Payable by (name/address)"
+      },
+      "ui.ws.pdf.acceptance_point": {
+        "de-CH": "Annahmestelle",
+        "en-US": "Acceptance point"
+      },
+      "ui.ws.pdf.separate": {
+        "de-CH": "Vor der Einzahlung abzutrennen",
+        "en-US": "Separate before paying in"
+      },
+      "ui.ws.pdf.reminder_dates": {
+        "de-CH": "Datum {issued} · zahlbar bis {due}",
+        "en-US": "Date {issued} · payable by {due}"
+      },
+      "ui.ws.documents.archived": {
+        "de-CH": "Archiviert",
+        "en-US": "Archived"
+      },
+      "ui.ws.documents.archived_hint": {
+        "de-CH": "Revisionssicher abgelegt: lässt sich weder umbenennen noch ersetzen oder löschen.",
+        "en-US": "Archived for audit: it cannot be renamed, replaced or deleted."
+      },
+      "ui.ws.invoice.download_pdf": {
+        "de-CH": "PDF herunterladen",
+        "en-US": "Download PDF"
+      },
+      "ui.ws.invoice.archive": {
+        "de-CH": "Archiv",
+        "en-US": "Archive"
+      },
+      "ui.ws.invoice.archived": {
+        "de-CH": "PDF/A archiviert",
+        "en-US": "PDF/A archived"
+      },
+      "ui.ws.invoice.archiving": {
+        "de-CH": "PDF wird erstellt …",
+        "en-US": "Creating the PDF …"
+      },
+      "ui.ws.invoice.checksum": {
+        "de-CH": "Prüfsumme SHA-256: {sha}",
+        "en-US": "SHA-256 checksum: {sha}"
       }
     }
   }

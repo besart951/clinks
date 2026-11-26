@@ -1,0 +1,38 @@
+/** Translation keys the PDF needs; the caller resolves them in the workspace's language. */
+export const pdfLabelKeys = {
+	invoice: 'ui.ws.invoice.invoice',
+	creditNote: 'ui.ws.invoice.credit_note',
+	dates: 'ui.ws.invoice.dates',
+	servicePeriod: 'ui.ws.invoice.service_period',
+	serviceDate: 'ui.ws.invoice.service_date',
+	position: 'ui.ws.invoice.position',
+	quantity: 'ui.ws.invoice.quantity',
+	unitPrice: 'ui.ws.invoice.unit_price',
+	vat: 'ui.ws.invoice.vat',
+	amount: 'ui.ws.invoice.amount',
+	net: 'ui.ws.invoice.net',
+	vatOn: 'ui.ws.invoice.vat_on',
+	total: 'ui.ws.invoice.total',
+	thanks: 'ui.ws.invoice.thanks',
+	message: 'ui.ws.invoice.reference',
+	page: 'ui.ws.pdf.page',
+	reminder: 'ui.ws.pdf.reminder',
+	reminderDates: 'ui.ws.pdf.reminder_dates',
+	reminderIntro: 'ui.ws.pdf.reminder_intro',
+	reminderOpen: 'ui.ws.pdf.reminder_open',
+	reminderFee: 'ui.ws.pdf.reminder_fee',
+	reminderDue: 'ui.ws.pdf.reminder_due',
+	paymentPart: 'ui.ws.invoice.payment_part',
+	receipt: 'ui.ws.pdf.receipt',
+	account: 'ui.ws.invoice.account',
+	reference: 'ui.ws.invoice.reference_label',
+	additionalInfo: 'ui.ws.invoice.additional_info',
+	payableBy: 'ui.ws.invoice.payable_by',
+	payableByBlank: 'ui.ws.pdf.payable_by_blank',
+	currency: 'ui.ws.invoice.currency',
+	acceptancePoint: 'ui.ws.pdf.acceptance_point',
+	separate: 'ui.ws.pdf.separate',
+} as const;
+
+export type PdfLabel = keyof typeof pdfLabelKeys;
+export type Translate = (key: string, params?: Record<string, string | number>) => string;

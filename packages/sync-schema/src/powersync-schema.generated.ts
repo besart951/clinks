@@ -75,6 +75,7 @@ export const documents = new Table(
 		data_url: column.text,
 		targets: column.text,
 		uploaded_by: column.text,
+		locked: column.integer,
 	},
 	{ indexes: { tenant: ['tenant_id'] } },
 );
@@ -98,6 +99,8 @@ export const invoices = new Table(
 		appointment_ids: column.text,
 		service_from: column.text,
 		service_to: column.text,
+		document_id: column.text,
+		pdf_sha256: column.text,
 	},
 	{ indexes: { tenant: ['tenant_id'] } },
 );

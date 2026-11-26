@@ -1,7 +1,8 @@
 import type { UserId } from '@clinks/domain/ids';
-import type { AppNotification, Contact, CommentTarget, MyVisits, NotificationKind } from '@clinks/domain/types';
+import type { AppNotification, CommentTarget, MyVisits, NotificationKind } from '@clinks/domain/types';
 import { myVisits } from '@clinks/domain/spitex-release';
 import { MockPlanNotices } from './mock-plan-notices.ts';
+import { MockInvoiceArchive } from './mock-invoice-archive.ts';
 import type { Repository } from '@clinks/contracts/repository';
 import { workspaceSchemas } from '@clinks/contracts/workspace-schemas';
 import { syncedTables, type SyncedTableName } from '@clinks/sync-schema/tables';
@@ -12,9 +13,9 @@ import { SyncedRepository } from '../sync/synced-repository.ts';
 import { workspaceTable, type WorkspaceTable } from './workspace-tables.ts';
 import { SyncedWorkspaceReads } from '../sync/workspace-reads.ts';
 
-export function contactName(contact: Pick<Contact, 'kind' | 'firstName' | 'lastName' | 'companyName'>): string {
-	return contact.kind === 'company' ? contact.companyName : `${contact.firstName} ${contact.lastName}`.trim();
-}
+import { contactName } from '@clinks/domain/contacts';
+
+export { contactName };
 
 export class WorkspaceApi {
 	readonly #db: WorkspaceCache;
@@ -44,6 +45,7 @@ export class WorkspaceApi {
 		this.#context = context;
 		this.#reads = engine ? new SyncedWorkspaceReads(engine, context) : null;
 		const plan = new MockPlanNotices(db, context);
+		const archive = new MockInvoiceArchive(db, context);
 		function repository<Name extends SyncedTableName>(
 			table: Name,
 			options: {
@@ -77,7 +79,10 @@ export class WorkspaceApi {
 		});
 		this.folders = repository('folders');
 		this.documents = repository('documents', { label: (row) => row.name });
-		this.invoices = repository('invoices', { label: (row) => row.number });
+		this.invoices = repository('invoices', {
+			label: (row) => row.number,
+			after: (before, after) => archive.invoiceChanged(before, after),
+		});
 		this.expenses = repository('expenses', { label: (row) => row.description });
 		this.tasks = repository('tasks', { label: (row) => row.title });
 		this.mails = repository('mails', { label: (row) => row.subject });

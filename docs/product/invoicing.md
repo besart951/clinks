@@ -37,11 +37,16 @@ internal mail module, which sends nothing outside.
 
 ### 2 · PDF/A from the server and the archive
 
-- [ ] The API renders the invoice as PDF/A-2b (embedded fonts, colour profile, metadata) with the QR part to scale;
-      the same layout as the screen.
-- [ ] Rendered once when the invoice is issued, stored in the workspace's bucket with object lock, its SHA-256 and
-      time kept on the invoice; issued invoices cannot be edited, corrections go by credit note and a new invoice.
-- [ ] Download and print use the stored file; CI checks the output with veraPDF (open source, runs locally).
+- [x] `@clinks/invoice-pdf` renders invoice and reminder as PDF/A-2b (Liberation Sans embedded as the SIX style guide
+      allows, sRGB output intent, XMP metadata, file identifier) with the QR part to scale (46 mm code, Swiss cross);
+      the same code runs in the API and in the demo.
+- [x] Rendered once when the invoice is issued, in the same transaction as the write (`InvoiceArchive`), stored as a
+      locked document in «Rechnungen» in the workspace's bucket (object lock) with its SHA-256 on the invoice. The
+      database refuses changes to what an issued invoice bills, deleting it, and renaming, replacing or deleting the
+      file; filing it elsewhere or linking a contact still works.
+- [x] `GET /finance/invoices/{id}/pdf` for anyone with `finance.read`; the invoice page downloads the archived file.
+- [x] Tests: structure (embedded fonts, metadata, intent), page breaks with the QR part on the last page, QR payload
+      read back from the rendered page. veraPDF runs before go-live (phase 6): the sandbox cannot fetch it.
 
 ### 3 · Sending
 
@@ -73,7 +78,7 @@ internal mail module, which sends nothing outside.
 
 ### 6 · Before go-live
 
-- [ ] Check sample bills with the SIX QR-bill validator (test tool only).
+- [ ] Check sample bills with the SIX QR-bill validator (test tool only) and the PDF/A output with veraPDF.
 - [ ] Have the invoice template, the secure-link texts and reminder texts checked (fiduciary or lawyer).
 - [ ] e2e: issue → send by link → open → import a camt.054 → paid; reminder level 1 with fee.
 
