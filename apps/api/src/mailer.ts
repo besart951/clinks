@@ -1,9 +1,19 @@
 import nodemailer from 'nodemailer';
 
+export interface MailAttachment {
+	filename: string;
+	content: Uint8Array;
+	contentType: string;
+}
+
 export interface MailMessage {
 	to: string;
 	subject: string;
 	text: string;
+	/** Display name in place of the platform's («Spitex Seeland» instead of «CLinks»); the address stays ours. */
+	fromName?: string;
+	replyTo?: string;
+	attachments?: MailAttachment[];
 }
 
 export interface Mailer {
@@ -14,10 +24,19 @@ export interface Mailer {
 export function smtpMailer(url: string, from: string): Mailer {
 	const transport = nodemailer.createTransport(url);
 	return {
-		async send(message) {
-			await transport.sendMail({ from, ...message });
+		async send({ fromName, attachments, ...message }) {
+			await transport.sendMail({
+				...message,
+				from: fromName ? { name: fromName, address: addressOf(from) } : from,
+				attachments: attachments?.map((file) => ({ ...file, content: Buffer.from(file.content) })),
+			});
 		},
 	};
+}
+
+/** The bare address of `Name <address>` or of a plain address. */
+export function addressOf(from: string) {
+	return /<([^>]+)>/.exec(from)?.[1] ?? from.trim();
 }
 
 /** Keeps mails in memory, for tests. */

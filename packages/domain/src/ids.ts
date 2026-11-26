@@ -15,6 +15,7 @@ export type SeriesId = Id<'Series'>;
 export type FolderId = Id<'Folder'>;
 export type DocumentId = Id<'Document'>;
 export type InvoiceId = Id<'Invoice'>;
+export type InvoiceSendId = Id<'InvoiceSend'>;
 export type ExpenseId = Id<'Expense'>;
 export type TaskId = Id<'Task'>;
 export type CommentId = Id<'Comment'>;

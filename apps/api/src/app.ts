@@ -112,7 +112,7 @@ export function createApp({ services, config }: AppOptions) {
 	registerSyncRoutes(me, deps);
 	registerBillingRoutes(app, me, deps);
 	registerFileRoutes(me, deps);
-	registerFinanceRoutes(me, deps);
+	registerFinanceRoutes(app, me, deps);
 
 	app.route('/', me);
 

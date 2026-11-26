@@ -1,3 +1,4 @@
+import { defaultDelivery, samePostcode } from '../src/invoicing.ts';
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 import { addDays, atTime, isoWeek, isoWeekday, monthGrid, startOfWeek } from '../src/dates.ts';
@@ -344,5 +345,23 @@ describe('dates, plans and permissions', () => {
 		assert.equal(moduleBooked({ plan: 'starter', enabledModules: ['finance'] }, 'finance'), false);
 		assert.equal(moduleBooked({ plan: 'team', enabledModules: ['finance'] }, 'finance'), true);
 		assert.equal(moduleBooked({ plan: 'starter', enabledModules: [] }, 'contacts'), true);
+	});
+});
+
+describe('sending invoices', () => {
+	const tenant = { industry: 'services' as const, enabledModules: [] };
+	it('sends a secure link when the workspace handles health data', () => {
+		assert.equal(defaultDelivery({ delivery: 'auto' }, tenant), 'attachment');
+		assert.equal(defaultDelivery({ delivery: 'auto' }, { ...tenant, industry: 'spitex' }), 'link');
+		assert.equal(defaultDelivery({ delivery: 'auto' }, { ...tenant, enabledModules: ['physio'] }), 'link');
+		assert.equal(defaultDelivery({ delivery: 'attachment' }, { ...tenant, industry: 'physio' }), 'attachment');
+	});
+
+	it('compares postcodes as people type them', () => {
+		assert.ok(samePostcode(' 3000 ', '3000'));
+		assert.ok(samePostcode('CH-3000', '3000'));
+		assert.ok(samePostcode('sw1a 1aa', 'SW1A 1AA'));
+		assert.ok(!samePostcode('3001', '3000'));
+		assert.ok(!samePostcode('', ''));
 	});
 });

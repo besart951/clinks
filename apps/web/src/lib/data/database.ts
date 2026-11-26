@@ -13,6 +13,7 @@ import type {
 	Folder,
 	Invitation,
 	Invoice,
+	InvoiceSend,
 	MailMessage,
 	MailTemplate,
 	Membership,
@@ -26,6 +27,9 @@ import type {
 	WeekRelease,
 } from '@clinks/domain/types';
 import type { StorageSettings } from '@clinks/domain/storage';
+
+/** The demo's send log: the server keeps the link token's hash in its own table, the demo keeps it on the row. */
+export type MockInvoiceSend = InvoiceSend & { token: string | null; attempts: number };
 
 export interface Tables {
 	tenants: Tenant;
@@ -52,6 +56,7 @@ export interface Tables {
 	notifications: AppNotification;
 	audit: AuditEntry;
 	storageSettings: StorageSettings;
+	invoiceSends: MockInvoiceSend;
 }
 
 export type TableName = keyof Tables;
@@ -82,6 +87,7 @@ export const tableNames: readonly TableName[] = [
 	'notifications',
 	'audit',
 	'storageSettings',
+	'invoiceSends',
 ];
 
 export type ErrorCode =

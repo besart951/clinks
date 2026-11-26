@@ -186,6 +186,50 @@ test('issues an invoice with a QR payment part', async ({ page }) => {
 	await expect(page.getByRole('menuitem', { name: 'Umbenennen' })).toHaveCount(0);
 });
 
+test('sends an issued invoice as a secure link that opens with the postcode', async ({ page }) => {
+	await signIn(page);
+	await page.goto('/#/finance/invoices/new');
+	await page.getByRole('combobox').first().click();
+	await page.getByRole('option').nth(1).click();
+	await page.getByLabel('Beschreibung').first().fill('Behandlung');
+	await page.getByLabel('Preis CHF').first().fill('120');
+	await page.getByLabel('Preis CHF').first().blur();
+	await page.getByRole('button', { name: 'Rechnung stellen' }).click();
+	await expect(page.getByText('PDF/A archiviert')).toBeVisible();
+	const number = (await page.getByRole('heading', { level: 1 }).innerText()).replace('Rechnung ', '');
+	await expect(page.getByText('Noch nicht per E-Mail gesendet.', { exact: false })).toBeVisible();
+
+	// Physio handles health data: the secure link is chosen, the address comes from the contact.
+	await page.getByRole('button', { name: 'Senden', exact: true }).click();
+	const dialog = page.getByRole('dialog', { name: `Rechnung ${number} senden` });
+	await expect(dialog.getByRole('radio', { name: /Sicherer Link/ })).toBeChecked();
+	const zip = /\((\d{4})\)/.exec(await dialog.getByText(/Postleitzahl der Rechnungsadresse/).innerText())![1];
+	await dialog.getByLabel('An', { exact: true }).fill('patientin@example.ch');
+	await dialog.getByRole('button', { name: 'Senden' }).click();
+	await expect(page.getByText(`Rechnung ${number} an patientin@example.ch gesendet`)).toBeVisible();
+	await expect(page.getByText(/an patientin@example\.ch$/)).toBeVisible();
+	await expect(page.getByText(/Noch nicht geöffnet · gültig bis/)).toBeVisible();
+
+	// The recipient's page: the wrong postcode is refused, the right one downloads the archived PDF.
+	await page.getByRole('link', { name: 'Link öffnen (Demo)' }).click();
+	await expect(page.getByRole('heading', { level: 1, name: `Rechnung ${number}` })).toBeVisible();
+	await page.getByLabel('Postleitzahl').fill('0000');
+	await page.getByRole('button', { name: 'PDF herunterladen' }).click();
+	await expect(page.getByText('Die Postleitzahl stimmt nicht.')).toBeVisible();
+	await page.getByLabel('Postleitzahl').fill(zip);
+	const download = page.waitForEvent('download');
+	await page.getByRole('button', { name: 'PDF herunterladen' }).click();
+	expect((await download).suggestedFilename()).toBe(`Rechnung ${number}.pdf`);
+	await page.goBack();
+	await expect(page.getByText(/^Geöffnet am .* \(1×\)$/)).toBeVisible();
+
+	// In the demo the mail lands in Mail › Gesendet, without amount or service.
+	await page.goto('/#/mail');
+	await page.getByRole('button', { name: /^Gesendet/ }).click();
+	await page.getByText(`Rechnung ${number} von`).first().click();
+	await expect(page.getByText(/Postleitzahl Ihrer Rechnungsadresse/).first()).toBeVisible();
+});
+
 test('sets the QR-IBAN and the payment term for invoices', async ({ page }) => {
 	await signIn(page);
 	await page.goto('/#/settings');

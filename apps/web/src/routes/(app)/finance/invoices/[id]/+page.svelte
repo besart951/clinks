@@ -26,18 +26,20 @@
 	import ObjectTimeline from '#lib/components/collaboration/ObjectTimeline.svelte';
 	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
 	import InvoiceDocument from '#lib/components/finance/InvoiceDocument.svelte';
+	import InvoiceSendDialog from '#lib/components/finance/InvoiceSendDialog.svelte';
+	import InvoiceSendLog from '#lib/components/finance/InvoiceSendLog.svelte';
+	import { InvoiceSendModel } from '#lib/features/finance/invoice-send.svelte';
 	import { InvoiceDetailModel } from '#lib/features/finance/invoice-detail.svelte';
 	import { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
 	import { contactName } from '#lib/data/workspace-api';
 	import { today } from '@clinks/domain/dates';
 	import type { InvoiceId } from '@clinks/domain/ids';
 	import { href, navigate } from '#lib/navigation';
-	import { useQuickCreate } from '#lib/features/shell/quick-create.svelte';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
-	const quick = useQuickCreate();
 	const model = new InvoiceDetailModel(workspace, page.params.id as InvoiceId);
+	const sending = new InvoiceSendModel(workspace, page.params.id as InvoiceId);
 	const people = new PeopleDirectory(workspace);
 	const canWrite = $derived(workspace.session.can('finance.write'));
 	let paymentOpen = $state(false);
@@ -46,6 +48,7 @@
 	let confirm = $state<ConfirmRequest | null>(null);
 
 	onMount(() => {
+		void sending.load();
 		return model.resource.connect();
 	});
 
@@ -60,16 +63,6 @@
 		const amount = Math.round(Number(paymentAmount.replace(',', '.')) * 100);
 		if (!amount) return;
 		if (await model.recordPayment(amount, paymentDate)) paymentOpen = false;
-	}
-
-	function sendByMail() {
-		const data = model.resource.value;
-		const to = data.contact?.email ?? '';
-		const subject = workspace.t('ui.ws.invoice.mail_subject', {
-			number: data.invoice.number,
-			company: workspace.session.tenant?.name ?? '',
-		});
-		quick.mail({ to: to ? [to] : [], subject });
 	}
 
 	function askCancel() {
@@ -132,6 +125,11 @@
 									})}
 								</Button>{/if}
 						{/if}
+						{#if canWrite && invoice.documentId && invoice.status !== 'cancelled'}<Button
+								onclick={() => sending.show(contact)}
+							>
+								<Send class="size-4" />{workspace.t('ui.ws.invoice.send')}
+							</Button>{/if}
 						{#if invoice.documentId}<Button
 								variant="outline"
 								onclick={() => workspace.run(() => workspace.invoiceFiles.save(invoice))}
@@ -156,11 +154,6 @@
 									</Button>{/snippet}
 							</DropdownMenu.Trigger>
 							<DropdownMenu.Content align="end">
-								{#if workspace.session.hasModule('mail') && workspace.session.can('mail.write')}<DropdownMenu.Item
-										onclick={sendByMail}
-									>
-										<Send class="size-4" />{workspace.t('ui.ws.invoice.send_mail')}
-									</DropdownMenu.Item>{/if}
 								{#if canWrite}
 									<DropdownMenu.Item onclick={duplicate}>{workspace.t('ui.ws.campaign.duplicate')}</DropdownMenu.Item>
 									{#if invoice.status !== 'draft' && invoice.status !== 'cancelled'}<DropdownMenu.Item
@@ -241,6 +234,11 @@
 							{/if}
 						</Card.Content>
 					</Card.Root>
+					{#if invoice.status !== 'draft'}<Card.Root>
+							<Card.Header><Card.Title>{workspace.t('ui.ws.invoice.sends')}</Card.Title></Card.Header>
+							<Card.Content><InvoiceSendLog model={sending} /></Card.Content>
+						</Card.Root>
+						<InvoiceSendDialog model={sending} {invoice} />{/if}
 					<Card.Root>
 						<Card.Content>
 							<Tabs.Root value="comments">

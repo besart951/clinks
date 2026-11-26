@@ -107,6 +107,7 @@ export const invoiceSettings = z.strictObject({
 		)
 		.max(3),
 	defaultInterest: z.boolean(),
+	replyTo: z.union([z.literal(''), z.email().max(254)]).optional(),
 });
 export const companyUpdate = z
 	.strictObject({
