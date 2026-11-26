@@ -11,6 +11,7 @@
 	import Eye from '@lucide/svelte/icons/eye';
 	import Download from '@lucide/svelte/icons/download';
 	import History from '@lucide/svelte/icons/history';
+	import Lock from '@lucide/svelte/icons/lock';
 	import PenLine from '@lucide/svelte/icons/pen-line';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
@@ -312,6 +313,12 @@
 														/>{:else}<FileText class="text-muted-foreground size-4" />{/if}
 													{document.name}
 												</button>
+												{#if document.locked}<span
+														class="text-muted-foreground inline-flex items-center gap-1 text-xs"
+														title={workspace.t('ui.ws.documents.archived_hint')}
+													>
+														<Lock class="size-3" aria-hidden="true" />{workspace.t('ui.ws.documents.archived')}
+													</span>{/if}
 											</Table.Cell>
 											<Table.Cell class="hidden md:table-cell">
 												<div class="flex flex-wrap gap-1">
@@ -360,22 +367,22 @@
 														{/if}
 														{#if canWrite}
 															<DropdownMenu.Separator />
-															<DropdownMenu.Item
-																onclick={() =>
-																	ask(workspace.t('ui.ws.documents.rename'), document.name, (name) =>
-																		model.rename(document, name),
-																	)}
-															>
-																<PenLine />{workspace.t('ui.ws.documents.rename')}
-															</DropdownMenu.Item>
+															{#if !document.locked}<DropdownMenu.Item
+																	onclick={() =>
+																		ask(workspace.t('ui.ws.documents.rename'), document.name, (name) =>
+																			model.rename(document, name),
+																		)}
+																>
+																	<PenLine />{workspace.t('ui.ws.documents.rename')}
+																</DropdownMenu.Item>{/if}
 															<DropdownMenu.Item onclick={() => (linking = document)}>
 																<Link2 />{workspace.t('ui.ws.documents.link_contact')}
 															</DropdownMenu.Item>
 															<FolderMoveMenu {model} {document} />
-															<DropdownMenu.Separator />
-															<DropdownMenu.Item variant="destructive" onclick={() => model.remove(document)}>
-																<Trash2 />{workspace.t('ui.ws.delete')}
-															</DropdownMenu.Item>
+															{#if !document.locked}<DropdownMenu.Separator />
+																<DropdownMenu.Item variant="destructive" onclick={() => model.remove(document)}>
+																	<Trash2 />{workspace.t('ui.ws.delete')}
+																</DropdownMenu.Item>{/if}
 														{/if}
 													</DropdownMenu.Content>
 												</DropdownMenu.Root>
@@ -481,7 +488,7 @@
 							</Button>{/if}
 					</li>{/each}
 			</ul>
-			{#if canWrite}<FileButton
+			{#if canWrite && !doc.locked}<FileButton
 					label={workspace.t('ui.ws.documents.upload_version')}
 					onpick={(files) => replace(doc, files[0])}
 				/>{/if}

@@ -39,7 +39,7 @@
 				<span class="text-muted-foreground shrink-0 text-xs">
 					{formatBytes(document.size, (value) => workspace.i18n.number(value))}
 				</span>
-				{#if canWrite}
+				{#if canWrite && !document.locked}
 					<Button
 						variant="ghost"
 						size="icon-xs"

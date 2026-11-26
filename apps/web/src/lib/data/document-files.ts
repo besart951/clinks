@@ -4,6 +4,7 @@ import { maxDocumentBytes } from '@clinks/contracts/workspace-schemas';
 import type { ApiClient } from './api-client.ts';
 import type { FileStore } from '../platform/types.ts';
 import { MockApiError } from './database.ts';
+import { bytesOf } from './data-url.ts';
 export interface DocumentVersion {
 	id: string;
 	size: number;
@@ -29,9 +30,10 @@ export class DocumentFiles {
 					)
 				).url
 			: doc.dataUrl;
-		const response = await fetch(url, { credentials: 'omit' });
-		if (!response.ok) throw new MockApiError('offline', this.#t('error.ws.offline'));
-		return new File([await response.blob()], doc.name, { type: doc.mimeType });
+		const bytes = await bytesOf(url).catch(() => {
+			throw new MockApiError('offline', this.#t('error.ws.offline'));
+		});
+		return new File([new Uint8Array(bytes)], doc.name, { type: doc.mimeType });
 	}
 	async preview(doc: StoredDocument) {
 		const file = await this.blob(doc);

@@ -251,6 +251,8 @@ export interface StoredDocument extends TenantRecord<DocumentId> {
 	dataUrl: string;
 	targets: AttachmentTarget[];
 	uploadedBy: UserId;
+	/** An archived file (an issued invoice or reminder): it can no longer be renamed, replaced or deleted. */
+	locked: boolean;
 }
 
 export const vatRates = [810, 260, 380, 0] as const;
@@ -287,6 +289,9 @@ export interface Invoice extends TenantRecord<InvoiceId> {
 	/** What the invoice bills, from–to (Art. 26 MWSTG); `null` on invoices made before it was asked. */
 	serviceFrom: CalendarDate | null;
 	serviceTo: CalendarDate | null;
+	/** The PDF/A archived when the invoice was issued, and its SHA-256; set by the server. */
+	documentId: DocumentId | null;
+	pdfSha256: string | null;
 }
 
 export const expenseCategories = [

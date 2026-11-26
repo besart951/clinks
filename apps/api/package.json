@@ -20,6 +20,7 @@
     "@clinks/db": "workspace:*",
     "@clinks/domain": "workspace:*",
     "@clinks/i18n-types": "workspace:*",
+    "@clinks/invoice-pdf": "workspace:*",
     "@clinks/sync-schema": "workspace:*",
     "@hono/node-server": "2.1.11",
     "@hono/zod-openapi": "1.6.3",

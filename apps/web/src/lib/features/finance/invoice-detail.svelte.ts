@@ -62,6 +62,8 @@ export class InvoiceDetailModel {
 					payments: [],
 					reminderLevel: 0,
 					appointmentIds: [],
+					documentId: null,
+					pdfSha256: null,
 				});
 			},
 			{ success: 'ui.ws.invoice.duplicated' },

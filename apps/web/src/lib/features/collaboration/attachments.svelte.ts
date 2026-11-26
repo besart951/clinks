@@ -22,6 +22,7 @@ export async function uploadDocument(
 		dataUrl,
 		targets: options.target ? [options.target] : [],
 		uploadedBy: workspace.session.user!.id,
+		locked: false,
 	});
 }
 

@@ -2,6 +2,8 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import Printer from '@lucide/svelte/icons/printer';
+	import FileDown from '@lucide/svelte/icons/file-down';
+	import Lock from '@lucide/svelte/icons/lock';
 	import Send from '@lucide/svelte/icons/send';
 	import Banknote from '@lucide/svelte/icons/banknote';
 	import BellRing from '@lucide/svelte/icons/bell-ring';
@@ -130,9 +132,18 @@
 									})}
 								</Button>{/if}
 						{/if}
-						<Button variant="outline" disabled={!invoice.number} onclick={() => workspace.platform.files.print()}>
-							<Printer class="size-4" />{workspace.t('ui.ws.invoice.print')}
-						</Button>
+						{#if invoice.documentId}<Button
+								variant="outline"
+								onclick={() => workspace.run(() => workspace.invoiceFiles.save(invoice))}
+							>
+								<FileDown class="size-4" />{workspace.t('ui.ws.invoice.download_pdf')}
+							</Button>{:else}<Button
+								variant="outline"
+								disabled={!invoice.number}
+								onclick={() => workspace.platform.files.print()}
+							>
+								<Printer class="size-4" />{workspace.t('ui.ws.invoice.print')}
+							</Button>{/if}
 						<DropdownMenu.Root>
 							<DropdownMenu.Trigger>
 								{#snippet child({ props })}<Button
@@ -198,6 +209,21 @@
 									<dt>{workspace.t('ui.ws.finance.balance')}</dt>
 									<dd class="tabular-nums">{workspace.i18n.money(Math.max(totals.balance, 0))}</dd>
 								</div>
+								{#if invoice.status !== 'draft'}<div class="flex justify-between gap-2">
+										<dt class="text-muted-foreground">{workspace.t('ui.ws.invoice.archive')}</dt>
+										<dd class="text-right">
+											{#if invoice.pdfSha256}<span class="inline-flex items-center gap-1">
+													<Lock class="size-3.5" aria-hidden="true" />{workspace.t('ui.ws.invoice.archived')}
+												</span><span
+													class="text-muted-foreground block font-mono text-[11px]"
+													title={workspace.t('ui.ws.invoice.checksum', { sha: invoice.pdfSha256 })}
+												>
+													SHA-256 {invoice.pdfSha256.slice(0, 12)}…
+												</span>{:else}<span class="text-muted-foreground">
+													{workspace.t('ui.ws.invoice.archiving')}
+												</span>{/if}
+										</dd>
+									</div>{/if}
 								{#if invoice.reminderLevel > 0}<div class="flex justify-between gap-2">
 										<dt class="text-muted-foreground">{workspace.t('ui.ws.invoice.reminders')}</dt>
 										<dd>{invoice.reminderLevel}</dd>

@@ -9,6 +9,7 @@ import type { Caller, Services } from './context.ts';
 import { requirePermission } from './permissions.ts';
 import { audit } from './audit.ts';
 import { tenantStores } from './storage.ts';
+import type { ObjectStore } from '../object-store.ts';
 
 type Scope = { tenantId: string; userId: string };
 const mimeType = z
@@ -63,9 +64,21 @@ export async function storeDocument(
 		return { dataUrl: previous, size: latest.size, mimeType: latest.mimeType };
 	}
 	const id = first ? uuid() : documentId;
+	return { dataUrl: await putVersion(tx, { store, storageId }, scope, documentId, id, bytes, String(fields.mimeType)) };
+}
+
+/** Puts the bytes into the bucket and records the version; returns the document's `dataUrl` reference. */
+async function putVersion(
+	tx: Tx,
+	{ store, storageId }: { store: ObjectStore; storageId: string | null },
+	scope: Scope,
+	documentId: string,
+	id: string,
+	bytes: Uint8Array,
+	type: string,
+) {
 	const key = objectKey(scope.tenantId, documentId, id);
-	const type = String(fields.mimeType);
-	const objectVersion = await store.put(key, bytes, type);
+	const objectVersion = await store.put(key, Buffer.from(bytes), type);
 	await tx
 		.insertInto('documentVersions')
 		.values({
@@ -80,7 +93,32 @@ export async function storeDocument(
 			storageId,
 		})
 		.execute();
-	return { dataUrl: 'version:' + id };
+	return 'version:' + id;
+}
+
+/**
+ * A file the server makes itself (an invoice PDF): one version in the workspace's bucket, or inline in the row when
+ * no bucket is configured (development).
+ */
+export async function storeServerFile(
+	tx: Tx,
+	services: Services,
+	scope: Scope,
+	documentId: string,
+	bytes: Uint8Array,
+	type: string,
+): Promise<string> {
+	const active = await tenantStores(services).active(tx, scope.tenantId);
+	if (!active.store) return `data:${type};base64,${Buffer.from(bytes).toString('base64')}`;
+	return putVersion(
+		tx,
+		{ store: active.store, storageId: active.storageId },
+		scope,
+		documentId,
+		documentId,
+		bytes,
+		type,
+	);
 }
 
 export class FileService {
@@ -186,4 +224,15 @@ export class FileService {
 function required<T>(store: T | undefined): T {
 	if (!store) throw new ApiError(503, 'error.internal');
 	return store;
+}
+
+/** Where a stored document can be fetched: a signed URL for its current version, or its inline data URL. */
+export async function documentUrl(tx: Tx, services: Services, documentId: string): Promise<string> {
+	const doc = await tx.selectFrom('documents').select('dataUrl').where('id', '=', documentId).executeTakeFirst();
+	if (!doc) throw new ApiError(404, 'error.ws.not_found');
+	const ref = String(doc.dataUrl);
+	if (!ref.startsWith('version:')) return ref;
+	const row = await getVersion(tx, documentId, ref.slice(8));
+	if (!row) throw new ApiError(404, 'error.ws.not_found');
+	return required(await tenantStores(services).of(tx, row.storageId)).download(row.objectKey, row.objectVersion);
 }

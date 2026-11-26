@@ -10,6 +10,7 @@ import { registerAccountRoutes } from './routes/account.ts';
 import { registerAuthRoutes } from './routes/auth.ts';
 import { registerBillingRoutes } from './routes/billing.ts';
 import { registerFileRoutes } from './routes/files.ts';
+import { registerFinanceRoutes } from './routes/finance.ts';
 import { registerSyncRoutes } from './routes/sync.ts';
 import {
 	callerOf,
@@ -24,6 +25,7 @@ import { AuthService } from './services/auth.ts';
 import { BillingService } from './services/billing.ts';
 import type { Services } from './services/context.ts';
 import { FileService } from './services/files.ts';
+import { InvoiceService } from './services/invoices.ts';
 import { SessionService } from './services/sessions.ts';
 import { SettingsService } from './services/settings.ts';
 import { StorageService } from './services/storage.ts';
@@ -46,6 +48,7 @@ export function createApp({ services, config }: AppOptions) {
 		storage: new StorageService(services),
 		billing: new BillingService(services),
 		files: new FileService(services),
+		invoices: new InvoiceService(services),
 		sync: new SyncService(services),
 		caller: (c) => callerOf(c, config.TRUST_PROXY),
 		deliver: (c, opened) => deliverSession(c, opened, config.COOKIE_SECURE),
@@ -109,6 +112,7 @@ export function createApp({ services, config }: AppOptions) {
 	registerSyncRoutes(me, deps);
 	registerBillingRoutes(app, me, deps);
 	registerFileRoutes(me, deps);
+	registerFinanceRoutes(me, deps);
 
 	app.route('/', me);
 
