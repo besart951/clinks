@@ -10,6 +10,8 @@ import type { AccessClaims } from '../tokens.ts';
 import type { Caller, Services } from './context.ts';
 import { activeRole } from './permissions.ts';
 import { audit } from './audit.ts';
+import { assertRoleAvailable } from './role-templates.ts';
+import { templateFor } from '@clinks/domain/products';
 
 export class SettingsService {
 	readonly #services: Services;
@@ -65,7 +67,7 @@ export class SettingsService {
 		return this.#tenant(claims, null, async (tx, tenantId) => {
 			const roles = await tx
 				.selectFrom('roles')
-				.select(['id', 'tenantId', 'name', 'kind', 'permissions'])
+				.select(['id', 'tenantId', 'name', 'kind', 'permissions', 'template'])
 				.where('tenantId', '=', tenantId)
 				.execute();
 			const members = await tx
@@ -141,7 +143,9 @@ export class SettingsService {
 			.where('tenantId', '=', tenantId)
 			.where('id', 'in', [next, current.roleId])
 			.execute();
-		if (!roles.some((role) => role.id === next)) throw new ApiError(404, 'error.role_not_found');
+		const target = roles.find((role) => role.id === next);
+		if (!target) throw new ApiError(404, 'error.role_not_found');
+		if (next !== current.roleId) await assertRoleAvailable(tx, tenantId, target);
 		const actor = await activeRole(tx, tenantId, claims.sub);
 		if (
 			actor?.kind !== 'administrator' &&
@@ -266,6 +270,31 @@ export class SettingsService {
 				caller,
 			);
 			return { id };
+		});
+	}
+	/** A template role goes back to the rights of its template; its name and members stay. */
+	resetRole(claims: AccessClaims, id: string, caller: Caller | null = null) {
+		return this.#tenant(claims, 'roles.manage', async (tx, tenantId) => {
+			const saved = await tx
+				.selectFrom('roles')
+				.selectAll()
+				.where('tenantId', '=', tenantId)
+				.where('id', '=', id)
+				.executeTakeFirst();
+			const template = templateFor(saved?.template);
+			if (!saved || !template) throw new ApiError(404, 'error.role_not_found');
+			const actor = await activeRole(tx, tenantId, claims.sub);
+			if (template.permissions.some((p) => !roleGrants(actor, p))) throw forbidden();
+			await tx
+				.updateTable('roles')
+				.set((tx) => ({
+					permissions: [...template.permissions],
+					revision: tx('revision', '+', 1),
+					updatedAt: this.#services.now(),
+				}))
+				.where('id', '=', id)
+				.execute();
+			await audit(tx, { tenantId, actorId: claims.sub, action: 'role.reset', target: id }, caller);
 		});
 	}
 	saveRole(claims: AccessClaims, input: z.infer<typeof roleUpdate>, caller: Caller | null = null) {

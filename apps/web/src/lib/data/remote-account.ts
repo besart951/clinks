@@ -111,6 +111,12 @@ export class RemoteAccountApi extends AccountApi {
 		this.#db.touch('roles');
 		return role;
 	}
+	override async resetRole(id: RoleId) {
+		await this.#client.request('POST', `/tenant/roles/${id}/reset`);
+		const role = (await this.members()).roles.find((role) => role.id === id)!;
+		this.#db.touch('roles');
+		return role;
+	}
 	override async deleteRole(id: RoleId) {
 		await this.#client.request('DELETE', '/tenant/roles/' + id);
 		this.#db.touch('roles');

@@ -53,6 +53,8 @@ export interface RoleTable {
 	name: string;
 	kind: 'administrator' | 'user' | 'custom';
 	permissions: Defaulted<string[]>;
+	/** The product template the role was made from (`spitex.care`), if any. */
+	template: Defaulted<string | null>;
 	revision: Generated<number>;
 	createdAt: Timestamp;
 	updatedAt: Timestamp;

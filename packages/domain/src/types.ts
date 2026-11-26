@@ -146,6 +146,8 @@ export interface Role extends TenantRecord<RoleId> {
 	name: string;
 	kind: RoleKind;
 	permissions: Permission[];
+	/** The product template the role was made from (`spitex.care`); see @clinks/domain/products. */
+	template: string | null;
 }
 
 export interface Membership extends TenantRecord<MembershipId> {

@@ -9,6 +9,7 @@ import {
 	type UserId,
 } from '@clinks/domain/ids';
 import { administratorPermissions, roleGrants, userPermissions } from '@clinks/domain/permissions';
+import { roleAvailable, templateFor, templatesFor } from '@clinks/domain/products';
 import { planFor, priceFor } from '@clinks/domain/plans';
 import type {
 	Invitation,
@@ -217,6 +218,7 @@ export class AccountApi {
 			this.#db.table('tenants').push(tenant);
 			const administrator = this.#insertRole(tenant.id, 'Administrator', 'administrator', administratorPermissions);
 			const user = this.#insertRole(tenant.id, 'Benutzer', 'user', userPermissions);
+			this.#addTemplates(tenant);
 			this.#db.table('memberships').push(
 				stamp<Membership>({
 					id: newId(),
@@ -248,7 +250,7 @@ export class AccountApi {
 	updateTenant(changes: Partial<Omit<Tenant, 'id' | 'revision' | 'createdAt' | 'updatedAt'>>): Promise<Tenant> {
 		return this.#db.request(
 			() => this.#mutateTenant('settings.manage', 'tenant.updated', changes),
-			['tenants', 'audit'],
+			['tenants', 'audit', 'roles'],
 		);
 	}
 
@@ -357,6 +359,7 @@ export class AccountApi {
 					email: this.#localize('error.ws.already_member'),
 				});
 			}
+			this.#assertRoleAvailable(tenantId, roleId);
 			const invitation = this.#insertInvitation(tenantId, normalized, roleId, this.#requireUser());
 			this.#audit(tenantId, 'invitation.created', 'invitation', invitation.id, normalized);
 			return invitation;
@@ -468,6 +471,7 @@ export class AccountApi {
 				revision: membership.revision + 1,
 				updatedAt: new Date().toISOString(),
 			};
+			if (changes.roleId && changes.roleId !== membership.roleId) this.#assertRoleAvailable(tenantId, changes.roleId);
 			this.#protectFinalAdministrator(tenantId, membership, next);
 			this.#db.replace(
 				'memberships',
@@ -565,6 +569,23 @@ export class AccountApi {
 		}, ['roles', 'audit']);
 	}
 
+	/** A template role goes back to the rights of its template; its name and members stay. */
+	resetRole(id: RoleId): Promise<Role> {
+		return this.#db.request(() => {
+			const tenantId = this.#authorize('roles.manage');
+			const current = this.#db.table('roles').find((row) => row.id === id && row.tenantId === tenantId);
+			const template = templateFor(current?.template);
+			if (!current || !template) throw new MockApiError('not_found', this.#localize('error.role_not_found'));
+			const next = { ...current, permissions: [...template.permissions], revision: current.revision + 1 };
+			this.#db.replace(
+				'roles',
+				this.#db.table('roles').map((row) => (row.id === id ? next : row)),
+			);
+			this.#audit(tenantId, 'role.reset', 'role', id, next.name);
+			return next;
+		}, ['roles', 'audit']);
+	}
+
 	deleteRole(id: RoleId): Promise<void> {
 		return this.#db.request(() => {
 			const tenantId = this.#authorize('roles.manage');
@@ -593,7 +614,7 @@ export class AccountApi {
 			return this.#mutateTenant('billing.manage', 'tenant.updated', {
 				enabledModules: tenant.enabledModules.filter((module) => allowed.includes(module)),
 			});
-		}, ['tenants', 'audit']);
+		}, ['tenants', 'audit', 'roles']);
 	}
 
 	cancelSubscription(): Promise<Tenant> {
@@ -867,12 +888,37 @@ export class AccountApi {
 			'tenants',
 			this.#db.table('tenants').map((row) => (row.id === tenantId ? next : row)),
 		);
+		this.#addTemplates(next);
 		this.#audit(tenantId, action, 'tenant', tenantId, next.name);
 		return next;
 	}
 
-	#insertRole(tenantId: TenantId, name: string, kind: Role['kind'], permissions: readonly Permission[]): Role {
-		const role = stamp<Role>({ id: newId(), tenantId, name, kind, permissions: [...permissions] });
+	/** Adds the role templates of the workspace's booked products that it does not have yet, like the API. */
+	#addTemplates(tenant: Tenant) {
+		const roles = this.#db.table('roles').filter((row) => row.tenantId === tenant.id);
+		for (const template of templatesFor(tenant.enabledModules)) {
+			const name = template.name[tenant.locale === 'en-US' ? 'en-US' : 'de-CH'];
+			if (roles.some((role) => role.template === template.key || role.name === name)) continue;
+			this.#insertRole(tenant.id, name, 'custom', template.permissions, template.key);
+		}
+	}
+
+	/** A template role cannot be given to anyone while its product is not booked. */
+	#assertRoleAvailable(tenantId: TenantId, roleId: RoleId) {
+		const role = this.#db.table('roles').find((row) => row.id === roleId && row.tenantId === tenantId);
+		const tenant = this.#db.table('tenants').find((row) => row.id === tenantId);
+		if (role && tenant && !roleAvailable(role, tenant))
+			throw new MockApiError('validation', this.#localize('error.ws.role_unavailable'));
+	}
+
+	#insertRole(
+		tenantId: TenantId,
+		name: string,
+		kind: Role['kind'],
+		permissions: readonly Permission[],
+		template: string | null = null,
+	): Role {
+		const role = stamp<Role>({ id: newId(), tenantId, name, kind, permissions: [...permissions], template });
 		this.#db.table('roles').push(role);
 		return role;
 	}

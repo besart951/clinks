@@ -144,6 +144,7 @@ export const roleDto = z.object({
 	name: z.string(),
 	kind: z.enum(['administrator', 'user', 'custom']),
 	permissions: z.array(z.enum(permissions)),
+	template: z.string().nullable(),
 });
 
 export const membershipDto = z.object({
