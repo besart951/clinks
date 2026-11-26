@@ -38,6 +38,11 @@ export class BankImports {
 			: this.#api().bankImports.assign(entryId, invoiceId);
 	}
 
+	/** Finance records the API keeps outside sync, for the data export; the demo's export already holds them. */
+	async exportAll(): Promise<Record<string, unknown[]>> {
+		return this.#client ? this.#client.request<Record<string, unknown[]>>('GET', '/finance/export') : {};
+	}
+
 	ignore(entryId: string): Promise<void> {
 		return this.#client
 			? this.#client.request<void>('POST', `/finance/bank-entries/${entryId}/ignore`, {})

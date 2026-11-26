@@ -91,9 +91,15 @@ in the internal mail module, which sent nothing outside.
 
 ### 6 · Before go-live
 
-- [ ] Check sample bills with the SIX QR-bill validator (test tool only) and the PDF/A output with veraPDF.
+- [ ] Check sample bills with the SIX QR-bill validator (test tool only) and the PDF/A output with veraPDF. Both are
+      manual: the sandbox cannot fetch them.
 - [ ] Have the invoice template, the secure-link texts and reminder texts checked (fiduciary or lawyer).
-- [ ] e2e: issue → send by link → open → import a camt.054 → paid; reminder level 1 with fee.
+- [x] e2e: issue → send by link → open with the postcode → import a camt.054 → paid, against the real API
+      (`remote.spec.ts`); on the demo: sending, reminder level 1 with fee, bank file with manual assignment.
+- [x] Side effects checked: the data export now holds the send log (without link tokens), bank files and credits
+      (`GET /finance/export`); the HTML invoice's QR amount leaves reminder fees out; audit texts for sending,
+      reminders, link openings, booked payments and bank imports; deleting the «Rechnungen» folder moves the locked
+      files up instead of failing; workspaces without IBAN still issue (the PDF then has no QR code).
 
 ## Out of scope (needs an outside party)
 

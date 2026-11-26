@@ -5889,6 +5889,10 @@
       "ui.ws.audit.invoice.payment_booked": {
         "de-CH": "hat zur Rechnung «{target}» eine Zahlung aus der Bankdatei verbucht",
         "en-US": "booked a payment from the bank file on invoice “{target}”"
+      },
+      "ui.ws.audit.bank_import.created": {
+        "de-CH": "hat eine Bankdatei importiert",
+        "en-US": "imported a bank file"
       }
     }
   }

@@ -98,6 +98,30 @@ export function registerFinanceRoutes(app: Router, me: Router, { invoices, bankI
 		route(
 			{
 				method: 'get',
+				path: '/finance/export',
+				tags: ['finance'],
+				responses: {
+					200: json(
+						z.object({
+							invoiceSends: z.array(z.record(z.string(), z.unknown())),
+							bankImports: z.array(z.record(z.string(), z.unknown())),
+							bankEntries: z.array(z.record(z.string(), z.unknown())),
+						}),
+					),
+				},
+			},
+			true,
+		),
+		async (c) => {
+			c.header('Cache-Control', 'no-store');
+			return c.json(await bankImports.exportAll(c.var.claims), 200);
+		},
+	);
+
+	me.openapi(
+		route(
+			{
+				method: 'get',
 				path: '/finance/bank-entries',
 				tags: ['finance'],
 				responses: { 200: json(z.array(finance.bankEntryDto)) },

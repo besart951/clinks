@@ -389,5 +389,12 @@ describe('bank files', () => {
 		assert.deepEqual(document, { locked: true, mimeType: 'application/xml' });
 		assert.equal((await call('POST', '/finance/bank-imports', { fileName: 'x.xml', content: '<a/>' })).status, 400);
 		assert.equal((await call('GET', '/finance/bank-imports')).body.length, 2);
+
+		// The data export holds the send log, the bank files and their credits.
+		const exported = (await call('GET', '/finance/export')).body;
+		assert.equal(exported.bankImports.length, 2);
+		assert.equal(exported.bankEntries.length, 3);
+		assert.ok(exported.invoiceSends.length > 0);
+		assert.equal('token' in exported.invoiceSends[0], false);
 	});
 });
