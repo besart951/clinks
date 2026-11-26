@@ -3463,12 +3463,12 @@
         "en-US": "Tasks"
       },
       "ui.ws.roles.area_physio": {
-        "de-CH": "Physio",
-        "en-US": "Physio"
+        "de-CH": "Behandlungen und Verordnungen",
+        "en-US": "Treatments and prescriptions"
       },
       "ui.ws.roles.area_spitex": {
-        "de-CH": "Spitex",
-        "en-US": "Home care"
+        "de-CH": "Einsatzplanung",
+        "en-US": "Visit planning"
       },
       "ui.ws.roles.area_team": {
         "de-CH": "Team verwalten",
@@ -3555,8 +3555,8 @@
         "en-US": "No pending invitations."
       },
       "ui.ws.roles.text": {
-        "de-CH": "Administrator und Benutzer sind geschützt. Eigene Rollen bündeln genau die Rechte, die ein Team braucht.",
-        "en-US": "Administrator and User are protected. Custom roles bundle exactly the permissions a team needs."
+        "de-CH": "Administrator und Benutzer sind geschützt. Vorlagen kommen mit dem gebuchten Produkt und lassen sich anpassen; eigene Rollen bündeln genau die Rechte, die ein Team braucht.",
+        "en-US": "Administrator and User are protected. Templates come with a booked product and can be adjusted; custom roles bundle exactly the rights a team needs."
       },
       "ui.ws.roles.new": {
         "de-CH": "Neue Rolle",
@@ -3567,8 +3567,8 @@
         "en-US": "Edit role"
       },
       "ui.ws.roles.matrix": {
-        "de-CH": "Rechte pro Rolle und Bereich",
-        "en-US": "Permissions per role and area"
+        "de-CH": "Rechte pro Rolle, nach Produkt gruppiert",
+        "en-US": "Rights per role, grouped by product"
       },
       "ui.ws.roles.area": {
         "de-CH": "Bereich",
@@ -3587,8 +3587,8 @@
         "en-US": "Edit"
       },
       "ui.ws.roles.read": {
-        "de-CH": "Lesen",
-        "en-US": "Read"
+        "de-CH": "Sehen",
+        "en-US": "View"
       },
       "ui.ws.roles.allowed": {
         "de-CH": "Erlaubt",
@@ -5039,12 +5039,12 @@
         "en-US": "Nothing planned yet"
       },
       "ui.ws.roles.area_spitex_own": {
-        "de-CH": "Spitex: eigene Einsätze",
-        "en-US": "Spitex: own visits"
+        "de-CH": "Nur eigene Einsätze, in freigegebenen Wochen",
+        "en-US": "Own visits only, in released weeks"
       },
       "ui.ws.roles.area_spitex_release": {
-        "de-CH": "Spitex: Plan freigeben",
-        "en-US": "Spitex: release the plan"
+        "de-CH": "Woche freigeben und entziehen",
+        "en-US": "Release and withdraw a week"
       },
       "ui.ws.activity.kind_plan": {
         "de-CH": "Wochenplan",
@@ -5313,6 +5313,62 @@
       "ui.ws.audit.membership.signed_out": {
         "de-CH": "hat {target} von allen Geräten abgemeldet",
         "en-US": "signed {target} out of all devices"
+      },
+      "error.ws.role_unavailable": {
+        "de-CH": "Diese Rolle gehört zu einem Produkt, das nicht gebucht ist.",
+        "en-US": "This role belongs to a product that is not booked."
+      },
+      "ui.ws.audit.role.reset": {
+        "de-CH": "hat die Rolle {target} auf die Vorlage zurückgesetzt",
+        "en-US": "reset the role {target} to its template"
+      },
+      "ui.ws.roles.group_core": {
+        "de-CH": "Grundfunktionen",
+        "en-US": "Basics"
+      },
+      "ui.ws.roles.group_planner": {
+        "de-CH": "Aufgaben",
+        "en-US": "Tasks"
+      },
+      "ui.ws.roles.group_mail": {
+        "de-CH": "Mail",
+        "en-US": "Mail"
+      },
+      "ui.ws.roles.group_finance": {
+        "de-CH": "Finanzen",
+        "en-US": "Finance"
+      },
+      "ui.ws.roles.group_spitex": {
+        "de-CH": "Spitex",
+        "en-US": "Home care"
+      },
+      "ui.ws.roles.group_physio": {
+        "de-CH": "Physio",
+        "en-US": "Physio"
+      },
+      "ui.ws.roles.group_admin": {
+        "de-CH": "Verwaltung",
+        "en-US": "Administration"
+      },
+      "ui.ws.roles.dormant": {
+        "de-CH": "Ruht, nicht gebucht: {products}",
+        "en-US": "Resting, not booked: {products}"
+      },
+      "ui.ws.roles.template": {
+        "de-CH": "Vorlage {product}",
+        "en-US": "{product} template"
+      },
+      "ui.ws.roles.reset": {
+        "de-CH": "Auf Vorlage zurücksetzen",
+        "en-US": "Reset to template"
+      },
+      "ui.ws.roles.reset_done": {
+        "de-CH": "Rolle auf Vorlage zurückgesetzt",
+        "en-US": "Role reset to its template"
+      },
+      "ui.ws.roles.none": {
+        "de-CH": "Kein Zugriff",
+        "en-US": "No access"
       }
     }
   }

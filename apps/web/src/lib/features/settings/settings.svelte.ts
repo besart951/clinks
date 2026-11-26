@@ -2,17 +2,9 @@ import { RemoteAuthGateway } from '../../session/remote-auth.ts';
 import type { InlineFieldSpec } from '@clinks/ui/kit/inline-edit';
 import { isValidSwissIban } from '@clinks/domain/qr-bill';
 import { toast } from 'svelte-sonner';
-import type { RoleId, SessionId } from '@clinks/domain/ids';
-import type {
-	BrowserSession,
-	ModuleKey,
-	NotificationPreferences,
-	Permission,
-	PlanCode,
-	Role,
-	Tenant,
-} from '@clinks/domain/types';
-import type { Member, PlatformInvoice } from '../../data/account-api.ts';
+import type { SessionId } from '@clinks/domain/ids';
+import type { BrowserSession, ModuleKey, NotificationPreferences, PlanCode, Tenant } from '@clinks/domain/types';
+import type { PlatformInvoice } from '../../data/account-api.ts';
 import type { Locale } from '@clinks/i18n-types/catalog';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
@@ -277,61 +269,6 @@ export class ProfileModel extends SettingsForm {
 		await this.workspace.run(() => this.workspace.account.revokeSession(id), {
 			success: 'ui.ws.settings.session_revoked',
 		});
-	}
-}
-
-export class RolesModel extends SettingsForm {
-	readonly resource: Resource<{ roles: Role[]; members: Member[] }>;
-	editing = $state<{ id: RoleId | null; name: string; permissions: Permission[] } | null>(null);
-
-	constructor(workspace: Workspace) {
-		super(workspace);
-		this.resource = new Resource(workspace.db, ['roles', 'memberships'], async () => {
-			const data = await workspace.account.members();
-			return { roles: data.roles, members: data.members };
-		});
-	}
-
-	usage(roleId: RoleId) {
-		return (this.resource.data?.members ?? []).filter(
-			(member) => member.role.id === roleId && member.membership.status === 'active',
-		).length;
-	}
-
-	edit(role: Role | null) {
-		this.editing = role
-			? { id: role.id, name: role.name, permissions: [...role.permissions] }
-			: { id: null, name: '', permissions: ['contacts.read', 'calendar.read'] };
-		this.fields = {};
-	}
-
-	toggle(permission: Permission) {
-		if (!this.editing) return;
-		const has = this.editing.permissions.includes(permission);
-		this.editing.permissions = has
-			? this.editing.permissions.filter((candidate) => candidate !== permission)
-			: [...this.editing.permissions, permission];
-		if (!has && permission.endsWith('.write')) {
-			const read = permission.replace('.write', '.read') as Permission;
-			if (!this.editing.permissions.includes(read)) this.editing.permissions = [...this.editing.permissions, read];
-		}
-	}
-
-	async save(): Promise<boolean> {
-		if (!this.editing) return false;
-		const saved = await this.attempt(
-			() => this.workspace.account.saveRole($state.snapshot(this.editing!)),
-			'ui.ws.roles.saved',
-		);
-		if (saved) {
-			this.editing = null;
-			await this.workspace.session.refresh();
-		}
-		return saved !== null;
-	}
-
-	remove(role: Role) {
-		return this.workspace.run(() => this.workspace.account.deleteRole(role.id), { success: 'ui.ws.roles.deleted' });
 	}
 }
 

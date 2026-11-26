@@ -603,3 +603,34 @@ test('signs a team member out and deactivates them, handing their visits back to
 	await expect(history).toContainText('hat Daniel Moser deaktiviert');
 	await expect(history).toContainText('hat Fatma Yilmaz von allen Geräten abgemeldet');
 });
+
+test('groups the rights of each role by booked product and resets a template role', async ({ page }) => {
+	await signIn(page);
+	await page.goto('/#/settings/roles');
+	// Stille Physio has no Spitex: no Spitex section, and the reception's Spitex right rests.
+	const matrix = page.getByRole('table', { name: 'Rechte pro Rolle, nach Produkt gruppiert' });
+	await expect(matrix.getByRole('rowheader', { name: 'Physio', exact: true })).toBeVisible();
+	await expect(matrix.getByRole('rowheader', { name: 'Spitex', exact: true })).toHaveCount(0);
+	await expect(matrix.getByRole('columnheader', { name: /Empfang/ }).first()).toContainText(
+		'Ruht, nicht gebucht: Spitex',
+	);
+
+	await page.getByRole('button', { name: 'Arbeitsbereich' }).click();
+	await page.getByRole('menuitem', { name: 'Stille Spitex Seeland' }).click();
+	await page.goto('/#/settings/roles');
+	await expect(matrix.getByRole('rowheader', { name: 'Spitex', exact: true })).toBeVisible();
+	await expect(matrix.getByRole('rowheader', { name: 'Physio', exact: true })).toHaveCount(0);
+	const care = matrix.getByRole('columnheader', { name: /Spitex-Pflege/ });
+	await expect(care).toContainText('Vorlage Spitex');
+
+	await care.getByRole('button', { name: 'Spitex-Pflege' }).click();
+	const dialog = page.getByRole('dialog', { name: 'Rolle bearbeiten' });
+	await dialog.getByRole('group', { name: 'Grundfunktionen' }).getByRole('checkbox').first().click();
+	await dialog.getByRole('button', { name: 'Speichern' }).click();
+	await care.getByRole('button', { name: 'Spitex-Pflege' }).click();
+	await dialog.getByRole('button', { name: 'Auf Vorlage zurücksetzen' }).click();
+	await expect(page.getByText('Rolle auf Vorlage zurückgesetzt')).toBeVisible();
+	await care.getByRole('button', { name: 'Spitex-Pflege' }).click();
+	await expect(dialog.getByRole('group', { name: 'Grundfunktionen' }).getByRole('checkbox').first()).not.toBeChecked();
+	await expect(dialog.getByRole('group', { name: 'Spitex' }).getByRole('checkbox').nth(2)).toBeChecked();
+});

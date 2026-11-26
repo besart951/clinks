@@ -1,5 +1,6 @@
 import type { InvitationId, MembershipId, RoleId } from '@clinks/domain/ids';
 import type { Appointment, AuditEntry, Invitation, Role } from '@clinks/domain/types';
+import { roleAvailable } from '@clinks/domain/products';
 import type { Member } from '../../data/account-api.ts';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
@@ -49,6 +50,14 @@ export class TeamModel extends SettingsForm {
 					Number(right.membership.status === 'active') - Number(left.membership.status === 'active') ||
 					left.user.lastName.localeCompare(right.user.lastName),
 			);
+	}
+
+	/** Roles that can be given now: templates of unbooked products only stay for whoever already has them. */
+	assignableRoles(current: RoleId | null = null): Role[] {
+		const tenant = this.workspace.session.tenant;
+		return (this.resource.data?.roles ?? []).filter(
+			(role) => role.id === current || !tenant || roleAvailable(role, tenant),
+		);
 	}
 
 	/** The visits a person still has ahead, which need someone else when they leave. */

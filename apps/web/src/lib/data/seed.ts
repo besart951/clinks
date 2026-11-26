@@ -3,6 +3,7 @@ import { addDays, atTime, startOfWeek, toCalendarDate } from '@clinks/domain/dat
 import { newId, type ContactId, type FolderId, type RoleId, type TenantId } from '@clinks/domain/ids';
 import { invoiceTotals } from '@clinks/domain/money';
 import { administratorPermissions, userPermissions } from '@clinks/domain/permissions';
+import { templatesFor } from '@clinks/domain/products';
 import type {
 	Appointment,
 	BaseRecord,
@@ -229,7 +230,7 @@ function tenant(context: SeedContext, seed: TenantSeed): { tenant: Tenant; roles
 	});
 	const tenantId = created.id;
 	const role = (name: string, kind: 'administrator' | 'user' | 'custom', permissions: readonly Permission[]) =>
-		add(context, 'roles', { tenantId, name, kind, permissions: [...permissions] }).id;
+		add(context, 'roles', { tenantId, name, kind, permissions: [...permissions], template: null }).id;
 	const roles = {
 		administrator: role('Administrator', 'administrator', administratorPermissions),
 		user: role('Benutzer', 'user', [
@@ -882,15 +883,11 @@ export function createSeed(now: Date = new Date(), seed = 20261121): Snapshot {
 
 	// Added last so the rows above keep their random values. Besi and Fatma plan; the others only see their own
 	// visits, and only of released weeks: the past two and the current one. Next week is still a draft.
-	const visiting = add(context, 'roles', {
-		tenantId: spitexId,
-		name: 'Spitex-Mitarbeitende',
-		kind: 'custom',
-		permissions: ['spitex.own.read'],
-	});
+	const visiting = templateRoles(context, spitex.tenant)['spitex.care'];
+	templateRoles(context, physio.tenant);
 	const visitors = new Set(spitexStaff.slice(2).map((member) => member.user.id));
 	for (const membership of context.snapshot.memberships)
-		if (membership.tenantId === spitexId && visitors.has(membership.userId)) membership.roleId = visiting.id;
+		if (membership.tenantId === spitexId && visitors.has(membership.userId)) membership.roleId = visiting;
 	for (const offset of [-14, -7, 0]) {
 		const release = add(context, 'weekReleases', {
 			tenantId: spitexId,
@@ -922,6 +919,22 @@ export function createSeed(now: Date = new Date(), seed = 20261121): Snapshot {
 			lastActiveAt: new Date(now.getTime() - (index === 2 ? 34 * 24 : index * 5 + 1) * 3_600_000).toISOString(),
 		});
 	return context.snapshot;
+}
+
+/** The role templates of a seeded workspace's products, by template key. */
+function templateRoles(context: SeedContext, tenant: Tenant): Record<string, RoleId> {
+	return Object.fromEntries(
+		templatesFor(tenant.enabledModules).map((template) => [
+			template.key,
+			add(context, 'roles', {
+				tenantId: tenant.id,
+				name: template.name['de-CH'],
+				kind: 'custom',
+				permissions: [...template.permissions],
+				template: template.key,
+			}).id,
+		]),
+	);
 }
 
 /** A small starter set for a tenant created in onboarding with "add demo data". */

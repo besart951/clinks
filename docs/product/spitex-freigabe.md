@@ -5,12 +5,12 @@ ist, und dann nur lesend.
 
 ## Wer was sieht
 
-| Berechtigung      | Sieht                                                                  | Typische Rolle           |
-| ----------------- | ---------------------------------------------------------------------- | ------------------------ |
-| `spitex.read`     | den ganzen Plan samt Entwürfen, alle Klient:innen                      | Planende, Administration |
-| `spitex.write`    | wie `spitex.read`, und plant Einsätze                                  | Planende                 |
-| `spitex.release`  | gibt eine Woche frei und entzieht die Freigabe (braucht `spitex.read`) | Leitung                  |
-| `spitex.own.read` | nur die eigenen Einsätze freigegebener Wochen                          | «Spitex-Mitarbeitende»   |
+| Berechtigung      | Sieht                                                                  | Typische Rolle            |
+| ----------------- | ---------------------------------------------------------------------- | ------------------------- |
+| `spitex.read`     | den ganzen Plan samt Entwürfen, alle Klient:innen                      | Planende, Administration  |
+| `spitex.write`    | wie `spitex.read`, und plant Einsätze                                  | Planende                  |
+| `spitex.release`  | gibt eine Woche frei und entzieht die Freigabe (braucht `spitex.read`) | Leitung                   |
+| `spitex.own.read` | nur die eigenen Einsätze freigegebener Wochen                          | «Spitex-Pflege» (Vorlage) |
 
 Die geschützte Rolle «Benutzer» enthält jedes Leserecht, also auch den ganzen Plan. Mitarbeitende, die nur ihre
 eigenen Einsätze sehen sollen, bekommen deshalb eine eigene Rolle mit nur `spitex.own.read`

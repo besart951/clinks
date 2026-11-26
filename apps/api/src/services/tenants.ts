@@ -11,6 +11,7 @@ import { hashPassword } from '../passwords.ts';
 import { enforceRateLimit } from '../rate-limit.ts';
 import type { AccessClaims } from '../tokens.ts';
 import { audit } from './audit.ts';
+import { addRoleTemplates, assertRoleAvailable } from './role-templates.ts';
 import type { Caller, Services } from './context.ts';
 import { findLink, issueLink, lifetimes, useUp } from './one-time.ts';
 import type { OpenedSession, SessionService } from './sessions.ts';
@@ -106,6 +107,7 @@ export class TenantService {
 				.insertInto('memberships')
 				.values({ id: uuid(), tenantId, userId: claims.sub, roleId: administrator })
 				.execute();
+			await addRoleTemplates(tx, tenantId);
 			await audit(tx, { action: 'tenant.created', actorId: claims.sub, tenantId }, caller);
 		});
 		return { tenantId };
@@ -130,11 +132,12 @@ export class TenantService {
 			this.#limit(`invite:tenant:${tenantId}`, 30);
 			const role = await tx
 				.selectFrom('roles')
-				.select(['id', 'permissions', 'kind'])
+				.select(['id', 'permissions', 'kind', 'template'])
 				.where('id', '=', input.roleId)
 				.where('tenantId', '=', tenantId)
 				.executeTakeFirst();
 			if (!role) throw new ApiError(404, 'error.role_not_found', { roleId: 'error.role_not_found' });
+			await assertRoleAvailable(tx, tenantId, role);
 			const actor = await activeRole(tx, tenantId, claims.sub);
 			if (
 				actor?.kind !== 'administrator' &&
@@ -410,6 +413,7 @@ function roleDto(role: RoleRow): MeResponse['roles'][number] {
 		name: role.name,
 		kind: role.kind,
 		permissions: role.permissions as Permission[],
+		template: role.template,
 	};
 }
 

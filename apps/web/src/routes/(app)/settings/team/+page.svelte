@@ -134,7 +134,9 @@
 										size="sm"
 										value={member.role.id}
 										label={workspace.t('ui.role')}
-										options={roles.map((role) => ({ value: role.id, label: role.name }))}
+										options={model
+											.assignableRoles(member.role.id)
+											.map((role) => ({ value: role.id, label: role.name }))}
 										onchange={(value) => model.changeRole(member.membership.id, value as RoleId)}
 									/>
 								</Table.Cell>
@@ -239,7 +241,7 @@
 					id="inv-role"
 					bind:value={model.inviteRole}
 					placeholder={model.resource.data?.roles.find((role) => role.kind === 'user')?.name}
-					options={(model.resource.data?.roles ?? []).map((role) => ({ value: role.id, label: role.name }))}
+					options={model.assignableRoles().map((role) => ({ value: role.id, label: role.name }))}
 				/>
 			</FormField>
 		</form>

@@ -33,18 +33,22 @@ what a person sees. Decided with the owner on 26.11.2026.
 
 ### 1 · Catalogue and grouped role page
 
-- [ ] `products.ts` with the catalogue; `moduleBooked`, navigation and plan checks read it.
-- [ ] Roles page grouped: «Grundfunktionen», one section per booked product, «Verwaltung» (team, roles, billing,
+- [x] `products.ts` with the catalogue (products, rights, templates); the role page, templates and role checks read
+      it. Navigation and billing move onto it in phase 3.
+- [x] Roles page grouped: «Grundfunktionen», one section per booked product, «Verwaltung» (team, roles, billing,
       settings, audit). Plain labels per right: «Sehen», «Bearbeiten», and special rights such as «Woche freigeben» or
       «Nur eigene Einsätze» with one line of explanation.
-- [ ] Rights of unbooked products are not shown; a role that still holds them shows «ruht, Spitex nicht gebucht».
-- [ ] Team list and invitation show the role with its products («Spitex-Pflege · Spitex»).
+- [x] Rights of unbooked products are not shown; a role that still holds them shows «ruht, Spitex nicht gebucht».
+- [x] Team list and invitation offer only roles that can be given; a template role of an unbooked product stays
+      with whoever already has it.
 
 ### 2 · Role templates per product
 
-- [ ] Templates for Spitex (Leitung, Planung, Pflege – eigene Einsätze) and Physio (Leitung, Therapie, Empfang).
-- [ ] Created on first booking, «Auf Vorlage zurücksetzen», hidden and not assignable while the product is off.
-- [ ] Migration: the Spitex demo's «Spitex-Mitarbeitende» becomes the Pflege template.
+- [x] Templates for Spitex (Leitung, Planung, Pflege – eigene Einsätze) and Physio (Leitung, Therapie, Empfang).
+- [x] Created on first booking, «Auf Vorlage zurücksetzen», hidden and not assignable while the product is off.
+- [x] Migration `0016_role_templates` adds the templates to workspaces that have Spitex or Physio; the demo's
+      «Spitex-Mitarbeitende» became the Pflege template. `POST /tenant/roles/{id}/reset`; a template role of an
+      unbooked product answers 409 on invite and role change.
 
 ### 3 · Booking add-ons
 

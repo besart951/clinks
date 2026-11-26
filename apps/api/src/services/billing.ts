@@ -8,6 +8,7 @@ import type { AccessClaims } from '../tokens.ts';
 import type { Services } from './context.ts';
 import { requirePermission } from './permissions.ts';
 import { audit } from './audit.ts';
+import { addRoleTemplates } from './role-templates.ts';
 
 const price = z.string().regex(/^price_[A-Za-z0-9]+$/u);
 export const priceBook = z.record(z.enum(planCodes), z.object({ monthly: price, yearly: price })).refine((book) => {
@@ -159,6 +160,7 @@ export class BillingService {
 				}))
 				.where('id', '=', tenantId)
 				.execute();
+			await addRoleTemplates(tx, tenantId);
 			await audit(
 				tx,
 				{ tenantId, actorId: null, action: 'billing.subscription', target: tenantId, meta: { status } },

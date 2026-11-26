@@ -233,6 +233,23 @@ export function registerAccountRoutes(app: Router, me: Router, deps: RouteDeps) 
 		route(
 			{
 				method: 'post',
+				path: '/tenant/roles/{id}/reset',
+				tags: ['tenants'],
+				request: { params: z.object({ id: z.uuid() }) },
+				responses: { 204: empty() },
+			},
+			true,
+		),
+		async (c) => {
+			await settings.resetRole(c.var.claims, c.req.valid('param').id, caller(c));
+			return c.body(null, 204);
+		},
+	);
+
+	me.openapi(
+		route(
+			{
+				method: 'post',
 				path: '/tenant/members/{id}',
 				tags: ['tenants'],
 				request: { params: z.object({ id: z.uuid() }), ...body(contract.memberUpdate) },
