@@ -2394,10 +2394,6 @@
         "de-CH": "Zahlung für {number} erfasst",
         "en-US": "Payment for {number} recorded"
       },
-      "ui.ws.invoice.reminder_sent": {
-        "de-CH": "{level}. Mahnung für {number} versendet",
-        "en-US": "Reminder {level} for {number} sent"
-      },
       "ui.ws.invoice.cancelled": {
         "de-CH": "Rechnung {number} storniert",
         "en-US": "Invoice {number} cancelled"
@@ -2623,8 +2619,8 @@
         "en-US": "Record payment"
       },
       "ui.ws.invoice.send_reminder": {
-        "de-CH": "{level}. Mahnung",
-        "en-US": "Reminder {level}"
+        "de-CH": "{level}. Mahnung senden",
+        "en-US": "Send reminder {level}"
       },
       "ui.ws.invoice.print": {
         "de-CH": "Drucken / PDF",
@@ -5499,8 +5495,8 @@
         "en-US": "PDF/A archived"
       },
       "ui.ws.invoice.archiving": {
-        "de-CH": "PDF wird erstellt …",
-        "en-US": "Creating the PDF …"
+        "de-CH": "Noch nicht archiviert",
+        "en-US": "Not archived yet"
       },
       "ui.ws.invoice.checksum": {
         "de-CH": "Prüfsumme SHA-256: {sha}",
@@ -5673,6 +5669,130 @@
       "ui.ws.invoice_link.questions": {
         "de-CH": "Fragen zur Rechnung? Antworten Sie auf die E-Mail von {tenant}.",
         "en-US": "Questions about the invoice? Reply to the e-mail from {tenant}."
+      },
+      "ui.ws.pdf.reminder_previous_fees": {
+        "de-CH": "Mahngebühren früherer Mahnungen",
+        "en-US": "Fees of earlier reminders"
+      },
+      "ui.ws.pdf.reminder_interest": {
+        "de-CH": "Ab {date} berechnen wir Verzugszins von 5 % pro Jahr (Art. 104 OR).",
+        "en-US": "From {date} we charge default interest of 5 % a year (Art. 104 Swiss Code of Obligations)."
+      },
+      "error.ws.reminder_none": {
+        "de-CH": "Für diese Rechnung ist keine weitere Mahnung möglich.",
+        "en-US": "No further reminder is possible for this invoice."
+      },
+      "error.ws.reminder_not_due": {
+        "de-CH": "Die nächste Mahnung ist noch nicht fällig.",
+        "en-US": "The next reminder is not due yet."
+      },
+      "ui.ws.invoice.remind": {
+        "de-CH": "Mahnung senden",
+        "en-US": "Send reminder"
+      },
+      "ui.ws.invoice.remind_title": {
+        "de-CH": "{level}. Mahnung zu {number}",
+        "en-US": "Reminder {level} for {number}"
+      },
+      "ui.ws.invoice.remind_terms": {
+        "de-CH": "Ohne Gebühr, neue Zahlungsfrist bis {due}. Das PDF mit neuem QR-Zahlteil wird archiviert.",
+        "en-US": "No fee, new deadline {due}. The PDF with a new QR payment part is archived."
+      },
+      "ui.ws.invoice.remind_terms_fee": {
+        "de-CH": "Mahngebühr {fee}, neue Zahlungsfrist bis {due}. Das PDF mit neuem QR-Zahlteil wird archiviert.",
+        "en-US": "Reminder fee {fee}, new deadline {due}. The PDF with a new QR payment part is archived."
+      },
+      "ui.ws.invoice.reminder_sent_to": {
+        "de-CH": "{level}. Mahnung zu {number} an {to} gesendet",
+        "en-US": "Reminder {level} for {number} sent to {to}"
+      },
+      "ui.ws.invoice.reminder_fees": {
+        "de-CH": "Mahngebühren",
+        "en-US": "Reminder fees"
+      },
+      "ui.ws.invoice.next_reminder": {
+        "de-CH": "Nächste Mahnung",
+        "en-US": "Next reminder"
+      },
+      "ui.ws.invoice.next_reminder_from": {
+        "de-CH": "{level}. Mahnung ab {date}",
+        "en-US": "Reminder {level} from {date}"
+      },
+      "ui.ws.finance.reminders_due": {
+        "de-CH": "{count} Rechnungen sind zur Mahnung fällig.",
+        "en-US": "{count} invoices are due for a reminder."
+      },
+      "ui.ws.finance.reminders_due_one": {
+        "de-CH": "1 Rechnung ist zur Mahnung fällig.",
+        "en-US": "1 invoice is due for a reminder."
+      },
+      "ui.ws.finance.show_reminders": {
+        "de-CH": "Anzeigen",
+        "en-US": "Show"
+      },
+      "ui.ws.finance.reminder_due": {
+        "de-CH": "Zur Mahnung fällig",
+        "en-US": "Due for a reminder"
+      },
+      "ui.ws.audit.invoice.sent": {
+        "de-CH": "hat Rechnung «{target}» per E-Mail gesendet",
+        "en-US": "sent invoice “{target}” by e-mail"
+      },
+      "ui.ws.audit.invoice.reminder_sent": {
+        "de-CH": "hat zur Rechnung «{target}» eine Mahnung gesendet",
+        "en-US": "sent a reminder for invoice “{target}”"
+      },
+      "ui.ws.audit.invoice.link_opened": {
+        "de-CH": "Der sichere Link zur Rechnung «{target}» wurde geöffnet",
+        "en-US": "The secure link to invoice “{target}” was opened"
+      },
+      "ui.ws.settings.reminders": {
+        "de-CH": "Mahnwesen",
+        "en-US": "Reminders"
+      },
+      "ui.ws.settings.reminders_text": {
+        "de-CH": "Drei Stufen. Eine Mahnung wird fällig, sobald die Zahlungsfrist der Rechnung oder der vorherigen Mahnung abgelaufen ist; versendet wird nur auf Klick. Gebühren und Verzugszins nur, wenn mit der Kundschaft vereinbart.",
+        "en-US": "Three levels. A reminder is due once the deadline of the invoice or the previous reminder has passed; nothing is sent without a click. Fees and default interest only if agreed with the customer."
+      },
+      "ui.ws.settings.reminder_days": {
+        "de-CH": "{level}. Mahnung: Zahlungsfrist in Tagen",
+        "en-US": "Reminder {level}: days to pay"
+      },
+      "ui.ws.settings.reminder_days_invalid": {
+        "de-CH": "Bitte 1 bis 90 Tage eingeben.",
+        "en-US": "Please enter 1 to 90 days."
+      },
+      "ui.ws.settings.reminder_fee": {
+        "de-CH": "{level}. Mahnung: Gebühr in CHF",
+        "en-US": "Reminder {level}: fee in CHF"
+      },
+      "ui.ws.settings.reminder_no_fee": {
+        "de-CH": "Keine Gebühr",
+        "en-US": "No fee"
+      },
+      "ui.ws.settings.reminder_fee_invalid": {
+        "de-CH": "Bitte einen Betrag wie 20.00 eingeben.",
+        "en-US": "Please enter an amount such as 20.00."
+      },
+      "ui.ws.settings.reminder_text": {
+        "de-CH": "{level}. Mahnung: Text",
+        "en-US": "Reminder {level}: text"
+      },
+      "ui.ws.settings.reminder_default_text": {
+        "de-CH": "Standardtext",
+        "en-US": "Default text"
+      },
+      "ui.ws.settings.default_interest": {
+        "de-CH": "Verzugszins 5 % (Art. 104 OR)",
+        "en-US": "Default interest 5 % (Art. 104 CO)"
+      },
+      "ui.ws.settings.default_interest_off": {
+        "de-CH": "Nicht verrechnen",
+        "en-US": "Do not charge"
+      },
+      "ui.ws.settings.default_interest_on": {
+        "de-CH": "Auf Mahnungen ausweisen",
+        "en-US": "State on reminders"
       }
     }
   }

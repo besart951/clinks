@@ -230,6 +230,39 @@ test('sends an issued invoice as a secure link that opens with the postcode', as
 	await expect(page.getByText(/Postleitzahl Ihrer Rechnungsadresse/).first()).toBeVisible();
 });
 
+test('sends a due reminder with its fee from the list of invoices to remind', async ({ page }) => {
+	await signIn(page);
+	await page.goto('/#/settings');
+	const reminders = page.getByRole('region', { name: 'Mahnwesen' });
+	await reminders
+		.getByRole('button', { name: /^Keine Gebühr/ })
+		.first()
+		.click();
+	await reminders.getByRole('textbox', { name: '1. Mahnung: Gebühr in CHF' }).fill('20');
+	await page.keyboard.press('Enter');
+	await expect(page.getByText('1. Mahnung: Gebühr in CHF gespeichert')).toBeVisible();
+
+	await page.goto('/#/finance');
+	await expect(page.getByText(/zur Mahnung fällig\./)).toBeVisible();
+	await page.getByRole('button', { name: 'Anzeigen' }).click();
+	const first = page.getByRole('table').getByRole('link').first();
+	const number = (await first.innerText()).trim();
+	await first.click();
+	const remind = page.getByRole('button', { name: /^\d\. Mahnung senden$/ });
+	const level = (await remind.innerText()).trim()[0];
+	await remind.click();
+	const dialog = page.getByRole('dialog', { name: `${level}. Mahnung zu ${number}` });
+	if (level === '1') await expect(dialog.getByText(/Mahngebühr CHF.20\.00/)).toBeVisible();
+	await dialog.getByRole('radio', { name: /PDF im Anhang/ }).check();
+	await dialog.getByLabel('An', { exact: true }).fill('kunde@example.ch');
+	await dialog.getByRole('button', { name: 'Mahnung senden' }).click();
+	await expect(page.getByText(`${level}. Mahnung zu ${number} an kunde@example.ch gesendet`)).toBeVisible();
+	await expect(page.getByText(`${level}. Mahnung:`)).toBeVisible();
+	// Sent: the next level waits for this reminder's own deadline.
+	await expect(page.getByRole('button', { name: /^\d\. Mahnung senden$/ })).toHaveCount(0);
+	await expect(page.getByText(new RegExp(`^${Number(level) + 1}\\. Mahnung ab `))).toBeVisible();
+});
+
 test('sets the QR-IBAN and the payment term for invoices', async ({ page }) => {
 	await signIn(page);
 	await page.goto('/#/settings');

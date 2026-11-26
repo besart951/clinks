@@ -88,6 +88,17 @@
 							onsave={(field, value) => model.saveField(field, value)}
 						/>
 					</SettingsCard>
+					<SettingsCard
+						card={{
+							title: workspace.t('ui.ws.settings.reminders'),
+							description: workspace.t('ui.ws.settings.reminders_text'),
+						}}
+					>
+						<AttributeList
+							list={{ fields: model.reminderFields(tenant) }}
+							onsave={(field, value) => model.saveField(field, value)}
+						/>
+					</SettingsCard>
 				{/if}
 				<SettingsCard
 					card={{

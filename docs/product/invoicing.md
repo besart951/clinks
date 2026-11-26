@@ -66,10 +66,15 @@ in the internal mail module, which sent nothing outside.
 
 ### 4 · Reminders
 
-- [ ] Up to three levels per workspace: text, extra days, optional fee; default interest only if switched on.
-- [ ] «Mahnen» renders a reminder PDF with a new QR part for the open amount plus fee, archived like the invoice,
-      and sends it the same way.
-- [ ] The finance overview lists invoices due for a reminder; nothing goes out without a click.
+- [x] Up to three levels per workspace (Settings › Mahnwesen): days to pay, optional fee, own text; default interest
+      only if switched on, then stated on the reminder (5 % from its date, Art. 104 OR).
+- [x] «n. Mahnung senden» renders a reminder PDF/A with a new QR part for the open amount, earlier fees and its own
+      fee, archived locked like the invoice, and sends it the same two ways (`POST /finance/invoices/{id}/remind`).
+      The invoice keeps `reminders` (level, date, deadline, fee, document) and the level; both are set by the server
+      only, and the list can only grow. Fees count towards the open balance, without VAT.
+- [x] A level is due the day after the invoice's or the previous reminder's deadline. The finance overview names how
+      many invoices are due and filters them; nothing goes out without a click.
+- [x] Invoices issued before the archive existed are archived when they are first sent.
 
 ### 5 · Payments from the bank file
 

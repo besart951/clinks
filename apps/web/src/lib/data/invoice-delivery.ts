@@ -34,6 +34,13 @@ export class InvoiceDelivery {
 			: this.#api().invoiceSends.send(invoiceId, input);
 	}
 
+	/** Sends the next reminder level; the server renders and archives its PDF. */
+	remind(invoiceId: InvoiceId, input: InvoiceSendInput): Promise<InvoiceSend> {
+		return this.#client
+			? this.#client.request<InvoiceSend>('POST', `/finance/invoices/${invoiceId}/remind`, input)
+			: this.#api().invoiceSends.remind(invoiceId, input);
+	}
+
 	sends(invoiceId: InvoiceId): Promise<InvoiceSend[]> {
 		return this.#client
 			? this.#client.request<InvoiceSend[]>('GET', `/finance/invoices/${invoiceId}/sends`)

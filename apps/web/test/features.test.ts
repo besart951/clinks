@@ -57,6 +57,7 @@ describe('finance report', () => {
 			issueDate: '2026-10-05',
 			dueDate,
 			reminderLevel: 0,
+			reminders: [],
 			payments: [],
 			lines: [{ description: 'x', quantity: 1, unitPrice: 10000, vatRate }],
 		});

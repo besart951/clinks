@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import Plus from '@lucide/svelte/icons/plus';
 	import ReceiptText from '@lucide/svelte/icons/receipt-text';
+	import BellRing from '@lucide/svelte/icons/bell-ring';
 	import * as Card from '@clinks/ui/components/ui/card';
 	import * as Table from '@clinks/ui/components/ui/table';
 	import { Button } from '@clinks/ui/components/ui/button';
@@ -14,7 +15,7 @@
 	import { invoiceTone } from '#lib/components/common/tones';
 	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
 	import FinanceNav from '#lib/components/finance/FinanceNav.svelte';
-	import { InvoiceListModel } from '#lib/features/finance/invoice-detail.svelte';
+	import { InvoiceListModel, reminderDueFilter } from '#lib/features/finance/invoice-detail.svelte';
 	import { contactName } from '#lib/data/workspace-api';
 	import { invoiceStatuses } from '@clinks/domain/types';
 	import { href, navigate } from '#lib/navigation';
@@ -66,6 +67,22 @@
 				</Card.Content>
 			</Card.Root>
 		</div>
+		{#if summary.reminders > 0 && model.status !== reminderDueFilter}
+			<div
+				class="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100"
+				role="status"
+			>
+				<BellRing class="size-4 shrink-0" aria-hidden="true" />
+				<p class="min-w-0 flex-1">
+					{summary.reminders === 1
+						? workspace.t('ui.ws.finance.reminders_due_one')
+						: workspace.t('ui.ws.finance.reminders_due', { count: summary.reminders })}
+				</p>
+				<Button size="sm" variant="outline" onclick={() => (model.status = reminderDueFilter)}>
+					{workspace.t('ui.ws.finance.show_reminders')}
+				</Button>
+			</div>
+		{/if}
 		<div class="mb-4 flex flex-wrap gap-2">
 			<SearchInput bind:value={model.search} label={workspace.t('ui.ws.finance.search')} class="w-full sm:w-72" />
 			<Choice
@@ -74,6 +91,7 @@
 				label={workspace.t('ui.ws.status')}
 				options={[
 					{ value: '', label: workspace.t('ui.ws.finance.all_statuses') },
+					{ value: reminderDueFilter, label: workspace.t('ui.ws.finance.reminder_due') },
 					...invoiceStatuses.map((status) => ({
 						value: status,
 						label: workspace.t(`ui.ws.invoice.status.${status}`),
@@ -132,6 +150,14 @@
 										tone={invoiceTone[row.status]}
 										label={workspace.t(`ui.ws.invoice.status.${row.status}`)}
 									/>
+									{#if row.reminderDue}<span
+											class="ms-1 inline-flex items-center gap-1 text-xs text-amber-700 dark:text-amber-300"
+											title={workspace.t('ui.ws.finance.reminder_due')}
+										>
+											<BellRing class="size-3.5" aria-hidden="true" /><span class="sr-only">
+												{workspace.t('ui.ws.finance.reminder_due')}
+											</span>
+										</span>{/if}
 								</Table.Cell>
 							</Table.Row>
 						{/each}

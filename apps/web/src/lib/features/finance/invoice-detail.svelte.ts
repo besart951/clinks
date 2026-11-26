@@ -1,6 +1,7 @@
 import { today } from '@clinks/domain/dates';
 import type { InvoiceId } from '@clinks/domain/ids';
 import { effectiveStatus, invoiceTotals, nextInvoiceNumber } from '@clinks/domain/money';
+import { defaultInvoiceSettings, nextReminder } from '@clinks/domain/invoicing';
 import type { Contact, Invoice, Rappen } from '@clinks/domain/types';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
@@ -27,6 +28,13 @@ export class InvoiceDetailModel {
 		return this.resource.data ? invoiceTotals(this.resource.data.invoice) : null;
 	}
 
+	/** The reminder this invoice can get next, if any, and whether it is due today. */
+	get nextReminder() {
+		const invoice = this.resource.data?.invoice;
+		const settings = this.#workspace.session.tenant?.invoiceSettings ?? defaultInvoiceSettings;
+		return invoice ? nextReminder(invoice, settings, today()) : null;
+	}
+
 	issue() {
 		return this.#patch({ status: 'open' }, 'ui.ws.invoice.issued');
 	}
@@ -34,13 +42,6 @@ export class InvoiceDetailModel {
 	recordPayment(amount: Rappen, date: string) {
 		const invoice = this.resource.data!.invoice;
 		return this.#patch({ payments: [...invoice.payments, { date, amount }] }, 'ui.ws.invoice.payment_recorded');
-	}
-
-	sendReminder() {
-		const invoice = this.resource.data!.invoice;
-		return this.#patch({ reminderLevel: invoice.reminderLevel + 1 }, 'ui.ws.invoice.reminder_sent', {
-			level: invoice.reminderLevel + 1,
-		});
 	}
 
 	cancel() {
@@ -61,6 +62,7 @@ export class InvoiceDetailModel {
 					dueDate: invoice.dueDate,
 					payments: [],
 					reminderLevel: 0,
+					reminders: [],
 					appointmentIds: [],
 					documentId: null,
 					pdfSha256: null,
@@ -90,12 +92,17 @@ export class InvoiceDetailModel {
 	}
 }
 
+/** The list filter that shows the invoices whose next reminder is due. */
+export const reminderDueFilter = 'reminder_due';
+
 export class InvoiceListModel {
 	readonly resource: Resource<{ invoices: Invoice[]; contacts: Map<string, Contact> }>;
 	status = $state<string>('');
 	search = $state('');
+	readonly #workspace: Workspace;
 
 	constructor(workspace: Workspace) {
+		this.#workspace = workspace;
 		this.resource = new Resource(workspace.db, ['invoices', 'contacts'], async () => {
 			const [invoices, contacts] = await Promise.all([
 				workspace.api.invoices.list(),
@@ -116,10 +123,11 @@ export class InvoiceListModel {
 				contact: data.contacts.get(invoice.contactId) ?? null,
 				status: effectiveStatus(invoice, day),
 				totals: invoiceTotals(invoice),
+				reminderDue: nextReminder(invoice, this.#settings, day)?.due === true,
 			}))
 			.filter(
 				(row) =>
-					(!this.status || row.status === this.status) &&
+					(!this.status || row.status === this.status || (this.status === reminderDueFilter && row.reminderDue)) &&
 					(!query ||
 						`${row.invoice.number} ${row.contact?.firstName ?? ''} ${row.contact?.lastName ?? ''} ${row.contact?.companyName ?? ''}`
 							.toLowerCase()
@@ -142,6 +150,11 @@ export class InvoiceListModel {
 				.filter((invoice) => ['overdue', 'reminded'].includes(effectiveStatus(invoice, day)))
 				.reduce((sum, invoice) => sum + invoiceTotals(invoice).balance, 0),
 			drafts: all.filter((invoice) => invoice.status === 'draft').length,
+			reminders: all.filter((invoice) => nextReminder(invoice, this.#settings, day)?.due).length,
 		};
+	}
+
+	get #settings() {
+		return this.#workspace.session.tenant?.invoiceSettings ?? defaultInvoiceSettings;
 	}
 }

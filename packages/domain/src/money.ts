@@ -12,6 +12,9 @@ export interface InvoiceTotals {
 	vat: Rappen;
 	gross: Rappen;
 	paid: Rappen;
+	/** Reminder fees charged so far; owed on top of the invoice, without VAT (compensation, not a service). */
+	fees: Rappen;
+	/** What is still owed: gross plus fees, minus payments. */
 	balance: Rappen;
 	shares: VatShare[];
 }
@@ -25,7 +28,9 @@ export function lineNet(line: InvoiceLine): Rappen {
 	return Math.round(line.quantity * line.unitPrice);
 }
 
-export function invoiceTotals(invoice: Pick<Invoice, 'lines' | 'payments'>): InvoiceTotals {
+export function invoiceTotals(
+	invoice: Pick<Invoice, 'lines' | 'payments'> & Partial<Pick<Invoice, 'reminders'>>,
+): InvoiceTotals {
 	const byRate = new Map<VatRate, Rappen>();
 	for (const line of invoice.lines) byRate.set(line.vatRate, (byRate.get(line.vatRate) ?? 0) + lineNet(line));
 	const shares = [...byRate.entries()]
@@ -35,7 +40,8 @@ export function invoiceTotals(invoice: Pick<Invoice, 'lines' | 'payments'>): Inv
 	const vat = shares.reduce((sum, share) => sum + share.vat, 0);
 	const gross = roundToFiveRappen(net + vat);
 	const paid = invoice.payments.reduce((sum, payment) => sum + payment.amount, 0);
-	return { net, vat, gross, paid, balance: gross - paid, shares };
+	const fees = (invoice.reminders ?? []).reduce((sum, reminder) => sum + reminder.fee, 0);
+	return { net, vat, gross, paid, fees, balance: gross + fees - paid, shares };
 }
 
 /** Status shown to people: stored state plus what follows from payments and the due date. */

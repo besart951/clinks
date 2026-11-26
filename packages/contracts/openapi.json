@@ -7909,6 +7909,254 @@
 				}
 			}
 		},
+		"/finance/invoices/{id}/remind": {
+			"post": {
+				"tags": [
+					"finance"
+				],
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"parameters": [
+					{
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						},
+						"required": true,
+						"name": "id",
+						"in": "path"
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"to": {
+										"type": "string",
+										"maxLength": 254,
+										"format": "email"
+									},
+									"method": {
+										"type": "string",
+										"enum": [
+											"attachment",
+											"link"
+										]
+									}
+								},
+								"required": [
+									"to",
+									"method"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"id": {
+											"type": "string",
+											"format": "uuid"
+										},
+										"tenantId": {
+											"type": "string",
+											"format": "uuid"
+										},
+										"invoiceId": {
+											"type": "string",
+											"format": "uuid"
+										},
+										"kind": {
+											"type": "string",
+											"enum": [
+												"invoice",
+												"reminder"
+											]
+										},
+										"level": {
+											"type": [
+												"integer",
+												"null"
+											]
+										},
+										"documentId": {
+											"type": "string",
+											"format": "uuid"
+										},
+										"recipient": {
+											"type": "string"
+										},
+										"method": {
+											"type": "string",
+											"enum": [
+												"attachment",
+												"link"
+											]
+										},
+										"sentAt": {
+											"type": "string"
+										},
+										"sentBy": {
+											"type": "string"
+										},
+										"linkExpiresAt": {
+											"type": [
+												"string",
+												"null"
+											]
+										},
+										"openedAt": {
+											"type": [
+												"string",
+												"null"
+											]
+										},
+										"openCount": {
+											"type": "integer"
+										}
+									},
+									"required": [
+										"id",
+										"tenantId",
+										"invoiceId",
+										"kind",
+										"level",
+										"documentId",
+										"recipient",
+										"method",
+										"sentAt",
+										"sentBy",
+										"linkExpiresAt",
+										"openedAt",
+										"openCount"
+									]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Not signed in",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Not allowed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/finance/invoices/{id}/sends": {
 			"get": {
 				"tags": [

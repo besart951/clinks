@@ -74,7 +74,11 @@ export const workspaceSchemas = {
 		dueDate: date,
 		status: z.enum(invoiceStatuses),
 		payments: z.array(z.object({ date, amount: z.int().positive() })),
-		reminderLevel: count,
+		// Set by the server when it sends a reminder; clients do not send them (sync ignores them on upload).
+		reminderLevel: count.optional(),
+		reminders: z
+			.array(z.object({ level: count, date, dueDate: date, fee: count, documentId: id.nullable() }))
+			.optional(),
 		notes: text,
 		appointmentIds: ids,
 	}),

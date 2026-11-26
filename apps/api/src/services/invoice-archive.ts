@@ -25,10 +25,11 @@ export class InvoiceArchive {
 		this.#services = services;
 	}
 
-	/** Archives the PDF of an invoice that was just issued; nothing happens when it already has one. */
-	async issue(tx: Tx, scope: Scope, invoiceId: string) {
+	/** Archives the PDF of an issued invoice once and returns its document; an archived one keeps its file. */
+	async issue(tx: Tx, scope: Scope, invoiceId: string): Promise<string | null> {
 		const input = await this.#input(tx, scope.tenantId, invoiceId);
-		if (!input || input.invoice.documentId) return;
+		if (!input) return null;
+		if (input.invoice.documentId) return String(input.invoice.documentId);
 		const bytes = await renderInvoicePdf(input.pdf, await nodeAssets());
 		const name = `${input.pdf.t('ui.ws.invoice.invoice')} ${input.invoice.number}.pdf`;
 		const documentId = await this.#store(tx, scope, input.locale, invoiceId, name, bytes);
@@ -42,6 +43,7 @@ export class InvoiceArchive {
 			}))
 			.where('id', '=', invoiceId)
 			.execute();
+		return documentId;
 	}
 
 	/** Renders and archives a reminder; returns the document and its bytes for sending. */

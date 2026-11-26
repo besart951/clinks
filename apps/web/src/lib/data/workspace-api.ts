@@ -49,7 +49,7 @@ export class WorkspaceApi {
 		this.#reads = engine ? new SyncedWorkspaceReads(engine, context) : null;
 		const plan = new MockPlanNotices(db, context);
 		const archive = new MockInvoiceArchive(db, context);
-		this.invoiceSends = new MockInvoiceSends(db, context);
+		this.invoiceSends = new MockInvoiceSends(db, context, archive);
 		function repository<Name extends SyncedTableName>(
 			table: Name,
 			options: {
