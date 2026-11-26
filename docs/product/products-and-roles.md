@@ -87,19 +87,22 @@ Swiss competitors, as published:
 | phyzio.ch  | CHF 60 per month incl. one physio, CHF 20 per further physio, −10 % yearly | Physio: agenda, records, KVG/UVG billing, MediData       |
 | Physitrack | CHF 74.99 per therapist, CHF 27.99 per assistant per month                 | Physio: records, exercise programs; Swiss billing open   |
 
-CLinks has no insurance billing (KLV/MediData, Tarif 312) and no interRAI yet, so it should sit clearly below:
+CLinks has no insurance billing (KLV/MediData, Tarif 312) and no interRAI yet. The owner wants to be clearly the
+cheapest, so the proposal sits far below (revised 26.11.2026):
 
 | Part                       | Proposal                                                       |
 | -------------------------- | -------------------------------------------------------------- |
-| Base (basics, tasks, mail) | CHF 15 per full user and month                                 |
-| Finance                    | CHF 19 per workspace and month                                 |
-| Spitex add-on              | CHF 39 per workspace + CHF 4 per care user («eigene Einsätze») |
-| Physio add-on              | CHF 29 per workspace (therapists are full users)               |
+| Base (basics, tasks, mail) | CHF 9 per full user and month                                  |
+| Finance                    | included in the base                                           |
+| Spitex add-on              | CHF 19 per workspace + CHF 2 per care user («eigene Einsätze») |
+| Physio add-on              | CHF 15 per workspace (therapists are full users)               |
 | Yearly                     | two months free (as today)                                     |
 | Trial                      | 30 days, no card                                               |
 
-Examples: freelance nurse CHF 54; Spitex with 2 planners and 10 care staff CHF 109 (CuraSoft from 250); physio with 1
-therapist CHF 44, with 3 therapists CHF 74 (phyzio.ch 60 / 100). Insurance billing later as its own add-on.
+Examples: freelance nurse CHF 28 (NURSANA 199, CuraSoft 250); Spitex with 2 planners and 10 care staff CHF 57
+(CuraSoft from 250); physio with 1 therapist CHF 24, with 3 therapists CHF 42 (phyzio.ch 60 / 100). Stripe keeps about
+2.9 % + CHF 0.30 per payment, so the smallest invoice still leaves about CHF 23. Insurance billing later as its own
+add-on.
 
 ## Open
 
