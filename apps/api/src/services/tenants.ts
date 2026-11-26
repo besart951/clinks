@@ -395,6 +395,8 @@ function tenantDto(tenant: TenantRow): MeResponse['tenants'][number] {
 		address: tenant.address,
 		vatNumber: tenant.vatNumber,
 		iban: tenant.iban,
+		qrIban: tenant.qrIban,
+		invoiceSettings: tenant.invoiceSettings,
 		locale: tenant.locale,
 		timeZone: tenant.timeZone,
 		plan: tenant.plan,

@@ -93,6 +93,21 @@ export const profileUpdate = z
 		notificationPreferences: preferences,
 	})
 	.partial();
+export const invoiceSettings = z.strictObject({
+	paymentTermDays: z.number().int().min(0).max(120),
+	footer: z.string().max(500),
+	delivery: z.enum(['auto', 'attachment', 'link']),
+	reminders: z
+		.array(
+			z.strictObject({
+				days: z.number().int().min(1).max(90),
+				fee: z.number().int().min(0).max(10_000),
+				text: z.string().max(1000),
+			}),
+		)
+		.max(3),
+	defaultInterest: z.boolean(),
+});
 export const companyUpdate = z
 	.strictObject({
 		name: z.string().trim().min(1).max(200),
@@ -100,6 +115,8 @@ export const companyUpdate = z
 		address,
 		vatNumber: z.string().max(50),
 		iban: z.string().max(36),
+		qrIban: z.string().max(36),
+		invoiceSettings,
 		brandColor: z.string().regex(/^#[a-f0-9]{6}$/iu),
 		locale: z.enum(['de-CH', 'en-US']),
 		timeZone: z.enum(['Europe/Zurich', 'Europe/Berlin', 'Europe/Vienna']),
@@ -132,6 +149,8 @@ export const tenantDto = z.object({
 	address,
 	vatNumber: z.string(),
 	iban: z.string(),
+	qrIban: z.string(),
+	invoiceSettings,
 	trialEndsAt: z.iso.datetime().nullable(),
 	enabledModules: z.array(z.enum(moduleKeys)),
 	featureFlags: z.array(z.string()),

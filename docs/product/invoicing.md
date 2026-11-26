@@ -26,13 +26,14 @@ internal mail module, which sends nothing outside.
 
 ### 1 · Payment details and references
 
-- [ ] Settings › Rechnungen: IBAN (exists), optional QR-IBAN (checked by its IID 30000–31999), payment term in days,
+- [x] Settings › Rechnungen: IBAN (exists), optional QR-IBAN (checked by its IID 30000–31999), payment term in days,
       footer text, VAT number shown when set.
-- [ ] Reference per invoice, fixed at issue: QR reference (26 digits + mod 10) with a QR-IBAN, else SCOR
-      (`RF` + mod 97) with the IBAN; derived from the invoice number so it is unique per workspace.
-- [ ] QR payload with `QRR`/`SCOR`; the reference also printed on the receipt and payment part.
-- [ ] Service date or period on the invoice (from the appointments it bills, editable).
-- [ ] Unit tests for both check digits and the payload against the examples of the SIX implementation guide 2.4.
+- [x] Reference per invoice, fixed at issue: QR reference (26 digits + mod 10) with a QR-IBAN, else SCOR
+      (`RF` + mod 97) with the IBAN; derived from the invoice number so it is unique per workspace (`paymentDetails` in
+      `@clinks/domain/qr-bill`; not stored, phase 2 archives the PDF with it).
+- [x] QR payload with `QRR`/`SCOR`; the reference also printed on the receipt and payment part.
+- [x] Service date or period on the invoice (from the appointments it bills, editable).
+- [x] Unit tests for both check digits and the payload against the examples of the SIX implementation guide 2.4.
 
 ### 2 · PDF/A from the server and the archive
 

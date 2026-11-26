@@ -12,6 +12,7 @@
     "test:integration": "vitest run"
   },
   "dependencies": {
+    "@clinks/domain": "workspace:*",
     "kysely": "0.29.9",
     "pg": "8.23.1"
   },

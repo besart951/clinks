@@ -6,7 +6,17 @@ import { layoutDay } from '../src/layout.ts';
 import { effectiveStatus, invoiceTotals, nextInvoiceNumber, roundToFiveRappen, vatFromGross } from '../src/money.ts';
 import { moduleBooked, roleGrants } from '../src/permissions.ts';
 import { planFor, priceFor } from '../src/plans.ts';
-import { isValidSwissIban, qrBillPayload } from '../src/qr-bill.ts';
+import {
+	creditorReference,
+	formatReference,
+	isQrIban,
+	isValidReference,
+	isValidSwissIban,
+	modulo10,
+	paymentDetails,
+	qrBillPayload,
+	qrReference,
+} from '../src/qr-bill.ts';
 import { formatAddress, splitStreet, streetLine } from '../src/address.ts';
 import { conflictsFor, planAssignments, seriesSlots, withinArrivalWindow } from '../src/scheduling.ts';
 import type { Appointment, Invoice } from '../src/types.ts';
@@ -104,6 +114,7 @@ describe('qr bill', () => {
 			},
 			debtor: null,
 			amount: 21310,
+			reference: null,
 			message: 'Rechnung 2026-0001',
 		}).split('\n');
 		assert.equal(payload[0], 'SPC');
@@ -113,6 +124,48 @@ describe('qr bill', () => {
 		assert.ok(payload.includes('213.10'));
 		assert.equal(payload.at(-2), 'Rechnung 2026-0001');
 		assert.equal(payload.at(-1), 'EPD');
+		assert.equal(payload.at(-4), 'NON');
+	});
+
+	it('computes QR references and creditor references like the published examples', () => {
+		// SIX implementation guide: 21 00000 00003 13947 14300 09017.
+		assert.equal(modulo10('21000000000313947143000901'), 7);
+		assert.equal(isValidReference('210000000003139471430009017'), true);
+		assert.equal(isValidReference('210000000003139471430009018'), false);
+		// ISO 11649 example.
+		assert.equal(creditorReference('539007547034'), 'RF18539007547034');
+		assert.equal(isValidReference('RF18 5390 0754 7034'), true);
+		assert.equal(isValidReference('RF19539007547034'), false);
+		const qr = qrReference('2026-0042');
+		assert.equal(qr.length, 27);
+		assert.equal(isValidReference(qr), true);
+		assert.equal(formatReference({ type: 'QRR', value: qr }), '00 00000 00000 00000 02026 0042' + qr.at(-1));
+		assert.equal(isValidReference(creditorReference('2026-0042')), true);
+	});
+
+	it('uses the QR reference with a QR-IBAN and the creditor reference with a normal IBAN', () => {
+		assert.equal(isQrIban('CH44 3199 9123 0008 8901 2'), true);
+		assert.equal(isQrIban('CH93 0076 2011 6238 5295 7'), false);
+		const qr = paymentDetails(
+			{ iban: 'CH93 0076 2011 6238 5295 7', qrIban: 'CH44 3199 9123 0008 8901 2' },
+			'2026-0042',
+		);
+		assert.equal(qr?.iban, 'CH44 3199 9123 0008 8901 2');
+		assert.equal(qr?.reference?.type, 'QRR');
+		const scor = paymentDetails({ iban: 'CH93 0076 2011 6238 5295 7', qrIban: '' }, '2026-0042');
+		assert.deepEqual(scor?.reference, { type: 'SCOR', value: creditorReference('2026-0042') });
+		// A QR-IBAN in the IBAN field cannot be paid without a QR reference.
+		assert.equal(paymentDetails({ iban: 'CH44 3199 9123 0008 8901 2', qrIban: '' }, '2026-0042'), null);
+		const payload = qrBillPayload({
+			iban: qr!.iban,
+			creditor: { name: 'X', address: { street: 'A', houseNumber: '1', zip: '2502', city: 'Biel' } },
+			debtor: null,
+			amount: 100,
+			reference: qr!.reference,
+			message: '',
+		}).split('\n');
+		assert.equal(payload[3], 'CH4431999123000889012');
+		assert.deepEqual(payload.slice(-4, -2), ['QRR', qr!.reference!.value]);
 	});
 });
 

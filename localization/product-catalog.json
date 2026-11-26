@@ -3331,12 +3331,12 @@
         "en-US": "VAT number"
       },
       "ui.ws.settings.iban": {
-        "de-CH": "IBAN für QR-Rechnungen",
-        "en-US": "IBAN for QR bills"
+        "de-CH": "IBAN",
+        "en-US": "IBAN"
       },
       "ui.ws.settings.iban_invalid": {
-        "de-CH": "Bitte gib eine gültige Schweizer IBAN ein.",
-        "en-US": "Please enter a valid Swiss IBAN."
+        "de-CH": "Bitte gib eine gültige Schweizer IBAN ein. Eine QR-IBAN gehört ins Feld QR-IBAN.",
+        "en-US": "Enter a valid Swiss IBAN. A QR-IBAN goes into the QR-IBAN field."
       },
       "ui.ws.settings.iban_hint": {
         "de-CH": "Schweizer oder Liechtensteiner IBAN",
@@ -5373,6 +5373,74 @@
       "ui.ws.gate.not_booked": {
         "de-CH": "Nicht gebucht",
         "en-US": "Not booked"
+      },
+      "ui.ws.settings.qr_iban": {
+        "de-CH": "QR-IBAN (optional)",
+        "en-US": "QR-IBAN (optional)"
+      },
+      "ui.ws.settings.qr_iban_invalid": {
+        "de-CH": "Das ist keine QR-IBAN. Deine Bank gibt sie dir; an Stelle 5 bis 9 steht eine Zahl zwischen 30000 und 31999.",
+        "en-US": "This is not a QR-IBAN. Your bank provides it; digits 5 to 9 are between 30000 and 31999."
+      },
+      "ui.ws.settings.invoicing": {
+        "de-CH": "Rechnungen",
+        "en-US": "Invoices"
+      },
+      "ui.ws.settings.invoicing_text": {
+        "de-CH": "Zahlungsfrist, Fusszeile und Versand. Mit QR-IBAN tragen Rechnungen eine QR-Referenz, sonst eine Creditor-Referenz – beide ordnen Zahlungen automatisch zu.",
+        "en-US": "Payment term, footer and delivery. With a QR-IBAN invoices carry a QR reference, otherwise a creditor reference; both match payments automatically."
+      },
+      "ui.ws.settings.payment_term": {
+        "de-CH": "Zahlungsfrist in Tagen",
+        "en-US": "Payment term in days"
+      },
+      "ui.ws.settings.payment_term_invalid": {
+        "de-CH": "Bitte eine Zahl zwischen 0 und 120.",
+        "en-US": "Enter a number between 0 and 120."
+      },
+      "ui.ws.settings.invoice_footer": {
+        "de-CH": "Fusszeile",
+        "en-US": "Footer"
+      },
+      "ui.ws.settings.delivery": {
+        "de-CH": "Versand",
+        "en-US": "Delivery"
+      },
+      "ui.ws.settings.delivery_auto": {
+        "de-CH": "Automatisch: sicherer Link bei Physio und Spitex, sonst PDF",
+        "en-US": "Automatic: secure link with Physio and Home care, otherwise PDF"
+      },
+      "ui.ws.settings.delivery_attachment": {
+        "de-CH": "PDF im Anhang",
+        "en-US": "PDF attached"
+      },
+      "ui.ws.settings.delivery_link": {
+        "de-CH": "Sicherer Link",
+        "en-US": "Secure link"
+      },
+      "ui.ws.invoice.reference_label": {
+        "de-CH": "Referenz",
+        "en-US": "Reference"
+      },
+      "ui.ws.invoice.service_from": {
+        "de-CH": "Leistung von",
+        "en-US": "Service from"
+      },
+      "ui.ws.invoice.service_to": {
+        "de-CH": "bis",
+        "en-US": "to"
+      },
+      "ui.ws.invoice.service_period": {
+        "de-CH": "Leistungszeitraum {from} – {to}",
+        "en-US": "Service period {from} – {to}"
+      },
+      "ui.ws.invoice.service_date": {
+        "de-CH": "Leistungsdatum {date}",
+        "en-US": "Service date {date}"
+      },
+      "ui.ws.invoice.service_invalid": {
+        "de-CH": "Das Ende liegt vor dem Beginn.",
+        "en-US": "The end lies before the start."
       }
     }
   }

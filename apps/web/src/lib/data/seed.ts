@@ -4,6 +4,7 @@ import { newId, type ContactId, type FolderId, type RoleId, type TenantId } from
 import { invoiceTotals } from '@clinks/domain/money';
 import { administratorPermissions, userPermissions } from '@clinks/domain/permissions';
 import { templatesFor } from '@clinks/domain/products';
+import { defaultInvoiceSettings } from '@clinks/domain/invoicing';
 import type {
 	Appointment,
 	BaseRecord,
@@ -216,6 +217,9 @@ function tenant(context: SeedContext, seed: TenantSeed): { tenant: Tenant; roles
 		address: { street: 'Zentralplatz', houseNumber: '1', zip: seed.city[0], city: seed.city[1] },
 		vatNumber: 'CHE-123.456.789 MWST',
 		iban: 'CH93 0076 2011 6238 5295 7',
+		// The physio practice has a QR-IBAN (QR reference), the Spitex pays to its IBAN (creditor reference).
+		qrIban: seed.industry === 'physio' ? 'CH44 3199 9123 0008 8901 2' : '',
+		invoiceSettings: defaultInvoiceSettings,
 		locale: 'de-CH',
 		timeZone: 'Europe/Zurich',
 		plan: 'business',
@@ -361,6 +365,8 @@ function invoiceFor(
 		reminderLevel: !paid && ageDays > 50 ? 1 : 0,
 		notes: '',
 		appointmentIds: [],
+		serviceFrom: issueDate,
+		serviceTo: issueDate,
 	});
 }
 

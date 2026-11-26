@@ -96,6 +96,8 @@ export const invoices = new Table(
 		reminder_level: column.integer,
 		notes: column.text,
 		appointment_ids: column.text,
+		service_from: column.text,
+		service_to: column.text,
 	},
 	{ indexes: { tenant: ['tenant_id'] } },
 );

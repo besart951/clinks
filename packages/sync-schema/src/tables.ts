@@ -132,6 +132,8 @@ export const syncedTables = {
 			{ column: 'reminder_level', field: 'reminderLevel', type: 'integer' },
 			text('notes', 'notes'),
 			{ column: 'appointment_ids', field: 'appointmentIds', type: 'json' },
+			{ column: 'service_from', field: 'serviceFrom', type: 'date', nullable: true },
+			{ column: 'service_to', field: 'serviceTo', type: 'date', nullable: true },
 		],
 	},
 	expenses: {

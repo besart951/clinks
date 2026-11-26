@@ -76,6 +76,19 @@
 						</label>
 					</div>
 				</SettingsCard>
+				{#if session.hasModule('finance')}
+					<SettingsCard
+						card={{
+							title: workspace.t('ui.ws.settings.invoicing'),
+							description: workspace.t('ui.ws.settings.invoicing_text'),
+						}}
+					>
+						<AttributeList
+							list={{ fields: model.invoiceFields(tenant) }}
+							onsave={(field, value) => model.saveField(field, value)}
+						/>
+					</SettingsCard>
+				{/if}
 				<SettingsCard
 					card={{
 						title: workspace.t('ui.ws.settings.regional'),

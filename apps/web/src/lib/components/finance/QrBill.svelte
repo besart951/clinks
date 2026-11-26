@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { streetLine } from '@clinks/domain/address';
 	import QRCode from 'qrcode';
-	import { formatIban, isValidSwissIban, qrBillPayload } from '@clinks/domain/qr-bill';
+	import { formatIban, formatReference, paymentDetails, qrBillPayload } from '@clinks/domain/qr-bill';
 	import { contactName } from '#lib/data/workspace-api';
 	import type { Contact, Rappen, Tenant } from '@clinks/domain/types';
 	import { useWorkspace } from '#lib/workspace.svelte';
@@ -10,18 +10,24 @@
 		tenant,
 		contact,
 		amount,
-		reference,
-	}: { tenant: Tenant; contact: Contact | null; amount: Rappen; reference: string } = $props();
+		number,
+		message,
+	}: { tenant: Tenant; contact: Contact | null; amount: Rappen; number: string; message: string } = $props();
 	const workspace = useWorkspace();
-	const valid = $derived(isValidSwissIban(tenant.iban));
+	/** Account and reference: a QR reference with a QR-IBAN, else a creditor reference; a draft has no number yet. */
+	const details = $derived(paymentDetails(tenant, number));
+	const valid = $derived(details !== null);
 	const payload = $derived(
-		qrBillPayload({
-			iban: tenant.iban,
-			creditor: { name: tenant.name, address: tenant.address },
-			debtor: contact ? { name: contactName(contact), address: contact.address } : null,
-			amount,
-			message: reference,
-		}),
+		details
+			? qrBillPayload({
+					iban: details.iban,
+					creditor: { name: tenant.name, address: tenant.address },
+					debtor: contact ? { name: contactName(contact), address: contact.address } : null,
+					amount,
+					reference: details.reference,
+					message,
+				})
+			: '',
 	);
 	let svg = $state('');
 
@@ -61,13 +67,18 @@
 		<div>
 			<dt class="font-bold">{workspace.t('ui.ws.invoice.account')}</dt>
 			<dd>
-				{formatIban(tenant.iban)}<br />{tenant.name}<br />{streetLine(tenant.address)}<br />{tenant.address.zip}
+				{formatIban(details?.iban ?? tenant.iban)}<br />{tenant.name}<br />{streetLine(tenant.address)}<br />{tenant
+					.address.zip}
 				{tenant.address.city}
 			</dd>
 		</div>
+		{#if details?.reference}<div>
+				<dt class="font-bold">{workspace.t('ui.ws.invoice.reference_label')}</dt>
+				<dd class="tabular-nums">{formatReference(details.reference)}</dd>
+			</div>{/if}
 		<div>
 			<dt class="font-bold">{workspace.t('ui.ws.invoice.additional_info')}</dt>
-			<dd>{reference}</dd>
+			<dd>{message}</dd>
 		</div>
 		{#if contact}<div>
 				<dt class="font-bold">{workspace.t('ui.ws.invoice.payable_by')}</dt>

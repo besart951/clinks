@@ -1,7 +1,7 @@
 import { inScope, type Tx } from '@clinks/db/scope';
 import { roleGrants } from '@clinks/domain/permissions';
 import type { Permission } from '@clinks/domain/types';
-import { isValidSwissIban } from '@clinks/domain/qr-bill';
+import { isQrIban, isValidSwissIban } from '@clinks/domain/qr-bill';
 import type { z } from 'zod';
 import type { profileUpdate, companyUpdate, roleUpdate, memberUpdate, TeamResponse } from '@clinks/contracts/auth';
 import { ApiError, forbidden } from '../errors.ts';
@@ -52,8 +52,10 @@ export class SettingsService {
 		});
 	}
 	company(claims: AccessClaims, input: z.infer<typeof companyUpdate>, caller: Caller | null = null) {
-		if (input.iban && !isValidSwissIban(input.iban))
+		if (input.iban && (!isValidSwissIban(input.iban) || isQrIban(input.iban)))
 			throw new ApiError(400, 'error.validation', { iban: 'ui.ws.settings.iban_invalid' });
+		if (input.qrIban && !isQrIban(input.qrIban))
+			throw new ApiError(400, 'error.validation', { qrIban: 'ui.ws.settings.qr_iban_invalid' });
 		return this.#tenant(claims, 'settings.manage', async (tx, tenantId) => {
 			await tx
 				.updateTable('tenants')

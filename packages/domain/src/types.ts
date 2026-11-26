@@ -1,3 +1,4 @@
+import type { InvoiceSettings } from './invoicing.ts';
 import type {
 	AppointmentId,
 	AuditEntryId,
@@ -78,6 +79,9 @@ export interface Tenant extends BaseRecord<TenantId> {
 	address: Address;
 	vatNumber: string;
 	iban: string;
+	/** From the bank, for payments with a QR reference; '' when the workspace has none. */
+	qrIban: string;
+	invoiceSettings: InvoiceSettings;
 	locale: string;
 	timeZone: string;
 	plan: PlanCode;
@@ -280,6 +284,9 @@ export interface Invoice extends TenantRecord<InvoiceId> {
 	reminderLevel: number;
 	notes: string;
 	appointmentIds: AppointmentId[];
+	/** What the invoice bills, from–to (Art. 26 MWSTG); `null` on invoices made before it was asked. */
+	serviceFrom: CalendarDate | null;
+	serviceTo: CalendarDate | null;
 }
 
 export const expenseCategories = [

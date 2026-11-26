@@ -157,9 +157,29 @@ test('issues an invoice with a QR payment part', async ({ page }) => {
 	await page.getByLabel('Beschreibung').first().fill('Beratung');
 	await page.getByLabel('Preis CHF').first().fill('150');
 	await page.getByLabel('Preis CHF').first().blur();
+	await page.getByLabel('Leistung von').fill('2026-11-02');
+	await page.getByLabel('bis', { exact: true }).fill('2026-11-20');
 	await page.getByRole('button', { name: 'Rechnung stellen' }).click();
-	await expect(page.getByRole('region', { name: 'QR-Rechnung' })).toBeVisible();
+	const bill = page.getByRole('region', { name: 'QR-Rechnung' });
+	await expect(bill).toBeVisible();
 	await expect(page.getByText('Beratung')).toBeVisible();
+	await expect(page.getByText(/Leistungszeitraum 02\.11\.2026 – 20\.11\.2026/)).toBeVisible();
+	// Stille Physio has a QR-IBAN: the bill carries a 27-digit QR reference, grouped in fives.
+	await expect(bill.getByText('CH44 3199 9123 0008 8901 2')).toBeVisible();
+	await expect(bill.getByText(/^\d{2}( \d{5}){5}$/)).toBeVisible();
+});
+
+test('sets the QR-IBAN and the payment term for invoices', async ({ page }) => {
+	await signIn(page);
+	await page.goto('/#/settings');
+	const invoicing = page.getByRole('region', { name: 'Rechnungen' });
+	await expect(invoicing).toBeVisible();
+	await invoicing.getByRole('button', { name: '30', exact: true }).click();
+	await invoicing.getByRole('textbox', { name: 'Zahlungsfrist in Tagen' }).fill('20');
+	await page.keyboard.press('Enter');
+	await expect(page.getByText('Zahlungsfrist in Tagen gespeichert')).toBeVisible();
+	await page.goto('/#/finance/invoices/new');
+	await expect(page.getByLabel('Zahlungsfrist (Tage)')).toHaveValue('20');
 });
 
 test('hides areas the role does not allow', async ({ page }) => {

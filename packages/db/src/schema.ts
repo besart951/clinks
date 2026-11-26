@@ -1,3 +1,4 @@
+import type { InvoiceSettings } from '@clinks/domain/invoicing';
 import type { ColumnType, Generated, Insertable, Selectable, Updateable } from 'kysely';
 
 /** Set by the database on insert, so optional when writing. */
@@ -9,6 +10,8 @@ export interface TenantTable {
 	address: Defaulted<{ street: string; houseNumber: string; zip: string; city: string }>;
 	vatNumber: Defaulted<string>;
 	iban: Defaulted<string>;
+	qrIban: Defaulted<string>;
+	invoiceSettings: Defaulted<InvoiceSettings>;
 	id: string;
 	name: string;
 	industry: 'physio' | 'spitex' | 'services';

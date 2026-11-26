@@ -1,8 +1,17 @@
 import { toast } from 'svelte-sonner';
-import { addDays, today } from '@clinks/domain/dates';
+import { addDays, daysBetween, toCalendarDate, today } from '@clinks/domain/dates';
+import { servicePeriod } from '@clinks/domain/invoicing';
 import type { AppointmentId, ContactId, InvoiceId } from '@clinks/domain/ids';
 import { invoiceTotals, nextInvoiceNumber } from '@clinks/domain/money';
-import type { Appointment, Contact, Invoice, InvoiceLine, PhysioService, VatRate } from '@clinks/domain/types';
+import type {
+	Appointment,
+	CalendarDate,
+	Contact,
+	Invoice,
+	InvoiceLine,
+	PhysioService,
+	VatRate,
+} from '@clinks/domain/types';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 
@@ -26,6 +35,10 @@ export class InvoiceEditorModel {
 	contactId = $state<ContactId | null>(null);
 	issueDate = $state(today());
 	paymentDays = $state(30);
+	/** What the invoice bills (Art. 26 MWSTG); follows the appointments added until someone sets it by hand. */
+	serviceFrom = $state(today());
+	serviceTo = $state(today());
+	#periodSet = false;
 	lines = $state<InvoiceLine[]>([{ description: '', quantity: 1, unitPrice: 0, vatRate: 810 }]);
 	notes = $state('');
 	appointmentIds = $state<AppointmentId[]>([]);
@@ -35,7 +48,15 @@ export class InvoiceEditorModel {
 	#workspace: Workspace;
 
 	dirty = $derived(
-		JSON.stringify([this.contactId, this.issueDate, this.paymentDays, this.lines, this.notes]) !== this.#initial,
+		JSON.stringify([
+			this.contactId,
+			this.issueDate,
+			this.paymentDays,
+			this.lines,
+			this.notes,
+			this.serviceFrom,
+			this.serviceTo,
+		]) !== this.#initial,
 	);
 	totals = $derived(invoiceTotals({ lines: this.lines, payments: [] }));
 
@@ -82,6 +103,8 @@ export class InvoiceEditorModel {
 			reminderLevel: 0,
 			notes: this.notes,
 			appointmentIds: this.appointmentIds,
+			serviceFrom: this.serviceFrom,
+			serviceTo: this.serviceTo,
 		} as Invoice;
 	}
 
@@ -113,13 +136,36 @@ export class InvoiceEditorModel {
 		if (this.appointmentIds.includes(appointment.id)) return;
 		this.appointmentIds = [...this.appointmentIds, appointment.id];
 		this.addLine(this.#lineFor(appointment));
+		this.#followAppointments();
+	}
+
+	/** The service period by hand; from then on adding appointments no longer moves it. */
+	setService(edge: 'from' | 'to', date: CalendarDate) {
+		this.#periodSet = true;
+		if (edge === 'from') this.serviceFrom = date;
+		else this.serviceTo = date;
+	}
+
+	#followAppointments() {
+		if (this.#periodSet) return;
+		const dates = (this.resource.data?.appointments ?? [])
+			.filter((row) => this.appointmentIds.includes(row.id))
+			.map((row) => toCalendarDate(row.start));
+		const period = servicePeriod(dates, this.issueDate);
+		this.serviceFrom = period.from;
+		this.serviceTo = period.to;
 	}
 
 	async save(issue: boolean): Promise<Invoice | null> {
 		const data = this.resource.data;
 		if (!data) return null;
-		this.busy = true;
 		this.fields = {};
+		if (this.serviceTo < this.serviceFrom) {
+			this.fields = { serviceTo: this.#workspace.t('ui.ws.invoice.service_invalid') };
+			toast.error(this.#workspace.t('ui.ws.invoice.service_invalid'));
+			return null;
+		}
+		this.busy = true;
 		const api = this.#workspace.api;
 		const draft = {
 			contactId: this.contactId as ContactId,
@@ -128,6 +174,8 @@ export class InvoiceEditorModel {
 			lines: $state.snapshot(this.lines).filter((line) => line.description || line.unitPrice),
 			notes: this.notes,
 			appointmentIds: [...this.appointmentIds],
+			serviceFrom: this.serviceFrom,
+			serviceTo: this.serviceTo,
 			status: issue ? ('open' as const) : ('draft' as const),
 		};
 		try {
@@ -172,22 +220,36 @@ export class InvoiceEditorModel {
 		if (invoice) {
 			this.contactId = invoice.contactId;
 			this.issueDate = invoice.issueDate;
+			this.paymentDays = Math.max(0, daysBetween(invoice.issueDate, invoice.dueDate));
 			this.lines = structuredClone(invoice.lines);
 			this.notes = invoice.notes;
 			this.appointmentIds = [...invoice.appointmentIds];
+			this.serviceFrom = invoice.serviceFrom ?? invoice.issueDate;
+			this.serviceTo = invoice.serviceTo ?? invoice.issueDate;
+			this.#periodSet = invoice.serviceFrom !== null;
 		} else {
+			this.paymentDays = this.#workspace.session.tenant?.invoiceSettings.paymentTermDays ?? 30;
 			const appointment = appointments.find((row) => row.id === preset.appointmentId);
 			this.contactId = appointment?.contactId ?? preset.contactId;
 			if (appointment) {
 				this.appointmentIds = [appointment.id];
 				this.lines = [this.#lineFor(appointment)];
+				this.serviceFrom = this.serviceTo = toCalendarDate(appointment.start);
 			}
 		}
 		this.#initial = this.#snapshot();
 	}
 
 	#snapshot() {
-		return JSON.stringify([this.contactId, this.issueDate, this.paymentDays, this.lines, this.notes]);
+		return JSON.stringify([
+			this.contactId,
+			this.issueDate,
+			this.paymentDays,
+			this.lines,
+			this.notes,
+			this.serviceFrom,
+			this.serviceTo,
+		]);
 	}
 
 	#lineFor(appointment: Appointment): InvoiceLine {

@@ -1,6 +1,6 @@
 import { RemoteAuthGateway } from '../../session/remote-auth.ts';
 import type { InlineFieldSpec } from '@clinks/ui/kit/inline-edit';
-import { isValidSwissIban } from '@clinks/domain/qr-bill';
+import { isQrIban, isValidSwissIban } from '@clinks/domain/qr-bill';
 import { toast } from 'svelte-sonner';
 import type { SessionId } from '@clinks/domain/ids';
 import type { BrowserSession, ModuleKey, NotificationPreferences, PlanCode, Tenant } from '@clinks/domain/types';
@@ -63,8 +63,43 @@ export class CompanySettingsModel {
 				label: t('ui.ws.settings.iban'),
 				value: tenant.iban,
 				mono: true,
-				validate: (value) => (value === '' || isValidSwissIban(value) ? null : t('ui.ws.settings.iban_invalid')),
+				validate: (value) =>
+					value === '' || (isValidSwissIban(value) && !isQrIban(value)) ? null : t('ui.ws.settings.iban_invalid'),
 			},
+			{
+				key: 'qrIban',
+				label: t('ui.ws.settings.qr_iban'),
+				value: tenant.qrIban,
+				mono: true,
+				validate: (value) => (value === '' || isQrIban(value) ? null : t('ui.ws.settings.qr_iban_invalid')),
+			},
+		];
+	}
+
+	/** Payment term, footer and delivery of the workspace's invoices; saved under `invoiceSettings`. */
+	invoiceFields(tenant: Tenant): InlineFieldSpec[] {
+		const t = (key: string) => this.#workspace.t(key);
+		const settings = tenant.invoiceSettings;
+		return [
+			{
+				key: 'invoice.paymentTermDays',
+				label: t('ui.ws.settings.payment_term'),
+				value: String(settings.paymentTermDays),
+				mono: true,
+				validate: (value) =>
+					/^\d{1,3}$/.test(value) && Number(value) <= 120 ? null : t('ui.ws.settings.payment_term_invalid'),
+			},
+			{
+				key: 'invoice.delivery',
+				label: t('ui.ws.settings.delivery'),
+				value: settings.delivery,
+				kind: 'select',
+				options: (['auto', 'attachment', 'link'] as const).map((value) => ({
+					value,
+					label: t(`ui.ws.settings.delivery_${value}`),
+				})),
+			},
+			{ key: 'invoice.footer', label: t('ui.ws.settings.invoice_footer'), value: settings.footer },
 		];
 	}
 
@@ -93,6 +128,13 @@ export class CompanySettingsModel {
 
 	saveField(field: InlineFieldSpec, value: string) {
 		const tenant = this.#workspace.session.tenant!;
+		if (field.key.startsWith('invoice.')) {
+			const key = field.key.slice('invoice.'.length) as 'paymentTermDays' | 'delivery' | 'footer';
+			// A plain copy: the session's tenant is reactive state, which storage cannot clone.
+			const previous = $state.snapshot(tenant.invoiceSettings) as Tenant['invoiceSettings'];
+			const invoiceSettings = { ...previous, [key]: key === 'paymentTermDays' ? Number(value) : value };
+			return this.#apply({ invoiceSettings }, { invoiceSettings: previous }, field.label);
+		}
 		const address = ['street', 'houseNumber', 'zip', 'city'].includes(field.key);
 		const patch: Partial<Tenant> = address
 			? { address: { ...tenant.address, [field.key]: value } }
