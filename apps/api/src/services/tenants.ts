@@ -263,7 +263,11 @@ export class TenantService {
 		const { db, now } = this.#services;
 		const { invitation, linkId } = await this.#openInvitation(token);
 		const existing = await db.selectFrom('users').select('id').where('email', '=', invitation.email).executeTakeFirst();
-		if (existing && claims?.sub !== existing.id) throw new ApiError(403, 'error.invite_email_mismatch');
+		if (existing && claims?.sub !== existing.id) {
+			// A second, simultaneous accept finds the account the first one just created: the link is used, not foreign.
+			await this.#openInvitation(token);
+			throw new ApiError(403, 'error.invite_email_mismatch');
+		}
 		if (!existing && !input.password)
 			throw new ApiError(400, 'error.validation', { password: 'error.ws.password_too_short' });
 		const userId = existing?.id ?? uuid();
