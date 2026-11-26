@@ -1398,6 +1398,71 @@
 													"iban": {
 														"type": "string"
 													},
+													"qrIban": {
+														"type": "string"
+													},
+													"invoiceSettings": {
+														"type": "object",
+														"properties": {
+															"paymentTermDays": {
+																"type": "integer",
+																"minimum": 0,
+																"maximum": 120
+															},
+															"footer": {
+																"type": "string",
+																"maxLength": 500
+															},
+															"delivery": {
+																"type": "string",
+																"enum": [
+																	"auto",
+																	"attachment",
+																	"link"
+																]
+															},
+															"reminders": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"days": {
+																			"type": "integer",
+																			"minimum": 1,
+																			"maximum": 90
+																		},
+																		"fee": {
+																			"type": "integer",
+																			"minimum": 0,
+																			"maximum": 10000
+																		},
+																		"text": {
+																			"type": "string",
+																			"maxLength": 1000
+																		}
+																	},
+																	"required": [
+																		"days",
+																		"fee",
+																		"text"
+																	],
+																	"additionalProperties": false
+																},
+																"maxItems": 3
+															},
+															"defaultInterest": {
+																"type": "boolean"
+															}
+														},
+														"required": [
+															"paymentTermDays",
+															"footer",
+															"delivery",
+															"reminders",
+															"defaultInterest"
+														],
+														"additionalProperties": false
+													},
 													"trialEndsAt": {
 														"type": [
 															"string",
@@ -1444,6 +1509,8 @@
 													"address",
 													"vatNumber",
 													"iban",
+													"qrIban",
+													"invoiceSettings",
 													"trialEndsAt",
 													"enabledModules",
 													"featureFlags",
@@ -4760,6 +4827,72 @@
 									"iban": {
 										"type": "string",
 										"maxLength": 36
+									},
+									"qrIban": {
+										"type": "string",
+										"maxLength": 36
+									},
+									"invoiceSettings": {
+										"type": "object",
+										"properties": {
+											"paymentTermDays": {
+												"type": "integer",
+												"minimum": 0,
+												"maximum": 120
+											},
+											"footer": {
+												"type": "string",
+												"maxLength": 500
+											},
+											"delivery": {
+												"type": "string",
+												"enum": [
+													"auto",
+													"attachment",
+													"link"
+												]
+											},
+											"reminders": {
+												"type": "array",
+												"items": {
+													"type": "object",
+													"properties": {
+														"days": {
+															"type": "integer",
+															"minimum": 1,
+															"maximum": 90
+														},
+														"fee": {
+															"type": "integer",
+															"minimum": 0,
+															"maximum": 10000
+														},
+														"text": {
+															"type": "string",
+															"maxLength": 1000
+														}
+													},
+													"required": [
+														"days",
+														"fee",
+														"text"
+													],
+													"additionalProperties": false
+												},
+												"maxItems": 3
+											},
+											"defaultInterest": {
+												"type": "boolean"
+											}
+										},
+										"required": [
+											"paymentTermDays",
+											"footer",
+											"delivery",
+											"reminders",
+											"defaultInterest"
+										],
+										"additionalProperties": false
 									},
 									"brandColor": {
 										"type": "string",

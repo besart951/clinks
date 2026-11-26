@@ -50,6 +50,12 @@
 				issued: workspace.i18n.date(invoice.issueDate),
 				due: workspace.i18n.date(invoice.dueDate),
 			})}
+			{#if invoice.serviceFrom && invoice.serviceTo}<br />{invoice.serviceFrom === invoice.serviceTo
+					? workspace.t('ui.ws.invoice.service_date', { date: workspace.i18n.date(invoice.serviceFrom) })
+					: workspace.t('ui.ws.invoice.service_period', {
+							from: workspace.i18n.date(invoice.serviceFrom),
+							to: workspace.i18n.date(invoice.serviceTo),
+						})}{/if}
 		</p>
 		<table class="mb-6 w-full">
 			<thead>
@@ -102,11 +108,15 @@
 		</dl>
 		{#if invoice.notes}<p class="mb-8 whitespace-pre-wrap">{invoice.notes}</p>{/if}
 		<p class="mb-8 text-zinc-500">{workspace.t('ui.ws.invoice.thanks')}</p>
+		{#if tenant.invoiceSettings.footer}<p class="mb-8 text-xs whitespace-pre-wrap text-zinc-500">
+				{tenant.invoiceSettings.footer}
+			</p>{/if}
 		<QrBill
 			{tenant}
 			{contact}
 			amount={totals.balance > 0 ? totals.balance : totals.gross}
-			reference={workspace.t('ui.ws.invoice.reference', { number: invoice.number })}
+			number={invoice.status === 'draft' && !invoice.number.match(/^\d/) ? '' : invoice.number}
+			message={workspace.t('ui.ws.invoice.reference', { number: invoice.number })}
 		/>
 	</article>
 </div>

@@ -10,6 +10,7 @@ import {
 } from '@clinks/domain/ids';
 import { administratorPermissions, roleGrants, userPermissions } from '@clinks/domain/permissions';
 import { roleAvailable, templateFor, templatesFor } from '@clinks/domain/products';
+import { defaultInvoiceSettings } from '@clinks/domain/invoicing';
 import { planFor, priceFor } from '@clinks/domain/plans';
 import type {
 	Invitation,
@@ -204,6 +205,8 @@ export class AccountApi {
 				address: { street: '', houseNumber: '', zip: '', city: '' },
 				vatNumber: '',
 				iban: '',
+				qrIban: '',
+				invoiceSettings: defaultInvoiceSettings,
 				locale: 'de-CH',
 				timeZone: 'Europe/Zurich',
 				plan: 'business',

@@ -103,6 +103,25 @@
 									<Input id="inv-days" type="number" min="0" bind:value={model.paymentDays} />
 								</FormField>
 							</div>
+							<div class="grid grid-cols-2 gap-3">
+								<FormField id="inv-from" label={workspace.t('ui.ws.invoice.service_from')}>
+									<Input
+										id="inv-from"
+										type="date"
+										value={model.serviceFrom}
+										onchange={(event) => model.setService('from', event.currentTarget.value)}
+									/>
+								</FormField>
+								<FormField id="inv-to" label={workspace.t('ui.ws.invoice.service_to')} error={model.fields.serviceTo}>
+									<Input
+										id="inv-to"
+										type="date"
+										value={model.serviceTo}
+										aria-invalid={!!model.fields.serviceTo}
+										onchange={(event) => model.setService('to', event.currentTarget.value)}
+									/>
+								</FormField>
+							</div>
 						</div>
 					</SettingsCard>
 
