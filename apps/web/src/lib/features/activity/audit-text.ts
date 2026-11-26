@@ -12,6 +12,10 @@ const knownActions = new Set([
 	'resumed',
 	'payment_method_changed',
 	'storage_changed',
+	'role_changed',
+	'deactivated',
+	'reactivated',
+	'signed_out',
 ]);
 
 /** Translation key for an audit action such as `invoice.created`. */

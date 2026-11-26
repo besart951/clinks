@@ -5233,6 +5233,86 @@
       "ui.ws.planner.none_due": {
         "de-CH": "In diesem Monat ist nichts fällig.",
         "en-US": "Nothing is due this month."
+      },
+      "ui.ws.team.last_sign_in": {
+        "de-CH": "Letzte Anmeldung",
+        "en-US": "Last sign-in"
+      },
+      "ui.ws.team.never_signed_in": {
+        "de-CH": "Noch nie angemeldet",
+        "en-US": "Never signed in"
+      },
+      "ui.ws.team.devices": {
+        "de-CH": "Geräte: {count}",
+        "en-US": "Devices: {count}"
+      },
+      "ui.ws.team.dormant": {
+        "de-CH": "Seit über 30 Tagen nicht angemeldet",
+        "en-US": "Not signed in for over 30 days"
+      },
+      "ui.ws.team.sign_out": {
+        "de-CH": "Von allen Geräten abmelden",
+        "en-US": "Sign out of all devices"
+      },
+      "ui.ws.team.sign_out_title": {
+        "de-CH": "{name} abmelden?",
+        "en-US": "Sign out {name}?"
+      },
+      "ui.ws.team.sign_out_text": {
+        "de-CH": "Alle Geräte von {name} in diesem Arbeitsbereich werden sofort abgemeldet. Zum Weiterarbeiten meldet sich die Person neu an.",
+        "en-US": "All devices of {name} in this workspace are signed out at once. To keep working, they sign in again."
+      },
+      "ui.ws.team.signed_out": {
+        "de-CH": "Von allen Geräten abgemeldet",
+        "en-US": "Signed out of all devices"
+      },
+      "ui.ws.team.deactivate_title": {
+        "de-CH": "{name} deaktivieren?",
+        "en-US": "Deactivate {name}?"
+      },
+      "ui.ws.team.deactivate_text": {
+        "de-CH": "Die Person wird sofort abgemeldet und kann sich in diesem Arbeitsbereich nicht mehr anmelden. Ihre Einträge und der Verlauf bleiben erhalten.",
+        "en-US": "They are signed out at once and can no longer sign in to this workspace. Their entries and history stay."
+      },
+      "ui.ws.team.future_visits": {
+        "de-CH": "Künftige Einsätze: {count}",
+        "en-US": "Future visits: {count}"
+      },
+      "ui.ws.team.future_visits_more": {
+        "de-CH": "und {count} weitere",
+        "en-US": "and {count} more"
+      },
+      "ui.ws.team.release_visits": {
+        "de-CH": "Diese Einsätze zu «Offene Einsätze» legen",
+        "en-US": "Move these visits to the open visits"
+      },
+      "ui.ws.team.release_visits_hint": {
+        "de-CH": "Sonst bleiben sie bei der Person und müssen einzeln umgeplant werden.",
+        "en-US": "Otherwise they stay with the person and must be replanned one by one."
+      },
+      "ui.ws.team.recent": {
+        "de-CH": "Letzte Änderungen",
+        "en-US": "Recent changes"
+      },
+      "ui.ws.team.recent_all": {
+        "de-CH": "Ganzer Verlauf",
+        "en-US": "Full history"
+      },
+      "ui.ws.audit.membership.role_changed": {
+        "de-CH": "hat die Rolle von {target} geändert",
+        "en-US": "changed the role of {target}"
+      },
+      "ui.ws.audit.membership.deactivated": {
+        "de-CH": "hat {target} deaktiviert",
+        "en-US": "deactivated {target}"
+      },
+      "ui.ws.audit.membership.reactivated": {
+        "de-CH": "hat {target} reaktiviert",
+        "en-US": "reactivated {target}"
+      },
+      "ui.ws.audit.membership.signed_out": {
+        "de-CH": "hat {target} von allen Geräten abgemeldet",
+        "en-US": "signed {target} out of all devices"
       }
     }
   }

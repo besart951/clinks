@@ -17,7 +17,12 @@
 	import StatusBadge from '#lib/components/common/StatusBadge.svelte';
 	import PersonAvatar from '#lib/components/common/PersonAvatar.svelte';
 	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
-	import { TeamModel } from '#lib/features/settings/settings.svelte';
+	import { TeamModel } from '#lib/features/settings/team.svelte';
+	import ConfirmDialog, { type ConfirmRequest } from '#lib/components/common/ConfirmDialog.svelte';
+	import DeactivateMemberDialog from '#lib/components/settings/DeactivateMemberDialog.svelte';
+	import MemberAccess from '#lib/components/settings/MemberAccess.svelte';
+	import TeamHistory from '#lib/components/settings/TeamHistory.svelte';
+	import type { Member } from '#lib/data/account-api';
 	import { planFor } from '@clinks/domain/plans';
 	import type { RoleId } from '@clinks/domain/ids';
 	import { href } from '#lib/navigation';
@@ -26,15 +31,32 @@
 	const workspace = useWorkspace();
 	const model = new TeamModel(workspace);
 	let inviteOpen = $state(false);
+	let leaving = $state<Member | null>(null);
+	let confirm = $state<ConfirmRequest | null>(null);
 	onMount(() => {
 		const stop = model.resource.connect();
+		const stopContext = model.context.connect();
 		const stopShortcut = workspace.registerNewAction(() => (inviteOpen = true));
 		return () => {
 			stop();
+			stopContext();
 			stopShortcut();
 		};
 	});
 	const seats = $derived(planFor(workspace.session.tenant?.plan ?? 'starter').includedSeats);
+
+	function askSignOut(member: Member) {
+		const name = `${member.user.firstName} ${member.user.lastName}`;
+		confirm = {
+			title: workspace.t('ui.ws.team.sign_out_title', { name }),
+			description: workspace.t('ui.ws.team.sign_out_text', { name }),
+			confirmLabel: workspace.t('ui.ws.team.sign_out'),
+			destructive: true,
+			onConfirm: async () => {
+				await model.signOut(member.membership.id);
+			},
+		};
+	}
 
 	async function invite(event: SubmitEvent) {
 		event.preventDefault();
@@ -65,7 +87,9 @@
 						<Table.Row>
 							<Table.Head>{workspace.t('ui.ws.contacts.name')}</Table.Head><Table.Head class="hidden md:table-cell">
 								{workspace.t('ui.ws.team.job_title')}
-							</Table.Head><Table.Head>{workspace.t('ui.role')}</Table.Head><Table.Head class="hidden sm:table-cell">
+							</Table.Head><Table.Head>{workspace.t('ui.role')}</Table.Head><Table.Head class="hidden lg:table-cell">
+								{workspace.t('ui.ws.team.last_sign_in')}
+							</Table.Head><Table.Head class="hidden sm:table-cell">
 								{workspace.t('ui.ws.status')}
 							</Table.Head><Table.Head class="w-10"><span class="sr-only">{workspace.t('ui.action')}</span></Table.Head>
 						</Table.Row>
@@ -114,6 +138,9 @@
 										onchange={(value) => model.changeRole(member.membership.id, value as RoleId)}
 									/>
 								</Table.Cell>
+								<Table.Cell class="hidden text-sm lg:table-cell">
+									{#if member.access}<MemberAccess access={member.access} />{/if}
+								</Table.Cell>
 								<Table.Cell class="hidden sm:table-cell">
 									<StatusBadge
 										tone={member.membership.status === 'active' ? 'success' : 'neutral'}
@@ -133,16 +160,19 @@
 												</Button>{/snippet}
 										</DropdownMenu.Trigger>
 										<DropdownMenu.Content align="end">
-											{#if member.membership.status === 'active'}<DropdownMenu.Item
-													variant="destructive"
-													onclick={() => model.setActive(member.membership.id, false)}
-												>
+											{#if member.membership.status === 'active'}
+												<DropdownMenu.Item disabled={isMe} onclick={() => askSignOut(member)}>
+													{workspace.t('ui.ws.team.sign_out')}
+												</DropdownMenu.Item>
+												<DropdownMenu.Separator />
+												<DropdownMenu.Item variant="destructive" onclick={() => (leaving = member)}>
 													{workspace.t('ui.ws.team.deactivate')}
-												</DropdownMenu.Item>{:else}<DropdownMenu.Item
-													onclick={() => model.setActive(member.membership.id, true)}
-												>
+												</DropdownMenu.Item>
+											{:else}
+												<DropdownMenu.Item onclick={() => model.reactivate(member.membership.id)}>
 													{workspace.t('ui.ws.team.reactivate')}
-												</DropdownMenu.Item>{/if}
+												</DropdownMenu.Item>
+											{/if}
 										</DropdownMenu.Content>
 									</DropdownMenu.Root>
 								</Table.Cell>
@@ -151,6 +181,7 @@
 					</Table.Body>
 				</Table.Root>
 			</div>
+			<TeamHistory {model} />
 			<Card.Root>
 				<Card.Header>
 					<Card.Title>{workspace.t('ui.ws.team.pending')}</Card.Title><Card.Description>
@@ -188,6 +219,9 @@
 		{/snippet}
 	</AsyncView>
 </ModuleGate>
+
+<DeactivateMemberDialog {model} bind:member={leaving} />
+<ConfirmDialog bind:request={confirm} />
 
 <Dialog.Root bind:open={inviteOpen}>
 	<Dialog.Content closeLabel={workspace.t('ui.ws.close')} class="sm:max-w-md">

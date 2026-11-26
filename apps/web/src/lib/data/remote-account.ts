@@ -4,7 +4,7 @@ import type { Invitation, Membership, Role } from '@clinks/domain/types';
 import type { StorageCheck, StorageSettingsInput, StorageSettingsView } from '@clinks/domain/storage';
 import { roleGrants } from '@clinks/domain/permissions';
 import type { RemoteAuthGateway } from '../session/remote-auth.ts';
-import { AccountApi, roleFor, type Caller, type Member } from './account-api.ts';
+import { AccountApi, roleFor, type Caller, type Member, type MemberChanges } from './account-api.ts';
 import type { ApiClient } from './api-client.ts';
 import type { WorkspaceCache } from './database.ts';
 
@@ -70,10 +70,11 @@ export class RemoteAccountApi extends AccountApi {
 			roleGrants(role, 'team.manage') ? this.#client.request<InvitationRow[]>('GET', '/tenant/invitations') : [],
 		]);
 		const roles = team.roles.map((row) => ({ ...stamps(), ...row }) as Role);
-		const members: Member[] = team.people.map(({ membership, user }) => ({
+		const members: Member[] = team.people.map(({ membership, user, access }) => ({
 			membership: { ...stamps(), ...membership } as Membership,
 			user: { ...user, id: user.id as UserId },
 			role: roles.find((r) => r.id === membership.roleId)!,
+			access,
 		}));
 		return {
 			members,
@@ -94,11 +95,15 @@ export class RemoteAccountApi extends AccountApi {
 		await this.#client.request('POST', '/tenant/invitations/' + id + '/resend');
 		this.#db.touch('invitations');
 	}
-	override async changeMember(id: MembershipId, changes: Parameters<AccountApi['changeMember']>[1]) {
+	override async changeMember(id: MembershipId, changes: MemberChanges) {
 		await this.#client.request('POST', '/tenant/members/' + id, changes);
 		const member = (await this.members()).members.find((member) => member.membership.id === id)!;
 		this.#db.touch('memberships');
 		return member.membership;
+	}
+	override async signOutMember(id: MembershipId) {
+		await this.#client.request('POST', `/tenant/members/${id}/sign-out`);
+		this.#db.touch('memberships');
 	}
 	override async saveRole(input: Parameters<AccountApi['saveRole']>[0]) {
 		const { id } = await this.#client.request<{ id: RoleId }>('POST', '/tenant/roles', input);

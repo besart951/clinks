@@ -913,6 +913,14 @@ export function createSeed(now: Date = new Date(), seed = 20261121): Snapshot {
 		location: 'Lyss',
 		lastActiveAt: new Date(now.getTime() - 26 * 3_600_000).toISOString(),
 	});
+	// The staff's phones, for the team page; Ruth has not signed in for a month.
+	for (const [index, member] of spitexStaff.slice(1).entries())
+		add(context, 'sessions', {
+			userId: member.user.id,
+			device: 'CLinks auf iPhone',
+			location: 'Lyss',
+			lastActiveAt: new Date(now.getTime() - (index === 2 ? 34 * 24 : index * 5 + 1) * 3_600_000).toISOString(),
+		});
 	return context.snapshot;
 }
 

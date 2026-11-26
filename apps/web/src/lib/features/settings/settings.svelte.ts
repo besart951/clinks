@@ -2,10 +2,9 @@ import { RemoteAuthGateway } from '../../session/remote-auth.ts';
 import type { InlineFieldSpec } from '@clinks/ui/kit/inline-edit';
 import { isValidSwissIban } from '@clinks/domain/qr-bill';
 import { toast } from 'svelte-sonner';
-import type { InvitationId, MembershipId, RoleId, SessionId } from '@clinks/domain/ids';
+import type { RoleId, SessionId } from '@clinks/domain/ids';
 import type {
 	BrowserSession,
-	Invitation,
 	ModuleKey,
 	NotificationPreferences,
 	Permission,
@@ -278,75 +277,6 @@ export class ProfileModel extends SettingsForm {
 		await this.workspace.run(() => this.workspace.account.revokeSession(id), {
 			success: 'ui.ws.settings.session_revoked',
 		});
-	}
-}
-
-export class TeamModel extends SettingsForm {
-	readonly resource: Resource<{ members: Member[]; invitations: Invitation[]; roles: Role[] }>;
-	inviteEmail = $state('');
-	inviteRole = $state<RoleId | ''>('');
-	search = $state('');
-
-	constructor(workspace: Workspace) {
-		super(workspace);
-		this.resource = new Resource(workspace.db, ['memberships', 'invitations', 'roles', 'users'], () =>
-			workspace.account.members(),
-		);
-	}
-
-	get members(): Member[] {
-		const query = this.search.trim().toLowerCase();
-		return (this.resource.data?.members ?? [])
-			.filter(
-				(member) =>
-					!query ||
-					`${member.user.firstName} ${member.user.lastName} ${member.user.email}`.toLowerCase().includes(query),
-			)
-			.sort(
-				(left, right) =>
-					Number(right.membership.status === 'active') - Number(left.membership.status === 'active') ||
-					left.user.lastName.localeCompare(right.user.lastName),
-			);
-	}
-
-	async invite(): Promise<boolean> {
-		const roleId = (this.inviteRole || this.resource.data?.roles.find((role) => role.kind === 'user')?.id) as RoleId;
-		const created = await this.attempt(
-			() => this.workspace.account.invite(this.inviteEmail, roleId),
-			'ui.ws.team.invited',
-		);
-		if (created) {
-			this.inviteEmail = '';
-			return true;
-		}
-		return false;
-	}
-
-	changeRole(id: MembershipId, roleId: RoleId) {
-		return this.workspace.run(() => this.workspace.account.changeMember(id, { roleId }), {
-			success: 'ui.ws.team.role_changed',
-		});
-	}
-
-	setActive(id: MembershipId, active: boolean) {
-		return this.workspace.run(
-			() => this.workspace.account.changeMember(id, { status: active ? 'active' : 'inactive' }),
-			{
-				success: active ? 'ui.ws.team.reactivated' : 'ui.ws.team.deactivated',
-			},
-		);
-	}
-
-	setJobTitle(id: MembershipId, jobTitle: string) {
-		return this.workspace.run(() => this.workspace.account.changeMember(id, { jobTitle }));
-	}
-
-	resend(id: InvitationId) {
-		return this.workspace.run(() => this.workspace.account.resendInvitation(id), { success: 'ui.ws.team.resent' });
-	}
-
-	revoke(id: InvitationId) {
-		return this.workspace.run(() => this.workspace.account.revokeInvitation(id), { success: 'ui.ws.team.revoked' });
 	}
 }
 

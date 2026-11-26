@@ -187,6 +187,29 @@ describe('account API', () => {
 		);
 	});
 
+	it('shows sign-ins and hands back future visits when someone is deactivated', async () => {
+		const env = setup();
+		env.as('besi@stille.ch', 'Stille Spitex Seeland');
+		const { members } = await env.account.members();
+		const daniel = members.find((member) => member.user.firstName === 'Daniel')!;
+		assert.equal(daniel.access?.devices, 1);
+		const now = new Date().toISOString();
+		const ahead = (await env.api.appointments.list()).filter(
+			(row) => row.kind === 'spitex' && row.assigneeId === daniel.user.id && row.start >= now,
+		);
+		assert.ok(ahead.length > 0);
+		await env.account.changeMember(daniel.membership.id, { status: 'inactive', releaseVisits: true });
+		const after = await env.api.appointments.list((row) => ahead.some((visit) => visit.id === row.id));
+		assert.ok(after.every((row) => row.assigneeId === null));
+		const changed = (await env.account.members()).members.find((member) => member.user.id === daniel.user.id)!;
+		assert.equal(changed.access?.devices, 0);
+		const log = await env.api.audit.list((entry) => entry.target.id === daniel.membership.id);
+		assert.deepEqual(
+			log.map((entry) => entry.action),
+			['membership.deactivated'],
+		);
+	});
+
 	it('runs the invitation flow end to end', async () => {
 		const env = setup();
 		env.as('besi@stille.ch', 'Stille Physio');
