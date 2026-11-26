@@ -236,3 +236,15 @@ export async function documentUrl(tx: Tx, services: Services, documentId: string
 	if (!row) throw new ApiError(404, 'error.ws.not_found');
 	return required(await tenantStores(services).of(tx, row.storageId)).download(row.objectKey, row.objectVersion);
 }
+
+/** The bytes of a document's current version: from the bucket, or decoded when it is kept inline. */
+export async function documentBytes(tx: Tx, services: Services, documentId: string): Promise<Uint8Array> {
+	const doc = await tx.selectFrom('documents').select('dataUrl').where('id', '=', documentId).executeTakeFirst();
+	if (!doc) throw new ApiError(404, 'error.ws.not_found');
+	const ref = String(doc.dataUrl);
+	if (ref.startsWith('data:')) return new Uint8Array(Buffer.from(ref.slice(ref.indexOf(',') + 1), 'base64'));
+	if (!ref.startsWith('version:')) throw new ApiError(404, 'error.ws.not_found');
+	const row = await getVersion(tx, documentId, ref.slice(8));
+	if (!row) throw new ApiError(404, 'error.ws.not_found');
+	return required(await tenantStores(services).of(tx, row.storageId)).read(row.objectKey, row.objectVersion);
+}

@@ -121,6 +121,8 @@ ist nichts weiter einzurichten.
 - [ ] Infomaniak-Mail: Adresse `no-reply@clinks.ch` anlegen. In `api.env` als
       `SMTP_URL=smtps://no-reply%40clinks.ch:PASSWORT@mail.infomaniak.com:465` (das `@` im Benutzernamen als `%40`).
 - [ ] SPF und DKIM für die Domain im Infomaniak-Manager aktivieren, damit Anmeldecodes nicht im Spam landen.
+      Rechnungen gehen über dieselbe Adresse hinaus (Anzeigename = Arbeitsbereich, `Reply-To` = dessen Adresse);
+      zusätzlich DMARC (`p=quarantine`) setzen, sonst sortieren Gmail und Outlook Rechnungsmails oft aus.
 
 ## 6 · Konfiguration und Deployment
 

@@ -120,6 +120,14 @@ export class ObjectStore {
 		});
 		return { size: head.ContentLength, mimeType: head.ContentType, objectVersion: version(head.VersionId) };
 	}
+	/** The bytes of one version, for files the server sends itself (an invoice attached to a mail). */
+	async read(key: string, versionId: string) {
+		const result = await this.client.send(
+			new GetObjectCommand({ Bucket: this.bucket, Key: key, VersionId: versionId }),
+		);
+		if (!result.Body) throw new ApiError(404, 'error.ws.not_found');
+		return result.Body.transformToByteArray();
+	}
 	download(key: string, versionId: string) {
 		return getSignedUrl(
 			this.client,

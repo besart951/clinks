@@ -2606,10 +2606,6 @@
         "de-CH": "Hinzufügen",
         "en-US": "Add"
       },
-      "ui.ws.invoice.mail_subject": {
-        "de-CH": "Rechnung {number} von {company}",
-        "en-US": "Invoice {number} from {company}"
-      },
       "ui.ws.invoice.cancel_title": {
         "de-CH": "Rechnung stornieren?",
         "en-US": "Cancel invoice?"
@@ -2633,10 +2629,6 @@
       "ui.ws.invoice.print": {
         "de-CH": "Drucken / PDF",
         "en-US": "Print / PDF"
-      },
-      "ui.ws.invoice.send_mail": {
-        "de-CH": "Per Mail senden",
-        "en-US": "Send by email"
       },
       "ui.ws.invoice.overview": {
         "de-CH": "Übersicht",
@@ -5513,6 +5505,174 @@
       "ui.ws.invoice.checksum": {
         "de-CH": "Prüfsumme SHA-256: {sha}",
         "en-US": "SHA-256 checksum: {sha}"
+      },
+      "mail.invoice.subject": {
+        "de-CH": "Rechnung {number} von {tenant}",
+        "en-US": "Invoice {number} from {tenant}"
+      },
+      "mail.invoice.body_attachment": {
+        "de-CH": "Guten Tag\n\nIm Anhang finden Sie die Rechnung {number} von {tenant}, zahlbar bis {due}. Der Einzahlungsschein mit QR-Code ist auf der letzten Seite.\n\nBei Fragen antworten Sie einfach auf diese E-Mail.\n\nFreundliche Grüsse\n{tenant}",
+        "en-US": "Hello\n\nAttached is invoice {number} from {tenant}, payable by {due}. The payment slip with the QR code is on the last page.\n\nIf you have questions, simply reply to this e-mail.\n\nKind regards\n{tenant}"
+      },
+      "mail.invoice.body_link": {
+        "de-CH": "Guten Tag\n\n{tenant} hat Ihnen ein Dokument zur Rechnung {number} gesendet. Sie öffnen es hier:\n\n{link}\n\nZum Schutz Ihrer Daten fragen wir vor dem Öffnen nach der Postleitzahl Ihrer Rechnungsadresse. Der Link ist bis {expires} gültig.\n\nBei Fragen antworten Sie einfach auf diese E-Mail.\n\nFreundliche Grüsse\n{tenant}",
+        "en-US": "Hello\n\n{tenant} has sent you a document for invoice {number}. Open it here:\n\n{link}\n\nTo protect your data, we ask for the postcode of your billing address before it opens. The link is valid until {expires}.\n\nIf you have questions, simply reply to this e-mail.\n\nKind regards\n{tenant}"
+      },
+      "mail.invoice.reminder_subject": {
+        "de-CH": "{level}. Mahnung zur Rechnung {number} von {tenant}",
+        "en-US": "Reminder {level} for invoice {number} from {tenant}"
+      },
+      "mail.invoice.reminder_body": {
+        "de-CH": "Guten Tag\n\nZur Rechnung {number} haben wir noch keine Zahlung erhalten. Im Anhang finden Sie die {level}. Mahnung mit einem neuen Einzahlungsschein. Falls Sie bereits bezahlt haben, betrachten Sie diese Nachricht bitte als gegenstandslos.\n\nBei Fragen antworten Sie einfach auf diese E-Mail.\n\nFreundliche Grüsse\n{tenant}",
+        "en-US": "Hello\n\nWe have not yet received payment for invoice {number}. Attached is reminder {level} with a new payment slip. If you have already paid, please disregard this message.\n\nIf you have questions, simply reply to this e-mail.\n\nKind regards\n{tenant}"
+      },
+      "error.ws.invoice_not_issued": {
+        "de-CH": "Nur gestellte Rechnungen können versendet werden.",
+        "en-US": "Only issued invoices can be sent."
+      },
+      "error.ws.invoice_link_no_postcode": {
+        "de-CH": "Für einen sicheren Link braucht der Kontakt eine Postleitzahl.",
+        "en-US": "A secure link needs a postcode on the contact."
+      },
+      "error.ws.invoice_archive_mismatch": {
+        "de-CH": "Die archivierte Datei stimmt nicht mehr mit ihrer Prüfsumme überein. Bitte den Support kontaktieren.",
+        "en-US": "The archived file no longer matches its checksum. Please contact support."
+      },
+      "error.ws.invoice_link_invalid": {
+        "de-CH": "Dieser Link ist ungültig oder abgelaufen. Bitten Sie den Absender um einen neuen.",
+        "en-US": "This link is invalid or has expired. Ask the sender for a new one."
+      },
+      "error.ws.invoice_link_postcode": {
+        "de-CH": "Die Postleitzahl stimmt nicht.",
+        "en-US": "The postcode does not match."
+      },
+      "error.ws.invoice_link_locked": {
+        "de-CH": "Zu viele falsche Eingaben. Bitten Sie den Absender um einen neuen Link.",
+        "en-US": "Too many wrong entries. Ask the sender for a new link."
+      },
+      "ui.ws.settings.reply_to": {
+        "de-CH": "Antworten an",
+        "en-US": "Replies to"
+      },
+      "ui.ws.settings.reply_to_sender": {
+        "de-CH": "Person, die sendet",
+        "en-US": "The person who sends"
+      },
+      "ui.ws.settings.reply_to_invalid": {
+        "de-CH": "Bitte eine gültige E-Mail-Adresse eingeben.",
+        "en-US": "Please enter a valid e-mail address."
+      },
+      "ui.ws.invoice.send": {
+        "de-CH": "Senden",
+        "en-US": "Send"
+      },
+      "ui.ws.invoice.send_title": {
+        "de-CH": "Rechnung {number} senden",
+        "en-US": "Send invoice {number}"
+      },
+      "ui.ws.invoice.send_to": {
+        "de-CH": "An",
+        "en-US": "To"
+      },
+      "ui.ws.invoice.send_method": {
+        "de-CH": "Versandart",
+        "en-US": "Delivery"
+      },
+      "ui.ws.invoice.send_link": {
+        "de-CH": "Sicherer Link",
+        "en-US": "Secure link"
+      },
+      "ui.ws.invoice.send_link_hint": {
+        "de-CH": "Die E-Mail enthält nur einen Link, keine Gesundheitsdaten. Geöffnet wird er mit der Postleitzahl der Rechnungsadresse ({zip}); 90 Tage gültig.",
+        "en-US": "The e-mail holds only a link, no health data. It opens with the postcode of the billing address ({zip}) and stays valid for 90 days."
+      },
+      "ui.ws.invoice.send_link_no_zip": {
+        "de-CH": "Der Kontakt hat keine Postleitzahl. Ergänzen Sie sie oder senden Sie das PDF im Anhang.",
+        "en-US": "The contact has no postcode. Add one or send the PDF attached."
+      },
+      "ui.ws.invoice.send_attachment": {
+        "de-CH": "PDF im Anhang",
+        "en-US": "PDF attached"
+      },
+      "ui.ws.invoice.send_attachment_hint": {
+        "de-CH": "Das archivierte PDF/A wird der E-Mail angehängt.",
+        "en-US": "The archived PDF/A is attached to the e-mail."
+      },
+      "ui.ws.invoice.send_from": {
+        "de-CH": "Absender: {tenant}. Antworten gehen an {reply_to}.",
+        "en-US": "Sender: {tenant}. Replies go to {reply_to}."
+      },
+      "ui.ws.invoice.sent": {
+        "de-CH": "Rechnung {number} an {to} gesendet",
+        "en-US": "Invoice {number} sent to {to}"
+      },
+      "ui.ws.invoice.sends": {
+        "de-CH": "Versand",
+        "en-US": "Sent"
+      },
+      "ui.ws.invoice.sends_empty": {
+        "de-CH": "Noch nicht per E-Mail gesendet. Drucken und per Post schicken geht weiterhin.",
+        "en-US": "Not sent by e-mail yet. Printing and posting it still works."
+      },
+      "ui.ws.invoice.send_entry": {
+        "de-CH": "{date} an {to}",
+        "en-US": "{date} to {to}"
+      },
+      "ui.ws.invoice.send_by": {
+        "de-CH": "{method} · von {name}",
+        "en-US": "{method} · by {name}"
+      },
+      "ui.ws.invoice.link_opened": {
+        "de-CH": "Geöffnet am {date} ({count}×)",
+        "en-US": "Opened on {date} ({count}×)"
+      },
+      "ui.ws.invoice.link_unopened": {
+        "de-CH": "Noch nicht geöffnet · gültig bis {date}",
+        "en-US": "Not opened yet · valid until {date}"
+      },
+      "ui.ws.invoice.link_expired": {
+        "de-CH": "Link abgelaufen",
+        "en-US": "Link expired"
+      },
+      "ui.ws.invoice.demo_link": {
+        "de-CH": "Link öffnen (Demo)",
+        "en-US": "Open link (demo)"
+      },
+      "ui.ws.invoice.reminder_entry": {
+        "de-CH": "{level}. Mahnung",
+        "en-US": "Reminder {level}"
+      },
+      "ui.ws.invoice_link.title": {
+        "de-CH": "Rechnung {number}",
+        "en-US": "Invoice {number}"
+      },
+      "ui.ws.invoice_link.title_reminder": {
+        "de-CH": "{level}. Mahnung zur Rechnung {number}",
+        "en-US": "Reminder {level} for invoice {number}"
+      },
+      "ui.ws.invoice_link.text": {
+        "de-CH": "{tenant} hat Ihnen dieses Dokument gesendet. Zum Schutz Ihrer Daten geben Sie bitte die Postleitzahl Ihrer Rechnungsadresse ein.",
+        "en-US": "{tenant} has sent you this document. To protect your data, please enter the postcode of your billing address."
+      },
+      "ui.ws.invoice_link.postcode": {
+        "de-CH": "Postleitzahl",
+        "en-US": "Postcode"
+      },
+      "ui.ws.invoice_link.open": {
+        "de-CH": "PDF herunterladen",
+        "en-US": "Download PDF"
+      },
+      "ui.ws.invoice_link.opened": {
+        "de-CH": "{name} wurde heruntergeladen.",
+        "en-US": "{name} was downloaded."
+      },
+      "ui.ws.invoice_link.valid_until": {
+        "de-CH": "Dieser Link ist bis {date} gültig.",
+        "en-US": "This link is valid until {date}."
+      },
+      "ui.ws.invoice_link.questions": {
+        "de-CH": "Fragen zur Rechnung? Antworten Sie auf die E-Mail von {tenant}.",
+        "en-US": "Questions about the invoice? Reply to the e-mail from {tenant}."
       }
     }
   }

@@ -1,4 +1,4 @@
-import type { InvoiceSettings } from './invoicing.ts';
+import type { DeliveryMethod, InvoiceSettings } from './invoicing.ts';
 import type {
 	AppointmentId,
 	AuditEntryId,
@@ -10,6 +10,7 @@ import type {
 	FolderId,
 	InvitationId,
 	InvoiceId,
+	InvoiceSendId,
 	MailId,
 	MembershipId,
 	NoteId,
@@ -292,6 +293,25 @@ export interface Invoice extends TenantRecord<InvoiceId> {
 	/** The PDF/A archived when the invoice was issued, and its SHA-256; set by the server. */
 	documentId: DocumentId | null;
 	pdfSha256: string | null;
+}
+
+/** One invoice or reminder sent by e-mail; link openings are counted, nothing else is tracked. */
+export interface InvoiceSend {
+	id: InvoiceSendId;
+	tenantId: TenantId;
+	invoiceId: InvoiceId;
+	kind: 'invoice' | 'reminder';
+	/** Reminder level; null for the invoice itself. */
+	level: number | null;
+	documentId: DocumentId;
+	recipient: string;
+	method: DeliveryMethod;
+	sentAt: Timestamp;
+	/** Name of the person who sent it. */
+	sentBy: string;
+	linkExpiresAt: Timestamp | null;
+	openedAt: Timestamp | null;
+	openCount: number;
 }
 
 export const expenseCategories = [

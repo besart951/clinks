@@ -117,7 +117,7 @@ export interface RecoveryCodeTable {
 	usedAt: Date | null;
 }
 
-export type OneTimePurpose = 'verify_email' | 'reset_password' | 'invitation' | 'two_factor';
+export type OneTimePurpose = 'verify_email' | 'reset_password' | 'invitation' | 'two_factor' | 'invoice_link';
 
 export interface OneTimeTokenTable {
 	id: string;
@@ -125,6 +125,7 @@ export interface OneTimeTokenTable {
 	userId: string | null;
 	invitationId: string | null;
 	tenantId: string | null;
+	invoiceSendId: ColumnType<string | null, string | null | undefined, string | null>;
 	tokenHash: Uint8Array;
 	attempts: Defaulted<number>;
 	expiresAt: Date;
@@ -175,6 +176,21 @@ export interface Database {
 	billingAccounts: { tenantId: string; customerId: string; status: Defaulted<string> };
 	billingEvents: { id: string; tenantId: string; createdAt: Timestamp };
 	planningRooms: { tenantId: string; state: Uint8Array; updatedAt: Timestamp };
+	invoiceSends: {
+		id: string;
+		tenantId: string;
+		invoiceId: string;
+		kind: 'invoice' | 'reminder';
+		level: number | null;
+		documentId: string;
+		recipient: string;
+		method: 'attachment' | 'link';
+		sentAt: Date;
+		sentBy: string | null;
+		linkExpiresAt: Date | null;
+		openedAt: Date | null;
+		openCount: Defaulted<number>;
+	};
 	documentVersions: {
 		id: string;
 		tenantId: string;

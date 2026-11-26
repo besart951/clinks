@@ -3,6 +3,7 @@ import type { AppNotification, CommentTarget, MyVisits, NotificationKind } from 
 import { myVisits } from '@clinks/domain/spitex-release';
 import { MockPlanNotices } from './mock-plan-notices.ts';
 import { MockInvoiceArchive } from './mock-invoice-archive.ts';
+import { MockInvoiceSends } from './mock-invoice-sends.ts';
 import type { Repository } from '@clinks/contracts/repository';
 import { workspaceSchemas } from '@clinks/contracts/workspace-schemas';
 import { syncedTables, type SyncedTableName } from '@clinks/sync-schema/tables';
@@ -38,6 +39,8 @@ export class WorkspaceApi {
 	readonly weekReleases;
 	readonly notifications;
 	readonly audit: Pick<Repository<Tables['audit']>, 'list'>;
+	/** Demo backend for sending invoices; with the API, `InvoiceDelivery` calls the server instead. */
+	readonly invoiceSends: MockInvoiceSends;
 	readonly #comments;
 
 	constructor(db: WorkspaceCache, context: RequestContext, engine: SyncEngine | null = null) {
@@ -46,6 +49,7 @@ export class WorkspaceApi {
 		this.#reads = engine ? new SyncedWorkspaceReads(engine, context) : null;
 		const plan = new MockPlanNotices(db, context);
 		const archive = new MockInvoiceArchive(db, context);
+		this.invoiceSends = new MockInvoiceSends(db, context);
 		function repository<Name extends SyncedTableName>(
 			table: Name,
 			options: {

@@ -1,3 +1,4 @@
+import { linkLifetimeDays } from '@clinks/domain/invoicing';
 import type { OneTimePurpose } from '@clinks/db/schema';
 import type { Tx } from '@clinks/db/scope';
 import type { Db } from '@clinks/db/client';
@@ -11,6 +12,7 @@ export const lifetimes: { [purpose in OneTimePurpose]: number } = {
 	reset_password: 60 * 60_000,
 	invitation: 72 * 60 * 60_000,
 	two_factor: 5 * 60_000,
+	invoice_link: linkLifetimeDays * 24 * 60 * 60_000,
 };
 
 interface Issue {
@@ -18,6 +20,7 @@ interface Issue {
 	userId?: string;
 	invitationId?: string;
 	tenantId?: string;
+	invoiceSendId?: string;
 	now: Date;
 }
 
@@ -48,6 +51,7 @@ async function insert(db: Db | Tx, id: string, tokenHash: Buffer, issue: Issue) 
 			userId: issue.userId ?? null,
 			invitationId: issue.invitationId ?? null,
 			tenantId: issue.tenantId ?? null,
+			invoiceSendId: issue.invoiceSendId ?? null,
 			tokenHash,
 			expiresAt: new Date(issue.now.getTime() + lifetimes[issue.purpose]),
 			usedAt: null,

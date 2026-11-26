@@ -99,6 +99,14 @@ export class CompanySettingsModel {
 					label: t(`ui.ws.settings.delivery_${value}`),
 				})),
 			},
+			{
+				key: 'invoice.replyTo',
+				label: t('ui.ws.settings.reply_to'),
+				value: settings.replyTo ?? '',
+				display: settings.replyTo || t('ui.ws.settings.reply_to_sender'),
+				validate: (value) =>
+					value === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? null : t('ui.ws.settings.reply_to_invalid'),
+			},
 			{ key: 'invoice.footer', label: t('ui.ws.settings.invoice_footer'), value: settings.footer },
 		];
 	}
@@ -129,7 +137,7 @@ export class CompanySettingsModel {
 	saveField(field: InlineFieldSpec, value: string) {
 		const tenant = this.#workspace.session.tenant!;
 		if (field.key.startsWith('invoice.')) {
-			const key = field.key.slice('invoice.'.length) as 'paymentTermDays' | 'delivery' | 'footer';
+			const key = field.key.slice('invoice.'.length) as 'paymentTermDays' | 'delivery' | 'footer' | 'replyTo';
 			// A plain copy: the session's tenant is reactive state, which storage cannot clone.
 			const previous = $state.snapshot(tenant.invoiceSettings) as Tenant['invoiceSettings'];
 			const invoiceSettings = { ...previous, [key]: key === 'paymentTermDays' ? Number(value) : value };

@@ -179,6 +179,7 @@ function emptySnapshot(): Snapshot {
 		notifications: [],
 		audit: [],
 		storageSettings: [],
+		invoiceSends: [],
 	};
 }
 

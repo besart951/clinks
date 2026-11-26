@@ -7,9 +7,9 @@ are what the plan assumes and should be checked by a fiduciary or lawyer before 
 
 ## Today
 
-Invoices with lines and VAT, numbers assigned by the server, Swiss QR payment part without reference (`NON`), print
-through the browser, payments and reminder level entered by hand. «Per Mail senden» only opens a draft in the
-internal mail module, which sends nothing outside.
+Before this plan: invoices with lines and VAT, numbers assigned by the server, Swiss QR payment part without reference
+(`NON`), print through the browser, payments and reminder level entered by hand. «Per Mail senden» only opened a draft
+in the internal mail module, which sent nothing outside.
 
 ## Legal frame (Switzerland)
 
@@ -50,15 +50,19 @@ internal mail module, which sends nothing outside.
 
 ### 3 · Sending
 
-- [ ] «Senden» on an issued invoice: e-mail through the existing mail server, sender name of the workspace, replies
-      go to the workspace's address.
-- [ ] Two ways, chosen per workspace and changeable per invoice:
-  - **Attachment**: the PDF in the mail. Default for workspaces without Physio or Spitex.
-  - **Secure link**: the mail holds no health data, only a link to the invoice that expires after 90 days and
-    asks for the recipient's postcode before showing it. Default with Physio or Spitex.
-- [ ] Sent invoices keep a log entry (when, to whom, which way); link openings are logged, no tracking pixels.
-- [ ] Print and post stay possible for recipients without e-mail.
-- [ ] Ops: SPF and DKIM for the sending domain (in `docs/ops/livegang.md`).
+- [x] «Senden» on an issued invoice: e-mail through the existing mail server, display name of the workspace, replies
+      go to the workspace's reply address (Settings › Rechnungen › «Antworten an») or else to the person who sends.
+- [x] Two ways, chosen per workspace and changeable per invoice:
+  - **Attachment**: the archived PDF in the mail (checked against its SHA-256 first). Default for workspaces
+    without Physio or Spitex.
+  - **Secure link**: the mail holds no amount and no service, only a link to `#/invoice-link/…` that expires after
+    90 days and asks for the postcode of the billing address; five wrong postcodes end it. Default with Physio or
+    Spitex. The token is stored hashed (`auth.one_time_tokens`, purpose `invoice_link`).
+- [x] Sent invoices keep a log entry (`invoice_sends`: when, to whom, which way, by whom) and an audit entry; link
+      openings are counted on the log, no tracking pixels. The demo files the mail under Mail › Gesendet and offers
+      the link in the log.
+- [x] Print and post stay possible for recipients without e-mail (PDF download).
+- [x] Ops: SPF, DKIM and DMARC for the sending domain (in `docs/ops/livegang.md`).
 
 ### 4 · Reminders
 

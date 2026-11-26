@@ -159,3 +159,102 @@ describe('archive', () => {
 		assert.deepEqual(after, { documentId: invoice.documentId, pdfSha256: invoice.pdfSha256 });
 	});
 });
+
+describe('sending', () => {
+	async function issued() {
+		const contactId = uuid();
+		const id = uuid();
+		await call('POST', '/sync/write', { ops: [{ op: 'PUT', table: 'contacts', id: contactId, data: contactRow }] });
+		await call('POST', '/sync/write', {
+			ops: [{ op: 'PUT', table: 'invoices', id, data: invoiceRow(contactId, { status: 'open' }) }],
+		});
+		const { number } = await api.owner
+			.selectFrom('invoices')
+			.select('number')
+			.where('id', '=', id)
+			.executeTakeFirstOrThrow();
+		return { id, number: String(number) };
+	}
+
+	it('attaches the archived PDF in the workspace’s name and logs the mail', async () => {
+		const { id, number } = await issued();
+		const sent = await call('POST', `/finance/invoices/${id}/send`, { to: 'kunde@example.ch', method: 'attachment' });
+		assert.equal(sent.status, 201, JSON.stringify(sent.body));
+		assert.equal(sent.body.method, 'attachment');
+		assert.equal(sent.body.linkExpiresAt, null);
+		const mail = api.mailer.last('kunde@example.ch');
+		assert.equal(mail.fromName, 'Rechnungen AG');
+		assert.equal(mail.replyTo, 'invoicing@example.ch');
+		assert.equal(mail.subject, `Rechnung ${number} von Rechnungen AG`);
+		assert.equal(mail.attachments?.length, 1);
+		assert.equal(mail.attachments![0].filename, `Rechnung ${number}.pdf`);
+		assert.equal(Buffer.from(mail.attachments![0].content).subarray(0, 8).toString(), '%PDF-1.7');
+
+		const log = await call('GET', `/finance/invoices/${id}/sends`);
+		assert.equal(log.body.length, 1);
+		assert.equal(log.body[0].recipient, 'kunde@example.ch');
+		const entry = await api.owner
+			.selectFrom('audit')
+			.select('action')
+			.where('target', '=', id)
+			.where('action', '=', 'invoice.sent')
+			.executeTakeFirst();
+		assert.ok(entry);
+	});
+
+	it('sends a secure link that opens only with the postcode and counts the openings', async () => {
+		const { id, number } = await issued();
+		const sent = await call('POST', `/finance/invoices/${id}/send`, { to: 'lea@example.ch', method: 'link' });
+		assert.equal(sent.status, 201, JSON.stringify(sent.body));
+		const mail = api.mailer.last('lea@example.ch');
+		assert.equal(mail.attachments, undefined);
+		// No amount and no service in the mail, only who and which invoice.
+		assert.doesNotMatch(mail.text, /Beratung|240|CHF/);
+		const token = decodeURIComponent(/invoice-link\/([A-Za-z0-9_%-]+)/.exec(mail.text)![1]);
+		const anonymous = (method: string, body?: unknown) =>
+			admin.browser.call(method, `/invoice-links/${encodeURIComponent(token)}`, { token: null, body });
+
+		const details = await anonymous('GET');
+		assert.equal(details.status, 200);
+		assert.equal(details.body.tenantName, 'Rechnungen AG');
+		assert.equal(details.body.number, number);
+		assert.equal('url' in details.body, false);
+
+		assert.equal((await anonymous('POST', { postcode: '8000' })).status, 400);
+		const opened = await anonymous('POST', { postcode: 'CH-3000' });
+		assert.equal(opened.status, 200, JSON.stringify(opened.body));
+		assert.equal(opened.body.name, `Rechnung ${number}.pdf`);
+		await anonymous('POST', { postcode: '3000' });
+		const [entry] = (await call('GET', `/finance/invoices/${id}/sends`)).body;
+		assert.equal(entry.openCount, 2);
+		assert.ok(entry.openedAt);
+		assert.ok(new Date(entry.linkExpiresAt).getTime() > Date.now() + 89 * 24 * 60 * 60_000);
+
+		// Five wrong postcodes end the link, even for the right one afterwards.
+		for (let attempt = 0; attempt < 4; attempt++) await anonymous('POST', { postcode: '0000' });
+		assert.equal((await anonymous('POST', { postcode: '3000' })).status, 410);
+		assert.equal((await admin.browser.call('GET', '/invoice-links/not-a-real-token-at-all', {})).status, 404);
+	});
+
+	it('sends nothing for drafts, without the finance right or across workspaces', async () => {
+		const contactId = uuid();
+		const draft = uuid();
+		await call('POST', '/sync/write', { ops: [{ op: 'PUT', table: 'contacts', id: contactId, data: contactRow }] });
+		await call('POST', '/sync/write', {
+			ops: [{ op: 'PUT', table: 'invoices', id: draft, data: invoiceRow(contactId) }],
+		});
+		const input = { to: 'kunde@example.ch', method: 'attachment' };
+		assert.equal((await call('POST', `/finance/invoices/${draft}/send`, input)).status, 400);
+		const { id } = await issued();
+		const other = await api.administrator('other-sender@example.ch', 'Andere AG');
+		const foreign = await other.browser.call('POST', `/finance/invoices/${id}/send`, {
+			token: other.token,
+			body: input,
+		});
+		assert.equal(foreign.status, 404);
+		assert.equal(
+			(await other.browser.call('GET', `/finance/invoices/${id}/sends`, { token: other.token })).body.length,
+			0,
+		);
+	});
+});
