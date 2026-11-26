@@ -1,4 +1,5 @@
 import type { TenantId } from '@clinks/domain/ids';
+import type { BankEntryView, BankImportView } from '@clinks/contracts/finance';
 import type {
 	AppNotification,
 	Appointment,
@@ -31,6 +32,14 @@ import type { StorageSettings } from '@clinks/domain/storage';
 /** The demo's send log: the server keeps the link token's hash in its own table, the demo keeps it on the row. */
 export type MockInvoiceSend = InvoiceSend & { token: string | null; attempts: number };
 
+/** The demo's bank files and their credits (apps/api: bank_imports, bank_entries). */
+export type MockBankImport = Omit<BankImportView, 'repeated'> & {
+	tenantId: TenantId;
+	sha256: string;
+	documentId: string;
+};
+export type MockBankEntry = Omit<BankEntryView, 'suggestions'> & { tenantId: TenantId; bankRef: string };
+
 export interface Tables {
 	tenants: Tenant;
 	users: User;
@@ -57,6 +66,8 @@ export interface Tables {
 	audit: AuditEntry;
 	storageSettings: StorageSettings;
 	invoiceSends: MockInvoiceSend;
+	bankImports: MockBankImport;
+	bankEntries: MockBankEntry;
 }
 
 export type TableName = keyof Tables;
@@ -88,6 +99,8 @@ export const tableNames: readonly TableName[] = [
 	'audit',
 	'storageSettings',
 	'invoiceSends',
+	'bankImports',
+	'bankEntries',
 ];
 
 export type ErrorCode =

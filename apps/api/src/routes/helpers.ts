@@ -8,6 +8,7 @@ import type { ZodError, ZodType } from 'zod';
 import { ApiError, unauthorized } from '../errors.ts';
 import { pickLocale, translate } from '../i18n.ts';
 import type { AuthService } from '../services/auth.ts';
+import type { BankImportService } from '../services/bank-imports.ts';
 import type { BillingService } from '../services/billing.ts';
 import type { Caller, Services } from '../services/context.ts';
 import type { FileService } from '../services/files.ts';
@@ -35,6 +36,7 @@ export interface RouteDeps {
 	billing: BillingService;
 	files: FileService;
 	invoices: InvoiceService;
+	bankImports: BankImportService;
 	sync: SyncService;
 	caller: (c: Context) => Caller;
 	deliver: (c: Context, opened: OpenedSession) => contract.SessionResponse;

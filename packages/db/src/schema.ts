@@ -176,6 +176,33 @@ export interface Database {
 	billingAccounts: { tenantId: string; customerId: string; status: Defaulted<string> };
 	billingEvents: { id: string; tenantId: string; createdAt: Timestamp };
 	planningRooms: { tenantId: string; state: Uint8Array; updatedAt: Timestamp };
+	bankImports: {
+		id: string;
+		tenantId: string;
+		fileName: string;
+		kind: 'camt.053' | 'camt.054';
+		sha256: string;
+		documentId: string;
+		importedAt: Date;
+		importedBy: string | null;
+		credits: number;
+		booked: number;
+		duplicates: number;
+	};
+	bankEntries: {
+		id: string;
+		tenantId: string;
+		importId: string;
+		bankRef: string;
+		bookedOn: string;
+		amount: number;
+		currency: string;
+		reference: string;
+		debtor: string;
+		info: string;
+		status: 'booked' | 'open' | 'ignored';
+		invoiceId: string | null;
+	};
 	invoiceSends: {
 		id: string;
 		tenantId: string;

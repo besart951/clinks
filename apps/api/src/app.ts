@@ -25,6 +25,7 @@ import { AuthService } from './services/auth.ts';
 import { BillingService } from './services/billing.ts';
 import type { Services } from './services/context.ts';
 import { FileService } from './services/files.ts';
+import { BankImportService } from './services/bank-imports.ts';
 import { InvoiceService } from './services/invoices.ts';
 import { SessionService } from './services/sessions.ts';
 import { SettingsService } from './services/settings.ts';
@@ -49,6 +50,7 @@ export function createApp({ services, config }: AppOptions) {
 		billing: new BillingService(services),
 		files: new FileService(services),
 		invoices: new InvoiceService(services),
+		bankImports: new BankImportService(services),
 		sync: new SyncService(services),
 		caller: (c) => callerOf(c, config.TRUST_PROXY),
 		deliver: (c, opened) => deliverSession(c, opened, config.COOKIE_SECURE),
@@ -78,8 +80,10 @@ export function createApp({ services, config }: AppOptions) {
 	const defaultLimit = limit(1024 * 1024);
 	const writeLimit = limit(2 * 1024 * 1024); // One base64-encoded document plus metadata.
 	const importLimit = limit(12 * 1024 * 1024); // One legacy browser workspace, including JSON escaping.
+	const bankFileLimit = limit(6 * 1024 * 1024); // A month of camt.054 notifications, as text in JSON.
 	app.use((c, next) => {
 		if (c.req.path === '/sync/import') return importLimit(c, next);
+		if (c.req.path === '/finance/bank-imports') return bankFileLimit(c, next);
 		if (['/sync/write', '/tenant/settings', '/me/profile'].includes(c.req.path)) return writeLimit(c, next);
 		return defaultLimit(c, next);
 	});

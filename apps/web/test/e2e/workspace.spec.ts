@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { failOnCspViolations } from './csp-guard.ts';
+import { readFileSync } from 'node:fs';
+import { qrReference } from '@clinks/domain/qr-bill';
 import { signIn, switchAccount, waitForToastGone, dragOnto } from './helpers.ts';
 
 failOnCspViolations();
@@ -261,6 +263,49 @@ test('sends a due reminder with its fee from the list of invoices to remind', as
 	// Sent: the next level waits for this reminder's own deadline.
 	await expect(page.getByRole('button', { name: /^\d\. Mahnung senden$/ })).toHaveCount(0);
 	await expect(page.getByText(new RegExp(`^${Number(level) + 1}\\. Mahnung ab `))).toBeVisible();
+});
+
+test('imports a camt.054, books by QR reference and assigns the rest by hand', async ({ page }) => {
+	await signIn(page);
+	await page.goto('/#/finance/invoices/new');
+	await page.getByRole('combobox').first().click();
+	await page.getByRole('option').nth(1).click();
+	await page.getByLabel('Beschreibung').first().fill('Therapie');
+	await page.getByLabel('Preis CHF').first().fill('500');
+	await page.getByLabel('Preis CHF').first().blur();
+	await page.getByRole('button', { name: 'Rechnung stellen' }).click();
+	await expect(page.getByText('PDF/A archiviert')).toBeVisible();
+	const number = (await page.getByRole('heading', { level: 1 }).innerText()).replace('Rechnung ', '');
+	const invoiceUrl = page.url();
+	const fixture = readFileSync(
+		new URL('../../../../packages/domain/test/fixtures/camt054.xml', import.meta.url),
+		'utf8',
+	);
+	const content = fixture
+		.replace('00 00000 00000 00000 02026 00427', qrReference(number))
+		.replace('129.70', '100.00')
+		.replace('RF61 2026 0043', 'RF71 9999 0001');
+	const file = { name: 'camt054-test.xml', mimeType: 'application/xml', buffer: Buffer.from(content) };
+
+	await page.goto('/#/finance/payments');
+	await page.getByLabel('Datei wählen').setInputFiles(file);
+	await expect(page.getByText('camt054-test.xml: 3 Gutschriften, 1 verbucht, 0 schon bekannt.')).toBeVisible();
+	const open = page.getByRole('list', { name: 'Zuzuordnende Gutschriften' });
+	await expect(open.getByRole('listitem')).toHaveCount(2);
+	const bruno = open.getByRole('listitem').filter({ hasText: 'Bruno Häfliger & Co' });
+	await bruno.getByRole('combobox', { name: 'Andere Rechnung …' }).click();
+	await page.getByRole('option', { name: new RegExp(`^${number} · `) }).click();
+	await expect(page.getByText('Zahlung über CHF 280.45 verbucht', { exact: false })).toBeVisible();
+	await expect(open.getByRole('listitem')).toHaveCount(1);
+	await open.getByRole('button', { name: 'Ignorieren' }).click();
+	await expect(page.getByText('Alle Gutschriften sind zugeordnet.')).toBeVisible();
+
+	// The same file again books nothing.
+	await page.getByLabel('Datei wählen').setInputFiles(file);
+	await expect(page.getByText('camt054-test.xml wurde schon importiert.', { exact: false })).toBeVisible();
+
+	await page.goto(invoiceUrl);
+	await expect(page.getByRole('listitem').filter({ hasText: /^05\.12\.2026/ })).toHaveCount(2);
 });
 
 test('sets the QR-IBAN and the payment term for invoices', async ({ page }) => {

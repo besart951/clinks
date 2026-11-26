@@ -270,6 +270,8 @@ export interface InvoiceLine {
 export interface Payment {
 	date: CalendarDate;
 	amount: Rappen;
+	/** The bank file entry it was booked from; absent for payments entered by hand. */
+	entryId?: string;
 }
 
 export const invoiceStatuses = ['draft', 'open', 'partially_paid', 'paid', 'overdue', 'reminded', 'cancelled'] as const;

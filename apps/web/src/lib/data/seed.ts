@@ -180,6 +180,8 @@ function emptySnapshot(): Snapshot {
 		audit: [],
 		storageSettings: [],
 		invoiceSends: [],
+		bankImports: [],
+		bankEntries: [],
 	};
 }
 

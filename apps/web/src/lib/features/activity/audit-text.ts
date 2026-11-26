@@ -20,6 +20,7 @@ const knownActions = new Set([
 	'sent',
 	'reminder_sent',
 	'link_opened',
+	'payment_booked',
 ]);
 
 /** Translation key for an audit action such as `invoice.created`. */

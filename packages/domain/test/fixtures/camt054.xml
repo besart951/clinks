@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Shaped like a camt.054.001.08 of a Swiss bank for QR bills; names and accounts are made up. -->
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.054.001.08">
+	<BkToCstmrDbtCdtNtfctn>
+		<GrpHdr><MsgId>20261205375204000006</MsgId><CreDtTm>2026-12-05T21:00:00</CreDtTm></GrpHdr>
+		<Ntfctn>
+			<Id>20261205375204000006</Id>
+			<Acct><Id><IBAN>CH4431999123000889012</IBAN></Id></Acct>
+			<Ntry>
+				<NtryRef>QRR-BATCH-1</NtryRef>
+				<Amt Ccy="CHF">410.15</Amt>
+				<CdtDbtInd>CRDT</CdtDbtInd>
+				<RvslInd>false</RvslInd>
+				<Sts><Cd>BOOK</Cd></Sts>
+				<BookgDt><Dt>2026-12-05</Dt></BookgDt>
+				<ValDt><Dt>2026-12-05</Dt></ValDt>
+				<AcctSvcrRef>ZV20261205/000001</AcctSvcrRef>
+				<NtryDtls>
+					<TxDtls>
+						<Refs><AcctSvcrRef>ZV20261205/000001/1</AcctSvcrRef></Refs>
+						<Amt Ccy="CHF">129.70</Amt>
+						<CdtDbtInd>CRDT</CdtDbtInd>
+						<RltdPties><Dbtr><Pty><Nm>Lea Muster</Nm></Pty></Dbtr></RltdPties>
+						<RmtInf>
+							<Strd><CdtrRefInf><Tp><CdOrPrtry><Prtry>QRR</Prtry></CdOrPrtry></Tp><Ref>00 00000 00000 00000 02026 00427</Ref></CdtrRefInf></Strd>
+						</RmtInf>
+					</TxDtls>
+					<TxDtls>
+						<Refs><AcctSvcrRef>ZV20261205/000001/2</AcctSvcrRef></Refs>
+						<Amt Ccy="CHF">280.45</Amt>
+						<CdtDbtInd>CRDT</CdtDbtInd>
+						<RltdPties><Dbtr><Pty><Nm>Bruno H&#228;fliger &amp; Co</Nm></Pty></Dbtr></RltdPties>
+						<RmtInf><Ustrd>Rechnung vom November</Ustrd></RmtInf>
+					</TxDtls>
+				</NtryDtls>
+			</Ntry>
+			<Ntry>
+				<Amt Ccy="CHF">50.00</Amt>
+				<CdtDbtInd>CRDT</CdtDbtInd>
+				<Sts><Cd>BOOK</Cd></Sts>
+				<BookgDt><Dt>2026-12-05</Dt></BookgDt>
+				<AcctSvcrRef>ZV20261205/000002</AcctSvcrRef>
+				<NtryDtls><TxDtls>
+					<Amt Ccy="CHF">50.00</Amt>
+					<RltdPties><Dbtr><Nm>Anna Beispiel</Nm></Dbtr></RltdPties>
+					<RmtInf><Strd><CdtrRefInf><Ref>RF61 2026 0043</Ref></CdtrRefInf></Strd></RmtInf>
+				</TxDtls></NtryDtls>
+			</Ntry>
+			<Ntry>
+				<Amt Ccy="CHF">99.00</Amt>
+				<CdtDbtInd>DBIT</CdtDbtInd>
+				<Sts><Cd>BOOK</Cd></Sts>
+				<BookgDt><Dt>2026-12-05</Dt></BookgDt>
+				<AcctSvcrRef>ZV20261205/000003</AcctSvcrRef>
+			</Ntry>
+			<Ntry>
+				<Amt Ccy="CHF">10.00</Amt>
+				<CdtDbtInd>CRDT</CdtDbtInd>
+				<Sts><Cd>PDNG</Cd></Sts>
+				<BookgDt><Dt>2026-12-05</Dt></BookgDt>
+				<AcctSvcrRef>ZV20261205/000004</AcctSvcrRef>
+			</Ntry>
+		</Ntfctn>
+	</BkToCstmrDbtCdtNtfctn>
+</Document>
