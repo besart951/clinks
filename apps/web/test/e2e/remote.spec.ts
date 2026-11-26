@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { newId } from '@clinks/domain/ids';
 import { expect, test, type Browser, type Page } from '@playwright/test';
 import { failOnCspViolations } from './csp-guard.ts';
@@ -399,4 +400,119 @@ test('releases the Spitex plan: staff get their own visits on their device, and 
 
 	await staff.context().close();
 	await plan.context().close();
+});
+
+test('sends an invoice as a secure link the recipient opens, and books its payment from a camt.054', async ({
+	browser,
+	page,
+}) => {
+	test.setTimeout(180_000);
+	const email = `rechnung-${Date.now()}@example.ch`;
+	const recipient = `patient-${Date.now()}@example.ch`;
+	const signUp = await api<{ verificationId: string }>('POST', '/auth/sign-up', {
+		body: { firstName: 'Fritz', lastName: 'Finanz', email, password },
+	});
+	const verified = await api<{ accessToken: string }>('POST', '/auth/verify-email', {
+		body: { verificationId: signUp.verificationId, code: await codeFor(email) },
+	});
+	const tenant = await api<{ tenantId: string }>('POST', '/tenants', {
+		token: verified.accessToken,
+		body: { name: 'Physio Versand', industry: 'physio', modules: ['physio', 'finance'] },
+	});
+	const token = (
+		await api<{ accessToken: string }>('POST', '/me/tenant', {
+			token: verified.accessToken,
+			body: { tenantId: tenant.tenantId },
+		})
+	).accessToken;
+	await api('POST', '/tenant/settings', { token, body: { iban: 'CH93 0076 2011 6238 5295 7' } });
+	const [contactId, invoiceId] = [newId<string>(), newId<string>()];
+	await api('POST', '/sync/write', {
+		token,
+		body: {
+			ops: [
+				{
+					op: 'PUT',
+					table: 'contacts',
+					id: contactId,
+					data: {
+						kind: 'person',
+						first_name: 'Paula',
+						last_name: 'Patientin',
+						company_name: '',
+						email: recipient,
+						phone: '',
+						address: JSON.stringify({ street: 'Seeweg', houseNumber: '5', zip: '3250', city: 'Lyss' }),
+						insurer: '',
+						tags: '[]',
+						notes: '',
+						archived: 0,
+					},
+				},
+				{
+					op: 'PUT',
+					table: 'invoices',
+					id: invoiceId,
+					data: {
+						number: '',
+						kind: 'invoice',
+						contact_id: contactId,
+						issue_date: '2026-11-20',
+						due_date: '2026-12-20',
+						status: 'open',
+						lines: JSON.stringify([{ description: 'Physiotherapie', quantity: 1, unitPrice: 12000, vatRate: 0 }]),
+						payments: '[]',
+						notes: '',
+						appointment_ids: '[]',
+						service_from: '2026-11-02',
+						service_to: '2026-11-20',
+					},
+				},
+			],
+		},
+	});
+
+	// The workspace sends it from the invoice page; Physio picks the secure link.
+	const office = await secondDevice(browser, email);
+	await office.goto(`/#/finance/invoices/${invoiceId}`);
+	await expect(office.getByText('PDF/A archiviert')).toBeVisible({ timeout: 20_000 });
+	const number = (await office.getByRole('heading', { level: 1 }).innerText()).replace('Rechnung ', '');
+	await office.getByRole('button', { name: 'Senden', exact: true }).click();
+	const dialog = office.getByRole('dialog');
+	await expect(dialog.getByRole('radio', { name: /Sicherer Link/ })).toBeChecked();
+	await dialog.getByRole('button', { name: 'Senden' }).click();
+	await expect(office.getByText(`Rechnung ${number} an ${recipient} gesendet`)).toBeVisible();
+
+	// The recipient: the mail names no amount; the link opens with the postcode only.
+	const mail = await mailFor(recipient, new RegExp(`Rechnung ${number} von Physio Versand`));
+	expect(mail).not.toMatch(/120|Physiotherapie/);
+	const link = /(\/#\/invoice-link\/[A-Za-z0-9_%-]+)/.exec(mail)![1];
+	await page.goto(link);
+	await expect(page.getByRole('heading', { level: 1, name: `Rechnung ${number}` })).toBeVisible();
+	await page.getByLabel('Postleitzahl').fill('3251');
+	await page.getByRole('button', { name: 'PDF herunterladen' }).click();
+	await expect(page.getByText('Die Postleitzahl stimmt nicht.')).toBeVisible();
+	await page.getByLabel('Postleitzahl').fill('3250');
+	const download = page.waitForEvent('download');
+	await page.getByRole('button', { name: 'PDF herunterladen' }).click();
+	expect((await download).suggestedFilename()).toBe(`Rechnung ${number}.pdf`);
+
+	// The bank file books the payment by its Creditor Reference.
+	const { creditorReference } = await import('@clinks/domain/qr-bill');
+	const fixture = readFileSync(
+		new URL('../../../../packages/domain/test/fixtures/camt054.xml', import.meta.url),
+		'utf8',
+	);
+	const content = fixture
+		.replace('RF61 2026 0043', creditorReference(number))
+		.replaceAll('>50.00<', '>120.00<')
+		.replaceAll('ZV20261205', `ZV${Date.now()}`);
+	await office.goto('/#/finance/payments');
+	await office
+		.getByLabel('Datei wählen')
+		.setInputFiles({ name: 'camt054.xml', mimeType: 'application/xml', buffer: Buffer.from(content) });
+	await expect(office.getByText(/camt054\.xml: 3 Gutschriften, 1 verbucht/)).toBeVisible();
+	await office.goto(`/#/finance/invoices/${invoiceId}`);
+	await expect(office.getByText('Bezahlt', { exact: true }).first()).toBeVisible({ timeout: 20_000 });
+	await expect(office.getByText(/^Geöffnet am /)).toBeVisible();
 });

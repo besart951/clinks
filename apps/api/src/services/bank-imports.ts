@@ -118,6 +118,18 @@ export class BankImportService {
 		});
 	}
 
+	/**
+	 * The workspace's finance records beyond sync, for the data export: send log (without link tokens), bank files
+	 * and their credits.
+	 */
+	exportAll(claims: AccessClaims) {
+		return this.#scoped(claims, 'finance.read', async (tx) => ({
+			invoiceSends: await tx.selectFrom('invoiceSends').selectAll().orderBy('sentAt').execute(),
+			bankImports: await tx.selectFrom('bankImports').selectAll().orderBy('importedAt').execute(),
+			bankEntries: await tx.selectFrom('bankEntries').selectAll().orderBy('bookedOn').execute(),
+		}));
+	}
+
 	/** Credits still to assign, each with up to three invoices it may pay. */
 	openEntries(claims: AccessClaims): Promise<BankEntryView[]> {
 		return this.#scoped(claims, 'finance.read', async (tx) => {

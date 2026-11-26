@@ -8761,6 +8761,166 @@
 				}
 			}
 		},
+		"/finance/export": {
+			"get": {
+				"tags": [
+					"finance"
+				],
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"invoiceSends": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"additionalProperties": {}
+											}
+										},
+										"bankImports": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"additionalProperties": {}
+											}
+										},
+										"bankEntries": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"additionalProperties": {}
+											}
+										}
+									},
+									"required": [
+										"invoiceSends",
+										"bankImports",
+										"bankEntries"
+									]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Not signed in",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Not allowed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/finance/bank-entries": {
 			"get": {
 				"tags": [

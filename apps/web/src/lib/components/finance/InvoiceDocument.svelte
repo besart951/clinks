@@ -114,7 +114,7 @@
 		<QrBill
 			{tenant}
 			{contact}
-			amount={totals.balance > 0 ? totals.balance : totals.gross}
+			amount={totals.gross - totals.paid > 0 ? totals.gross - totals.paid : totals.gross}
 			number={invoice.status === 'draft' && !invoice.number.match(/^\d/) ? '' : invoice.number}
 			message={workspace.t('ui.ws.invoice.reference', { number: invoice.number })}
 		/>

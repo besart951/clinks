@@ -23,7 +23,14 @@ import type {
 	Tenant,
 	User,
 } from '@clinks/domain/types';
-import { MockApiError, stamp, type WorkspaceCache, type Snapshot, type TableName } from './database.ts';
+import {
+	MockApiError,
+	stamp,
+	type MockInvoiceSend,
+	type WorkspaceCache,
+	type Snapshot,
+	type TableName,
+} from './database.ts';
 import { appendAudit, validationError } from './repository.ts';
 import { demoPassword } from './seed.ts';
 import type { NewTenant } from '../session/auth-gateway.ts';
@@ -752,6 +759,11 @@ export class AccountApi {
 				if (owned.length > 0) result[name] = owned;
 			}
 			result.tenant = snapshot.tenants.filter((row) => row.id === tenantId);
+			// Link tokens give access to an invoice; they stay with the recipient.
+			if (result.invoiceSends)
+				result.invoiceSends = (result.invoiceSends as MockInvoiceSend[]).map(
+					({ token: _token, attempts: _attempts, ...send }) => send,
+				);
 			// Access keys stay out of exports.
 			if (result.storageSettings)
 				result.storageSettings = (result.storageSettings as StorageSettings[]).map(storageView);

@@ -441,10 +441,11 @@ export class PrivacyModel extends SettingsForm {
 	password = $state('');
 
 	async exportData() {
-		const data = await this.attempt(
-			async () => this.workspace.api.exportTenantData(await this.workspace.account.exportTenantData()),
-			'ui.ws.privacy.exported',
-		);
+		const data = await this.attempt(async () => {
+			const exported = await this.workspace.api.exportTenantData(await this.workspace.account.exportTenantData());
+			const finance = this.workspace.session.can('finance.read') ? await this.workspace.bankImports.exportAll() : {};
+			return { ...exported, ...finance };
+		}, 'ui.ws.privacy.exported');
 		if (!data) return;
 		this.workspace.platform.files.save(
 			new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }),
