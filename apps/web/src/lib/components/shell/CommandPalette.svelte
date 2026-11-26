@@ -19,9 +19,13 @@
 		'mails',
 	];
 
+	// Opened by the shortcut, the search button or the dialog itself: load fresh entries each time.
+	$effect(() => {
+		if (open) void search.load();
+	});
+
 	function onOpenChange(next: boolean) {
 		open = next;
-		if (next) void search.load();
 	}
 
 	async function choose(entry: CommandEntry) {
@@ -45,7 +49,11 @@
 			{#if entries.length > 0}
 				<Command.Group heading={workspace.t(`ui.ws.command.group_${group}`)}>
 					{#each entries as entry (entry.id)}
-						<Command.Item value={`${entry.label} ${entry.detail} ${entry.id}`} onSelect={() => choose(entry)}>
+						<Command.Item
+							value={`${entry.label} ${entry.detail} ${entry.id}`}
+							disabled={entry.denied}
+							onSelect={() => choose(entry)}
+						>
 							<span class="truncate">{entry.label}</span>
 							{#if entry.detail}<span class="text-muted-foreground ml-auto truncate text-xs">{entry.detail}</span>{/if}
 						</Command.Item>

@@ -61,15 +61,45 @@ what a person sees. Decided with the owner on 26.11.2026.
 
 ### 4 · Hiding and dormant data
 
-- [ ] Search, command palette, dashboard widgets, contact page sections and notifications check product + right.
-- [ ] Direct link without right: «Kein Zugriff» page with who to ask (team managers).
-- [ ] Contact page: care and therapy sections only with `spitex.read` / `physio.read`; the contact itself stays shared.
+- [x] Navigation (sidebar and phone bar) shows only places the person may open; an unbooked product appears as
+      «locked» only to those who may book it (`billing.manage`), for everyone else it is hidden.
+- [x] Search (⌘K) lists a booked area without the right as «Kein Zugriff», not selectable; unbooked areas only for
+      those who may book them («Nicht gebucht»); create actions need the write right. The palette now loads its
+      entries however it is opened (shortcut, button).
+- [x] Direct link without right: «Kein Zugriff» (`ModuleGate`); dashboard widgets already check product + right.
+- [x] Contact page: the buttons to the Physio record and the Spitex client need `physio.read` / `spitex.read`.
 - [ ] Cancelled product: data kept, export in Settings › Datenschutz, booking again restores roles and data.
 
 ### 5 · Tests
 
 - [ ] Integration: a right of an unbooked product grants nothing in the API, RLS and sync streams.
 - [ ] e2e: Home-Care24 books Spitex, a nurse with the Pflege template sees only «Meine Einsätze», Physio stays hidden.
+
+## Pricing proposal (research 26.11.2026, to confirm)
+
+Swiss competitors, as published:
+
+| Product    | Price                                                                      | What it covers                                           |
+| ---------- | -------------------------------------------------------------------------- | -------------------------------------------------------- |
+| CuraSoft   | CHF 250 (≤ 10 clients), 350 (≤ 30), 700 (≤ 50), 1000 (≤ 100) per month     | Spitex: planning, clients, KVG billing, MediData         |
+| NURSANA    | CHF 199 per month freelance, organisations from CHF 499; interRAI extra    | Spitex: care planning, dispatch, KLV billing, accounting |
+| All-in-one | about CHF 50–100 per user and month (job.rocks comparison)                 | Spitex suites with planning, mobile app, billing         |
+| phyzio.ch  | CHF 60 per month incl. one physio, CHF 20 per further physio, −10 % yearly | Physio: agenda, records, KVG/UVG billing, MediData       |
+| Physitrack | CHF 74.99 per therapist, CHF 27.99 per assistant per month                 | Physio: records, exercise programs; Swiss billing open   |
+
+CLinks has no insurance billing (KLV/MediData, Tarif 312) and no interRAI yet, so it should sit clearly below:
+
+| Part                       | Proposal                                                       |
+| -------------------------- | -------------------------------------------------------------- |
+| Base (basics, tasks, mail) | CHF 15 per full user and month                                 |
+| Finance                    | CHF 19 per workspace and month                                 |
+| Spitex add-on              | CHF 39 per workspace + CHF 4 per care user («eigene Einsätze») |
+| Physio add-on              | CHF 29 per workspace (therapists are full users)               |
+| Yearly                     | two months free (as today)                                     |
+| Trial                      | 30 days, no card                                               |
+
+Examples: freelance nurse CHF 54; Spitex with 2 planners and 10 care staff CHF 109 (CuraSoft from 250); physio with 1
+therapist CHF 44, with 3 therapists CHF 74 (phyzio.ch 60 / 100). Insurance billing later as its own add-on.
 
 ## Open
 

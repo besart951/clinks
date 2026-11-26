@@ -13,7 +13,7 @@
 	import NotificationBell from './NotificationBell.svelte';
 	import SyncStatus from './SyncStatus.svelte';
 	import UserMenu from './UserMenu.svelte';
-	import { navigationGroups, type NavigationItem } from '#lib/features/shell/navigation-items';
+	import { navigationAccess, navigationGroups, type NavigationItem } from '#lib/features/shell/navigation-items';
 	import { NavBadges } from '#lib/features/shell/nav-badges.svelte';
 	import { locales, type Locale } from '@clinks/i18n-types/catalog';
 	import { href, routePath } from '#lib/navigation';
@@ -42,7 +42,7 @@
 			.map((group) => ({
 				...group,
 				items: group.items.filter(
-					(item) => item.path !== '/settings' && (!item.permission || session.can(item.permission)),
+					(item) => item.path !== '/settings' && ['open', 'locked'].includes(navigationAccess(item, session)),
 				),
 			}))
 			.filter((group) => group.items.length > 0),
@@ -50,7 +50,7 @@
 	const settingsActive = $derived(routePath(page.url).startsWith('/settings'));
 
 	function locked(item: NavigationItem) {
-		return item.module !== undefined && !session.hasModule(item.module);
+		return navigationAccess(item, session) === 'locked';
 	}
 
 	function active(item: NavigationItem) {

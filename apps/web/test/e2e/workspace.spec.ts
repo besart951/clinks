@@ -634,3 +634,21 @@ test('groups the rights of each role by booked product and resets a template rol
 	await expect(dialog.getByRole('group', { name: 'Grundfunktionen' }).getByRole('checkbox').first()).not.toBeChecked();
 	await expect(dialog.getByRole('group', { name: 'Spitex' }).getByRole('checkbox').nth(2)).toBeChecked();
 });
+
+test('hides areas without rights in the navigation and names them «Kein Zugriff» in the search', async ({ page }) => {
+	await signIn(page, 'daniel.moser@spitex-seeland.ch');
+	const navigation = page.getByRole('navigation', { name: 'Hauptnavigation' });
+	await expect(navigation.getByRole('link', { name: 'Meine Einsätze' })).toBeVisible();
+	// Neither booked areas without rights nor unbooked ones show up for staff.
+	for (const name of ['Kontakte', 'Finanzen', 'Physio'])
+		await expect(navigation.getByRole('link', { name })).toHaveCount(0);
+
+	await page.keyboard.press('ControlOrMeta+k');
+	const palette = page.getByRole('dialog', { name: 'Befehle und Suche' });
+	await palette.getByRole('combobox').fill('Finanzen');
+	const finance = palette.getByRole('option', { name: /Finanzen/ });
+	await expect(finance).toContainText('Kein Zugriff');
+	await expect(finance).toHaveAttribute('aria-disabled', 'true');
+	await palette.getByRole('combobox').fill('Physio');
+	await expect(palette.getByRole('option', { name: /Physio/ })).toHaveCount(0);
+});

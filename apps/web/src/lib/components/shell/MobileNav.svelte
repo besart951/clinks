@@ -3,7 +3,7 @@
 	import LayoutDashboard from '@lucide/svelte/icons/layout-dashboard';
 	import Menu from '@lucide/svelte/icons/menu';
 	import { getSidebarContext } from '@clinks/ui/components/ui/sidebar';
-	import { allNavigationItems } from '#lib/features/shell/navigation-items';
+	import { allNavigationItems, navigationAccess } from '#lib/features/shell/navigation-items';
 	import { href, routePath } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
@@ -16,10 +16,7 @@
 		{ path: '/dashboard', label: 'ui.ws.nav.dashboard', icon: LayoutDashboard },
 		...preferred
 			.flatMap((path) => allNavigationItems.filter((item) => item.path === path))
-			.filter(
-				(item) =>
-					(!item.permission || session.can(item.permission)) && (!item.module || session.hasModule(item.module)),
-			)
+			.filter((item) => navigationAccess(item, session) === 'open')
 			.slice(0, 3),
 	]);
 </script>
