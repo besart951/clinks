@@ -3,6 +3,7 @@
 	import EyeOff from '@lucide/svelte/icons/eye-off';
 	import Send from '@lucide/svelte/icons/send';
 	import { Button } from '@clinks/ui/components/ui/button';
+	import * as Tooltip from '@clinks/ui/components/ui/tooltip';
 	import ConfirmDialog, { type ConfirmRequest } from '#lib/components/common/ConfirmDialog.svelte';
 	import type { PlanningModel } from '#lib/features/spitex/planning.svelte';
 	import type { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
@@ -18,6 +19,11 @@
 	const week = $derived(isoWeek(model.date));
 	const canRelease = $derived(workspace.session.can('spitex.release'));
 	let confirm = $state<ConfirmRequest | null>(null);
+	const status = $derived(
+		`${workspace.t('ui.ws.spitex.release.week', { week })} · ${workspace.t(
+			model.release ? 'ui.ws.spitex.release.status_released' : 'ui.ws.spitex.release.status_draft',
+		)}`,
+	);
 	const hint = $derived(
 		model.release
 			? workspace.t('ui.ws.spitex.release.status_released_hint', {
@@ -53,19 +59,24 @@
 
 {#if model.resource.data}
 	{#if part === 'status'}
-		<!-- Text and icon carry the state, not the colour alone; a change is announced. -->
-		<span
-			role="status"
-			class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium {model.release
-				? 'border-emerald-600/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300'
-				: 'border-amber-600/30 bg-amber-500/10 text-amber-800 dark:text-amber-300'}"
-			title={hint}
-		>
-			{#if model.release}<CircleCheck class="size-3.5" />{:else}<EyeOff class="size-3.5" />{/if}
-			{workspace.t('ui.ws.spitex.release.week', { week })} ·
-			{workspace.t(model.release ? 'ui.ws.spitex.release.status_released' : 'ui.ws.spitex.release.status_draft')}
-			<span class="sr-only">{hint}</span>
-		</span>
+		<!-- Only the icon on the page; week, state and hint on hover or focus. The state is announced as text. -->
+		<Tooltip.Provider delayDuration={150}>
+			<Tooltip.Root>
+				<Tooltip.Trigger
+					class="inline-flex size-8 items-center justify-center rounded-full border pointer-coarse:size-11 {model.release
+						? 'border-emerald-600/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
+						: 'border-amber-600/30 bg-amber-500/10 text-amber-700 dark:text-amber-300'}"
+					aria-label={status}
+				>
+					{#if model.release}<CircleCheck class="size-4" />{:else}<EyeOff class="size-4" />{/if}
+				</Tooltip.Trigger>
+				<Tooltip.Content class="max-w-64 flex-col items-start gap-0.5">
+					<p class="font-medium">{status}</p>
+					<p>{hint}</p>
+				</Tooltip.Content>
+			</Tooltip.Root>
+		</Tooltip.Provider>
+		<span role="status" class="sr-only">{status}. {hint}</span>
 	{:else if canRelease}
 		{#if model.release}
 			<Button variant="outline" onclick={askWithdraw}>

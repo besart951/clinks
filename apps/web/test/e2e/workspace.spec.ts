@@ -508,6 +508,13 @@ test('releases a week of the Spitex plan to the staff and withdraws it again', a
 	await page.keyboard.press('Enter');
 	await expect(status).toContainText('Entwurf');
 	await expect(status).toContainText('Mitarbeitende sehen diese Woche noch nicht.');
+	// On the page only the icon; week, state and hint appear on hover.
+	await expect(page.getByText(/^KW \d+ · Entwurf$/)).toBeHidden();
+	await page.getByRole('button', { name: /^KW \d+ · Entwurf$/ }).hover();
+	await expect(page.locator('[data-slot="tooltip-content"]')).toContainText(
+		'Mitarbeitende sehen diese Woche noch nicht.',
+	);
+	await page.mouse.move(0, 0);
 
 	await page.getByRole('button', { name: 'Woche freigeben' }).click();
 	const dialog = page.getByRole('dialog', { name: /KW \d+/ });
