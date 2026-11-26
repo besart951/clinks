@@ -393,6 +393,34 @@ test('opens a task on its own page and edits it there', async ({ page }) => {
 	await expect(page.getByLabel('Beschreibung')).toHaveValue('Mehr Platz für die Details.');
 });
 
+test('shows a client’s arrival window in the plan and drops visits inside it', async ({ page }) => {
+	await signIn(page);
+	await page.getByRole('button', { name: 'Arbeitsbereich' }).click();
+	await page.getByRole('menuitem', { name: 'Stille Spitex Seeland' }).click();
+	await page.goto('/#/spitex');
+	const daniel = page.getByRole('grid', { name: /Daniel Moser/ });
+	const item = page
+		.getByRole('listitem')
+		.filter({ has: page.getByTitle(/zuzuweisen/) })
+		.first();
+	const [, from, to] = /Ankunft (\d\d:\d\d)–(\d\d:\d\d)/.exec((await item.textContent())!)!;
+	const title = (await item.locator('p').first().textContent())!.trim();
+	const band = page.locator('[data-arrival-window]');
+	await expect(band).toHaveCount(0);
+	// Pointing at an open visit marks its window in every column of that day.
+	await item.hover();
+	await expect(band.first()).toBeVisible();
+	await expect(page.locator('[data-arrival-label]')).toHaveText(`Ankunft ${from}–${to}`);
+	await page.mouse.move(0, 0);
+	await expect(band).toHaveCount(0);
+	// Let go further down the column, well after the window: the visit starts at the end of the window instead.
+	const column = (await daniel.boundingBox())!;
+	const low = (page.viewportSize()!.height - 30 - column.y) / column.height;
+	await dragOnto(page, item.getByTitle(/zuzuweisen/), daniel, { x: 0.5, y: low });
+	await expect(daniel.getByRole('button').filter({ hasText: title })).toContainText(`${to}–`);
+	await expect(page.getByText(`«${title}» zugewiesen`, { exact: false }).first()).toBeVisible();
+});
+
 test('hides staff in the Spitex plan and opens a staff member’s page', async ({ page }) => {
 	await signIn(page);
 	await page.getByRole('button', { name: 'Arbeitsbereich' }).click();

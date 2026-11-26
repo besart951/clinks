@@ -1,4 +1,4 @@
-import { addDays, atTime, isoWeekday, minutesOfDay, timeOfDay } from './dates.ts';
+import { addDays, atTime, isoWeekday, minutesOfDay, minutesToTime, timeToMinutes } from './dates.ts';
 import type { Appointment, ArrivalWindow, CalendarDate } from './types.ts';
 import type { AppointmentId, UserId } from './ids.ts';
 
@@ -20,15 +20,10 @@ export function conflictsFor(candidate: Slot, others: readonly Slot[]): Slot[] {
 	);
 }
 
-function toMinutes(value: string) {
-	const [hours, minutes] = value.split(':').map(Number);
-	return hours * 60 + minutes;
-}
-
 export function withinArrivalWindow(start: string, window: ArrivalWindow | null): boolean {
 	if (!window) return true;
 	const value = minutesOfDay(start);
-	return value >= toMinutes(window.from) && value <= toMinutes(window.to);
+	return value >= timeToMinutes(window.from) && value <= timeToMinutes(window.to);
 }
 
 export interface SeriesRequest {
@@ -54,7 +49,18 @@ export function seriesSlots(request: SeriesRequest): { start: string; end: strin
 	return slots;
 }
 
-/** Earliest start for a visit inside its arrival window that does not collide with the staff member's day. */
+/** The times a visit may start: its arrival window, or only its planned time when it has none. */
+function startRange(visit: Pick<Appointment, 'start' | 'arrivalWindow'>) {
+	const planned = minutesOfDay(visit.start);
+	return visit.arrivalWindow
+		? { from: timeToMinutes(visit.arrivalWindow.from), to: timeToMinutes(visit.arrivalWindow.to), planned }
+		: { from: planned, to: planned, planned };
+}
+
+/**
+ * Free start for a visit inside its arrival window that does not collide with the staff member's day: the planned
+ * time when it is inside the window and free, otherwise the free time closest to it, in steps of 5 minutes.
+ */
 export function firstFreeStart(
 	visit: Pick<Appointment, 'start' | 'end' | 'arrivalWindow'>,
 	date: CalendarDate,
@@ -62,10 +68,14 @@ export function firstFreeStart(
 	day: readonly Slot[],
 ): string | null {
 	const duration = (new Date(visit.end).getTime() - new Date(visit.start).getTime()) / 60_000;
-	const window = visit.arrivalWindow ?? { from: timeOfDay(visit.start), to: timeOfDay(visit.start) };
-	for (let minutes = toMinutes(window.from); minutes <= toMinutes(window.to); minutes += 5) {
-		const hours = String(Math.floor(minutes / 60)).padStart(2, '0');
-		const start = atTime(date, `${hours}:${String(minutes % 60).padStart(2, '0')}`);
+	const range = startRange(visit);
+	const preferred = Math.min(range.to, Math.max(range.from, range.planned));
+	const options: number[] = [];
+	for (let minutes = range.from; minutes <= range.to; minutes += 5) options.push(minutes);
+	if (!options.includes(preferred)) options.push(preferred);
+	options.sort((left, right) => Math.abs(left - preferred) - Math.abs(right - preferred) || left - right);
+	for (const minutes of options) {
+		const start = atTime(date, minutesToTime(minutes));
 		const end = new Date(new Date(start).getTime() + duration * 60_000).toISOString();
 		const candidate = { id: 'candidate' as AppointmentId, start, end, assigneeId, status: 'planned' as const };
 		if (conflictsFor(candidate, day).length === 0) return start;
@@ -83,7 +93,13 @@ export function planAssignments(
 	const planned = [...day];
 	const result: { visit: Appointment; assigneeId: UserId; start: string }[] = [];
 	const load = new Map(staff.map((id) => [id, planned.filter((row) => row.assigneeId === id).length]));
-	for (const visit of [...open].sort((left, right) => left.start.localeCompare(right.start))) {
+	// The least room first: fixed times, then narrow windows, so a wide window does not take a narrow one's slot.
+	const order = [...open].sort((left, right) => {
+		const a = startRange(left);
+		const b = startRange(right);
+		return a.to - a.from - (b.to - b.from) || a.from - b.from || left.start.localeCompare(right.start);
+	});
+	for (const visit of order) {
 		const candidates = [...staff].sort((left, right) => (load.get(left) ?? 0) - (load.get(right) ?? 0));
 		for (const assigneeId of candidates) {
 			const start = firstFreeStart(visit, date, assigneeId, planned);

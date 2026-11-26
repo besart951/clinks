@@ -36,12 +36,13 @@ export async function waitForToastGone(page: Page, text: string) {
 }
 
 /** Native drag and drop in small steps, like a real mouse; a direct jump does not always start the drag. */
-export async function dragOnto(page: Page, source: Locator, target: Locator) {
+/** Drags with the mouse; `at` is where on the target to let go, as fractions of its size (default: centre). */
+export async function dragOnto(page: Page, source: Locator, target: Locator, at = { x: 0.5, y: 0.5 }) {
 	const from = (await source.boundingBox())!;
 	const to = (await target.boundingBox())!;
 	await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
 	await page.mouse.down();
 	await page.mouse.move(from.x + from.width / 2 + 10, from.y + from.height / 2 + 10, { steps: 5 });
-	await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2, { steps: 10 });
+	await page.mouse.move(to.x + to.width * at.x, to.y + to.height * at.y, { steps: 10 });
 	await page.mouse.up();
 }
