@@ -1,8 +1,10 @@
+import { CamtError, matchCredit, parseCamt, suggestInvoices } from '../src/camt.ts';
+import { readFileSync } from 'node:fs';
 import { defaultDelivery, defaultInvoiceSettings, nextReminder, samePostcode } from '../src/invoicing.ts';
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 import { addDays, atTime, isoWeek, isoWeekday, monthGrid, startOfWeek } from '../src/dates.ts';
-import { newId, type AppointmentId, type UserId } from '../src/ids.ts';
+import { newId, type AppointmentId, type InvoiceId, type UserId } from '../src/ids.ts';
 import { layoutDay } from '../src/layout.ts';
 import { effectiveStatus, invoiceTotals, nextInvoiceNumber, roundToFiveRappen, vatFromGross } from '../src/money.ts';
 import { moduleBooked, roleGrants } from '../src/permissions.ts';
@@ -404,5 +406,105 @@ describe('reminders', () => {
 		assert.equal(invoiceTotals(paid).balance, 0);
 		assert.equal(nextReminder(paid, defaultInvoiceSettings, '2027-01-31'), null);
 		assert.equal(nextReminder({ ...invoice, status: 'draft' }, settings, '2027-01-31'), null);
+	});
+});
+
+function invoiceFixture(overrides: Partial<Invoice>): Invoice {
+	return {
+		id: newId<InvoiceId>(),
+		tenantId: 't' as Invoice['tenantId'],
+		revision: 1,
+		createdAt: '',
+		updatedAt: '',
+		number: '',
+		kind: 'invoice',
+		contactId: 'c' as Invoice['contactId'],
+		issueDate: '2026-11-01',
+		dueDate: '2026-12-01',
+		status: 'open',
+		lines: [],
+		payments: [],
+		reminderLevel: 0,
+		reminders: [],
+		notes: '',
+		appointmentIds: [],
+		serviceFrom: null,
+		serviceTo: null,
+		documentId: null,
+		pdfSha256: null,
+		...overrides,
+	};
+}
+
+describe('bank files', () => {
+	const camt = readFileSync(new URL('./fixtures/camt054.xml', import.meta.url), 'utf8');
+
+	it('reads booked credits of a camt.054, one per transaction of a batch', () => {
+		const file = parseCamt(camt);
+		assert.equal(file.kind, 'camt.054');
+		assert.deepEqual(
+			file.credits.map((credit) => [credit.bankRef, credit.amount, credit.reference, credit.debtor]),
+			[
+				['ZV20261205/000001/1', 12970, '000000000000000000202600427', 'Lea Muster'],
+				['ZV20261205/000001/2', 28045, '', 'Bruno Häfliger & Co'],
+				['ZV20261205/000002/1', 5000, 'RF6120260043', 'Anna Beispiel'],
+			],
+		);
+		assert.equal(file.credits[1].info, 'Rechnung vom November');
+		assert.equal(file.credits[0].date, '2026-12-05');
+		assert.equal(file.credits[0].currency, 'CHF');
+	});
+
+	it('reads a camt.053 statement and refuses other files and entity tricks', () => {
+		const statement = camt
+			.replace('camt.054.001.08', 'camt.053.001.08')
+			.replaceAll('BkToCstmrDbtCdtNtfctn', 'BkToCstmrStmt')
+			.replaceAll('Ntfctn>', 'Stmt>');
+		assert.equal(parseCamt(statement).kind, 'camt.053');
+		assert.equal(parseCamt(statement).credits.length, 3);
+		assert.throws(() => parseCamt('<Document><pain/></Document>'), CamtError);
+		assert.throws(() => parseCamt('no xml'), CamtError);
+		assert.throws(
+			() => parseCamt('<!DOCTYPE d [<!ENTITY a "aaaa">]><Document>&a;</Document>'),
+			(error: unknown) => error instanceof CamtError && error.reason === 'not_xml',
+		);
+	});
+
+	it('matches credits by QR or Creditor Reference and suggests invoices by amount and name', () => {
+		const make = (id: string, number: string, unitPrice: number, contactId: string) => ({
+			...invoiceFixture({
+				id: id as Invoice['id'],
+				number,
+				status: 'open',
+				lines: [{ description: 'x', quantity: 1, unitPrice, vatRate: 0 }],
+			}),
+			contactId: contactId as Invoice['contactId'],
+		});
+		const invoices = [
+			make('a', '2026-0042', 12970, 'lea'),
+			make('b', '2026-0043', 9000, 'anna'),
+			make('c', '2026-0044', 28045, 'bruno'),
+			make('d', '2026-0045', 5000, 'other'),
+		];
+		const [qr, , scor] = parseCamt(camt).credits;
+		assert.equal(matchCredit(qr, invoices)?.id, 'a');
+		assert.equal(matchCredit(scor, invoices)?.id, 'b');
+		assert.equal(matchCredit({ reference: '' }, invoices), null);
+		const names: Record<string, string> = { bruno: 'Bruno Häfliger', anna: 'Anna Beispiel', other: 'X', lea: 'Lea' };
+		const suggested = suggestInvoices(
+			{ amount: 28045, debtor: 'Bruno Häfliger & Co' },
+			invoices,
+			(invoice) => names[invoice.contactId],
+		);
+		assert.deepEqual(
+			suggested.map((invoice) => invoice.id),
+			['c'],
+		);
+		assert.deepEqual(
+			suggestInvoices({ amount: 5000, debtor: 'Anna Beispiel' }, invoices, (invoice) => names[invoice.contactId]).map(
+				(invoice) => invoice.id,
+			),
+			['d', 'b'],
+		);
 	});
 });

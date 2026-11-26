@@ -9,6 +9,7 @@
 	label={workspace.t('ui.ws.module.finance')}
 	links={[
 		{ path: '/finance', label: 'ui.ws.command.group_invoices', exact: true, match: '/finance/invoices' },
+		{ path: '/finance/payments', label: 'ui.ws.payments.title' },
 		{ path: '/finance/expenses', label: 'ui.ws.finance.expenses' },
 		{ path: '/finance/reports', label: 'ui.ws.finance.reports' },
 	]}

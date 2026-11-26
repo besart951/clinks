@@ -248,3 +248,46 @@ export async function documentBytes(tx: Tx, services: Services, documentId: stri
 	if (!row) throw new ApiError(404, 'error.ws.not_found');
 	return required(await tenantStores(services).of(tx, row.storageId)).read(row.objectKey, row.objectVersion);
 }
+
+/**
+ * Keeps a file the server made or received as an accounting record: a locked document (not renamed, replaced or
+ * deleted, see migration 0018) in a top-level folder of that name, created when missing.
+ */
+export async function archiveServerFile(
+	tx: Tx,
+	services: Services,
+	scope: Scope,
+	file: { name: string; folder: string; bytes: Uint8Array; type: string; targets: { kind: string; id: string }[] },
+): Promise<string> {
+	const documentId = uuid();
+	const dataUrl = await storeServerFile(tx, services, scope, documentId, file.bytes, file.type);
+	await tx
+		.insertInto('documents')
+		.values({
+			id: documentId,
+			tenantId: scope.tenantId,
+			name: file.name,
+			folderId: await topFolder(tx, scope.tenantId, file.folder),
+			mimeType: file.type,
+			size: file.bytes.length,
+			dataUrl,
+			targets: JSON.stringify(file.targets),
+			uploadedBy: scope.userId,
+			locked: true,
+		})
+		.execute();
+	return documentId;
+}
+
+async function topFolder(tx: Tx, tenantId: string, name: string) {
+	const existing = await tx
+		.selectFrom('folders')
+		.select('id')
+		.where('name', '=', name)
+		.where('parentId', 'is', null)
+		.executeTakeFirst();
+	if (existing) return existing.id as string;
+	const id = uuid();
+	await tx.insertInto('folders').values({ id, tenantId, name, parentId: null }).execute();
+	return id;
+}

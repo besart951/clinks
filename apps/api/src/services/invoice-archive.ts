@@ -5,10 +5,9 @@ import { renderInvoicePdf, type InvoicePdfInput, type PdfReminder } from '@clink
 import { contactName } from '@clinks/domain/contacts';
 import type { Address, Contact, Invoice, Tenant } from '@clinks/domain/types';
 import type { ProductTranslationKey } from '@clinks/i18n-types';
-import { uuid } from '../crypto.ts';
 import { translate } from '../i18n.ts';
 import type { Services } from './context.ts';
-import { storeServerFile } from './files.ts';
+import { archiveServerFile } from './files.ts';
 
 type Scope = { tenantId: string; userId: string };
 
@@ -85,39 +84,14 @@ export class InvoiceArchive {
 		return { invoice, pdf, locale };
 	}
 
-	async #store(tx: Tx, scope: Scope, locale: 'de-CH' | 'en-US', invoiceId: string, name: string, bytes: Uint8Array) {
-		const documentId = uuid();
-		const type = 'application/pdf';
-		const dataUrl = await storeServerFile(tx, this.#services, scope, documentId, bytes, type);
-		await tx
-			.insertInto('documents')
-			.values({
-				id: documentId,
-				tenantId: scope.tenantId,
-				name,
-				folderId: await this.#folder(tx, scope.tenantId, folderName[locale]),
-				mimeType: type,
-				size: bytes.length,
-				dataUrl,
-				targets: JSON.stringify([{ kind: 'invoice', id: invoiceId }]),
-				uploadedBy: scope.userId,
-				locked: true,
-			})
-			.execute();
-		return documentId;
-	}
-
-	async #folder(tx: Tx, tenantId: string, name: string) {
-		const existing = await tx
-			.selectFrom('folders')
-			.select('id')
-			.where('name', '=', name)
-			.where('parentId', 'is', null)
-			.executeTakeFirst();
-		if (existing) return existing.id as string;
-		const id = uuid();
-		await tx.insertInto('folders').values({ id, tenantId, name, parentId: null }).execute();
-		return id;
+	#store(tx: Tx, scope: Scope, locale: 'de-CH' | 'en-US', invoiceId: string, name: string, bytes: Uint8Array) {
+		return archiveServerFile(tx, this.#services, scope, {
+			name,
+			folder: folderName[locale],
+			bytes,
+			type: 'application/pdf',
+			targets: [{ kind: 'invoice', id: invoiceId }],
+		});
 	}
 }
 

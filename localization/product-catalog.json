@@ -5793,6 +5793,102 @@
       "ui.ws.settings.default_interest_on": {
         "de-CH": "Auf Mahnungen ausweisen",
         "en-US": "State on reminders"
+      },
+      "error.ws.bank_file_invalid": {
+        "de-CH": "Die Datei ist keine camt.053- oder camt.054-Datei aus dem E-Banking.",
+        "en-US": "The file is not a camt.053 or camt.054 file from e-banking."
+      },
+      "error.ws.bank_entry_done": {
+        "de-CH": "Diese Gutschrift wurde bereits zugeordnet oder ignoriert.",
+        "en-US": "This credit has already been assigned or ignored."
+      },
+      "ui.ws.payments.title": {
+        "de-CH": "Zahlungseingang",
+        "en-US": "Payments received"
+      },
+      "ui.ws.payments.import": {
+        "de-CH": "Bankdatei importieren",
+        "en-US": "Import a bank file"
+      },
+      "ui.ws.payments.import_text": {
+        "de-CH": "camt.054 oder camt.053 aus dem E-Banking. Gutschriften mit QR- oder Creditor-Referenz werden direkt der Rechnung gutgeschrieben; die Datei wird archiviert. Dieselbe Datei zweimal bucht nichts doppelt.",
+        "en-US": "camt.054 or camt.053 from e-banking. Credits with a QR or Creditor Reference are booked on their invoice right away; the file is archived. Importing the same file twice books nothing twice."
+      },
+      "ui.ws.payments.choose_file": {
+        "de-CH": "Datei wählen",
+        "en-US": "Choose file"
+      },
+      "ui.ws.payments.result": {
+        "de-CH": "{file}: {credits} Gutschriften, {booked} verbucht, {duplicates} schon bekannt.",
+        "en-US": "{file}: {credits} credits, {booked} booked, {duplicates} already known."
+      },
+      "ui.ws.payments.repeated": {
+        "de-CH": "{file} wurde schon importiert. Es wurde nichts erneut verbucht.",
+        "en-US": "{file} was imported before. Nothing was booked again."
+      },
+      "ui.ws.payments.open": {
+        "de-CH": "Zuzuordnende Gutschriften",
+        "en-US": "Credits to assign"
+      },
+      "ui.ws.payments.open_text": {
+        "de-CH": "Ohne passende Referenz. Vorschläge nach Betrag und Name des Zahlenden.",
+        "en-US": "Without a matching reference. Suggestions by amount and payer name."
+      },
+      "ui.ws.payments.none_open": {
+        "de-CH": "Alle Gutschriften sind zugeordnet.",
+        "en-US": "All credits are assigned."
+      },
+      "ui.ws.payments.unknown_payer": {
+        "de-CH": "Unbekannter Absender",
+        "en-US": "Unknown payer"
+      },
+      "ui.ws.payments.reference": {
+        "de-CH": "Referenz {reference}",
+        "en-US": "Reference {reference}"
+      },
+      "ui.ws.payments.book_to": {
+        "de-CH": "{number} · {recipient} · offen {balance}",
+        "en-US": "{number} · {recipient} · open {balance}"
+      },
+      "ui.ws.payments.other_invoice": {
+        "de-CH": "Andere Rechnung …",
+        "en-US": "Other invoice …"
+      },
+      "ui.ws.payments.ignore": {
+        "de-CH": "Ignorieren",
+        "en-US": "Ignore"
+      },
+      "ui.ws.payments.assigned": {
+        "de-CH": "Zahlung über {amount} verbucht",
+        "en-US": "Payment of {amount} booked"
+      },
+      "ui.ws.payments.ignored": {
+        "de-CH": "Gutschrift ignoriert",
+        "en-US": "Credit ignored"
+      },
+      "ui.ws.payments.history": {
+        "de-CH": "Letzte Importe",
+        "en-US": "Recent imports"
+      },
+      "ui.ws.payments.no_imports": {
+        "de-CH": "Noch keine Bankdatei importiert.",
+        "en-US": "No bank file imported yet."
+      },
+      "ui.ws.payments.file": {
+        "de-CH": "Datei",
+        "en-US": "File"
+      },
+      "ui.ws.payments.booked": {
+        "de-CH": "Verbucht",
+        "en-US": "Booked"
+      },
+      "ui.ws.payments.files_in_documents": {
+        "de-CH": "Dateien unter Dokumente › Zahlungseingänge",
+        "en-US": "Files under Documents › Payments received"
+      },
+      "ui.ws.audit.invoice.payment_booked": {
+        "de-CH": "hat zur Rechnung «{target}» eine Zahlung aus der Bankdatei verbucht",
+        "en-US": "booked a payment from the bank file on invoice “{target}”"
       }
     }
   }

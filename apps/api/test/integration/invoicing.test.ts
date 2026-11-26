@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { afterAll, beforeAll, describe, it } from 'vitest';
 import { uuid } from '../../src/crypto.ts';
 import { startApi, type Api } from './harness.ts';
@@ -313,5 +314,80 @@ describe('reminders', () => {
 			api.owner.updateTable('invoices').set({ reminders: '[]' }).where('id', '=', id).execute(),
 			/sent reminders cannot be changed/,
 		);
+	});
+});
+
+describe('bank files', () => {
+	it('books credits by reference, keeps the rest to assign and never books a file twice', async () => {
+		const contactId = uuid();
+		await call('POST', '/sync/write', { ops: [{ op: 'PUT', table: 'contacts', id: contactId, data: contactRow }] });
+		const issue = async () => {
+			const id = uuid();
+			await call('POST', '/sync/write', {
+				ops: [{ op: 'PUT', table: 'invoices', id, data: invoiceRow(contactId, { status: 'open' }) }],
+			});
+			const row = await api.owner
+				.selectFrom('invoices')
+				.select('number')
+				.where('id', '=', id)
+				.executeTakeFirstOrThrow();
+			return { id, number: String(row.number) };
+		};
+		const byQr = await issue();
+		const byScor = await issue();
+		const byHand = await issue();
+		const { qrReference, creditorReference } = await import('@clinks/domain/qr-bill');
+		const fixture = await readFile(
+			new URL('../../../../packages/domain/test/fixtures/camt054.xml', import.meta.url),
+			'utf8',
+		);
+		const content = fixture
+			.replace('00 00000 00000 00000 02026 00427', qrReference(byQr.number))
+			.replace('RF61 2026 0043', creditorReference(byScor.number))
+			// The invoice is CHF 259.25; one partial payment by QR, CHF 50 by SCOR, the rest by hand.
+			.replace('129.70', '100.00');
+
+		const first = await call('POST', '/finance/bank-imports', { fileName: 'camt054-dezember.xml', content });
+		assert.equal(first.status, 201, JSON.stringify(first.body));
+		assert.deepEqual(
+			[first.body.kind, first.body.credits, first.body.booked, first.body.duplicates],
+			['camt.054', 3, 2, 0],
+		);
+		const payments = async (id: string) =>
+			(await api.owner.selectFrom('invoices').select('payments').where('id', '=', id).executeTakeFirstOrThrow())
+				.payments as { amount: number; date: string; entryId?: string }[];
+		assert.deepEqual(
+			(await payments(byQr.id)).map((payment) => [payment.amount, payment.date]),
+			[[10000, '2026-12-05']],
+		);
+		assert.equal((await payments(byScor.id))[0].amount, 5000);
+
+		// The same file again books nothing; a file with the same entries under another name neither.
+		const again = await call('POST', '/finance/bank-imports', { fileName: 'nochmals.xml', content });
+		assert.equal(again.body.repeated, true);
+		const renamed = await call('POST', '/finance/bank-imports', { fileName: 'kopie.xml', content: `${content}\n` });
+		assert.deepEqual([renamed.body.booked, renamed.body.duplicates], [0, 3]);
+		assert.equal((await payments(byQr.id)).length, 1);
+
+		const open = await call('GET', '/finance/bank-entries');
+		assert.equal(open.body.length, 1);
+		const [entry] = open.body;
+		assert.deepEqual([entry.amount, entry.debtor, entry.info], [28045, 'Bruno Häfliger & Co', 'Rechnung vom November']);
+		assert.equal(
+			(await call('POST', `/finance/bank-entries/${entry.id}/assign`, { invoiceId: byHand.id })).status,
+			204,
+		);
+		assert.equal((await payments(byHand.id))[0].entryId, entry.id);
+		assert.equal((await call('POST', `/finance/bank-entries/${entry.id}/ignore`)).status, 409);
+		assert.equal((await call('GET', '/finance/bank-entries')).body.length, 0);
+
+		const document = await api.owner
+			.selectFrom('documents')
+			.select(['locked', 'mimeType'])
+			.where('name', '=', 'camt054-dezember.xml')
+			.executeTakeFirstOrThrow();
+		assert.deepEqual(document, { locked: true, mimeType: 'application/xml' });
+		assert.equal((await call('POST', '/finance/bank-imports', { fileName: 'x.xml', content: '<a/>' })).status, 400);
+		assert.equal((await call('GET', '/finance/bank-imports')).body.length, 2);
 	});
 });

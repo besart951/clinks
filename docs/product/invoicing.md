@@ -78,12 +78,16 @@ in the internal mail module, which sent nothing outside.
 
 ### 5 · Payments from the bank file
 
-- [ ] Upload camt.054 (and camt.053) from e-banking; the API reads it, matches each credit by its QR or SCOR
-      reference, and books full or partial payments.
-- [ ] Credits without a match are listed with suggestions (amount and name) to assign by hand.
-- [ ] Importing the same file twice books nothing twice (bank entry reference); the file is archived as an
-      accounting record with its hash.
-- [ ] Audit entries for every import and every booked payment.
+- [x] Finance › Zahlungseingang: upload camt.054 (and camt.053) from e-banking. `@clinks/domain/camt` reads booked
+      credits (batches per transaction, debits/reversals/pending left out; no DTD, so no entity expansion) and matches
+      each by its QR or SCOR reference (`invoiceReferences`); partial payments simply book what came in
+      (`POST /finance/bank-imports`). Payments keep the bank entry they came from (`entryId`).
+- [x] Credits without a match are listed with up to three suggestions (exact open amount, payer name) to book by
+      hand or to ignore (`/finance/bank-entries`).
+- [x] The same file twice books nothing twice: the file's SHA-256 and each entry's bank reference are unique per
+      workspace. The file is archived as a locked document in «Zahlungseingänge».
+- [x] Audit entries for every import and every booked payment; payer names and messages are kept only to assign
+      credits (migration 0021).
 
 ### 6 · Before go-live
 

@@ -39,3 +39,46 @@ export const invoiceLinkOpen = z.strictObject({ postcode: z.string().trim().min(
 
 export const invoiceLinkFile = z.object({ name: z.string(), url: z.string() });
 export type InvoiceLinkFile = z.infer<typeof invoiceLinkFile>;
+
+/** A camt.053 or camt.054 file as text; e-banking exports are XML in UTF-8. */
+export const bankImportInput = z.strictObject({
+	fileName: z.string().trim().min(1).max(200),
+	content: z
+		.string()
+		.min(1)
+		.max(5 * 1024 * 1024),
+});
+export type BankImportInput = z.infer<typeof bankImportInput>;
+
+export const bankImportDto = z.object({
+	id: uuid,
+	fileName: z.string(),
+	kind: z.enum(['camt.053', 'camt.054']),
+	importedAt: z.string(),
+	importedBy: z.string(),
+	credits: z.number().int(),
+	booked: z.number().int(),
+	duplicates: z.number().int(),
+	/** True when this very file had been imported before; nothing was booked again. */
+	repeated: z.boolean(),
+});
+export type BankImportView = z.infer<typeof bankImportDto>;
+
+export const bankEntryDto = z.object({
+	id: uuid,
+	importId: uuid,
+	date: z.string(),
+	amount: z.number().int(),
+	currency: z.string(),
+	reference: z.string(),
+	debtor: z.string(),
+	info: z.string(),
+	status: z.enum(['booked', 'open', 'ignored']),
+	invoiceId: uuid.nullable(),
+	suggestions: z.array(
+		z.object({ invoiceId: uuid, number: z.string(), recipient: z.string(), balance: z.number().int() }),
+	),
+});
+export type BankEntryView = z.infer<typeof bankEntryDto>;
+
+export const bankEntryAssign = z.strictObject({ invoiceId: uuid });
