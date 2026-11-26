@@ -65,6 +65,8 @@
 	let axis = $state<TimeAxis>(query.get('axis') === 'horizontal' ? 'horizontal' : 'vertical');
 	/** The visit being dragged, from the list or inside the plan. */
 	let dragging = $state<Appointment | null>(null);
+	/** The open visit pointed at in the list: the plan shows its arrival window. */
+	let pointedVisit = $state<Appointment | null>(null);
 
 	function changeAxis(next: TimeAxis) {
 		axis = next;
@@ -77,6 +79,7 @@
 		if (card) event.dataTransfer?.setDragImage(card, 16, 16);
 		event.dataTransfer?.setData('text/plain', visit.id);
 		dragging = visit;
+		pointedVisit = null;
 	}
 
 	onMount(() => {
@@ -351,6 +354,8 @@
 											class="bg-background relative rounded-lg border border-dashed p-2 text-sm {canWrite
 												? 'ps-7'
 												: ''} {dragging?.id === visit.id ? 'opacity-40' : ''}"
+											onpointerenter={() => (pointedVisit = visit)}
+											onpointerleave={() => (pointedVisit = null)}
 										>
 											{#if canWrite}
 												<!-- Pointer only; «Zuweisen» below is the keyboard and screen-reader way to do the same. -->
@@ -476,7 +481,7 @@
 						</Card.Root>
 					</div>
 					<div class="min-w-0 max-xl:order-2">
-						<TimeGrid {columns} {handlers} {axis} {selectedId} bind:dragging editable={canWrite} />
+						<TimeGrid {columns} {handlers} {axis} {selectedId} bind:dragging focus={pointedVisit} editable={canWrite} />
 					</div>
 				</div>
 			</AsyncView>

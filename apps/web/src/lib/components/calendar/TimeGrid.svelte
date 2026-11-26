@@ -36,7 +36,7 @@
 <script lang="ts">
 	import MapLink from '#lib/components/common/MapLink.svelte';
 	import { layoutDay } from '@clinks/domain/layout';
-	import { atTime, minutesToTime, toCalendarDate } from '@clinks/domain/dates';
+	import { atTime, minutesToTime, timeToMinutes, toCalendarDate } from '@clinks/domain/dates';
 	import { dayEndMinutes, dayStartMinutes } from '#lib/features/calendar/calendar.svelte';
 	import { useWorkspace } from '#lib/workspace.svelte';
 	import * as HoverCard from '@clinks/ui/components/ui/hover-card';
@@ -48,6 +48,7 @@
 		editable,
 		axis = 'vertical',
 		dragging = $bindable(null),
+		focus = null,
 		selectedId = null,
 	}: {
 		columns: GridColumn[];
@@ -57,6 +58,8 @@
 		axis?: TimeAxis;
 		/** The appointment being dragged; bindable so a list outside the grid can drag onto it. */
 		dragging?: Appointment | null;
+		/** An appointment pointed at outside the grid (an open visit in a list): its arrival window shows. */
+		focus?: Appointment | null;
 		/** The appointment open in the side panel. */
 		selectedId?: string | null;
 	} = $props();
@@ -103,6 +106,36 @@
 		(_, index) => dayStartMinutes / 60 + index,
 	);
 	let hover = $state<{ key: string; minutes: number } | null>(null);
+	/** The appointment under the pointer in the grid, for its arrival window. */
+	let pointed = $state<Appointment | null>(null);
+	/** Whose arrival window shows: the one being dragged, else the one pointed at here or in a list. */
+	const windowed = $derived(dragging ?? focus ?? pointed);
+	const arrival = $derived(
+		windowed?.arrivalWindow
+			? {
+					date: toCalendarDate(windowed.start),
+					from: timeToMinutes(windowed.arrivalWindow.from),
+					to: timeToMinutes(windowed.arrivalWindow.to),
+					text: workspace.t('ui.ws.spitex.window', {
+						window: `${windowed.arrivalWindow.from}–${windowed.arrivalWindow.to}`,
+					}),
+				}
+			: null,
+	);
+
+	/** The one column that names the window: the one under the pointer while dragging, else the first of that day. */
+	const labelled = $derived(
+		arrival ? (hover?.key ?? columns.find((column) => column.date === arrival.date)?.key ?? null) : null,
+	);
+
+	/** A drop lands inside the arrival window: the start moves to its nearest edge. */
+	function snap(minutes: number, appointment: Appointment) {
+		if (!appointment.arrivalWindow) return minutes;
+		return Math.min(
+			timeToMinutes(appointment.arrivalWindow.to),
+			Math.max(timeToMinutes(appointment.arrivalWindow.from), minutes),
+		);
+	}
 	/** The appointment whose info card is open; none while dragging or resizing. */
 	let peek = $state<string | null>(null);
 
@@ -256,13 +289,18 @@
 	function onDragOver(event: DragEvent, column: GridColumn) {
 		if (!dragging) return;
 		event.preventDefault();
-		hover = { key: column.key, minutes: minutesAt(event, event.currentTarget as HTMLElement) };
+		hover = { key: column.key, minutes: snap(minutesAt(event, event.currentTarget as HTMLElement), dragging) };
 	}
 
 	function onDrop(event: DragEvent, column: GridColumn) {
 		event.preventDefault();
 		if (dragging)
-			handlers.drop(dragging, column.date, minutesAt(event, event.currentTarget as HTMLElement), column.assigneeId);
+			handlers.drop(
+				dragging,
+				column.date,
+				snap(minutesAt(event, event.currentTarget as HTMLElement), dragging),
+				column.assigneeId,
+			);
 		dragging = null;
 		hover = null;
 	}
@@ -373,6 +411,34 @@
 				style:left={horizontal ? `${(nowMinutes - dayStartMinutes) * pixelsPerMinute}px` : undefined}
 			></div>
 		{/if}
+		{#if arrival && arrival.date === column.date && arrival.to > dayStartMinutes && arrival.from < dayEndMinutes}
+			{@const band = place(
+				Math.max(arrival.from, dayStartMinutes) - dayStartMinutes,
+				Math.min(arrival.to, dayEndMinutes) - Math.max(arrival.from, dayStartMinutes),
+			)}
+			<!-- The client's arrival window: a drop lands inside it. -->
+			<div
+				data-arrival-window
+				class="arrival-window pointer-events-none absolute z-[2] border-emerald-500/70 {horizontal
+					? 'inset-y-0 border-x border-dashed'
+					: 'inset-x-0 border-y border-dashed'}"
+				style:top={horizontal ? undefined : band.top}
+				style:height={horizontal ? undefined : band.height}
+				style:left={horizontal ? band.left : undefined}
+				style:width={horizontal ? band.width : undefined}
+			></div>
+			{#if labelled === column.key}
+				<!-- Above the appointments, so it stays readable where they overlap the window. -->
+				<span
+					data-arrival-label
+					class="pointer-events-none absolute z-[8] rounded border border-emerald-600 bg-white px-1 text-[10px] font-semibold whitespace-nowrap text-emerald-800 shadow-xs dark:bg-zinc-900 dark:text-emerald-300"
+					style:top={horizontal ? '2px' : `calc(${band.top} + 2px)`}
+					style:left={horizontal ? `calc(${band.left} + 2px)` : '2px'}
+				>
+					{arrival.text}
+				</span>
+			{/if}
+		{/if}
 		{#if hover?.key === column.key && dragging}
 			{@const box = place(
 				hover.minutes - dayStartMinutes,
@@ -413,6 +479,7 @@
 							draggable={editable && !live}
 							ondragstart={(event) => {
 								peek = null;
+								pointed = null;
 								dragging = appointment;
 								event.dataTransfer?.setData('text/plain', appointment.id);
 							}}
@@ -420,6 +487,8 @@
 								dragging = null;
 								hover = null;
 							}}
+							onmouseenter={() => (pointed = appointment)}
+							onmouseleave={() => (pointed = null)}
 							onclick={() => {
 								peek = null;
 								if (!swallowClick) handlers.open(appointment);
@@ -548,3 +617,10 @@
 		</div>
 	{/if}
 </div>
+
+<style>
+	/* The arrival window: hatched, so it reads as a band to aim for and not as an appointment. */
+	.arrival-window {
+		background-image: repeating-linear-gradient(-45deg, rgb(16 185 129 / 0.16) 0 4px, rgb(16 185 129 / 0.04) 4px 9px);
+	}
+</style>

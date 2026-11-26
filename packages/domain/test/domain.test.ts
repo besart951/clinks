@@ -18,7 +18,7 @@ import {
 	qrReference,
 } from '../src/qr-bill.ts';
 import { formatAddress, splitStreet, streetLine } from '../src/address.ts';
-import { conflictsFor, planAssignments, seriesSlots, withinArrivalWindow } from '../src/scheduling.ts';
+import { conflictsFor, firstFreeStart, planAssignments, seriesSlots, withinArrivalWindow } from '../src/scheduling.ts';
 import type { Appointment, Invoice } from '../src/types.ts';
 
 function appointment(overrides: Partial<Appointment>): Appointment {
@@ -242,6 +242,47 @@ describe('scheduling', () => {
 		const plan = planAssignments(open, [], [anna, beat], '2026-11-23');
 		assert.equal(plan.length, 2);
 		assert.notEqual(plan[0].assigneeId, plan[1].assigneeId);
+	});
+
+	it('keeps the planned time when it is free and fits the window, otherwise the closest free time', () => {
+		const visit = appointment({
+			start: atTime('2026-11-23', '09:10'),
+			end: atTime('2026-11-23', '09:40'),
+			arrivalWindow: { from: '08:30', to: '09:30' },
+		});
+		assert.equal(firstFreeStart(visit, '2026-11-23', anna, []), atTime('2026-11-23', '09:10'));
+		const busy = appointment({
+			assigneeId: anna,
+			start: atTime('2026-11-23', '09:00'),
+			end: atTime('2026-11-23', '09:45'),
+		});
+		// 09:45 is past the window; the nearest free start before the busy slot is 08:30.
+		assert.equal(firstFreeStart(visit, '2026-11-23', anna, [busy]), atTime('2026-11-23', '08:30'));
+	});
+
+	it('keeps visits without a window at their planned time', () => {
+		const visit = appointment({ start: atTime('2026-11-23', '10:00'), end: atTime('2026-11-23', '10:30') });
+		assert.equal(firstFreeStart(visit, '2026-11-23', anna, []), atTime('2026-11-23', '10:00'));
+		const busy = appointment({
+			assigneeId: anna,
+			start: atTime('2026-11-23', '10:15'),
+			end: atTime('2026-11-23', '10:45'),
+		});
+		assert.equal(firstFreeStart(visit, '2026-11-23', anna, [busy]), null);
+	});
+
+	it('plans the visits with the least room first', () => {
+		// Same person, both want 08:00: the fixed one gets it, the one with a window moves within it.
+		const flexible = appointment({ title: 'flexibel', arrivalWindow: { from: '08:00', to: '09:00' } });
+		const fixed = appointment({ title: 'fix', start: atTime('2026-11-23', '08:00') });
+		const plan = planAssignments([flexible, fixed], [], [anna], '2026-11-23');
+		assert.deepEqual(
+			plan.map((entry) => [entry.visit.title, entry.start]),
+			[
+				['fix', atTime('2026-11-23', '08:00')],
+				['flexibel', atTime('2026-11-23', '08:30')],
+			],
+		);
 	});
 
 	it('leaves a visit open when nobody is free in the window', () => {

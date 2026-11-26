@@ -87,6 +87,12 @@ export function atTime(date: CalendarDate, time: string): Timestamp {
 	return fromCalendarDate(date, time).toISOString();
 }
 
+/** Minutes after midnight of a time such as `09:45`. */
+export function timeToMinutes(value: string): number {
+	const [hours, minutes] = value.split(':').map(Number);
+	return hours * 60 + minutes;
+}
+
 export function minutesToTime(minutes: number): string {
 	return `${pad(Math.floor(minutes / 60))}:${pad(minutes % 60)}`;
 }
