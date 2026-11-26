@@ -21,6 +21,8 @@ export const pdfLabelKeys = {
 	reminderIntro: 'ui.ws.pdf.reminder_intro',
 	reminderOpen: 'ui.ws.pdf.reminder_open',
 	reminderFee: 'ui.ws.pdf.reminder_fee',
+	reminderPreviousFees: 'ui.ws.pdf.reminder_previous_fees',
+	reminderInterest: 'ui.ws.pdf.reminder_interest',
 	reminderDue: 'ui.ws.pdf.reminder_due',
 	paymentPart: 'ui.ws.invoice.payment_part',
 	receipt: 'ui.ws.pdf.receipt',

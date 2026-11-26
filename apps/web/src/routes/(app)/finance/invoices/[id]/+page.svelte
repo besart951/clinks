@@ -116,16 +116,21 @@
 							<Button variant="outline" onclick={openPayment}>
 								<Banknote class="size-4" />{workspace.t('ui.ws.invoice.record_payment')}
 							</Button>
-							{#if status === 'overdue' || status === 'reminded'}<Button
+							{#if model.nextReminder?.due}<Button
 									variant="outline"
-									onclick={() => model.sendReminder()}
+									onclick={() =>
+										sending.show(contact, {
+											level: model.nextReminder!.level,
+											fee: model.nextReminder!.step.fee,
+											dueDate: model.nextReminder!.dueDate,
+										})}
 								>
 									<BellRing class="size-4" />{workspace.t('ui.ws.invoice.send_reminder', {
-										level: invoice.reminderLevel + 1,
+										level: model.nextReminder.level,
 									})}
 								</Button>{/if}
 						{/if}
-						{#if canWrite && invoice.documentId && invoice.status !== 'cancelled'}<Button
+						{#if canWrite && invoice.status !== 'draft' && invoice.status !== 'cancelled'}<Button
 								onclick={() => sending.show(contact)}
 							>
 								<Send class="size-4" />{workspace.t('ui.ws.invoice.send')}
@@ -198,6 +203,10 @@
 									<dt class="text-muted-foreground">{workspace.t('ui.ws.invoice.paid')}</dt>
 									<dd class="tabular-nums">{workspace.i18n.money(totals.paid)}</dd>
 								</div>
+								{#if totals.fees > 0}<div class="flex justify-between gap-2">
+										<dt class="text-muted-foreground">{workspace.t('ui.ws.invoice.reminder_fees')}</dt>
+										<dd class="tabular-nums">{workspace.i18n.money(totals.fees)}</dd>
+									</div>{/if}
 								<div class="flex justify-between gap-2 font-semibold">
 									<dt>{workspace.t('ui.ws.finance.balance')}</dt>
 									<dd class="tabular-nums">{workspace.i18n.money(Math.max(totals.balance, 0))}</dd>
@@ -220,6 +229,15 @@
 								{#if invoice.reminderLevel > 0}<div class="flex justify-between gap-2">
 										<dt class="text-muted-foreground">{workspace.t('ui.ws.invoice.reminders')}</dt>
 										<dd>{invoice.reminderLevel}</dd>
+									</div>{/if}
+								{#if model.nextReminder && !model.nextReminder.due}<div class="flex justify-between gap-2">
+										<dt class="text-muted-foreground">{workspace.t('ui.ws.invoice.next_reminder')}</dt>
+										<dd>
+											{workspace.t('ui.ws.invoice.next_reminder_from', {
+												level: model.nextReminder.level,
+												date: workspace.i18n.date(model.nextReminder.since),
+											})}
+										</dd>
 									</div>{/if}
 							</dl>
 							{#if invoice.payments.length > 0}

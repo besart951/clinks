@@ -1,9 +1,11 @@
 import type { InvoiceLinkDetails, InvoiceLinkFile, InvoiceSendInput } from '@clinks/contracts/finance';
 import { newId, type InvoiceId, type InvoiceSendId, type MailId } from '@clinks/domain/ids';
-import { linkAttempts, linkLifetimeDays, samePostcode } from '@clinks/domain/invoicing';
-import type { Invoice, InvoiceSend, MailMessage } from '@clinks/domain/types';
+import { linkAttempts, linkLifetimeDays, nextReminder, samePostcode } from '@clinks/domain/invoicing';
+import { today } from '@clinks/domain/dates';
+import type { Invoice, InvoiceReminder, InvoiceSend, MailMessage } from '@clinks/domain/types';
 import { bundleFor, interpolate, type Locale } from '@clinks/i18n-types/catalog';
 import { MockApiError, stamp, type MockInvoiceSend, type WorkspaceCache } from './database.ts';
+import type { MockInvoiceArchive } from './mock-invoice-archive.ts';
 import { appendAudit, type RequestContext } from './repository.ts';
 
 /**
@@ -13,13 +15,62 @@ import { appendAudit, type RequestContext } from './repository.ts';
 export class MockInvoiceSends {
 	readonly #db: WorkspaceCache;
 	readonly #context: RequestContext;
+	readonly #archive: MockInvoiceArchive;
 
-	constructor(db: WorkspaceCache, context: RequestContext) {
+	constructor(db: WorkspaceCache, context: RequestContext, archive: MockInvoiceArchive) {
 		this.#db = db;
 		this.#context = context;
+		this.#archive = archive;
 	}
 
-	send(invoiceId: InvoiceId, input: InvoiceSendInput): Promise<InvoiceSend> {
+	/** The next reminder level, rendered first (the PDF library is async), then recorded and sent in one request. */
+	async remind(invoiceId: InvoiceId, input: InvoiceSendInput): Promise<InvoiceSend> {
+		const { tenantId } = this.#allowed('finance.write');
+		const before = this.#invoice(invoiceId, tenantId);
+		const tenant = this.#db.table('tenants').find((row) => row.id === tenantId)!;
+		const day = today();
+		const next = nextReminder(before, tenant.invoiceSettings, day);
+		if (!next) throw this.#error('validation', 'error.ws.reminder_none');
+		if (!next.due) throw this.#error('validation', 'error.ws.reminder_not_due');
+		const reminder: InvoiceReminder = {
+			level: next.level,
+			date: day,
+			dueDate: next.dueDate,
+			fee: next.step.fee,
+			documentId: null,
+		};
+		const archived = await this.#archive.render(invoiceId, {
+			...reminder,
+			text: next.step.text,
+			interest: tenant.invoiceSettings.defaultInterest,
+		});
+		if (!archived) throw this.#error('validation', 'error.ws.invoice_not_issued');
+		return this.#db.request(() => {
+			const { actorId } = this.#allowed('finance.write');
+			const invoice = this.#invoice(invoiceId, tenantId);
+			if (invoice.reminders.length !== before.reminders.length) throw this.#error('conflict', 'error.ws.reminder_none');
+			const updated: Invoice = {
+				...invoice,
+				reminders: [...invoice.reminders, { ...reminder, documentId: archived.document.id }],
+				reminderLevel: next.level,
+				revision: invoice.revision + 1,
+				updatedAt: new Date().toISOString(),
+			};
+			this.#db.merge({ ...archived.rows, invoices: [updated] });
+			return this.deliver(
+				updated,
+				{ kind: 'reminder', level: next.level, documentId: archived.document.id, ...input },
+				actorId,
+			);
+		}, ['invoices', 'documents', 'folders', 'invoiceSends', 'mails', 'audit']);
+	}
+
+	async send(invoiceId: InvoiceId, input: InvoiceSendInput): Promise<InvoiceSend> {
+		const { tenantId: scope } = this.#allowed('finance.write');
+		const current = this.#invoice(invoiceId, scope);
+		// Issued before the archive existed (the demo's seed): archived now, once, before it goes out.
+		if (!current.documentId && current.status !== 'draft' && current.status !== 'cancelled')
+			await this.#archive.issue(invoiceId);
 		return this.#db.request(() => {
 			const { tenantId, actorId } = this.#allowed('finance.write');
 			const invoice = this.#invoice(invoiceId, tenantId);

@@ -41,6 +41,21 @@ export function registerFinanceRoutes(app: Router, me: Router, { invoices, calle
 	me.openapi(
 		route(
 			{
+				method: 'post',
+				path: '/finance/invoices/{id}/remind',
+				tags: ['finance'],
+				request: { params, body: { content: { 'application/json': { schema: finance.invoiceSendInput } } } },
+				responses: { 201: json(finance.invoiceSendDto) },
+			},
+			true,
+		),
+		async (c) =>
+			c.json(await invoices.remind(c.var.claims, c.req.valid('param').id, c.req.valid('json'), caller(c)), 201),
+	);
+
+	me.openapi(
+		route(
+			{
 				method: 'get',
 				path: '/finance/invoices/{id}/sends',
 				tags: ['finance'],

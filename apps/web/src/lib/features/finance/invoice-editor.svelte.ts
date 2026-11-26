@@ -189,6 +189,7 @@ export class InvoiceEditorModel {
 						kind: 'invoice',
 						payments: [],
 						reminderLevel: 0,
+						reminders: [],
 						documentId: null,
 						pdfSha256: null,
 					});

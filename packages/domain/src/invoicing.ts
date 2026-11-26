@@ -1,6 +1,11 @@
-import type { CalendarDate, Rappen, Tenant } from './types.ts';
+import { addDays } from './dates.ts';
+import { invoiceTotals } from './money.ts';
+import type { CalendarDate, Invoice, Rappen, Tenant } from './types.ts';
 
-/** One reminder level: days after the due date (or the last reminder), a fee and an own text ('' = the default). */
+/**
+ * One reminder level: the days it gives to pay, a fee and an own text ('' = the default). A level is due once the
+ * invoice's due date, or the previous reminder's deadline, has passed.
+ */
 export interface ReminderStep {
 	days: number;
 	fee: Rappen;
@@ -69,4 +74,28 @@ export function servicePeriod(dates: readonly CalendarDate[], fallback: Calendar
 	if (dates.length === 0) return { from: fallback, to: fallback };
 	const sorted = [...dates].sort();
 	return { from: sorted[0], to: sorted.at(-1)! };
+}
+
+/** The reminder an invoice can get next, and since when it is due; null when none is left or nothing is owed. */
+export function nextReminder(
+	invoice: Pick<Invoice, 'status' | 'dueDate' | 'reminderLevel' | 'reminders' | 'lines' | 'payments'>,
+	settings: Pick<InvoiceSettings, 'reminders'>,
+	today: CalendarDate,
+) {
+	if (invoice.status === 'draft' || invoice.status === 'cancelled') return null;
+	if (invoiceTotals(invoice).balance <= 0) return null;
+	const sent = Math.max(invoice.reminders.length, invoice.reminderLevel);
+	const step = settings.reminders[sent];
+	if (!step) return null;
+	const last = invoice.reminders.at(-1);
+	// A level made outside CLinks (only `reminderLevel`) counts as sent on the due date.
+	const since = addDays(sent > 0 && last ? last.dueDate : invoice.dueDate, 1);
+	return {
+		level: sent + 1,
+		step,
+		since,
+		due: since <= today,
+		/** The deadline the reminder prints when sent today. */
+		dueDate: addDays(today, step.days),
+	};
 }

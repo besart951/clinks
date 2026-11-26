@@ -1,8 +1,14 @@
 import { inScope, type Tx } from '@clinks/db/scope';
 import type { InvoiceLinkDetails, InvoiceLinkFile, InvoiceSendInput } from '@clinks/contracts/finance';
 import { createHash } from 'node:crypto';
-import { linkAttempts, samePostcode, type DeliveryMethod, type InvoiceSettings } from '@clinks/domain/invoicing';
-import type { InvoiceSend } from '@clinks/domain/types';
+import {
+	linkAttempts,
+	nextReminder,
+	samePostcode,
+	type DeliveryMethod,
+	type InvoiceSettings,
+} from '@clinks/domain/invoicing';
+import type { Invoice, InvoiceReminder, InvoiceSend } from '@clinks/domain/types';
 import type { ProductTranslationKey } from '@clinks/i18n-types';
 import { uuid } from '../crypto.ts';
 import { ApiError, forbidden } from '../errors.ts';
@@ -12,6 +18,7 @@ import type { AccessClaims } from '../tokens.ts';
 import { audit } from './audit.ts';
 import type { Caller, Services } from './context.ts';
 import { documentBytes, documentUrl } from './files.ts';
+import { InvoiceArchive } from './invoice-archive.ts';
 import { findLink, issueLink, lifetimes } from './one-time.ts';
 import { requirePermission } from './permissions.ts';
 
@@ -31,8 +38,10 @@ export interface Delivery {
 /** Invoices beyond sync: the archived PDF, sending by e-mail and the secure link the recipient opens. */
 export class InvoiceService {
 	readonly #services: Services;
+	readonly #archive: InvoiceArchive;
 	constructor(services: Services) {
 		this.#services = services;
+		this.#archive = new InvoiceArchive(services);
 	}
 
 	/** Where the archived PDF/A of an issued invoice can be downloaded; for anyone who may read finance. */
@@ -57,8 +66,11 @@ export class InvoiceService {
 				.where('id', '=', invoiceId)
 				.executeTakeFirst();
 			if (!invoice) throw new ApiError(404, 'error.ws.not_found');
-			if (invoice.status === 'draft' || invoice.status === 'cancelled' || !invoice.documentId)
+			if (invoice.status === 'draft' || invoice.status === 'cancelled')
 				throw new ApiError(400, 'error.ws.invoice_not_issued');
+			// Issued before the archive existed: archived now, once, before it goes out.
+			const documentId = invoice.documentId ?? (await this.#archive.issue(tx, scope, invoiceId));
+			if (!documentId) throw new ApiError(400, 'error.ws.invoice_not_issued');
 			return this.deliver(
 				tx,
 				scope,
@@ -66,7 +78,68 @@ export class InvoiceService {
 					invoiceId,
 					kind: 'invoice',
 					level: null,
-					documentId: String(invoice.documentId),
+					documentId: String(documentId),
+					to: input.to,
+					method: input.method,
+				},
+				caller,
+			);
+		});
+	}
+
+	/**
+	 * Sends the next reminder level once it is due: renders and archives its PDF (open amount, earlier fees, its own
+	 * fee and a new QR part), records it on the invoice and sends it like the invoice. Nothing is sent automatically.
+	 */
+	remind(claims: AccessClaims, invoiceId: string, input: InvoiceSendInput, caller: Caller) {
+		return this.#scoped(claims, 'finance.write', async (tx, scope) => {
+			const row = await tx.selectFrom('invoices').selectAll().where('id', '=', invoiceId).executeTakeFirst();
+			if (!row) throw new ApiError(404, 'error.ws.not_found');
+			const invoice = row as unknown as Invoice;
+			const tenant = await tx
+				.selectFrom('tenants')
+				.select(['invoiceSettings', 'timeZone'])
+				.where('id', '=', scope.tenantId)
+				.executeTakeFirstOrThrow();
+			const settings = tenant.invoiceSettings as InvoiceSettings;
+			const today = localDate(this.#services.now(), String(tenant.timeZone));
+			const next = nextReminder(invoice, settings, today);
+			if (!next) throw new ApiError(400, 'error.ws.reminder_none');
+			if (!next.due) throw new ApiError(400, 'error.ws.reminder_not_due');
+			const archived = await this.#archive.reminder(tx, scope, invoiceId, {
+				level: next.level,
+				date: today,
+				fee: next.step.fee,
+				dueDate: next.dueDate,
+				text: next.step.text,
+				interest: settings.defaultInterest,
+			});
+			if (!archived) throw new ApiError(400, 'error.ws.invoice_not_issued');
+			const reminder: InvoiceReminder = {
+				level: next.level,
+				date: today,
+				dueDate: next.dueDate,
+				fee: next.step.fee,
+				documentId: archived.documentId as InvoiceReminder['documentId'],
+			};
+			await tx
+				.updateTable('invoices')
+				.set((eb) => ({
+					reminders: JSON.stringify([...invoice.reminders, reminder]),
+					reminderLevel: next.level,
+					revision: eb('revision', '+', 1),
+					updatedAt: this.#services.now(),
+				}))
+				.where('id', '=', invoiceId)
+				.execute();
+			return this.deliver(
+				tx,
+				scope,
+				{
+					invoiceId,
+					kind: 'reminder',
+					level: next.level,
+					documentId: archived.documentId,
 					to: input.to,
 					method: input.method,
 				},
@@ -330,6 +403,11 @@ export class InvoiceService {
 			return work(tx, scope);
 		});
 	}
+}
+
+/** Today in the workspace's time zone, as YYYY-MM-DD. */
+function localDate(now: Date, timeZone: string) {
+	return now.toLocaleDateString('sv-SE', { timeZone: timeZone || 'Europe/Zurich' });
 }
 
 function sha256(bytes: Uint8Array) {

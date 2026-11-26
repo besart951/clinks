@@ -95,6 +95,7 @@ export const invoices = new Table(
 		lines: column.text,
 		payments: column.text,
 		reminder_level: column.integer,
+		reminders: column.text,
 		notes: column.text,
 		appointment_ids: column.text,
 		service_from: column.text,

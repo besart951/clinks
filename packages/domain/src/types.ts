@@ -275,6 +275,15 @@ export interface Payment {
 export const invoiceStatuses = ['draft', 'open', 'partially_paid', 'paid', 'overdue', 'reminded', 'cancelled'] as const;
 export type InvoiceStatus = (typeof invoiceStatuses)[number];
 
+/** A reminder sent for an invoice: its own payment deadline, fee and archived PDF; set by the server. */
+export interface InvoiceReminder {
+	level: number;
+	date: CalendarDate;
+	dueDate: CalendarDate;
+	fee: Rappen;
+	documentId: DocumentId | null;
+}
+
 export interface Invoice extends TenantRecord<InvoiceId> {
 	number: string;
 	kind: 'invoice' | 'credit_note';
@@ -285,6 +294,8 @@ export interface Invoice extends TenantRecord<InvoiceId> {
 	lines: InvoiceLine[];
 	payments: Payment[];
 	reminderLevel: number;
+	/** The reminders sent through CLinks; older invoices only have `reminderLevel`. */
+	reminders: InvoiceReminder[];
 	notes: string;
 	appointmentIds: AppointmentId[];
 	/** What the invoice bills, from–to (Art. 26 MWSTG); `null` on invoices made before it was asked. */

@@ -364,6 +364,7 @@ function invoiceFor(
 				? [{ date: addDays(issueDate, 10), amount: Math.round(gross / 2 / 5) * 5 }]
 				: [],
 		reminderLevel: !paid && ageDays > 50 ? 1 : 0,
+		reminders: [],
 		notes: '',
 		appointmentIds: [],
 		serviceFrom: issueDate,

@@ -258,3 +258,60 @@ describe('sending', () => {
 		);
 	});
 });
+
+describe('reminders', () => {
+	it('sends the next level once it is due, archives its PDF and records the fee', async () => {
+		const settings = {
+			paymentTermDays: 30,
+			footer: '',
+			delivery: 'attachment',
+			reminders: [
+				{ days: 10, fee: 500, text: '' },
+				{ days: 10, fee: 1000, text: '' },
+			],
+			defaultInterest: true,
+		};
+		assert.equal((await call('POST', '/tenant/settings', { invoiceSettings: settings })).status, 204);
+		const contactId = uuid();
+		const id = uuid();
+		await call('POST', '/sync/write', { ops: [{ op: 'PUT', table: 'contacts', id: contactId, data: contactRow }] });
+		const overdue = invoiceRow(contactId, { status: 'open', issue_date: '2026-01-05', due_date: '2026-02-04' });
+		await call('POST', '/sync/write', { ops: [{ op: 'PUT', table: 'invoices', id, data: overdue }] });
+		// Clients cannot set the level or forge reminders.
+		await call('POST', '/sync/write', {
+			ops: [{ op: 'PATCH', table: 'invoices', id, data: { reminder_level: 3, reminders: '[{"level":9}]' } }],
+		});
+
+		const sent = await call('POST', `/finance/invoices/${id}/remind`, { to: 'lea@example.ch', method: 'attachment' });
+		assert.equal(sent.status, 201, JSON.stringify(sent.body));
+		assert.deepEqual([sent.body.kind, sent.body.level], ['reminder', 1]);
+		const invoice = await api.owner
+			.selectFrom('invoices')
+			.select(['number', 'reminderLevel', 'reminders'])
+			.where('id', '=', id)
+			.executeTakeFirstOrThrow();
+		assert.equal(invoice.reminderLevel, 1);
+		const [reminder] = invoice.reminders as { level: number; fee: number; documentId: string; dueDate: string }[];
+		assert.equal(reminder.level, 1);
+		assert.equal(reminder.fee, 500);
+		const document = await api.owner
+			.selectFrom('documents')
+			.select(['name', 'locked'])
+			.where('id', '=', reminder.documentId)
+			.executeTakeFirstOrThrow();
+		assert.deepEqual(document, { name: `1. Mahnung ${invoice.number}.pdf`, locked: true });
+		const mail = api.mailer.last('lea@example.ch');
+		assert.equal(mail.subject, `1. Mahnung zur Rechnung ${invoice.number} von Rechnungen AG`);
+		assert.equal(mail.attachments?.[0].filename, document.name);
+
+		// Level 2 waits for the first reminder's deadline.
+		const early = await call('POST', `/finance/invoices/${id}/remind`, { to: 'lea@example.ch', method: 'attachment' });
+		assert.equal(early.status, 400);
+		assert.equal(early.body.error.code, 'error.ws.reminder_not_due');
+		// The list of sent reminders only grows.
+		await assert.rejects(
+			api.owner.updateTable('invoices').set({ reminders: '[]' }).where('id', '=', id).execute(),
+			/sent reminders cannot be changed/,
+		);
+	});
+});

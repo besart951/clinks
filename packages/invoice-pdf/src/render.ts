@@ -27,6 +27,8 @@ export interface PdfReminder {
 	fee: Rappen;
 	dueDate: string;
 	text: string;
+	/** Default interest of 5 % a year from the reminder's date (Art. 104 OR), when the workspace charges it. */
+	interest?: boolean;
 }
 
 export interface InvoicePdfInput {
@@ -373,11 +375,13 @@ function drawReminder(writer: PageWriter, input: InvoicePdfInput, label: Label, 
 		{ size: 10 },
 	);
 	writer.gap(5 * mm);
-	const rows: [string, number][] = [
-		[label('reminderOpen', { number: input.invoice.number }), Math.max(0, totals.balance)],
-	];
+	// The invoice's own open amount, fees of earlier reminders and this reminder's fee, as separate lines.
+	const open = Math.max(0, totals.balance);
+	const invoiceOpen = Math.min(open, Math.max(0, totals.gross - totals.paid));
+	const rows: [string, number][] = [[label('reminderOpen', { number: input.invoice.number }), invoiceOpen]];
+	if (open > invoiceOpen) rows.push([label('reminderPreviousFees'), open - invoiceOpen]);
 	if (reminder.fee > 0) rows.push([label('reminderFee'), reminder.fee]);
-	rows.push([label('total'), Math.max(0, totals.balance) + reminder.fee]);
+	rows.push([label('total'), open + reminder.fee]);
 	const fonts = writer.fonts;
 	rows.forEach(([name, value], index) => {
 		const font = index === rows.length - 1 ? fonts.bold : fonts.regular;
@@ -394,6 +398,10 @@ function drawReminder(writer: PageWriter, input: InvoicePdfInput, label: Label, 
 	});
 	writer.gap(4 * mm);
 	writer.paragraph(label('reminderDue', { due: format.date(reminder.dueDate) }), { size: 10 });
+	if (reminder.interest) {
+		writer.gap(2 * mm);
+		writer.paragraph(label('reminderInterest', { date: format.date(reminder.date) }), { size: 9.5 });
+	}
 }
 
 /** The Swiss QR payment part: receipt (62 mm) and payment part (148 mm), 105 mm high, as in the SIX style guide. */

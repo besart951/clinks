@@ -1,4 +1,4 @@
-import { defaultDelivery, samePostcode } from '../src/invoicing.ts';
+import { defaultDelivery, defaultInvoiceSettings, nextReminder, samePostcode } from '../src/invoicing.ts';
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 import { addDays, atTime, isoWeek, isoWeekday, monthGrid, startOfWeek } from '../src/dates.ts';
@@ -363,5 +363,46 @@ describe('sending invoices', () => {
 		assert.ok(samePostcode('sw1a 1aa', 'SW1A 1AA'));
 		assert.ok(!samePostcode('3001', '3000'));
 		assert.ok(!samePostcode('', ''));
+	});
+});
+
+describe('reminders', () => {
+	const invoice = {
+		status: 'open' as const,
+		dueDate: '2026-11-30',
+		reminderLevel: 0,
+		reminders: [],
+		lines: [{ description: 'Behandlung', quantity: 1, unitPrice: 10000, vatRate: 0 as const }],
+		payments: [],
+	};
+	const settings = {
+		reminders: [
+			{ days: 10, fee: 0, text: '' },
+			{ days: 10, fee: 2000, text: '' },
+		],
+	};
+
+	it('is due the day after the due date, then after each reminder’s own deadline', () => {
+		assert.equal(nextReminder(invoice, settings, '2026-11-30')?.due, false);
+		const first = nextReminder(invoice, settings, '2026-12-01')!;
+		assert.deepEqual([first.level, first.due, first.dueDate], [1, true, '2026-12-11']);
+		const reminded = {
+			...invoice,
+			reminderLevel: 1,
+			reminders: [{ level: 1, date: '2026-12-01', dueDate: '2026-12-11', fee: 0, documentId: null }],
+		};
+		assert.equal(nextReminder(reminded, settings, '2026-12-11')?.due, false);
+		assert.deepEqual(nextReminder(reminded, settings, '2026-12-12')?.step.fee, 2000);
+	});
+
+	it('stops after the last level and once the invoice is paid, fees included', () => {
+		const fee = { level: 1, date: '2026-12-01', dueDate: '2026-12-11', fee: 2000, documentId: null };
+		const twice = { ...invoice, reminderLevel: 2, reminders: [fee, { ...fee, level: 2 }] };
+		assert.equal(nextReminder(twice, settings, '2027-01-31'), null);
+		assert.equal(invoiceTotals(twice).balance, 14000);
+		const paid = { ...invoice, reminders: [fee], payments: [{ date: '2026-12-05', amount: 12000 }] };
+		assert.equal(invoiceTotals(paid).balance, 0);
+		assert.equal(nextReminder(paid, defaultInvoiceSettings, '2027-01-31'), null);
+		assert.equal(nextReminder({ ...invoice, status: 'draft' }, settings, '2027-01-31'), null);
 	});
 });

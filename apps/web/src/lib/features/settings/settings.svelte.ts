@@ -1,6 +1,7 @@
 import { RemoteAuthGateway } from '../../session/remote-auth.ts';
 import type { InlineFieldSpec } from '@clinks/ui/kit/inline-edit';
 import { isQrIban, isValidSwissIban } from '@clinks/domain/qr-bill';
+import type { InvoiceSettings } from '@clinks/domain/invoicing';
 import { toast } from 'svelte-sonner';
 import type { SessionId } from '@clinks/domain/ids';
 import type { BrowserSession, ModuleKey, NotificationPreferences, PlanCode, Tenant } from '@clinks/domain/types';
@@ -111,6 +112,56 @@ export class CompanySettingsModel {
 		];
 	}
 
+	/** Three reminder levels: the days each gives to pay, its fee and an own text; default interest on or off. */
+	reminderFields(tenant: Tenant): InlineFieldSpec[] {
+		const t = (key: string, params?: { [name: string]: string | number }) => this.#workspace.t(key, params);
+		const settings = tenant.invoiceSettings;
+		const levels = settings.reminders.flatMap((step, index): InlineFieldSpec[] => {
+			const level = index + 1;
+			return [
+				{
+					key: `reminder.${index}.days`,
+					label: t('ui.ws.settings.reminder_days', { level }),
+					value: String(step.days),
+					mono: true,
+					validate: (value) =>
+						/^\d{1,2}$/.test(value) && Number(value) >= 1 && Number(value) <= 90
+							? null
+							: t('ui.ws.settings.reminder_days_invalid'),
+				},
+				{
+					key: `reminder.${index}.fee`,
+					label: t('ui.ws.settings.reminder_fee', { level }),
+					value: (step.fee / 100).toFixed(2),
+					display: step.fee > 0 ? this.#workspace.i18n.money(step.fee) : t('ui.ws.settings.reminder_no_fee'),
+					mono: true,
+					validate: (value) =>
+						/^\d{1,3}([.,]\d{1,2})?$/.test(value.trim()) ? null : t('ui.ws.settings.reminder_fee_invalid'),
+				},
+				{
+					key: `reminder.${index}.text`,
+					label: t('ui.ws.settings.reminder_text', { level }),
+					value: step.text,
+					kind: 'textarea',
+					display: step.text || t('ui.ws.settings.reminder_default_text'),
+				},
+			];
+		});
+		return [
+			...levels,
+			{
+				key: 'invoice.defaultInterest',
+				label: t('ui.ws.settings.default_interest'),
+				value: settings.defaultInterest ? 'on' : 'off',
+				kind: 'select',
+				options: [
+					{ value: 'off', label: t('ui.ws.settings.default_interest_off') },
+					{ value: 'on', label: t('ui.ws.settings.default_interest_on') },
+				],
+			},
+		];
+	}
+
 	regionalFields(tenant: Tenant): InlineFieldSpec[] {
 		const t = (key: string) => this.#workspace.t(key);
 		return [
@@ -136,11 +187,10 @@ export class CompanySettingsModel {
 
 	saveField(field: InlineFieldSpec, value: string) {
 		const tenant = this.#workspace.session.tenant!;
-		if (field.key.startsWith('invoice.')) {
-			const key = field.key.slice('invoice.'.length) as 'paymentTermDays' | 'delivery' | 'footer' | 'replyTo';
+		if (field.key.startsWith('invoice.') || field.key.startsWith('reminder.')) {
 			// A plain copy: the session's tenant is reactive state, which storage cannot clone.
 			const previous = $state.snapshot(tenant.invoiceSettings) as Tenant['invoiceSettings'];
-			const invoiceSettings = { ...previous, [key]: key === 'paymentTermDays' ? Number(value) : value };
+			const invoiceSettings = invoiceSettingsWith(previous, field.key, value);
 			return this.#apply({ invoiceSettings }, { invoiceSettings: previous }, field.label);
 		}
 		const address = ['street', 'houseNumber', 'zip', 'city'].includes(field.key);
@@ -407,4 +457,22 @@ export class PrivacyModel extends SettingsForm {
 		if (ok !== null) this.workspace.session.signOut();
 		return ok !== null;
 	}
+}
+
+/** The invoice settings with one field changed: `invoice.<setting>` or `reminder.<level index>.<days|fee|text>`. */
+function invoiceSettingsWith(previous: InvoiceSettings, key: string, value: string): InvoiceSettings {
+	const [scope, first, second] = key.split('.');
+	if (scope === 'reminder') {
+		const index = Number(first);
+		const reminders = previous.reminders.map((step, at) => {
+			if (at !== index) return step;
+			if (second === 'days') return { ...step, days: Number(value) };
+			if (second === 'fee') return { ...step, fee: Math.round(Number(value.trim().replace(',', '.')) * 100) };
+			return { ...step, text: value.trim() };
+		});
+		return { ...previous, reminders };
+	}
+	if (first === 'paymentTermDays') return { ...previous, paymentTermDays: Number(value) };
+	if (first === 'defaultInterest') return { ...previous, defaultInterest: value === 'on' };
+	return { ...previous, [first]: value };
 }
