@@ -577,3 +577,29 @@ test('shows staff only their own visits, and a week only once it is released', a
 	const bar = page.getByRole('navigation', { name: 'Schnellnavigation' });
 	await expect(bar.getByRole('link')).toHaveText(['Start', 'Meine Einsätze']);
 });
+
+test('signs a team member out and deactivates them, handing their visits back to the plan', async ({ page }) => {
+	await signIn(page);
+	await page.getByRole('button', { name: 'Arbeitsbereich' }).click();
+	await page.getByRole('menuitem', { name: 'Stille Spitex Seeland' }).click();
+	await page.goto('/#/settings/team');
+	const row = (name: string) => page.getByRole('row').filter({ hasText: name });
+	await expect(row('Ruth Gerber')).toContainText('Seit über 30 Tagen nicht angemeldet');
+	await expect(row('Fatma Yilmaz')).toContainText('Geräte: 1');
+
+	await row('Fatma Yilmaz').getByRole('button', { name: 'Weitere Aktionen' }).click();
+	await page.getByRole('menuitem', { name: 'Von allen Geräten abmelden' }).click();
+	await page.getByRole('dialog').getByRole('button', { name: 'Von allen Geräten abmelden' }).click();
+	await expect(row('Fatma Yilmaz')).toContainText('Geräte: 0');
+
+	await row('Daniel Moser').getByRole('button', { name: 'Weitere Aktionen' }).click();
+	await page.getByRole('menuitem', { name: 'Deaktivieren' }).click();
+	const dialog = page.getByRole('dialog', { name: 'Daniel Moser deaktivieren?' });
+	await expect(dialog).toContainText(/Künftige Einsätze: \d+/);
+	await expect(dialog.getByRole('checkbox', { name: /Offene Einsätze/ })).toBeChecked();
+	await dialog.getByRole('button', { name: 'Deaktivieren' }).click();
+	await expect(row('Daniel Moser')).toContainText('Inaktiv');
+	const history = page.getByRole('region', { name: 'Letzte Änderungen' });
+	await expect(history).toContainText('hat Daniel Moser deaktiviert');
+	await expect(history).toContainText('hat Fatma Yilmaz von allen Geräten abgemeldet');
+});

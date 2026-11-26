@@ -156,7 +156,13 @@ export const membershipDto = z.object({
 });
 
 export const memberUpdate = z
-	.strictObject({ roleId: uuid, status: z.enum(['active', 'inactive']), jobTitle: z.string().max(128) })
+	.strictObject({
+		roleId: uuid,
+		status: z.enum(['active', 'inactive']),
+		jobTitle: z.string().max(128),
+		/** With `status: 'inactive'`: the person's future Spitex visits go back to the open visits. */
+		releaseVisits: z.boolean(),
+	})
 	.partial();
 export const roleUpdate = z.strictObject({
 	id: uuid.nullable(),
@@ -176,6 +182,8 @@ export const teamResponse = z.object({
 				avatarColor: true,
 				avatarDataUrl: true,
 			}),
+			/** Sign-in activity in this workspace; only for those who manage the team. */
+			access: z.object({ lastActiveAt: z.iso.datetime().nullable(), devices: z.number().int() }).nullable(),
 		}),
 	),
 });

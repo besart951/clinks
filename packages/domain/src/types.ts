@@ -168,6 +168,8 @@ export interface BrowserSession extends BaseRecord<SessionId> {
 	device: string;
 	location: string;
 	lastActiveAt: Timestamp;
+	/** Set when someone who manages the team signed the person out; the device must sign in again. */
+	endedAt?: Timestamp;
 }
 
 export type ContactKind = 'person' | 'company';

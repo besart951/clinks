@@ -3753,11 +3753,34 @@
 															"avatarColor",
 															"avatarDataUrl"
 														]
+													},
+													"access": {
+														"type": [
+															"object",
+															"null"
+														],
+														"properties": {
+															"lastActiveAt": {
+																"type": [
+																	"string",
+																	"null"
+																],
+																"format": "date-time"
+															},
+															"devices": {
+																"type": "integer"
+															}
+														},
+														"required": [
+															"lastActiveAt",
+															"devices"
+														]
 													}
 												},
 												"required": [
 													"membership",
-													"user"
+													"user",
+													"access"
 												]
 											}
 										}
@@ -4262,6 +4285,9 @@
 									"jobTitle": {
 										"type": "string",
 										"maxLength": 128
+									},
+									"releaseVisits": {
+										"type": "boolean"
 									}
 								},
 								"additionalProperties": false
@@ -4269,6 +4295,142 @@
 						}
 					}
 				},
+				"responses": {
+					"204": {
+						"description": "No content"
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Not signed in",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Not allowed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/tenant/members/{id}/sign-out": {
+			"post": {
+				"tags": [
+					"tenants"
+				],
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"parameters": [
+					{
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						},
+						"required": true,
+						"name": "id",
+						"in": "path"
+					}
+				],
 				"responses": {
 					"204": {
 						"description": "No content"

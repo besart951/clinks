@@ -86,43 +86,92 @@ export class SettingsService {
 				])
 				.where('tenantId', '=', tenantId)
 				.execute();
+			const access = roleGrants(await activeRole(tx, tenantId, claims.sub), 'team.manage')
+				? await this.#access(tx, tenantId)
+				: null;
 			return {
 				roles: roles.map((role) => ({ ...role, permissions: role.permissions as Permission[] })),
 				people: members.map(({ email, firstName, lastName, avatarColor, avatarDataUrl, ...membership }) => ({
 					membership,
 					user: { id: membership.userId, email, firstName, lastName, avatarColor, avatarDataUrl },
+					access: access ? (access.get(membership.userId) ?? { lastActiveAt: null, devices: 0 }) : null,
 				})),
 			};
 		});
 	}
+	/** Last sign-in and signed-in devices per person, from the refresh tokens kept for this workspace. */
+	async #access(tx: Tx, tenantId: string) {
+		const now = this.#services.now();
+		const rows = await tx
+			.selectFrom('auth.refreshTokens')
+			.select((eb) => [
+				'userId',
+				eb.fn.max('createdAt').as('lastActiveAt'),
+				eb.fn
+					.count<number>('familyId')
+					.distinct()
+					.filterWhere((w) =>
+						w.and([w('revokedAt', 'is', null), w('replacedAt', 'is', null), w('expiresAt', '>', now)]),
+					)
+					.as('devices'),
+			])
+			.where('tenantId', '=', tenantId)
+			.groupBy('userId')
+			.execute();
+		return new Map(
+			rows.map((row) => [
+				row.userId,
+				{ lastActiveAt: new Date(row.lastActiveAt).toISOString(), devices: Number(row.devices) },
+			]),
+		);
+	}
+	/** The membership to change, after checking that the caller may manage both its old and new role. */
+	async #managed(tx: Tx, tenantId: string, claims: AccessClaims, id: string, roleId?: string) {
+		const current = await tx
+			.selectFrom('memberships')
+			.selectAll()
+			.where('tenantId', '=', tenantId)
+			.where('id', '=', id)
+			.executeTakeFirst();
+		if (!current) throw new ApiError(404, 'error.membership_not_found');
+		const next = roleId ?? current.roleId;
+		const roles = await tx
+			.selectFrom('roles')
+			.selectAll()
+			.where('tenantId', '=', tenantId)
+			.where('id', 'in', [next, current.roleId])
+			.execute();
+		if (!roles.some((role) => role.id === next)) throw new ApiError(404, 'error.role_not_found');
+		const actor = await activeRole(tx, tenantId, claims.sub);
+		if (
+			actor?.kind !== 'administrator' &&
+			roles.some(
+				(role) => role.kind === 'administrator' || role.permissions.some((p) => !roleGrants(actor, p as Permission)),
+			)
+		)
+			throw forbidden();
+		const name = (roleId: string) => roles.find((role) => role.id === roleId)?.name ?? '';
+		return { current, from: name(current.roleId), to: name(next) };
+	}
+	/** Ends every sign-in of the person in this workspace; their devices must sign in again. */
+	async #signOut(tx: Tx, tenantId: string, userId: string) {
+		const revoked = await tx
+			.updateTable('auth.refreshTokens')
+			.set({ revokedAt: this.#services.now() })
+			.where('userId', '=', userId)
+			.where('tenantId', '=', tenantId)
+			.where('revokedAt', 'is', null)
+			.returning('familyId')
+			.execute();
+		return new Set(revoked.map((row) => row.familyId)).size;
+	}
 	member(claims: AccessClaims, id: string, input: z.infer<typeof memberUpdate>, caller: Caller | null = null) {
 		return this.#tenant(claims, 'team.manage', async (tx, tenantId) => {
-			const current = await tx
-				.selectFrom('memberships')
-				.selectAll()
-				.where('tenantId', '=', tenantId)
-				.where('id', '=', id)
-				.executeTakeFirst();
-			if (!current) throw new ApiError(404, 'error.membership_not_found');
-			const roleId = input.roleId ?? current.roleId;
-			const roles = await tx
-				.selectFrom('roles')
-				.selectAll()
-				.where('tenantId', '=', tenantId)
-				.where('id', 'in', [roleId, current.roleId])
-				.execute();
-			if (!roles.some((role) => role.id === roleId)) throw new ApiError(404, 'error.role_not_found');
-			const actor = await activeRole(tx, tenantId, claims.sub);
-			if (
-				actor?.kind !== 'administrator' &&
-				roles.some(
-					(role) => role.kind === 'administrator' || role.permissions.some((p) => !roleGrants(actor, p as Permission)),
-				)
-			)
-				throw forbidden();
+			const { releaseVisits, ...changes } = input;
+			const { current, from, to } = await this.#managed(tx, tenantId, claims, id, changes.roleId);
 			await tx
 				.updateTable('memberships')
-				.set((tx) => ({ ...input, revision: tx('revision', '+', 1), updatedAt: this.#services.now() }))
+				.set((tx) => ({ ...changes, revision: tx('revision', '+', 1), updatedAt: this.#services.now() }))
 				.where('id', '=', id)
 				.execute();
 			const admin = await tx
@@ -134,8 +183,41 @@ export class SettingsService {
 				.where('roles.kind', '=', 'administrator')
 				.executeTakeFirst();
 			if (!admin) throw new ApiError(409, 'error.ws.last_administrator');
-			await audit(tx, { tenantId, actorId: claims.sub, action: 'membership.updated', target: id }, caller);
+			const log = (action: string, meta: Record<string, unknown> = {}) =>
+				audit(tx, { tenantId, actorId: claims.sub, action, target: id, meta }, caller);
+			if (changes.roleId && changes.roleId !== current.roleId) await log('membership.role_changed', { from, to });
+			if (changes.status === 'inactive' && current.status === 'active') {
+				const devices = await this.#signOut(tx, tenantId, current.userId);
+				const visits = releaseVisits ? await this.#releaseVisits(tx, tenantId, current.userId) : 0;
+				await log('membership.deactivated', { devices, visits });
+			}
+			if (changes.status === 'active' && current.status === 'inactive') await log('membership.reactivated');
+			if (changes.jobTitle !== undefined && changes.jobTitle !== current.jobTitle) await log('membership.updated');
 		});
+	}
+	signOut(claims: AccessClaims, id: string, caller: Caller | null = null) {
+		return this.#tenant(claims, 'team.manage', async (tx, tenantId) => {
+			const { current } = await this.#managed(tx, tenantId, claims, id);
+			const devices = await this.#signOut(tx, tenantId, current.userId);
+			await audit(
+				tx,
+				{ tenantId, actorId: claims.sub, action: 'membership.signed_out', target: id, meta: { devices } },
+				caller,
+			);
+		});
+	}
+	/** Future Spitex visits of someone who leaves go back to the open visits, to be planned again. */
+	async #releaseVisits(tx: Tx, tenantId: string, userId: string) {
+		const released = await tx
+			.updateTable('appointments')
+			.set((tx) => ({ assigneeId: null, revision: tx('revision', '+', 1), updatedAt: this.#services.now() }))
+			.where('tenantId', '=', tenantId)
+			.where('assigneeId', '=', userId)
+			.where('kind', '=', 'spitex')
+			.where('startsAt', '>=', this.#services.now())
+			.returning('id')
+			.execute();
+		return released.length;
 	}
 	role(claims: AccessClaims, id: string, input?: z.infer<typeof roleUpdate>, caller: Caller | null = null) {
 		return this.#tenant(claims, 'roles.manage', async (tx, tenantId) => {

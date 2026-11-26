@@ -45,6 +45,21 @@ export interface Member {
 	membership: Membership;
 	user: Pick<User, 'id' | 'email' | 'firstName' | 'lastName' | 'avatarColor' | 'avatarDataUrl'>;
 	role: Role;
+	/** Last sign-in and signed-in devices; only for those who manage the team. */
+	access: MemberAccess | null;
+}
+
+export interface MemberAccess {
+	lastActiveAt: string | null;
+	devices: number;
+}
+
+export interface MemberChanges {
+	roleId?: RoleId;
+	status?: 'active' | 'inactive';
+	jobTitle?: string;
+	/** With `status: 'inactive'`: future Spitex visits go back to the open visits. */
+	releaseVisits?: boolean;
 }
 
 export interface PlatformInvoice {
@@ -291,7 +306,9 @@ export class AccountApi {
 	}
 
 	sessions() {
-		return this.#db.request(() => this.#db.table('sessions').filter((row) => row.userId === this.#requireUser()));
+		return this.#db.request(() =>
+			this.#db.table('sessions').filter((row) => row.userId === this.#requireUser() && !row.endedAt),
+		);
 	}
 
 	revokeSession(id: SessionId): Promise<void> {
@@ -308,13 +325,15 @@ export class AccountApi {
 		return this.#db.request(() => {
 			const tenantId = this.#requireTenant();
 			const roles = this.#db.table('roles').filter((row) => row.tenantId === tenantId);
+			const manages = roleGrants(roleFor(this.#db, this.#caller.userId(), tenantId), 'team.manage');
 			const members = this.#db
 				.table('memberships')
 				.filter((row) => row.tenantId === tenantId)
 				.flatMap((membership) => {
 					const user = this.#db.table('users').find((row) => row.id === membership.userId);
 					const role = roles.find((row) => row.id === membership.roleId);
-					return user && role ? [{ membership, user, role }] : [];
+					const access = manages ? this.#access(membership.userId) : null;
+					return user && role ? [{ membership, user, role, access }] : [];
 				});
 			const invitations = this.#db
 				.table('invitations')
@@ -438,10 +457,7 @@ export class AccountApi {
 		}, ['users', 'memberships', 'invitations', 'audit']);
 	}
 
-	changeMember(
-		id: MembershipId,
-		changes: { roleId?: RoleId; status?: 'active' | 'inactive'; jobTitle?: string },
-	): Promise<Membership> {
+	changeMember(id: MembershipId, { releaseVisits, ...changes }: MemberChanges): Promise<Membership> {
 		return this.#db.request(() => {
 			const tenantId = this.#authorize('team.manage');
 			const membership = this.#db.table('memberships').find((row) => row.id === id && row.tenantId === tenantId);
@@ -457,10 +473,68 @@ export class AccountApi {
 				'memberships',
 				this.#db.table('memberships').map((row) => (row.id === id ? next : row)),
 			);
-			const user = this.#db.table('users').find((row) => row.id === membership.userId);
-			this.#audit(tenantId, 'membership.updated', 'membership', id, user?.email ?? '');
+			const label = this.#memberLabel(membership.userId);
+			const log = (verb: string) => this.#audit(tenantId, `membership.${verb}`, 'membership', id, label);
+			if (changes.roleId && changes.roleId !== membership.roleId) log('role_changed');
+			if (changes.status === 'inactive' && membership.status === 'active') {
+				this.#signOut(membership.userId);
+				if (releaseVisits) this.#releaseVisits(tenantId, membership.userId);
+				log('deactivated');
+			}
+			if (changes.status === 'active' && membership.status === 'inactive') log('reactivated');
+			if (changes.jobTitle !== undefined && changes.jobTitle !== membership.jobTitle) log('updated');
 			return next;
-		}, ['memberships', 'audit']);
+		}, ['memberships', 'audit', 'sessions', 'appointments']);
+	}
+
+	/** Ends every sign-in of the person; their devices must sign in again. */
+	signOutMember(id: MembershipId): Promise<void> {
+		return this.#db.request(() => {
+			const tenantId = this.#authorize('team.manage');
+			const membership = this.#db.table('memberships').find((row) => row.id === id && row.tenantId === tenantId);
+			if (!membership) throw new MockApiError('not_found', this.#localize('error.membership_not_found'));
+			this.#signOut(membership.userId);
+			this.#audit(tenantId, 'membership.signed_out', 'membership', id, this.#memberLabel(membership.userId));
+		}, ['sessions', 'audit']);
+	}
+
+	#access(userId: UserId): MemberAccess {
+		const sessions = this.#db.table('sessions').filter((row) => row.userId === userId);
+		const last =
+			sessions
+				.map((row) => row.lastActiveAt)
+				.sort()
+				.at(-1) ?? null;
+		return { lastActiveAt: last, devices: sessions.filter((row) => !row.endedAt).length };
+	}
+
+	#signOut(userId: UserId) {
+		this.#db.replace(
+			'sessions',
+			this.#db
+				.table('sessions')
+				.map((row) => (row.userId === userId && !row.endedAt ? { ...row, endedAt: new Date().toISOString() } : row)),
+		);
+	}
+
+	/** Future Spitex visits of someone who leaves go back to the open visits, to be planned again. */
+	#releaseVisits(tenantId: TenantId, userId: UserId) {
+		const now = new Date().toISOString();
+		this.#db.replace(
+			'appointments',
+			this.#db
+				.table('appointments')
+				.map((row) =>
+					row.tenantId === tenantId && row.assigneeId === userId && row.kind === 'spitex' && row.start >= now
+						? { ...row, assigneeId: null, revision: row.revision + 1, updatedAt: now }
+						: row,
+				),
+		);
+	}
+
+	#memberLabel(userId: UserId) {
+		const user = this.#db.table('users').find((row) => row.id === userId);
+		return user ? `${user.firstName} ${user.lastName}` : '';
 	}
 
 	saveRole(role: { id: RoleId | null; name: string; permissions: Permission[] }): Promise<Role> {
@@ -711,7 +785,7 @@ export class AccountApi {
 				.flatMap((membership) => {
 					const user = this.#db.table('users').find((row) => row.id === membership.userId);
 					const role = this.#db.table('roles').find((row) => row.id === membership.roleId);
-					return user && role ? [{ membership, user, role }] : [];
+					return user && role ? [{ membership, user, role, access: null }] : [];
 				});
 		});
 	}

@@ -250,6 +250,23 @@ export function registerAccountRoutes(app: Router, me: Router, deps: RouteDeps) 
 		route(
 			{
 				method: 'post',
+				path: '/tenant/members/{id}/sign-out',
+				tags: ['tenants'],
+				request: { params: z.object({ id: z.uuid() }) },
+				responses: { 204: empty() },
+			},
+			true,
+		),
+		async (c) => {
+			await settings.signOut(c.var.claims, c.req.valid('param').id, caller(c));
+			return c.body(null, 204);
+		},
+	);
+
+	me.openapi(
+		route(
+			{
+				method: 'post',
 				path: '/tenant/settings',
 				tags: ['tenants'],
 				request: body(contract.companyUpdate),
