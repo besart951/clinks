@@ -313,8 +313,8 @@
 									<span class="sm:hidden" aria-hidden="true">{open}</span><span class="max-sm:sr-only">
 										{workspace.t('ui.ws.spitex.open_count', { count: open })}
 									</span>
-								</span>{:else}<span class="text-muted-foreground inline-flex items-center gap-1">
-									<CircleCheck class="size-3" /><span class="max-sm:sr-only">
+								</span>{:else}<span class="inline-flex items-center text-emerald-600 dark:text-emerald-400">
+									<CircleCheck class="size-4" aria-hidden="true" /><span class="sr-only">
 										{workspace.t('ui.ws.spitex.all_assigned')}
 									</span>
 								</span>{/if}
