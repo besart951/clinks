@@ -19,6 +19,7 @@ Bei einem Push auf `main` laufen die vier Quality-Jobs auf dem Runner `clinks-ze
    ```
 
    Optional sind `SMTP_RELAY_URL`, `INBOUND_IMAP_URL`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICES` und `STRIPE_TAX`. Geheimnisse mit Dollarzeichen in dotenv in einfache Anführungszeichen setzen. Sonderzeichen in SMTP-Benutzername und Passwort URL-kodieren.
+
 4. Der nächste erfolgreiche Push auf `main` baut die beiden Images auf zep, überträgt sie per SSH und migriert die neue Datenbank. Ohne Provider-Secret überspringt der Job die Veröffentlichung. `DEPLOY_KEY` und `DEPLOY_KNOWN_HOSTS` sind im GitHub-Environment bereits eingerichtet.
 
 ## Betrieb
