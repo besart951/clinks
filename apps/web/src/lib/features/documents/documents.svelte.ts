@@ -149,10 +149,53 @@ export class DocumentsModel {
 	}
 
 	async move(document: StoredDocument, folderId: FolderId | null) {
+		return this.moveAll([document], folderId);
+	}
+
+	/** Moves files into a folder; the toast offers to put each back where it was. */
+	async moveAll(documents: StoredDocument[], folderId: FolderId | null) {
+		const api = this.#workspace.api.documents;
+		const moving = documents.filter((document) => document.folderId !== folderId);
+		if (moving.length === 0) return null;
 		return this.#workspace.run(
-			() => this.#workspace.api.documents.update(document.id, document.revision, { folderId }),
-			{ success: 'ui.ws.documents.moved' },
+			async () => {
+				for (const document of moving) await api.update(document.id, document.revision, { folderId });
+			},
+			{
+				success: moving.length > 1 ? 'ui.ws.documents.moved_many' : 'ui.ws.documents.moved',
+				successParams: { count: moving.length },
+				undo: async () => {
+					for (const document of moving) {
+						const current = await api.get(document.id);
+						await api.update(current.id, current.revision, { folderId: document.folderId });
+					}
+				},
+			},
 		);
+	}
+
+	/**
+	 * Where a file or folder can be moved, «All files» first, each folder named with its path. A folder cannot
+	 * go into itself or below; files cannot go where they all already are.
+	 */
+	moveTargets(item: { folder: Folder } | { documents: StoredDocument[] }): { id: FolderId | null; label: string }[] {
+		return [
+			{ id: null as FolderId | null, label: this.#workspace.t('ui.ws.documents.all_files') },
+			...this.folders.map((candidate) => ({
+				id: candidate.id as FolderId | null,
+				label: folderPath(this.folders, candidate.id)
+					.map((part) => part.name)
+					.join(' / '),
+			})),
+		]
+			.filter((target) =>
+				'folder' in item
+					? this.canMoveFolder(item.folder, target.id)
+					: item.documents.some((document) => document.folderId !== target.id),
+			)
+			.sort((left, right) =>
+				left.id === null ? -1 : right.id === null ? 1 : left.label.localeCompare(right.label, 'de'),
+			);
 	}
 
 	async link(document: StoredDocument, contact: Contact) {
@@ -166,12 +209,21 @@ export class DocumentsModel {
 		);
 	}
 
-	async remove(document: StoredDocument) {
+	async remove(documents: StoredDocument[]) {
 		const api = this.#workspace.api.documents;
-		await this.#workspace.run(() => api.remove(document.id), {
-			success: 'ui.ws.documents.deleted',
-			successParams: { name: document.name },
-			undo: () => api.restore(document),
-		});
+		const removable = documents.filter((document) => !document.locked);
+		if (removable.length === 0) return;
+		await this.#workspace.run(
+			async () => {
+				for (const document of removable) await api.remove(document.id);
+			},
+			{
+				success: removable.length > 1 ? 'ui.ws.documents.deleted_many' : 'ui.ws.documents.deleted',
+				successParams: { name: removable[0].name, count: removable.length },
+				undo: async () => {
+					for (const document of removable) await api.restore(document);
+				},
+			},
+		);
 	}
 }

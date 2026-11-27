@@ -8,11 +8,6 @@
 	import FileText from '@lucide/svelte/icons/file-text';
 	import Archive from '@lucide/svelte/icons/archive';
 	import Star from '@lucide/svelte/icons/star';
-	import Reply from '@lucide/svelte/icons/reply';
-	import Trash2 from '@lucide/svelte/icons/trash-2';
-	import MailOpen from '@lucide/svelte/icons/mail-open';
-	import SquareKanban from '@lucide/svelte/icons/square-kanban';
-	import CalendarPlus from '@lucide/svelte/icons/calendar-plus';
 	import ArrowLeft from '@lucide/svelte/icons/arrow-left';
 	import UserRound from '@lucide/svelte/icons/user-round';
 	import { Button } from '@clinks/ui/components/ui/button';
@@ -25,6 +20,9 @@
 	import MailNav from '#lib/components/mail/MailNav.svelte';
 	import ComposeSheet from '#lib/components/mail/ComposeSheet.svelte';
 	import { MailboxModel } from '#lib/features/mail/mailbox.svelte';
+	import { mailList } from '#lib/features/mail/mail-list.svelte';
+	import SelectableList from '#lib/components/list/SelectableList.svelte';
+	import ListBar from '#lib/components/list/ListBar.svelte';
 	import { contactName } from '#lib/data/workspace-api';
 	import { mailFolders, type MailFolder, type MailMessage } from '@clinks/domain/types';
 	import type { MailId } from '@clinks/domain/ids';
@@ -38,9 +36,16 @@
 	const canWrite = $derived(workspace.session.can('mail.write'));
 	let compose: ComposeSheet;
 	const icons = { inbox: Inbox, sent: Send, drafts: FileText, archive: Archive };
+	const list = mailList(workspace, model, {
+		open,
+		reply: (mail) => compose.show({ replyTo: mail }),
+		appointment: (mail) => quick.appointment({ contactId: model.contactFor(mail)?.id ?? null }),
+	});
 	const query = routeQuery(page.url);
 	if (query.get('folder')) model.folder = query.get('folder') as MailFolder;
 	if (query.get('message')) model.selectedId = query.get('message') as MailId;
+	/** The reading pane's buttons: the list's actions for the open mail; the ones with a short label spelled out. */
+	const spelled = new Set(['reply', 'archive', 'task', 'appointment']);
 
 	onMount(() => {
 		const stop = model.resource.connect();
@@ -56,6 +61,7 @@
 	function chooseFolder(folder: MailFolder) {
 		model.folder = folder;
 		model.selectedId = null;
+		list.clear();
 		void setQuery(page.url, { folder: folder === 'inbox' ? null : folder, message: null });
 	}
 
@@ -66,11 +72,6 @@
 		}
 		void model.select(mail);
 		void setQuery(page.url, { message: mail.id });
-	}
-
-	/** Creates the task and stays in the mailbox; the toast confirms it. */
-	function toTask(mail: MailMessage) {
-		void model.toTask(mail);
 	}
 </script>
 
@@ -87,7 +88,7 @@
 	<MailNav />
 
 	<AsyncView resource={model.resource} skeleton="detail">
-		{@const selected = model.selected}
+		{@const selected = list.many ? null : model.selected}
 		<div
 			class="grid gap-4 lg:grid-cols-[13rem_minmax(18rem,24rem)_1fr] lg:grid-rows-[minmax(0,1fr)]"
 			{@attach fillViewport()}
@@ -122,41 +123,35 @@
 				aria-label={workspace.t(`ui.ws.mail.folder.${model.folder}`)}
 			>
 				<SearchInput bind:value={model.search} label={workspace.t('ui.ws.mail.search')} />
-				<ul class="min-h-0 flex-1 divide-y overflow-y-auto rounded-xl border">
-					{#each model.messages as mail (mail.id)}
-						<li>
-							<button
-								class="hover:bg-muted/60 flex w-full flex-col gap-0.5 px-3 py-2.5 text-left text-sm aria-pressed:bg-muted"
-								aria-pressed={mail.id === model.selectedId}
-								onclick={() => open(mail)}
-							>
-								<span class="flex items-center gap-2">
-									{#if !mail.read}<span
-											class="size-2 shrink-0 rounded-full bg-sky-500"
-											aria-label={workspace.t('ui.ws.mail.unread')}
-										></span>{/if}
-									<span class="flex-1 truncate {mail.read ? '' : 'font-semibold'}">
-										{mail.folder === 'inbox'
-											? mail.fromName
-											: mail.to.join(', ') || workspace.t('ui.ws.mail.no_recipient')}
-									</span>
-									{#if mail.starred}<Star class="size-3.5 fill-amber-400 text-amber-400" />{/if}
-									<span class="text-muted-foreground shrink-0 text-xs">{workspace.i18n.relative(mail.sentAt)}</span>
+				<ListBar {list} />
+				<SelectableList {list} class="min-h-0 flex-1 overflow-y-auto rounded-xl border">
+					{#snippet row(mail: MailMessage)}
+						<span class="flex flex-col gap-0.5 px-3 py-2.5 text-sm">
+							<span class="flex items-center gap-2">
+								{#if !mail.read}<span
+										class="size-2 shrink-0 rounded-full bg-sky-500"
+										aria-label={workspace.t('ui.ws.mail.unread')}
+									></span>{/if}
+								<span class="flex-1 truncate {mail.read ? '' : 'font-semibold'}">
+									{mail.folder === 'inbox'
+										? mail.fromName
+										: mail.to.join(', ') || workspace.t('ui.ws.mail.no_recipient')}
 								</span>
-								<span class="truncate {mail.read ? 'text-muted-foreground' : 'font-medium'}">
-									{mail.subject || workspace.t('ui.ws.mail.no_subject')}
-								</span>
-								<span class="text-muted-foreground truncate text-xs">
-									{mail.body.replace(/\s+/g, ' ').slice(0, 90)}
-								</span>
-							</button>
-						</li>
-					{:else}
-						<li class="text-muted-foreground px-3 py-10 text-center text-sm">
-							{workspace.t('ui.ws.mail.empty_folder')}
-						</li>
-					{/each}
-				</ul>
+								{#if mail.starred}<Star class="size-3.5 fill-amber-400 text-amber-400" />{/if}
+								<span class="text-muted-foreground shrink-0 text-xs">{workspace.i18n.relative(mail.sentAt)}</span>
+							</span>
+							<span class="truncate {mail.read ? 'text-muted-foreground' : 'font-medium'}">
+								{mail.subject || workspace.t('ui.ws.mail.no_subject')}
+							</span>
+							<span class="text-muted-foreground truncate text-xs">
+								{mail.body.replace(/\s+/g, ' ').slice(0, 90)}
+							</span>
+						</span>
+					{/snippet}
+					{#snippet empty()}
+						<p class="text-muted-foreground px-3 py-10 text-center text-sm">{workspace.t('ui.ws.mail.empty_folder')}</p>
+					{/snippet}
+				</SelectableList>
 			</section>
 
 			<article
@@ -175,61 +170,24 @@
 						>
 							<ArrowLeft class="size-4" />
 						</Button>
-						{#if canWrite}
-							<Button variant="ghost" size="sm" onclick={() => compose.show({ replyTo: selected })}>
-								<Reply class="size-4" />{workspace.t('ui.ws.mail.reply')}
-							</Button>
-							{#if selected.folder !== 'archive'}<Button
-									variant="ghost"
-									size="sm"
-									onclick={() => model.moveTo(selected, 'archive')}
-								>
-									<Archive class="size-4" />{workspace.t('ui.ws.contacts.archive')}
-								</Button>{:else}<Button variant="ghost" size="sm" onclick={() => model.moveTo(selected, 'inbox')}>
-									<Inbox class="size-4" />{workspace.t('ui.ws.mail.folder.inbox')}
-								</Button>{/if}
+						{#each list.actionsFor([selected]) as action (action.id)}
+							{@const Icon = action.icon([selected])}
+							{@const pressed = action.pressed?.([selected])}
+							{#if action.destructive}<div class="flex-1"></div>{/if}
 							<Button
 								variant="ghost"
-								size="icon-sm"
-								onclick={() => model.toggleStar(selected)}
-								aria-label={workspace.t('ui.ws.mail.star')}
-								aria-pressed={selected.starred}
+								size={spelled.has(action.id) ? 'sm' : 'icon-sm'}
+								class={action.destructive ? 'text-destructive' : ''}
+								aria-label={spelled.has(action.id) ? undefined : action.label([selected])}
+								title={action.label([selected])}
+								aria-pressed={pressed}
+								onclick={() => list.run(action, [selected])}
 							>
-								<Star class="size-4 {selected.starred ? 'fill-amber-400 text-amber-400' : ''}" />
+								<Icon class="size-4 {pressed ? action.pressedClass : ''}" />{#if spelled.has(action.id)}{action.label([
+										selected,
+									])}{/if}
 							</Button>
-							<Button
-								variant="ghost"
-								size="icon-sm"
-								onclick={() => model.markUnread(selected)}
-								aria-label={workspace.t('ui.ws.mail.mark_unread')}
-							>
-								<MailOpen class="size-4" />
-							</Button>
-							<div class="flex-1"></div>
-							{#if workspace.session.can('planner.write') && workspace.session.hasModule('planner')}<Button
-									variant="outline"
-									size="sm"
-									onclick={() => toTask(selected)}
-								>
-									<SquareKanban class="size-4" />{workspace.t('ui.ws.mail.to_task')}
-								</Button>{/if}
-							{#if workspace.session.can('calendar.write')}<Button
-									variant="outline"
-									size="sm"
-									onclick={() => quick.appointment({ contactId: contact?.id ?? null })}
-								>
-									<CalendarPlus class="size-4" />{workspace.t('ui.ws.mail.to_appointment')}
-								</Button>{/if}
-							<Button
-								variant="ghost"
-								size="icon-sm"
-								class="text-destructive"
-								onclick={() => model.remove(selected)}
-								aria-label={workspace.t('ui.ws.delete')}
-							>
-								<Trash2 class="size-4" />
-							</Button>
-						{/if}
+						{/each}
 					</div>
 					<div class="space-y-4 p-5">
 						<header class="space-y-1">
@@ -254,7 +212,12 @@
 				{:else}
 					<!-- The pane already has a border: the empty state fills it without a second, dashed one. -->
 					<div class="grid flex-1 place-items-center [&>div]:border-0">
-						<EmptyState icon={Inbox} title={workspace.t('ui.ws.mail.nothing_selected')} />
+						<EmptyState
+							icon={Inbox}
+							title={list.many
+								? workspace.t('ui.ws.selected', { count: list.selected.length })
+								: workspace.t('ui.ws.mail.nothing_selected')}
+						/>
 					</div>
 				{/if}
 			</article>

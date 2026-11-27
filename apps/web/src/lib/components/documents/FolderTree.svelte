@@ -20,7 +20,7 @@
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import * as DropdownMenu from '@clinks/ui/components/ui/dropdown-menu';
 	import FolderMoveMenu from './FolderMoveMenu.svelte';
-	import { carriesItem, readItem, startItemDrag } from './drag-item';
+	import { carriesItem, readItem, startItemDrag } from '#lib/features/documents/drag-item';
 	import type { DocumentsModel } from '#lib/features/documents/documents.svelte';
 	import { useWorkspace } from '#lib/workspace.svelte';
 

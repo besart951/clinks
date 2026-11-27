@@ -183,9 +183,13 @@ test('issues an invoice with a QR payment part', async ({ page }) => {
 		.getByRole('button', { name: /^Rechnungen/ })
 		.first()
 		.click();
-	const row = page.getByRole('row').filter({ hasText: `Rechnung ${number}.pdf` });
+	const row = page.getByRole('listitem').filter({ hasText: `Rechnung ${number}.pdf` });
 	await expect(row).toContainText('Archiviert');
-	await row.getByRole('button', { name: /^Aktionen für/ }).click();
+	// Archived: neither the buttons on the row nor its right-click menu offer to delete or rename it.
+	await row.hover();
+	await expect(row.getByRole('button', { name: 'Löschen' })).toHaveCount(0);
+	await row.click({ button: 'right' });
+	await expect(page.getByRole('menuitem', { name: 'Herunterladen' })).toBeVisible();
 	await expect(page.getByRole('menuitem', { name: 'Löschen' })).toHaveCount(0);
 	await expect(page.getByRole('menuitem', { name: 'Umbenennen' })).toHaveCount(0);
 });
@@ -1147,4 +1151,73 @@ test('hides areas without rights in the navigation and names them «Kein Zugriff
 	await expect(finance).toHaveAttribute('aria-disabled', 'true');
 	await palette.getByRole('combobox').fill('Physio');
 	await expect(palette.getByRole('option', { name: /Physio/ })).toHaveCount(0);
+});
+
+test('acts on mails from the list: hover buttons, Ctrl-click, right-click and undo', async ({ page }) => {
+	await page.setViewportSize({ width: 1440, height: 900 });
+	await signIn(page);
+	await page.goto('/#/mail');
+	const rows = page.getByRole('list', { name: 'Posteingang' }).getByRole('listitem');
+	const first = rows.nth(0);
+	const second = rows.nth(1);
+	// Hovering shows the buttons for the row; starring needs no opening.
+	await first.hover();
+	await first.getByRole('button', { name: 'Markieren', exact: true }).click();
+	await expect(first.getByRole('button', { name: 'Markierung entfernen' })).toHaveAttribute('aria-pressed', 'true');
+	// A click opens the mail beside the list; Ctrl-click adds a second one and the bar for both appears.
+	await first.getByRole('button').first().click();
+	await expect(page.getByRole('article').getByRole('heading', { level: 2 })).toBeVisible();
+	await second
+		.getByRole('button')
+		.first()
+		.click({ modifiers: ['ControlOrMeta'] });
+	const bar = page.getByRole('region', { name: 'Auswahl' });
+	await expect(bar).toContainText('2 ausgewählt');
+	await bar.getByRole('button', { name: 'Archivieren' }).click();
+	await expect(page.getByText('2 Mails verschoben nach Archiv')).toBeVisible();
+	await expect(bar).toBeHidden();
+	await page.getByRole('button', { name: 'Rückgängig' }).click();
+	await expect(page.getByText('Rückgängig gemacht')).toBeVisible();
+	// Right-click: the same actions as a menu.
+	await rows.nth(0).click({ button: 'right' });
+	await expect(page.getByRole('menuitem', { name: 'Antworten' })).toBeVisible();
+	await page.keyboard.press('Escape');
+	// Ctrl+A selects every mail of the folder, Escape clears the selection.
+	await rows.nth(0).getByRole('button').first().focus();
+	await page.keyboard.press('ControlOrMeta+a');
+	await expect(bar).toContainText(`${await rows.count()} ausgewählt`);
+	await page.keyboard.press('Escape');
+	await expect(bar).toBeHidden();
+});
+
+test('marks files with a click, opens them with a double click and moves several at once', async ({ page }) => {
+	await page.setViewportSize({ width: 1440, height: 900 });
+	await signIn(page);
+	await page.goto('/#/documents');
+	// The search lists the files of every folder.
+	await page.getByRole('searchbox', { name: 'Dateien suchen' }).fill('.');
+	const rows = page.getByRole('list', { name: 'Dateien' }).getByRole('listitem');
+	const first = rows.nth(0);
+	const name = (await first.getByRole('button').first().innerText()).split('\n')[0].trim();
+	await first.getByRole('button').first().click();
+	await expect(first.getByRole('button').first()).toHaveAttribute('aria-current', 'true');
+	await expect(page.getByRole('dialog')).toHaveCount(0);
+	await first.getByRole('button').first().dblclick();
+	await expect(page.getByRole('dialog', { name })).toBeVisible();
+	await page.keyboard.press('Escape');
+	// Shift-click picks the range; the bar's menu moves all of them.
+	await rows
+		.nth(1)
+		.getByRole('button')
+		.first()
+		.click({ modifiers: ['Shift'] });
+	const bar = page.getByRole('region', { name: 'Auswahl' });
+	await expect(bar).toContainText('2 ausgewählt');
+	await bar.getByRole('button', { name: 'Weitere Aktionen' }).click();
+	await page.getByRole('menuitem', { name: 'Verschieben nach' }).click();
+	// «Belege» holds no files yet, so both move.
+	await page.getByRole('menuitem', { name: 'Belege', exact: true }).click();
+	await expect(page.getByText('2 Dateien verschoben')).toBeVisible();
+	await page.getByRole('button', { name: 'Rückgängig' }).click();
+	await expect(rows.filter({ hasText: name })).toHaveCount(1);
 });
