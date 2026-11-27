@@ -162,7 +162,7 @@ export class InvoiceService {
 			})
 			.execute();
 		const link = expiresAt ? { url: await this.#linkUrl(tx, scope.tenantId, id, now), expiresAt } : null;
-		const outboxId = await enqueueMail(tx, scope.tenantId, invoiceMail(context, delivery, link));
+		const { id: outboxId } = await enqueueMail(tx, scope.tenantId, invoiceMail(context, delivery, link));
 		await tx.updateTable('invoiceSends').set({ outboxId }).where('id', '=', id).execute();
 		await audit(
 			tx,

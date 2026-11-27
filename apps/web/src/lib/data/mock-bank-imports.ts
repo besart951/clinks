@@ -4,8 +4,8 @@ import { contactName } from '@clinks/domain/contacts';
 import { newId, type DocumentId, type FolderId, type InvoiceId } from '@clinks/domain/ids';
 import { invoiceTotals } from '@clinks/domain/money';
 import type { Folder, Invoice, StoredDocument } from '@clinks/domain/types';
-import { MockApiError, stamp, type MockBankEntry, type MockBankImport, type WorkspaceCache } from './database.ts';
-import { appendAudit, type RequestContext } from './repository.ts';
+import { stamp, type MockBankEntry, type MockBankImport, type WorkspaceCache } from './database.ts';
+import { allowedCaller, appendAudit, mockError, type RequestContext } from './repository.ts';
 
 /**
  * The demo's stand-in for bank file imports (apps/api services/bank-imports.ts): the same parser and matching,
@@ -26,14 +26,14 @@ export class MockBankImports {
 			byte.toString(16).padStart(2, '0'),
 		).join('');
 		return this.#db.request(() => {
-			const { tenantId, actorId } = this.#allowed('finance.write');
+			const { tenantId, actorId } = allowedCaller(this.#context, 'finance.write');
 			const known = this.#db.table('bankImports').find((row) => row.tenantId === tenantId && row.sha256 === sha256);
 			if (known) return { ...view(known), repeated: true };
 			let file;
 			try {
 				file = parseCamt(input.content);
 			} catch (error) {
-				if (error instanceof CamtError) throw this.#error('validation', 'error.ws.bank_file_invalid');
+				if (error instanceof CamtError) throw mockError(this.#context, 'validation', 'error.ws.bank_file_invalid');
 				throw error;
 			}
 			const tenant = this.#db.table('tenants').find((row) => row.id === tenantId)!;
@@ -87,7 +87,7 @@ export class MockBankImports {
 
 	imports(): Promise<BankImportView[]> {
 		return this.#db.request(() => {
-			const { tenantId } = this.#allowed('finance.read');
+			const { tenantId } = allowedCaller(this.#context, 'finance.read');
 			return this.#db
 				.table('bankImports')
 				.filter((row) => row.tenantId === tenantId)
@@ -99,7 +99,7 @@ export class MockBankImports {
 
 	openEntries(): Promise<BankEntryView[]> {
 		return this.#db.request(() => {
-			const { tenantId } = this.#allowed('finance.read');
+			const { tenantId } = allowedCaller(this.#context, 'finance.read');
 			const invoices = this.#invoices(tenantId);
 			const contacts = new Map(this.#db.table('contacts').map((contact) => [contact.id, contactName(contact)]));
 			const name = (invoice: Invoice) => contacts.get(invoice.contactId) ?? '';
@@ -121,10 +121,10 @@ export class MockBankImports {
 
 	assign(entryId: string, invoiceId: InvoiceId): Promise<void> {
 		return this.#db.request(() => {
-			const { tenantId, actorId } = this.#allowed('finance.write');
+			const { tenantId, actorId } = allowedCaller(this.#context, 'finance.write');
 			const entry = this.#open(entryId, tenantId);
 			const invoice = this.#invoices(tenantId).find((candidate) => candidate.id === invoiceId);
-			if (!invoice) throw this.#error('validation', 'error.ws.invoice_not_issued');
+			if (!invoice) throw mockError(this.#context, 'validation', 'error.ws.invoice_not_issued');
 			entry.status = 'booked';
 			entry.invoiceId = invoice.id;
 			this.#book(invoice, entry, actorId);
@@ -133,7 +133,7 @@ export class MockBankImports {
 
 	ignore(entryId: string): Promise<void> {
 		return this.#db.request(() => {
-			const { tenantId } = this.#allowed('finance.write');
+			const { tenantId } = allowedCaller(this.#context, 'finance.write');
 			this.#open(entryId, tenantId).status = 'ignored';
 		}, ['bankEntries']);
 	}
@@ -203,21 +203,9 @@ export class MockBankImports {
 
 	#open(entryId: string, tenantId: string) {
 		const entry = this.#db.table('bankEntries').find((row) => row.id === entryId && row.tenantId === tenantId);
-		if (!entry) throw this.#error('not_found', 'error.ws.not_found');
-		if (entry.status !== 'open') throw this.#error('conflict', 'error.ws.bank_entry_done');
+		if (!entry) throw mockError(this.#context, 'not_found', 'error.ws.not_found');
+		if (entry.status !== 'open') throw mockError(this.#context, 'conflict', 'error.ws.bank_entry_done');
 		return entry;
-	}
-
-	#allowed(permission: 'finance.read' | 'finance.write') {
-		const tenantId = this.#context.tenantId();
-		const actorId = this.#context.actorId();
-		if (!tenantId || !actorId) throw this.#error('unauthorized', 'error.unauthorized');
-		if (!this.#context.can(permission)) throw this.#error('forbidden', 'error.forbidden');
-		return { tenantId, actorId };
-	}
-
-	#error(code: ConstructorParameters<typeof MockApiError>[0], key: string) {
-		return new MockApiError(code, this.#context.localize(key));
 	}
 }
 

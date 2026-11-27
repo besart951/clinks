@@ -4,9 +4,9 @@ import { linkAttempts, linkLifetimeDays, nextReminder, samePostcode } from '@cli
 import { today } from '@clinks/domain/dates';
 import type { Invoice, InvoiceReminder, InvoiceSend, MailMessage } from '@clinks/domain/types';
 import { bundleFor, interpolate, type Locale } from '@clinks/i18n-types/catalog';
-import { MockApiError, stamp, type MockInvoiceSend, type WorkspaceCache } from './database.ts';
+import { stamp, type MockInvoiceSend, type WorkspaceCache } from './database.ts';
 import type { MockInvoiceArchive } from './mock-invoice-archive.ts';
-import { appendAudit, type RequestContext } from './repository.ts';
+import { allowedCaller, appendAudit, mockError, type RequestContext } from './repository.ts';
 
 /**
  * The demo's stand-in for sending invoices (apps/api services/invoices.ts). Nothing leaves the browser: the mail
@@ -25,13 +25,13 @@ export class MockInvoiceSends {
 
 	/** The next reminder level, rendered first (the PDF library is async), then recorded and sent in one request. */
 	async remind(invoiceId: InvoiceId, input: InvoiceSendInput): Promise<InvoiceSend> {
-		const { tenantId } = this.#allowed('finance.write');
+		const { tenantId } = allowedCaller(this.#context, 'finance.write');
 		const before = this.#invoice(invoiceId, tenantId);
 		const tenant = this.#db.table('tenants').find((row) => row.id === tenantId)!;
 		const day = today();
 		const next = nextReminder(before, tenant.invoiceSettings, day);
-		if (!next) throw this.#error('validation', 'error.ws.reminder_none');
-		if (!next.due) throw this.#error('validation', 'error.ws.reminder_not_due');
+		if (!next) throw mockError(this.#context, 'validation', 'error.ws.reminder_none');
+		if (!next.due) throw mockError(this.#context, 'validation', 'error.ws.reminder_not_due');
 		const reminder: InvoiceReminder = {
 			level: next.level,
 			date: day,
@@ -44,11 +44,12 @@ export class MockInvoiceSends {
 			text: next.step.text,
 			interest: tenant.invoiceSettings.defaultInterest,
 		});
-		if (!archived) throw this.#error('validation', 'error.ws.invoice_not_issued');
+		if (!archived) throw mockError(this.#context, 'validation', 'error.ws.invoice_not_issued');
 		return this.#db.request(() => {
-			const { actorId } = this.#allowed('finance.write');
+			const { actorId } = allowedCaller(this.#context, 'finance.write');
 			const invoice = this.#invoice(invoiceId, tenantId);
-			if (invoice.reminders.length !== before.reminders.length) throw this.#error('conflict', 'error.ws.reminder_none');
+			if (invoice.reminders.length !== before.reminders.length)
+				throw mockError(this.#context, 'conflict', 'error.ws.reminder_none');
 			const updated: Invoice = {
 				...invoice,
 				reminders: [...invoice.reminders, { ...reminder, documentId: archived.document.id }],
@@ -66,16 +67,16 @@ export class MockInvoiceSends {
 	}
 
 	async send(invoiceId: InvoiceId, input: InvoiceSendInput): Promise<InvoiceSend> {
-		const { tenantId: scope } = this.#allowed('finance.write');
+		const { tenantId: scope } = allowedCaller(this.#context, 'finance.write');
 		const current = this.#invoice(invoiceId, scope);
 		// Issued before the archive existed (the demo's seed): archived now, once, before it goes out.
 		if (!current.documentId && current.status !== 'draft' && current.status !== 'cancelled')
 			await this.#archive.issue(invoiceId);
 		return this.#db.request(() => {
-			const { tenantId, actorId } = this.#allowed('finance.write');
+			const { tenantId, actorId } = allowedCaller(this.#context, 'finance.write');
 			const invoice = this.#invoice(invoiceId, tenantId);
 			if (invoice.status === 'draft' || invoice.status === 'cancelled' || !invoice.documentId)
-				throw this.#error('validation', 'error.ws.invoice_not_issued');
+				throw mockError(this.#context, 'validation', 'error.ws.invoice_not_issued');
 			return this.deliver(invoice, { kind: 'invoice', level: null, documentId: invoice.documentId, ...input }, actorId);
 		}, ['invoiceSends', 'mails', 'audit']);
 	}
@@ -93,7 +94,7 @@ export class MockInvoiceSends {
 			.table('mailSenders')
 			.find((row) => row.tenantId === invoice.tenantId && row.kind === 'business' && row.isDefault);
 		if (delivery.method === 'link' && !contact?.address.zip.trim())
-			throw this.#error('validation', 'error.ws.invoice_link_no_postcode');
+			throw mockError(this.#context, 'validation', 'error.ws.invoice_link_no_postcode');
 		const now = new Date();
 		const token = delivery.method === 'link' ? randomToken() : null;
 		const row: MockInvoiceSend = {
@@ -162,7 +163,7 @@ export class MockInvoiceSends {
 
 	list(invoiceId: InvoiceId): Promise<InvoiceSend[]> {
 		return this.#db.request(() => {
-			const { tenantId } = this.#allowed('finance.read');
+			const { tenantId } = allowedCaller(this.#context, 'finance.read');
 			return this.#db
 				.table('invoiceSends')
 				.filter((row) => row.tenantId === tenantId && row.invoiceId === invoiceId)
@@ -193,14 +194,15 @@ export class MockInvoiceSends {
 	open(token: string, postcode: string): Promise<InvoiceLinkFile> {
 		return this.#db.request(() => {
 			const row = this.#link(token);
-			if (row.attempts >= linkAttempts) throw this.#error('validation', 'error.ws.invoice_link_locked');
+			if (row.attempts >= linkAttempts) throw mockError(this.#context, 'validation', 'error.ws.invoice_link_locked');
 			const invoice = this.#db.table('invoices').find((candidate) => candidate.id === row.invoiceId)!;
 			const contact = this.#db.table('contacts').find((candidate) => candidate.id === invoice.contactId);
 			if (!samePostcode(postcode, contact?.address.zip ?? '')) {
 				row.attempts += 1;
 				// Kept although the request fails, as the server counts it in a transaction of its own.
 				this.#db.merge({ invoiceSends: [row] });
-				throw this.#error(
+				throw mockError(
+					this.#context,
 					'validation',
 					row.attempts >= linkAttempts ? 'error.ws.invoice_link_locked' : 'error.ws.invoice_link_postcode',
 				);
@@ -208,7 +210,7 @@ export class MockInvoiceSends {
 			row.openedAt ??= new Date().toISOString();
 			row.openCount += 1;
 			const document = this.#db.table('documents').find((candidate) => candidate.id === row.documentId);
-			if (!document) throw this.#error('not_found', 'error.ws.invoice_link_invalid');
+			if (!document) throw mockError(this.#context, 'not_found', 'error.ws.invoice_link_invalid');
 			return { name: document.name, url: document.dataUrl };
 		}, ['invoiceSends']);
 	}
@@ -218,26 +220,14 @@ export class MockInvoiceSends {
 			.table('invoiceSends')
 			.find((candidate) => candidate.token !== null && candidate.token === token);
 		if (!row || new Date(row.linkExpiresAt!) <= new Date())
-			throw this.#error('not_found', 'error.ws.invoice_link_invalid');
+			throw mockError(this.#context, 'not_found', 'error.ws.invoice_link_invalid');
 		return row;
 	}
 
 	#invoice(id: InvoiceId, tenantId: string) {
 		const invoice = this.#db.table('invoices').find((row) => row.id === id && row.tenantId === tenantId);
-		if (!invoice) throw this.#error('not_found', 'error.ws.not_found');
+		if (!invoice) throw mockError(this.#context, 'not_found', 'error.ws.not_found');
 		return invoice;
-	}
-
-	#allowed(permission: 'finance.read' | 'finance.write') {
-		const tenantId = this.#context.tenantId();
-		const actorId = this.#context.actorId();
-		if (!tenantId || !actorId) throw this.#error('unauthorized', 'error.unauthorized');
-		if (!this.#context.can(permission)) throw this.#error('forbidden', 'error.forbidden');
-		return { tenantId, actorId };
-	}
-
-	#error(code: ConstructorParameters<typeof MockApiError>[0], key: string) {
-		return new MockApiError(code, this.#context.localize(key));
 	}
 }
 

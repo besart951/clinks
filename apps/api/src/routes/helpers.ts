@@ -10,6 +10,7 @@ import { pickLocale, translate } from '../i18n.ts';
 import type { AuthService } from '../services/auth.ts';
 import type { BankImportService } from '../services/bank-imports.ts';
 import type { MailSettingsService } from '../services/mail-settings.ts';
+import type { MailComposeService } from '../services/mail-compose.ts';
 import type { BillingService } from '../services/billing.ts';
 import type { Caller, Services } from '../services/context.ts';
 import type { FileService } from '../services/files.ts';
@@ -41,6 +42,7 @@ export interface RouteDeps {
 	invoiceLinks: InvoiceLinks;
 	bankImports: BankImportService;
 	mailSettings: MailSettingsService;
+	mailCompose: MailComposeService;
 	sync: SyncService;
 	caller: (c: Context) => Caller;
 	deliver: (c: Context, opened: OpenedSession) => contract.SessionResponse;

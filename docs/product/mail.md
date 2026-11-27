@@ -148,14 +148,20 @@ state the UI needs comes through REST.
 
 ### 4 · The mail module sends for real
 
-- [ ] Compose: choose sender (personal or business the role may use), to/cc to contacts or addresses, template with
-      placeholders (`{{vorname}}`, `{{nachname}}`, `{{firma}}`, `{{arbeitsbereich}}`), attachments from documents;
-      «Senden» enqueues, the mail appears in Gesendet with its delivery state.
-- [ ] Drafts stay internal; replies (`Antworten`) from a filed inbound mail set `In-Reply-To`/`References`.
-- [ ] Permissions: `mail.write` sends from the own personal sender; using a business sender needs `mail.business`
-      (new, in the role templates for admin and office); audit `mail.sent`.
-- [ ] Limits per workspace and day (config per plan, e.g. 500 personal/business mails) with a clear error.
-- [ ] Tests: placeholders, permission matrix, limit, suppressed addresses (scope `all`) refused with a message.
+- [x] Compose: choose sender (own personal one, business ones the role may use, else the platform address in the
+      caller's name with Reply-To to them), to contacts or addresses (each gets a mail of their own), template with
+      placeholders (`{vorname}`, `{nachname}`, `{firma}`, `{anrede}`, filled per recipient by the server), up to five
+      attachments from Dokumente; «Senden» (`POST /mail/send`) enqueues, each mail appears in Gesendet with its
+      delivery state.
+- [x] Drafts stay internal and are removed once sent; a sync upload cannot file a new row or a draft under Gesendet.
+      Replies (`Antworten`) from a filed inbound mail set `In-Reply-To`/`References`.
+- [x] Permissions: `mail.write` sends from the own personal sender; using a business sender needs `mail.business`
+      (new; administrators and the demo's «Empfang» role have it); newsletter senders are refused; audit `mail.sent`.
+- [x] Limit per workspace and day (`MAIL_DAILY_LIMIT`, default 500 personal/business mails), counted under a lock so
+      parallel sends cannot pass it; error «Tageslimit erreicht».
+- [x] Tests: placeholders (domain), sending with threading, attachments and draft removal, permission matrix, limit
+      with parallel sends, sync guard (integration), template to two recipients with attachment (e2e on the demo).
+      Suppressed addresses are reported back per recipient (`suppressed`) and shown as a warning.
 
 ### 5 · Newsletter
 

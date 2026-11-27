@@ -178,6 +178,20 @@ export class TenantRepository<Name extends TenantTable> implements Repository<Ro
 	}
 }
 
+/** The caller of a demo request that needs `permission`, or the error the API would answer with. */
+export function allowedCaller(context: RequestContext, permission: Permission) {
+	const tenantId = context.tenantId();
+	const actorId = context.actorId();
+	if (!tenantId || !actorId) throw mockError(context, 'unauthorized', 'error.unauthorized');
+	if (!context.can(permission)) throw mockError(context, 'forbidden', 'error.forbidden');
+	return { tenantId, actorId };
+}
+
+/** An API error of the demo backend, with its message in the caller's language. */
+export function mockError(context: RequestContext, code: ConstructorParameters<typeof MockApiError>[0], key: string) {
+	return new MockApiError(code, context.localize(key));
+}
+
 export function appendAudit(db: WorkspaceCache, entry: Draft<AuditEntry> & { tenantId: TenantId }) {
 	db.table('audit').push(stamp<AuditEntry>({ ...entry, id: newId() }));
 }

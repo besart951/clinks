@@ -127,6 +127,8 @@ export const permissions = [
 	'documents.write',
 	'mail.read',
 	'mail.write',
+	/** Send personal mail from the workspace's business senders (e.g. info@), not only from one's own. */
+	'mail.business',
 	'finance.read',
 	'finance.write',
 	'planner.read',

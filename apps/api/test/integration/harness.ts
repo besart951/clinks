@@ -122,6 +122,20 @@ export async function startApi(billing?: Billing, options: { allowInternalStorag
 		return { browser, token: switched.body.accessToken as string, tenantId: created.body.tenantId as string };
 	}
 
+	/** A member of `admin`'s workspace with a custom role of exactly these permissions; returns their token. */
+	async function member(admin: { token: string }, email: string, permissions: string[]) {
+		const browser = client();
+		const role = await browser.call('POST', '/tenant/roles', {
+			token: admin.token,
+			body: { id: null, name: `Rolle ${email}`, permissions },
+		});
+		await browser.call('POST', '/tenant/invitations', { token: admin.token, body: { email, roleId: role.body.id } });
+		const accepted = await browser.call('POST', `/invitations/${linkTokenIn(email)}/accept`, {
+			body: { firstName: 'Mit', lastName: 'Arbeiterin', password },
+		});
+		return { browser, token: accepted.body.session.accessToken as string };
+	}
+
 	function codeIn(email: string): string {
 		return /\b([0-9]{6})\b/.exec(mailer.last(email).text)![1];
 	}
@@ -145,6 +159,7 @@ export async function startApi(billing?: Billing, options: { allowInternalStorag
 		client,
 		signedUp,
 		administrator,
+		member,
 		codeIn,
 		linkTokenIn,
 		totp: (secret: string) =>

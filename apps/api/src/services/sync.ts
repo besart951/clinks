@@ -157,6 +157,8 @@ export class SyncService {
 			fields.uploadedBy !== (existing?.uploadedBy ?? scope.userId)
 		)
 			throw forbidden();
+		// Only «Senden» files a mail under Gesendet: a new row or a draft cannot pretend to be sent.
+		if (table === 'mails' && merged.folder === 'sent' && (stored?.folder ?? 'drafts') === 'drafts') throw forbidden();
 		if (
 			table === 'notifications' &&
 			existing &&
