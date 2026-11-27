@@ -41,12 +41,10 @@ export function documentList(workspace: Workspace, documents: DocumentsModel, ha
 		},
 		{
 			id: 'download',
-			label: () => t('ui.ws.documents.download'),
 			icon: () => Download,
 			inline: true,
-			run: async (files) => {
-				for (const file of files) await workspace.run(() => workspace.documentFiles.save(file));
-			},
+			label: (files) => t(files.length > 1 ? 'ui.ws.documents.download_zip' : 'ui.ws.documents.download'),
+			run: (files) => documents.download(files),
 		},
 		{
 			id: 'versions',

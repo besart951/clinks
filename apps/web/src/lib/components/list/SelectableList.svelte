@@ -27,7 +27,11 @@
 	});
 </script>
 
-<ul bind:this={element} class="divide-y {className}" aria-label={list.name}>
+<ul
+	bind:this={element}
+	class="{list.layout === 'tiles' ? 'grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4' : 'divide-y'} {className}"
+	aria-label={list.name}
+>
 	{#each list.items as item (list.id(item))}
 		<ListRow {list} {item}>{@render row(item)}</ListRow>
 	{:else}

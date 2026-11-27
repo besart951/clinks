@@ -5,6 +5,21 @@ import type { Workspace } from '../../workspace.svelte.ts';
 import { uploadDocument } from '../collaboration/attachments.svelte.ts';
 import { canMoveFolder, folderPath } from '@clinks/domain/folders';
 import { SvelteSet } from 'svelte/reactivity';
+import type { DocumentId } from '@clinks/domain/ids';
+import {
+	defaultSort,
+	nextSort,
+	remember,
+	sortDocuments,
+	type DocumentSort,
+	type DocumentSortKey,
+} from './document-sort.ts';
+import { zipFiles } from './zip.ts';
+
+/** How the files show: rows with columns, or tiles with a picture. */
+export type DocumentView = 'table' | 'cards';
+
+const prefix = 'clinks.workspace.documents.';
 
 export interface DocumentsData {
 	folders: Folder[];
@@ -20,10 +35,21 @@ export class DocumentsModel {
 	uploading = $state(false);
 	/** Open branches of the folder tree. */
 	readonly expanded = new SvelteSet<FolderId>();
+	/** Kept on the device, like other view settings: order, view, pinned folders and recently opened files. */
+	sort = $state<DocumentSort>(defaultSort);
+	view = $state<DocumentView>('table');
+	pinned = $state<FolderId[]>([]);
+	recent = $state<DocumentId[]>([]);
 	#workspace: Workspace;
+	readonly #pictures = new Map<string, Promise<string>>();
 
 	constructor(workspace: Workspace) {
 		this.#workspace = workspace;
+		const preferences = workspace.platform.preferences;
+		this.sort = preferences.read(`${prefix}sort`, defaultSort);
+		this.view = preferences.read<DocumentView>(`${prefix}view`, 'table');
+		this.pinned = preferences.read<FolderId[]>(`${prefix}pinned`, []);
+		this.recent = preferences.read<DocumentId[]>(`${prefix}recent`, []);
 		this.resource = new Resource(workspace.db, ['folders', 'documents', 'contacts'], async () => {
 			const [folders, documents, contacts] = await Promise.all([
 				workspace.api.folders.list(),
@@ -88,9 +114,80 @@ export class DocumentsModel {
 
 	get files(): StoredDocument[] {
 		const query = this.search.trim().toLowerCase();
-		return (this.resource.data?.documents ?? [])
-			.filter((document) => (query ? document.name.toLowerCase().includes(query) : document.folderId === this.folderId))
-			.sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+		return sortDocuments(
+			(this.resource.data?.documents ?? []).filter((document) =>
+				query ? document.name.toLowerCase().includes(query) : document.folderId === this.folderId,
+			),
+			this.sort,
+		);
+	}
+
+	setSort(key: DocumentSortKey) {
+		this.sort = nextSort(this.sort, key);
+		this.#keep('sort', this.sort);
+	}
+
+	setView(view: DocumentView) {
+		this.view = view;
+		this.#keep('view', view);
+	}
+
+	get pinnedFolders(): Folder[] {
+		return this.pinned.flatMap((id) => this.folders.filter((folder) => folder.id === id));
+	}
+
+	isPinned(folder: Folder) {
+		return this.pinned.includes(folder.id);
+	}
+
+	togglePin(folder: Folder) {
+		this.pinned = this.isPinned(folder) ? this.pinned.filter((id) => id !== folder.id) : [...this.pinned, folder.id];
+		this.#keep('pinned', this.pinned);
+	}
+
+	/** The files opened last on this device that still exist, newest first. */
+	get recentFiles(): StoredDocument[] {
+		const documents = this.resource.data?.documents ?? [];
+		return this.recent.flatMap((id) => documents.filter((document) => document.id === id));
+	}
+
+	opened(document: StoredDocument) {
+		this.recent = remember(this.recent, document.id);
+		this.#keep('recent', this.recent);
+	}
+
+	/** One file downloads as it is; several as one ZIP archive named after the folder. */
+	async download(documents: StoredDocument[]) {
+		const files = this.#workspace.documentFiles;
+		if (documents.length === 1) return this.#workspace.run(() => files.save(documents[0]));
+		return this.#workspace.run(async () => {
+			const entries = await Promise.all(
+				documents.map(async (document) => ({
+					name: document.name,
+					bytes: new Uint8Array(await (await files.blob(document)).arrayBuffer()),
+					modified: new Date(document.createdAt),
+				})),
+			);
+			const name = this.path.at(-1)?.name ?? this.#workspace.t('ui.ws.documents.all_files');
+			this.#workspace.platform.files.save(new Blob([zipFiles(entries)], { type: 'application/zip' }), `${name}.zip`);
+		});
+	}
+
+	/** A picture of the file for tiles and the preview pane, loaded once per version. */
+	picture(document: StoredDocument): Promise<string> {
+		const key = `${document.id}:${document.revision}`;
+		let picture = this.#pictures.get(key);
+		if (!picture) {
+			picture = document.dataUrl.startsWith('data:')
+				? Promise.resolve(document.dataUrl)
+				: this.#workspace.documentFiles.preview(document).then((preview) => preview.dataUrl);
+			this.#pictures.set(key, picture);
+		}
+		return picture;
+	}
+
+	#keep(key: string, value: unknown) {
+		this.#workspace.platform.preferences.write(`${prefix}${key}`, $state.snapshot(value));
 	}
 
 	count(folderId: FolderId): number {

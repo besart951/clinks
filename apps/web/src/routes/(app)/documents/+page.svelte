@@ -24,6 +24,15 @@
 	import ConfirmDialog, { type ConfirmRequest } from '#lib/components/common/ConfirmDialog.svelte';
 	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
 	import { DocumentsModel } from '#lib/features/documents/documents.svelte';
+	import type { DocumentSortKey } from '#lib/features/documents/document-sort';
+	import ViewToggle, { type ListView } from '#lib/components/common/ViewToggle.svelte';
+	import DocumentPicture from '#lib/components/documents/DocumentPicture.svelte';
+	import DocumentPane from '#lib/components/documents/DocumentPane.svelte';
+	import FolderPinItem from '#lib/components/documents/FolderPinItem.svelte';
+	import Pin from '@lucide/svelte/icons/pin';
+	import Clock from '@lucide/svelte/icons/clock';
+	import ArrowUp from '@lucide/svelte/icons/arrow-up';
+	import ArrowDown from '@lucide/svelte/icons/arrow-down';
 	import { documentList } from '#lib/features/documents/document-list.svelte';
 	import { combineKeys, commandKeys } from '#lib/features/shell/page-keys';
 	import { printKey } from '#lib/features/list/list-model.svelte';
@@ -45,6 +54,7 @@
 	let versioned = $state<StoredDocument | null>(null);
 	let versions = $state<import('#lib/data/document-files').DocumentVersion[]>([]);
 	async function showPreview(doc: StoredDocument) {
+		model.opened(doc);
 		preview = await workspace.run(() => workspace.documentFiles.preview(doc));
 	}
 	async function showVersions(doc: StoredDocument) {
@@ -80,6 +90,27 @@
 			ask(workspace.t('ui.ws.documents.rename'), document.name, (name) => model.rename(document, name)),
 		link: (document) => (linking = document),
 	});
+	list.layout = model.view === 'cards' ? 'tiles' : 'rows';
+	function setView(view: ListView) {
+		model.setView(view);
+		list.layout = view === 'cards' ? 'tiles' : 'rows';
+	}
+	/** The one marked file, shown beside the list on wide screens. */
+	const marked = $derived(list.many ? null : (list.selected[0] ?? null));
+	/** The path step a dragged file or folder is over. */
+	let overCrumb = $state<string | null>(null);
+	function allowCrumb(event: DragEvent, target: string) {
+		if (!canWrite || !carriesItem(event)) return;
+		event.preventDefault();
+		overCrumb = target;
+	}
+	function dropOnCrumb(event: DragEvent, folderId: FolderId | null) {
+		const item = readItem(event);
+		overCrumb = null;
+		if (!item) return;
+		event.preventDefault();
+		void model.dropInto(item, folderId);
+	}
 	let naming = $state<{ title: string; value: string; save: (name: string) => Promise<unknown> } | null>(null);
 	let linking = $state<StoredDocument | null>(null);
 	let linkContact = $state<ContactId | null>(null);
@@ -185,6 +216,22 @@
 	}
 </script>
 
+{#snippet sorter(key: DocumentSortKey, label: string, className = '')}
+	{@const active = model.sort.key === key}
+	<button
+		type="button"
+		class="hover:text-foreground inline-flex items-center gap-1 rounded px-1 py-0.5 {active
+			? 'text-foreground'
+			: ''} {className}"
+		aria-pressed={active}
+		aria-label={workspace.t('ui.ws.documents.sort_by', { column: workspace.t(label) })}
+		onclick={() => model.setSort(key)}
+	>
+		{workspace.t(label)}
+		{#if active}{#if model.sort.dir === 'asc'}<ArrowUp class="size-3" />{:else}<ArrowDown class="size-3" />{/if}{/if}
+	</button>
+{/snippet}
+
 <svelte:head><title>{workspace.t('ui.ws.module.documents')} · CLinks</title></svelte:head>
 
 <ModuleGate permission="documents.read">
@@ -210,23 +257,62 @@
 
 	<AsyncView resource={model.resource}>
 		<div class="grid items-start gap-6 lg:grid-cols-[16rem_minmax(0,1fr)]">
-			<aside class="bg-muted/30 hidden rounded-xl border p-2 lg:sticky lg:top-4 lg:block">
+			<aside class="bg-muted/30 hidden space-y-3 rounded-xl border p-2 lg:sticky lg:top-4 lg:block">
+				{#if model.pinnedFolders.length > 0}
+					<nav aria-label={workspace.t('ui.ws.documents.pinned')}>
+						<h2 class="text-muted-foreground px-2 pb-1 text-xs font-medium">{workspace.t('ui.ws.documents.pinned')}</h2>
+						{#each model.pinnedFolders as folder (folder.id)}
+							<button
+								class="hover:bg-muted flex w-full items-center gap-2 rounded-md px-2 py-1 text-left text-sm aria-pressed:bg-muted"
+								aria-pressed={model.folderId === folder.id}
+								onclick={() => model.open(folder.id)}
+							>
+								<Pin class="text-muted-foreground size-3.5 shrink-0" /><span class="truncate">{folder.name}</span>
+							</button>
+						{/each}
+					</nav>
+				{/if}
+				{#if model.recentFiles.length > 0}
+					<nav aria-label={workspace.t('ui.ws.documents.recent')}>
+						<h2 class="text-muted-foreground px-2 pb-1 text-xs font-medium">{workspace.t('ui.ws.documents.recent')}</h2>
+						{#each model.recentFiles.slice(0, 5) as document (document.id)}
+							<button
+								class="hover:bg-muted flex w-full items-center gap-2 rounded-md px-2 py-1 text-left text-sm"
+								onclick={() => showPreview(document)}
+							>
+								<Clock class="text-muted-foreground size-3.5 shrink-0" /><span class="truncate">{document.name}</span>
+							</button>
+						{/each}
+					</nav>
+				{/if}
 				<FolderTree bind:this={tree} {model} actions={treeActions} />
 			</aside>
 			<div class="min-w-0">
 				<div class="mb-4 flex flex-wrap items-center gap-2">
 					<nav aria-label={workspace.t('ui.ws.documents.path')} class="flex flex-wrap items-center gap-1 text-sm">
+						<!-- Each step of the path takes dropped files and folders, to move them up quickly. -->
 						<button
-							class="hover:underline {model.folderId === null ? 'font-semibold' : ''}"
+							class="rounded px-1 hover:underline {model.folderId === null ? 'font-semibold' : ''} {overCrumb === 'root'
+								? 'bg-primary/10 ring-primary/40 ring-1'
+								: ''}"
 							onclick={() => model.open(null)}
+							ondragover={(event) => allowCrumb(event, 'root')}
+							ondragleave={() => (overCrumb = null)}
+							ondrop={(event) => dropOnCrumb(event, null)}
 						>
 							{workspace.t('ui.ws.documents.all_files')}
 						</button>
 						{#each model.path as folder (folder.id)}
 							<ChevronRight class="text-muted-foreground size-3.5" />
 							<button
-								class="hover:underline {folder.id === model.folderId ? 'font-semibold' : ''}"
+								class="rounded px-1 hover:underline {folder.id === model.folderId ? 'font-semibold' : ''} {overCrumb ===
+								folder.id
+									? 'bg-primary/10 ring-primary/40 ring-1'
+									: ''}"
 								onclick={() => model.open(folder.id)}
+								ondragover={(event) => allowCrumb(event, folder.id)}
+								ondragleave={() => (overCrumb = null)}
+								ondrop={(event) => dropOnCrumb(event, folder.id)}
 							>
 								{folder.name}
 							</button>
@@ -234,6 +320,7 @@
 					</nav>
 					<div class="flex-1"></div>
 					<SearchInput bind:value={model.search} label={workspace.t('ui.ws.documents.search')} class="w-full sm:w-64" />
+					<ViewToggle view={model.view} onchange={setView} />
 				</div>
 
 				<section
@@ -289,6 +376,7 @@
 													<PenLine />{workspace.t('ui.ws.documents.rename')}
 												</DropdownMenu.Item>
 												<FolderMoveMenu {model} {folder} />
+												<FolderPinItem {model} {folder} />
 												<DropdownMenu.Separator />
 												<DropdownMenu.Item variant="destructive" onclick={() => deleteFolder(folder)}>
 													<Trash2 />{workspace.t('ui.ws.delete')}
@@ -309,47 +397,79 @@
 						/>
 					{:else}
 						<ListBar {list} class="mb-2" />
-						<div class="rounded-xl border">
-							<div
-								class="text-muted-foreground grid grid-cols-[minmax(0,1fr)_6rem] gap-3 border-b py-2 ps-10 pe-3 text-xs font-medium md:grid-cols-[minmax(0,1fr)_12rem_6rem] lg:grid-cols-[minmax(0,1fr)_12rem_6rem_7rem]"
-								aria-hidden="true"
-							>
-								<span>{workspace.t('ui.ws.contacts.name')}</span>
-								<span class="hidden md:block">{workspace.t('ui.ws.documents.linked_to')}</span>
-								<span>{workspace.t('ui.ws.documents.size')}</span>
-								<span class="hidden lg:block">{workspace.t('ui.ws.documents.uploaded_at')}</span>
+						<div class="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_18rem]">
+							<div class={model.view === 'table' ? 'rounded-xl border' : ''}>
+								<div
+									class="text-muted-foreground text-xs font-medium {model.view === 'table'
+										? 'grid grid-cols-[minmax(0,1fr)_6rem] gap-3 border-b py-1.5 ps-9 pe-3 md:grid-cols-[minmax(0,1fr)_12rem_6rem] lg:grid-cols-[minmax(0,1fr)_12rem_6rem_7rem]'
+										: 'mb-2 flex flex-wrap items-center gap-1'}"
+									role="group"
+									aria-label={workspace.t('ui.ws.documents.sorting')}
+								>
+									{@render sorter('name', 'ui.ws.contacts.name')}
+									{#if model.view === 'table'}<span class="hidden self-center md:block">
+											{workspace.t('ui.ws.documents.linked_to')}
+										</span>{/if}
+									{@render sorter('size', 'ui.ws.documents.size')}
+									{@render sorter(
+										'createdAt',
+										'ui.ws.documents.uploaded_at',
+										model.view === 'table' ? 'hidden lg:inline-flex' : '',
+									)}
+								</div>
+								<SelectableList {list}>
+									{#snippet row(document: StoredDocument)}
+										{#if model.view === 'cards'}
+											<span class="flex flex-col">
+												<DocumentPicture {document} {model} class="aspect-[4/3] border-b" />
+												<span class="space-y-0.5 p-2">
+													<span class="block truncate text-sm font-medium">{document.name}</span>
+													<span class="text-muted-foreground block text-xs">
+														{formatBytes(document.size, (value) => workspace.i18n.number(value))} · {workspace.i18n.date(
+															document.createdAt,
+														)}
+													</span>
+												</span>
+											</span>
+										{:else}
+											<span
+												class="grid grid-cols-[minmax(0,1fr)_6rem] items-center gap-3 py-2.5 ps-2 pe-3 text-sm md:grid-cols-[minmax(0,1fr)_12rem_6rem] lg:grid-cols-[minmax(0,1fr)_12rem_6rem_7rem]"
+											>
+												<span class="flex min-w-0 items-center gap-2 font-medium">
+													{#if document.mimeType.startsWith('image/')}<FileImage
+															class="text-muted-foreground size-4 shrink-0"
+														/>{:else}<FileText class="text-muted-foreground size-4 shrink-0" />{/if}
+													<span class="truncate">{document.name}</span>
+													{#if document.locked}<span
+															class="text-muted-foreground inline-flex shrink-0 items-center gap-1 text-xs font-normal"
+															title={workspace.t('ui.ws.documents.archived_hint')}
+														>
+															<Lock class="size-3" aria-hidden="true" />{workspace.t('ui.ws.documents.archived')}
+														</span>{/if}
+												</span>
+												<span class="hidden min-w-0 flex-wrap gap-1 md:flex">
+													{#each linkedContacts(document) as contact (contact.id)}<span
+															class="bg-muted truncate rounded-full px-2 py-0.5 text-xs"
+														>
+															{contactName(contact)}
+														</span>{/each}
+												</span>
+												<span class="text-muted-foreground">
+													{formatBytes(document.size, (value) => workspace.i18n.number(value))}
+												</span>
+												<span class="text-muted-foreground hidden lg:block">
+													{workspace.i18n.date(document.createdAt)}
+												</span>
+											</span>
+										{/if}
+									{/snippet}
+								</SelectableList>
 							</div>
-							<SelectableList {list}>
-								{#snippet row(document: StoredDocument)}
-									<span
-										class="grid grid-cols-[minmax(0,1fr)_6rem] items-center gap-3 py-2.5 ps-2 pe-3 text-sm md:grid-cols-[minmax(0,1fr)_12rem_6rem] lg:grid-cols-[minmax(0,1fr)_12rem_6rem_7rem]"
-									>
-										<span class="flex min-w-0 items-center gap-2 font-medium">
-											{#if document.mimeType.startsWith('image/')}<FileImage
-													class="text-muted-foreground size-4 shrink-0"
-												/>{:else}<FileText class="text-muted-foreground size-4 shrink-0" />{/if}
-											<span class="truncate">{document.name}</span>
-											{#if document.locked}<span
-													class="text-muted-foreground inline-flex shrink-0 items-center gap-1 text-xs font-normal"
-													title={workspace.t('ui.ws.documents.archived_hint')}
-												>
-													<Lock class="size-3" aria-hidden="true" />{workspace.t('ui.ws.documents.archived')}
-												</span>{/if}
-										</span>
-										<span class="hidden min-w-0 flex-wrap gap-1 md:flex">
-											{#each linkedContacts(document) as contact (contact.id)}<span
-													class="bg-muted truncate rounded-full px-2 py-0.5 text-xs"
-												>
-													{contactName(contact)}
-												</span>{/each}
-										</span>
-										<span class="text-muted-foreground">
-											{formatBytes(document.size, (value) => workspace.i18n.number(value))}
-										</span>
-										<span class="text-muted-foreground hidden lg:block">{workspace.i18n.date(document.createdAt)}</span>
-									</span>
-								{/snippet}
-							</SelectableList>
+							{#if marked}
+								<div class="hidden xl:sticky xl:top-4 xl:block">
+									<DocumentPane document={marked} {model} open={showPreview} />
+								</div>
+							{/if}
 						</div>
 					{/if}
 					{#if canWrite}<p class="text-muted-foreground text-xs">
