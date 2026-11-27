@@ -265,6 +265,9 @@ importers:
       stripe:
         specifier: 23.2.0
         version: 23.2.0(@types/node@26.6.6)
+      unpdf:
+        specifier: 2.2.3
+        version: 2.2.3
       zod:
         specifier: 4.6.7
         version: 4.6.7
@@ -2652,6 +2655,17 @@ packages:
   undici-types@8.9.0:
     resolution: {integrity: sha512-KTDyRTYX8sWmKXAikPHHSyc63CRPETMctyjKFupcC6OBLXT3xsN0e9aF7m+mIXutFWpUXuedtowG7iLOzp0kQg==}
 
+  unpdf@2.2.3:
+    resolution: {integrity: sha512-fDdQW4Wh+fYow4W0/Cid+Hh4ql1hw3RxhpwXCVHrDzwOpcptqww5QejjssClz7l/srO1S8ObdYswXQbtg+bjbg==}
+    peerDependencies:
+      '@napi-rs/canvas': ^0.1.69 || ^1.0.0
+      pdfjs-dist: '*'
+    peerDependenciesMeta:
+      '@napi-rs/canvas':
+        optional: true
+      pdfjs-dist:
+        optional: true
+
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
 
@@ -4876,6 +4890,8 @@ snapshots:
   uc.micro@3.0.0: {}
 
   undici-types@8.9.0: {}
+
+  unpdf@2.2.3: {}
 
   uri-js@4.4.1:
     dependencies:

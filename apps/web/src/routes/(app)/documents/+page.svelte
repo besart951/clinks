@@ -29,6 +29,7 @@
 	import DocumentPicture from '#lib/components/documents/DocumentPicture.svelte';
 	import DocumentPane from '#lib/components/documents/DocumentPane.svelte';
 	import FolderPinItem from '#lib/components/documents/FolderPinItem.svelte';
+	import ShareDialog from '#lib/components/documents/ShareDialog.svelte';
 	import Pin from '@lucide/svelte/icons/pin';
 	import Clock from '@lucide/svelte/icons/clock';
 	import ArrowUp from '@lucide/svelte/icons/arrow-up';
@@ -89,7 +90,9 @@
 		rename: (document) =>
 			ask(workspace.t('ui.ws.documents.rename'), document.name, (name) => model.rename(document, name)),
 		link: (document) => (linking = document),
+		share: (document) => (sharing = document),
 	});
+	let sharing = $state<StoredDocument | null>(null);
 	list.layout = model.view === 'cards' ? 'tiles' : 'rows';
 	function setView(view: ListView) {
 		model.setView(view);
@@ -439,7 +442,14 @@
 													{#if document.mimeType.startsWith('image/')}<FileImage
 															class="text-muted-foreground size-4 shrink-0"
 														/>{:else}<FileText class="text-muted-foreground size-4 shrink-0" />{/if}
-													<span class="truncate">{document.name}</span>
+													<span class="min-w-0">
+														<span class="block truncate">{document.name}</span>
+														{#if model.excerptOf(document)}<span
+																class="text-muted-foreground block truncate text-xs font-normal"
+															>
+																{model.excerptOf(document)}
+															</span>{/if}
+													</span>
 													{#if document.locked}<span
 															class="text-muted-foreground inline-flex shrink-0 items-center gap-1 text-xs font-normal"
 															title={workspace.t('ui.ws.documents.archived_hint')}
@@ -547,6 +557,7 @@
 	</Dialog.Content>
 </Dialog.Root>
 <ConfirmDialog bind:request={confirm} />
+<ShareDialog bind:document={sharing} />
 
 <Dialog.Root open={versioned !== null} onOpenChange={(open) => !open && (versioned = null)}>
 	<Dialog.Content closeLabel={workspace.t('ui.ws.close')}>

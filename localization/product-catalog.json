@@ -2482,6 +2482,90 @@
         "de-CH": "Sortierung",
         "en-US": "Sorting"
       },
+      "ui.ws.documents.share": {
+        "de-CH": "Teilen-Link",
+        "en-US": "Share link"
+      },
+      "ui.ws.documents.share_text": {
+        "de-CH": "Wer den Link hat, kann «{name}» ohne Konto herunterladen, bis er endet.",
+        "en-US": "Anyone with the link can download “{name}” without an account until it ends."
+      },
+      "ui.ws.documents.share_valid": {
+        "de-CH": "Gültig für",
+        "en-US": "Valid for"
+      },
+      "ui.ws.documents.share_day": {
+        "de-CH": "1 Tag",
+        "en-US": "1 day"
+      },
+      "ui.ws.documents.share_week": {
+        "de-CH": "1 Woche",
+        "en-US": "1 week"
+      },
+      "ui.ws.documents.share_month": {
+        "de-CH": "30 Tage",
+        "en-US": "30 days"
+      },
+      "ui.ws.documents.share_create": {
+        "de-CH": "Link erstellen",
+        "en-US": "Create link"
+      },
+      "ui.ws.documents.share_made": {
+        "de-CH": "Der Link ist bereit. Er wird nur jetzt angezeigt – kopiere ihn.",
+        "en-US": "The link is ready. It is shown only now – copy it."
+      },
+      "ui.ws.documents.share_link": {
+        "de-CH": "Link zum Teilen",
+        "en-US": "Link to share"
+      },
+      "ui.ws.documents.share_copy": {
+        "de-CH": "Kopieren",
+        "en-US": "Copy"
+      },
+      "ui.ws.documents.share_copied": {
+        "de-CH": "Link kopiert",
+        "en-US": "Link copied"
+      },
+      "ui.ws.documents.share_active": {
+        "de-CH": "Aktive Links",
+        "en-US": "Active links"
+      },
+      "ui.ws.documents.share_until": {
+        "de-CH": "Bis {date}",
+        "en-US": "Until {date}"
+      },
+      "ui.ws.documents.share_opened": {
+        "de-CH": "{count}× geöffnet",
+        "en-US": "opened {count}×"
+      },
+      "ui.ws.documents.share_end": {
+        "de-CH": "Beenden",
+        "en-US": "End"
+      },
+      "ui.ws.documents.share_revoked": {
+        "de-CH": "Link beendet",
+        "en-US": "Link ended"
+      },
+      "ui.ws.share.title": {
+        "de-CH": "{name}",
+        "en-US": "{name}"
+      },
+      "ui.ws.share.text": {
+        "de-CH": "{tenant} teilt diese Datei mit dir.",
+        "en-US": "{tenant} shares this file with you."
+      },
+      "ui.ws.share.download": {
+        "de-CH": "Herunterladen",
+        "en-US": "Download"
+      },
+      "ui.ws.share.valid_until": {
+        "de-CH": "Der Link gilt bis {date}.",
+        "en-US": "The link works until {date}."
+      },
+      "ui.ws.share.downloaded": {
+        "de-CH": "«{name}» heruntergeladen",
+        "en-US": "“{name}” downloaded"
+      },
       "ui.ws.documents.file_list": {
         "de-CH": "Dateien",
         "en-US": "Files"
@@ -6410,6 +6494,10 @@
         "de-CH": "Mails von Geschäftsadressen senden",
         "en-US": "Send mail from business addresses"
       },
+      "error.ws.share_invalid": {
+        "de-CH": "Dieser Link gilt nicht mehr. Bitte frage beim Absender einen neuen an.",
+        "en-US": "This link no longer works. Please ask the sender for a new one."
+      },
       "error.ws.mail_already_sent": {
         "de-CH": "Die Mail ist schon unterwegs und lässt sich nicht mehr zurückholen.",
         "en-US": "The email is already on its way and can no longer be taken back."
@@ -6425,6 +6513,18 @@
       "error.ws.mail_attachment_invalid": {
         "de-CH": "Ein Anhang wurde nicht gefunden.",
         "en-US": "An attachment was not found."
+      },
+      "ui.ws.audit.document.shared": {
+        "de-CH": "hat «{target}» per Link geteilt",
+        "en-US": "shared “{target}” by link"
+      },
+      "ui.ws.audit.document.share_revoked": {
+        "de-CH": "hat einen Link zu «{target}» beendet",
+        "en-US": "ended a link to “{target}”"
+      },
+      "ui.ws.audit.document.share_opened": {
+        "de-CH": "Ein Link zu «{target}» wurde geöffnet",
+        "en-US": "A link to “{target}” was opened"
       },
       "ui.ws.audit.mail.cancelled": {
         "de-CH": "hat das Senden von «{target}» rückgängig gemacht",

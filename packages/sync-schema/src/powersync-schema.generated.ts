@@ -80,6 +80,7 @@ export const documents = new Table(
 		targets: column.text,
 		uploaded_by: column.text,
 		locked: column.integer,
+		search_text: column.text,
 	},
 	{ indexes: { tenant: ['tenant_id'] } },
 );

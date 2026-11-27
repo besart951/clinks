@@ -1,3 +1,4 @@
+import { searchableText } from '@clinks/domain/search-text';
 import type { AttachmentTarget, StoredDocument } from '@clinks/domain/types';
 import { MockApiError } from '../../data/database.ts';
 import { Resource } from '../../state/resource.svelte.ts';
@@ -23,6 +24,8 @@ export async function uploadDocument(
 		targets: options.target ? [options.target] : [],
 		uploadedBy: workspace.session.user!.id,
 		locked: false,
+		// The demo reads text files itself; with the API the server reads every file (services/document-text.ts).
+		searchText: file.type.startsWith('text/') ? searchableText(await file.text()) : null,
 	});
 }
 

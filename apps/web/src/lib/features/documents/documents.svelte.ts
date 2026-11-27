@@ -15,6 +15,7 @@ import {
 	type DocumentSortKey,
 } from './document-sort.ts';
 import { zipFiles } from './zip.ts';
+import { excerpt } from '@clinks/domain/search-text';
 
 /** How the files show: rows with columns, or tiles with a picture. */
 export type DocumentView = 'table' | 'cards';
@@ -116,10 +117,19 @@ export class DocumentsModel {
 		const query = this.search.trim().toLowerCase();
 		return sortDocuments(
 			(this.resource.data?.documents ?? []).filter((document) =>
-				query ? document.name.toLowerCase().includes(query) : document.folderId === this.folderId,
+				query
+					? document.name.toLowerCase().includes(query) || !!document.searchText?.toLowerCase().includes(query)
+					: document.folderId === this.folderId,
 			),
 			this.sort,
 		);
+	}
+
+	/** Where the search found a file by its text (not its name): the words around the match. */
+	excerptOf(document: StoredDocument): string | null {
+		const query = this.search.trim();
+		if (!query || !document.searchText || document.name.toLowerCase().includes(query.toLowerCase())) return null;
+		return excerpt(document.searchText, query);
 	}
 
 	setSort(key: DocumentSortKey) {

@@ -1,3 +1,4 @@
+import { MockDocumentShares } from './mock-document-shares.ts';
 import type { UserId } from '@clinks/domain/ids';
 import type { AppNotification, CommentTarget, MyVisits, NotificationKind } from '@clinks/domain/types';
 import { myVisits } from '@clinks/domain/spitex-release';
@@ -51,6 +52,7 @@ export class WorkspaceApi {
 	readonly mailSettings: MockMailSettings;
 	/** Demo backend for «Senden»; with the API, `MailOutgoing` calls the server instead. */
 	readonly mailOutgoing: MockMailOutgoing;
+	readonly documentShares: MockDocumentShares;
 	/** Demo backends for the newsletter; with the API, `newsletter.ts` calls the server instead. */
 	readonly newsletterForms: MockNewsletterForms;
 	readonly newsletterConsents: MockNewsletterConsents;
@@ -67,6 +69,7 @@ export class WorkspaceApi {
 		this.bankImports = new MockBankImports(db, context);
 		this.mailSettings = new MockMailSettings(db, context);
 		this.mailOutgoing = new MockMailOutgoing(db, context);
+		this.documentShares = new MockDocumentShares(db, context);
 		this.newsletterForms = new MockNewsletterForms(db, context);
 		this.newsletterConsents = new MockNewsletterConsents(db, context);
 		this.campaignWorkflow = new MockCampaignWorkflow(db, context);

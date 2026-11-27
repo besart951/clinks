@@ -1,3 +1,4 @@
+import type { DocumentShareView } from '@clinks/contracts/documents';
 import type { TenantId } from '@clinks/domain/ids';
 import type { BankEntryView, BankImportView } from '@clinks/contracts/finance';
 import type { MailSenderView, StoredMailDomain } from '@clinks/contracts/mail';
@@ -47,6 +48,8 @@ export type MockMailDomain = StoredMailDomain & { tenantId: TenantId };
 export type MockMailSender = Omit<MailSenderView, 'active'> & { tenantId: TenantId };
 /** The demo's filing address per workspace (apps/api: auth.mail_inbound_addresses). */
 export type MockFilingAddress = { id: string; tenantId: TenantId; address: string };
+/** The demo's «Teilen-Link» (apps/api: document_shares; the server keeps only a hash of the token). */
+export type MockDocumentShare = DocumentShareView & { tenantId: TenantId; documentId: string; token: string };
 /** The demo's newsletter: forms, sign-ups waiting for their link, the consent log and blocked addresses. */
 export type MockNewsletterForm = NewsletterFormView & { tenantId: TenantId };
 export type MockNewsletterRequest = {
@@ -96,6 +99,7 @@ export interface Tables {
 	newsletterForms: MockNewsletterForm;
 	newsletterRequests: MockNewsletterRequest;
 	newsletterConsents: MockNewsletterConsent;
+	documentShares: MockDocumentShare;
 }
 
 export type TableName = keyof Tables;
@@ -135,6 +139,7 @@ export const tableNames: readonly TableName[] = [
 	'newsletterForms',
 	'newsletterRequests',
 	'newsletterConsents',
+	'documentShares',
 ];
 
 export type ErrorCode =
