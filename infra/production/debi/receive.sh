@@ -67,6 +67,12 @@ curl --fail --retry 6 --retry-all-errors "https://$API_HOST/.well-known/jwks.jso
 "${compose[@]}" up -d --no-build --wait --wait-timeout 180
 curl -fsS -H "Host: $WEB_HOST" http://127.0.0.1:18780/ -o /dev/null
 python3 debi/route.py web
-curl -fsS "https://$WEB_HOST/" -o /dev/null
+expected=$(docker exec clinks-live-caddy-1 sha256sum /srv/index.html | cut -d' ' -f1)
+for attempt in {1..10}; do
+    actual=$(curl -fsS "https://$WEB_HOST/" | sha256sum | cut -d' ' -f1)
+    [[ $actual == "$expected" ]] && break
+    sleep 1
+done
+[[ $actual == "$expected" ]] || { echo 'Public home page differs from release'; exit 1; }
 case $(curl -sS -o /dev/null -w '%{http_code}' "https://$WEB_HOST/besmir/") in 200|302|401) ;; *) exit 1 ;; esac
 ln -sfn "$source_dir" /srv/clinks/current
