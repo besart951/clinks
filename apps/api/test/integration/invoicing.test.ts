@@ -104,6 +104,8 @@ describe('archive', () => {
 		assert.equal(document.mimeType, 'application/pdf');
 		assert.equal(document.name, `Rechnung ${invoice.number}.pdf`);
 		assert.deepEqual(document.targets, [{ kind: 'invoice', id }]);
+		// Its text is read for the search, from the PDF's text layer.
+		assert.match(String(document.searchText), new RegExp(String(invoice.number)));
 
 		const pdf = await call('GET', `/finance/invoices/${id}/pdf`);
 		assert.equal(pdf.status, 200);

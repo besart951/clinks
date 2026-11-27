@@ -1,3 +1,4 @@
+import { searchableText } from '@clinks/domain/search-text';
 import { streetLine } from '@clinks/domain/address';
 import { addDays, atTime, startOfWeek, toCalendarDate } from '@clinks/domain/dates';
 import { newId, type ContactId, type FolderId, type RoleId, type TenantId } from '@clinks/domain/ids';
@@ -188,6 +189,7 @@ function emptySnapshot(): Snapshot {
 		newsletterForms: [],
 		newsletterRequests: [],
 		newsletterConsents: [],
+		documentShares: [],
 	};
 }
 
@@ -742,6 +744,7 @@ function seedDocuments(context: SeedContext, tenantId: TenantId, me: User, conta
 			targets: contactId ? [{ kind: 'contact', id: contactId }] : [],
 			uploadedBy: me.id,
 			locked: false,
+			searchText: searchableText(text),
 		});
 	file(
 		'Mietvertrag Praxis.txt',

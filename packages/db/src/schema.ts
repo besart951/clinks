@@ -139,7 +139,13 @@ export interface OutboxAttachment {
 }
 
 export type OneTimePurpose =
-	'verify_email' | 'reset_password' | 'invitation' | 'two_factor' | 'invoice_link' | 'newsletter_optin';
+	| 'verify_email'
+	| 'reset_password'
+	| 'invitation'
+	| 'two_factor'
+	| 'invoice_link'
+	| 'newsletter_optin'
+	| 'document_share';
 
 export interface OneTimeTokenTable {
 	id: string;
@@ -149,6 +155,7 @@ export interface OneTimeTokenTable {
 	tenantId: string | null;
 	invoiceSendId: ColumnType<string | null, string | null | undefined, string | null>;
 	newsletterRequestId: ColumnType<string | null, string | null | undefined, string | null>;
+	documentShareId: ColumnType<string | null, string | null | undefined, string | null>;
 	tokenHash: Uint8Array;
 	attempts: Defaulted<number>;
 	expiresAt: Date;
@@ -323,6 +330,11 @@ export interface Database {
 		campaignId: string | null;
 		createdAt: Timestamp;
 	};
+	'auth.documentTextQueue': {
+		documentId: string;
+		tenantId: string;
+		queuedAt: Defaulted<Date>;
+	};
 	'auth.mailRetention': {
 		tenantId: string;
 		checkedAt: Defaulted<Date>;
@@ -342,6 +354,17 @@ export interface Database {
 		tenantId: string;
 		dueAt: Defaulted<Date>;
 		lockedUntil: Date | null;
+	};
+	documentShares: {
+		id: string;
+		tenantId: string;
+		documentId: string;
+		createdBy: string | null;
+		expiresAt: Date;
+		revokedAt: Date | null;
+		openCount: Defaulted<number>;
+		openedAt: Date | null;
+		createdAt: Timestamp;
 	};
 	invoiceSends: {
 		id: string;

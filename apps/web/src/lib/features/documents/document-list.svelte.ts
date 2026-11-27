@@ -6,6 +6,7 @@ import FolderInput from '@lucide/svelte/icons/folder-input';
 import History from '@lucide/svelte/icons/history';
 import Link2 from '@lucide/svelte/icons/link-2';
 import PenLine from '@lucide/svelte/icons/pen-line';
+import Share2 from '@lucide/svelte/icons/share-2';
 import Trash2 from '@lucide/svelte/icons/trash-2';
 import type { DocumentId } from '@clinks/domain/ids';
 import type { StoredDocument } from '@clinks/domain/types';
@@ -20,6 +21,7 @@ export interface DocumentListHandlers {
 	versions(document: StoredDocument): void;
 	rename(document: StoredDocument): void;
 	link(document: StoredDocument): void;
+	share(document: StoredDocument): void;
 }
 
 /**
@@ -70,6 +72,14 @@ export function documentList(workspace: Workspace, documents: DocumentsModel, ha
 			single: true,
 			when: writes,
 			run: (files) => handlers.link(files[0]),
+		},
+		{
+			id: 'share',
+			label: () => t('ui.ws.documents.share'),
+			icon: () => Share2,
+			single: true,
+			when: writes,
+			run: (files) => handlers.share(files[0]),
 		},
 		{
 			id: 'move',

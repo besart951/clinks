@@ -272,6 +272,8 @@ export interface StoredDocument extends TenantRecord<DocumentId> {
 	uploadedBy: UserId;
 	/** An archived file (an issued invoice or reminder): it can no longer be renamed, replaced or deleted. */
 	locked: boolean;
+	/** The file's text, read by the server for the search; absent until read, and for files without text. */
+	searchText?: string | null;
 }
 
 export const vatRates = [810, 260, 380, 0] as const;

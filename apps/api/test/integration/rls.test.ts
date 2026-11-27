@@ -14,6 +14,8 @@ const withoutTenant = [
 	// Campaigns due to go out across workspaces: ids only, like the mail queue.
 	'auth.campaign_queue',
 	'auth.credentials',
+	// Files waiting for their text to be read across workspaces: ids only, the file is read in its workspace.
+	'auth.document_text_queue',
 	// The worker's queue across workspaces: ids only, the mail itself is read in the workspace's scope.
 	'auth.mail_queue',
 	// Workspaces with outbox mail, for the daily retention run: ids only.

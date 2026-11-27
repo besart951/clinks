@@ -28,6 +28,7 @@ import {
 	stamp,
 	type MockInvoiceSend,
 	type MockNewsletterRequest,
+	type MockDocumentShare,
 	type WorkspaceCache,
 	type Snapshot,
 	type TableName,
@@ -772,6 +773,11 @@ export class AccountApi {
 			if (result.newsletterRequests)
 				result.newsletterRequests = (result.newsletterRequests as MockNewsletterRequest[]).map(
 					({ token: _token, ...request }) => request,
+				);
+			// A share's token opens the file for anyone who has it.
+			if (result.documentShares)
+				result.documentShares = (result.documentShares as MockDocumentShare[]).map(
+					({ token: _token, ...share }) => share,
 				);
 			// Access keys stay out of exports.
 			if (result.storageSettings)

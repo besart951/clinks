@@ -10,6 +10,8 @@ import { registerAccountRoutes } from './routes/account.ts';
 import { registerAuthRoutes } from './routes/auth.ts';
 import { registerBillingRoutes } from './routes/billing.ts';
 import { registerFileRoutes } from './routes/files.ts';
+import { registerShareRoutes } from './routes/shares.ts';
+import { DocumentShares } from './services/document-shares.ts';
 import { registerFinanceRoutes } from './routes/finance.ts';
 import { registerMailRoutes } from './routes/mail.ts';
 import { registerSyncRoutes } from './routes/sync.ts';
@@ -60,6 +62,7 @@ export function createApp({ services, config }: AppOptions) {
 		storage: new StorageService(services),
 		billing: new BillingService(services),
 		files: new FileService(services),
+		documentShares: new DocumentShares(services),
 		invoices: new InvoiceService(services),
 		invoiceLinks: new InvoiceLinks(services),
 		bankImports: new BankImportService(services),
@@ -137,6 +140,7 @@ export function createApp({ services, config }: AppOptions) {
 	registerSyncRoutes(me, deps);
 	registerBillingRoutes(app, me, deps);
 	registerFileRoutes(me, deps);
+	registerShareRoutes(app, me, deps);
 	registerFinanceRoutes(app, me, deps);
 	registerMailRoutes(me, deps);
 	registerNewsletterRoutes(app, me, deps);

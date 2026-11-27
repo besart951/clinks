@@ -1406,3 +1406,30 @@ test('shows files as tiles, sorts them, previews the marked one and pins folders
 	await expect(files.first().locator('img, svg').first()).toBeVisible();
 	await page.getByRole('button', { name: 'Tabelle' }).click();
 });
+
+test('finds a file by its text and shares it by a link that works without an account', async ({ page }) => {
+	await page.setViewportSize({ width: 1440, height: 900 });
+	await signIn(page);
+	await page.goto('/#/documents');
+	await page.getByRole('searchbox', { name: 'Dateien suchen' }).fill('Laufzeit');
+	const files = page.getByRole('list', { name: 'Dateien' }).getByRole('listitem');
+	await expect(files).toHaveCount(1);
+	await expect(files.first()).toContainText('Mietvertrag Praxis.txt');
+	await expect(files.first()).toContainText('Laufzeit bis 2029');
+
+	await files.first().click({ button: 'right' });
+	await page.getByRole('menuitem', { name: 'Teilen-Link' }).click();
+	const dialog = page.getByRole('dialog', { name: 'Teilen-Link' });
+	await dialog.getByRole('button', { name: '1 Woche' }).click();
+	await dialog.getByRole('button', { name: 'Link erstellen' }).click();
+	const link = await dialog.getByRole('textbox', { name: 'Link zum Teilen' }).inputValue();
+	expect(link).toMatch(/#\/share\/[0-9a-f]{32}$/);
+	await expect(dialog.getByRole('region', { name: 'Aktive Links' })).toContainText('0× geöffnet');
+	await page.keyboard.press('Escape');
+
+	await page.goto(link.slice(link.indexOf('#') - 1).replace(/^\//, '/'));
+	await expect(page.getByRole('heading', { name: 'Mietvertrag Praxis.txt' })).toBeVisible();
+	const download = page.waitForEvent('download');
+	await page.getByRole('button', { name: 'Herunterladen' }).click();
+	expect((await download).suggestedFilename()).toBe('Mietvertrag Praxis.txt');
+});

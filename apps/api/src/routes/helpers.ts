@@ -22,6 +22,7 @@ import type { Caller, Services } from '../services/context.ts';
 import type { FileService } from '../services/files.ts';
 import type { InvoiceService } from '../services/invoices.ts';
 import type { InvoiceLinks } from '../services/invoice-links.ts';
+import type { DocumentShares } from '../services/document-shares.ts';
 import type { OpenedSession, SessionService } from '../services/sessions.ts';
 import type { SettingsService } from '../services/settings.ts';
 import type { StorageService } from '../services/storage.ts';
@@ -44,6 +45,7 @@ export interface RouteDeps {
 	storage: StorageService;
 	billing: BillingService;
 	files: FileService;
+	documentShares: DocumentShares;
 	invoices: InvoiceService;
 	invoiceLinks: InvoiceLinks;
 	bankImports: BankImportService;

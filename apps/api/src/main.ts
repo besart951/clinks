@@ -15,6 +15,7 @@ import { CampaignDispatcher } from './services/campaigns.ts';
 import { expireSignUps } from './services/newsletter-signup.ts';
 import { AppointmentReminders } from './services/appointment-mail.ts';
 import { pruneMailOutbox } from './services/mail-retention.ts';
+import { DocumentText } from './services/document-text.ts';
 import { imapSource, mailpitSource } from './inbound-sources.ts';
 import { pruneExpiredTokens } from './services/sessions.ts';
 import { TokenService } from './tokens.ts';
@@ -76,9 +77,10 @@ const inboundTimer = inbound
 inboundTimer?.unref();
 const campaigns = new CampaignDispatcher(services);
 const reminders = new AppointmentReminders(services);
+const documentText = new DocumentText(services);
 const scheduleTimer = config.MAIL_WORKER
 	? setInterval(() => {
-			void Promise.all([campaigns.dispatch(), reminders.dispatch()]).catch((error: unknown) =>
+			void Promise.all([campaigns.dispatch(), reminders.dispatch(), documentText.run()]).catch((error: unknown) =>
 				console.error(JSON.stringify({ event: 'mail.schedule_failed', errorType: (error as Error)?.name ?? 'Error' })),
 			);
 		}, 30_000)

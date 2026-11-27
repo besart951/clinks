@@ -1,6 +1,7 @@
 import { RemoteAccountApi } from './data/remote-account.ts';
 import type { PageKeys } from './features/shell/page-keys.ts';
 import { DocumentFiles } from './data/document-files.ts';
+import { DocumentShares } from './data/document-shares.ts';
 import { InvoiceFiles } from './data/invoice-files.ts';
 import { InvoiceDelivery } from './data/invoice-delivery.ts';
 import { BankImports } from './data/bank-imports.ts';
@@ -58,6 +59,7 @@ export class Workspace {
 	readonly bankImports: BankImports;
 	readonly mailSettings: MailSettings;
 	readonly mailOutgoing: MailOutgoing;
+	readonly documentShares: DocumentShares;
 	readonly newsletterForms: NewsletterForms;
 	readonly newsletterConsents: NewsletterConsents;
 	readonly campaignWorkflow: CampaignWorkflow;
@@ -107,6 +109,7 @@ export class Workspace {
 		this.bankImports = new BankImports(client, () => this.api);
 		this.mailSettings = new MailSettings(client, () => this.api);
 		this.mailOutgoing = new MailOutgoing(client, () => this.api);
+		this.documentShares = new DocumentShares(client, () => this.api);
 		this.newsletterForms = new NewsletterForms(client, () => this.api);
 		this.newsletterConsents = new NewsletterConsents(client, () => this.api);
 		this.campaignWorkflow = new CampaignWorkflow(

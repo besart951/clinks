@@ -122,6 +122,8 @@ export const syncedTables = {
 			{ column: 'targets', field: 'targets', type: 'json' },
 			{ column: 'uploaded_by', field: 'uploadedBy', type: 'uuid', references: 'users' },
 			{ column: 'locked', field: 'locked', type: 'boolean', serverSet: true },
+			// Read by the server from the file (services/document-text.ts), for the full-text search.
+			{ column: 'search_text', field: 'searchText', type: 'text', nullable: true, serverSet: true },
 		],
 	},
 	invoices: {

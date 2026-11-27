@@ -15,6 +15,8 @@ export const lifetimes: { [purpose in OneTimePurpose]: number } = {
 	invoice_link: linkLifetimeDays * 24 * 60 * 60_000,
 	// Unconfirmed newsletter sign-ups are deleted after this.
 	newsletter_optin: 7 * 24 * 60 * 60_000,
+	// The longest a shared file can stay open; each share sets its own end (`expiresAt`).
+	document_share: 30 * 24 * 60 * 60_000,
 };
 
 interface Issue {
@@ -24,6 +26,9 @@ interface Issue {
 	tenantId?: string;
 	invoiceSendId?: string;
 	newsletterRequestId?: string;
+	documentShareId?: string;
+	/** An end before the purpose's longest lifetime. */
+	expiresAt?: Date;
 	now: Date;
 }
 
@@ -56,8 +61,11 @@ async function insert(db: Db | Tx, id: string, tokenHash: Buffer, issue: Issue) 
 			tenantId: issue.tenantId ?? null,
 			invoiceSendId: issue.invoiceSendId ?? null,
 			newsletterRequestId: issue.newsletterRequestId ?? null,
+			documentShareId: issue.documentShareId ?? null,
 			tokenHash,
-			expiresAt: new Date(issue.now.getTime() + lifetimes[issue.purpose]),
+			expiresAt: new Date(
+				Math.min(issue.expiresAt?.getTime() ?? Infinity, issue.now.getTime() + lifetimes[issue.purpose]),
+			),
 			usedAt: null,
 		})
 		.execute();
