@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { focusOnMount } from '#lib/components/common/focus-on-mount';
 	import Plus from '@lucide/svelte/icons/plus';
 	import { Input } from '@clinks/ui/components/ui/input';
 	import TaskCard from './TaskCard.svelte';
@@ -184,7 +185,7 @@
 				{#if adding === column.status}
 					<li>
 						<Input
-							autofocus
+							{@attach focusOnMount}
 							bind:value={newTitle}
 							placeholder={workspace.t('ui.ws.planner.quick_add')}
 							aria-label={workspace.t('ui.ws.planner.quick_add')}

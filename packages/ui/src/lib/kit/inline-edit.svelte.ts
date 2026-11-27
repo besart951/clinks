@@ -42,6 +42,8 @@ export interface InlineFieldSpec {
 	hint?: string;
 	/** A place to open in a map next to the value, e.g. an address. */
 	place?: string;
+	/** An address to write to, with an icon next to the value. */
+	mail?: string;
 	options?: InlineOption[];
 	/** The inputs of a `group` field; its `value` is `groupValue(parts)` and `display` the formatted whole. */
 	parts?: InlinePart[];

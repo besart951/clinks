@@ -19,7 +19,9 @@ const browserFiles: FileStore = {
 		URL.revokeObjectURL(link.href);
 	},
 	open(url) {
-		window.open(url, '_blank', 'noopener');
+		// A mail link hands over to the mail program; a new tab would stay empty.
+		if (url.startsWith('mailto:')) window.location.assign(url);
+		else window.open(url, '_blank', 'noopener');
 	},
 	print() {
 		window.print();

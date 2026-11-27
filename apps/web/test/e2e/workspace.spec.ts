@@ -35,7 +35,9 @@ test('adds a task to the board', async ({ page }) => {
 	await signIn(page);
 	await page.goto('/#/planner');
 	await page.getByRole('button', { name: 'Aufgabe in «Zu erledigen» hinzufügen' }).click();
-	await page.getByLabel('Titel eingeben und Enter drücken').fill('Prototyp testen');
+	// The field takes the focus: typing right away works.
+	await expect(page.getByLabel('Titel eingeben und Enter drücken')).toBeFocused();
+	await page.keyboard.type('Prototyp testen');
 	await page.keyboard.press('Enter');
 	await expect(page.getByRole('region', { name: 'Zu erledigen' }).getByText('Prototyp testen')).toBeVisible();
 });
@@ -515,6 +517,32 @@ test('offers the calendar basics in every calendar view: hidden weekdays per vie
 	await page.getByRole('button', { name: 'Weiter' }).click();
 	await page.getByRole('button', { name: 'Heute', exact: true }).click();
 	await expect(page.getByRole('heading', { name: /^KW \d+ · / })).toBeVisible();
+});
+
+test('writes to a contact’s address in CLinks or the mail program, and remembers the choice', async ({ page }) => {
+	await signIn(page);
+	await page.goto('/#/contacts?new=1');
+	await page.getByLabel('Vorname').fill('Mona');
+	await page.getByLabel('Nachname').fill('Mail');
+	await page.getByRole('textbox', { name: 'E-Mail' }).fill('mona.mail@example.ch');
+	await page.getByRole('button', { name: 'Speichern' }).click();
+	await expect(page.getByRole('heading', { level: 1, name: 'Mona Mail' })).toBeVisible();
+
+	await page.getByRole('button', { name: 'E-Mail an mona.mail@example.ch schreiben' }).click();
+	const ask = page.getByRole('dialog', { name: 'E-Mail schreiben' });
+	await expect(ask.getByRole('button', { name: /Mit dem Mail-Programm des Geräts/ })).toBeVisible();
+	await ask.getByRole('checkbox').check();
+	await ask.getByRole('button', { name: /In CLinks schreiben/ }).click();
+	const compose = page.getByRole('dialog', { name: 'Neue Mail' });
+	await expect(compose.getByText('mona.mail@example.ch')).toBeVisible();
+	await compose.getByRole('button', { name: 'Schliessen' }).click();
+
+	// Remembered: straight to the compose sheet; the profile can change it back.
+	await page.getByRole('button', { name: 'E-Mail an mona.mail@example.ch schreiben' }).click();
+	await expect(page.getByRole('dialog', { name: 'Neue Mail' })).toBeVisible();
+	await expect(page.getByRole('dialog', { name: 'E-Mail schreiben' })).toHaveCount(0);
+	await page.goto('/#/settings/profile');
+	await expect(page.getByLabel('E-Mails schreiben mit')).toContainText('CLinks');
 });
 
 test('sets the QR-IBAN and the payment term for invoices', async ({ page }) => {

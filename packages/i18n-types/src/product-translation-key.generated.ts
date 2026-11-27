@@ -1679,6 +1679,19 @@ export const productDefaultTranslations = {
 	"ui.ws.visits.pending_title": "Der Plan für KW {week} ist noch in Arbeit",
 	"ui.ws.visits.text": "Dein Plan, sobald die Woche freigegeben ist.",
 	"ui.ws.visits.title": "Meine Einsätze",
+	"ui.ws.write_mail.clinks": "In CLinks schreiben",
+	"ui.ws.write_mail.clinks_hint": "Von deiner oder der Geschäftsadresse; die Mail landet unter «Gesendet» beim Kontakt.",
+	"ui.ws.write_mail.preference": "E-Mails schreiben mit",
+	"ui.ws.write_mail.preference_ask": "Jedes Mal fragen",
+	"ui.ws.write_mail.preference_clinks": "CLinks",
+	"ui.ws.write_mail.preference_system": "Mail-Programm des Geräts",
+	"ui.ws.write_mail.remember": "Auswahl merken",
+	"ui.ws.write_mail.remember_hint": "Ändern unter Einstellungen › Profil.",
+	"ui.ws.write_mail.system": "Mit dem Mail-Programm des Geräts",
+	"ui.ws.write_mail.system_hint": "Outlook, Apple Mail, Gmail – was dein System für E-Mail-Links verwendet.",
+	"ui.ws.write_mail.text": "An {email} – womit möchtest du schreiben?",
+	"ui.ws.write_mail.title": "E-Mail schreiben",
+	"ui.ws.write_mail.to": "E-Mail an {email} schreiben",
 } as const;
 
 export const productTranslationKeys = [
@@ -3358,6 +3371,19 @@ export const productTranslationKeys = [
 	"ui.ws.visits.pending_title",
 	"ui.ws.visits.text",
 	"ui.ws.visits.title",
+	"ui.ws.write_mail.clinks",
+	"ui.ws.write_mail.clinks_hint",
+	"ui.ws.write_mail.preference",
+	"ui.ws.write_mail.preference_ask",
+	"ui.ws.write_mail.preference_clinks",
+	"ui.ws.write_mail.preference_system",
+	"ui.ws.write_mail.remember",
+	"ui.ws.write_mail.remember_hint",
+	"ui.ws.write_mail.system",
+	"ui.ws.write_mail.system_hint",
+	"ui.ws.write_mail.text",
+	"ui.ws.write_mail.title",
+	"ui.ws.write_mail.to",
 ] as const;
 
 export type ProductTranslationKey = (typeof productTranslationKeys)[number];
