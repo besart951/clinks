@@ -308,6 +308,54 @@ test('imports a camt.054, books by QR reference and assigns the rest by hand', a
 	await expect(page.getByRole('listitem').filter({ hasText: /^05\.12\.2026/ })).toHaveCount(2);
 });
 
+test('sets up a sender domain and a business sender that invoices go out from', async ({ page }) => {
+	await signIn(page);
+	await page.goto('/#/settings/mail');
+	await page.getByLabel('Domain', { exact: true }).fill('praxis-sonne.ch');
+	await page.getByRole('button', { name: 'Domain hinzufügen' }).click();
+	const domain = page.getByRole('article', { name: 'praxis-sonne.ch' });
+	await expect(domain.getByText('Ausstehend')).toBeVisible();
+	const records = domain.getByRole('list', { name: 'DNS-Einträge für praxis-sonne.ch' });
+	await expect(records.getByRole('listitem')).toHaveCount(3);
+	await expect(records).toContainText('v=spf1 include:_spf.clinks.ch ~all');
+	await expect(records).toContainText(/clinks-\w+\._domainkey\.praxis-sonne\.ch/);
+	await domain.getByRole('button', { name: 'Prüfen' }).click();
+	await expect(domain.getByText('Bestätigt')).toBeVisible();
+
+	await page.getByRole('button', { name: 'Geschäftsabsender' }).click();
+	const dialog = page.getByRole('dialog', { name: 'Geschäftsabsender' });
+	await dialog.getByLabel('Adresse').fill('rechnung@other.ch');
+	await dialog.getByRole('button', { name: 'Speichern' }).click();
+	await expect(dialog.getByText(/Die Adresse muss auf einer eingetragenen Domain/)).toBeVisible();
+	await dialog.getByLabel('Adresse').fill('rechnung@praxis-sonne.ch');
+	await dialog.getByLabel('Anzeigename').fill('Praxis Sonne Buchhaltung');
+	await dialog.getByRole('button', { name: 'Speichern' }).click();
+	await expect(dialog).toBeHidden();
+	const row = page.getByRole('row').filter({ hasText: 'rechnung@praxis-sonne.ch' });
+	await expect(row).toContainText('Aktiv');
+
+	// Invoices now go out from it (in the demo: Mail › Gesendet).
+	await page.goto('/#/finance/invoices/new');
+	await page.getByRole('combobox').first().click();
+	await page.getByRole('option').nth(1).click();
+	await page.getByLabel('Beschreibung').first().fill('Behandlung');
+	await page.getByLabel('Preis CHF').first().fill('80');
+	await page.getByLabel('Preis CHF').first().blur();
+	await page.getByRole('button', { name: 'Rechnung stellen' }).click();
+	await expect(page.getByText('PDF/A archiviert')).toBeVisible();
+	await page.getByRole('button', { name: 'Senden', exact: true }).click();
+	await page.getByRole('dialog').getByRole('button', { name: 'Senden' }).click();
+	await expect(page.getByRole('dialog')).toBeHidden();
+	await expect(page.getByText(/^Physio · von|^Sicherer Link · von/).first()).toBeVisible();
+	await page.goto('/#/mail');
+	await page.getByRole('button', { name: /^Gesendet/ }).click();
+	await page
+		.getByText(/^Rechnung \d{4}-\d{4} von/)
+		.first()
+		.click();
+	await expect(page.getByText('Praxis Sonne Buchhaltung').first()).toBeVisible();
+});
+
 test('sets the QR-IBAN and the payment term for invoices', async ({ page }) => {
 	await signIn(page);
 	await page.goto('/#/settings');

@@ -20,8 +20,12 @@ export interface Services {
 	billing?: Billing;
 	tokens: TokenService;
 	mailer: Mailer;
+	/** Sends from workspaces' own verified domains (SMTP_RELAY_URL); without it they use the platform sender. */
+	relay?: Mailer;
+	/** DNS TXT lookup for sender domains; tests pass a fixed table. */
+	resolveTxt?: (host: string) => Promise<string[][]>;
 	limiter: RateLimiter;
-	config: Pick<Config, 'WEB_ORIGIN'> & Partial<Pick<Config, 'STORAGE_ALLOW_INTERNAL'>>;
+	config: Pick<Config, 'WEB_ORIGIN'> & Partial<Pick<Config, 'STORAGE_ALLOW_INTERNAL' | 'MAIL_SPF_INCLUDE'>>;
 	now: () => Date;
 }
 

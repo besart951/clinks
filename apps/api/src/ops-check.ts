@@ -8,6 +8,7 @@ import { GetObjectLockConfigurationCommand } from '@aws-sdk/client-s3';
 import { createDb } from '@clinks/db/client';
 import { sql } from 'kysely';
 import nodemailer from 'nodemailer';
+import { resolveTxt } from 'node:dns/promises';
 import { readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { parseArgs, parseEnv } from 'node:util';
@@ -346,6 +347,24 @@ export async function connectionChecks({ api, powersync }: EnvFiles): Promise<Ch
 			async () => (await nodemailer.createTransport(api.SMTP_URL!).verify()) === true,
 			'SMTP_URL (Benutzer, Passwort, Port 465) prüfen.',
 		);
+
+	if (api.SMTP_RELAY_URL) {
+		const include = api.MAIL_SPF_INCLUDE ?? '_spf.clinks.ch';
+		await attempt(
+			checks,
+			'E-Mail',
+			'Relay für eigene Absender-Domains nimmt die Anmeldung an',
+			async () => (await nodemailer.createTransport(api.SMTP_RELAY_URL!).verify()) === true,
+			'SMTP_RELAY_URL des Versanddienstes prüfen (Benutzer, Passwort, Port).',
+		);
+		await attempt(
+			checks,
+			'E-Mail',
+			`SPF-Sammeleintrag ${include} ist veröffentlicht`,
+			async () => (await resolveTxt(include)).some((parts) => parts.join('').startsWith('v=spf1')),
+			'TXT-Eintrag mit «v=spf1 include:<SPF des Versanddienstes> ~all» anlegen; Kundendomains verweisen darauf.',
+		);
+	}
 
 	if (api.STRIPE_SECRET_KEY)
 		await attempt(

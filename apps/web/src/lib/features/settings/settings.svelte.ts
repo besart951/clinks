@@ -255,6 +255,7 @@ export class ProfileModel extends SettingsForm {
 	lastName = $state('');
 	email = $state('');
 	avatarDataUrl = $state<string | null>(null);
+	mailSignature = $state('');
 	preferences = $state<NotificationPreferences>({ inApp: true, email: true, push: false, digest: 'daily' });
 	currentPassword = $state('');
 	newPassword = $state('');
@@ -276,6 +277,7 @@ export class ProfileModel extends SettingsForm {
 		this.lastName = user.lastName;
 		this.email = user.email;
 		this.avatarDataUrl = user.avatarDataUrl;
+		this.mailSignature = user.mailSignature ?? '';
 		this.preferences = { ...user.notificationPreferences };
 	}
 
@@ -296,6 +298,7 @@ export class ProfileModel extends SettingsForm {
 					lastName: this.lastName,
 					email: this.email,
 					avatarDataUrl: this.avatarDataUrl,
+					mailSignature: this.mailSignature,
 					notificationPreferences: $state.snapshot(this.preferences),
 				}),
 			'ui.ws.settings.saved',

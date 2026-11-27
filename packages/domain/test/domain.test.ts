@@ -1,5 +1,6 @@
 import { CamtError, matchCredit, parseCamt, suggestInvoices } from '../src/camt.ts';
 import { readFileSync } from 'node:fs';
+import { checkRecords, domainVerified, expectedRecords, normalizeDomain, senderFits } from '../src/mail-domains.ts';
 import { defaultDelivery, defaultInvoiceSettings, nextReminder, samePostcode } from '../src/invoicing.ts';
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
@@ -506,5 +507,62 @@ describe('bank files', () => {
 			),
 			['d', 'b'],
 		);
+	});
+});
+
+describe('sender domains', () => {
+	const records = expectedRecords(
+		'praxis.ch',
+		{ selector: 'clinks-a1b2c3', publicKey: 'MIIBkey+/=' },
+		'_spf.clinks.ch',
+	);
+
+	it('normalizes domains and keeps newsletter mail on its own domain', () => {
+		assert.equal(normalizeDomain(' @Praxis.CH. '), 'praxis.ch');
+		assert.equal(normalizeDomain('news.praxis.ch'), 'news.praxis.ch');
+		assert.equal(normalizeDomain('praxis'), null);
+		assert.equal(normalizeDomain('a b.ch'), null);
+		assert.ok(senderFits('personal', 'business'));
+		assert.ok(!senderFits('newsletter', 'business'));
+		assert.ok(!senderFits('business', 'newsletter'));
+	});
+
+	it('lists the records to publish', () => {
+		assert.deepEqual(
+			records.map((record) => [record.host, record.value]),
+			[
+				['praxis.ch', 'v=spf1 include:_spf.clinks.ch ~all'],
+				['clinks-a1b2c3._domainkey.praxis.ch', 'v=DKIM1; k=rsa; p=MIIBkey+/='],
+				['_dmarc.praxis.ch', 'v=DMARC1; p=none'],
+			],
+		);
+	});
+
+	it('judges DNS answers: an existing SPF needs only the include, DKIM must be our key', () => {
+		const dns: Record<string, string[]> = {
+			'praxis.ch': [
+				'google-site-verification=x',
+				'v=spf1 include:spf.protection.outlook.com include:_spf.clinks.ch -all',
+			],
+			'clinks-a1b2c3._domainkey.praxis.ch': ['v=DKIM1; k=rsa; p=MIIB key+/='],
+			'_dmarc.praxis.ch': ['v=DMARC1; p=quarantine; rua=mailto:d@praxis.ch'],
+		};
+		const ok = checkRecords(records, (host) => dns[host] ?? [], '_spf.clinks.ch');
+		assert.ok(domainVerified(ok));
+		const wrong = checkRecords(
+			records,
+			(host) =>
+				({ 'praxis.ch': ['v=spf1 -all'], 'clinks-a1b2c3._domainkey.praxis.ch': ['v=DKIM1; p=OTHER'] })[host] ?? [],
+			'_spf.clinks.ch',
+		);
+		assert.deepEqual(
+			wrong.map((check) => [check.record, check.ok, check.found]),
+			[
+				['spf', false, 'v=spf1 -all'],
+				['dkim', false, 'v=DKIM1; p=OTHER'],
+				['dmarc', false, null],
+			],
+		);
+		assert.ok(!domainVerified(wrong));
 	});
 });

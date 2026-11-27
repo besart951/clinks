@@ -35,6 +35,8 @@ export interface FileStore {
 	/** Opens a document or link outside the app. */
 	open(url: string): void;
 	print(): void;
+	/** Puts text on the clipboard, e.g. a DNS record to paste elsewhere. */
+	copyText(text: string): Promise<void>;
 }
 
 export interface Notifier {

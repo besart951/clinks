@@ -89,6 +89,9 @@ export class MockInvoiceSends {
 		const tenant = this.#db.table('tenants').find((row) => row.id === invoice.tenantId)!;
 		const contact = this.#db.table('contacts').find((row) => row.id === invoice.contactId);
 		const user = this.#db.table('users').find((row) => row.id === actorId);
+		const sender = this.#db
+			.table('mailSenders')
+			.find((row) => row.tenantId === invoice.tenantId && row.kind === 'business' && row.isDefault);
 		if (delivery.method === 'link' && !contact?.address.zip.trim())
 			throw this.#error('validation', 'error.ws.invoice_link_no_postcode');
 		const now = new Date();
@@ -135,8 +138,8 @@ export class MockInvoiceSends {
 				id: newId<MailId>(),
 				tenantId: invoice.tenantId,
 				folder: 'sent',
-				from: tenant.invoiceSettings.replyTo || user?.email || '',
-				fromName: tenant.name,
+				from: sender?.address ?? (tenant.invoiceSettings.replyTo || user?.email || ''),
+				fromName: sender?.displayName ?? tenant.name,
 				to: [delivery.to],
 				subject: t(delivery.kind === 'invoice' ? 'mail.invoice.subject' : 'mail.invoice.reminder_subject', params),
 				body,

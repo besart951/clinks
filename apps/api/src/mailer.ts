@@ -14,6 +14,9 @@ export interface MailMessage {
 	html?: string;
 	/** Display name in place of the platform's («Spitex Seeland» instead of «CLinks»); the address stays ours. */
 	fromName?: string;
+	/** A workspace's own verified address (relay only), signed with its domain's DKIM key. */
+	from?: { name: string; address: string };
+	dkim?: { domainName: string; keySelector: string; privateKey: string };
 	replyTo?: string;
 	attachments?: MailAttachment[];
 	/** `<id@host>`; set by the outbox so bounces and replies can be traced to the mail. */
@@ -29,10 +32,10 @@ export interface Mailer {
 export function smtpMailer(url: string, from: string): Mailer {
 	const transport = nodemailer.createTransport(url);
 	return {
-		async send({ fromName, attachments, ...message }) {
+		async send({ fromName, from: own, attachments, ...message }) {
 			await transport.sendMail({
 				...message,
-				from: fromName ? { name: fromName, address: addressOf(from) } : from,
+				from: own ?? (fromName ? { name: fromName, address: addressOf(from) } : from),
 				attachments: attachments?.map((file) => ({ ...file, content: Buffer.from(file.content) })),
 			});
 		},

@@ -5,6 +5,7 @@ import { MockPlanNotices } from './mock-plan-notices.ts';
 import { MockInvoiceArchive } from './mock-invoice-archive.ts';
 import { MockInvoiceSends } from './mock-invoice-sends.ts';
 import { MockBankImports } from './mock-bank-imports.ts';
+import { MockMailSettings } from './mock-mail-settings.ts';
 import type { Repository } from '@clinks/contracts/repository';
 import { workspaceSchemas } from '@clinks/contracts/workspace-schemas';
 import { syncedTables, type SyncedTableName } from '@clinks/sync-schema/tables';
@@ -44,6 +45,8 @@ export class WorkspaceApi {
 	readonly invoiceSends: MockInvoiceSends;
 	/** Demo backend for bank files; with the API, `BankImports` calls the server instead. */
 	readonly bankImports: MockBankImports;
+	/** Demo backend for Settings › E-Mail; with the API, `MailSettings` calls the server instead. */
+	readonly mailSettings: MockMailSettings;
 	readonly #comments;
 
 	constructor(db: WorkspaceCache, context: RequestContext, engine: SyncEngine | null = null) {
@@ -54,6 +57,7 @@ export class WorkspaceApi {
 		const archive = new MockInvoiceArchive(db, context);
 		this.invoiceSends = new MockInvoiceSends(db, context, archive);
 		this.bankImports = new MockBankImports(db, context);
+		this.mailSettings = new MockMailSettings(db, context);
 		function repository<Name extends SyncedTableName>(
 			table: Name,
 			options: {

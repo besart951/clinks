@@ -114,6 +114,8 @@ export interface User extends BaseRecord<UserId> {
 	locale: string;
 	globalRole: 'super_administrator' | null;
 	notificationPreferences: NotificationPreferences;
+	/** Appended to mails the person sends from their personal sender. */
+	mailSignature: string;
 }
 
 export const permissions = [

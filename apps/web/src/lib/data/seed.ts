@@ -182,6 +182,8 @@ function emptySnapshot(): Snapshot {
 		invoiceSends: [],
 		bankImports: [],
 		bankEntries: [],
+		mailDomains: [],
+		mailSenders: [],
 	};
 }
 
@@ -200,6 +202,7 @@ function user(context: SeedContext, input: { first: string; last: string; email:
 		locale: 'de-CH',
 		globalRole: input.superAdmin ? 'super_administrator' : null,
 		notificationPreferences: { inApp: true, email: true, push: false, digest: 'daily' },
+		mailSignature: '',
 	});
 }
 

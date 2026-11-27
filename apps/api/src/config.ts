@@ -41,6 +41,10 @@ const environment = z.object({
 	STORAGE_ALLOW_INTERNAL: boolean.default(false),
 	SMTP_URL: z.string().default('smtp://localhost:1025'),
 	MAIL_FROM: z.string().default('CLinks <no-reply@clinks.ch>'),
+	/** SMTP relay for mail from workspaces' own verified domains; CLinks signs DKIM itself. Without it they fall back to MAIL_FROM. */
+	SMTP_RELAY_URL: z.string().optional(),
+	/** The SPF include workspaces publish; CLinks points it at the relay, so a new provider needs no customer change. */
+	MAIL_SPF_INCLUDE: z.string().default('_spf.clinks.ch'),
 	/** Sends the outbox from this process; on exactly one instance in production. */
 	MAIL_WORKER: boolean.default(true),
 	/** Upper bound for the outbox, across workspaces; the mail provider's limit decides. */

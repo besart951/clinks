@@ -24,6 +24,9 @@ const browserFiles: FileStore = {
 	print() {
 		window.print();
 	},
+	copyText(text) {
+		return navigator.clipboard.writeText(text);
+	},
 };
 
 const browserNotifier: Notifier = {

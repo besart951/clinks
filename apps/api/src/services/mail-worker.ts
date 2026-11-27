@@ -5,6 +5,7 @@ import { sql } from 'kysely';
 import { isPermanentFailure, type MailAttachment } from '../mailer.ts';
 import type { Services } from './context.ts';
 import { documentBytes } from './files.ts';
+import { ownIdentity } from './mail-senders.ts';
 
 /** Minutes to wait before the 2nd, 3rd … attempt; after the last one the mail is marked failed. */
 const backoffMinutes = [1, 5, 30, 120, 360];
@@ -84,7 +85,11 @@ export class MailWorker {
 			if (!mail || mail.status !== 'queued') return dequeue(tx, outboxId);
 			const messageId = `<${mail.id}@clinks.ch>`;
 			try {
-				await this.#services.mailer.send({
+				const own = mail.senderId ? await ownIdentity(tx, this.#services, mail.senderId) : null;
+				const transport = own ? this.#services.relay! : this.#services.mailer;
+				await transport.send({
+					from: own?.from,
+					dkim: own?.dkim,
 					to: mail.recipient,
 					subject: mail.subject,
 					text: mail.textBody,

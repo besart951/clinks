@@ -41,6 +41,7 @@ const services: Services = {
 	secrets: config.STORAGE_SECRET_KEY ? SecretBox.fromBase64(config.STORAGE_SECRET_KEY) : SecretBox.ephemeral(),
 	tokens,
 	mailer: smtpMailer(config.SMTP_URL, config.MAIL_FROM),
+	relay: config.SMTP_RELAY_URL ? smtpMailer(config.SMTP_RELAY_URL, config.MAIL_FROM) : undefined,
 	limiter: new RateLimiter(),
 	config,
 	now: () => new Date(),
