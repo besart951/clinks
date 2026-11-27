@@ -128,16 +128,23 @@ state the UI needs comes through REST.
 
 ### 3 · Inbound: filing address and bounces
 
-- [ ] `InboundSource` (IMAP via `imapflow`, Mailpit API in dev/test), `InboundRouter`: filing address → parse with
-      `mailparser` → `mails` row in `inbox` at the contact whose address matches From (or To for forwarded sent
-      mail, then folder `sent`); attachments become documents (size limit as uploads); unknown sender → inbox without
-      contact. Bounce address → outbox `bounced`, suppression after a hard bounce.
-- [ ] Settings › E-Mail shows the filing address with copy button and a short how-to (BCC on outgoing mail,
-      forwarding rule for incoming); «Neue Adresse» rotates it.
-- [ ] Contact page: mail timeline (sent through CLinks, filed, invoices/reminders/newsletters with delivery state).
-- [ ] Guards: max 10 MB per message, only `in.clinks.ch` recipients, mails older than 30 days in the mailbox are
-      deleted after processing, no auto-replies to inbound mail (loop guard: `Auto-Submitted`, `Precedence`).
-- [ ] Tests: routing (filed, forwarded, unknown, bounce hard/soft), attachment to document, loop guard.
+- [x] `InboundSource` (IMAP with `imapflow`, Mailpit API in development, memory in tests) and `InboundMail`: mail to
+      a filing address is parsed (`mailparser`) and filed in `mails`: from a member or sender of the workspace (BCC)
+      under «Gesendet» at the recipient's contact, otherwise in the inbox at the sender's contact; attachments become
+      documents at the contact (folder «E-Mail-Ablage»); the Message-ID keeps a mail from being filed twice.
+- [x] Bounces: every outbox mail has its own Return-Path `b-<outbox>-<workspace>@in.clinks.ch` (base32, no lookup
+      across workspaces). A hard bounce (5.x.x) marks the mail `bounced` (outbox, send log and the copy at the contact)
+      and blocks the address (`mail_suppressions`, scope `all`); later mail to it is `suppressed`. Soft bounces
+      change nothing.
+- [x] Mail to a contact sent through the outbox is filed under «Gesendet» at that contact with its delivery
+      (`mails.message_id`, `mails.delivery`, server-set), so the contact page and the mail module show
+      «Unzustellbar»; one `DeliveryNote` for invoices, contacts and mail.
+- [x] Settings › E-Mail shows the filing address with copy button and how-to (BCC, forwarding); «Neue Adresse»
+      replaces it. Demo: shows the address, nothing arrives.
+- [x] Guards: messages over 10 MB are not filed, unknown local parts are dropped, every handled message leaves the
+      mailbox. BCC copies need `Delivered-To`/`X-Original-To` from the receiving server (ops check).
+- [x] Tests: address rotation, inbox filing with attachment and dedupe, BCC under «Gesendet», unknown address,
+      soft and hard bounce, suppressed follow-up mail.
 
 ### 4 · The mail module sends for real
 

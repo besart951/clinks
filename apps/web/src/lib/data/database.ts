@@ -44,6 +44,8 @@ export type MockBankEntry = Omit<BankEntryView, 'suggestions'> & { tenantId: Ten
 /** The demo's sender domains and senders (apps/api: mail_domains, mail_senders). */
 export type MockMailDomain = StoredMailDomain & { tenantId: TenantId };
 export type MockMailSender = Omit<MailSenderView, 'active'> & { tenantId: TenantId };
+/** The demo's filing address per workspace (apps/api: auth.mail_inbound_addresses). */
+export type MockFilingAddress = { id: string; tenantId: TenantId; address: string };
 
 export interface Tables {
 	tenants: Tenant;
@@ -75,6 +77,7 @@ export interface Tables {
 	bankEntries: MockBankEntry;
 	mailDomains: MockMailDomain;
 	mailSenders: MockMailSender;
+	mailFilingAddresses: MockFilingAddress;
 }
 
 export type TableName = keyof Tables;
@@ -110,6 +113,7 @@ export const tableNames: readonly TableName[] = [
 	'bankEntries',
 	'mailDomains',
 	'mailSenders',
+	'mailFilingAddresses',
 ];
 
 export type ErrorCode =

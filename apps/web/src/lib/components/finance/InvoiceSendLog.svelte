@@ -2,6 +2,7 @@
 	import Link from '@lucide/svelte/icons/link';
 	import Paperclip from '@lucide/svelte/icons/paperclip';
 	import type { InvoiceSend } from '@clinks/domain/types';
+	import DeliveryNote from '#lib/components/mail/DeliveryNote.svelte';
 	import type { InvoiceSendModel } from '#lib/features/finance/invoice-send.svelte';
 	import { href } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
@@ -47,11 +48,10 @@
 							name: send.sentBy,
 						})}
 					</p>
-					{#if send.delivery !== 'sent'}<p
-							class="text-xs {send.delivery === 'queued' ? 'text-muted-foreground' : 'text-destructive'}"
-						>
-							{workspace.t(`ui.ws.invoice.delivery.${send.delivery}`)}
-						</p>{:else if send.method === 'link'}<p class="text-muted-foreground text-xs">{linkState(send)}</p>{/if}
+					<DeliveryNote delivery={send.delivery} />
+					{#if send.delivery === 'sent' && send.method === 'link'}<p class="text-muted-foreground text-xs">
+							{linkState(send)}
+						</p>{/if}
 					{#if demo}<a
 							class="text-primary text-xs underline-offset-2 hover:underline"
 							href={href(`/invoice-link/${demo}`)}

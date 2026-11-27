@@ -184,6 +184,7 @@ function emptySnapshot(): Snapshot {
 		bankEntries: [],
 		mailDomains: [],
 		mailSenders: [],
+		mailFilingAddresses: [],
 	};
 }
 
@@ -537,6 +538,8 @@ function seedMail(context: SeedContext, tenantId: TenantId, tenantName: string, 
 			read: index > 3,
 			starred: index === 2,
 			contactId: contact.id,
+			messageId: null,
+			delivery: null,
 		});
 	}
 	add(context, 'mails', {
@@ -551,6 +554,8 @@ function seedMail(context: SeedContext, tenantId: TenantId, tenantName: string, 
 		read: true,
 		starred: false,
 		contactId: null,
+		messageId: null,
+		delivery: null,
 	});
 	add(context, 'templates', {
 		tenantId,

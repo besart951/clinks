@@ -47,6 +47,12 @@ export class MailSettings {
 			: this.#api().mailSettings.saveSender(id, input);
 	}
 
+	rotateFilingAddress(): Promise<MailSettingsView> {
+		return this.#client
+			? this.#client.request<MailSettingsView>('POST', '/mail/filing-address', {})
+			: this.#api().mailSettings.rotateFilingAddress();
+	}
+
 	removeSender(id: string): Promise<void> {
 		return this.#client
 			? this.#client.request<void>('DELETE', `/mail/senders/${id}`)

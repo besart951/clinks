@@ -250,14 +250,21 @@ export async function documentBytes(tx: Tx, services: Services, documentId: stri
 }
 
 /**
- * Keeps a file the server made or received as an accounting record: a locked document (not renamed, replaced or
- * deleted, see migration 0018) in a top-level folder of that name, created when missing.
+ * Stores a file the server made or received as a document in a top-level folder of that name, created when missing.
+ * Accounting records (archived invoices, bank files) are `locked`: not renamed, replaced or deleted (migration 0018).
  */
-export async function archiveServerFile(
+export async function storeFile(
 	tx: Tx,
 	services: Services,
 	scope: Scope,
-	file: { name: string; folder: string; bytes: Uint8Array; type: string; targets: { kind: string; id: string }[] },
+	file: {
+		name: string;
+		folder: string;
+		bytes: Uint8Array;
+		type: string;
+		targets: { kind: string; id: string }[];
+		locked: boolean;
+	},
 ): Promise<string> {
 	const documentId = uuid();
 	const dataUrl = await storeServerFile(tx, services, scope, documentId, file.bytes, file.type);
@@ -273,7 +280,7 @@ export async function archiveServerFile(
 			dataUrl,
 			targets: JSON.stringify(file.targets),
 			uploadedBy: scope.userId,
-			locked: true,
+			locked: file.locked,
 		})
 		.execute();
 	return documentId;

@@ -93,6 +93,8 @@ export class ComposeModel {
 			read: true,
 			starred: false,
 			contactId: contact?.id ?? this.replyTo?.contactId ?? null,
+			messageId: null,
+			delivery: null,
 		};
 		const api = this.#workspace.api.mails;
 		try {

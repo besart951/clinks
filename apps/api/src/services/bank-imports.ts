@@ -11,7 +11,7 @@ import { ApiError } from '../errors.ts';
 import type { AccessClaims } from '../tokens.ts';
 import { audit } from './audit.ts';
 import type { Caller, Services } from './context.ts';
-import { archiveServerFile } from './files.ts';
+import { storeFile } from './files.ts';
 import { withPermission, type MemberScope } from './permissions.ts';
 
 /** Folder the bank files go into, per workspace language. */
@@ -46,12 +46,13 @@ export class BankImportService {
 				.select('locale')
 				.where('id', '=', scope.tenantId)
 				.executeTakeFirstOrThrow();
-			const documentId = await archiveServerFile(tx, this.#services, scope, {
+			const documentId = await storeFile(tx, this.#services, scope, {
 				name: input.fileName,
 				folder: folderName[tenant.locale === 'en-US' ? 'en-US' : 'de-CH'],
 				bytes,
 				type: 'application/xml',
 				targets: [],
+				locked: true,
 			});
 			const importId = uuid();
 			await tx

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import DeliveryNote from '#lib/components/mail/DeliveryNote.svelte';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import PenSquare from '@lucide/svelte/icons/pen-square';
@@ -239,6 +240,7 @@
 							</p>
 							<p class="text-muted-foreground text-xs">
 								{workspace.t('ui.ws.mail.to')}: {selected.to.join(', ')} · {workspace.i18n.dateTime(selected.sentAt)}
+								<DeliveryNote delivery={selected.delivery} />
 							</p>
 							{#if contact}<a
 									class="bg-muted inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs hover:underline"

@@ -397,6 +397,10 @@ export interface MailMessage extends TenantRecord<MailId> {
 	read: boolean;
 	starred: boolean;
 	contactId: ContactId | null;
+	/** Set by the server: the Message-ID of mail sent through the outbox or filed from outside. */
+	messageId: string | null;
+	/** Set by the server for mail it sends: where the delivery stands; null for drafts and filed mail. */
+	delivery: MailDelivery | null;
 }
 
 export interface MailTemplate extends TenantRecord<TemplateId> {

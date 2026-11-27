@@ -1,4 +1,5 @@
 <script lang="ts">
+	import DeliveryNote from '#lib/components/mail/DeliveryNote.svelte';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import CalendarPlus from '@lucide/svelte/icons/calendar-plus';
@@ -125,6 +126,7 @@
 					<span class="text-muted-foreground text-xs">
 						{workspace.i18n.dateTime(mail.sentAt)} · {workspace.t(`ui.ws.mail.folder.${mail.folder}`)}
 					</span>
+					<DeliveryNote delivery={mail.delivery} />
 				</a>
 			{/snippet}
 			<DetailHeader

@@ -8,7 +8,7 @@ import {
 } from '@clinks/contracts/mail';
 import type { Tx } from '@clinks/db/scope';
 import { normalizeDomain, senderFits, type DomainPurpose } from '@clinks/domain/mail-domains';
-import { uuid } from '../crypto.ts';
+import { randomLocalPart, uuid } from '../crypto.ts';
 import { ApiError } from '../errors.ts';
 import type { AccessClaims } from '../tokens.ts';
 import { audit } from './audit.ts';
@@ -104,6 +104,24 @@ export class MailSettingsService {
 		});
 	}
 
+	/** A new filing address; the old one stops filing at once (e.g. after it leaked into spam lists). */
+	rotateFilingAddress(claims: AccessClaims, caller: Caller) {
+		return this.#manage(claims, async (tx, scope) => {
+			if (!this.#services.config.INBOUND_DOMAIN) throw new ApiError(409, 'error.ws.mail_inbound_off');
+			await tx
+				.updateTable('auth.mailInboundAddresses')
+				.set({ active: false })
+				.where('tenantId', '=', scope.tenantId)
+				.execute();
+			await tx
+				.insertInto('auth.mailInboundAddresses')
+				.values({ localPart: `ablage-${randomLocalPart(10)}`, tenantId: scope.tenantId, createdBy: scope.userId })
+				.execute();
+			await this.#audit(tx, scope, caller, 'mail_filing.rotated', scope.tenantId);
+			return this.#view(tx);
+		});
+	}
+
 	removeSender(claims: AccessClaims, id: string, caller: Caller) {
 		return this.#manage(claims, async (tx, scope) => {
 			const removed = await tx.deleteFrom('mailSenders').where('id', '=', id).executeTakeFirst();
@@ -139,8 +157,17 @@ export class MailSettingsService {
 		const senders = await tx.selectFrom('mailSenders').selectAll().orderBy('kind').orderBy('address').execute();
 		const verified = new Set(domains.filter((domain) => domain.status === 'verified').map((domain) => domain.id));
 		const relay = !!this.#services.relay;
+		const domain = this.#services.config.INBOUND_DOMAIN;
+		const filing = domain
+			? await tx
+					.selectFrom('auth.mailInboundAddresses')
+					.select('localPart')
+					.where('active', '=', true)
+					.executeTakeFirst()
+			: undefined;
 		return {
 			relay,
+			filingAddress: filing ? `${filing.localPart}@${domain}` : null,
 			domains: domains.map((domain) => this.#toView(domain)),
 			senders: senders.map((sender): MailSenderView => ({
 				id: sender.id,

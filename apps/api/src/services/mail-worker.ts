@@ -6,6 +6,7 @@ import { isPermanentFailure, type MailAttachment } from '../mailer.ts';
 import type { Services } from './context.ts';
 import { documentBytes } from './files.ts';
 import { ownIdentity } from './mail-senders.ts';
+import { bounceAddress, dequeue, outboxMessageId, settle } from './outbox.ts';
 
 /** Minutes to wait before the 2nd, 3rd … attempt; after the last one the mail is marked failed. */
 const backoffMinutes = [1, 5, 30, 120, 360];
@@ -83,7 +84,7 @@ export class MailWorker {
 		await inScope(this.#services.db, { tenantId, userId: null }, async (tx) => {
 			const mail = await tx.selectFrom('mailOutbox').selectAll().where('id', '=', outboxId).executeTakeFirst();
 			if (!mail || mail.status !== 'queued') return dequeue(tx, outboxId);
-			const messageId = `<${mail.id}@clinks.ch>`;
+			const messageId = mail.messageId ?? outboxMessageId(mail.id);
 			try {
 				const own = mail.senderId ? await ownIdentity(tx, this.#services, mail.senderId) : null;
 				const transport = own ? this.#services.relay! : this.#services.mailer;
@@ -98,6 +99,9 @@ export class MailWorker {
 					replyTo: mail.replyTo ?? undefined,
 					headers: mail.headers,
 					messageId,
+					returnPath: this.#services.config.INBOUND_DOMAIN
+						? bounceAddress(mail.id, tenantId, this.#services.config.INBOUND_DOMAIN)
+						: undefined,
 					attachments: await Promise.all(mail.attachments.map((attachment) => this.#attachment(tx, attachment))),
 				});
 			} catch (error) {
@@ -105,10 +109,10 @@ export class MailWorker {
 			}
 			await tx
 				.updateTable('mailOutbox')
-				.set({ attempts: mail.attempts + 1, status: 'sent', sentAt: this.#services.now(), error: null, messageId })
+				.set({ attempts: mail.attempts + 1, sentAt: this.#services.now(), error: null })
 				.where('id', '=', outboxId)
 				.execute();
-			await dequeue(tx, outboxId);
+			await settle(tx, outboxId, 'sent', this.#services.now());
 		});
 	}
 
@@ -117,10 +121,10 @@ export class MailWorker {
 		const final = isPermanentFailure(error) || error instanceof ArchiveMismatch || attempts > backoffMinutes.length;
 		await tx
 			.updateTable('mailOutbox')
-			.set({ attempts, status: final ? 'failed' : 'queued', error: describe(error) })
+			.set({ attempts, error: describe(error) })
 			.where('id', '=', outboxId)
 			.execute();
-		if (final) return dequeue(tx, outboxId);
+		if (final) return settle(tx, outboxId, 'failed', this.#services.now());
 		const dueAt = new Date(this.#services.now().getTime() + backoffMinutes[attempts - 1] * 60_000);
 		await tx.updateTable('auth.mailQueue').set({ dueAt, lockedUntil: null }).where('outboxId', '=', outboxId).execute();
 	}
@@ -131,10 +135,6 @@ export class MailWorker {
 			throw new ArchiveMismatch();
 		return { filename: attachment.filename, content, contentType: attachment.contentType };
 	}
-}
-
-function dequeue(tx: Tx, outboxId: string) {
-	return tx.deleteFrom('auth.mailQueue').where('outboxId', '=', outboxId).execute();
 }
 
 /** The archived file no longer matches the checksum recorded when it was archived: never send it. */
