@@ -1262,7 +1262,8 @@ test('works the mail and the files with the keyboard and lists the keys under «
 	await expect(rows.first().getByRole('button').first()).toBeFocused();
 	await expect(page.getByRole('article').getByRole('heading', { level: 2 })).toBeVisible();
 	await page.keyboard.press('s');
-	await expect(rows.first().getByRole('button', { name: 'Markierung entfernen' })).toHaveAttribute(
+	// The reading pane's star shows the change (the row's buttons only show on hover).
+	await expect(page.getByRole('button', { name: 'Markierung entfernen' }).first()).toHaveAttribute(
 		'aria-pressed',
 		'true',
 	);
