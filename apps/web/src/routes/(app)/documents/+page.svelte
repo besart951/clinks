@@ -28,8 +28,14 @@
 	import ViewToggle, { type ListView } from '#lib/components/common/ViewToggle.svelte';
 	import DocumentPicture from '#lib/components/documents/DocumentPicture.svelte';
 	import DocumentPane from '#lib/components/documents/DocumentPane.svelte';
-	import FolderPinItem from '#lib/components/documents/FolderPinItem.svelte';
+	import FolderDeviceItems from '#lib/components/documents/FolderDeviceItems.svelte';
 	import ShareDialog from '#lib/components/documents/ShareDialog.svelte';
+	import ScanDialog from '#lib/components/documents/ScanDialog.svelte';
+	import SharedFilesDialog from '#lib/components/documents/SharedFilesDialog.svelte';
+	import ScanLine from '@lucide/svelte/icons/scan-line';
+	import CloudCheck from '@lucide/svelte/icons/cloud-check';
+	import { page } from '$app/state';
+	import { routeQuery, setQuery } from '#lib/navigation';
 	import Pin from '@lucide/svelte/icons/pin';
 	import Clock from '@lucide/svelte/icons/clock';
 	import ArrowUp from '@lucide/svelte/icons/arrow-up';
@@ -93,6 +99,9 @@
 		share: (document) => (sharing = document),
 	});
 	let sharing = $state<StoredDocument | null>(null);
+	let scanning = $state(false);
+	/** Files another app shared into CLinks, waiting for a folder. */
+	let shared = $state<File[]>([]);
 	list.layout = model.view === 'cards' ? 'tiles' : 'rows';
 	function setView(view: ListView) {
 		model.setView(view);
@@ -124,6 +133,11 @@
 	onMount(() => {
 		const stop = model.resource.connect();
 		const stopShortcut = workspace.registerNewAction(() => canWrite && fileInput?.click());
+		// Opened by «Teilen → CLinks» (manifest share_target): the shared files wait for a folder.
+		if (routeQuery(page.url).get('shared') === '1') {
+			void workspace.platform.inbox.take().then((files) => (shared = files));
+			void setQuery(page.url, { shared: null });
+		}
 		const stopKeys = workspace.registerPageKeys(
 			combineKeys(
 				list,
@@ -243,6 +257,9 @@
 			{#if canWrite}
 				<Button variant="outline" onclick={newFolder}>
 					<FolderPlus class="size-4" />{workspace.t('ui.ws.documents.new_folder')}
+				</Button>
+				<Button variant="outline" onclick={() => (scanning = true)}>
+					<ScanLine class="size-4" />{workspace.t('ui.ws.documents.scan')}
 				</Button>
 				<Button onclick={() => fileInput?.click()} disabled={model.uploading}>
 					<Upload class="size-4" />{workspace.t('ui.ws.documents.upload')}
@@ -379,7 +396,7 @@
 													<PenLine />{workspace.t('ui.ws.documents.rename')}
 												</DropdownMenu.Item>
 												<FolderMoveMenu {model} {folder} />
-												<FolderPinItem {model} {folder} />
+												<FolderDeviceItems {model} {folder} />
 												<DropdownMenu.Separator />
 												<DropdownMenu.Item variant="destructive" onclick={() => deleteFolder(folder)}>
 													<Trash2 />{workspace.t('ui.ws.delete')}
@@ -450,6 +467,10 @@
 																{model.excerptOf(document)}
 															</span>{/if}
 													</span>
+													{#if model.kept(document)}<CloudCheck
+															class="text-muted-foreground size-3.5 shrink-0"
+															aria-label={workspace.t('ui.ws.documents.offline_kept')}
+														/>{/if}
 													{#if document.locked}<span
 															class="text-muted-foreground inline-flex shrink-0 items-center gap-1 text-xs font-normal"
 															title={workspace.t('ui.ws.documents.archived_hint')}
@@ -558,6 +579,8 @@
 </Dialog.Root>
 <ConfirmDialog bind:request={confirm} />
 <ShareDialog bind:document={sharing} />
+<ScanDialog bind:open={scanning} folderId={model.folderId} />
+<SharedFilesDialog bind:files={shared} {model} />
 
 <Dialog.Root open={versioned !== null} onOpenChange={(open) => !open && (versioned = null)}>
 	<Dialog.Content closeLabel={workspace.t('ui.ws.close')}>

@@ -1433,3 +1433,48 @@ test('finds a file by its text and shares it by a link that works without an acc
 	await page.getByRole('button', { name: 'Herunterladen' }).click();
 	expect((await download).suggestedFilename()).toBe('Mietvertrag Praxis.txt');
 });
+
+const scanPhoto = Buffer.from(
+	'iVBORw0KGgoAAAANSUhEUgAAADwAAABQCAIAAADKqIEEAAAAkklEQVR4Xu3bsQkDMRBFwbvDxagE9R+pLOPQyYUDC28a0Oexqe611jXNM23wT6OVSiuVViqtfN4fOueoJX/23i/vdh5KpZVKK5VWKq1UWqm0Umml0kqllUorlVYqrVRaqbRSaaXSSqWVSiuVViqtVFqptFJppdJKpZVKK5VWKq2MLH33+wIZeR6NViqtVFoZWfoL6jcEkd0RupUAAAAASUVORK5CYII=',
+	'base64',
+);
+
+test('scans two pages into one PDF, takes files shared into CLinks and keeps a folder offline', async ({ page }) => {
+	await page.setViewportSize({ width: 1440, height: 900 });
+	await signIn(page);
+	await page.goto('/#/documents');
+	await page.getByRole('button', { name: 'Scannen' }).click();
+	const scan = page.getByRole('dialog', { name: 'Scannen' });
+	const photo = (name: string) => ({ name, mimeType: 'image/png', buffer: scanPhoto });
+	await scan.getByLabel('Seite fotografieren').setInputFiles([photo('seite-1.png'), photo('seite-2.png')]);
+	await expect(scan.getByRole('img', { name: 'Seite 2' })).toBeVisible();
+	await scan.getByRole('button', { name: 'Drehen' }).first().click();
+	await scan.getByLabel('Name').fill('Arztzeugnis');
+	await scan.getByRole('button', { name: 'Als PDF speichern (2 Seiten)' }).click();
+	await expect(page.getByText('«Arztzeugnis.pdf» hochgeladen')).toBeVisible();
+	await expect(page.getByRole('list', { name: 'Dateien' })).toContainText('Arztzeugnis.pdf');
+
+	// «Teilen → CLinks»: the service worker leaves the file in the shared-files cache and opens the page.
+	await page.evaluate(async () => {
+		const cache = await caches.open('clinks-shared-files');
+		await cache.put(
+			new URL('shared/test', location.href).href,
+			new Response('Laborwerte', { headers: { 'content-type': 'text/plain', 'x-file-name': 'Labor.txt' } }),
+		);
+	});
+	await page.goto('/#/documents?shared=1');
+	const shared = page.getByRole('dialog', { name: 'In CLinks speichern' });
+	await expect(shared).toContainText('Labor.txt');
+	await shared.getByRole('button', { name: 'Speichern' }).click();
+	await expect(page.getByText('«Labor.txt» hochgeladen')).toBeVisible();
+
+	// Offline: the folder's files are marked as kept on the device.
+	await page.getByRole('button', { name: 'Aktionen für «Verträge»' }).last().click();
+	await page.getByRole('menuitem', { name: 'Offline verfügbar machen' }).click();
+	await expect(page.getByText('«Verträge» ist auf diesem Gerät offline verfügbar')).toBeVisible();
+	await page
+		.getByRole('navigation', { name: 'Ordner' })
+		.getByRole('button', { name: /^Verträge/ })
+		.click();
+	await expect(page.getByRole('list', { name: 'Dateien' }).getByLabel('Offline verfügbar').first()).toBeVisible();
+});

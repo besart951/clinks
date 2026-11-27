@@ -2566,6 +2566,90 @@
         "de-CH": "«{name}» heruntergeladen",
         "en-US": "“{name}” downloaded"
       },
+      "ui.ws.documents.scan": {
+        "de-CH": "Scannen",
+        "en-US": "Scan"
+      },
+      "ui.ws.documents.scan_text": {
+        "de-CH": "Fotografiere jede Seite. CLinks schneidet sie auf das Blatt zu und speichert alle als ein PDF im offenen Ordner.",
+        "en-US": "Photograph each page. CLinks cuts it to the sheet and saves all of them as one PDF in the open folder."
+      },
+      "ui.ws.documents.scan_add": {
+        "de-CH": "Seite fotografieren",
+        "en-US": "Photograph a page"
+      },
+      "ui.ws.documents.scan_more": {
+        "de-CH": "Weitere Seite",
+        "en-US": "Another page"
+      },
+      "ui.ws.documents.scan_page": {
+        "de-CH": "Seite {number}",
+        "en-US": "Page {number}"
+      },
+      "ui.ws.documents.scan_rotate": {
+        "de-CH": "Drehen",
+        "en-US": "Rotate"
+      },
+      "ui.ws.documents.scan_crop": {
+        "de-CH": "Auf das Blatt zuschneiden",
+        "en-US": "Cut to the sheet"
+      },
+      "ui.ws.documents.scan_enhance": {
+        "de-CH": "Als Dokument (Schwarzweiss, mehr Kontrast)",
+        "en-US": "As a document (black and white, more contrast)"
+      },
+      "ui.ws.documents.scan_earlier": {
+        "de-CH": "Früher",
+        "en-US": "Earlier"
+      },
+      "ui.ws.documents.scan_later": {
+        "de-CH": "Später",
+        "en-US": "Later"
+      },
+      "ui.ws.documents.scan_save": {
+        "de-CH": "Als PDF speichern ({count} Seiten)",
+        "en-US": "Save as PDF ({count} pages)"
+      },
+      "ui.ws.documents.scan_name": {
+        "de-CH": "Scan {date} {time}",
+        "en-US": "Scan {date} {time}"
+      },
+      "ui.ws.documents.offline_keep": {
+        "de-CH": "Offline verfügbar machen",
+        "en-US": "Keep available offline"
+      },
+      "ui.ws.documents.offline_stop": {
+        "de-CH": "Nicht mehr offline halten",
+        "en-US": "Stop keeping offline"
+      },
+      "ui.ws.documents.offline_on": {
+        "de-CH": "«{name}» ist auf diesem Gerät offline verfügbar",
+        "en-US": "“{name}” is available offline on this device"
+      },
+      "ui.ws.documents.offline_off": {
+        "de-CH": "«{name}» wird nicht mehr offline gehalten",
+        "en-US": "“{name}” is no longer kept offline"
+      },
+      "ui.ws.documents.offline_kept": {
+        "de-CH": "Offline verfügbar",
+        "en-US": "Available offline"
+      },
+      "ui.ws.documents.shared_title": {
+        "de-CH": "In CLinks speichern",
+        "en-US": "Save in CLinks"
+      },
+      "ui.ws.documents.shared_text": {
+        "de-CH": "{count} Dateien wurden mit CLinks geteilt. Wähle den Ordner dafür.",
+        "en-US": "{count} files were shared with CLinks. Choose their folder."
+      },
+      "ui.ws.documents.shared_folder": {
+        "de-CH": "Ordner",
+        "en-US": "Folder"
+      },
+      "ui.ws.documents.shared_save": {
+        "de-CH": "Speichern",
+        "en-US": "Save"
+      },
       "ui.ws.documents.file_list": {
         "de-CH": "Dateien",
         "en-US": "Files"

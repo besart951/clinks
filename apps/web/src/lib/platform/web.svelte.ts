@@ -1,5 +1,5 @@
 import { updated } from '$app/state';
-import type { FileStore, Notifier, Platform, Updater } from './types.ts';
+import type { OfflineFiles, SharedInbox, FileStore, Notifier, Platform, Updater } from './types.ts';
 import { StoragePreferences, StorageSecrets, browserStorage } from './web-storage.ts';
 
 const browserFiles: FileStore = {
@@ -57,6 +57,49 @@ const browserUpdater: Updater = {
 	},
 };
 
+/** The service worker puts shared files here (service-worker/index.ts, `share-target`). */
+const sharedCache = 'clinks-shared-files';
+const offlineCache = 'clinks-offline-files';
+const offlineKey = (key: string) => `/offline/${encodeURIComponent(key)}`;
+
+const browserInbox: SharedInbox = {
+	async take() {
+		if (typeof caches === 'undefined') return [];
+		const cache = await caches.open(sharedCache);
+		const files: File[] = [];
+		for (const request of await cache.keys()) {
+			const response = await cache.match(request);
+			if (response) {
+				const name = decodeURIComponent(response.headers.get('x-file-name') ?? 'Datei');
+				files.push(new File([await response.blob()], name, { type: response.headers.get('content-type') ?? '' }));
+			}
+			await cache.delete(request);
+		}
+		return files;
+	},
+};
+
+const browserOffline: OfflineFiles = {
+	async get(key) {
+		if (typeof caches === 'undefined') return null;
+		const response = await (await caches.open(offlineCache)).match(offlineKey(key));
+		return response ? response.blob() : null;
+	},
+	async put(key, content) {
+		if (typeof caches === 'undefined') return;
+		await (await caches.open(offlineCache)).put(offlineKey(key), new Response(content));
+	},
+	async keys() {
+		if (typeof caches === 'undefined') return [];
+		const requests = await (await caches.open(offlineCache)).keys();
+		return requests.map((request) => decodeURIComponent(new URL(request.url).pathname.replace('/offline/', '')));
+	},
+	async remove(key) {
+		if (typeof caches === 'undefined') return;
+		await (await caches.open(offlineCache)).delete(offlineKey(key));
+	},
+};
+
 export function createWebPlatform(): Platform {
 	const storage = browserStorage();
 	return {
@@ -65,5 +108,7 @@ export function createWebPlatform(): Platform {
 		files: browserFiles,
 		notifier: browserNotifier,
 		updater: browserUpdater,
+		inbox: browserInbox,
+		offline: browserOffline,
 	};
 }
