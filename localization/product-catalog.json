@@ -5078,10 +5078,6 @@
         "de-CH": "Dein Plan, sobald die Woche freigegeben ist.",
         "en-US": "Your plan, once the week is released."
       },
-      "ui.ws.visits.this_week": {
-        "de-CH": "Diese Woche",
-        "en-US": "This week"
-      },
       "ui.ws.visits.pending_title": {
         "de-CH": "Der Plan für KW {week} ist noch in Arbeit",
         "en-US": "The plan for week {week} is still in the works"
@@ -6705,6 +6701,10 @@
       "ui.ws.appointment_mail.contact_off": {
         "de-CH": "Terminmails ausgeschaltet",
         "en-US": "Appointment mails off"
+      },
+      "ui.ws.calendar.weekdays": {
+        "de-CH": "Wochentage anzeigen",
+        "en-US": "Weekdays shown"
       }
     }
   }

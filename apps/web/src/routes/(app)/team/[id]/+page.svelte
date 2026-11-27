@@ -2,8 +2,6 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import CalendarDays from '@lucide/svelte/icons/calendar-days';
-	import ChevronLeft from '@lucide/svelte/icons/chevron-left';
-	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	import Mail from '@lucide/svelte/icons/mail';
 	import { Button } from '@clinks/ui/components/ui/button';
 	import SideCard from '@clinks/ui/kit/SideCard.svelte';
@@ -11,9 +9,10 @@
 	import AsyncView from '#lib/components/common/AsyncView.svelte';
 	import EmptyState from '#lib/components/common/EmptyState.svelte';
 	import DetailHeader from '#lib/components/kit/DetailHeader.svelte';
+	import CalendarToolbar from '#lib/components/calendar/CalendarToolbar.svelte';
 	import { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
 	import { PersonDetailModel } from '#lib/features/team/person-detail.svelte';
-	import { addDays, minutesToTime, today, toCalendarDate } from '@clinks/domain/dates';
+	import { minutesToTime, today, toCalendarDate } from '@clinks/domain/dates';
 	import type { Appointment } from '@clinks/domain/types';
 	import type { UserId } from '@clinks/domain/ids';
 	import { href, routeQuery } from '#lib/navigation';
@@ -30,7 +29,7 @@
 	const fullDay = 8.5 * 60;
 	const weekMinutes = $derived(model.days.reduce((sum, day) => sum + model.minutesOn(day), 0));
 	/** The calendar opens on today within the current week, else on the week's Monday. */
-	const calendarDate = $derived(model.days.includes(today()) ? today() : model.week);
+	const calendarDate = $derived(model.period.showsToday ? today() : model.week);
 
 	onMount(() => model.resource.connect());
 
@@ -41,11 +40,6 @@
 				? (`ui.ws.physio.service.${appointment.service}` as const)
 				: (`ui.ws.spitex.service.${appointment.service}` as const),
 		);
-	}
-
-	function weekLabel() {
-		const end = addDays(model.week, 6);
-		return `${workspace.i18n.format(model.week, { day: 'numeric', month: 'short' })} – ${workspace.i18n.format(end, { day: 'numeric', month: 'short', year: 'numeric' })}`;
 	}
 </script>
 
@@ -78,26 +72,8 @@
 				<section class="bg-card grid grid-cols-[minmax(0,1fr)] gap-3 rounded-xl border p-5 shadow-[var(--shadow-sm)]">
 					<header class="flex flex-wrap items-center gap-2">
 						<h2 class="text-sm font-semibold">{workspace.t('ui.ws.person.appointments')}</h2>
-						<span class="text-muted-foreground text-sm">{weekLabel()}</span>
-						<div class="ms-auto flex items-center gap-1">
-							<Button
-								variant="ghost"
-								size="icon-sm"
-								aria-label={workspace.t('ui.ws.calendar.previous')}
-								onclick={() => model.moveWeek(-1)}
-							>
-								<ChevronLeft class="size-4" />
-							</Button>
-							<Button
-								variant="ghost"
-								size="icon-sm"
-								aria-label={workspace.t('ui.ws.calendar.next')}
-								onclick={() => model.moveWeek(1)}
-							>
-								<ChevronRight class="size-4" />
-							</Button>
-						</div>
 					</header>
+					<CalendarToolbar period={model.period} />
 					{#if (model.resource.data?.appointments.length ?? 0) === 0}
 						<p class="text-muted-foreground text-sm">{workspace.t('ui.ws.person.no_appointments')}</p>
 					{:else}

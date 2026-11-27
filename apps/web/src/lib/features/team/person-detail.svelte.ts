@@ -1,7 +1,8 @@
-import { addDays, minutesBetween, startOfWeek, today, toCalendarDate, weekDays } from '@clinks/domain/dates';
+import { addDays, minutesBetween, startOfWeek, toCalendarDate } from '@clinks/domain/dates';
 import type { UserId } from '@clinks/domain/ids';
 import type { Appointment, CalendarDate, Task } from '@clinks/domain/types';
 import { Resource } from '../../state/resource.svelte.ts';
+import { CalendarPeriod } from '../calendar/calendar-period.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 
 export interface PersonWeek {
@@ -12,10 +13,15 @@ export interface PersonWeek {
 /** What one staff member has on: appointments of a week, open tasks and how full each day is. */
 export class PersonDetailModel {
 	readonly resource: Resource<PersonWeek>;
-	week = $state<CalendarDate>(startOfWeek(today()));
+	readonly period: CalendarPeriod;
 
 	constructor(workspace: Workspace, id: UserId) {
 		const { api, session } = workspace;
+		this.period = new CalendarPeriod({
+			units: ['week'],
+			weekdays: { key: 'person', preferences: workspace.platform.preferences },
+			onchange: () => void this.resource.reload(true),
+		});
 		this.resource = new Resource(workspace.db, ['appointments', 'tasks'], async () => {
 			const from = this.week;
 			const to = addDays(from, 6);
@@ -40,8 +46,14 @@ export class PersonDetailModel {
 		});
 	}
 
+	/** The Monday of the week on show. */
+	get week(): CalendarDate {
+		return startOfWeek(this.period.anchor);
+	}
+
+	/** The days listed: the week without the weekdays hidden on this page. */
 	get days(): CalendarDate[] {
-		return weekDays(this.week, 7);
+		return this.period.shownDays;
 	}
 
 	on(date: CalendarDate): Appointment[] {
@@ -50,10 +62,5 @@ export class PersonDetailModel {
 
 	minutesOn(date: CalendarDate): number {
 		return this.on(date).reduce((sum, row) => sum + minutesBetween(row.start, row.end), 0);
-	}
-
-	moveWeek(direction: -1 | 1) {
-		this.week = addDays(this.week, direction * 7);
-		void this.resource.reload(true);
 	}
 }
