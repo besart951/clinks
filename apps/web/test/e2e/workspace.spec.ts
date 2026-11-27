@@ -1365,3 +1365,44 @@ test('filters the search, snoozes a mail until tomorrow and shows what CLinks kn
 	await page.getByRole('article').first().locator('[data-slot="hover-card-trigger"]').first().hover();
 	await expect(page.getByRole('group', { name: /^Über / })).toBeVisible();
 });
+
+test('shows files as tiles, sorts them, previews the marked one and pins folders like Explorer', async ({ page }) => {
+	await page.setViewportSize({ width: 1440, height: 900 });
+	await signIn(page);
+	await page.goto('/#/documents');
+	const files = page.getByRole('list', { name: 'Dateien' }).getByRole('listitem');
+	// Pinning a folder puts it at the top of the sidebar.
+	await page.getByRole('button', { name: 'Aktionen für «Formulare»' }).last().click();
+	await page.getByRole('menuitem', { name: 'Anheften' }).click();
+	await expect(page.getByRole('navigation', { name: 'Angeheftet' })).toContainText('Formulare');
+	// Dropping a file on a step of the path moves it there.
+	await page.getByRole('navigation', { name: 'Angeheftet' }).getByRole('button', { name: 'Formulare' }).click();
+	await files
+		.first()
+		.dragTo(page.getByRole('navigation', { name: 'Ordnerpfad' }).getByRole('button', { name: 'Alle Dateien' }));
+	await expect(page.getByText('Verschoben', { exact: true })).toBeVisible();
+
+	await page.getByRole('navigation', { name: 'Ordnerpfad' }).getByRole('button', { name: 'Alle Dateien' }).click();
+	await page.getByRole('searchbox', { name: 'Dateien suchen' }).fill('.');
+	await page.getByRole('button', { name: 'Sortieren nach Grösse' }).click();
+	await expect(page.getByRole('button', { name: 'Sortieren nach Grösse' })).toHaveAttribute('aria-pressed', 'true');
+	// A marked file shows beside the list; opening it adds it to «Zuletzt geöffnet».
+	await files.first().getByRole('button').first().click();
+	const name = (await files.first().getByRole('button').first().innerText()).split('\n')[0].trim();
+	await expect(page.getByRole('complementary', { name: `Details zu ${name}` })).toBeVisible();
+	await files.first().getByRole('button').first().dblclick();
+	await expect(page.getByRole('dialog', { name })).toBeVisible();
+	await page.keyboard.press('Escape');
+	await expect(page.getByRole('dialog', { name })).toBeHidden();
+	await expect(page.getByRole('navigation', { name: 'Zuletzt geöffnet' })).toContainText(name);
+	// Several files download as one ZIP.
+	await page.keyboard.press('ControlOrMeta+a');
+	const download = page.waitForEvent('download');
+	await page.getByRole('region', { name: 'Auswahl' }).getByRole('button', { name: 'Als ZIP herunterladen' }).click();
+	expect((await download).suggestedFilename()).toBe('Alle Dateien.zip');
+	await page.keyboard.press('Escape');
+	// Tiles: the same files with a picture.
+	await page.getByRole('button', { name: 'Karten' }).click();
+	await expect(files.first().locator('img, svg').first()).toBeVisible();
+	await page.getByRole('button', { name: 'Tabelle' }).click();
+});

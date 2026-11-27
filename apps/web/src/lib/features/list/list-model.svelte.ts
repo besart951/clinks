@@ -80,6 +80,8 @@ export class ListModel<T, Id extends string = string> implements PageKeys {
 	anchor = $state<Id | null>(null);
 	/** A long press on a touch screen started picking several entries. */
 	picking = $state(false);
+	/** Rows (a list) or tiles (a grid of cards); the keys and the selection work the same in both. */
+	layout = $state<'rows' | 'tiles'>('rows');
 	/** Counts moves by key; the list focuses the anchor row on each, so focus and screen readers follow. */
 	moved = $state(0);
 	readonly #options: ListOptions<T, Id>;

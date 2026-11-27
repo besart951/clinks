@@ -16,6 +16,8 @@
 	const selected = $derived(list.has(item));
 	const label = $derived(list.label(item));
 	const inline = $derived(list.inline(item));
+	/** Tiles (a grid of cards): the checkbox and the buttons float over the card's corners. */
+	const tiles = $derived(list.layout === 'tiles');
 	const start = $derived(list.swipe('start', item));
 	const end = $derived(list.swipe('end', item));
 	const gesture = new RowGesture({
@@ -70,7 +72,11 @@
 		{#snippet child({ props })}
 			<li
 				{...menuTrigger(props)}
-				class="group/row relative overflow-hidden touch-pan-y {selected ? 'bg-muted' : ''}"
+				class="group/row relative overflow-hidden touch-pan-y {tiles ? 'rounded-xl border' : ''} {selected
+					? tiles
+						? 'ring-primary bg-muted ring-2'
+						: 'bg-muted'
+					: ''}"
 				data-selected={selected || undefined}
 				data-row={list.id(item)}
 				draggable={list.drag ? true : undefined}
@@ -100,7 +106,7 @@
 						: 'hover:bg-muted/60'}"
 					style:translate="{gesture.dx}px 0"
 				>
-					<span class="flex items-center ps-3">
+					<span class={tiles ? 'absolute start-2 top-2 z-[1] flex' : 'flex items-center ps-3'}>
 						<Checkbox
 							checked={selected}
 							onCheckedChange={() => list.toggle(item)}
@@ -122,7 +128,9 @@
 					{#if inline.length > 0}
 						<!-- Shown on hover and while a part of the row has focus; touch screens swipe instead. -->
 						<div
-							class="bg-muted absolute inset-y-0 end-0 hidden items-center gap-0.5 ps-2 pe-2 group-focus-within/row:flex group-hover/row:flex [@media(hover:none)]:!hidden"
+							class="bg-muted absolute end-0 hidden items-center gap-0.5 ps-2 pe-2 group-focus-within/row:flex group-hover/row:flex [@media(hover:none)]:!hidden {tiles
+								? 'end-1 top-1 rounded-md py-0.5 shadow-xs'
+								: 'inset-y-0'}"
 						>
 							{#each inline as action (action.id)}
 								{@const Icon = action.icon([item])}

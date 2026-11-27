@@ -2450,6 +2450,38 @@
         "de-CH": "Mit Kontakt verknüpft",
         "en-US": "Linked to contact"
       },
+      "ui.ws.documents.download_zip": {
+        "de-CH": "Als ZIP herunterladen",
+        "en-US": "Download as ZIP"
+      },
+      "ui.ws.documents.details": {
+        "de-CH": "Details zu {name}",
+        "en-US": "Details of {name}"
+      },
+      "ui.ws.documents.pin": {
+        "de-CH": "Anheften",
+        "en-US": "Pin"
+      },
+      "ui.ws.documents.unpin": {
+        "de-CH": "Lösen",
+        "en-US": "Unpin"
+      },
+      "ui.ws.documents.pinned": {
+        "de-CH": "Angeheftet",
+        "en-US": "Pinned"
+      },
+      "ui.ws.documents.recent": {
+        "de-CH": "Zuletzt geöffnet",
+        "en-US": "Recently opened"
+      },
+      "ui.ws.documents.sort_by": {
+        "de-CH": "Sortieren nach {column}",
+        "en-US": "Sort by {column}"
+      },
+      "ui.ws.documents.sorting": {
+        "de-CH": "Sortierung",
+        "en-US": "Sorting"
+      },
       "ui.ws.documents.file_list": {
         "de-CH": "Dateien",
         "en-US": "Files"
