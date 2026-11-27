@@ -194,6 +194,7 @@ describe('sending', () => {
 		const log = await call('GET', `/finance/invoices/${id}/sends`);
 		assert.equal(log.body.length, 1);
 		assert.equal(log.body[0].recipient, 'kunde@example.ch');
+		assert.equal(log.body[0].delivery, 'sent');
 		const entry = await api.owner
 			.selectFrom('audit')
 			.select('action')
@@ -208,9 +209,10 @@ describe('sending', () => {
 		const sent = await call('POST', `/finance/invoices/${id}/send`, { to: 'lea@example.ch', method: 'link' });
 		assert.equal(sent.status, 201, JSON.stringify(sent.body));
 		const mail = api.mailer.last('lea@example.ch');
-		assert.equal(mail.attachments, undefined);
+		assert.deepEqual(mail.attachments, []);
 		// No amount and no service in the mail, only who and which invoice.
-		assert.doesNotMatch(mail.text, /Beratung|240|CHF/);
+		assert.doesNotMatch(`${mail.text} ${mail.html}`, /Beratung|240|CHF/);
+		assert.match(mail.html ?? '', />Dokument öffnen</);
 		const token = decodeURIComponent(/invoice-link\/([A-Za-z0-9_%-]+)/.exec(mail.text)![1]);
 		const anonymous = (method: string, body?: unknown) =>
 			admin.browser.call(method, `/invoice-links/${encodeURIComponent(token)}`, { token: null, body });

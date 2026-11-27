@@ -47,7 +47,11 @@
 							name: send.sentBy,
 						})}
 					</p>
-					{#if send.method === 'link'}<p class="text-muted-foreground text-xs">{linkState(send)}</p>{/if}
+					{#if send.delivery !== 'sent'}<p
+							class="text-xs {send.delivery === 'queued' ? 'text-muted-foreground' : 'text-destructive'}"
+						>
+							{workspace.t(`ui.ws.invoice.delivery.${send.delivery}`)}
+						</p>{:else if send.method === 'link'}<p class="text-muted-foreground text-xs">{linkState(send)}</p>{/if}
 					{#if demo}<a
 							class="text-primary text-xs underline-offset-2 hover:underline"
 							href={href(`/invoice-link/${demo}`)}

@@ -41,6 +41,10 @@ const environment = z.object({
 	STORAGE_ALLOW_INTERNAL: boolean.default(false),
 	SMTP_URL: z.string().default('smtp://localhost:1025'),
 	MAIL_FROM: z.string().default('CLinks <no-reply@clinks.ch>'),
+	/** Sends the outbox from this process; on exactly one instance in production. */
+	MAIL_WORKER: boolean.default(true),
+	/** Upper bound for the outbox, across workspaces; the mail provider's limit decides. */
+	MAIL_RATE_PER_SECOND: z.coerce.number().positive().default(5),
 	/** Secure cookies need HTTPS; browsers treat http://localhost as secure too. */
 	COOKIE_SECURE: boolean.default(true),
 	/** Behind Caddy the client address comes from X-Forwarded-For. */

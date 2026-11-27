@@ -308,6 +308,9 @@ export interface Invoice extends TenantRecord<InvoiceId> {
 	pdfSha256: string | null;
 }
 
+/** Where a mail of the outbox stands: waiting, handed to the mail server, refused or bounced, or held back. */
+export type MailDelivery = 'queued' | 'sent' | 'bounced' | 'failed' | 'suppressed';
+
 /** One invoice or reminder sent by e-mail; link openings are counted, nothing else is tracked. */
 export interface InvoiceSend {
 	id: InvoiceSendId;
@@ -325,6 +328,7 @@ export interface InvoiceSend {
 	linkExpiresAt: Timestamp | null;
 	openedAt: Timestamp | null;
 	openCount: number;
+	delivery: MailDelivery;
 }
 
 export const expenseCategories = [

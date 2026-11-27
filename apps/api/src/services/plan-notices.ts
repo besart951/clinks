@@ -3,7 +3,9 @@ import { sql } from 'kysely';
 import type { Tx } from '@clinks/db/scope';
 import { addDays, isoWeek } from '@clinks/domain/dates';
 import { pickLocale, translate } from '../i18n.ts';
+import { blocksFromText } from '@clinks/mail-layout/layout';
 import type { Services } from './context.ts';
+import { enqueueMail } from './outbox.ts';
 
 /** What happened to a person's plan. Mails and notifications name the week, never a client. */
 export type PlanEvent = 'released' | 'withdrawn' | 'changed';
@@ -18,12 +20,6 @@ export interface PlanNotice {
 	 * succession (dragging visits around) do not each send a mail.
 	 */
 	once: string;
-}
-
-export interface PlanMail {
-	to: string;
-	subject: string;
-	text: string;
 }
 
 /** A stable id for a notice, so that the second insert of the same one is a no-op. */
@@ -56,17 +52,17 @@ export async function weekAssignees(tx: Tx, tenantId: string, weekStart: string)
 }
 
 /**
- * Writes the in-app notifications in the caller's transaction and returns the mails to send once it has
- * committed. The person who made the change is not told about it.
+ * Writes the in-app notifications and the mails (outbox) in the caller's transaction. The person who made the
+ * change is not told about it; whoever turned mails off gets only the in-app notice.
  */
 export async function recordPlanNotices(
 	tx: Tx,
 	services: Services,
 	scope: { tenantId: string; userId: string },
 	notices: readonly PlanNotice[],
-): Promise<PlanMail[]> {
+): Promise<void> {
 	const wanted = notices.filter((notice) => notice.userId !== scope.userId);
-	if (wanted.length === 0) return [];
+	if (wanted.length === 0) return;
 	const now = services.now();
 	const fresh: PlanNotice[] = [];
 	for (const notice of wanted) {
@@ -98,7 +94,7 @@ export async function recordPlanNotices(
 			if ((error as { code?: string }).code !== '23505') throw error;
 		}
 	}
-	if (fresh.length === 0) return [];
+	if (fresh.length === 0) return;
 	const tenant = await tx
 		.selectFrom('tenants')
 		.select('name')
@@ -116,7 +112,6 @@ export async function recordPlanNotices(
 			fresh.map((notice) => notice.userId),
 		)
 		.execute();
-	const mails: PlanMail[] = [];
 	for (const notice of fresh) {
 		const person = people.find((candidate) => candidate.id === notice.userId);
 		if (!person || !person.notificationPreferences.email) continue;
@@ -133,22 +128,16 @@ export async function recordPlanNotices(
 			to: date(addDays(notice.weekStart, 6)),
 			link: `${services.config.WEB_ORIGIN}/#/visits?week=${notice.weekStart}`,
 		};
-		mails.push({
+		await enqueueMail(tx, scope.tenantId, {
+			kind: 'system',
 			to: person.email,
 			subject: translate(locale, `mail.plan.${notice.event}.subject`, params),
-			text: translate(locale, `mail.plan.${notice.event}.body`, params),
+			content: {
+				blocks: blocksFromText(
+					translate(locale, `mail.plan.${notice.event}.body`, params),
+					translate(locale, 'mail.plan.open'),
+				),
+			},
 		});
-	}
-	return mails;
-}
-
-/** After the commit. A mail that cannot be sent must not undo the plan change; the notification stands. */
-export async function sendPlanMails(services: Services, mails: readonly PlanMail[]) {
-	for (const mail of mails) {
-		try {
-			await services.mailer.send(mail);
-		} catch (error) {
-			console.error(JSON.stringify({ event: 'plan.mail_failed', errorType: (error as Error).name }));
-		}
 	}
 }

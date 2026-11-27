@@ -8,6 +8,8 @@ import { createApp } from './app.ts';
 import { loadConfig } from './config.ts';
 import { smtpMailer } from './mailer.ts';
 import { RateLimiter } from './rate-limit.ts';
+import type { Services } from './services/context.ts';
+import { MailWorker } from './services/mail-worker.ts';
 import { pruneExpiredTokens } from './services/sessions.ts';
 import { TokenService } from './tokens.ts';
 
@@ -30,22 +32,22 @@ const tokens = await TokenService.create({
 });
 if (!config.SIGNING_KEY) console.warn('No SIGNING_KEY: using a key that lasts until restart (development only).');
 
-const app = createApp({
-	services: {
-		billing,
-		db,
-		objects: config.S3_BUCKET
-			? new ObjectStore({ bucket: config.S3_BUCKET, endpoint: config.S3_ENDPOINT, region: config.S3_REGION })
-			: undefined,
-		secrets: config.STORAGE_SECRET_KEY ? SecretBox.fromBase64(config.STORAGE_SECRET_KEY) : SecretBox.ephemeral(),
-		tokens,
-		mailer: smtpMailer(config.SMTP_URL, config.MAIL_FROM),
-		limiter: new RateLimiter(),
-		config,
-		now: () => new Date(),
-	},
+const services: Services = {
+	billing,
+	db,
+	objects: config.S3_BUCKET
+		? new ObjectStore({ bucket: config.S3_BUCKET, endpoint: config.S3_ENDPOINT, region: config.S3_REGION })
+		: undefined,
+	secrets: config.STORAGE_SECRET_KEY ? SecretBox.fromBase64(config.STORAGE_SECRET_KEY) : SecretBox.ephemeral(),
+	tokens,
+	mailer: smtpMailer(config.SMTP_URL, config.MAIL_FROM),
+	limiter: new RateLimiter(),
 	config,
-});
+	now: () => new Date(),
+};
+const app = createApp({ services, config });
+const mailWorker = new MailWorker(services, { ratePerSecond: config.MAIL_RATE_PER_SECOND });
+if (config.MAIL_WORKER) mailWorker.start();
 
 const server = serve({ fetch: app.fetch, port: config.PORT }, (info) =>
 	console.log(`CLinks API on http://localhost:${info.port}`),
@@ -66,6 +68,7 @@ for (const signal of ['SIGINT', 'SIGTERM'] as const) {
 		if (closing) return;
 		closing = true;
 		clearInterval(pruneTimer);
+		mailWorker.stop();
 		const timeout = setTimeout(() => {
 			void db.destroy().finally(() => process.exit(0));
 		}, 10_000);

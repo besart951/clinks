@@ -27,6 +27,7 @@ import type { Services } from './services/context.ts';
 import { FileService } from './services/files.ts';
 import { BankImportService } from './services/bank-imports.ts';
 import { InvoiceService } from './services/invoices.ts';
+import { InvoiceLinks } from './services/invoice-links.ts';
 import { SessionService } from './services/sessions.ts';
 import { SettingsService } from './services/settings.ts';
 import { StorageService } from './services/storage.ts';
@@ -50,6 +51,7 @@ export function createApp({ services, config }: AppOptions) {
 		billing: new BillingService(services),
 		files: new FileService(services),
 		invoices: new InvoiceService(services),
+		invoiceLinks: new InvoiceLinks(services),
 		bankImports: new BankImportService(services),
 		sync: new SyncService(services),
 		caller: (c) => callerOf(c, config.TRUST_PROXY),

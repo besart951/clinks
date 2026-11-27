@@ -10,10 +10,15 @@ export interface MailMessage {
 	to: string;
 	subject: string;
 	text: string;
+	/** The same content as HTML (see @clinks/mail-layout); the text part is always sent too. */
+	html?: string;
 	/** Display name in place of the platform's («Spitex Seeland» instead of «CLinks»); the address stays ours. */
 	fromName?: string;
 	replyTo?: string;
 	attachments?: MailAttachment[];
+	/** `<id@host>`; set by the outbox so bounces and replies can be traced to the mail. */
+	messageId?: string;
+	headers?: Record<string, string>;
 }
 
 export interface Mailer {
@@ -32,6 +37,12 @@ export function smtpMailer(url: string, from: string): Mailer {
 			});
 		},
 	};
+}
+
+/** Refused by the receiving server for good (5xx): retrying would not help. */
+export function isPermanentFailure(error: unknown) {
+	const code = (error as { responseCode?: unknown }).responseCode;
+	return typeof code === 'number' && code >= 500 && code < 600;
 }
 
 /** The bare address of `Name <address>` or of a plain address. */

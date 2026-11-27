@@ -1,4 +1,5 @@
 import type { InvoiceSettings } from '@clinks/domain/invoicing';
+import type { MailDelivery } from '@clinks/domain/types';
 import type { ColumnType, Generated, Insertable, Selectable, Updateable } from 'kysely';
 
 /** Set by the database on insert, so optional when writing. */
@@ -117,6 +118,16 @@ export interface RecoveryCodeTable {
 	usedAt: Date | null;
 }
 
+export type MailKind = 'invoice' | 'reminder' | 'appointment' | 'personal' | 'campaign' | 'optin' | 'system';
+export type MailStatus = MailDelivery;
+export interface OutboxAttachment {
+	documentId: string;
+	filename: string;
+	contentType: string;
+	/** Checked before sending when given: archived invoices and reminders. */
+	sha256?: string;
+}
+
 export type OneTimePurpose = 'verify_email' | 'reset_password' | 'invitation' | 'two_factor' | 'invoice_link';
 
 export interface OneTimeTokenTable {
@@ -203,6 +214,32 @@ export interface Database {
 		status: 'booked' | 'open' | 'ignored';
 		invoiceId: string | null;
 	};
+	mailOutbox: {
+		id: string;
+		tenantId: string;
+		kind: MailKind;
+		fromName: string;
+		replyTo: string | null;
+		recipient: string;
+		subject: string;
+		textBody: string;
+		htmlBody: string;
+		attachments: Defaulted<OutboxAttachment[]>;
+		headers: Defaulted<Record<string, string>>;
+		contactId: string | null;
+		status: Defaulted<MailStatus>;
+		attempts: Defaulted<number>;
+		error: string | null;
+		messageId: string | null;
+		createdAt: Timestamp;
+		sentAt: Date | null;
+	};
+	'auth.mailQueue': {
+		outboxId: string;
+		tenantId: string;
+		dueAt: Defaulted<Date>;
+		lockedUntil: Date | null;
+	};
 	invoiceSends: {
 		id: string;
 		tenantId: string;
@@ -217,6 +254,7 @@ export interface Database {
 		linkExpiresAt: Date | null;
 		openedAt: Date | null;
 		openCount: Defaulted<number>;
+		outboxId: ColumnType<string | null, string | null | undefined, string | null>;
 	};
 	documentVersions: {
 		id: string;

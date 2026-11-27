@@ -10,6 +10,8 @@ import { startApi, type Api } from './harness.ts';
  */
 const withoutTenant = [
 	'auth.credentials',
+	// The worker's queue across workspaces: ids only, the mail itself is read in the workspace's scope.
+	'auth.mail_queue',
 	'auth.one_time_tokens',
 	'auth.recovery_codes',
 	'auth.refresh_tokens',
