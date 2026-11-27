@@ -11,7 +11,7 @@
 	import ConfirmDialog, { type ConfirmRequest } from '#lib/components/common/ConfirmDialog.svelte';
 	import SearchInput from '#lib/components/common/SearchInput.svelte';
 	import Forbidden from '#lib/components/common/Forbidden.svelte';
-	import LocaleSwitch from '#lib/components/shell/LocaleSwitch.svelte';
+	import LocalePicker from '#lib/components/shell/LocalePicker.svelte';
 	import { AdminModel, featureFlags } from '#lib/features/admin/admin.svelte';
 	import { landingPath } from '#lib/features/auth/auth-forms.svelte';
 	import { requestSignOut } from '#lib/features/shell/sign-out';
@@ -55,7 +55,7 @@
 	<span class="min-w-0 truncate font-semibold">{workspace.t('ui.ws.admin.title')}</span>
 	<Badge variant="secondary" class="hidden sm:inline-flex">{workspace.t('ui.super_administrator')}</Badge>
 	<div class="flex-1"></div>
-	<LocaleSwitch />
+	<LocalePicker />
 	<Button variant="outline" size="sm" onclick={signOut}>{workspace.t('ui.sign_out')}</Button>
 </header>
 <main class="mx-auto max-w-6xl space-y-6 p-4 sm:p-6">

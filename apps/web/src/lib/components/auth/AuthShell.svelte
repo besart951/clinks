@@ -2,7 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import Link2 from '@lucide/svelte/icons/link-2';
 	import { useWorkspace } from '#lib/workspace.svelte';
-	import LocaleSwitch from '#lib/components/shell/LocaleSwitch.svelte';
+	import LocalePicker from '#lib/components/shell/LocalePicker.svelte';
 
 	let {
 		title,
@@ -39,7 +39,7 @@
 		></div>
 	</aside>
 	<main class="flex flex-col px-5 py-6 sm:px-10">
-		<div class="flex justify-end"><LocaleSwitch /></div>
+		<div class="flex justify-end"><LocalePicker /></div>
 		<div class="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-6 py-10">
 			<div class="space-y-1.5">
 				<h1 class="text-2xl font-semibold tracking-tight">{title}</h1>

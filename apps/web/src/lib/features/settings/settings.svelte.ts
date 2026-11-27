@@ -6,7 +6,6 @@ import { toast } from 'svelte-sonner';
 import type { SessionId } from '@clinks/domain/ids';
 import type { BrowserSession, ModuleKey, NotificationPreferences, PlanCode, Tenant } from '@clinks/domain/types';
 import type { PlatformInvoice } from '../../data/account-api.ts';
-import type { Locale } from '@clinks/i18n-types/catalog';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 import { maxUploadBytes } from '../collaboration/attachments.svelte.ts';
@@ -304,11 +303,6 @@ export class ProfileModel extends SettingsForm {
 			'ui.ws.settings.saved',
 		);
 		if (saved) await this.workspace.session.refresh();
-	}
-
-	async setLocale(locale: Locale) {
-		this.workspace.i18n.setLocale(locale);
-		await this.workspace.account.updateProfile({ locale }).catch(() => undefined);
 	}
 
 	async changePassword() {

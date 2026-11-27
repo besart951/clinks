@@ -1,5 +1,6 @@
 <script lang="ts">
 	import MailAlertsCard from '#lib/components/settings/MailAlertsCard.svelte';
+	import LocalePicker from '#lib/components/shell/LocalePicker.svelte';
 	import { useWriteMail, type MailPreference } from '#lib/features/mail/write-mail.svelte';
 	import { onMount } from 'svelte';
 	import Monitor from '@lucide/svelte/icons/monitor';
@@ -15,7 +16,6 @@
 	import Choice from '#lib/components/common/Choice.svelte';
 	import PersonAvatar from '#lib/components/common/PersonAvatar.svelte';
 	import { ProfileModel } from '#lib/features/settings/settings.svelte';
-	import { locales, type Locale } from '@clinks/i18n-types/catalog';
 	import type { ThemeMode } from '#lib/state/theme.svelte';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
@@ -160,15 +160,7 @@
 		<Card.Header><Card.Title>{workspace.t('ui.ws.settings.display')}</Card.Title></Card.Header>
 		<Card.Content class="grid gap-4 sm:grid-cols-2">
 			<FormField id="pf-locale" label={workspace.t('ui.ws.settings.language')}>
-				<Choice
-					id="pf-locale"
-					value={workspace.i18n.locale}
-					options={locales.map((locale) => ({
-						value: locale,
-						label: locale === 'de-CH' ? 'Deutsch (Schweiz)' : 'English',
-					}))}
-					onchange={(value) => model.setLocale(value as Locale)}
-				/>
+				<LocalePicker look="full" id="pf-locale" />
 			</FormField>
 			<FormField id="pf-theme" label={workspace.t('ui.theme')}>
 				<Choice
