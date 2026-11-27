@@ -1,5 +1,6 @@
 <script lang="ts">
 	import MapLink from '#lib/components/common/MapLink.svelte';
+	import MailLink from '#lib/components/common/MailLink.svelte';
 	import { untrack } from 'svelte';
 	import Eye from '@lucide/svelte/icons/eye';
 	import EyeOff from '@lucide/svelte/icons/eye-off';
@@ -199,6 +200,8 @@
 		{:else if field.place}
 			<!-- Beside the value, not inside it: the value is itself a button that starts editing. -->
 			<MapLink place={field.place} />
+		{:else if field.mail}
+			<MailLink address={field.mail} />
 		{:else}<span></span>{/if}
 	{/if}
 </div>

@@ -16,6 +16,8 @@
 	import { useWorkspace } from '#lib/workspace.svelte';
 	import QuickCreateSheets from '#lib/components/shell/QuickCreateSheets.svelte';
 	import { QuickCreate, setQuickCreate } from '#lib/features/shell/quick-create.svelte';
+	import { WriteMail, setWriteMail } from '#lib/features/mail/write-mail.svelte';
+	import WriteMailDialog from '#lib/components/mail/WriteMailDialog.svelte';
 
 	let { children }: { children: Snippet } = $props();
 	const workspace = useWorkspace();
@@ -24,6 +26,8 @@
 	let paletteOpen = $state(false);
 	const quick = new QuickCreate();
 	setQuickCreate(quick);
+	const writeMail = new WriteMail(workspace, quick);
+	setWriteMail(writeMail);
 	let shortcutsOpen = $state(false);
 	let leader = 0;
 
@@ -96,6 +100,7 @@
 			<DevPanel />
 		{/if}
 		<QuickCreateSheets {quick} />
+		<WriteMailDialog model={writeMail} />
 	</SidebarProvider>
 {:else}
 	<div class="mx-auto max-w-2xl p-10"><SkeletonRows /></div>

@@ -10,6 +10,8 @@
 	import EmptyState from '#lib/components/common/EmptyState.svelte';
 	import DetailHeader from '#lib/components/kit/DetailHeader.svelte';
 	import CalendarToolbar from '#lib/components/calendar/CalendarToolbar.svelte';
+	import MailLink from '#lib/components/common/MailLink.svelte';
+	import { useWriteMail } from '#lib/features/mail/write-mail.svelte';
 	import { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
 	import { PersonDetailModel } from '#lib/features/team/person-detail.svelte';
 	import { minutesToTime, today, toCalendarDate } from '@clinks/domain/dates';
@@ -19,6 +21,7 @@
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
+	const writeMail = useWriteMail();
 	const id = page.params.id as UserId;
 	const people = new PeopleDirectory(workspace);
 	const person = $derived(people.get(id));
@@ -60,7 +63,7 @@
 					<CalendarDays class="size-4" />{workspace.t('ui.ws.person.in_calendar')}
 				</Button>
 			{/if}
-			<Button variant="outline" href="mailto:{person.email}">
+			<Button variant="outline" onclick={() => writeMail.write(person.email)}>
 				<Mail class="size-4" />{workspace.t('ui.ws.person.write_mail')}
 			</Button>
 		{/snippet}
@@ -158,7 +161,7 @@
 					</ul>
 				</SideCard>
 				<SideCard card={{ title: workspace.t('ui.ws.person.contact') }}>
-					<a class="text-sm hover:underline" href="mailto:{person.email}">{person.email}</a>
+					<span class="flex items-center gap-1 text-sm">{person.email}<MailLink address={person.email} /></span>
 				</SideCard>
 			</aside>
 		</div>

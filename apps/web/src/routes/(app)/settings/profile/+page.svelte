@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useWriteMail, type MailPreference } from '#lib/features/mail/write-mail.svelte';
 	import { onMount } from 'svelte';
 	import Monitor from '@lucide/svelte/icons/monitor';
 	import Upload from '@lucide/svelte/icons/upload';
@@ -18,6 +19,7 @@
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
+	const writeMail = useWriteMail();
 	const model = new ProfileModel(workspace);
 	const user = $derived(workspace.session.user);
 	let enabling = $state(false);
@@ -161,6 +163,19 @@
 					onchange={(value) => workspace.theme.setMode(value as ThemeMode)}
 				/>
 			</FormField>
+			{#if writeMail.canUseClinks}
+				<FormField id="pf-mail-with" label={workspace.t('ui.ws.write_mail.preference')}>
+					<Choice
+						id="pf-mail-with"
+						value={writeMail.preference}
+						options={(['ask', 'clinks', 'system'] as const).map((way) => ({
+							value: way,
+							label: workspace.t(`ui.ws.write_mail.preference_${way}`),
+						}))}
+						onchange={(value) => writeMail.setPreference(value as MailPreference)}
+					/>
+				</FormField>
+			{/if}
 		</Card.Content>
 	</Card.Root>
 

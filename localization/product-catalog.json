@@ -6705,6 +6705,58 @@
       "ui.ws.calendar.weekdays": {
         "de-CH": "Wochentage anzeigen",
         "en-US": "Weekdays shown"
+      },
+      "ui.ws.write_mail.to": {
+        "de-CH": "E-Mail an {email} schreiben",
+        "en-US": "Write to {email}"
+      },
+      "ui.ws.write_mail.title": {
+        "de-CH": "E-Mail schreiben",
+        "en-US": "Write an e-mail"
+      },
+      "ui.ws.write_mail.text": {
+        "de-CH": "An {email} – womit möchtest du schreiben?",
+        "en-US": "To {email} – what would you like to write with?"
+      },
+      "ui.ws.write_mail.clinks": {
+        "de-CH": "In CLinks schreiben",
+        "en-US": "Write in CLinks"
+      },
+      "ui.ws.write_mail.clinks_hint": {
+        "de-CH": "Von deiner oder der Geschäftsadresse; die Mail landet unter «Gesendet» beim Kontakt.",
+        "en-US": "From your or the business address; the mail is filed under “Sent” at the contact."
+      },
+      "ui.ws.write_mail.system": {
+        "de-CH": "Mit dem Mail-Programm des Geräts",
+        "en-US": "With the device’s mail program"
+      },
+      "ui.ws.write_mail.system_hint": {
+        "de-CH": "Outlook, Apple Mail, Gmail – was dein System für E-Mail-Links verwendet.",
+        "en-US": "Outlook, Apple Mail, Gmail – whatever your system uses for e-mail links."
+      },
+      "ui.ws.write_mail.remember": {
+        "de-CH": "Auswahl merken",
+        "en-US": "Remember my choice"
+      },
+      "ui.ws.write_mail.remember_hint": {
+        "de-CH": "Ändern unter Einstellungen › Profil.",
+        "en-US": "Change it under Settings › Profile."
+      },
+      "ui.ws.write_mail.preference": {
+        "de-CH": "E-Mails schreiben mit",
+        "en-US": "Write e-mails with"
+      },
+      "ui.ws.write_mail.preference_ask": {
+        "de-CH": "Jedes Mal fragen",
+        "en-US": "Ask every time"
+      },
+      "ui.ws.write_mail.preference_clinks": {
+        "de-CH": "CLinks",
+        "en-US": "CLinks"
+      },
+      "ui.ws.write_mail.preference_system": {
+        "de-CH": "Mail-Programm des Geräts",
+        "en-US": "The device’s mail program"
       }
     }
   }
