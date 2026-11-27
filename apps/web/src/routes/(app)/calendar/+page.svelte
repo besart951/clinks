@@ -295,6 +295,7 @@
 			<AsyncView resource={model.resource} skeleton="detail">
 				{#if model.view === 'month'}
 					<MonthGrid
+						bind:selectedId
 						days={period.shownDays}
 						month={model.anchor.slice(0, 7)}
 						handlers={{
@@ -306,7 +307,7 @@
 						}}
 					/>
 				{:else}
-					<TimeGrid {columns} {handlers} axis={axis.value} {selectedId} editable={canWrite} />
+					<TimeGrid {columns} {handlers} axis={axis.value} bind:selectedId editable={canWrite} />
 					{#if model.view === 'day' || model.view === 'resources'}
 						{@const summary = model.daySummary(model.anchor)}
 						<dl class="bg-card mt-3 grid grid-cols-3 divide-x rounded-xl border py-3 text-center">

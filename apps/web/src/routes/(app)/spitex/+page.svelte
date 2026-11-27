@@ -447,7 +447,7 @@
 							{columns}
 							{handlers}
 							axis={axis.value}
-							{selectedId}
+							bind:selectedId
 							bind:dragging
 							focus={pointedVisit}
 							editable={canWrite}

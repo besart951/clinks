@@ -38,6 +38,7 @@
 	import { layoutDay } from '@clinks/domain/layout';
 	import { atTime, minutesToTime, timeToMinutes, toCalendarDate } from '@clinks/domain/dates';
 	import { dayEndMinutes, dayStartMinutes } from '#lib/features/calendar/calendar.svelte';
+	import { appointmentPress, slotPress } from '#lib/features/calendar/press';
 	import { useWorkspace } from '#lib/workspace.svelte';
 	import * as HoverCard from '@clinks/ui/components/ui/hover-card';
 	import EyeOff from '@lucide/svelte/icons/eye-off';
@@ -49,7 +50,7 @@
 		axis = 'vertical',
 		dragging = $bindable(null),
 		focus = null,
-		selectedId = null,
+		selectedId = $bindable(null),
 	}: {
 		columns: GridColumn[];
 		handlers: GridHandlers;
@@ -60,7 +61,7 @@
 		dragging?: Appointment | null;
 		/** An appointment pointed at outside the grid (an open visit in a list): its arrival window shows. */
 		focus?: Appointment | null;
-		/** The appointment open in the side panel. */
+		/** The marked appointment: a click marks it, a double click opens it (see `appointmentPress`). */
 		selectedId?: string | null;
 	} = $props();
 	const workspace = useWorkspace();
@@ -146,7 +147,7 @@
 	}
 
 	/**
-	 * The hover card's trigger props minus its button semantics: the appointment opens its sheet on click, so it
+	 * The hover card's trigger props minus its button semantics: the appointment opens its sheet on a double click, so it
 	 * must not announce a popup or an expanded state. The card is described as a tooltip instead.
 	 */
 	function cardEvents(props: Record<string, unknown>) {
@@ -268,6 +269,7 @@
 	const earlierKey = $derived(horizontal ? 'ArrowLeft' : 'ArrowUp');
 	const laterKey = $derived(horizontal ? 'ArrowRight' : 'ArrowDown');
 	function onAppointmentKey(event: KeyboardEvent, appointment: Appointment, column: GridColumn) {
+		if (event.key === 'Escape' && selectedId === appointment.id) selectedId = null;
 		if (!editable || !event.altKey || (event.key !== earlierKey && event.key !== laterKey)) return;
 		event.preventDefault();
 		const delta = event.key === earlierKey ? -step : step;
@@ -282,8 +284,18 @@
 	}
 
 	function onSlotClick(event: MouseEvent, column: GridColumn) {
-		if (!editable || event.target !== event.currentTarget) return;
-		handlers.create(column.date, minutesAt(event, event.currentTarget as HTMLElement), column.assigneeId);
+		if (event.target !== event.currentTarget) return;
+		const action = slotPress(event, selectedId !== null);
+		if (action === 'clear') selectedId = null;
+		else if (action === 'create' && editable)
+			handlers.create(column.date, minutesAt(event, event.currentTarget as HTMLElement), column.assigneeId);
+	}
+
+	function onAppointmentClick(event: MouseEvent, appointment: Appointment) {
+		peek = null;
+		if (swallowClick) return;
+		if (appointmentPress(event, selectedId === appointment.id) === 'open') handlers.open(appointment);
+		else selectedId = appointment.id;
 	}
 
 	function onDragOver(event: DragEvent, column: GridColumn) {
@@ -475,6 +487,7 @@
 						<button
 							{...cardEvents(props)}
 							aria-describedby={peek === appointment.id ? `peek-${appointment.id}` : undefined}
+							aria-current={selectedId === appointment.id ? true : undefined}
 							type="button"
 							draggable={editable && !live}
 							ondragstart={(event) => {
@@ -489,10 +502,7 @@
 							}}
 							onmouseenter={() => (pointed = appointment)}
 							onmouseleave={() => (pointed = null)}
-							onclick={() => {
-								peek = null;
-								if (!swallowClick) handlers.open(appointment);
-							}}
+							onclick={(event) => onAppointmentClick(event, appointment)}
 							onkeydown={(event) => onAppointmentKey(event, appointment, column)}
 							aria-keyshortcuts={editable
 								? `Alt+${earlierKey} Alt+${laterKey} Alt+Shift+${earlierKey} Alt+Shift+${laterKey}`
