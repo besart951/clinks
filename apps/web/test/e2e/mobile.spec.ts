@@ -47,7 +47,7 @@ test('keeps side sheets inside a phone screen without sideways scrolling', async
 			),
 		);
 	await page.goto('/#/calendar?view=day');
-	await page.getByRole('grid').first().getByRole('button').first().click();
+	await page.getByRole('grid').first().getByRole('button').first().dblclick();
 	const sheet = page.getByRole('dialog', { name: 'Termin bearbeiten' });
 	await expect(sheet.getByLabel('Titel')).toBeVisible();
 	expect(Math.round((await sheet.boundingBox())?.width ?? 0)).toBe(390);
@@ -169,6 +169,21 @@ test('gives fingers big enough targets on a touch screen', async ({ browser }) =
 	await page.getByRole('button', { name: 'Neue Mail' }).click();
 	const send = page.getByRole('button', { name: 'Senden' });
 	await expect(send).toBeInViewport({ ratio: 1 });
+	await context.close();
+});
+
+test('marks an appointment with a tap and opens it with a second tap', async ({ browser }) => {
+	const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+	const page = await context.newPage();
+	await signIn(page);
+	await page.goto('/#/calendar?view=day');
+	const appointment = page.getByRole('grid').first().getByRole('button').first();
+	const sheet = page.getByRole('dialog', { name: 'Termin bearbeiten' });
+	await appointment.tap();
+	await expect(appointment).toHaveAttribute('aria-current', 'true');
+	await expect(sheet).toBeHidden();
+	await appointment.tap();
+	await expect(sheet.getByLabel('Titel')).toBeVisible();
 	await context.close();
 });
 

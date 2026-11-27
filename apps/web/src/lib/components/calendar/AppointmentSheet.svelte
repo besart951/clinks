@@ -45,7 +45,7 @@
 		 * rest stays usable. Narrow screens, or without `docked`: a modal sheet over the page.
 		 */
 		docked?: boolean;
-		/** The appointment shown, so the page can highlight it. */
+		/** The marked appointment in the grid; opening one marks it. */
 		selectedId?: string | null;
 	} = $props();
 
@@ -65,9 +65,6 @@
 			panel.show();
 			panel.querySelector<HTMLElement>('#a-title')?.focus();
 		} else if (!open && panel.open) panel.close();
-	});
-	$effect(() => {
-		selectedId = open ? (form.original?.id ?? null) : null;
 	});
 
 	/** The panel ends at the window's bottom edge, like the grid beside it; only its form scrolls. */
@@ -90,6 +87,8 @@
 	export function show(appointment: Appointment | null, preset: Partial<AppointmentFields> = {}) {
 		const load = () => {
 			form.start(appointment, preset);
+			// The opened appointment is the marked one; it stays marked after the panel closes.
+			selectedId = appointment?.id ?? null;
 			open = true;
 		};
 		// The docked panel leaves the calendar usable: switching to another appointment must not drop edits.

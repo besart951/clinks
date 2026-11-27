@@ -15,9 +15,21 @@
 	import EyeOff from '@lucide/svelte/icons/eye-off';
 	import { isoWeekday, today } from '@clinks/domain/dates';
 	import { useWorkspace } from '#lib/workspace.svelte';
+	import { appointmentPress } from '#lib/features/calendar/press';
 
 	/** `days` are the weeks of the month without hidden weekdays, so each row has as many days as there are columns. */
-	let { days, month, handlers }: { days: CalendarDate[]; month: string; handlers: MonthHandlers } = $props();
+	let {
+		days,
+		month,
+		handlers,
+		selectedId = $bindable(null),
+	}: {
+		days: CalendarDate[];
+		month: string;
+		handlers: MonthHandlers;
+		/** The marked appointment, as in the time grid: a click marks it, a double click opens it. */
+		selectedId?: string | null;
+	} = $props();
 	const workspace = useWorkspace();
 	const weekdays = $derived([...new Set(days.map(isoWeekday))].sort());
 	const headers = $derived(
@@ -26,6 +38,11 @@
 			return { weekday, name: workspace.i18n.format(sample, { weekday: 'short' }) };
 		}),
 	);
+
+	function press(event: MouseEvent, appointment: Appointment) {
+		if (appointmentPress(event, selectedId === appointment.id) === 'open') handlers.open(appointment);
+		else selectedId = appointment.id;
+	}
 </script>
 
 <div class="overflow-hidden rounded-xl border">
@@ -72,8 +89,15 @@
 					{#each items.slice(0, 3) as appointment (appointment.id)}
 						<li>
 							<button
-								class="hover:bg-muted flex w-full items-center gap-1 truncate rounded px-1 text-left"
-								onclick={() => handlers.open(appointment)}
+								class="hover:bg-muted flex w-full items-center gap-1 truncate rounded px-1 text-left {selectedId ===
+								appointment.id
+									? 'ring-primary bg-muted ring-2'
+									: ''}"
+								aria-current={selectedId === appointment.id ? true : undefined}
+								onclick={(event) => press(event, appointment)}
+								onkeydown={(event) => {
+									if (event.key === 'Escape' && selectedId === appointment.id) selectedId = null;
+								}}
 							>
 								<span class="size-1.5 shrink-0 rounded-full" style:background-color={handlers.color(appointment)}
 								></span>

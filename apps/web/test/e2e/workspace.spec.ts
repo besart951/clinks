@@ -735,9 +735,9 @@ test('shows an info card when hovering an appointment and hides it on Escape', a
 	const card = page.getByRole('tooltip');
 	await expect(card).toBeVisible();
 	await expect(card.getByRole('term')).toContainText(['Art', 'Zuständig']);
-	await expect(card).toContainText('Klicken öffnet den Termin.');
+	await expect(card).toContainText('Doppelklick öffnet den Termin.');
 	await expect(card.getByRole('link', { name: /in Google Maps öffnen/ })).toHaveAttribute('target', '_blank');
-	// Described by the card while it is open, but the button keeps its own role: a click opens the appointment.
+	// Described by the card while it is open, but the button keeps its own role: a double click opens the appointment.
 	await expect(appointment).toHaveAttribute('aria-describedby', /^peek-/);
 	expect(await appointment.getAttribute('aria-expanded')).toBeNull();
 	await page.keyboard.press('Escape');
@@ -748,21 +748,35 @@ test('opens appointments in a panel beside the calendar, which stays usable', as
 	await signIn(page);
 	await page.goto('/#/calendar?view=week');
 	const first = page.getByRole('grid').first().getByRole('button').first();
-	await first.click();
 	const panel = page.getByRole('dialog', { name: 'Termin bearbeiten' });
+	// One click only marks the appointment; a double click opens it.
+	await first.click();
+	await expect(first).toHaveAttribute('aria-current', 'true');
+	await expect(panel).toBeHidden();
+	await first.dblclick();
 	await expect(panel.getByLabel('Titel')).toBeFocused();
 	const title = await panel.getByLabel('Titel').inputValue();
-	// Non-modal: another appointment opens in the same panel with one click.
+	// Non-modal: another appointment opens in the same panel.
 	const second = page.getByRole('grid').nth(1).getByRole('button').first();
-	await second.click();
+	await second.dblclick();
 	await expect(panel.getByLabel('Titel')).not.toHaveValue(title);
+	await expect(second).toHaveAttribute('aria-current', 'true');
+	await expect(first).not.toHaveAttribute('aria-current');
 	// Unsaved edits are not dropped silently when switching.
 	await panel.getByLabel('Titel').fill('Geändert');
-	await first.click();
+	await first.dblclick();
 	await page.getByRole('button', { name: 'Verwerfen' }).click();
 	await expect(panel.getByLabel('Titel')).toHaveValue(title);
 	await panel.getByRole('button', { name: 'Schliessen' }).click();
 	await expect(panel).toBeHidden();
+	// The keyboard has no double click: Enter opens the focused appointment, Escape clears the mark.
+	await second.focus();
+	await page.keyboard.press('Enter');
+	await expect(panel).toBeVisible();
+	await panel.getByRole('button', { name: 'Schliessen' }).click();
+	await second.focus();
+	await page.keyboard.press('Escape');
+	await expect(second).not.toHaveAttribute('aria-current');
 });
 
 test('opens a task on its own page and edits it there', async ({ page }) => {

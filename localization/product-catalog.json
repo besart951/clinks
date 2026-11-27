@@ -1779,8 +1779,8 @@
         "en-US": "Team"
       },
       "ui.ws.calendar.hint": {
-        "de-CH": "Klicke in eine freie Zeit für einen neuen Termin. Ziehe Termine, um sie zu verschieben, oder ihren oberen und unteren Rand, um die Zeit zu ändern (Tastatur: Alt + ↑/↓ für den Beginn, Alt + Shift + ↑/↓ für das Ende).",
-        "en-US": "Click a free slot for a new appointment. Drag appointments to move them, or their top and bottom edge to change the time (keyboard: Alt + ↑/↓ for the start, Alt + Shift + ↑/↓ for the end)."
+        "de-CH": "Ein Klick markiert einen Termin, ein Doppelklick oder Enter öffnet ihn. Doppelklicke in eine freie Zeit für einen neuen Termin. Ziehe Termine, um sie zu verschieben, oder ihren oberen und unteren Rand, um die Zeit zu ändern (Tastatur: Alt + ↑/↓ für den Beginn, Alt + Shift + ↑/↓ für das Ende).",
+        "en-US": "A click marks an appointment, a double click or Enter opens it. Double-click a free slot for a new appointment. Drag appointments to move them, or their top and bottom edge to change the time (keyboard: Alt + ↑/↓ for the start, Alt + Shift + ↑/↓ for the end)."
       },
       "ui.ws.planner.completed": {
         "de-CH": "«{title}» erledigt",
@@ -4815,8 +4815,8 @@
         "en-US": "Time from left to right"
       },
       "ui.ws.calendar.hint_horizontal": {
-        "de-CH": "Klicke in eine freie Zeit für einen neuen Termin. Ziehe Termine, um sie zu verschieben, oder ihren linken und rechten Rand, um die Zeit zu ändern (Tastatur: Alt + ←/→ für den Beginn, Alt + Shift + ←/→ für das Ende).",
-        "en-US": "Click a free slot for a new appointment. Drag appointments to move them, or their left and right edge to change the time (keyboard: Alt + ←/→ for the start, Alt + Shift + ←/→ for the end)."
+        "de-CH": "Ein Klick markiert einen Termin, ein Doppelklick oder Enter öffnet ihn. Doppelklicke in eine freie Zeit für einen neuen Termin. Ziehe Termine, um sie zu verschieben, oder ihren linken und rechten Rand, um die Zeit zu ändern (Tastatur: Alt + ←/→ für den Beginn, Alt + Shift + ←/→ für das Ende).",
+        "en-US": "A click marks an appointment, a double click or Enter opens it. Double-click a free slot for a new appointment. Drag appointments to move them, or their left and right edge to change the time (keyboard: Alt + ←/→ for the start, Alt + Shift + ←/→ for the end)."
       },
       "ui.ws.spitex.drag_visit": {
         "de-CH": "Ziehen, um «{title}» zuzuweisen",
@@ -4835,8 +4835,8 @@
         "en-US": "Note"
       },
       "ui.ws.calendar.peek.open_hint": {
-        "de-CH": "Klicken öffnet den Termin.",
-        "en-US": "Click to open the appointment."
+        "de-CH": "Doppelklick öffnet den Termin.",
+        "en-US": "Double-click to open the appointment."
       },
       "ui.ws.documents.folder_name": {
         "de-CH": "Ordnername",
