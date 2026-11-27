@@ -20,6 +20,8 @@ COPY packages/contracts/package.json packages/contracts/package.json
 COPY packages/db/package.json packages/db/package.json
 COPY packages/domain/package.json packages/domain/package.json
 COPY packages/i18n-types/package.json packages/i18n-types/package.json
+COPY packages/invoice-pdf/package.json packages/invoice-pdf/package.json
+COPY packages/mail-layout/package.json packages/mail-layout/package.json
 COPY packages/sync-schema/package.json packages/sync-schema/package.json
 COPY packages/ui/package.json packages/ui/package.json
 RUN pnpm install --filter @clinks/api... --filter @clinks/collab... --frozen-lockfile --prod --ignore-scripts
@@ -31,6 +33,9 @@ COPY packages/db/src packages/db/src
 COPY packages/db/migrations packages/db/migrations
 COPY packages/domain/src packages/domain/src
 COPY packages/i18n-types/src packages/i18n-types/src
+COPY packages/invoice-pdf/src packages/invoice-pdf/src
+COPY packages/invoice-pdf/assets packages/invoice-pdf/assets
+COPY packages/mail-layout/src packages/mail-layout/src
 COPY packages/sync-schema/src packages/sync-schema/src
 USER node
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 CMD ["node","-e","fetch('http://127.0.0.1:'+(process.env.PORT||8787)+'/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
