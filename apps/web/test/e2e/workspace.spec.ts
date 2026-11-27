@@ -863,6 +863,27 @@ test('adds a client from the open visits and plans their first visit', async ({ 
 	await expect(visit.getByLabel('Titel')).toHaveValue('Rosa Planbar');
 });
 
+test('edits a client from their open visit, without planning a new visit', async ({ page }) => {
+	await signIn(page);
+	await page.getByRole('button', { name: 'Arbeitsbereich' }).click();
+	await page.getByRole('menuitem', { name: 'Stille Spitex Seeland' }).click();
+	await page.goto('/#/spitex');
+	const card = page
+		.getByRole('listitem')
+		.filter({ has: page.getByRole('button', { name: 'Zuweisen' }) })
+		.first();
+	const edit = card.getByRole('button', { name: /^Angaben von .+ bearbeiten$/ });
+	await expect(edit).toHaveCSS('opacity', '0');
+	await card.hover();
+	await expect(edit).toHaveCSS('opacity', '1');
+	await edit.click();
+	const sheet = page.getByRole('dialog', { name: 'Kontakt bearbeiten' });
+	await sheet.getByLabel('Telefon').fill('+41 32 555 66 77');
+	await sheet.getByRole('button', { name: 'Speichern' }).click();
+	await expect(sheet).toBeHidden();
+	await expect(page.getByRole('dialog', { name: 'Neuer Termin' })).toHaveCount(0);
+});
+
 test('hides weekdays in week and month view and brings them back', async ({ page }) => {
 	await signIn(page);
 	await page.goto('/#/calendar?view=week');

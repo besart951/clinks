@@ -6757,6 +6757,10 @@
       "ui.ws.write_mail.preference_system": {
         "de-CH": "Mail-Programm des Geräts",
         "en-US": "The device’s mail program"
+      },
+      "ui.ws.spitex.edit_client": {
+        "de-CH": "Angaben von {name} bearbeiten",
+        "en-US": "Edit the details of {name}"
       }
     }
   }

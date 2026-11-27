@@ -12,7 +12,8 @@
 	import type { Draft } from '@clinks/contracts/repository';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
-	let { onSaved }: { onSaved?: (contact: Contact) => void } = $props();
+	/** `created` tells a new contact from an edited one. */
+	let { onSaved }: { onSaved?: (contact: Contact, created: boolean) => void } = $props();
 
 	const workspace = useWorkspace();
 	const form = new ContactFormModel(workspace);
@@ -44,10 +45,11 @@
 
 	async function submit(event: SubmitEvent) {
 		event.preventDefault();
+		const created = !form.editing;
 		const saved = await form.save();
 		if (!saved) return;
 		open = false;
-		onSaved?.(saved);
+		onSaved?.(saved, created);
 	}
 
 	function onTagKey(event: KeyboardEvent) {
