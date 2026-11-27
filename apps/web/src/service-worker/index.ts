@@ -25,8 +25,39 @@ self.addEventListener('activate', (event) => {
 			.then(() => self.clients.claim()),
 	);
 });
+/**
+ * «Teilen → CLinks» on a phone (manifest `share_target`): the shared files wait in a cache of their own until the
+ * documents page takes them (platform `inbox`), then the app opens there.
+ */
+const sharedCache = 'clinks-shared-files';
+async function receiveShare(request: Request) {
+	const data = await request.formData();
+	const cache = await caches.open(sharedCache);
+	let index = 0;
+	for (const file of data.getAll('files')) {
+		if (!(file instanceof File)) continue;
+		await cache.put(
+			new URL(`shared/${Date.now()}-${index++}`, self.registration.scope).href,
+			new Response(file, {
+				headers: {
+					'content-type': file.type || 'application/octet-stream',
+					'x-file-name': encodeURIComponent(file.name),
+				},
+			}),
+		);
+	}
+	return Response.redirect(new URL('./#/documents?shared=1', self.registration.scope).href, 303);
+}
+
 self.addEventListener('fetch', (event) => {
 	const request = event.request;
+	if (
+		request.method === 'POST' &&
+		new URL(request.url).href === new URL('share-target', self.registration.scope).href
+	) {
+		event.respondWith(receiveShare(request));
+		return;
+	}
 	if (request.method !== 'GET') return;
 	const root = new URL(self.registration.scope);
 	const url = new URL(request.url);

@@ -40,6 +40,8 @@ export class DocumentsModel {
 	sort = $state<DocumentSort>(defaultSort);
 	view = $state<DocumentView>('table');
 	pinned = $state<FolderId[]>([]);
+	/** Folders whose files are kept on this device, with their subfolders. */
+	offline = $state<FolderId[]>([]);
 	recent = $state<DocumentId[]>([]);
 	#workspace: Workspace;
 	readonly #pictures = new Map<string, Promise<string>>();
@@ -50,6 +52,7 @@ export class DocumentsModel {
 		this.sort = preferences.read(`${prefix}sort`, defaultSort);
 		this.view = preferences.read<DocumentView>(`${prefix}view`, 'table');
 		this.pinned = preferences.read<FolderId[]>(`${prefix}pinned`, []);
+		this.offline = preferences.read<FolderId[]>(`${prefix}offline`, []);
 		this.recent = preferences.read<DocumentId[]>(`${prefix}recent`, []);
 		this.resource = new Resource(workspace.db, ['folders', 'documents', 'contacts'], async () => {
 			const [folders, documents, contacts] = await Promise.all([
@@ -57,6 +60,8 @@ export class DocumentsModel {
 				workspace.api.documents.list(),
 				workspace.session.can('contacts.read') ? workspace.api.contacts.list() : Promise.resolve([]),
 			]);
+			// The files of offline folders follow each change: new ones are kept, old versions dropped.
+			void this.#keepOffline(folders, documents);
 			return { folders, documents, contacts };
 		});
 	}
@@ -153,6 +158,39 @@ export class DocumentsModel {
 	togglePin(folder: Folder) {
 		this.pinned = this.isPinned(folder) ? this.pinned.filter((id) => id !== folder.id) : [...this.pinned, folder.id];
 		this.#keep('pinned', this.pinned);
+	}
+
+	isOffline(folder: Folder) {
+		return this.offline.includes(folder.id);
+	}
+
+	/** Whether a file is kept on the device: it lies in an offline folder or below one. */
+	kept(document: StoredDocument): boolean {
+		if (this.offline.length === 0 || document.folderId === null) return false;
+		return folderPath(this.folders, document.folderId).some((folder) => this.offline.includes(folder.id));
+	}
+
+	async toggleOffline(folder: Folder) {
+		const on = !this.isOffline(folder);
+		this.offline = on ? [...this.offline, folder.id] : this.offline.filter((id) => id !== folder.id);
+		this.#keep('offline', this.offline);
+		const data = this.resource.data;
+		if (!data) return;
+		await this.#workspace.run(() => this.#keepOffline(data.folders, data.documents), {
+			success: on ? 'ui.ws.documents.offline_on' : 'ui.ws.documents.offline_off',
+			successParams: { name: folder.name },
+		});
+	}
+
+	async #keepOffline(folders: Folder[], documents: StoredDocument[]) {
+		const files = this.#workspace.documentFiles;
+		const kept = documents.filter(
+			(document) =>
+				document.folderId !== null &&
+				folderPath(folders, document.folderId).some((folder) => this.offline.includes(folder.id)),
+		);
+		for (const document of kept) await files.keep(document).catch(() => undefined);
+		await files.prune(kept).catch(() => undefined);
 	}
 
 	/** The files opened last on this device that still exist, newest first. */
@@ -286,6 +324,15 @@ export class DocumentsModel {
 	 * go into itself or below; files cannot go where they all already are.
 	 */
 	moveTargets(item: { folder: Folder } | { documents: StoredDocument[] }): { id: FolderId | null; label: string }[] {
+		return this.folderChoices().filter((target) =>
+			'folder' in item
+				? this.canMoveFolder(item.folder, target.id)
+				: item.documents.some((document) => document.folderId !== target.id),
+		);
+	}
+
+	/** Every place a file can go, «All files» first, each folder named with its path. */
+	folderChoices(): { id: FolderId | null; label: string }[] {
 		return [
 			{ id: null as FolderId | null, label: this.#workspace.t('ui.ws.documents.all_files') },
 			...this.folders.map((candidate) => ({
@@ -294,15 +341,9 @@ export class DocumentsModel {
 					.map((part) => part.name)
 					.join(' / '),
 			})),
-		]
-			.filter((target) =>
-				'folder' in item
-					? this.canMoveFolder(item.folder, target.id)
-					: item.documents.some((document) => document.folderId !== target.id),
-			)
-			.sort((left, right) =>
-				left.id === null ? -1 : right.id === null ? 1 : left.label.localeCompare(right.label, 'de'),
-			);
+		].sort((left, right) =>
+			left.id === null ? -1 : right.id === null ? 1 : left.label.localeCompare(right.label, 'de'),
+		);
 	}
 
 	async link(document: StoredDocument, contact: Contact) {

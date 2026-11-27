@@ -9,6 +9,21 @@ export interface Platform {
 	files: FileStore;
 	notifier: Notifier;
 	updater: Updater;
+	inbox: SharedInbox;
+	offline: OfflineFiles;
+}
+
+/** Files another app shared into CLinks («Teilen → CLinks»), waiting to be saved; taken once. */
+export interface SharedInbox {
+	take(): Promise<File[]>;
+}
+
+/** Copies of files kept on the device, so they open without a connection. Keys name a file's version. */
+export interface OfflineFiles {
+	get(key: string): Promise<Blob | null>;
+	put(key: string, content: Blob): Promise<void>;
+	keys(): Promise<string[]>;
+	remove(key: string): Promise<void>;
 }
 
 /** Small, non-secret settings such as theme, language and open sections. Synchronous for the first render. */

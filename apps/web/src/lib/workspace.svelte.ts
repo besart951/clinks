@@ -103,7 +103,7 @@ export class Workspace {
 			localize,
 		};
 		this.remote = client;
-		this.documentFiles = new DocumentFiles(client, platform.files, localize);
+		this.documentFiles = new DocumentFiles(client, platform, localize);
 		this.invoiceFiles = new InvoiceFiles(client, platform.files, () => this.api, localize);
 		this.invoiceDelivery = new InvoiceDelivery(client, platform.files, () => this.api, localize);
 		this.bankImports = new BankImports(client, () => this.api);

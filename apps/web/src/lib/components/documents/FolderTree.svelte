@@ -20,7 +20,7 @@
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import * as DropdownMenu from '@clinks/ui/components/ui/dropdown-menu';
 	import FolderMoveMenu from './FolderMoveMenu.svelte';
-	import FolderPinItem from './FolderPinItem.svelte';
+	import FolderDeviceItems from './FolderDeviceItems.svelte';
 	import { carriesItem, readItem, startItemDrag } from '#lib/features/documents/drag-item';
 	import type { DocumentsModel } from '#lib/features/documents/documents.svelte';
 	import { useWorkspace } from '#lib/workspace.svelte';
@@ -264,7 +264,7 @@
 								<PenLine />{workspace.t('ui.ws.documents.rename')}
 							</DropdownMenu.Item>
 							<FolderMoveMenu {model} {folder} />
-							<FolderPinItem {model} {folder} />
+							<FolderDeviceItems {model} {folder} />
 							<DropdownMenu.Separator />
 							<DropdownMenu.Item variant="destructive" onclick={() => actions.remove(folder)}>
 								<Trash2 />{workspace.t('ui.ws.delete')}

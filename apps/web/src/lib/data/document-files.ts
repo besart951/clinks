@@ -2,7 +2,7 @@ import { newId } from '@clinks/domain/ids';
 import type { StoredDocument } from '@clinks/domain/types';
 import { maxDocumentBytes } from '@clinks/contracts/workspace-schemas';
 import type { ApiClient } from './api-client.ts';
-import type { FileStore } from '../platform/types.ts';
+import type { FileStore, OfflineFiles, Platform } from '../platform/types.ts';
 import { MockApiError } from './database.ts';
 import { bytesOf } from './data-url.ts';
 export interface DocumentVersion {
@@ -12,16 +12,39 @@ export interface DocumentVersion {
 	createdAt: string;
 }
 
+/** A version's copy on the device: a new version is a new key. */
+function offlineKey(doc: StoredDocument) {
+	return `${doc.id}:${doc.dataUrl}`;
+}
+
 export class DocumentFiles {
 	readonly #client: ApiClient | null;
 	readonly #files: FileStore;
+	readonly #offline: OfflineFiles;
 	readonly #t: (key: string) => string;
-	constructor(client: ApiClient | null, files: FileStore, t: (key: string) => string) {
+	constructor(client: ApiClient | null, platform: Pick<Platform, 'files' | 'offline'>, t: (key: string) => string) {
 		this.#client = client;
-		this.#files = files;
+		this.#files = platform.files;
+		this.#offline = platform.offline;
 		this.#t = t;
 	}
+	/** The bytes of the file's current version: the copy on the device when it is kept offline, else downloaded. */
 	async blob(doc: StoredDocument) {
+		const kept = await this.#offline.get(offlineKey(doc)).catch(() => null);
+		if (kept) return new File([kept], doc.name, { type: doc.mimeType });
+		return this.#download(doc);
+	}
+	/** Keeps a copy of the file's current version on the device; files kept inline are there already. */
+	async keep(doc: StoredDocument) {
+		if (doc.dataUrl.startsWith('data:') || (await this.#offline.get(offlineKey(doc)))) return;
+		await this.#offline.put(offlineKey(doc), await this.#download(doc));
+	}
+	/** Drops the device's copies that are not in `keep` (older versions, files no longer kept offline). */
+	async prune(keep: StoredDocument[]) {
+		const wanted = new Set(keep.map(offlineKey));
+		for (const key of await this.#offline.keys()) if (!wanted.has(key)) await this.#offline.remove(key);
+	}
+	async #download(doc: StoredDocument) {
 		const url = doc.dataUrl.startsWith('version:')
 			? (
 					await this.#client!.request<{ url: string }>(
