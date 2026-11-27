@@ -35,10 +35,13 @@ if mode == 'services' and 'server_name api.clinks.ch sync.clinks.ch collab.clink
 elif mode == 'web':
     original = '    location / {\n      proxy_pass http://codelinks_api;'
     target = '    location / {\n      set $clinks_edge clinks-web;\n      proxy_pass http://$clinks_edge;'
-    if target not in previous:
-        if previous.count(original) != 1:
-            sys.exit('Unexpected www root configuration')
-        updated = previous.replace(original, target)
+    start = previous.index('    server_name www.clinks.ch;')
+    end = previous.index('\n  }', start)
+    web = previous[start:end]
+    if web.count(original) == 1 and target not in web:
+        updated = previous[:start] + web.replace(original, target) + previous[end:]
+    elif web.count(target) != 1 or original in web:
+        sys.exit('Unexpected www root configuration')
 if updated != previous:
     backup = pathlib.Path('/srv/clinks') / ('nginx-before-' + mode + '.conf')
     if not backup.exists():
