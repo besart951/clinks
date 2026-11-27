@@ -196,6 +196,7 @@ export const syncedTables = {
 			{ column: 'sent_at', field: 'sentAt', type: 'timestamp' },
 			{ column: 'is_read', field: 'read', type: 'boolean' },
 			{ column: 'starred', field: 'starred', type: 'boolean' },
+			{ column: 'snoozed_until', field: 'snoozedUntil', type: 'timestamp', nullable: true },
 			{ column: 'contact_id', field: 'contactId', type: 'uuid', nullable: true, references: 'contacts' },
 			{ column: 'message_id', field: 'messageId', type: 'text', nullable: true, serverSet: true },
 			{ column: 'delivery', field: 'delivery', type: 'text', nullable: true, serverSet: true },

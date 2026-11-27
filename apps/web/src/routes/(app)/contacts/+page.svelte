@@ -44,7 +44,12 @@
 	onMount(() => {
 		const stop = model.resource.connect();
 		const stopShortcut = workspace.registerNewAction(() => canWrite && sheet.show(null));
-		if (routeQuery(page.url).get('new') === '1' && canWrite) sheet.show(null);
+		const query = routeQuery(page.url);
+		// From a mail's sender card: the address and name are filled in.
+		if (query.get('new') === '1' && canWrite) {
+			const [firstName = '', ...rest] = (query.get('name') ?? '').trim().split(/\s+/);
+			sheet.show(null, { email: query.get('email') ?? '', firstName, lastName: rest.join(' ') });
+		}
 		return () => {
 			stop();
 			stopShortcut();

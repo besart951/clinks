@@ -1966,6 +1966,74 @@
         "de-CH": "{count} Mails im Verlauf",
         "en-US": "{count} emails in the conversation"
       },
+      "ui.ws.mail.folder.snoozed": {
+        "de-CH": "Zurückgestellt",
+        "en-US": "Snoozed"
+      },
+      "ui.ws.mail.snooze": {
+        "de-CH": "Später erinnern",
+        "en-US": "Remind me later"
+      },
+      "ui.ws.mail.snooze_until": {
+        "de-CH": "{choice} · {when}",
+        "en-US": "{choice} · {when}"
+      },
+      "ui.ws.mail.snooze.evening": {
+        "de-CH": "Heute Abend",
+        "en-US": "This evening"
+      },
+      "ui.ws.mail.snooze.tomorrow": {
+        "de-CH": "Morgen früh",
+        "en-US": "Tomorrow morning"
+      },
+      "ui.ws.mail.snooze.monday": {
+        "de-CH": "Nächste Woche",
+        "en-US": "Next week"
+      },
+      "ui.ws.mail.unsnooze": {
+        "de-CH": "Jetzt zurückholen",
+        "en-US": "Bring back now"
+      },
+      "ui.ws.mail.snoozed": {
+        "de-CH": "Zurückgestellt bis {when}",
+        "en-US": "Snoozed until {when}"
+      },
+      "ui.ws.mail.unsnoozed": {
+        "de-CH": "Zurück im Ordner",
+        "en-US": "Back in its folder"
+      },
+      "ui.ws.mail.unread_count": {
+        "de-CH": "{count} ungelesen",
+        "en-US": "{count} unread"
+      },
+      "ui.ws.mail.search_hint": {
+        "de-CH": "Filter: von: an: ist:ungelesen ist:markiert nach:2026-11-01 vor:2026-12-31",
+        "en-US": "Filters: from: to: is:unread is:starred after:2026-11-01 before:2026-12-31"
+      },
+      "ui.ws.mail.sender_card": {
+        "de-CH": "Über {name}",
+        "en-US": "About {name}"
+      },
+      "ui.ws.mail.sender.next_appointment": {
+        "de-CH": "Nächster Termin",
+        "en-US": "Next appointment"
+      },
+      "ui.ws.mail.sender.no_appointment": {
+        "de-CH": "Kein Termin geplant",
+        "en-US": "No appointment planned"
+      },
+      "ui.ws.mail.sender.open_invoices": {
+        "de-CH": "Offene Rechnungen",
+        "en-US": "Open invoices"
+      },
+      "ui.ws.mail.sender.unknown": {
+        "de-CH": "Noch kein Kontakt",
+        "en-US": "Not a contact yet"
+      },
+      "ui.ws.mail.sender.add_contact": {
+        "de-CH": "Als Kontakt erfassen",
+        "en-US": "Add as contact"
+      },
       "ui.ws.mail.undo_send": {
         "de-CH": "Senden rückgängig",
         "en-US": "Undo send"

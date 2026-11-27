@@ -3,10 +3,11 @@
 	import Send from '@lucide/svelte/icons/send';
 	import FileText from '@lucide/svelte/icons/file-text';
 	import Archive from '@lucide/svelte/icons/archive';
+	import AlarmClock from '@lucide/svelte/icons/alarm-clock';
 	import SquareKanban from '@lucide/svelte/icons/square-kanban';
 	import CalendarPlus from '@lucide/svelte/icons/calendar-plus';
 	import { mailFolders, type MailFolder, type MailMessage } from '@clinks/domain/types';
-	import type { MailboxModel } from '#lib/features/mail/mailbox.svelte';
+	import type { MailboxModel, MailView } from '#lib/features/mail/mailbox.svelte';
 	import { carriesMails, readMailDrag } from '#lib/features/mail/mail-drag';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
@@ -20,11 +21,13 @@
 		drops,
 	}: {
 		model: MailboxModel;
-		choose: (folder: MailFolder) => void;
+		choose: (view: MailView) => void;
 		drops: { task?: (mails: MailMessage[]) => void; appointment?: (mails: MailMessage[]) => void };
 	} = $props();
 	const workspace = useWorkspace();
-	const icons = { inbox: Inbox, sent: Send, drafts: FileText, archive: Archive };
+	const icons = { inbox: Inbox, sent: Send, drafts: FileText, archive: Archive, snoozed: AlarmClock };
+	/** The folders, then «Zurückgestellt» when something waits there. */
+	const views = $derived<MailView[]>([...mailFolders, ...(model.count('snoozed') > 0 ? ['snoozed' as const] : [])]);
 	/** Where mails can be moved by dropping: not into Gesendet or Entwürfe. */
 	const droppable = new Set<MailFolder>(['inbox', 'archive']);
 	let dragging = $state(false);
@@ -91,9 +94,9 @@
 	class="flex flex-wrap gap-1 lg:flex-col lg:flex-nowrap lg:overflow-y-auto"
 	aria-label={workspace.t('ui.ws.mail.folders')}
 >
-	{#each mailFolders as folder (folder)}
+	{#each views as folder (folder)}
 		{@const Icon = icons[folder]}
-		{@const target = canWrite && droppable.has(folder)}
+		{@const target = canWrite && folder !== 'snoozed' && droppable.has(folder)}
 		<button
 			class="hover:bg-muted flex shrink-0 items-center gap-2 rounded-md px-2.5 py-1.5 text-sm aria-pressed:bg-muted aria-pressed:font-medium {over ===
 			folder
@@ -103,15 +106,21 @@
 			onclick={() => choose(folder)}
 			ondragover={target ? (event) => allow(event, folder) : undefined}
 			ondragleave={() => (over = null)}
-			ondrop={target ? (event) => drop(event, (mails) => model.moveTo(mails, folder)) : undefined}
+			ondrop={target ? (event) => drop(event, (mails) => model.moveTo(mails, folder as MailFolder)) : undefined}
 		>
 			<Icon class="size-4" /><span class="flex-1 text-left">{workspace.t(`ui.ws.mail.folder.${folder}`)}</span>
-			{#if folder === 'inbox' && model.unread('inbox') > 0}<span
-					class="bg-primary text-primary-foreground rounded-full px-1.5 text-[11px]"
+			<!-- Unread in every folder that receives mail; how many there are in Entwürfe and Zurückgestellt. -->
+			{#if folder === 'drafts' || folder === 'snoozed'}{#if model.count(folder) > 0}<span
+						class="text-muted-foreground text-xs tabular-nums"
+					>
+						{model.count(folder)}
+					</span>{/if}{:else if model.unread(folder) > 0}<span
+					class="rounded-full px-1.5 text-[11px] tabular-nums {folder === 'inbox'
+						? 'bg-primary text-primary-foreground'
+						: 'bg-muted-foreground/15 text-muted-foreground'}"
+					aria-label={workspace.t('ui.ws.mail.unread_count', { count: model.unread(folder) })}
 				>
-					{model.unread('inbox')}
-				</span>{:else if folder === 'drafts' && model.count('drafts') > 0}<span class="text-muted-foreground text-xs">
-					{model.count('drafts')}
+					{model.unread(folder)}
 				</span>{/if}
 		</button>
 	{/each}

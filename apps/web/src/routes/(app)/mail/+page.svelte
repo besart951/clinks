@@ -15,11 +15,11 @@
 	import MailFolders from '#lib/components/mail/MailFolders.svelte';
 	import MailReader from '#lib/components/mail/MailReader.svelte';
 	import ComposeSheet from '#lib/components/mail/ComposeSheet.svelte';
-	import { MailboxModel } from '#lib/features/mail/mailbox.svelte';
+	import { MailboxModel, type MailView } from '#lib/features/mail/mailbox.svelte';
 	import { mailList } from '#lib/features/mail/mail-list.svelte';
 	import SelectableList from '#lib/components/list/SelectableList.svelte';
 	import ListBar from '#lib/components/list/ListBar.svelte';
-	import type { MailFolder, MailMessage } from '@clinks/domain/types';
+	import type { MailMessage } from '@clinks/domain/types';
 	import type { MailId } from '@clinks/domain/ids';
 	import { routeQuery, setQuery } from '#lib/navigation';
 	import { useQuickCreate } from '#lib/features/shell/quick-create.svelte';
@@ -36,7 +36,7 @@
 		appointment: (mail) => quick.appointment({ contactId: model.contactFor(mail)?.id ?? null }),
 	});
 	const query = routeQuery(page.url);
-	if (query.get('folder')) model.folder = query.get('folder') as MailFolder;
+	if (query.get('folder')) model.folder = query.get('folder') as MailView;
 	if (query.get('message')) model.selectedId = query.get('message') as MailId;
 	const canPlan = $derived(workspace.session.can('planner.write') && workspace.session.hasModule('planner'));
 
@@ -44,16 +44,19 @@
 		const stop = model.resource.connect();
 		const stopShortcut = workspace.registerNewAction(() => canWrite && compose.show());
 		const stopKeys = workspace.registerPageKeys(list);
+		// Snoozed mails come back while the page stays open.
+		const clock = setInterval(() => model.tick(), 30_000);
 		if (query.get('compose') === '1' && canWrite)
 			compose.show({ to: query.get('to') ? [query.get('to')!] : [], subject: query.get('subject') ?? undefined });
 		return () => {
 			stop();
 			stopShortcut();
 			stopKeys();
+			clearInterval(clock);
 		};
 	});
 
-	function chooseFolder(folder: MailFolder) {
+	function chooseFolder(folder: MailView) {
 		model.folder = folder;
 		model.selectedId = null;
 		list.clear();
@@ -103,7 +106,13 @@
 				class="flex min-h-0 min-w-0 flex-col gap-2 {selected ? 'hidden lg:flex' : ''}"
 				aria-label={workspace.t(`ui.ws.mail.folder.${model.folder}`)}
 			>
-				<SearchInput bind:value={model.search} label={workspace.t('ui.ws.mail.search')} />
+				<div class="group/search space-y-1">
+					<SearchInput bind:value={model.search} label={workspace.t('ui.ws.mail.search')} />
+					<!-- The filters, shown while searching. -->
+					<p class="text-muted-foreground hidden px-1 text-[11px] group-focus-within/search:block">
+						{workspace.t('ui.ws.mail.search_hint')}
+					</p>
+				</div>
 				<ListBar {list} />
 				<SelectableList {list} class="min-h-0 flex-1 overflow-y-auto rounded-xl border">
 					{#snippet row(mail: MailMessage)}

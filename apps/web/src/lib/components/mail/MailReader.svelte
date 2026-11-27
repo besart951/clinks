@@ -86,7 +86,7 @@
 				</a>{/if}
 		</p>
 	</header>
-	<MailConversation mails={conversation} />
+	<MailConversation mails={conversation} contactFor={(entry) => model.contactFor(entry)} />
 	{#if canWrite}
 		{#key answered.id}
 			<InlineReply mail={answered} to={answerTo} expand={compose} />

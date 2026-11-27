@@ -187,6 +187,41 @@ describe('sending from the mail module', () => {
 		assert.equal(written.status, 403);
 	});
 
+	it('snoozes a mail through sync and brings it back', async () => {
+		const id = uuid();
+		const until = new Date(Date.now() + 86_400_000).toISOString();
+		const row = {
+			folder: 'inbox',
+			sender: 'lea@example.ch',
+			from_name: 'Lea',
+			recipients: '["compose@example.ch"]',
+			subject: 'Später',
+			body: '',
+			sent_at: new Date().toISOString(),
+			is_read: 1,
+			starred: 0,
+			contact_id: null,
+		};
+		await call('POST', '/sync/write', { ops: [{ op: 'PUT', table: 'mails', id, data: row }] });
+		const snoozed = await call('POST', '/sync/write', {
+			ops: [{ op: 'PATCH', table: 'mails', id, data: { snoozed_until: until } }],
+		});
+		assert.equal(snoozed.status, 200, JSON.stringify(snoozed.body));
+		const stored = await api.owner
+			.selectFrom('mails')
+			.select('snoozedUntil')
+			.where('id', '=', id)
+			.executeTakeFirstOrThrow();
+		assert.equal(new Date(stored.snoozedUntil as unknown as string).toISOString(), until);
+		await call('POST', '/sync/write', { ops: [{ op: 'PATCH', table: 'mails', id, data: { snoozed_until: null } }] });
+		const back = await api.owner
+			.selectFrom('mails')
+			.select('snoozedUntil')
+			.where('id', '=', id)
+			.executeTakeFirstOrThrow();
+		assert.equal(back.snoozedUntil, null);
+	});
+
 	it('takes a send back while it waits for «undo send», and refuses once it is on its way', async () => {
 		api.config.MAIL_UNDO_SECONDS = 10;
 		try {

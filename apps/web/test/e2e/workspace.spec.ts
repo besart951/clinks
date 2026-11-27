@@ -1324,3 +1324,44 @@ test('answers right under the conversation and drags mails onto a folder or a ta
 	await page.mouse.up();
 	await expect(page.getByText('Aufgabe aus Mail erstellt')).toBeVisible();
 });
+
+test('filters the search, snoozes a mail until tomorrow and shows what CLinks knows about the sender', async ({
+	page,
+}) => {
+	await page.setViewportSize({ width: 1440, height: 900 });
+	await signIn(page);
+	await page.goto('/#/mail');
+	const folders = page.getByRole('navigation', { name: 'Ordner' });
+	const rows = page.getByRole('list', { name: 'Posteingang' }).getByRole('listitem');
+	await expect(rows.first()).toBeVisible();
+	const unread = Number(
+		await folders
+			.getByRole('button', { name: /^Posteingang/ })
+			.innerText()
+			.then((text) => text.match(/\d+/)?.[0] ?? '0'),
+	);
+	await page.getByRole('searchbox', { name: 'Mails durchsuchen' }).fill('ist:ungelesen');
+	await expect(page.getByText(/^Filter: von:/)).toBeVisible();
+	await expect(rows).toHaveCount(unread);
+	await page.getByRole('searchbox', { name: 'Mails durchsuchen' }).fill('');
+
+	// Später erinnern: out of the inbox, under «Zurückgestellt» until tomorrow.
+	const count = await rows.count();
+	await rows.first().click({ button: 'right' });
+	await page.getByRole('menuitem', { name: 'Später erinnern' }).click();
+	await page.getByRole('menuitem', { name: /^Morgen früh/ }).click();
+	await expect(page.getByText(/^Zurückgestellt bis /)).toBeVisible();
+	await expect(rows).toHaveCount(count - 1);
+	await folders.getByRole('button', { name: /^Zurückgestellt/ }).click();
+	const snoozed = page.getByRole('list', { name: 'Zurückgestellt' }).getByRole('listitem');
+	await expect(snoozed).toHaveCount(1);
+	await snoozed.first().hover();
+	await snoozed.first().getByRole('button', { name: 'Jetzt zurückholen' }).click();
+	await expect(page.getByText('Zurück im Ordner')).toBeVisible();
+
+	// The sender's name in an open mail opens a card about them.
+	await folders.getByRole('button', { name: /^Posteingang/ }).click();
+	await rows.first().getByRole('button').first().click();
+	await page.getByRole('article').first().locator('[data-slot="hover-card-trigger"]').first().hover();
+	await expect(page.getByRole('group', { name: /^Über / })).toBeVisible();
+});

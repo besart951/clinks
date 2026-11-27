@@ -1,6 +1,10 @@
 import type { MailId } from '@clinks/domain/ids';
 import type { Contact, MailFolder, MailMessage, MailTemplate } from '@clinks/domain/types';
-import { threadKey, threads, type MailThread } from '@clinks/domain/mail-threads';
+import { threadKey, threads, waiting, type MailThread } from '@clinks/domain/mail-threads';
+import { emptyQuery, matchesMailQuery, parseMailQuery } from '@clinks/domain/mail-query';
+
+/** A folder, or «Zurückgestellt»: the snoozed mails of every folder until their time comes. */
+export type MailView = MailFolder | 'snoozed';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { RunOptions, Workspace } from '../../workspace.svelte.ts';
 
@@ -13,7 +17,9 @@ export interface MailboxData {
 /** Folders, reading pane and the actions on a message. */
 export class MailboxModel {
 	readonly resource: Resource<MailboxData>;
-	folder = $state<MailFolder>('inbox');
+	folder = $state<MailView>('inbox');
+	/** The clock snoozed mails are measured against; `tick` moves it, so they come back while the page is open. */
+	now = $state(new Date());
 	selectedId = $state<MailId | null>(null);
 	search = $state('');
 	#workspace: Workspace;
@@ -32,13 +38,10 @@ export class MailboxModel {
 
 	/** The folder's conversations, newest first; the search finds a conversation by any of its mails. */
 	readonly threads: MailThread[] = $derived.by(() => {
-		const query = this.search.trim().toLowerCase();
-		return threads((this.resource.data?.mails ?? []).filter((mail) => mail.folder === this.folder)).filter(
-			(thread) =>
-				!query ||
-				thread.mails.some((mail) =>
-					`${mail.subject} ${mail.fromName} ${mail.from} ${mail.body}`.toLowerCase().includes(query),
-				),
+		const query = parseMailQuery(this.search);
+		const mails = (this.resource.data?.mails ?? []).filter((mail) => this.#inView(mail));
+		return threads(mails).filter(
+			(thread) => emptyQuery(query) || thread.mails.some((mail) => matchesMailQuery(mail, query)),
 		);
 	});
 	/** Each conversation by the id of its newest mail, which stands for it in the list. */
@@ -72,12 +75,22 @@ export class MailboxModel {
 		return this.resource.data?.mails.find((mail) => mail.id === this.selectedId) ?? null;
 	}
 
-	unread(folder: MailFolder) {
-		return (this.resource.data?.mails ?? []).filter((mail) => mail.folder === folder && !mail.read).length;
+	unread(view: MailView) {
+		return (this.resource.data?.mails ?? []).filter((mail) => this.#inView(mail, view) && !mail.read).length;
 	}
 
-	count(folder: MailFolder) {
-		return (this.resource.data?.mails ?? []).filter((mail) => mail.folder === folder).length;
+	count(view: MailView) {
+		return (this.resource.data?.mails ?? []).filter((mail) => this.#inView(mail, view)).length;
+	}
+
+	tick() {
+		this.now = new Date();
+	}
+
+	/** Snoozed mails wait under «Zurückgestellt», out of their folder; drafts are never snoozed. */
+	#inView(mail: MailMessage, view: MailView = this.folder) {
+		const snoozed = waiting(mail, this.now);
+		return view === 'snoozed' ? snoozed && mail.folder !== 'drafts' : mail.folder === view && !snoozed;
 	}
 
 	contactFor(mail: MailMessage): Contact | null {
@@ -110,6 +123,22 @@ export class MailboxModel {
 	async setRead(mails: MailMessage[], read: boolean) {
 		await this.#update(mails, { read });
 		if (!read && mails.some((mail) => mail.id === this.selectedId)) this.selectedId = null;
+	}
+
+	/** «Später erinnern» until then; null brings them back now. */
+	async snooze(mails: MailMessage[], until: Date | null) {
+		if (mails.some((mail) => mail.id === this.selectedId)) this.selectedId = null;
+		await this.#update(
+			mails,
+			{ snoozedUntil: until?.toISOString() ?? null },
+			until
+				? {
+						success: 'ui.ws.mail.snoozed',
+						successParams: { when: this.#workspace.i18n.dateTime(until.toISOString()) },
+						undo: true,
+					}
+				: { success: 'ui.ws.mail.unsnoozed' },
+		);
 	}
 
 	async moveTo(mails: MailMessage[], folder: MailFolder) {
@@ -148,12 +177,12 @@ export class MailboxModel {
 	 */
 	async #update(
 		mails: MailMessage[],
-		patch: Partial<Pick<MailMessage, 'read' | 'starred' | 'folder'>>,
+		patch: Partial<Pick<MailMessage, 'read' | 'starred' | 'folder' | 'snoozedUntil'>>,
 		toast: Pick<RunOptions, 'success' | 'successParams'> & { undo?: boolean } = {},
 	) {
 		const api = this.#workspace.api.mails;
 		const changed = mails.filter((mail) =>
-			(Object.keys(patch) as (keyof typeof patch)[]).some((key) => mail[key] !== patch[key]),
+			(Object.keys(patch) as (keyof typeof patch)[]).some((key) => (mail[key] ?? null) !== patch[key]),
 		);
 		if (changed.length === 0) return;
 		await this.#workspace.run(
@@ -168,7 +197,7 @@ export class MailboxModel {
 							for (const mail of changed) {
 								const current = await api.get(mail.id);
 								const before = Object.fromEntries(
-									(Object.keys(patch) as (keyof typeof patch)[]).map((key) => [key, mail[key]]),
+									(Object.keys(patch) as (keyof typeof patch)[]).map((key) => [key, mail[key] ?? null]),
 								);
 								await api.update(current.id, current.revision, before);
 							}

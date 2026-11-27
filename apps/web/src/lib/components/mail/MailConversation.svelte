@@ -1,16 +1,20 @@
 <script lang="ts">
-	import type { MailMessage } from '@clinks/domain/types';
+	import type { Contact, MailMessage } from '@clinks/domain/types';
+	import SenderCard from './SenderCard.svelte';
 	import { useWorkspace } from '#lib/workspace.svelte';
 	import DeliveryNote from './DeliveryNote.svelte';
 
-	/** The mails of a conversation, oldest first; the earlier ones folded to one line, the newest open. */
-	let { mails }: { mails: MailMessage[] } = $props();
+	/**
+	 * The mails of a conversation, oldest first; the earlier ones folded to one line, the newest open. Each
+	 * sender's name opens a card about them (`contactFor`).
+	 */
+	let { mails, contactFor }: { mails: MailMessage[]; contactFor: (mail: MailMessage) => Contact | null } = $props();
 	const workspace = useWorkspace();
 </script>
 
 {#snippet head(mail: MailMessage)}
 	<span class="flex flex-wrap items-baseline gap-x-2 text-sm">
-		<span class="font-medium">{mail.fromName || mail.from}</span>
+		<SenderCard name={mail.fromName} address={mail.from} contact={contactFor(mail)} />
 		<span class="text-muted-foreground">&lt;{mail.from}&gt;</span>
 		<span class="text-muted-foreground ms-auto text-xs">{workspace.i18n.dateTime(mail.sentAt)}</span>
 	</span>
