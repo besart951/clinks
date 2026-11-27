@@ -19,12 +19,21 @@ export async function startApi(billing?: Billing, options: { allowInternalStorag
 	const owner: Db = createDb(database.ownerUrl, { max: 2 });
 	const tokens = await TokenService.create({ issuer: 'http://test', audience: 'clinks' });
 	const mailer = new MemoryMailer();
+	// Mail from workspaces' own domains, and the DNS their records are looked up in.
+	const relay = new MemoryMailer();
+	const dns = new Map<string, string[]>();
 	const clock = { offset: 0 };
 	const services = {
 		billing,
 		db,
 		tokens,
 		mailer,
+		relay,
+		resolveTxt: async (host: string) => {
+			const texts = dns.get(host);
+			if (!texts) throw Object.assign(new Error('not found'), { code: 'ENOTFOUND' });
+			return texts.map((text) => [text]);
+		},
 		limiter: new RateLimiter(),
 		secrets: SecretBox.ephemeral(),
 		// Fixed DNS: provider hosts resolve to a public address, one name points inside.
@@ -118,6 +127,8 @@ export async function startApi(billing?: Billing, options: { allowInternalStorag
 		owner,
 		tokens,
 		mailer,
+		relay,
+		dns,
 		mailWorker,
 		clock,
 		client,

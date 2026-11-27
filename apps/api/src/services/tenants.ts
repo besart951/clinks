@@ -380,6 +380,7 @@ function userDto(user: UserRow, twoFactorEnabled: boolean) {
 		globalRole,
 		avatarDataUrl: user.avatarDataUrl,
 		notificationPreferences: user.notificationPreferences,
+		mailSignature: user.mailSignature,
 		emailVerified: user.emailVerifiedAt !== null,
 		twoFactorEnabled,
 	};

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { afterAll, beforeAll, describe, it } from 'vitest';
 import { uuid } from '../../src/crypto.ts';
+import { contactRow, invoiceRow } from './fixtures.ts';
 import { startApi, type Api } from './harness.ts';
 
 let api: Api;
@@ -16,38 +17,6 @@ afterAll(async () => {
 
 const call = (method: string, path: string, body?: unknown) =>
 	admin.browser.call(method, path, { token: admin.token, body });
-
-export const contactRow = {
-	kind: 'person',
-	first_name: 'Lea',
-	last_name: 'Muster',
-	company_name: '',
-	email: 'lea@example.ch',
-	phone: '',
-	address: JSON.stringify({ street: 'Weg', houseNumber: '1', zip: '3000', city: 'Bern' }),
-	birth_date: null,
-	insurer: '',
-	tags: '[]',
-	notes: '',
-	archived: 0,
-};
-
-export const invoiceRow = (contactId: string, overrides: Record<string, unknown> = {}) => ({
-	number: '',
-	kind: 'invoice',
-	contact_id: contactId,
-	issue_date: '2026-11-22',
-	due_date: '2026-12-22',
-	status: 'draft',
-	lines: JSON.stringify([{ description: 'Beratung', quantity: 2, unitPrice: 12000, vatRate: 810 }]),
-	payments: '[]',
-	reminder_level: 0,
-	notes: '',
-	appointment_ids: '[]',
-	service_from: '2026-11-02',
-	service_to: '2026-11-20',
-	...overrides,
-});
 
 describe('payment details', () => {
 	it('keeps the QR-IBAN apart from the IBAN and validates both', async () => {

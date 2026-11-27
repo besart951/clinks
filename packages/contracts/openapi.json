@@ -1478,6 +1478,9 @@
 														"digest"
 													]
 												},
+												"mailSignature": {
+													"type": "string"
+												},
 												"globalRole": {
 													"type": [
 														"string",
@@ -1503,6 +1506,7 @@
 												"locale",
 												"avatarDataUrl",
 												"notificationPreferences",
+												"mailSignature",
 												"globalRole",
 												"emailVerified",
 												"twoFactorEnabled"
@@ -6002,6 +6006,10 @@
 											"push",
 											"digest"
 										]
+									},
+									"mailSignature": {
+										"type": "string",
+										"maxLength": 1000
 									}
 								},
 								"additionalProperties": false
@@ -9351,6 +9359,1589 @@
 				"responses": {
 					"204": {
 						"description": "Ignored"
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Not signed in",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Not allowed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mail/settings": {
+			"get": {
+				"tags": [
+					"mail"
+				],
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"domains": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"id": {
+														"type": "string",
+														"format": "uuid"
+													},
+													"domain": {
+														"type": "string"
+													},
+													"purpose": {
+														"type": "string",
+														"enum": [
+															"business",
+															"newsletter"
+														]
+													},
+													"status": {
+														"type": "string",
+														"enum": [
+															"pending",
+															"verified",
+															"failing"
+														]
+													},
+													"checkedAt": {
+														"type": [
+															"string",
+															"null"
+														]
+													},
+													"records": {
+														"type": "array",
+														"items": {
+															"type": "object",
+															"properties": {
+																"record": {
+																	"type": "string",
+																	"enum": [
+																		"spf",
+																		"dkim",
+																		"dmarc"
+																	]
+																},
+																"type": {
+																	"type": "string",
+																	"enum": [
+																		"TXT"
+																	]
+																},
+																"host": {
+																	"type": "string"
+																},
+																"value": {
+																	"type": "string"
+																},
+																"ok": {
+																	"type": [
+																		"boolean",
+																		"null"
+																	]
+																},
+																"found": {
+																	"type": [
+																		"string",
+																		"null"
+																	]
+																}
+															},
+															"required": [
+																"record",
+																"type",
+																"host",
+																"value",
+																"ok",
+																"found"
+															]
+														}
+													}
+												},
+												"required": [
+													"id",
+													"domain",
+													"purpose",
+													"status",
+													"checkedAt",
+													"records"
+												]
+											}
+										},
+										"senders": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"kind": {
+														"type": "string",
+														"enum": [
+															"business",
+															"personal",
+															"newsletter"
+														]
+													},
+													"address": {
+														"type": "string",
+														"maxLength": 254,
+														"format": "email"
+													},
+													"displayName": {
+														"type": "string",
+														"minLength": 1,
+														"maxLength": 120
+													},
+													"replyTo": {
+														"type": [
+															"string",
+															"null"
+														],
+														"maxLength": 254,
+														"format": "email"
+													},
+													"userId": {
+														"type": [
+															"string",
+															"null"
+														],
+														"format": "uuid"
+													},
+													"signature": {
+														"type": "string",
+														"maxLength": 1000
+													},
+													"isDefault": {
+														"type": "boolean"
+													},
+													"id": {
+														"type": "string",
+														"format": "uuid"
+													},
+													"domainId": {
+														"type": "string",
+														"format": "uuid"
+													},
+													"active": {
+														"type": "boolean"
+													}
+												},
+												"required": [
+													"kind",
+													"address",
+													"displayName",
+													"replyTo",
+													"userId",
+													"signature",
+													"isDefault",
+													"id",
+													"domainId",
+													"active"
+												],
+												"additionalProperties": false
+											}
+										},
+										"relay": {
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"domains",
+										"senders",
+										"relay"
+									]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Not signed in",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Not allowed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mail/domains": {
+			"post": {
+				"tags": [
+					"mail"
+				],
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"domain": {
+										"type": "string",
+										"minLength": 3,
+										"maxLength": 253
+									},
+									"purpose": {
+										"type": "string",
+										"enum": [
+											"business",
+											"newsletter"
+										]
+									}
+								},
+								"required": [
+									"domain",
+									"purpose"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"id": {
+											"type": "string",
+											"format": "uuid"
+										},
+										"domain": {
+											"type": "string"
+										},
+										"purpose": {
+											"type": "string",
+											"enum": [
+												"business",
+												"newsletter"
+											]
+										},
+										"status": {
+											"type": "string",
+											"enum": [
+												"pending",
+												"verified",
+												"failing"
+											]
+										},
+										"checkedAt": {
+											"type": [
+												"string",
+												"null"
+											]
+										},
+										"records": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"record": {
+														"type": "string",
+														"enum": [
+															"spf",
+															"dkim",
+															"dmarc"
+														]
+													},
+													"type": {
+														"type": "string",
+														"enum": [
+															"TXT"
+														]
+													},
+													"host": {
+														"type": "string"
+													},
+													"value": {
+														"type": "string"
+													},
+													"ok": {
+														"type": [
+															"boolean",
+															"null"
+														]
+													},
+													"found": {
+														"type": [
+															"string",
+															"null"
+														]
+													}
+												},
+												"required": [
+													"record",
+													"type",
+													"host",
+													"value",
+													"ok",
+													"found"
+												]
+											}
+										}
+									},
+									"required": [
+										"id",
+										"domain",
+										"purpose",
+										"status",
+										"checkedAt",
+										"records"
+									]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Not signed in",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Not allowed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mail/domains/{id}/check": {
+			"post": {
+				"tags": [
+					"mail"
+				],
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"parameters": [
+					{
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						},
+						"required": true,
+						"name": "id",
+						"in": "path"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"id": {
+											"type": "string",
+											"format": "uuid"
+										},
+										"domain": {
+											"type": "string"
+										},
+										"purpose": {
+											"type": "string",
+											"enum": [
+												"business",
+												"newsletter"
+											]
+										},
+										"status": {
+											"type": "string",
+											"enum": [
+												"pending",
+												"verified",
+												"failing"
+											]
+										},
+										"checkedAt": {
+											"type": [
+												"string",
+												"null"
+											]
+										},
+										"records": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"record": {
+														"type": "string",
+														"enum": [
+															"spf",
+															"dkim",
+															"dmarc"
+														]
+													},
+													"type": {
+														"type": "string",
+														"enum": [
+															"TXT"
+														]
+													},
+													"host": {
+														"type": "string"
+													},
+													"value": {
+														"type": "string"
+													},
+													"ok": {
+														"type": [
+															"boolean",
+															"null"
+														]
+													},
+													"found": {
+														"type": [
+															"string",
+															"null"
+														]
+													}
+												},
+												"required": [
+													"record",
+													"type",
+													"host",
+													"value",
+													"ok",
+													"found"
+												]
+											}
+										}
+									},
+									"required": [
+										"id",
+										"domain",
+										"purpose",
+										"status",
+										"checkedAt",
+										"records"
+									]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Not signed in",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Not allowed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mail/domains/{id}": {
+			"delete": {
+				"tags": [
+					"mail"
+				],
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"parameters": [
+					{
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						},
+						"required": true,
+						"name": "id",
+						"in": "path"
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "Done"
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Not signed in",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Not allowed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mail/senders": {
+			"post": {
+				"tags": [
+					"mail"
+				],
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"enum": [
+											"business",
+											"personal",
+											"newsletter"
+										]
+									},
+									"address": {
+										"type": "string",
+										"maxLength": 254,
+										"format": "email"
+									},
+									"displayName": {
+										"type": "string",
+										"minLength": 1,
+										"maxLength": 120
+									},
+									"replyTo": {
+										"type": [
+											"string",
+											"null"
+										],
+										"maxLength": 254,
+										"format": "email"
+									},
+									"userId": {
+										"type": [
+											"string",
+											"null"
+										],
+										"format": "uuid"
+									},
+									"signature": {
+										"type": "string",
+										"maxLength": 1000
+									},
+									"isDefault": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"kind",
+									"address",
+									"displayName",
+									"replyTo",
+									"userId",
+									"signature",
+									"isDefault"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"kind": {
+											"type": "string",
+											"enum": [
+												"business",
+												"personal",
+												"newsletter"
+											]
+										},
+										"address": {
+											"type": "string",
+											"maxLength": 254,
+											"format": "email"
+										},
+										"displayName": {
+											"type": "string",
+											"minLength": 1,
+											"maxLength": 120
+										},
+										"replyTo": {
+											"type": [
+												"string",
+												"null"
+											],
+											"maxLength": 254,
+											"format": "email"
+										},
+										"userId": {
+											"type": [
+												"string",
+												"null"
+											],
+											"format": "uuid"
+										},
+										"signature": {
+											"type": "string",
+											"maxLength": 1000
+										},
+										"isDefault": {
+											"type": "boolean"
+										},
+										"id": {
+											"type": "string",
+											"format": "uuid"
+										},
+										"domainId": {
+											"type": "string",
+											"format": "uuid"
+										},
+										"active": {
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"kind",
+										"address",
+										"displayName",
+										"replyTo",
+										"userId",
+										"signature",
+										"isDefault",
+										"id",
+										"domainId",
+										"active"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Not signed in",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Not allowed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/mail/senders/{id}": {
+			"post": {
+				"tags": [
+					"mail"
+				],
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"parameters": [
+					{
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						},
+						"required": true,
+						"name": "id",
+						"in": "path"
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"kind": {
+										"type": "string",
+										"enum": [
+											"business",
+											"personal",
+											"newsletter"
+										]
+									},
+									"address": {
+										"type": "string",
+										"maxLength": 254,
+										"format": "email"
+									},
+									"displayName": {
+										"type": "string",
+										"minLength": 1,
+										"maxLength": 120
+									},
+									"replyTo": {
+										"type": [
+											"string",
+											"null"
+										],
+										"maxLength": 254,
+										"format": "email"
+									},
+									"userId": {
+										"type": [
+											"string",
+											"null"
+										],
+										"format": "uuid"
+									},
+									"signature": {
+										"type": "string",
+										"maxLength": 1000
+									},
+									"isDefault": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"kind",
+									"address",
+									"displayName",
+									"replyTo",
+									"userId",
+									"signature",
+									"isDefault"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"kind": {
+											"type": "string",
+											"enum": [
+												"business",
+												"personal",
+												"newsletter"
+											]
+										},
+										"address": {
+											"type": "string",
+											"maxLength": 254,
+											"format": "email"
+										},
+										"displayName": {
+											"type": "string",
+											"minLength": 1,
+											"maxLength": 120
+										},
+										"replyTo": {
+											"type": [
+												"string",
+												"null"
+											],
+											"maxLength": 254,
+											"format": "email"
+										},
+										"userId": {
+											"type": [
+												"string",
+												"null"
+											],
+											"format": "uuid"
+										},
+										"signature": {
+											"type": "string",
+											"maxLength": 1000
+										},
+										"isDefault": {
+											"type": "boolean"
+										},
+										"id": {
+											"type": "string",
+											"format": "uuid"
+										},
+										"domainId": {
+											"type": "string",
+											"format": "uuid"
+										},
+										"active": {
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"kind",
+										"address",
+										"displayName",
+										"replyTo",
+										"userId",
+										"signature",
+										"isDefault",
+										"id",
+										"domainId",
+										"active"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Not signed in",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Not allowed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"tags": [
+					"mail"
+				],
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"parameters": [
+					{
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						},
+						"required": true,
+						"name": "id",
+						"in": "path"
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "Done"
 					},
 					"400": {
 						"description": "Validation failed",

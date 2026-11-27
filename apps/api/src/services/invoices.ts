@@ -10,6 +10,7 @@ import type { Caller, Services } from './context.ts';
 import { documentUrl } from './files.ts';
 import { InvoiceArchive } from './invoice-archive.ts';
 import { invoiceMail, invoiceMailContext, type Delivery } from './invoice-mail.ts';
+import { defaultSender } from './mail-senders.ts';
 import { issueLink, lifetimes } from './one-time.ts';
 import { enqueueMail } from './outbox.ts';
 import { withPermission, type MemberScope } from './permissions.ts';
@@ -139,7 +140,7 @@ export class InvoiceService {
 	 * together or not at all. The send log then shows the outbox's delivery state.
 	 */
 	async deliver(tx: Tx, scope: MemberScope, delivery: Delivery, caller: Caller): Promise<InvoiceSend> {
-		const context = await invoiceMailContext(tx, scope, delivery.invoiceId);
+		const context = await invoiceMailContext(tx, scope, delivery.invoiceId, await defaultSender(tx, 'business'));
 		if (delivery.method === 'link' && !context.postcode) throw new ApiError(400, 'error.ws.invoice_link_no_postcode');
 		const now = this.#services.now();
 		const id = uuid();

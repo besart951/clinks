@@ -123,6 +123,9 @@ ist nichts weiter einzurichten.
 - [ ] SPF und DKIM für die Domain im Infomaniak-Manager aktivieren, damit Anmeldecodes nicht im Spam landen.
       Rechnungen gehen über dieselbe Adresse hinaus (Anzeigename = Arbeitsbereich, `Reply-To` = dessen Adresse);
       zusätzlich DMARC (`p=quarantine`) setzen, sonst sortieren Gmail und Outlook Rechnungsmails oft aus.
+- [ ] Versanddienst (EU/CH, SMTP-Relay, eigene DKIM-Signatur erlaubt) wählen, Auftragsbearbeitungsvertrag
+      abschliessen, `SMTP_RELAY_URL` setzen. TXT `_spf.clinks.ch` = `v=spf1 include:<SPF des Dienstes> ~all`
+      anlegen: Kundendomains verweisen nur darauf, ein Anbieterwechsel braucht bei ihnen keine Änderung.
 
 ## 6 · Konfiguration und Deployment
 

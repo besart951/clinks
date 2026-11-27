@@ -2,6 +2,7 @@ import type { MailKind, OutboxAttachment } from '@clinks/db/schema';
 import type { Tx } from '@clinks/db/scope';
 import { renderMail, type MailContent, type MailExtras } from '@clinks/mail-layout/layout';
 import { uuid } from '../crypto.ts';
+import type { Sender } from './mail-senders.ts';
 
 /** One mail a workspace sends; the outbox renders it in the workspace's layout and the worker sends it. */
 export interface QueuedMail {
@@ -9,8 +10,11 @@ export interface QueuedMail {
 	to: string;
 	subject: string;
 	content: MailContent;
-	/** Display name; the workspace's name when not given. */
+	/** The workspace address it goes out from; without one the platform address with the workspace's name. */
+	sender?: Sender | null;
+	/** Display name; the sender's, else the workspace's name. */
 	fromName?: string;
+	/** Where replies go; the sender's reply-to or address when not given. */
 	replyTo?: string;
 	attachments?: OutboxAttachment[];
 	headers?: Record<string, string>;
@@ -32,8 +36,9 @@ export async function enqueueMail(tx: Tx, tenantId: string, mail: QueuedMail): P
 	const footer = [`${address.street} ${address.houseNumber}`.trim(), `${address.zip} ${address.city}`.trim()].filter(
 		Boolean,
 	);
+	const sender = mail.sender ?? null;
 	const rendered = renderMail(
-		mail.content,
+		{ ...mail.content, signature: mail.content.signature ?? (sender?.signature || undefined) },
 		{ name: tenant.name, color: tenant.brandColor, footer },
 		{ locale: tenant.locale, ...mail.extras },
 	);
@@ -44,8 +49,9 @@ export async function enqueueMail(tx: Tx, tenantId: string, mail: QueuedMail): P
 			id,
 			tenantId,
 			kind: mail.kind,
-			fromName: mail.fromName ?? tenant.name,
-			replyTo: mail.replyTo ?? null,
+			senderId: sender?.id ?? null,
+			fromName: mail.fromName ?? sender?.displayName ?? tenant.name,
+			replyTo: mail.replyTo ?? sender?.replyTo ?? sender?.address ?? null,
 			recipient: mail.to,
 			subject: mail.subject,
 			textBody: rendered.text,

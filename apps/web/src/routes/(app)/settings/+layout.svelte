@@ -8,6 +8,7 @@
 	import CreditCard from '@lucide/svelte/icons/credit-card';
 	import Lock from '@lucide/svelte/icons/lock';
 	import HardDrive from '@lucide/svelte/icons/hard-drive';
+	import AtSign from '@lucide/svelte/icons/at-sign';
 	import type { Permission } from '@clinks/domain/types';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import Check from '@lucide/svelte/icons/check';
@@ -21,6 +22,7 @@
 		{ path: '/settings/profile', label: 'ui.ws.settings.profile', icon: UserRound },
 		{ path: '/settings', label: 'ui.ws.settings.company', icon: Building2, permission: 'settings.manage' },
 		{ path: '/settings/storage', label: 'ui.ws.settings.storage', icon: HardDrive, permission: 'settings.manage' },
+		{ path: '/settings/mail', label: 'ui.ws.settings.mail', icon: AtSign, permission: 'settings.manage' },
 		{ path: '/settings/team', label: 'ui.ws.settings.team', icon: Users, permission: 'team.manage' },
 		{ path: '/settings/roles', label: 'ui.ws.settings.roles', icon: ShieldCheck, permission: 'roles.manage' },
 		{ path: '/settings/billing', label: 'ui.ws.settings.billing', icon: CreditCard, permission: 'billing.manage' },

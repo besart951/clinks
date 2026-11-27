@@ -91,6 +91,7 @@ export const profileUpdate = z
 		locale: z.enum(['de-CH', 'en-US']),
 		avatarDataUrl: image,
 		notificationPreferences: preferences,
+		mailSignature: z.string().max(1000),
 	})
 	.partial();
 export const invoiceSettings = z.strictObject({
@@ -132,6 +133,7 @@ export const userDto = z.object({
 	locale: z.string(),
 	avatarDataUrl: image,
 	notificationPreferences: preferences,
+	mailSignature: z.string(),
 	globalRole: z.literal('super_administrator').nullable(),
 	emailVerified: z.boolean(),
 	twoFactorEnabled: z.boolean(),

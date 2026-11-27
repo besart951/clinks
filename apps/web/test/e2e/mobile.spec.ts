@@ -136,6 +136,7 @@ test('fits every page into a phone screen, with touch-sized targets', async ({ b
 		'/settings/billing',
 		'/settings/privacy',
 		'/settings/storage',
+		'/settings/mail',
 		'/onboarding',
 		...(details as string[]),
 	])

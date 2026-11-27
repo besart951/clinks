@@ -42,6 +42,7 @@ export interface UserTable {
 	email: string;
 	firstName: Defaulted<string>;
 	lastName: Defaulted<string>;
+	mailSignature: Defaulted<string>;
 	avatarColor: Defaulted<string>;
 	locale: Defaulted<string>;
 	globalRole: 'super_administrator' | null;
@@ -120,6 +121,12 @@ export interface RecoveryCodeTable {
 
 export type MailKind = 'invoice' | 'reminder' | 'appointment' | 'personal' | 'campaign' | 'optin' | 'system';
 export type MailStatus = MailDelivery;
+/** One DNS record of a sender domain as last checked: what CLinks expects, whether it is there, what was found. */
+export interface DomainCheck {
+	record: 'spf' | 'dkim' | 'dmarc';
+	ok: boolean;
+	found: string | null;
+}
 export interface OutboxAttachment {
 	documentId: string;
 	filename: string;
@@ -214,9 +221,36 @@ export interface Database {
 		status: 'booked' | 'open' | 'ignored';
 		invoiceId: string | null;
 	};
+	mailDomains: {
+		id: string;
+		tenantId: string;
+		domain: string;
+		purpose: 'business' | 'newsletter';
+		selector: string;
+		dkimPublicKey: string;
+		status: Defaulted<'pending' | 'verified' | 'failing'>;
+		checks: Defaulted<DomainCheck[]>;
+		checkedAt: Date | null;
+		createdAt: Timestamp;
+	};
+	'auth.mailDomainKeys': { domainId: string; tenantId: string; privateKeyCiphertext: string };
+	mailSenders: {
+		id: string;
+		tenantId: string;
+		domainId: string;
+		kind: 'business' | 'personal' | 'newsletter';
+		address: string;
+		displayName: string;
+		replyTo: string | null;
+		userId: string | null;
+		signature: Defaulted<string>;
+		isDefault: Defaulted<boolean>;
+		createdAt: Timestamp;
+	};
 	mailOutbox: {
 		id: string;
 		tenantId: string;
+		senderId: ColumnType<string | null, string | null | undefined, string | null>;
 		kind: MailKind;
 		fromName: string;
 		replyTo: string | null;

@@ -4,6 +4,7 @@ import type { ProductTranslationKey } from '@clinks/i18n-types';
 import { blocksFromText } from '@clinks/mail-layout/layout';
 import { ApiError } from '../errors.ts';
 import { translate } from '../i18n.ts';
+import type { Sender } from './mail-senders.ts';
 import type { QueuedMail } from './outbox.ts';
 
 type Locale = 'de-CH' | 'en-US';
@@ -20,8 +21,16 @@ export interface Delivery {
 	method: DeliveryMethod;
 }
 
-/** What the mails about one invoice need: names, dates, the recipient's postcode and the file names. */
-export async function invoiceMailContext(tx: Tx, scope: { tenantId: string; userId: string }, invoiceId: string) {
+/**
+ * What the mails about one invoice need: names, dates, the recipient's postcode, the file names, and who answers:
+ * the business sender, else «Antworten an» of the invoice settings, else the person who sends.
+ */
+export async function invoiceMailContext(
+	tx: Tx,
+	scope: { tenantId: string; userId: string },
+	invoiceId: string,
+	sender: Sender | null,
+) {
 	const invoice = await tx
 		.selectFrom('invoices')
 		.leftJoin('contacts', 'contacts.id', 'invoices.contactId')
@@ -34,7 +43,7 @@ export async function invoiceMailContext(tx: Tx, scope: { tenantId: string; user
 		.select(['name', 'locale', 'invoiceSettings'])
 		.where('id', '=', scope.tenantId)
 		.executeTakeFirstOrThrow();
-	const sender = await tx.selectFrom('users').select('email').where('id', '=', scope.userId).executeTakeFirst();
+	const person = await tx.selectFrom('users').select('email').where('id', '=', scope.userId).executeTakeFirst();
 	const documents = await tx
 		.selectFrom('documents')
 		.select(['id', 'name'])
@@ -49,7 +58,10 @@ export async function invoiceMailContext(tx: Tx, scope: { tenantId: string; user
 		dueDate: String(invoice.dueDate),
 		contactId: invoice.contactId ? String(invoice.contactId) : null,
 		postcode: (invoice.address as { zip?: string } | null)?.zip?.trim() ?? '',
-		replyTo: (tenant.invoiceSettings as InvoiceSettings).replyTo || sender?.email || undefined,
+		sender,
+		replyTo: sender
+			? (sender.replyTo ?? sender.address)
+			: (tenant.invoiceSettings as InvoiceSettings).replyTo || person?.email || undefined,
 		fileName: (documentId: string) => files.get(documentId) ?? `${number}.pdf`,
 	};
 }
@@ -64,7 +76,7 @@ export function invoiceMail(
 	context: InvoiceMailContext,
 	delivery: Delivery,
 	link: { url: string; expiresAt: Date } | null,
-): Omit<QueuedMail, 'fromName'> {
+): QueuedMail {
 	const t = (key: ProductTranslationKey, params?: { [name: string]: string | number }) =>
 		translate(context.locale, key, params);
 	const params = {
@@ -86,6 +98,7 @@ export function invoiceMail(
 		to: delivery.to,
 		subject: t(invoice ? 'mail.invoice.subject' : 'mail.invoice.reminder_subject', params),
 		content: { blocks: blocksFromText(text, link ? t('mail.invoice.open_link') : undefined) },
+		sender: context.sender,
 		replyTo: context.replyTo,
 		contactId: context.contactId,
 		attachments: link

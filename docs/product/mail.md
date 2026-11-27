@@ -110,19 +110,21 @@ state the UI needs comes through REST.
 
 ### 2 · Domains and senders
 
-- [ ] Settings › E-Mail (admins, `settings.manage`): add a domain and its purpose; CLinks creates the DKIM key
-      (RSA 2048, selector `clinks<yyyymm>`) and shows the records to copy: SPF `include:` of the relay, DKIM TXT on
-      `<selector>._domainkey`, DMARC (`p=none` suggested at first, a hint to tighten later), and for newsletters a
-      separate subdomain (`news.praxis.ch`).
-- [ ] «Prüfen» resolves the records (`node:dns/promises`, resolver injected in tests) and shows each one green or
-      red with what was found; a daily re-check marks a domain `failing` and falls back to the platform sender with a
-      notification to admins.
-- [ ] Senders: one default business sender (used by invoices, reminders, appointments), personal senders per member
-      (admin assigns, or the member picks an address on a verified domain), one newsletter sender. Reply-to per
-      sender; invoice settings' «Antworten an» becomes the business sender's reply-to (migration copies it).
-- [ ] Personal signature in Profile; business signature per sender.
-- [ ] Tests: DNS check matrix (missing, wrong, ok), sender must match a verified domain of the right purpose, DKIM
-      signature verifies (`mailauth` in tests only), fallback when failing.
+- [x] Settings › E-Mail (`settings.manage`): add a domain and its purpose; CLinks creates the DKIM key (RSA 2048,
+      selector `clinks-<6 hex>`, private half sealed with `SecretBox` in `auth.mail_domain_keys`) and shows the TXT
+      records with copy buttons: SPF `include:` of `MAIL_SPF_INCLUDE` (default `_spf.clinks.ch`, which CLinks points
+      at the relay), DKIM on `<selector>._domainkey`, DMARC `p=none` to start.
+- [x] «Prüfen» resolves the records (resolver injected in tests) and shows each as found / missing with what DNS
+      answered; before sending, the worker re-checks a domain verified more than 24 h ago and on failure marks it
+      `failing`, notifies admins in the app and sends from the platform address instead.
+- [x] Senders: business (default one used by invoices and reminders), personal (per member), newsletter (only on a
+      newsletter domain). Reply-to per sender; without a business sender invoices keep using «Antworten an».
+- [x] Personal signature in the profile; business signature per sender, appended by the outbox.
+- [x] `SMTP_RELAY_URL`, `MAIL_SPF_INCLUDE` in config and env examples; `ops:check` checks the relay login and the
+      SPF collection record. Demo: «Prüfen» takes the records as published.
+- [x] Tests: DNS judgement (missing, wrong, existing SPF with the include), records, DKIM key pair matches the
+      published key, invoice via relay from the sender with signature, fallback and admin notice when failing,
+      domain removal only without senders; e2e: domain → check → sender → invoice from it.
 
 ### 3 · Inbound: filing address and bounces
 

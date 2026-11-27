@@ -5,6 +5,7 @@
 	import * as Card from '@clinks/ui/components/ui/card';
 	import { Button } from '@clinks/ui/components/ui/button';
 	import { Input } from '@clinks/ui/components/ui/input';
+	import { Textarea } from '@clinks/ui/components/ui/textarea';
 	import { Switch } from '@clinks/ui/components/ui/switch';
 	import { Label } from '@clinks/ui/components/ui/label';
 	import PageHeader from '#lib/components/common/PageHeader.svelte';
@@ -87,6 +88,14 @@
 				</FormField>
 				<FormField id="pf-email" label={workspace.t('ui.email')} error={model.fields.email} class="sm:col-span-2">
 					<Input id="pf-email" readonly={Boolean(workspace.remote)} type="email" bind:value={model.email} />
+				</FormField>
+				<FormField
+					id="pf-signature"
+					label={workspace.t('ui.ws.settings.mail_signature')}
+					hint={workspace.t('ui.ws.settings.mail_signature_hint')}
+					class="sm:col-span-2"
+				>
+					<Textarea id="pf-signature" rows={3} maxlength={1000} bind:value={model.mailSignature} />
 				</FormField>
 				<fieldset class="space-y-3 sm:col-span-2">
 					<legend class="mb-2 text-sm font-medium">{workspace.t('ui.ws.settings.notifications')}</legend>

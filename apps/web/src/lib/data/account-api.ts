@@ -143,6 +143,7 @@ export class AccountApi {
 				locale: 'de-CH',
 				globalRole: null,
 				notificationPreferences: { inApp: true, email: true, push: false, digest: 'daily' },
+				mailSignature: '',
 			});
 			this.#db.table('users').push(user);
 			return user;
@@ -271,6 +272,7 @@ export class AccountApi {
 		locale?: string;
 		avatarDataUrl?: string | null;
 		notificationPreferences?: NotificationPreferences;
+		mailSignature?: string;
 	}): Promise<User> {
 		return this.#db.request(() => {
 			const userId = this.#requireUser();
@@ -449,6 +451,7 @@ export class AccountApi {
 					locale: 'de-CH',
 					globalRole: null,
 					notificationPreferences: { inApp: true, email: true, push: false, digest: 'daily' },
+					mailSignature: '',
 				});
 				this.#db.table('users').push(user);
 			}

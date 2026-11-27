@@ -3,6 +3,7 @@ import { DocumentFiles } from './data/document-files.ts';
 import { InvoiceFiles } from './data/invoice-files.ts';
 import { InvoiceDelivery } from './data/invoice-delivery.ts';
 import { BankImports } from './data/bank-imports.ts';
+import { MailSettings } from './data/mail-settings.ts';
 import { createContext } from 'svelte';
 import { toast } from 'svelte-sonner';
 import { AccountApi, roleFor } from './data/account-api.ts';
@@ -52,6 +53,7 @@ export class Workspace {
 	readonly invoiceFiles: InvoiceFiles;
 	readonly invoiceDelivery: InvoiceDelivery;
 	readonly bankImports: BankImports;
+	readonly mailSettings: MailSettings;
 	readonly remote: ApiClient | null;
 	/** Sign-in, onboarding and invitations: against the API when `VITE_API_URL` is set, otherwise the demo. */
 	readonly auth: AuthGateway;
@@ -94,6 +96,7 @@ export class Workspace {
 		this.invoiceFiles = new InvoiceFiles(client, platform.files, () => this.api, localize);
 		this.invoiceDelivery = new InvoiceDelivery(client, platform.files, () => this.api, localize);
 		this.bankImports = new BankImports(client, () => this.api);
+		this.mailSettings = new MailSettings(client, () => this.api);
 		if (client) {
 			this.sync = new SyncEngine(
 				client,

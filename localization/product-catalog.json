@@ -5917,6 +5917,266 @@
       "ui.ws.invoice.delivery.suppressed": {
         "de-CH": "Nicht gesendet: Die Adresse ist gesperrt (abgemeldet oder unzustellbar).",
         "en-US": "Not sent: the address is blocked (unsubscribed or undeliverable)."
+      },
+      "error.ws.mail_domain_invalid": {
+        "de-CH": "Bitte eine eigene Domain wie praxis.ch eingeben.",
+        "en-US": "Please enter a domain of your own such as praxis.ch."
+      },
+      "error.ws.mail_domain_taken": {
+        "de-CH": "Diese Domain ist bereits eingetragen.",
+        "en-US": "This domain is already set up."
+      },
+      "error.ws.mail_domain_in_use": {
+        "de-CH": "Die Domain wird noch von Absendern verwendet. Zuerst die Absender entfernen.",
+        "en-US": "Senders still use this domain. Remove them first."
+      },
+      "error.ws.mail_sender_taken": {
+        "de-CH": "Diese Adresse gibt es schon als Absender.",
+        "en-US": "This address is already a sender."
+      },
+      "error.ws.mail_sender_domain": {
+        "de-CH": "Die Adresse muss auf einer eingetragenen Domain mit passendem Zweck liegen (Newsletter nur auf der Newsletter-Domain).",
+        "en-US": "The address must be on a domain set up for this purpose (newsletters only on the newsletter domain)."
+      },
+      "ui.ws.notification.mail_domain_failing": {
+        "de-CH": "Die Domain {domain} besteht die DNS-Prüfung nicht mehr. Mails gehen bis zur Korrektur über clinks.ch hinaus.",
+        "en-US": "The domain {domain} no longer passes the DNS check. Mail goes out through clinks.ch until it is fixed."
+      },
+      "ui.ws.settings.mail_signature": {
+        "de-CH": "E-Mail-Signatur",
+        "en-US": "E-mail signature"
+      },
+      "ui.ws.settings.mail_signature_hint": {
+        "de-CH": "Steht unter Mails, die du von deiner persönlichen Absenderadresse sendest.",
+        "en-US": "Added below mails you send from your personal sender address."
+      },
+      "ui.ws.settings.mail": {
+        "de-CH": "E-Mail",
+        "en-US": "E-mail"
+      },
+      "ui.ws.mail_settings.text": {
+        "de-CH": "Von welchen Adressen Rechnungen, persönliche Mails und Newsletter hinausgehen.",
+        "en-US": "Which addresses invoices, personal mail and newsletters go out from."
+      },
+      "ui.ws.mail_settings.no_relay": {
+        "de-CH": "Versand ab eigener Domain ist auf diesem Server noch nicht eingerichtet. Mails gehen mit dem Namen Ihres Arbeitsbereichs über clinks.ch hinaus; Antworten kommen an Ihre Adresse.",
+        "en-US": "Sending from your own domain is not set up on this server yet. Mail goes out through clinks.ch with your workspace name; replies come to your address."
+      },
+      "ui.ws.mail_settings.demo": {
+        "de-CH": "In der Demo prüft «Prüfen» keine echten DNS-Einträge, sondern nimmt sie als gesetzt an. Es verlässt keine Mail den Browser.",
+        "en-US": "In the demo «Check» does not look up real DNS records but takes them as published. No mail leaves the browser."
+      },
+      "ui.ws.mail_settings.domains": {
+        "de-CH": "Absender-Domains",
+        "en-US": "Sender domains"
+      },
+      "ui.ws.mail_settings.domains_text": {
+        "de-CH": "Tragen Sie Ihre Domain ein und setzen Sie die drei DNS-Einträge bei Ihrem Domain-Anbieter. Für Newsletter empfehlen wir eine eigene Subdomain wie news.praxis.ch.",
+        "en-US": "Enter your domain and add the three DNS records at your domain provider. For newsletters we recommend a subdomain of its own such as news.praxis.ch."
+      },
+      "ui.ws.mail_settings.domain": {
+        "de-CH": "Domain",
+        "en-US": "Domain"
+      },
+      "ui.ws.mail_settings.purpose": {
+        "de-CH": "Zweck",
+        "en-US": "Purpose"
+      },
+      "ui.ws.mail_settings.purpose_business": {
+        "de-CH": "Geschäft und persönlich",
+        "en-US": "Business and personal"
+      },
+      "ui.ws.mail_settings.purpose_newsletter": {
+        "de-CH": "Newsletter",
+        "en-US": "Newsletter"
+      },
+      "ui.ws.mail_settings.add_domain": {
+        "de-CH": "Domain hinzufügen",
+        "en-US": "Add domain"
+      },
+      "ui.ws.mail_settings.status_pending": {
+        "de-CH": "Ausstehend",
+        "en-US": "Pending"
+      },
+      "ui.ws.mail_settings.status_verified": {
+        "de-CH": "Bestätigt",
+        "en-US": "Verified"
+      },
+      "ui.ws.mail_settings.status_failing": {
+        "de-CH": "Fehlerhaft",
+        "en-US": "Failing"
+      },
+      "ui.ws.mail_settings.check": {
+        "de-CH": "Prüfen",
+        "en-US": "Check"
+      },
+      "ui.ws.mail_settings.checked": {
+        "de-CH": "DNS-Einträge geprüft",
+        "en-US": "DNS records checked"
+      },
+      "ui.ws.mail_settings.domain_removed": {
+        "de-CH": "Domain entfernt",
+        "en-US": "Domain removed"
+      },
+      "ui.ws.mail_settings.records": {
+        "de-CH": "DNS-Einträge für {domain}",
+        "en-US": "DNS records for {domain}"
+      },
+      "ui.ws.mail_settings.records_text": {
+        "de-CH": "Je einen TXT-Eintrag anlegen. Änderungen brauchen beim Anbieter oft einige Minuten bis Stunden.",
+        "en-US": "Add one TXT record each. Changes often take minutes to hours at the provider."
+      },
+      "ui.ws.mail_settings.record_spf": {
+        "de-CH": "SPF (wer senden darf)",
+        "en-US": "SPF (who may send)"
+      },
+      "ui.ws.mail_settings.record_dkim": {
+        "de-CH": "DKIM (Signatur)",
+        "en-US": "DKIM (signature)"
+      },
+      "ui.ws.mail_settings.record_dmarc": {
+        "de-CH": "DMARC (Richtlinie)",
+        "en-US": "DMARC (policy)"
+      },
+      "ui.ws.mail_settings.record_ok": {
+        "de-CH": "gefunden",
+        "en-US": "found"
+      },
+      "ui.ws.mail_settings.record_missing": {
+        "de-CH": "fehlt oder weicht ab",
+        "en-US": "missing or different"
+      },
+      "ui.ws.mail_settings.record_unchecked": {
+        "de-CH": "noch nicht geprüft",
+        "en-US": "not checked yet"
+      },
+      "ui.ws.mail_settings.host": {
+        "de-CH": "Name",
+        "en-US": "Name"
+      },
+      "ui.ws.mail_settings.value": {
+        "de-CH": "Wert",
+        "en-US": "Value"
+      },
+      "ui.ws.mail_settings.found": {
+        "de-CH": "Gefunden",
+        "en-US": "Found"
+      },
+      "ui.ws.mail_settings.copy": {
+        "de-CH": "{what} kopieren",
+        "en-US": "Copy {what}"
+      },
+      "ui.ws.mail_settings.copied": {
+        "de-CH": "In die Zwischenablage kopiert",
+        "en-US": "Copied to the clipboard"
+      },
+      "ui.ws.mail_settings.senders": {
+        "de-CH": "Absender",
+        "en-US": "Senders"
+      },
+      "ui.ws.mail_settings.senders_text": {
+        "de-CH": "Rechnungen und Mahnungen gehen vom Standard-Geschäftsabsender hinaus, persönliche Mails vom Absender der Person.",
+        "en-US": "Invoices and reminders go out from the default business sender, personal mail from the person’s sender."
+      },
+      "ui.ws.mail_settings.address": {
+        "de-CH": "Adresse",
+        "en-US": "Address"
+      },
+      "ui.ws.mail_settings.kind": {
+        "de-CH": "Art",
+        "en-US": "Kind"
+      },
+      "ui.ws.mail_settings.kind_business": {
+        "de-CH": "Geschäft",
+        "en-US": "Business"
+      },
+      "ui.ws.mail_settings.kind_personal": {
+        "de-CH": "Persönlich",
+        "en-US": "Personal"
+      },
+      "ui.ws.mail_settings.kind_newsletter": {
+        "de-CH": "Newsletter",
+        "en-US": "Newsletter"
+      },
+      "ui.ws.mail_settings.default": {
+        "de-CH": "Standard",
+        "en-US": "Default"
+      },
+      "ui.ws.mail_settings.active": {
+        "de-CH": "Aktiv",
+        "en-US": "Active"
+      },
+      "ui.ws.mail_settings.fallback": {
+        "de-CH": "Über clinks.ch",
+        "en-US": "Via clinks.ch"
+      },
+      "ui.ws.mail_settings.add_business": {
+        "de-CH": "Geschäftsabsender",
+        "en-US": "Business sender"
+      },
+      "ui.ws.mail_settings.add_personal": {
+        "de-CH": "Persönlicher Absender",
+        "en-US": "Personal sender"
+      },
+      "ui.ws.mail_settings.add_newsletter": {
+        "de-CH": "Newsletter-Absender",
+        "en-US": "Newsletter sender"
+      },
+      "ui.ws.mail_settings.sender_business": {
+        "de-CH": "Geschäftsabsender",
+        "en-US": "Business sender"
+      },
+      "ui.ws.mail_settings.sender_business_text": {
+        "de-CH": "Für Rechnungen, Mahnungen und Termine, z. B. rechnung@praxis.ch.",
+        "en-US": "For invoices, reminders and appointments, e.g. rechnung@praxis.ch."
+      },
+      "ui.ws.mail_settings.sender_personal": {
+        "de-CH": "Persönlicher Absender",
+        "en-US": "Personal sender"
+      },
+      "ui.ws.mail_settings.sender_personal_text": {
+        "de-CH": "Für Mails einer Person an Kundinnen und Kunden, z. B. anna@praxis.ch. Die Signatur legt die Person im Profil fest.",
+        "en-US": "For one person’s mail to customers, e.g. anna@praxis.ch. The person sets the signature in their profile."
+      },
+      "ui.ws.mail_settings.sender_newsletter": {
+        "de-CH": "Newsletter-Absender",
+        "en-US": "Newsletter sender"
+      },
+      "ui.ws.mail_settings.sender_newsletter_text": {
+        "de-CH": "Nur auf der Newsletter-Domain, z. B. news@news.praxis.ch.",
+        "en-US": "Only on the newsletter domain, e.g. news@news.praxis.ch."
+      },
+      "ui.ws.mail_settings.display_name": {
+        "de-CH": "Anzeigename",
+        "en-US": "Display name"
+      },
+      "ui.ws.mail_settings.reply_to": {
+        "de-CH": "Antworten an",
+        "en-US": "Replies to"
+      },
+      "ui.ws.mail_settings.reply_to_hint": {
+        "de-CH": "Leer: an die Absenderadresse.",
+        "en-US": "Empty: to the sender address."
+      },
+      "ui.ws.mail_settings.person": {
+        "de-CH": "Person",
+        "en-US": "Person"
+      },
+      "ui.ws.mail_settings.signature": {
+        "de-CH": "Signatur",
+        "en-US": "Signature"
+      },
+      "ui.ws.mail_settings.default_business": {
+        "de-CH": "Für Rechnungen und Mahnungen verwenden",
+        "en-US": "Use for invoices and reminders"
+      },
+      "ui.ws.mail_settings.default_newsletter": {
+        "de-CH": "Für Newsletter verwenden",
+        "en-US": "Use for newsletters"
+      },
+      "ui.ws.mail_settings.sender_removed": {
+        "de-CH": "Absender entfernt",
+        "en-US": "Sender removed"
       }
     }
   }

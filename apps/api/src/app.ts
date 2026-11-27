@@ -11,6 +11,7 @@ import { registerAuthRoutes } from './routes/auth.ts';
 import { registerBillingRoutes } from './routes/billing.ts';
 import { registerFileRoutes } from './routes/files.ts';
 import { registerFinanceRoutes } from './routes/finance.ts';
+import { registerMailRoutes } from './routes/mail.ts';
 import { registerSyncRoutes } from './routes/sync.ts';
 import {
 	callerOf,
@@ -26,6 +27,7 @@ import { BillingService } from './services/billing.ts';
 import type { Services } from './services/context.ts';
 import { FileService } from './services/files.ts';
 import { BankImportService } from './services/bank-imports.ts';
+import { MailSettingsService } from './services/mail-settings.ts';
 import { InvoiceService } from './services/invoices.ts';
 import { InvoiceLinks } from './services/invoice-links.ts';
 import { SessionService } from './services/sessions.ts';
@@ -53,6 +55,7 @@ export function createApp({ services, config }: AppOptions) {
 		invoices: new InvoiceService(services),
 		invoiceLinks: new InvoiceLinks(services),
 		bankImports: new BankImportService(services),
+		mailSettings: new MailSettingsService(services),
 		sync: new SyncService(services),
 		caller: (c) => callerOf(c, config.TRUST_PROXY),
 		deliver: (c, opened) => deliverSession(c, opened, config.COOKIE_SECURE),
@@ -119,6 +122,7 @@ export function createApp({ services, config }: AppOptions) {
 	registerBillingRoutes(app, me, deps);
 	registerFileRoutes(me, deps);
 	registerFinanceRoutes(app, me, deps);
+	registerMailRoutes(me, deps);
 
 	app.route('/', me);
 

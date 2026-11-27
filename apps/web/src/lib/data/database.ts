@@ -1,5 +1,6 @@
 import type { TenantId } from '@clinks/domain/ids';
 import type { BankEntryView, BankImportView } from '@clinks/contracts/finance';
+import type { MailSenderView, StoredMailDomain } from '@clinks/contracts/mail';
 import type {
 	AppNotification,
 	Appointment,
@@ -40,6 +41,10 @@ export type MockBankImport = Omit<BankImportView, 'repeated'> & {
 };
 export type MockBankEntry = Omit<BankEntryView, 'suggestions'> & { tenantId: TenantId; bankRef: string };
 
+/** The demo's sender domains and senders (apps/api: mail_domains, mail_senders). */
+export type MockMailDomain = StoredMailDomain & { tenantId: TenantId };
+export type MockMailSender = Omit<MailSenderView, 'active'> & { tenantId: TenantId };
+
 export interface Tables {
 	tenants: Tenant;
 	users: User;
@@ -68,6 +73,8 @@ export interface Tables {
 	invoiceSends: MockInvoiceSend;
 	bankImports: MockBankImport;
 	bankEntries: MockBankEntry;
+	mailDomains: MockMailDomain;
+	mailSenders: MockMailSender;
 }
 
 export type TableName = keyof Tables;
@@ -101,6 +108,8 @@ export const tableNames: readonly TableName[] = [
 	'invoiceSends',
 	'bankImports',
 	'bankEntries',
+	'mailDomains',
+	'mailSenders',
 ];
 
 export type ErrorCode =
