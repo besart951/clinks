@@ -2,7 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import * as ContextMenu from '@clinks/ui/components/ui/context-menu';
 	import { Checkbox } from '@clinks/ui/components/ui/checkbox';
-	import type { ListModel } from '#lib/features/list/list-model.svelte';
+	import { printKey, type ListModel } from '#lib/features/list/list-model.svelte';
 	import { RowGesture } from '#lib/features/list/row-gesture.svelte';
 	import { useWorkspace } from '#lib/workspace.svelte';
 	import ListMenuItems from './ListMenuItems.svelte';
@@ -72,6 +72,7 @@
 				{...menuTrigger(props)}
 				class="group/row relative overflow-hidden touch-pan-y {selected ? 'bg-muted' : ''}"
 				data-selected={selected || undefined}
+				data-row={list.id(item)}
 				draggable={list.drag ? true : undefined}
 				ondragstart={(event) => list.drag?.(event, item)}
 				onpointerdown={(event) => {
@@ -112,6 +113,7 @@
 					<button
 						type="button"
 						class="min-w-0 flex-1 text-left focus-visible:outline-none focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-inset"
+						data-row-main
 						aria-current={selected && !list.many ? true : undefined}
 						onclick={click}
 					>
@@ -131,7 +133,9 @@
 										? 'hover:text-destructive'
 										: ''}"
 									aria-label={action.label([item])}
-									title={action.label([item])}
+									title={action.key
+										? `${action.label([item])} (${printKey(action.key, (key) => workspace.t(key))})`
+										: action.label([item])}
 									aria-pressed={pressed}
 									onclick={() => list.run(action, [item])}
 								>

@@ -1246,3 +1246,46 @@ test('marks files with a click, opens them with a double click and moves several
 	await page.getByRole('button', { name: 'Rückgängig' }).click();
 	await expect(rows.filter({ hasText: name })).toHaveCount(1);
 });
+
+test('works the mail and the files with the keyboard and lists the keys under «?»', async ({ page }) => {
+	await page.setViewportSize({ width: 1440, height: 900 });
+	await signIn(page);
+	await page.goto('/#/mail');
+	const rows = page.getByRole('list', { name: 'Posteingang' }).getByRole('listitem');
+	await expect(rows.first()).toBeVisible();
+	const count = await rows.count();
+	// ↓ opens the first mail, S stars it, E archives it.
+	await page.keyboard.press('ArrowDown');
+	await expect(rows.first().getByRole('button').first()).toBeFocused();
+	await expect(page.getByRole('article').getByRole('heading', { level: 2 })).toBeVisible();
+	await page.keyboard.press('s');
+	await expect(rows.first().getByRole('button', { name: 'Markierung entfernen' })).toHaveAttribute(
+		'aria-pressed',
+		'true',
+	);
+	await page.keyboard.press('e');
+	await expect(page.getByText('Verschoben nach Archiv')).toBeVisible();
+	await expect(rows).toHaveCount(count - 1);
+	await page.keyboard.press('?');
+	const overview = page.getByRole('dialog', { name: 'Tastenkürzel' });
+	await expect(overview.getByRole('region', { name: 'Auf dieser Seite' })).toContainText('Antworten');
+	await page.keyboard.press('Escape');
+
+	await page.goto('/#/documents');
+	await page
+		.getByRole('button', { name: /^Formulare/ })
+		.first()
+		.click();
+	const files = page.getByRole('list', { name: 'Dateien' }).getByRole('listitem');
+	await expect(files.first()).toBeVisible();
+	await page.getByRole('heading', { level: 1 }).click();
+	await page.keyboard.press('ArrowDown');
+	await expect(files.first().getByRole('button').first()).toHaveAttribute('aria-current', 'true');
+	await page.keyboard.press('F2');
+	await expect(page.getByRole('dialog', { name: 'Umbenennen' })).toBeVisible();
+	await page.keyboard.press('Escape');
+	// Backspace goes up to the parent folder.
+	await page.getByRole('heading', { level: 1 }).click();
+	await page.keyboard.press('Backspace');
+	await expect(page.getByRole('navigation', { name: 'Ordnerpfad' }).getByRole('button')).toHaveCount(1);
+});

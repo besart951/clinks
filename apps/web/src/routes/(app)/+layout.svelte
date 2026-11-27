@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { insideOverlay } from '#lib/features/shell/page-keys';
 	import { onMount, type Snippet } from 'svelte';
 	import Search from '@lucide/svelte/icons/search';
 	import { SidebarProvider, SidebarTrigger, SidebarInset } from '@clinks/ui/components/ui/sidebar';
@@ -50,12 +51,18 @@
 			paletteOpen = !paletteOpen;
 			return;
 		}
-		if (typing(event.target) || event.metaKey || event.ctrlKey || event.altKey) return;
+		if (typing(event.target) || insideOverlay(event.target)) return;
+		const leading = Date.now() - leader < 1200;
+		if (!leading && workspace.pageKeys?.handle(event)) {
+			event.preventDefault();
+			return;
+		}
+		if (event.metaKey || event.ctrlKey || event.altKey) return;
 		if (event.key === '?') {
 			shortcutsOpen = true;
 		} else if (event.key === 'g') {
 			leader = Date.now();
-		} else if (Date.now() - leader < 1200) {
+		} else if (leading) {
 			const item = allNavigationItems.find((candidate) => candidate.shortcut === event.key);
 			leader = 0;
 			if (item) void navigate(item.path);

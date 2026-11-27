@@ -19,6 +19,22 @@
 			<Dialog.Title>{workspace.t('ui.ws.shortcuts.title')}</Dialog.Title>
 			<Dialog.Description>{workspace.t('ui.ws.shortcuts.text')}</Dialog.Description>
 		</Dialog.Header>
+		{@const page = workspace.pageKeys?.help() ?? []}
+		{#if page.length > 0}
+			<section aria-labelledby="shortcuts-page">
+				<h3 id="shortcuts-page" class="mb-2 text-sm font-semibold">{workspace.t('ui.ws.shortcuts.page')}</h3>
+				<dl class="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+					{#each page as shortcut (shortcut.label)}
+						<div class="flex items-center justify-between gap-2">
+							<dt>{shortcut.label}</dt>
+							<dd class="flex shrink-0 gap-1">
+								{#each shortcut.keys as key (key)}<kbd class="bg-muted rounded border px-1.5 text-xs">{key}</kbd>{/each}
+							</dd>
+						</div>
+					{/each}
+				</dl>
+			</section>
+		{/if}
 		<div class="grid gap-6 sm:grid-cols-2">
 			<dl class="space-y-2 text-sm">
 				{#each general as shortcut (shortcut.label)}

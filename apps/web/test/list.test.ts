@@ -61,6 +61,7 @@ describe('ListModel', () => {
 	];
 	const model = () =>
 		new ListModel<Row>({
+			t: (key) => key,
 			name: () => 'Rows',
 			items: () => rows,
 			id: (row) => row.id,
@@ -89,9 +90,19 @@ describe('ListModel', () => {
 		const list = model();
 		list.selectAll();
 		list.toggle(rows[1]);
-		expect(list.keydown({ key: 'Delete' } as KeyboardEvent)).toBe(true);
+		expect(list.handle({ key: 'Delete' } as KeyboardEvent)).toBe(true);
 		await Promise.resolve();
 		expect(remove).toHaveBeenCalledWith([rows[0], rows[2]]);
 		await vi.waitFor(() => expect(list.selected).toEqual([]));
+	});
+
+	it('moves with the arrows, extends with Shift and lists its keys for the overview', () => {
+		const list = model();
+		list.handle({ key: 'ArrowDown' } as KeyboardEvent);
+		list.handle({ key: 'ArrowDown', shiftKey: true } as KeyboardEvent);
+		expect(list.selected).toEqual([rows[0], rows[1]]);
+		list.handle({ key: 'End' } as KeyboardEvent);
+		expect(list.selected).toEqual([rows[2]]);
+		expect(list.help().map((line) => line.label)).toContain('Delete');
 	});
 });

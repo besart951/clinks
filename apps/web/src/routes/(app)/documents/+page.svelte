@@ -25,6 +25,8 @@
 	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
 	import { DocumentsModel } from '#lib/features/documents/documents.svelte';
 	import { documentList } from '#lib/features/documents/document-list.svelte';
+	import { combineKeys, commandKeys } from '#lib/features/shell/page-keys';
+	import { printKey } from '#lib/features/list/list-model.svelte';
 	import SelectableList from '#lib/components/list/SelectableList.svelte';
 	import ListBar from '#lib/components/list/ListBar.svelte';
 	import FolderTree, { type FolderTreeActions } from '#lib/components/documents/FolderTree.svelte';
@@ -88,9 +90,24 @@
 	onMount(() => {
 		const stop = model.resource.connect();
 		const stopShortcut = workspace.registerNewAction(() => canWrite && fileInput?.click());
+		const stopKeys = workspace.registerPageKeys(
+			combineKeys(
+				list,
+				commandKeys([
+					{
+						key: 'Backspace',
+						shown: printKey('Backspace', (key) => workspace.t(key)),
+						label: workspace.t('ui.ws.documents.parent_folder'),
+						when: () => model.folderId !== null,
+						run: () => model.open(model.path.at(-2)?.id ?? null),
+					},
+				]),
+			),
+		);
 		return () => {
 			stop();
 			stopShortcut();
+			stopKeys();
 		};
 	});
 
