@@ -109,7 +109,6 @@
 		resize: (appointment, times) => model.retime(appointment, times),
 		color: (appointment) => people.get(appointment.assigneeId)?.avatarColor ?? '#a1a1aa',
 		assignee: (appointment) => people.get(appointment.assigneeId)?.name ?? null,
-		subtitle: (appointment) => (appointment.service ? workspace.t(`ui.ws.spitex.service.${appointment.service}`) : ''),
 		mark: (appointment) =>
 			model.changedSinceRelease(appointment) ? workspace.t('ui.ws.spitex.release.changed') : null,
 	};

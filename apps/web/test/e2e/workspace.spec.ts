@@ -739,7 +739,7 @@ test('moves Spitex visits by drag and drop, from the list and with time running 
 	);
 	// Along a row: back to the open visits removes the assignment.
 	const visit = fatma.getByRole('button').first();
-	const title = (await visit.locator('span').first().textContent())!.trim();
+	const title = (await visit.locator('span.font-medium').first().textContent())!.trim();
 	const inList = list.getByText(title, { exact: true });
 	const listed = await inList.count();
 	await dragOnto(page, visit, open);
@@ -760,6 +760,9 @@ test('shows an info card when hovering an appointment and hides it on Escape', a
 	await signIn(page);
 	await page.goto('/#/calendar?view=week');
 	const appointment = page.getByRole('grid').first().getByRole('button').first();
+	// The entry shows its start and title only; the end and the rest are in the card.
+	await expect(appointment).toHaveText(/^\s*\d{2}:\d{2}\s+\S/);
+	await expect(appointment).not.toContainText('–');
 	await appointment.hover();
 	const card = page.getByRole('tooltip');
 	await expect(card).toBeVisible();
@@ -856,7 +859,7 @@ test('shows a client’s arrival window in the plan and drops visits inside it',
 	const column = (await daniel.boundingBox())!;
 	const low = (page.viewportSize()!.height - 30 - column.y) / column.height;
 	await dragOnto(page, item.getByTitle(/zuzuweisen/), daniel, { x: 0.5, y: low });
-	await expect(daniel.getByRole('button').filter({ hasText: title })).toContainText(`${to}–`);
+	await expect(daniel.getByRole('button').filter({ hasText: title })).toContainText(`${to} ${title}`);
 	await expect(page.getByText(`«${title}» zugewiesen`, { exact: false }).first()).toBeVisible();
 });
 
