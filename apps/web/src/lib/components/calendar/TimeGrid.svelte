@@ -25,7 +25,6 @@
 		color(appointment: Appointment): string;
 		/** Name of the person the appointment is assigned to, for the info card on hover. */
 		assignee(appointment: Appointment): string | null;
-		subtitle(appointment: Appointment): string;
 		/** A short note that marks an appointment, e.g. «changed since the release»; shown as a dot and read out. */
 		mark?(appointment: Appointment): string | null;
 	}
@@ -531,13 +530,14 @@
 									title={mark}
 									aria-hidden="true"
 								></span>{/if}
-							<span class="block truncate font-medium {mark ? 'pe-2.5' : ''}">{appointment.title}</span>
+							<!-- The start and the title only; the end, the person and the service are in the info card. -->
+							<span class="block truncate {mark ? 'pe-2.5' : ''}">
+								<span class="text-muted-foreground tabular-nums">{workspace.i18n.time(appointment.start)}</span>
+								<span class="font-medium">{appointment.title}</span>
+							</span>
 							{#if live}
 								<span class="block truncate font-medium tabular-nums">{label(live.start)}–{label(live.end)}</span>
-							{:else if horizontal || item.height >= 30}<span class="text-muted-foreground block truncate">
-									{workspace.i18n.time(appointment.start)}–{workspace.i18n.time(appointment.end)}
-									{handlers.subtitle(appointment)}
-								</span>{/if}
+							{/if}
 							{#if editable && appointment.status !== 'cancelled'}
 								{#each ['start', 'end'] as const as edge (edge)}
 									<span
