@@ -39,6 +39,7 @@ export function mailList(workspace: Workspace, mailbox: MailboxModel, handlers: 
 			label: () => t('ui.ws.mail.reply'),
 			icon: () => Reply,
 			single: true,
+			key: 'r',
 			when: (mails) => writes() && mails[0].folder !== 'drafts',
 			run: (mails) => handlers.reply(mails[0]),
 		},
@@ -47,6 +48,7 @@ export function mailList(workspace: Workspace, mailbox: MailboxModel, handlers: 
 			label: (mails) => t(allStarred(mails) ? 'ui.ws.mail.unstar' : 'ui.ws.mail.star'),
 			icon: (mails) => (allStarred(mails) ? StarOff : Star),
 			inline: true,
+			key: 's',
 			when: writes,
 			pressed: allStarred,
 			pressedClass: 'fill-amber-400 text-amber-400',
@@ -57,6 +59,7 @@ export function mailList(workspace: Workspace, mailbox: MailboxModel, handlers: 
 			label: (mails) => t(allRead(mails) ? 'ui.ws.mail.mark_unread' : 'ui.ws.mail.mark_read'),
 			icon: (mails) => (allRead(mails) ? Mail : MailOpen),
 			inline: true,
+			key: 'u',
 			when: (mails) => writes() && mails.every((mail) => mail.folder !== 'drafts'),
 			run: (mails) => mailbox.setRead(mails, !allRead(mails)),
 		},
@@ -65,6 +68,7 @@ export function mailList(workspace: Workspace, mailbox: MailboxModel, handlers: 
 			label: (mails) => t(archived(mails) ? 'ui.ws.mail.to_inbox' : 'ui.ws.contacts.archive'),
 			icon: (mails) => (archived(mails) ? Inbox : Archive),
 			inline: true,
+			key: 'e',
 			when: (mails) => writes() && mails.every((mail) => mail.folder !== 'drafts'),
 			run: (mails) => mailbox.moveTo(mails, archived(mails) ? 'inbox' : 'archive'),
 		},
@@ -89,6 +93,7 @@ export function mailList(workspace: Workspace, mailbox: MailboxModel, handlers: 
 			label: () => t('ui.ws.delete'),
 			icon: () => Trash2,
 			inline: true,
+			key: 'Delete',
 			destructive: true,
 			when: writes,
 			run: (mails) => mailbox.remove(mails),
@@ -96,6 +101,7 @@ export function mailList(workspace: Workspace, mailbox: MailboxModel, handlers: 
 	];
 
 	return new ListModel<MailMessage, MailId>({
+		t,
 		name: () => t(`ui.ws.mail.folder.${mailbox.folder}`),
 		items: () => mailbox.messages,
 		id: (mail) => mail.id,

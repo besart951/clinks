@@ -726,6 +726,46 @@
         "de-CH": "Drücke G und danach den Buchstaben, um einen Bereich zu öffnen.",
         "en-US": "Press G and then the letter to open an area."
       },
+      "ui.ws.shortcuts.page": {
+        "de-CH": "Auf dieser Seite",
+        "en-US": "On this page"
+      },
+      "ui.ws.keys.delete": {
+        "de-CH": "Entf",
+        "en-US": "Del"
+      },
+      "ui.ws.keys.backspace": {
+        "de-CH": "Rücktaste",
+        "en-US": "Backspace"
+      },
+      "ui.ws.keys.enter": {
+        "de-CH": "Enter",
+        "en-US": "Enter"
+      },
+      "ui.ws.keys.space": {
+        "de-CH": "Leertaste",
+        "en-US": "Space"
+      },
+      "ui.ws.keys.escape": {
+        "de-CH": "Esc",
+        "en-US": "Esc"
+      },
+      "ui.ws.keys.move": {
+        "de-CH": "Nächster oder vorheriger Eintrag (auch J und K)",
+        "en-US": "Next or previous entry (also J and K)"
+      },
+      "ui.ws.keys.extend": {
+        "de-CH": "Auswahl erweitern",
+        "en-US": "Extend the selection"
+      },
+      "ui.ws.keys.open": {
+        "de-CH": "Öffnen",
+        "en-US": "Open"
+      },
+      "ui.ws.documents.parent_folder": {
+        "de-CH": "Übergeordneter Ordner",
+        "en-US": "Parent folder"
+      },
       "ui.ws.shortcuts.palette": {
         "de-CH": "Befehle und Suche",
         "en-US": "Commands and search"

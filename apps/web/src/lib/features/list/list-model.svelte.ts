@@ -1,6 +1,7 @@
 import type { Component } from 'svelte';
 import { SvelteSet } from 'svelte/reactivity';
 import { listPress, pressInput, rangeBetween, type OpenOn } from './list-press.ts';
+import type { KeyHelp, PageKeys } from '../shell/page-keys.ts';
 
 /** A choice inside an action's submenu, e.g. one folder of «Move to». */
 export interface ListChoice {
@@ -33,11 +34,13 @@ export interface ListAction<T> {
 	pressedClass?: string;
 	/** A submenu instead of a single step. */
 	choices?: (items: T[]) => ListChoice[];
-	/** The key that runs it, e.g. `Delete` or `s`, shown in menus and handled by the list. */
+	/** The key that runs it on the selection, as `KeyboardEvent.key`: e.g. `Delete`, `F2` or `s`. */
 	key?: string;
 }
 
 export interface ListOptions<T, Id extends string> {
+	/** The translator, for the shortcut overview and printed key names. */
+	t: (key: string) => string;
 	/** The list's accessible name, e.g. the mail folder. */
 	name: () => string;
 	items: () => T[];
@@ -53,13 +56,32 @@ export interface ListOptions<T, Id extends string> {
 	drag?: (event: DragEvent, item: T) => void;
 }
 
-/** Selection and actions of a list, shared by mail, documents and the other lists. */
-export class ListModel<T, Id extends string = string> {
+/** How keys are printed: «Entf», «F2», «S». */
+const keyNames: Partial<Record<string, string>> = {
+	Delete: 'ui.ws.keys.delete',
+	Backspace: 'ui.ws.keys.backspace',
+	Enter: 'ui.ws.keys.enter',
+	' ': 'ui.ws.keys.space',
+	Escape: 'ui.ws.keys.escape',
+};
+
+export function printKey(key: string, t: (key: string) => string): string {
+	const name = keyNames[key];
+	return name ? t(name) : key.length === 1 ? key.toUpperCase() : key;
+}
+
+/**
+ * Selection and actions of a list, shared by mail, documents and the other lists. It is also the page's keys
+ * (`PageKeys`): arrows move, Shift extends, Ctrl+A, Escape and each action's key.
+ */
+export class ListModel<T, Id extends string = string> implements PageKeys {
 	readonly ids = new SvelteSet<Id>();
 	/** Where a Shift-click range starts: the last entry clicked. */
 	anchor = $state<Id | null>(null);
 	/** A long press on a touch screen started picking several entries. */
 	picking = $state(false);
+	/** Counts moves by key; the list focuses the anchor row on each, so focus and screen readers follow. */
+	moved = $state(0);
 	readonly #options: ListOptions<T, Id>;
 
 	constructor(options: ListOptions<T, Id>) {
@@ -192,9 +214,10 @@ export class ListModel<T, Id extends string = string> {
 		if (items.length > 1) this.clear();
 	}
 
-	/** Keys on the list: Ctrl+A selects all, Escape clears, an action's key runs it on the selection. */
-	keydown(event: KeyboardEvent): boolean {
-		if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'a') {
+	/** The app's key handler asks the list first (see `PageKeys`). */
+	handle(event: KeyboardEvent): boolean {
+		const ctrl = event.ctrlKey || event.metaKey;
+		if (ctrl && !event.altKey && event.key.toLowerCase() === 'a') {
 			this.selectAll();
 			return true;
 		}
@@ -202,7 +225,11 @@ export class ListModel<T, Id extends string = string> {
 			this.clear();
 			return true;
 		}
-		if (event.ctrlKey || event.metaKey || event.altKey) return false;
+		if (ctrl || event.altKey) return false;
+		const step = { ArrowDown: 1, j: 1, ArrowUp: -1, k: -1 }[event.key];
+		if (step) return this.#step(step, event.shiftKey);
+		if (event.key === 'Home' || event.key === 'End')
+			return this.#jump(event.key === 'Home' ? 0 : this.items.length - 1);
 		const items = this.selected;
 		const action = this.actionsFor(items).find(
 			(candidate) => candidate.key && !candidate.choices && candidate.key.toLowerCase() === event.key.toLowerCase(),
@@ -210,5 +237,52 @@ export class ListModel<T, Id extends string = string> {
 		if (!action) return false;
 		void this.run(action, items);
 		return true;
+	}
+
+	help(): KeyHelp[] {
+		const t = this.#options.t;
+		const sample = this.items.slice(0, 1);
+		return [
+			{ keys: ['↑', '↓'], label: t('ui.ws.keys.move') },
+			{ keys: ['Shift', '↑', '↓'], label: t('ui.ws.keys.extend') },
+			{ keys: [printKey('Enter', t)], label: t('ui.ws.keys.open') },
+			{ keys: ['Ctrl', 'A'], label: t('ui.ws.select_all') },
+			{ keys: [printKey('Escape', t)], label: t('ui.ws.list.clear_selection') },
+			...this.#options
+				.actions()
+				.filter((action) => action.key)
+				.map((action) => ({ keys: [printKey(action.key!, t)], label: action.label(sample) })),
+		];
+	}
+
+	/** One entry further or back: it becomes the marked one (and opens, where a click opens); Shift extends. */
+	#step(step: number, extend: boolean): boolean {
+		const order = this.items.map((item) => this.id(item));
+		if (order.length === 0) return false;
+		const from = this.anchor === null ? -1 : order.indexOf(this.anchor);
+		const index = Math.min(
+			order.length - 1,
+			Math.max(0, from === -1 ? (step > 0 ? 0 : order.length - 1) : from + step),
+		);
+		const item = this.items[index];
+		if (extend) {
+			this.ids.add(this.id(item));
+			this.anchor = this.id(item);
+		} else this.#go(item);
+		this.moved++;
+		return true;
+	}
+
+	#jump(index: number): boolean {
+		const item = this.items[index];
+		if (!item) return false;
+		this.#go(item);
+		this.moved++;
+		return true;
+	}
+
+	#go(item: T) {
+		this.only(item);
+		if (this.openOn === 'click') this.#options.open(item);
 	}
 }

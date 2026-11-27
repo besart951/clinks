@@ -61,6 +61,7 @@ export function documentList(workspace: Workspace, documents: DocumentsModel, ha
 			label: () => t('ui.ws.documents.rename'),
 			icon: () => PenLine,
 			single: true,
+			key: 'F2',
 			when: (files) => writes() && unlocked(files),
 			run: (files) => handlers.rename(files[0]),
 		},
@@ -91,6 +92,7 @@ export function documentList(workspace: Workspace, documents: DocumentsModel, ha
 			label: () => t('ui.ws.delete'),
 			icon: () => Trash2,
 			inline: true,
+			key: 'Delete',
 			destructive: true,
 			when: (files) => writes() && unlocked(files),
 			run: (files) => documents.remove(files),
@@ -98,6 +100,7 @@ export function documentList(workspace: Workspace, documents: DocumentsModel, ha
 	];
 
 	return new ListModel<StoredDocument, DocumentId>({
+		t,
 		name: () => t('ui.ws.documents.file_list'),
 		items: () => documents.files,
 		id: (file) => file.id,

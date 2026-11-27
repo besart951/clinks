@@ -1,4 +1,5 @@
 import { RemoteAccountApi } from './data/remote-account.ts';
+import type { PageKeys } from './features/shell/page-keys.ts';
 import { DocumentFiles } from './data/document-files.ts';
 import { InvoiceFiles } from './data/invoice-files.ts';
 import { InvoiceDelivery } from './data/invoice-delivery.ts';
@@ -70,6 +71,8 @@ export class Workspace {
 	readonly persistent: boolean;
 	/** The "N" shortcut runs the create action of the page that is open. */
 	newAction = $state<(() => void) | null>(null);
+	/** The keys of the page in front, e.g. a list's (`features/shell/page-keys.ts`). */
+	pageKeys = $state.raw<PageKeys | null>(null);
 	versions = $state(Object.fromEntries(tableNames.map((name) => [name, 0])) as { [Name in TableName]: number });
 
 	constructor(platform: Platform = createWebPlatform()) {
@@ -198,6 +201,14 @@ export class Workspace {
 		this.newAction = action;
 		return () => {
 			if (this.newAction === action) this.newAction = null;
+		};
+	}
+
+	/** Registers the page's keys for the app's key handler and the «?» overview; returns the cleanup. */
+	registerPageKeys(keys: PageKeys): () => void {
+		this.pageKeys = keys;
+		return () => {
+			if (this.pageKeys === keys) this.pageKeys = null;
 		};
 	}
 

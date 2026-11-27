@@ -2,10 +2,12 @@
 	import * as DropdownMenu from '@clinks/ui/components/ui/dropdown-menu';
 	import * as ContextMenu from '@clinks/ui/components/ui/context-menu';
 	import type { ListAction, ListModel } from '#lib/features/list/list-model.svelte';
-	import { keyLabel } from './key-label';
+	import { printKey } from '#lib/features/list/list-model.svelte';
+	import { useWorkspace } from '#lib/workspace.svelte';
 
 	/** The actions as menu items, in a right-click menu or in an «…» menu; destructive ones last, set apart. */
 	let { list, items, kind }: { list: ListModel<T, string>; items: T[]; kind: 'context' | 'dropdown' } = $props();
+	const workspace = useWorkspace();
 	// Both menus offer the same parts; the dropdown's types stand for both.
 	const Menu = $derived((kind === 'context' ? ContextMenu : DropdownMenu) as typeof DropdownMenu);
 	const actions = $derived(list.actionsFor(items));
@@ -34,7 +36,7 @@
 	{:else}
 		<Menu.Item variant={action.destructive ? 'destructive' : 'default'} onclick={() => list.run(action, items)}>
 			<Icon />{action.label(items)}
-			{#if action.key}<Menu.Shortcut>{keyLabel(action.key)}</Menu.Shortcut>{/if}
+			{#if action.key}<Menu.Shortcut>{printKey(action.key, (key) => workspace.t(key))}</Menu.Shortcut>{/if}
 		</Menu.Item>
 	{/if}
 {/snippet}
