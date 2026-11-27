@@ -2034,6 +2034,38 @@
         "de-CH": "Als Kontakt erfassen",
         "en-US": "Add as contact"
       },
+      "ui.ws.mail.alert_title": {
+        "de-CH": "Neue Mail von {name}",
+        "en-US": "New email from {name}"
+      },
+      "ui.ws.settings.mail_alerts": {
+        "de-CH": "Mitteilungen für neue Mails",
+        "en-US": "Alerts for new emails"
+      },
+      "ui.ws.settings.mail_alerts_text": {
+        "de-CH": "Auf diesem Gerät, solange CLinks im Hintergrund offen ist.",
+        "en-US": "On this device, while CLinks is open in the background."
+      },
+      "ui.ws.settings.mail_alerts_other": {
+        "de-CH": "Alle übrigen Adressen",
+        "en-US": "All other addresses"
+      },
+      "ui.ws.settings.push_blocked": {
+        "de-CH": "Das Gerät erlaubt keine Mitteilungen. Erlaube sie in den Browser- oder Systemeinstellungen.",
+        "en-US": "The device does not allow notifications. Allow them in the browser or system settings."
+      },
+      "ui.ws.list.refresh": {
+        "de-CH": "Zum Aktualisieren ziehen",
+        "en-US": "Pull to refresh"
+      },
+      "ui.ws.list.refreshing": {
+        "de-CH": "Wird aktualisiert …",
+        "en-US": "Refreshing …"
+      },
+      "ui.ws.mail.actions": {
+        "de-CH": "Aktionen für die Mail",
+        "en-US": "Actions for the email"
+      },
       "ui.ws.mail.undo_send": {
         "de-CH": "Senden rückgängig",
         "en-US": "Undo send"

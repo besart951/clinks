@@ -42,6 +42,10 @@ export interface FileStore {
 export interface Notifier {
 	/** Shows a system notification when the user allowed it; returns whether one was shown. */
 	notify(title: string, body: string): boolean;
+	/** Whether system notifications may be shown on this device. */
+	permission(): 'granted' | 'denied' | 'default' | 'unsupported';
+	/** Asks the person (only on their action, e.g. turning a switch on); returns whether it is allowed now. */
+	request(): Promise<boolean>;
 }
 
 export interface Updater {

@@ -9,6 +9,7 @@
 	import CommandPalette from '#lib/components/shell/CommandPalette.svelte';
 	import DevPanel from '#lib/components/shell/DevPanel.svelte';
 	import MobileNav from '#lib/components/shell/MobileNav.svelte';
+	import MailAlertsWatcher from '#lib/components/shell/MailAlertsWatcher.svelte';
 	import ShortcutsDialog from '#lib/components/shell/ShortcutsDialog.svelte';
 	import SkeletonRows from '#lib/components/common/SkeletonRows.svelte';
 	import { landingPath } from '#lib/features/auth/auth-forms.svelte';
@@ -78,6 +79,7 @@
 {#if ready}
 	<SidebarProvider>
 		{#key session.tenantId}
+			{#if session.hasModule('mail') && session.can('mail.read')}<MailAlertsWatcher />{/if}
 			<AppSidebar actions={{ search: () => (paletteOpen = true), shortcuts: () => (shortcutsOpen = true) }} />
 		{/key}
 		<SidebarInset class="flex min-h-dvh min-w-0 flex-col pb-16 md:pb-0">

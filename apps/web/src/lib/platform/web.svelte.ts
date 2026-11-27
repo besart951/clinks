@@ -38,6 +38,13 @@ const browserNotifier: Notifier = {
 		new Notification(title, { body });
 		return true;
 	},
+	permission() {
+		return typeof Notification === 'undefined' ? 'unsupported' : Notification.permission;
+	},
+	async request() {
+		if (typeof Notification === 'undefined') return false;
+		return (await Notification.requestPermission()) === 'granted';
+	},
 };
 
 /** SvelteKit polls the deployed version (`version.pollInterval`); a reload picks up the new build. */
