@@ -63,6 +63,16 @@ export class SyncEngine {
 		return this.pendingWrites;
 	}
 
+	/**
+	 * Resolves once local writes are uploaded, or after `timeoutMs` (offline): a REST step that reads what was just
+	 * saved locally, such as sending a campaign to review, goes after the upload.
+	 */
+	async uploaded(timeoutMs = 15_000) {
+		const until = Date.now() + timeoutMs;
+		while ((await this.pendingCount()) > 0 && Date.now() < until)
+			await new Promise((resolve) => setTimeout(resolve, 200));
+	}
+
 	/** Writes records in one local transaction (uploaded as one), e.g. demo data at onboarding. */
 	async insert(table: SyncedTableName, records: readonly { id: string }[]) {
 		if (records.length === 0) return;

@@ -106,7 +106,11 @@ export class Workspace {
 		this.mailOutgoing = new MailOutgoing(client, () => this.api);
 		this.newsletterForms = new NewsletterForms(client, () => this.api);
 		this.newsletterConsents = new NewsletterConsents(client, () => this.api);
-		this.campaignWorkflow = new CampaignWorkflow(client, () => this.api);
+		this.campaignWorkflow = new CampaignWorkflow(
+			client,
+			() => this.api,
+			() => this.sync,
+		);
 		if (client) {
 			this.sync = new SyncEngine(
 				client,

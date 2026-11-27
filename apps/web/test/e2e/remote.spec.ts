@@ -548,7 +548,9 @@ test('signs a reader up with double opt-in, sends them a campaign and lets their
 	await page.getByLabel('Zielgruppe (Schlagwort)').click();
 	await page.getByRole('option', { name: /^Newsletter/ }).click();
 	await page.getByLabel('Betreff').fill('Neuigkeiten für {vorname} aus der Praxis');
+	// The step goes to the server once the edits are uploaded; the new status then syncs back.
 	await page.getByRole('button', { name: 'Zur Prüfung einreichen' }).click();
+	await expect(page.getByText('Zur Prüfung eingereicht')).toBeVisible({ timeout: 20_000 });
 	await page.getByRole('button', { name: 'Freigeben' }).click();
 	await expect(page.getByText('Kampagne freigegeben')).toBeVisible();
 	await page.getByRole('tab', { name: /Prüfung/ }).click();

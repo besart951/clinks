@@ -135,6 +135,12 @@ export class NewsletterConsents extends Backend {
 
 /** The steps of a campaign after editing: review, approval, sending; and who it reaches. */
 export class CampaignWorkflow extends Backend {
+	readonly #sync: () => { uploaded(): Promise<void> } | null;
+	constructor(client: ApiClient | null, api: () => WorkspaceApi, sync: () => { uploaded(): Promise<void> } | null) {
+		super(client, api);
+		this.#sync = sync;
+	}
+
 	audience(id: CampaignId): Promise<AudienceView> {
 		return this.call(
 			(client) => client.request('GET', `/mail/campaigns/${id}/audience`),
@@ -142,9 +148,13 @@ export class CampaignWorkflow extends Backend {
 		);
 	}
 
+	/** The server checks the content it has: the edits saved on this device are uploaded first. */
 	step(id: CampaignId, step: 'review' | 'withdraw' | 'approve' | 'test'): Promise<void> {
 		return this.call(
-			(client) => client.request('POST', `/mail/campaigns/${id}/${step}`, {}),
+			async (client) => {
+				await this.#sync()?.uploaded();
+				await client.request('POST', `/mail/campaigns/${id}/${step}`, {});
+			},
 			(api) => api.campaignWorkflow[step](id),
 		);
 	}
@@ -152,7 +162,10 @@ export class CampaignWorkflow extends Backend {
 	/** «Planen» at `at`, or «Jetzt senden» with null. */
 	schedule(id: CampaignId, at: string | null): Promise<void> {
 		return this.call(
-			(client) => client.request('POST', `/mail/campaigns/${id}/schedule`, { at }),
+			async (client) => {
+				await this.#sync()?.uploaded();
+				await client.request('POST', `/mail/campaigns/${id}/schedule`, { at });
+			},
 			(api) => api.campaignWorkflow.schedule(id, at),
 		);
 	}
