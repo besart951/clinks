@@ -205,6 +205,7 @@ export const mails = new Table(
 		sent_at: column.text,
 		is_read: column.integer,
 		starred: column.integer,
+		snoozed_until: column.text,
 		contact_id: column.text,
 		message_id: column.text,
 		delivery: column.text,

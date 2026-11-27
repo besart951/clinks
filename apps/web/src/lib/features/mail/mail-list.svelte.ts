@@ -1,3 +1,5 @@
+import AlarmClock from '@lucide/svelte/icons/alarm-clock';
+import AlarmClockOff from '@lucide/svelte/icons/alarm-clock-off';
 import Archive from '@lucide/svelte/icons/archive';
 import CalendarPlus from '@lucide/svelte/icons/calendar-plus';
 import Inbox from '@lucide/svelte/icons/inbox';
@@ -10,6 +12,8 @@ import StarOff from '@lucide/svelte/icons/star-off';
 import Trash2 from '@lucide/svelte/icons/trash-2';
 import type { MailId } from '@clinks/domain/ids';
 import type { MailMessage } from '@clinks/domain/types';
+import { waiting } from '@clinks/domain/mail-threads';
+import { snoozeChoices } from '@clinks/domain/snooze';
 import { ListModel, type ListAction } from '../list/list-model.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 import type { MailboxModel } from './mailbox.svelte.ts';
@@ -74,6 +78,30 @@ export function mailList(workspace: Workspace, mailbox: MailboxModel, handlers: 
 			key: 'e',
 			when: (mails) => writes() && mails.every((mail) => mail.folder !== 'drafts'),
 			run: (mails) => mailbox.moveTo(whole(mails), archived(mails) ? 'inbox' : 'archive'),
+		},
+		{
+			id: 'snooze',
+			label: () => t('ui.ws.mail.snooze'),
+			icon: () => AlarmClock,
+			when: (mails) => writes() && mails.every((mail) => mail.folder !== 'drafts' && !waiting(mail, mailbox.now)),
+			run: () => undefined,
+			choices: (mails) =>
+				snoozeChoices(new Date()).map(({ choice, until }) => ({
+					id: choice,
+					label: t('ui.ws.mail.snooze_until', {
+						choice: t(`ui.ws.mail.snooze.${choice}`),
+						when: workspace.i18n.dateTime(until.toISOString()),
+					}),
+					run: () => mailbox.snooze(whole(mails), until),
+				})),
+		},
+		{
+			id: 'unsnooze',
+			label: () => t('ui.ws.mail.unsnooze'),
+			icon: () => AlarmClockOff,
+			inline: true,
+			when: (mails) => writes() && mails.every((mail) => waiting(mail, mailbox.now)),
+			run: (mails) => mailbox.snooze(whole(mails), null),
 		},
 		{
 			id: 'task',

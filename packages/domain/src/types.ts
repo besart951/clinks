@@ -412,6 +412,8 @@ export interface MailMessage extends TenantRecord<MailId> {
 	sentAt: Timestamp;
 	read: boolean;
 	starred: boolean;
+	/** «Später erinnern»: out of its folder until then; null or absent: not snoozed. */
+	snoozedUntil?: Timestamp | null;
 	contactId: ContactId | null;
 	/** Set by the server: the Message-ID of mail sent through the outbox or filed from outside. */
 	messageId: string | null;

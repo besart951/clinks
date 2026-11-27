@@ -25,6 +25,16 @@ export function threadKey(mail: Pick<MailMessage, 'folder' | 'from' | 'to' | 'su
 	return `${threadSubject(mail.subject).toLowerCase()}|${counterpart(mail)}`;
 }
 
+/** Snoozed and still waiting at `now`: out of its folder. */
+export function waiting(mail: Pick<MailMessage, 'snoozedUntil'>, now: Date): boolean {
+	return !!mail.snoozedUntil && Date.parse(mail.snoozedUntil) > now.getTime();
+}
+
+/** When a mail counts as new: when it came, or when its snooze ended, whichever is later. */
+export function arrivedAt(mail: Pick<MailMessage, 'sentAt' | 'snoozedUntil'>): string {
+	return mail.snoozedUntil && mail.snoozedUntil > mail.sentAt ? mail.snoozedUntil : mail.sentAt;
+}
+
 export interface MailThread {
 	key: string;
 	/** Oldest first. */
@@ -50,5 +60,10 @@ export function threads(mails: readonly MailMessage[]): MailThread[] {
 				unread: sorted.filter((mail) => !mail.read).length,
 			};
 		})
-		.sort((left, right) => right.latest.sentAt.localeCompare(left.latest.sentAt));
+		.sort((left, right) => latestArrival(right).localeCompare(latestArrival(left)));
+}
+
+/** A conversation whose snooze ended goes back on top, as if it had just come. */
+function latestArrival(thread: MailThread): string {
+	return thread.mails.map(arrivedAt).sort().at(-1)!;
 }
