@@ -2,8 +2,6 @@
 	import { streetLine } from '@clinks/domain/address';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
-	import ChevronLeft from '@lucide/svelte/icons/chevron-left';
-	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	import Wand from '@lucide/svelte/icons/wand-sparkles';
 	import Printer from '@lucide/svelte/icons/printer';
 	import Plus from '@lucide/svelte/icons/plus';
@@ -16,18 +14,12 @@
 	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
 	import SpitexNav from '#lib/components/spitex/SpitexNav.svelte';
 	import WeekRelease from '#lib/components/spitex/WeekRelease.svelte';
-	import TimeGrid, {
-		type GridColumn,
-		type GridHandlers,
-		type TimeAxis,
-	} from '#lib/components/calendar/TimeGrid.svelte';
-	import AxisToggle from '#lib/components/calendar/AxisToggle.svelte';
-	import DateJump from '#lib/components/calendar/DateJump.svelte';
-	import PeriodNav from '#lib/components/calendar/PeriodNav.svelte';
+	import TimeGrid, { type GridColumn, type GridHandlers } from '#lib/components/calendar/TimeGrid.svelte';
+	import CalendarToolbar from '#lib/components/calendar/CalendarToolbar.svelte';
+	import { AxisSetting } from '#lib/features/calendar/axis.svelte';
 	import FloatingAddButton from '#lib/components/common/FloatingAddButton.svelte';
 	import Grip from '@lucide/svelte/icons/grip-vertical';
 	import Users from '@lucide/svelte/icons/users';
-	import LocateFixed from '@lucide/svelte/icons/locate-fixed';
 	import { personBadge } from '@clinks/ui/kit/avatar';
 	import AppointmentSheet from '#lib/components/calendar/AppointmentSheet.svelte';
 	import ContactFormSheet from '#lib/components/contacts/ContactFormSheet.svelte';
@@ -36,15 +28,17 @@
 	import { contactName } from '#lib/data/workspace-api';
 	import { PlanningModel } from '#lib/features/spitex/planning.svelte';
 	import { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
-	import { addDays, minutesToTime, today } from '@clinks/domain/dates';
+	import { minutesToTime } from '@clinks/domain/dates';
 	import { firstFreeStart } from '@clinks/domain/scheduling';
 	import type { Appointment, Contact } from '@clinks/domain/types';
 	import type { UserId } from '@clinks/domain/ids';
-	import { href, routeQuery, setQuery } from '#lib/navigation';
+	import { href, routeQuery } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
-	const model = new PlanningModel(workspace);
+	const query = routeQuery(page.url);
+	const model = new PlanningModel(workspace, query.get('date') ?? undefined);
+	const axis = new AxisSetting(page.url);
 	const people = new PeopleDirectory(workspace);
 	const canWrite = $derived(workspace.session.can('spitex.write') && workspace.session.can('calendar.write'));
 	const canAddClient = $derived(canWrite && workspace.session.can('contacts.write'));
@@ -60,18 +54,10 @@
 	let sheet: AppointmentSheet;
 	/** The appointment open in the panel, highlighted in the grid. */
 	let selectedId = $state<string | null>(null);
-	const query = routeQuery(page.url);
-	if (query.get('date')) model.date = query.get('date')!;
-	let axis = $state<TimeAxis>(query.get('axis') === 'horizontal' ? 'horizontal' : 'vertical');
 	/** The visit being dragged, from the list or inside the plan. */
 	let dragging = $state<Appointment | null>(null);
 	/** The open visit pointed at in the list: the plan shows its arrival window. */
 	let pointedVisit = $state<Appointment | null>(null);
-
-	function changeAxis(next: TimeAxis) {
-		axis = next;
-		void setQuery(page.url, { axis: next === 'horizontal' ? next : null });
-	}
 
 	/** Drags the whole card, not just the handle, so the drag image shows what is being assigned. */
 	function startDrag(event: DragEvent, visit: Appointment) {
@@ -209,51 +195,9 @@
 	</PageHeader>
 	<SpitexNav />
 
-	<div class="mb-3 md:hidden">
-		<PeriodNav
-			value={model.date}
-			label={workspace.i18n.format(model.date, { weekday: 'short', day: 'numeric', month: 'long' })}
-			units={['day', 'week']}
-			onstep={(direction) => model.setDate(addDays(model.date, direction))}
-			onpick={(_unit, date) => model.setDate(date)}
-		/>
-	</div>
-
-	<div class="mb-4 flex flex-wrap items-center gap-2">
-		<Button variant="outline" size="sm" class="hidden md:inline-flex" onclick={() => model.setDate(today())}>
-			{workspace.t('ui.ws.calendar.today')}
-		</Button>
-		{#if model.date !== today()}
-			<Button variant="ghost" size="sm" class="md:hidden" onclick={() => model.setDate(today())}>
-				<LocateFixed class="size-4" />{workspace.t('ui.ws.calendar.today')}
-			</Button>
-		{/if}
-		<Button
-			variant="ghost"
-			size="icon-sm"
-			class="hidden md:inline-flex"
-			onclick={() => model.setDate(addDays(model.date, -1))}
-			aria-label={workspace.t('ui.ws.calendar.previous')}
-		>
-			<ChevronLeft class="size-4" />
-		</Button>
-		<Button
-			variant="ghost"
-			size="icon-sm"
-			class="hidden md:inline-flex"
-			onclick={() => model.setDate(addDays(model.date, 1))}
-			aria-label={workspace.t('ui.ws.calendar.next')}
-		>
-			<ChevronRight class="size-4" />
-		</Button>
-		<span class="hidden md:contents">
-			<DateJump value={model.date} units={['day', 'week']} onpick={(_unit, date) => model.setDate(date)} />
-		</span>
-		<h2 class="sr-only font-semibold capitalize md:not-sr-only" aria-live="polite">
-			{workspace.i18n.format(model.date, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-		</h2>
-		<WeekRelease {model} {people} part="status" />
-		<div class="ms-auto flex items-center gap-2 print:hidden">
+	<CalendarToolbar period={model.period} {axis}>
+		{#snippet status()}<WeekRelease {model} {people} part="status" />{/snippet}
+		{#snippet actions()}
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>
 					{#snippet child({ props })}<Button {...props} variant="outline" size="sm">
@@ -283,16 +227,15 @@
 					{/if}
 				</DropdownMenu.Content>
 			</DropdownMenu.Root>
-			<span class="hidden md:contents"><AxisToggle {axis} onchange={changeAxis} /></span>
-		</div>
-	</div>
+		{/snippet}
+	</CalendarToolbar>
 
 	<!-- The appointment panel docks on the right on wide screens; the plan stays usable beside it. -->
 	<div class="flex items-start gap-4">
 		<div class="min-w-0 flex-1">
 			<AsyncView resource={model.resource} skeleton="detail">
 				<div
-					class="mb-4 grid grid-cols-7 gap-1 text-center text-xs"
+					class="mb-4 grid auto-cols-fr grid-flow-col gap-1 text-center text-xs"
 					role="group"
 					aria-label={workspace.t('ui.ws.calendar.view_week')}
 				>
@@ -481,7 +424,15 @@
 						</Card.Root>
 					</div>
 					<div class="min-w-0 max-xl:order-2">
-						<TimeGrid {columns} {handlers} {axis} {selectedId} bind:dragging focus={pointedVisit} editable={canWrite} />
+						<TimeGrid
+							{columns}
+							{handlers}
+							axis={axis.value}
+							{selectedId}
+							bind:dragging
+							focus={pointedVisit}
+							editable={canWrite}
+						/>
 					</div>
 				</div>
 			</AsyncView>

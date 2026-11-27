@@ -485,6 +485,38 @@ test('turns on appointment reminders for the workspace and off for one contact',
 	await expect(mails.getByRole('switch')).not.toBeChecked();
 });
 
+test('offers the calendar basics in every calendar view: hidden weekdays per view and the small calendar', async ({
+	page,
+}) => {
+	await signIn(page);
+	await page.goto('/#/settings/mail');
+	await page.getByRole('button', { name: 'Arbeitsbereich' }).click();
+	await page.getByRole('menuitem', { name: 'Stille Spitex Seeland' }).click();
+	await page.goto('/#/spitex');
+	const strip = page.getByRole('group', { name: 'Woche' }).first();
+	await expect(strip.getByRole('button')).toHaveCount(7);
+	await page.getByRole('button', { name: 'Wochentage anzeigen' }).click();
+	await page.getByRole('menuitemcheckbox', { name: 'Sonntag' }).click();
+	await page.keyboard.press('Escape');
+	await expect(strip.getByRole('button')).toHaveCount(6);
+	await expect(page.getByRole('button', { name: 'So ausgeblendet' })).toBeVisible();
+
+	// The calendar keeps its own days.
+	await page.goto('/#/calendar?view=week');
+	await expect(page.getByRole('button', { name: /ausgeblendet/ })).toHaveCount(0);
+
+	// The staff page has the small calendar now too.
+	await page.goto('/#/spitex');
+	await page
+		.getByRole('link', { name: /Daniel Moser/ })
+		.first()
+		.click();
+	await expect(page.getByRole('heading', { name: /^KW \d+ · / })).toBeVisible();
+	await page.getByRole('button', { name: 'Weiter' }).click();
+	await page.getByRole('button', { name: 'Heute', exact: true }).click();
+	await expect(page.getByRole('heading', { name: /^KW \d+ · / })).toBeVisible();
+});
+
 test('sets the QR-IBAN and the payment term for invoices', async ({ page }) => {
 	await signIn(page);
 	await page.goto('/#/settings');

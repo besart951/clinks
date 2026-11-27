@@ -1,65 +1,48 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
-	import ChevronLeft from '@lucide/svelte/icons/chevron-left';
-	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	import Plus from '@lucide/svelte/icons/plus';
 	import Filter from '@lucide/svelte/icons/filter';
-	import Eye from '@lucide/svelte/icons/eye';
 	import CalendarDays from '@lucide/svelte/icons/calendar-days';
 	import CalendarRange from '@lucide/svelte/icons/calendar-range';
 	import Columns3 from '@lucide/svelte/icons/columns-3';
 	import UsersIcon from '@lucide/svelte/icons/users';
-	import LocateFixed from '@lucide/svelte/icons/locate-fixed';
 	import * as Tabs from '@clinks/ui/components/ui/tabs';
 	import * as DropdownMenu from '@clinks/ui/components/ui/dropdown-menu';
 	import { Button } from '@clinks/ui/components/ui/button';
 	import PageHeader from '#lib/components/common/PageHeader.svelte';
 	import AsyncView from '#lib/components/common/AsyncView.svelte';
 	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
-	import TimeGrid, {
-		type GridColumn,
-		type GridHandlers,
-		type TimeAxis,
-	} from '#lib/components/calendar/TimeGrid.svelte';
-	import DateJump from '#lib/components/calendar/DateJump.svelte';
-	import PeriodNav from '#lib/components/calendar/PeriodNav.svelte';
+	import TimeGrid, { type GridColumn, type GridHandlers } from '#lib/components/calendar/TimeGrid.svelte';
+	import CalendarToolbar from '#lib/components/calendar/CalendarToolbar.svelte';
 	import FloatingAddButton from '#lib/components/common/FloatingAddButton.svelte';
-	import AxisToggle from '#lib/components/calendar/AxisToggle.svelte';
+	import { AxisSetting } from '#lib/features/calendar/axis.svelte';
 	import MonthGrid from '#lib/components/calendar/MonthGrid.svelte';
 	import AppointmentSheet from '#lib/components/calendar/AppointmentSheet.svelte';
 	import { CalendarModel, type CalendarView } from '#lib/features/calendar/calendar.svelte';
 	import { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
 	import { contactName } from '#lib/data/workspace-api';
-	import {
-		addDays,
-		atTime,
-		isoWeek,
-		isoWeekday,
-		minutesToTime,
-		startOfWeek,
-		today,
-		weekDays,
-	} from '@clinks/domain/dates';
-	import { appointmentKinds, type Appointment, type CalendarDate } from '@clinks/domain/types';
+	import { atTime, isoWeekday, minutesToTime, startOfWeek, today, weekDays } from '@clinks/domain/dates';
+	import { appointmentKinds, type Appointment } from '@clinks/domain/types';
 	import type { ContactId } from '@clinks/domain/ids';
 	import { href, routeQuery, setQuery } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
 	const session = workspace.session;
-	const model = new CalendarModel(workspace);
+	const query = routeQuery(page.url);
+	const model = new CalendarModel(workspace, {
+		anchor: query.get('date') ?? undefined,
+		view: (query.get('view') as CalendarView | null) ?? (window.innerWidth < 768 ? 'day' : undefined),
+		onview: (view) => void setQuery(page.url, { view }),
+	});
+	const period = model.period;
+	const axis = new AxisSetting(page.url);
 	const people = new PeopleDirectory(workspace);
 	const canWrite = $derived(session.can('calendar.write'));
 	let sheet: AppointmentSheet;
 	/** The appointment open in the panel, highlighted in the grid. */
 	let selectedId = $state<string | null>(null);
-
-	const query = routeQuery(page.url);
-	if (query.get('date')) model.anchor = query.get('date')!;
-	if (query.get('view')) model.view = query.get('view') as CalendarView;
-	else if (window.innerWidth < 768) model.view = 'day';
-	let axis = $state<TimeAxis>(query.get('axis') === 'horizontal' ? 'horizontal' : 'vertical');
 
 	onMount(() => {
 		const stop = model.resource.connect();
@@ -142,16 +125,16 @@
 					: []),
 			];
 		}
-		return model.shownDays.map((day) => ({
+		return period.shownDays.map((day) => ({
 			key: day,
 			label: workspace.i18n.format(day, { weekday: 'short', day: 'numeric' }),
 			hide:
-				model.view === 'week' && model.shownDays.length > 1
+				model.view === 'week' && period.shownDays.length > 1
 					? {
 							label: workspace.t('ui.ws.calendar.hide_day', {
 								day: workspace.i18n.format(day, { weekday: 'short' }),
 							}),
-							run: () => hideWeekday(isoWeekday(day)),
+							run: () => period.hideWeekday(isoWeekday(day)),
 						}
 					: undefined,
 			sublabel: model.view === 'day' ? workspace.i18n.format(day, { month: 'long', year: 'numeric' }) : undefined,
@@ -161,49 +144,8 @@
 		}));
 	});
 
-	const rangeLabel = $derived.by(() => {
-		const [from, to] = model.range;
-		if (model.view === 'month') return workspace.i18n.format(model.anchor, { month: 'long', year: 'numeric' });
-		if (model.view === 'week')
-			return `${workspace.i18n.format(from, { day: 'numeric', month: 'short' })} – ${workspace.i18n.format(to, { day: 'numeric', month: 'short', year: 'numeric' })}`;
-		return workspace.i18n.format(model.anchor, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-	});
-
-	/** Hidden weekdays are remembered in this browser, like the sidebar. */
-	const hiddenDaysKey = 'clinks.workspace.calendar.hiddenWeekdays';
-	model.hiddenWeekdays = workspace.platform.preferences.read<number[]>(hiddenDaysKey, []);
-
-	function hideWeekday(weekday: number) {
-		model.hideWeekday(weekday);
-		workspace.platform.preferences.write(hiddenDaysKey, model.hiddenWeekdays);
-	}
-
-	function showAllDays() {
-		model.hiddenWeekdays = [];
-		workspace.platform.preferences.write(hiddenDaysKey, []);
-	}
-
-	/** «Sa, So» for the button that brings hidden days back. */
-	const hiddenDayNames = $derived(
-		model.hiddenWeekdays
-			.map((weekday) => workspace.i18n.format(addDays(startOfWeek(today()), weekday - 1), { weekday: 'short' }))
-			.join(', '),
-	);
-
-	/** A day keeps the team view; otherwise the view follows what was picked. */
-	function jumpTo(unit: 'day' | 'week' | 'month', date: CalendarDate) {
-		model.setAnchor(date);
-		if (!(unit === 'day' && model.view === 'resources') && unit !== model.view) changeView(unit);
-	}
-
 	function changeView(view: string) {
 		model.setView(view as CalendarView);
-		void setQuery(page.url, { view });
-	}
-
-	function changeAxis(next: TimeAxis) {
-		axis = next;
-		void setQuery(page.url, { axis: next === 'horizontal' ? next : null });
 	}
 
 	const views = [
@@ -213,20 +155,11 @@
 		{ value: 'resources', label: 'ui.ws.calendar.view_resources', icon: UsersIcon },
 	] as const;
 
-	/** The title on phones: short enough for one line. */
-	const mobileLabel = $derived(
-		model.view === 'month'
-			? workspace.i18n.format(model.anchor, { month: 'long', year: 'numeric' })
-			: model.view === 'week'
-				? `${workspace.i18n.format(model.anchor, { month: 'short', year: 'numeric' })} · ${workspace.t('ui.ws.spitex.release.week', { week: isoWeek(model.anchor) })}`
-				: workspace.i18n.format(model.anchor, { weekday: 'short', day: 'numeric', month: 'long' }),
-	);
-
 	/** Filters that hide something, for the badge on the button. */
 	const filterCount = $derived(model.hiddenPeople.length + model.hiddenKinds.length + (model.showOpen ? 0 : 1));
 
 	function openDay(date: string) {
-		model.setAnchor(date);
+		period.setAnchor(date);
 		changeView('day');
 	}
 </script>
@@ -286,7 +219,7 @@
 		{/snippet}
 	</PageHeader>
 
-	<!-- Phones: views across the width, the date to tap in the middle, the week to pick a day from. -->
+	<!-- Phones: views across the width; the toolbar's period below, then the week to pick a day from. -->
 	<div class="mb-3 space-y-3 md:hidden">
 		<div
 			class="bg-muted grid grid-cols-4 gap-1 rounded-xl p-1"
@@ -307,17 +240,29 @@
 				</button>
 			{/each}
 		</div>
-		<PeriodNav
-			value={model.anchor}
-			label={mobileLabel}
-			units={['day', 'week', 'month']}
-			initial={model.view === 'month' ? 'month' : model.view === 'week' ? 'week' : 'day'}
-			onstep={(direction) => model.go(direction)}
-			onpick={jumpTo}
-		/>
-		{#if model.view === 'day' || model.view === 'resources'}
-			<div class="grid grid-cols-7 gap-1" role="group" aria-label={workspace.t('ui.ws.calendar.view_week')}>
-				{#each weekDays(startOfWeek(model.anchor), 7) as day (day)}
+	</div>
+
+	<CalendarToolbar {period} axis={model.view === 'month' ? undefined : axis}>
+		{#snippet actions()}
+			{@render filterMenu()}
+			<Tabs.Root value={model.view} onValueChange={changeView} class="hidden md:flex">
+				<Tabs.List>
+					<Tabs.Trigger value="day">{workspace.t('ui.ws.calendar.view_day')}</Tabs.Trigger>
+					<Tabs.Trigger value="week">{workspace.t('ui.ws.calendar.view_week')}</Tabs.Trigger>
+					<Tabs.Trigger value="month">{workspace.t('ui.ws.calendar.view_month')}</Tabs.Trigger>
+					<Tabs.Trigger value="resources">{workspace.t('ui.ws.calendar.view_resources')}</Tabs.Trigger>
+				</Tabs.List>
+			</Tabs.Root>
+		{/snippet}
+	</CalendarToolbar>
+	{#if model.view === 'day' || model.view === 'resources'}
+		<div class="mb-3 md:hidden">
+			<div
+				class="grid auto-cols-fr grid-flow-col gap-1"
+				role="group"
+				aria-label={workspace.t('ui.ws.calendar.view_week')}
+			>
+				{#each period.withoutHidden(weekDays(startOfWeek(model.anchor), 7)) as day (day)}
 					{@const selected = day === model.anchor}
 					{@const busy = model.on(day).length > 0}
 					<button
@@ -330,7 +275,7 @@
 						aria-pressed={selected}
 						aria-current={day === today() ? 'date' : undefined}
 						aria-label={workspace.i18n.format(day, { weekday: 'long', day: 'numeric', month: 'long' })}
-						onclick={() => model.setAnchor(day)}
+						onclick={() => period.setAnchor(day)}
 					>
 						<span>{workspace.i18n.format(day, { weekday: 'short' })}</span>
 						<span class="text-sm font-semibold tabular-nums">{Number(day.slice(8))}</span>
@@ -341,72 +286,8 @@
 					</button>
 				{/each}
 			</div>
-		{/if}
-		<div class="flex items-center gap-2">
-			{@render filterMenu()}
-			{#if model.view !== 'day' || model.anchor !== today()}
-				<Button variant="ghost" size="sm" onclick={() => model.go(0)}>
-					<LocateFixed class="size-4" />{workspace.t('ui.ws.calendar.today')}
-				</Button>
-			{/if}
-			{#if model.hiddenWeekdays.length > 0 && (model.view === 'week' || model.view === 'month')}
-				<Button variant="ghost" size="sm" class="text-muted-foreground ms-auto" onclick={showAllDays}>
-					<Eye class="size-4" />{workspace.t('ui.ws.calendar.hidden_days', { days: hiddenDayNames })}
-				</Button>
-			{/if}
 		</div>
-	</div>
-
-	<div class="mb-4 hidden flex-wrap items-center gap-2 md:flex">
-		<Button variant="outline" size="sm" onclick={() => model.go(0)}>{workspace.t('ui.ws.calendar.today')}</Button>
-		<div class="flex">
-			<Button
-				variant="ghost"
-				size="icon-sm"
-				onclick={() => model.go(-1)}
-				aria-label={workspace.t('ui.ws.calendar.previous')}
-			>
-				<ChevronLeft class="size-4" />
-			</Button>
-			<Button
-				variant="ghost"
-				size="icon-sm"
-				onclick={() => model.go(1)}
-				aria-label={workspace.t('ui.ws.calendar.next')}
-			>
-				<ChevronRight class="size-4" />
-			</Button>
-		</div>
-		<DateJump
-			value={model.anchor}
-			units={['day', 'week', 'month']}
-			initial={model.view === 'month' ? 'month' : model.view === 'week' ? 'week' : 'day'}
-			onpick={jumpTo}
-		/>
-		<h2 class="min-w-0 text-base font-semibold capitalize" aria-live="polite">{rangeLabel}</h2>
-		<div class="flex-1"></div>
-		{#if model.hiddenWeekdays.length > 0 && (model.view === 'week' || model.view === 'month')}
-			<Button
-				variant="ghost"
-				size="sm"
-				class="text-muted-foreground"
-				title={workspace.t('ui.ws.calendar.show_days')}
-				onclick={showAllDays}
-			>
-				<Eye class="size-4" />{workspace.t('ui.ws.calendar.hidden_days', { days: hiddenDayNames })}
-			</Button>
-		{/if}
-		{@render filterMenu()}
-		{#if model.view !== 'month'}<AxisToggle {axis} onchange={changeAxis} />{/if}
-		<Tabs.Root value={model.view} onValueChange={changeView}>
-			<Tabs.List>
-				<Tabs.Trigger value="day">{workspace.t('ui.ws.calendar.view_day')}</Tabs.Trigger>
-				<Tabs.Trigger value="week">{workspace.t('ui.ws.calendar.view_week')}</Tabs.Trigger>
-				<Tabs.Trigger value="month">{workspace.t('ui.ws.calendar.view_month')}</Tabs.Trigger>
-				<Tabs.Trigger value="resources">{workspace.t('ui.ws.calendar.view_resources')}</Tabs.Trigger>
-			</Tabs.List>
-		</Tabs.Root>
-	</div>
+	{/if}
 
 	<!-- The appointment panel docks on the right on wide screens; the plan stays usable beside it. -->
 	<div class="flex items-start gap-4">
@@ -414,18 +295,18 @@
 			<AsyncView resource={model.resource} skeleton="detail">
 				{#if model.view === 'month'}
 					<MonthGrid
-						days={model.shownDays}
+						days={period.shownDays}
 						month={model.anchor.slice(0, 7)}
 						handlers={{
 							appointmentsOn: (date) => model.on(date),
 							color: handlers.color,
 							open: handlers.open,
 							day: openDay,
-							hideWeekday,
+							hideWeekday: (weekday) => period.hideWeekday(weekday),
 						}}
 					/>
 				{:else}
-					<TimeGrid {columns} {handlers} {axis} {selectedId} editable={canWrite} />
+					<TimeGrid {columns} {handlers} axis={axis.value} {selectedId} editable={canWrite} />
 					{#if model.view === 'day' || model.view === 'resources'}
 						{@const summary = model.daySummary(model.anchor)}
 						<dl class="bg-card mt-3 grid grid-cols-3 divide-x rounded-xl border py-3 text-center">
@@ -454,7 +335,7 @@
 						</dl>
 					{/if}
 					{#if canWrite}<p class="text-muted-foreground mt-2 hidden text-xs md:block">
-							{workspace.t(axis === 'horizontal' ? 'ui.ws.calendar.hint_horizontal' : 'ui.ws.calendar.hint')}
+							{workspace.t(axis.value === 'horizontal' ? 'ui.ws.calendar.hint_horizontal' : 'ui.ws.calendar.hint')}
 						</p>{/if}
 				{/if}
 			</AsyncView>

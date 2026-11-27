@@ -1,34 +1,27 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import ChevronLeft from '@lucide/svelte/icons/chevron-left';
-	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	import CalendarClock from '@lucide/svelte/icons/calendar-clock';
 	import CalendarX from '@lucide/svelte/icons/calendar-x-2';
 	import Phone from '@lucide/svelte/icons/phone';
-	import { Button } from '@clinks/ui/components/ui/button';
 	import PageHeader from '#lib/components/common/PageHeader.svelte';
 	import AsyncView from '#lib/components/common/AsyncView.svelte';
 	import EmptyState from '#lib/components/common/EmptyState.svelte';
 	import MapLink from '#lib/components/common/MapLink.svelte';
 	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
-	import DateJump from '#lib/components/calendar/DateJump.svelte';
+	import CalendarToolbar from '#lib/components/calendar/CalendarToolbar.svelte';
 	import { MyVisitsModel } from '#lib/features/spitex/my-visits.svelte';
 	import { contactName } from '#lib/data/workspace-api';
 	import { formatAddress } from '@clinks/domain/address';
-	import { addDays, isoWeek, minutesBetween, today } from '@clinks/domain/dates';
+	import { isoWeek, minutesBetween, today } from '@clinks/domain/dates';
 	import { page } from '$app/state';
 	import { routeQuery } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
-	const model = new MyVisitsModel(workspace);
-	const week = $derived(isoWeek(model.week));
-	const range = $derived(
-		`${workspace.i18n.format(model.week, { day: 'numeric', month: 'short' })} – ${workspace.i18n.format(addDays(model.week, 6), { day: 'numeric', month: 'short', year: 'numeric' })}`,
-	);
 	// A notification links to its week.
 	const linked = routeQuery(page.url).get('week');
-	if (linked && /^\d{4}-\d{2}-\d{2}$/.test(linked)) model.show(linked);
+	const model = new MyVisitsModel(workspace, linked && /^\d{4}-\d{2}-\d{2}$/.test(linked) ? linked : undefined);
+	const week = $derived(isoWeek(model.week));
 	onMount(() => model.resource.connect());
 </script>
 
@@ -37,25 +30,7 @@
 <ModuleGate module="spitex" permission="spitex.own.read">
 	<PageHeader title={workspace.t('ui.ws.visits.title')} description={workspace.t('ui.ws.visits.text')} />
 
-	<div class="mb-4 flex flex-wrap items-center gap-2">
-		<Button variant="outline" size="sm" onclick={() => model.go(0)}>{workspace.t('ui.ws.visits.this_week')}</Button>
-		<Button
-			variant="ghost"
-			size="icon-sm"
-			onclick={() => model.go(-1)}
-			aria-label={workspace.t('ui.ws.calendar.previous')}
-		>
-			<ChevronLeft class="size-4" />
-		</Button>
-		<Button variant="ghost" size="icon-sm" onclick={() => model.go(1)} aria-label={workspace.t('ui.ws.calendar.next')}>
-			<ChevronRight class="size-4" />
-		</Button>
-		<DateJump value={model.week} units={['week']} initial="week" onpick={(_unit, date) => model.show(date)} />
-		<h2 class="font-semibold" aria-live="polite">
-			{workspace.t('ui.ws.spitex.release.week', { week })}
-			<span class="text-muted-foreground font-normal">· {range}</span>
-		</h2>
-	</div>
+	<CalendarToolbar period={model.period} />
 
 	<AsyncView resource={model.resource} skeleton="detail">
 		{#if !model.released}

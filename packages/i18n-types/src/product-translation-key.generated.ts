@@ -410,6 +410,7 @@ export const productDefaultTranslations = {
 	"ui.ws.calendar.views": "Ansicht",
 	"ui.ws.calendar.week_of": "KW {week}, ab {from}",
 	"ui.ws.calendar.week_short": "KW",
+	"ui.ws.calendar.weekdays": "Wochentage anzeigen",
 	"ui.ws.campaign.approve": "Freigeben",
 	"ui.ws.campaign.approved_by": "Freigegeben von",
 	"ui.ws.campaign.audience": "Zielgruppe (Schlagwort)",
@@ -1677,7 +1678,6 @@ export const productDefaultTranslations = {
 	"ui.ws.visits.pending_text": "Sobald die Woche freigegeben ist, erscheinen deine Einsätze hier. Du bekommst eine Benachrichtigung.",
 	"ui.ws.visits.pending_title": "Der Plan für KW {week} ist noch in Arbeit",
 	"ui.ws.visits.text": "Dein Plan, sobald die Woche freigegeben ist.",
-	"ui.ws.visits.this_week": "Diese Woche",
 	"ui.ws.visits.title": "Meine Einsätze",
 } as const;
 
@@ -2089,6 +2089,7 @@ export const productTranslationKeys = [
 	"ui.ws.calendar.views",
 	"ui.ws.calendar.week_of",
 	"ui.ws.calendar.week_short",
+	"ui.ws.calendar.weekdays",
 	"ui.ws.campaign.approve",
 	"ui.ws.campaign.approved_by",
 	"ui.ws.campaign.audience",
@@ -3356,7 +3357,6 @@ export const productTranslationKeys = [
 	"ui.ws.visits.pending_text",
 	"ui.ws.visits.pending_title",
 	"ui.ws.visits.text",
-	"ui.ws.visits.this_week",
 	"ui.ws.visits.title",
 ] as const;
 

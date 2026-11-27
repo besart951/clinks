@@ -1,19 +1,11 @@
 import { saveTimes, type AppointmentTimes } from '../calendar/retime.ts';
 import { toast } from 'svelte-sonner';
-import {
-	addDays,
-	atTime,
-	minutesToTime,
-	today,
-	toCalendarDate,
-	weekDays,
-	startOfWeek,
-	minutesBetween,
-} from '@clinks/domain/dates';
+import { addDays, atTime, minutesToTime, toCalendarDate, startOfWeek, minutesBetween } from '@clinks/domain/dates';
 import type { UserId } from '@clinks/domain/ids';
 import { planAssignments, withinArrivalWindow } from '@clinks/domain/scheduling';
 import type { Appointment, CalendarDate, Contact, WeekRelease } from '@clinks/domain/types';
 import { Resource } from '../../state/resource.svelte.ts';
+import { CalendarPeriod } from '../calendar/calendar-period.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 import type { Person } from '../collaboration/people.svelte.ts';
 
@@ -27,15 +19,27 @@ export interface PlanningData {
 /** The daily dispatch board for home-care visits. */
 export class PlanningModel {
 	readonly resource: Resource<PlanningData>;
-	date = $state<CalendarDate>(today());
+	/** One day on show; the whole week is loaded (the week strip, the release). */
+	readonly period: CalendarPeriod;
 	/** Staff columns hidden from the plan; their visits stay assigned. */
 	hiddenPeople = $state<UserId[]>([]);
 	#workspace: Workspace;
 
-	constructor(workspace: Workspace) {
+	#loadedWeek: CalendarDate | null = null;
+
+	constructor(workspace: Workspace, anchor?: CalendarDate) {
 		this.#workspace = workspace;
+		this.period = new CalendarPeriod({
+			units: ['day'],
+			jumps: ['day', 'week'],
+			anchor,
+			weekdays: { key: 'spitex', preferences: workspace.platform.preferences },
+			onchange: () => {
+				if (this.#loadedWeek !== startOfWeek(this.date)) void this.resource.reload(true);
+			},
+		});
 		this.resource = new Resource(workspace.db, ['appointments', 'contacts', 'weekReleases'], async () => {
-			const from = startOfWeek(this.date);
+			const from = (this.#loadedWeek = startOfWeek(this.date));
 			const to = addDays(from, 6);
 			const [visits, contacts, releases] = await Promise.all([
 				workspace.api.appointments.list(
@@ -50,6 +54,10 @@ export class PlanningModel {
 				release: releases[0] ?? null,
 			};
 		});
+	}
+
+	get date(): CalendarDate {
+		return this.period.anchor;
 	}
 
 	get day(): Appointment[] {
@@ -114,8 +122,9 @@ export class PlanningModel {
 			: [...this.hiddenPeople, id];
 	}
 
+	/** The week strip: the week of the day on show, without the weekdays hidden here. */
 	get week(): CalendarDate[] {
-		return weekDays(startOfWeek(this.date), 7);
+		return this.period.withoutHidden(this.period.week);
 	}
 
 	minutesFor(userId: UserId, date: CalendarDate): number {
@@ -131,9 +140,7 @@ export class PlanningModel {
 	}
 
 	setDate(date: CalendarDate) {
-		const reload = startOfWeek(date) !== startOfWeek(this.date);
-		this.date = date;
-		if (reload) void this.resource.reload(true);
+		this.period.setAnchor(date);
 	}
 
 	async assign(visit: Appointment, assigneeId: UserId | null, minutes: number | null) {

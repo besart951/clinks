@@ -1,14 +1,6 @@
 import { saveTimes, type AppointmentTimes } from './retime.ts';
-import {
-	addDays,
-	addMonths,
-	isoWeekday,
-	minutesBetween,
-	monthGrid,
-	startOfWeek,
-	today,
-	weekDays,
-} from '@clinks/domain/dates';
+import { addDays, minutesBetween, startOfWeek } from '@clinks/domain/dates';
+import { CalendarPeriod } from './calendar-period.svelte.ts';
 import type { AppointmentId, UserId } from '@clinks/domain/ids';
 import type { Appointment, AppointmentKind, CalendarDate, Contact } from '@clinks/domain/types';
 import { Resource } from '../../state/resource.svelte.ts';
@@ -24,22 +16,43 @@ export interface CalendarData {
 	contacts: Map<string, Contact>;
 }
 
-/** Calendar state: which range is shown, whose appointments, and moving them around. */
+/** Calendar state: which range is shown (through the shared period), whose appointments, and moving them around. */
 export class CalendarModel {
 	readonly resource: Resource<CalendarData>;
-	view = $state<CalendarView>('week');
-	anchor = $state<CalendarDate>(today());
+	readonly period: CalendarPeriod;
 	hiddenPeople = $state<UserId[]>([]);
 	hiddenKinds = $state<AppointmentKind[]>([]);
 	showOpen = $state(true);
-	/** ISO weekdays (1 = Monday … 7 = Sunday) left out of the week and month view, e.g. the weekend. */
-	hiddenWeekdays = $state<number[]>([]);
+	/** The team view: one day, a column per person. */
+	#team = $state(false);
+	/** The days loaded: the whole week in day and team view, so another day of it needs nothing new. */
+	#loaded: readonly [CalendarDate, CalendarDate] | null = null;
+	readonly #onview: ((view: CalendarView) => void) | undefined;
 	#workspace: Workspace;
 
-	constructor(workspace: Workspace) {
+	constructor(
+		workspace: Workspace,
+		start: { view?: CalendarView; anchor?: CalendarDate; onview?: (view: CalendarView) => void } = {},
+	) {
 		this.#workspace = workspace;
+		this.#onview = start.onview;
+		this.#team = start.view === 'resources';
+		this.period = new CalendarPeriod({
+			units: ['day', 'week', 'month'],
+			unit: start.view === 'resources' ? 'day' : (start.view ?? 'week'),
+			anchor: start.anchor,
+			weekdays: { key: 'calendar', preferences: workspace.platform.preferences },
+			onunit: (unit) => {
+				if (unit !== 'day') this.#team = false;
+				this.#onview?.(this.view);
+			},
+			onchange: () => {
+				const [from, to] = this.loadedRange;
+				if (!this.#loaded || from < this.#loaded[0] || to > this.#loaded[1]) void this.resource.reload(true);
+			},
+		});
 		this.resource = new Resource(workspace.db, ['appointments', 'contacts'], async () => {
-			const [from, to] = this.loadedRange;
+			const [from, to] = (this.#loaded = this.loadedRange);
 			const [appointments, contacts] = await Promise.all([
 				workspace.api.appointments.list(
 					(row) => row.start.slice(0, 10) >= addDays(from, -1) && row.start.slice(0, 10) <= addDays(to, 1),
@@ -50,36 +63,26 @@ export class CalendarModel {
 		});
 	}
 
-	get days(): CalendarDate[] {
-		if (this.view === 'month') return monthGrid(this.anchor);
-		if (this.view === 'week') return weekDays(startOfWeek(this.anchor), 7);
-		return [this.anchor];
+	get view(): CalendarView {
+		return this.#team && this.period.unit === 'day' ? 'resources' : this.period.unit;
 	}
 
-	/** The days drawn: in week and month view without the hidden weekdays. */
-	get shownDays(): CalendarDate[] {
-		if (this.view !== 'week' && this.view !== 'month') return this.days;
-		return this.days.filter((day) => !this.hiddenWeekdays.includes(isoWeekday(day)));
+	setView(view: CalendarView) {
+		const unit = view === 'resources' ? 'day' : view;
+		this.#team = view === 'resources';
+		// A new unit reports itself through the period; day ↔ team view keeps the unit.
+		if (unit === this.period.unit) this.#onview?.(this.view);
+		else this.period.setUnit(unit);
 	}
 
-	/** Hides a weekday; at least one stays. */
-	hideWeekday(weekday: number) {
-		if (this.hiddenWeekdays.includes(weekday) || this.hiddenWeekdays.length >= 6) return;
-		this.hiddenWeekdays = [...this.hiddenWeekdays, weekday].sort();
+	get anchor(): CalendarDate {
+		return this.period.anchor;
 	}
 
-	get range(): [CalendarDate, CalendarDate] {
-		const days = this.days;
-		return [days[0], days[days.length - 1]];
-	}
-
-	/** What is loaded: the whole week in day and team view, so moving to another day of it is instant. */
-	get loadedRange(): [CalendarDate, CalendarDate] {
-		if (this.view === 'day' || this.view === 'resources') {
-			const monday = startOfWeek(this.anchor);
-			return [monday, addDays(monday, 6)];
-		}
-		return this.range;
+	get loadedRange(): readonly [CalendarDate, CalendarDate] {
+		if (this.period.unit !== 'day') return this.period.range;
+		const monday = startOfWeek(this.period.anchor);
+		return [monday, addDays(monday, 6)];
 	}
 
 	/** At a glance for one day: appointments, booked time and visits nobody has yet. */
@@ -106,26 +109,6 @@ export class CalendarModel {
 				new Date(row.start).toDateString() === new Date(`${date}T12:00:00`).toDateString() &&
 				(assigneeId === undefined || row.assigneeId === assigneeId),
 		);
-	}
-
-	go(direction: -1 | 0 | 1) {
-		if (direction === 0) this.anchor = today();
-		else if (this.view === 'month') this.anchor = addMonths(this.anchor, direction);
-		else this.anchor = addDays(this.anchor, direction * (this.view === 'week' ? 7 : 1));
-		void this.resource.reload(true);
-	}
-
-	setView(view: CalendarView) {
-		this.view = view;
-		void this.resource.reload(true);
-	}
-
-	setAnchor(date: CalendarDate) {
-		const [loadedFrom, loadedTo] = this.loadedRange;
-		this.anchor = date;
-		// Another day of the loaded week needs nothing new; a new month grid or week does.
-		const [from, to] = this.loadedRange;
-		if (from < loadedFrom || to > loadedTo) void this.resource.reload(true);
 	}
 
 	togglePerson(id: UserId) {
