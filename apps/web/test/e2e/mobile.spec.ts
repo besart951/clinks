@@ -122,6 +122,7 @@ test('fits every page into a phone screen, with touch-sized targets', async ({ b
 		'/documents',
 		'/physio',
 		'/finance',
+		'/finance/payments',
 		'/finance/expenses',
 		'/finance/reports',
 		'/finance/invoices/new',

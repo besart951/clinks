@@ -5,6 +5,7 @@ import { generateHOTP } from '@oslojs/otp';
 import { decodeBase32IgnorePadding } from '@oslojs/encoding';
 import { createApp } from '../../src/app.ts';
 import { MemoryMailer } from '../../src/mailer.ts';
+import { MailWorker } from '../../src/services/mail-worker.ts';
 import { RateLimiter } from '../../src/rate-limit.ts';
 import { TokenService } from '../../src/tokens.ts';
 import { SecretBox } from '../../src/crypto.ts';
@@ -35,6 +36,8 @@ export async function startApi(billing?: Billing, options: { allowInternalStorag
 		services,
 		config: { WEB_ORIGIN: 'http://web.test', COOKIE_SECURE: true, TRUST_PROXY: true },
 	});
+	// The outbox is sent after every request, so tests see the mails a call caused right after it.
+	const mailWorker = new MailWorker(services, { ratePerSecond: 10_000 });
 	let nextIp = 1;
 
 	/** A browser: keeps the refresh cookie between calls and has its own address. */
@@ -67,6 +70,7 @@ export async function startApi(billing?: Billing, options: { allowInternalStorag
 					headers,
 					body: options.body === undefined ? undefined : JSON.stringify(options.body),
 				});
+				await mailWorker.drain();
 				const setCookie = response.headers.get('set-cookie');
 				if (setCookie) cookie = setCookie.includes('Max-Age=0') ? null : setCookie.split(';')[0];
 				const text = await response.text();
@@ -114,6 +118,7 @@ export async function startApi(billing?: Billing, options: { allowInternalStorag
 		owner,
 		tokens,
 		mailer,
+		mailWorker,
 		clock,
 		client,
 		signedUp,

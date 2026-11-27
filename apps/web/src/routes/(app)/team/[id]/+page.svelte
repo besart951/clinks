@@ -74,8 +74,8 @@
 
 	<AsyncView resource={model.resource} skeleton="detail">
 		<div class="grid grid-cols-[minmax(0,1fr)] items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-			<div class="grid min-w-0 gap-6">
-				<section class="bg-card grid gap-3 rounded-xl border p-5 shadow-[var(--shadow-sm)]">
+			<div class="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-6">
+				<section class="bg-card grid grid-cols-[minmax(0,1fr)] gap-3 rounded-xl border p-5 shadow-[var(--shadow-sm)]">
 					<header class="flex flex-wrap items-center gap-2">
 						<h2 class="text-sm font-semibold">{workspace.t('ui.ws.person.appointments')}</h2>
 						<span class="text-muted-foreground text-sm">{weekLabel()}</span>
@@ -132,7 +132,7 @@
 					{/if}
 				</section>
 				{#if workspace.session.can('planner.read') && workspace.session.hasModule('planner')}
-					<section class="bg-card grid gap-2 rounded-xl border p-5 shadow-[var(--shadow-sm)]">
+					<section class="bg-card grid grid-cols-[minmax(0,1fr)] gap-2 rounded-xl border p-5 shadow-[var(--shadow-sm)]">
 						<h2 class="text-sm font-semibold">
 							{workspace.t('ui.ws.person.tasks')}
 							<span class="text-muted-foreground font-normal tabular-nums">
@@ -145,7 +145,7 @@
 								href={href(`/planner/${task.id}`)}
 							>
 								<span class="bg-input size-2 shrink-0 rounded-full" aria-hidden="true"></span>
-								<span class="flex-1 truncate">{task.title}</span>
+								<span class="min-w-0 flex-1 truncate">{task.title}</span>
 								<span class="text-muted-foreground text-xs">{workspace.t(`ui.ws.task.status.${task.status}`)}</span>
 								{#if task.dueDate}<span class="text-muted-foreground text-xs tabular-nums">
 										{workspace.i18n.date(task.dueDate)}

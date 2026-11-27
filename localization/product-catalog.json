@@ -5893,6 +5893,30 @@
       "ui.ws.audit.bank_import.created": {
         "de-CH": "hat eine Bankdatei importiert",
         "en-US": "imported a bank file"
+      },
+      "mail.invoice.open_link": {
+        "de-CH": "Dokument öffnen",
+        "en-US": "Open the document"
+      },
+      "mail.plan.open": {
+        "de-CH": "Einsätze ansehen",
+        "en-US": "See your visits"
+      },
+      "ui.ws.invoice.delivery.queued": {
+        "de-CH": "Wird gesendet …",
+        "en-US": "Sending …"
+      },
+      "ui.ws.invoice.delivery.bounced": {
+        "de-CH": "Unzustellbar: Die Adresse hat die Mail abgewiesen.",
+        "en-US": "Undeliverable: the address refused the mail."
+      },
+      "ui.ws.invoice.delivery.failed": {
+        "de-CH": "Nicht gesendet: Der Mailserver hat die Mail abgelehnt.",
+        "en-US": "Not sent: the mail server refused it."
+      },
+      "ui.ws.invoice.delivery.suppressed": {
+        "de-CH": "Nicht gesendet: Die Adresse ist gesperrt (abgemeldet oder unzustellbar).",
+        "en-US": "Not sent: the address is blocked (unsubscribed or undeliverable)."
       }
     }
   }

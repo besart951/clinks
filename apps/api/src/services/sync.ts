@@ -43,7 +43,7 @@ export class SyncService {
 	): Promise<{ applied: number }> {
 		const tenantId = claims.tenant_id;
 		if (!tenantId) throw forbidden();
-		const plan = await inScope(this.#services.db, { tenantId, userId: claims.sub }, async (tx) => {
+		await inScope(this.#services.db, { tenantId, userId: claims.sub }, async (tx) => {
 			const deferred: { table: SyncedTableName; fields: Fields }[] = [];
 			const role = await activeRole(tx, tenantId, claims.sub);
 			if (!role) throw forbidden();
@@ -80,14 +80,12 @@ export class SyncService {
 			}
 			for (const { table, fields } of deferred) await checkReferences(tx, tenantId, table, fields);
 			await plan.record(tx);
-			return plan;
 		}).catch((error: unknown) => {
 			const code = (error as { code?: string }).code;
 			if (code === '23503') throw new ApiError(409, 'error.conflict');
 			if (code === '23502' || code === '23514' || code?.startsWith('22')) throw new ApiError(400, 'error.validation');
 			throw error;
 		});
-		await plan.send();
 		return { applied: request.ops.length };
 	}
 

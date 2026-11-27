@@ -107,6 +107,8 @@ export class MockInvoiceSends {
 			linkExpiresAt: token ? new Date(now.getTime() + linkLifetimeDays * 86_400_000).toISOString() : null,
 			openedAt: null,
 			openCount: 0,
+			// The demo has no mail server: handed over at once.
+			delivery: 'sent',
 			token,
 			attempts: 0,
 		};

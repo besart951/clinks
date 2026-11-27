@@ -43,6 +43,14 @@ export class InvoiceSendModel {
 		if (sends) this.sends = sends;
 	}
 
+	/** The outbox sends within seconds; the log follows until nothing is waiting any more (at most half a minute). */
+	async #follow() {
+		for (let round = 0; round < 10 && this.sends?.some((send) => send.delivery === 'queued'); round++) {
+			await new Promise((resolve) => setTimeout(resolve, 3000));
+			await this.load();
+		}
+	}
+
 	show(contact: Contact | null, reminder: ReminderPreview | null = null) {
 		this.reminder = reminder;
 		const tenant = this.#workspace.session.tenant;
@@ -72,6 +80,7 @@ export class InvoiceSendModel {
 			if (!sent) return;
 			this.open = false;
 			this.sends = [sent, ...(this.sends ?? [])];
+			void this.#follow();
 		} finally {
 			this.busy = false;
 		}

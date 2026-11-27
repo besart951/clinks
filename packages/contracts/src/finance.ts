@@ -23,6 +23,7 @@ export const invoiceSendDto = z.object({
 	linkExpiresAt: z.string().nullable(),
 	openedAt: z.string().nullable(),
 	openCount: z.number().int(),
+	delivery: z.enum(['queued', 'sent', 'bounced', 'failed', 'suppressed']),
 });
 
 /** What a secure link shows before the postcode: who sent what, and until when it works. */

@@ -2,7 +2,11 @@ import * as finance from '@clinks/contracts/finance';
 import { z } from 'zod';
 import { json, route, type RouteDeps, type Router } from './helpers.ts';
 
-export function registerFinanceRoutes(app: Router, me: Router, { invoices, bankImports, caller }: RouteDeps) {
+export function registerFinanceRoutes(
+	app: Router,
+	me: Router,
+	{ invoices, invoiceLinks, bankImports, caller }: RouteDeps,
+) {
 	const params = z.object({ id: z.uuid() });
 	const link = z.object({ token: z.string().min(16).max(200) });
 
@@ -176,7 +180,7 @@ export function registerFinanceRoutes(app: Router, me: Router, { invoices, bankI
 		}),
 		async (c) => {
 			c.header('Cache-Control', 'no-store');
-			return c.json(await invoices.linkDetails(c.req.valid('param').token), 200);
+			return c.json(await invoiceLinks.details(c.req.valid('param').token), 200);
 		},
 	);
 
@@ -194,7 +198,7 @@ export function registerFinanceRoutes(app: Router, me: Router, { invoices, bankI
 		async (c) => {
 			c.header('Cache-Control', 'no-store');
 			const { token } = c.req.valid('param');
-			return c.json(await invoices.openLink(token, c.req.valid('json').postcode, caller(c)), 200);
+			return c.json(await invoiceLinks.open(token, c.req.valid('json').postcode, caller(c)), 200);
 		},
 	);
 }

@@ -5,21 +5,14 @@ import type { Appointment, Permission, RoleKind } from '@clinks/domain/types';
 import type { SyncedTableName } from '@clinks/sync-schema/tables';
 import { forbidden } from '../errors.ts';
 import type { Services } from './context.ts';
-import {
-	changeWindow,
-	recordPlanNotices,
-	sendPlanMails,
-	weekAssignees,
-	type PlanMail,
-	type PlanNotice,
-} from './plan-notices.ts';
+import { changeWindow, recordPlanNotices, weekAssignees, type PlanNotice } from './plan-notices.ts';
 
 type Fields = { [field: string]: unknown };
 type Visit = Pick<Appointment, 'kind' | 'assigneeId' | 'start' | 'end' | 'status' | 'location' | 'contactId'>;
 
 /**
  * The Spitex plan's rules for one sync upload: who may change visits and releases, and whom a change concerns.
- * The sync service calls it around each write; it collects the notices and sends them once the upload is saved.
+ * The sync service calls it around each write; it collects the notices and records them with the upload.
  */
 export class PlanWrites {
 	readonly #services: Services;
@@ -29,7 +22,6 @@ export class PlanWrites {
 	readonly #planner: boolean;
 	readonly #seesPlan: boolean;
 	readonly #notices: PlanNotice[] = [];
-	#mails: PlanMail[] = [];
 
 	constructor(
 		services: Services,
@@ -66,19 +58,9 @@ export class PlanWrites {
 		}
 	}
 
-	/** In the upload's transaction: the in-app notices. */
+	/** In the upload's transaction: the in-app notices and the mails. */
 	async record(tx: Tx) {
-		this.#mails = await recordPlanNotices(
-			tx,
-			this.#services,
-			{ tenantId: this.#tenantId, userId: this.#userId },
-			this.#notices,
-		);
-	}
-
-	/** After the commit: the mails. */
-	send() {
-		return sendPlanMails(this.#services, this.#mails);
+		await recordPlanNotices(tx, this.#services, { tenantId: this.#tenantId, userId: this.#userId }, this.#notices);
 	}
 
 	/** A release or its withdrawal concerns everyone with visits in that week. */

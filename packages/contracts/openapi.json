@@ -7777,6 +7777,16 @@
 										},
 										"openCount": {
 											"type": "integer"
+										},
+										"delivery": {
+											"type": "string",
+											"enum": [
+												"queued",
+												"sent",
+												"bounced",
+												"failed",
+												"suppressed"
+											]
 										}
 									},
 									"required": [
@@ -7792,7 +7802,8 @@
 										"sentBy",
 										"linkExpiresAt",
 										"openedAt",
-										"openCount"
+										"openCount",
+										"delivery"
 									]
 								}
 							}
@@ -8025,6 +8036,16 @@
 										},
 										"openCount": {
 											"type": "integer"
+										},
+										"delivery": {
+											"type": "string",
+											"enum": [
+												"queued",
+												"sent",
+												"bounced",
+												"failed",
+												"suppressed"
+											]
 										}
 									},
 									"required": [
@@ -8040,7 +8061,8 @@
 										"sentBy",
 										"linkExpiresAt",
 										"openedAt",
-										"openCount"
+										"openCount",
+										"delivery"
 									]
 								}
 							}
@@ -8247,6 +8269,16 @@
 											},
 											"openCount": {
 												"type": "integer"
+											},
+											"delivery": {
+												"type": "string",
+												"enum": [
+													"queued",
+													"sent",
+													"bounced",
+													"failed",
+													"suppressed"
+												]
 											}
 										},
 										"required": [
@@ -8262,7 +8294,8 @@
 											"sentBy",
 											"linkExpiresAt",
 											"openedAt",
-											"openCount"
+											"openCount",
+											"delivery"
 										]
 									}
 								}

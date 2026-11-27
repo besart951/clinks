@@ -1,5 +1,5 @@
 import type { BankEntryView, BankImportInput, BankImportView } from '@clinks/contracts/finance';
-import { inScope, type Tx } from '@clinks/db/scope';
+import type { Tx } from '@clinks/db/scope';
 import { sql } from 'kysely';
 import { CamtError, matchCredit, parseCamt, suggestInvoices, type BankCredit } from '@clinks/domain/camt';
 import { contactName } from '@clinks/domain/contacts';
@@ -7,14 +7,12 @@ import { invoiceTotals } from '@clinks/domain/money';
 import type { Contact, Invoice, Payment } from '@clinks/domain/types';
 import { createHash } from 'node:crypto';
 import { uuid } from '../crypto.ts';
-import { ApiError, forbidden } from '../errors.ts';
+import { ApiError } from '../errors.ts';
 import type { AccessClaims } from '../tokens.ts';
 import { audit } from './audit.ts';
 import type { Caller, Services } from './context.ts';
 import { archiveServerFile } from './files.ts';
-import { requirePermission } from './permissions.ts';
-
-type Scope = { tenantId: string; userId: string };
+import { withPermission, type MemberScope } from './permissions.ts';
 
 /** Folder the bank files go into, per workspace language. */
 const folderName = { 'de-CH': 'Zahlungseingänge', 'en-US': 'Payments received' } as const;
@@ -31,7 +29,7 @@ export class BankImportService {
 	}
 
 	import(claims: AccessClaims, input: BankImportInput, caller: Caller): Promise<BankImportView> {
-		return this.#scoped(claims, 'finance.write', async (tx, scope) => {
+		return withPermission(this.#services.db, claims, 'finance.write', async (tx, scope) => {
 			const bytes = new TextEncoder().encode(input.content);
 			const sha256 = createHash('sha256').update(bytes).digest('hex');
 			const known = await tx.selectFrom('bankImports').select('id').where('sha256', '=', sha256).executeTakeFirst();
@@ -112,7 +110,7 @@ export class BankImportService {
 	}
 
 	imports(claims: AccessClaims): Promise<BankImportView[]> {
-		return this.#scoped(claims, 'finance.read', async (tx) => {
+		return withPermission(this.#services.db, claims, 'finance.read', async (tx) => {
 			const rows = await tx.selectFrom('bankImports').select('id').orderBy('importedAt', 'desc').limit(20).execute();
 			return Promise.all(rows.map(async (row) => ({ ...(await this.#importView(tx, row.id)), repeated: false })));
 		});
@@ -123,7 +121,7 @@ export class BankImportService {
 	 * and their credits.
 	 */
 	exportAll(claims: AccessClaims) {
-		return this.#scoped(claims, 'finance.read', async (tx) => ({
+		return withPermission(this.#services.db, claims, 'finance.read', async (tx) => ({
 			invoiceSends: await tx.selectFrom('invoiceSends').selectAll().orderBy('sentAt').execute(),
 			bankImports: await tx.selectFrom('bankImports').selectAll().orderBy('importedAt').execute(),
 			bankEntries: await tx.selectFrom('bankEntries').selectAll().orderBy('bookedOn').execute(),
@@ -132,7 +130,7 @@ export class BankImportService {
 
 	/** Credits still to assign, each with up to three invoices it may pay. */
 	openEntries(claims: AccessClaims): Promise<BankEntryView[]> {
-		return this.#scoped(claims, 'finance.read', async (tx) => {
+		return withPermission(this.#services.db, claims, 'finance.read', async (tx) => {
 			const entries = await tx
 				.selectFrom('bankEntries')
 				.selectAll()
@@ -161,7 +159,7 @@ export class BankImportService {
 
 	/** Books an open credit on an invoice chosen by hand. */
 	assign(claims: AccessClaims, entryId: string, invoiceId: string, caller: Caller) {
-		return this.#scoped(claims, 'finance.write', async (tx, scope) => {
+		return withPermission(this.#services.db, claims, 'finance.write', async (tx, scope) => {
 			const entry = await this.#openEntry(tx, entryId);
 			const invoice = await tx.selectFrom('invoices').select(['status']).where('id', '=', invoiceId).executeTakeFirst();
 			if (!invoice) throw new ApiError(404, 'error.ws.not_found');
@@ -174,7 +172,7 @@ export class BankImportService {
 
 	/** Leaves a credit that pays no invoice (a refund, a transfer) out of the list. */
 	ignore(claims: AccessClaims, entryId: string, caller: Caller) {
-		return this.#scoped(claims, 'finance.write', async (tx, scope) => {
+		return withPermission(this.#services.db, claims, 'finance.write', async (tx, scope) => {
 			await this.#openEntry(tx, entryId);
 			await tx.updateTable('bankEntries').set({ status: 'ignored' }).where('id', '=', entryId).execute();
 			await audit(
@@ -192,7 +190,14 @@ export class BankImportService {
 		return entry;
 	}
 
-	async #insertEntry(tx: Tx, scope: Scope, importId: string, id: string, credit: BankCredit, invoiceId: string | null) {
+	async #insertEntry(
+		tx: Tx,
+		scope: MemberScope,
+		importId: string,
+		id: string,
+		credit: BankCredit,
+		invoiceId: string | null,
+	) {
 		await tx
 			.insertInto('bankEntries')
 			.values({
@@ -213,7 +218,7 @@ export class BankImportService {
 	}
 
 	/** Appends the payment to the invoice (payments stay open to change after issue, see migration 0018). */
-	async #book(tx: Tx, scope: Scope, caller: Caller, invoiceId: string, payment: Payment) {
+	async #book(tx: Tx, scope: MemberScope, caller: Caller, invoiceId: string, payment: Payment) {
 		await tx
 			.updateTable('invoices')
 			.set((eb) => ({
@@ -263,19 +268,6 @@ export class BankImportService {
 			booked: row.booked,
 			duplicates: row.duplicates,
 		};
-	}
-
-	#scoped<T>(
-		claims: AccessClaims,
-		permission: 'finance.read' | 'finance.write',
-		work: (tx: Tx, scope: Scope) => Promise<T>,
-	) {
-		if (!claims.tenant_id) throw forbidden();
-		const scope = { tenantId: claims.tenant_id, userId: claims.sub };
-		return inScope(this.#services.db, scope, async (tx) => {
-			await requirePermission(tx, scope.tenantId, scope.userId, permission);
-			return work(tx, scope);
-		});
 	}
 }
 

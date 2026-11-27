@@ -13,6 +13,7 @@ import type { BillingService } from '../services/billing.ts';
 import type { Caller, Services } from '../services/context.ts';
 import type { FileService } from '../services/files.ts';
 import type { InvoiceService } from '../services/invoices.ts';
+import type { InvoiceLinks } from '../services/invoice-links.ts';
 import type { OpenedSession, SessionService } from '../services/sessions.ts';
 import type { SettingsService } from '../services/settings.ts';
 import type { StorageService } from '../services/storage.ts';
@@ -36,6 +37,7 @@ export interface RouteDeps {
 	billing: BillingService;
 	files: FileService;
 	invoices: InvoiceService;
+	invoiceLinks: InvoiceLinks;
 	bankImports: BankImportService;
 	sync: SyncService;
 	caller: (c: Context) => Caller;

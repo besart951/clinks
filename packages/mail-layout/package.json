@@ -1,0 +1,19 @@
+{
+  "name": "@clinks/mail-layout",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "The HTML and text form of every mail a workspace sends: one accessible layout, no tracking. Pure functions for the API and the demo.",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "check": "tsc --noEmit -p .",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.6",
+    "typescript": "6.0.3",
+    "vitest": "5.1.1"
+  }
+}
