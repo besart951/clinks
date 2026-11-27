@@ -18,11 +18,11 @@ jobs:
     runs-on: ${{ github.event_name == 'push' && 'clinks-zep' || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v4 # version from packageManager in package.json
       - uses: actions/setup-node@v6
         with:
           node-version-file: .node-version
-          cache: pnpm
+          package-manager-cache: false
+      - uses: pnpm/action-setup@v4
       - run: pnpm install --frozen-lockfile
       - run: pnpm verify
       - run: pnpm audit --prod --audit-level=high
@@ -45,11 +45,11 @@ jobs:
           --health-retries 10
     steps:
       - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v6
         with:
           node-version-file: .node-version
-          cache: pnpm
+          package-manager-cache: false
+      - uses: pnpm/action-setup@v4
       - run: pnpm install --frozen-lockfile
       # The API's login role (no owner, no superuser), as in the dev init script.
       - run: psql postgres://clinks:clinks-dev@localhost:5432/clinks -v ON_ERROR_STOP=1 -f infra/postgres/init/02-api-role.sql
@@ -60,11 +60,11 @@ jobs:
     runs-on: ${{ github.event_name == 'push' && 'clinks-zep' || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v6
         with:
           node-version-file: .node-version
-          cache: pnpm
+          package-manager-cache: false
+      - uses: pnpm/action-setup@v4
       - run: pnpm install --frozen-lockfile
       - if: github.event_name == 'push'
         run: pnpm --filter @clinks/web exec playwright install --with-deps chrome
@@ -88,11 +88,11 @@ jobs:
       WEB_ORIGIN: http://localhost:5176
     steps:
       - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v6
         with:
           node-version-file: .node-version
-          cache: pnpm
+          package-manager-cache: false
+      - uses: pnpm/action-setup@v4
       - run: pnpm install --frozen-lockfile
       - if: github.event_name == 'push'
         run: pnpm --filter @clinks/web exec playwright install --with-deps chrome
