@@ -34,6 +34,7 @@ import { NewsletterConsents } from './services/newsletter-consents.ts';
 import { Campaigns } from './services/campaigns.ts';
 import { Unsubscribe } from './services/unsubscribe.ts';
 import { AppointmentMailService } from './services/appointment-mail.ts';
+import { MailExport } from './services/mail-export.ts';
 import { registerNewsletterRoutes } from './routes/newsletter.ts';
 import { InvoiceService } from './services/invoices.ts';
 import { InvoiceLinks } from './services/invoice-links.ts';
@@ -70,6 +71,7 @@ export function createApp({ services, config }: AppOptions) {
 		campaigns: new Campaigns(services),
 		unsubscribe: new Unsubscribe(services),
 		appointmentMail: new AppointmentMailService(services),
+		mailExport: new MailExport(services),
 		sync: new SyncService(services),
 		caller: (c) => callerOf(c, config.TRUST_PROXY),
 		deliver: (c, opened) => deliverSession(c, opened, config.COOKIE_SECURE),

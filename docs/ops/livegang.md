@@ -129,6 +129,16 @@ ist nichts weiter einzurichten.
 - [ ] Sammelpostfach für `in.clinks.ch`: MX auf den Mailanbieter, alle Adressen der Domain in ein Postfach
       (Catch-all), Zugang per IMAP in `INBOUND_IMAP_URL`. Prüfen, dass zugestellte Mails einen `Delivered-To`- oder
       `X-Original-To`-Header tragen (sonst erkennt CLinks BCC-Kopien nicht).
+- [ ] `API_ORIGIN=https://api.clinks.ch` setzen: Mail-Apps rufen den Abmeldelink der Newsletter direkt dort auf
+      (RFC 8058, «Abmelden» oben in Gmail und Apple Mail).
+- [ ] `MAIL_WORKER=true` auf **genau einer** API-Instanz, auf allen weiteren `false`. Sie verschickt die Warteschlange,
+      plant Kampagnen und Terminerinnerungen ein und holt das Sammelpostfach ab. `monitor.sh` meldet, wenn niemand
+      versendet oder mehr als 1 % der Mails einer Stunde scheitern.
+- [ ] `MAIL_RATE_PER_SECOND` (Standard 5) und `MAIL_DAILY_LIMIT` (Standard 500 persönliche Mails pro Arbeitsbereich
+      und Tag) an die Limiten des Versanddienstes und der Pläne anpassen.
+- [ ] Probe: eine eigene Testdomain in Einstellungen › E-Mail eintragen, die angezeigten Einträge setzen, «Prüfen»,
+      eine Rechnung, eine Terminbestätigung und eine Kampagne an ein Gmail- und ein Outlook-Postfach schicken. In
+      Gmail «Original anzeigen»: SPF, DKIM und DMARC «PASS», `List-Unsubscribe` vorhanden.
 
 ## 6 · Konfiguration und Deployment
 
@@ -192,7 +202,10 @@ pnpm ops:check -- --config-dir /etc/clinks
 
 - [ ] Auftragsverarbeitungsverträge mit Infomaniak und Stripe abschliessen; Verzeichnis der
       Bearbeitungstätigkeiten (revDSG) anlegen.
-- [ ] Aufbewahrungsfristen pro Dokumenttyp festlegen und Object Lock danach ausrichten.
+- [ ] Aufbewahrungsfristen pro Dokumenttyp festlegen und Object Lock danach ausrichten. Mail: Inhalte im Postausgang
+      werden nach 90 Tagen gelöscht, der Versandnachweis nach zwei Jahren; Einwilligungen bleiben, solange der
+      Kontakt besteht (Nachweispflicht).
+- [ ] Einwilligungstexte der Newsletter-Formulare und die Texte der Terminmails rechtlich prüfen lassen.
 - [ ] **Externer Penetrationstest** (siehe [security-review.md](../security-review.md) – die interne Prüfung ist
       gemacht).
 - [ ] Pilot-Mandant mit echten Benutzern einrichten, Einladungen verschicken, eine Woche begleiten.

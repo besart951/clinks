@@ -85,6 +85,9 @@ export const products: readonly Product[] = [
 					'spitex.read',
 					'spitex.write',
 					'spitex.release',
+					'mail.read',
+					'mail.write',
+					'mail.business',
 				],
 			},
 			{
@@ -117,7 +120,17 @@ export const products: readonly Product[] = [
 				key: 'physio.reception',
 				product: 'physio',
 				name: { 'de-CH': 'Physio-Empfang', 'en-US': 'Reception' },
-				permissions: ['contacts.read', 'contacts.write', 'calendar.read', 'calendar.write', 'documents.read'],
+				// The desk writes from the practice's address (info@) too; mail rights apply where Mail is booked.
+				permissions: [
+					'contacts.read',
+					'contacts.write',
+					'calendar.read',
+					'calendar.write',
+					'documents.read',
+					'mail.read',
+					'mail.write',
+					'mail.business',
+				],
 			},
 		],
 	},

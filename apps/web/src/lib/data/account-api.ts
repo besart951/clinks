@@ -27,6 +27,7 @@ import {
 	MockApiError,
 	stamp,
 	type MockInvoiceSend,
+	type MockNewsletterRequest,
 	type WorkspaceCache,
 	type Snapshot,
 	type TableName,
@@ -767,6 +768,11 @@ export class AccountApi {
 				result.invoiceSends = (result.invoiceSends as MockInvoiceSend[]).map(
 					({ token: _token, attempts: _attempts, ...send }) => send,
 				);
+			// A sign-up's confirmation token is the person's, like an invoice link.
+			if (result.newsletterRequests)
+				result.newsletterRequests = (result.newsletterRequests as MockNewsletterRequest[]).map(
+					({ token: _token, ...request }) => request,
+				);
 			// Access keys stay out of exports.
 			if (result.storageSettings)
 				result.storageSettings = (result.storageSettings as StorageSettings[]).map(storageView);
@@ -799,7 +805,12 @@ export class AccountApi {
 				'users',
 				this.#db.table('users').filter((row) => row.id !== userId),
 			);
-		}, ['users', 'memberships']);
+			// Personal senders go with the account (the signature is on the user), as ON DELETE CASCADE does.
+			this.#db.replace(
+				'mailSenders',
+				this.#db.table('mailSenders').filter((row) => row.userId !== userId),
+			);
+		}, ['users', 'memberships', 'mailSenders']);
 	}
 
 	platformTenants(): Promise<TenantOverview[]> {

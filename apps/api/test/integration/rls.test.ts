@@ -16,6 +16,8 @@ const withoutTenant = [
 	'auth.credentials',
 	// The worker's queue across workspaces: ids only, the mail itself is read in the workspace's scope.
 	'auth.mail_queue',
+	// Workspaces with outbox mail, for the daily retention run: ids only.
+	'auth.mail_retention',
 	// Filing addresses by their random local part: read before the workspace is known.
 	'auth.mail_inbound_addresses',
 	'auth.one_time_tokens',

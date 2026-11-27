@@ -16,6 +16,7 @@ import type { NewsletterConsents } from '../services/newsletter-consents.ts';
 import type { Campaigns } from '../services/campaigns.ts';
 import type { Unsubscribe } from '../services/unsubscribe.ts';
 import type { AppointmentMailService } from '../services/appointment-mail.ts';
+import type { MailExport } from '../services/mail-export.ts';
 import type { BillingService } from '../services/billing.ts';
 import type { Caller, Services } from '../services/context.ts';
 import type { FileService } from '../services/files.ts';
@@ -54,6 +55,7 @@ export interface RouteDeps {
 	campaigns: Campaigns;
 	unsubscribe: Unsubscribe;
 	appointmentMail: AppointmentMailService;
+	mailExport: MailExport;
 	sync: SyncService;
 	caller: (c: Context) => Caller;
 	deliver: (c: Context, opened: OpenedSession) => contract.SessionResponse;

@@ -14,6 +14,7 @@ import { InboundMail } from './services/inbound.ts';
 import { CampaignDispatcher } from './services/campaigns.ts';
 import { expireSignUps } from './services/newsletter-signup.ts';
 import { AppointmentReminders } from './services/appointment-mail.ts';
+import { pruneMailOutbox } from './services/mail-retention.ts';
 import { imapSource, mailpitSource } from './inbound-sources.ts';
 import { pruneExpiredTokens } from './services/sessions.ts';
 import { TokenService } from './tokens.ts';
@@ -92,6 +93,7 @@ const pruneTimer = setInterval(() => {
 	// Unconfirmed sign-ups first: deleting them by their expired link needs the link still there.
 	void expireSignUps(db, new Date())
 		.then(() => pruneExpiredTokens(db, new Date()))
+		.then(() => pruneMailOutbox(db, new Date()))
 		.catch((error: unknown) =>
 			console.error(
 				JSON.stringify({ event: 'auth.prune_failed', message: error instanceof Error ? error.message : String(error) }),
