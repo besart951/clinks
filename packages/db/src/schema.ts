@@ -221,6 +221,20 @@ export interface Database {
 		status: 'booked' | 'open' | 'ignored';
 		invoiceId: string | null;
 	};
+	'auth.mailInboundAddresses': {
+		localPart: string;
+		tenantId: string;
+		createdBy: string;
+		active: Defaulted<boolean>;
+		createdAt: Timestamp;
+	};
+	mailSuppressions: {
+		tenantId: string;
+		address: string;
+		scope: 'all' | 'newsletter';
+		reason: 'bounced' | 'unsubscribed' | 'complaint' | 'manual';
+		createdAt: Timestamp;
+	};
 	mailDomains: {
 		id: string;
 		tenantId: string;

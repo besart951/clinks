@@ -126,6 +126,9 @@ ist nichts weiter einzurichten.
 - [ ] Versanddienst (EU/CH, SMTP-Relay, eigene DKIM-Signatur erlaubt) wählen, Auftragsbearbeitungsvertrag
       abschliessen, `SMTP_RELAY_URL` setzen. TXT `_spf.clinks.ch` = `v=spf1 include:<SPF des Dienstes> ~all`
       anlegen: Kundendomains verweisen nur darauf, ein Anbieterwechsel braucht bei ihnen keine Änderung.
+- [ ] Sammelpostfach für `in.clinks.ch`: MX auf den Mailanbieter, alle Adressen der Domain in ein Postfach
+      (Catch-all), Zugang per IMAP in `INBOUND_IMAP_URL`. Prüfen, dass zugestellte Mails einen `Delivered-To`- oder
+      `X-Original-To`-Header tragen (sonst erkennt CLinks BCC-Kopien nicht).
 
 ## 6 · Konfiguration und Deployment
 

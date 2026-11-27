@@ -112,6 +112,9 @@ export const workspaceSchemas = {
 		read: z.boolean(),
 		starred: z.boolean(),
 		contactId: id.nullable(),
+		// Set by the server; clients do not send them (sync ignores them on upload).
+		messageId: text.nullable().optional(),
+		delivery: z.enum(['queued', 'sent', 'bounced', 'failed', 'suppressed']).nullable().optional(),
 	}),
 	templates: templateSchema.extend({ body: text }),
 	campaigns: campaignSchema.extend({

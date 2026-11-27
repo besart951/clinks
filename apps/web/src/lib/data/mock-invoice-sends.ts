@@ -147,6 +147,8 @@ export class MockInvoiceSends {
 				read: true,
 				starred: false,
 				contactId: invoice.contactId,
+				messageId: null,
+				delivery: 'sent',
 			}),
 		);
 		appendAudit(this.#db, {

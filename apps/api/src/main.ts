@@ -10,6 +10,8 @@ import { smtpMailer } from './mailer.ts';
 import { RateLimiter } from './rate-limit.ts';
 import type { Services } from './services/context.ts';
 import { MailWorker } from './services/mail-worker.ts';
+import { InboundMail } from './services/inbound.ts';
+import { imapSource, mailpitSource } from './inbound-sources.ts';
 import { pruneExpiredTokens } from './services/sessions.ts';
 import { TokenService } from './tokens.ts';
 
@@ -49,6 +51,25 @@ const services: Services = {
 const app = createApp({ services, config });
 const mailWorker = new MailWorker(services, { ratePerSecond: config.MAIL_RATE_PER_SECOND });
 if (config.MAIL_WORKER) mailWorker.start();
+const inboundSource = config.INBOUND_IMAP_URL
+	? imapSource(config.INBOUND_IMAP_URL)
+	: config.INBOUND_MAILPIT_URL
+		? mailpitSource(config.INBOUND_MAILPIT_URL, config.INBOUND_DOMAIN)
+		: null;
+const inbound =
+	inboundSource && config.MAIL_WORKER && config.INBOUND_DOMAIN
+		? new InboundMail(services, inboundSource, config.INBOUND_DOMAIN)
+		: null;
+const inboundTimer = inbound
+	? setInterval(() => {
+			void inbound
+				.poll()
+				.catch((error: unknown) =>
+					console.error(JSON.stringify({ event: 'mail.inbound_failed', errorType: (error as Error)?.name ?? 'Error' })),
+				);
+		}, 30_000)
+	: undefined;
+inboundTimer?.unref();
 
 const server = serve({ fetch: app.fetch, port: config.PORT }, (info) =>
 	console.log(`CLinks API on http://localhost:${info.port}`),
@@ -70,6 +91,7 @@ for (const signal of ['SIGINT', 'SIGTERM'] as const) {
 		closing = true;
 		clearInterval(pruneTimer);
 		mailWorker.stop();
+		clearInterval(inboundTimer);
 		const timeout = setTimeout(() => {
 			void db.destroy().finally(() => process.exit(0));
 		}, 10_000);

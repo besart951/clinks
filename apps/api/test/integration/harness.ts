@@ -6,6 +6,8 @@ import { decodeBase32IgnorePadding } from '@oslojs/encoding';
 import { createApp } from '../../src/app.ts';
 import { MemoryMailer } from '../../src/mailer.ts';
 import { MailWorker } from '../../src/services/mail-worker.ts';
+import { InboundMail } from '../../src/services/inbound.ts';
+import { MemoryInbound } from '../../src/inbound-sources.ts';
 import { RateLimiter } from '../../src/rate-limit.ts';
 import { TokenService } from '../../src/tokens.ts';
 import { SecretBox } from '../../src/crypto.ts';
@@ -38,7 +40,11 @@ export async function startApi(billing?: Billing, options: { allowInternalStorag
 		secrets: SecretBox.ephemeral(),
 		// Fixed DNS: provider hosts resolve to a public address, one name points inside.
 		resolveHost: async (host: string) => (host === 'internal.example.com' ? ['10.1.2.3'] : ['185.10.20.30']),
-		config: { WEB_ORIGIN: 'http://web.test', STORAGE_ALLOW_INTERNAL: options.allowInternalStorage ?? false },
+		config: {
+			WEB_ORIGIN: 'http://web.test',
+			STORAGE_ALLOW_INTERNAL: options.allowInternalStorage ?? false,
+			INBOUND_DOMAIN: 'in.clinks.test',
+		},
 		now: () => new Date(Date.now() + clock.offset),
 	};
 	const app = createApp({
@@ -47,6 +53,9 @@ export async function startApi(billing?: Billing, options: { allowInternalStorag
 	});
 	// The outbox is sent after every request, so tests see the mails a call caused right after it.
 	const mailWorker = new MailWorker(services, { ratePerSecond: 10_000 });
+	// The catch-all mailbox: tests drop raw messages in and read them like the worker does.
+	const mailbox = new MemoryInbound();
+	const inbound = new InboundMail(services, mailbox, 'in.clinks.test');
 	let nextIp = 1;
 
 	/** A browser: keeps the refresh cookie between calls and has its own address. */
@@ -130,6 +139,8 @@ export async function startApi(billing?: Billing, options: { allowInternalStorag
 		relay,
 		dns,
 		mailWorker,
+		mailbox,
+		inbound,
 		clock,
 		client,
 		signedUp,

@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import Plus from '@lucide/svelte/icons/plus';
 	import Info from '@lucide/svelte/icons/info';
+	import Copy from '@lucide/svelte/icons/copy';
 	import * as Alert from '@clinks/ui/components/ui/alert';
 	import * as Card from '@clinks/ui/components/ui/card';
 	import * as Table from '@clinks/ui/components/ui/table';
@@ -77,6 +78,38 @@
 								<Plus class="size-4" />{workspace.t('ui.ws.mail_settings.add_domain')}
 							</Button>
 						</form>
+					</Card.Content>
+				</Card.Root>
+
+				<Card.Root>
+					<Card.Header>
+						<Card.Title><h2>{workspace.t('ui.ws.mail_settings.filing')}</h2></Card.Title>
+						<Card.Description>{workspace.t('ui.ws.mail_settings.filing_text')}</Card.Description>
+					</Card.Header>
+					<Card.Content class="space-y-3">
+						{#if settings.filingAddress}
+							<div class="bg-muted/40 flex min-w-0 items-center gap-2 rounded-md p-3">
+								<code class="min-w-0 flex-1 font-mono text-sm break-all">{settings.filingAddress}</code>
+								<Button
+									size="icon"
+									variant="ghost"
+									class="size-8 shrink-0"
+									aria-label={workspace.t('ui.ws.mail_settings.copy', { what: settings.filingAddress })}
+									onclick={() => model.copy(settings.filingAddress!)}
+								>
+									<Copy class="size-4" />
+								</Button>
+							</div>
+							<ul class="text-muted-foreground list-disc space-y-1 ps-5 text-sm">
+								<li>{workspace.t('ui.ws.mail_settings.filing_bcc')}</li>
+								<li>{workspace.t('ui.ws.mail_settings.filing_forward')}</li>
+							</ul>
+						{/if}
+						<Button variant="outline" size="sm" disabled={model.busy} onclick={() => model.rotateFilingAddress()}>
+							{workspace.t(
+								settings.filingAddress ? 'ui.ws.mail_settings.filing_rotate' : 'ui.ws.mail_settings.filing_create',
+							)}
+						</Button>
 					</Card.Content>
 				</Card.Root>
 

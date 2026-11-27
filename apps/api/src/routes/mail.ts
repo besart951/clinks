@@ -54,6 +54,19 @@ export function registerMailRoutes(me: Router, { mailSettings, caller }: RouteDe
 		route(
 			{
 				method: 'post',
+				path: '/mail/filing-address',
+				tags: ['mail'],
+				responses: { 200: json(mail.mailSettingsDto) },
+			},
+			true,
+		),
+		async (c) => c.json(await mailSettings.rotateFilingAddress(c.var.claims, caller(c)), 200),
+	);
+
+	me.openapi(
+		route(
+			{
+				method: 'post',
 				path: '/mail/senders',
 				tags: ['mail'],
 				request: body(mail.mailSenderInput),

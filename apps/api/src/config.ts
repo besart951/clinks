@@ -45,6 +45,12 @@ const environment = z.object({
 	SMTP_RELAY_URL: z.string().optional(),
 	/** The SPF include workspaces publish; CLinks points it at the relay, so a new provider needs no customer change. */
 	MAIL_SPF_INCLUDE: z.string().default('_spf.clinks.ch'),
+	/** Domain of the catch-all mailbox for filing addresses and bounces (Return-Path); empty turns both off. */
+	INBOUND_DOMAIN: z.string().default('in.clinks.ch'),
+	/** The catch-all mailbox, `imaps://user:password@host:993`; without it nothing is read (development: Mailpit). */
+	INBOUND_IMAP_URL: z.string().optional(),
+	/** Development: read inbound mail from Mailpit's API instead of IMAP. */
+	INBOUND_MAILPIT_URL: z.url().optional(),
 	/** Sends the outbox from this process; on exactly one instance in production. */
 	MAIL_WORKER: boolean.default(true),
 	/** Upper bound for the outbox, across workspaces; the mail provider's limit decides. */

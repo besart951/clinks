@@ -25,7 +25,8 @@ export interface Services {
 	/** DNS TXT lookup for sender domains; tests pass a fixed table. */
 	resolveTxt?: (host: string) => Promise<string[][]>;
 	limiter: RateLimiter;
-	config: Pick<Config, 'WEB_ORIGIN'> & Partial<Pick<Config, 'STORAGE_ALLOW_INTERNAL' | 'MAIL_SPF_INCLUDE'>>;
+	config: Pick<Config, 'WEB_ORIGIN'> &
+		Partial<Pick<Config, 'STORAGE_ALLOW_INTERNAL' | 'MAIL_SPF_INCLUDE' | 'INBOUND_DOMAIN'>>;
 	now: () => Date;
 }
 

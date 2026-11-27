@@ -29,13 +29,16 @@
     "@oslojs/encoding": "1.1.0",
     "@oslojs/otp": "1.1.0",
     "hono": "4.13.19",
+    "imapflow": "2.12.1",
     "jose": "6.2.18",
     "kysely": "0.29.9",
+    "mailparser": "3.14.5",
     "nodemailer": "10.6.1",
     "stripe": "23.2.0",
     "zod": "4.6.7"
   },
   "devDependencies": {
+    "@types/mailparser": "3.9.0",
     "@types/node": "26.6.6",
     "@types/nodemailer": "8.0.2",
     "typescript": "6.0.3",

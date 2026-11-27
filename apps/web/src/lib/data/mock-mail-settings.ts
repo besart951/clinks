@@ -10,8 +10,9 @@ import { expectedRecords, normalizeDomain, senderFits, type DomainPurpose } from
 import { MockApiError, type MockMailDomain, type MockMailSender, type WorkspaceCache } from './database.ts';
 import type { RequestContext } from './repository.ts';
 
-/** The SPF include the demo shows; the API's comes from MAIL_SPF_INCLUDE. */
+/** The SPF include and inbound domain the demo shows; the API's come from MAIL_SPF_INCLUDE and INBOUND_DOMAIN. */
 export const demoSpfInclude = '_spf.clinks.ch';
+const demoInboundDomain = 'in.clinks.ch';
 
 /**
  * The demo's stand-in for Settings › E-Mail (apps/api services/mail-settings.ts). It cannot look into DNS: «Prüfen»
@@ -104,6 +105,22 @@ export class MockMailSettings {
 		}, ['mailSenders']);
 	}
 
+	/** A new filing address; in the demo nothing arrives there, it only shows how it looks. */
+	rotateFilingAddress(): Promise<MailSettingsView> {
+		return this.#db.request(() => {
+			const tenantId = this.#tenant();
+			const local = Array.from(crypto.getRandomValues(new Uint8Array(10)), (byte) =>
+				'abcdefghijklmnopqrstuvwxyz0123456789'.charAt(byte % 36),
+			).join('');
+			const others = this.#db.table('mailFilingAddresses').filter((row) => row.tenantId !== tenantId);
+			this.#db.replace('mailFilingAddresses', [
+				...others,
+				{ id: newId(), tenantId, address: `ablage-${local}@${demoInboundDomain}` },
+			]);
+			return this.#view(tenantId);
+		}, ['mailFilingAddresses']);
+	}
+
 	removeSender(id: string): Promise<void> {
 		return this.#db.request(() => {
 			this.#tenant();
@@ -120,6 +137,7 @@ export class MockMailSettings {
 		return {
 			// The demo sends nothing outside, so senders count as ready once their domain is verified.
 			relay: true,
+			filingAddress: this.#db.table('mailFilingAddresses').find((row) => row.tenantId === tenantId)?.address ?? null,
 			domains: domains.map((row) => mailDomainView(row, demoSpfInclude)),
 			senders: this.#senders(tenantId).map(({ tenantId: _tenant, ...sender }) => ({
 				...sender,

@@ -88,7 +88,7 @@ describe('mail outbox', () => {
 	it('hands each mail to only one of two workers', async () => {
 		const before = api.mailer.sent.length;
 		const ids = await Promise.all(Array.from({ length: 6 }, (_, index) => queue(`pair-${index}@example.ch`)));
-		const second = new MailWorker({ db: api.db, mailer: api.mailer, now: () => new Date() } as never, {
+		const second = new MailWorker({ db: api.db, mailer: api.mailer, now: () => new Date(), config: {} } as never, {
 			ratePerSecond: 10_000,
 		});
 		const workers = [api.mailWorker, second];

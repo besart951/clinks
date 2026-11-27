@@ -54,6 +54,8 @@ export const mailSettingsDto = z.object({
 	senders: z.array(mailSenderDto),
 	/** Whether this installation has a relay for own domains at all. */
 	relay: z.boolean(),
+	/** BCC or forward mail here to file it at the contact; null when inbound mail is not set up. */
+	filingAddress: z.string().nullable(),
 });
 export type MailSettingsView = z.infer<typeof mailSettingsDto>;
 

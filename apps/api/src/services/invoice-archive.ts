@@ -7,7 +7,7 @@ import type { Address, Contact, Invoice, Tenant } from '@clinks/domain/types';
 import type { ProductTranslationKey } from '@clinks/i18n-types';
 import { translate } from '../i18n.ts';
 import type { Services } from './context.ts';
-import { archiveServerFile } from './files.ts';
+import { storeFile } from './files.ts';
 
 type Scope = { tenantId: string; userId: string };
 
@@ -85,12 +85,13 @@ export class InvoiceArchive {
 	}
 
 	#store(tx: Tx, scope: Scope, locale: 'de-CH' | 'en-US', invoiceId: string, name: string, bytes: Uint8Array) {
-		return archiveServerFile(tx, this.#services, scope, {
+		return storeFile(tx, this.#services, scope, {
 			name,
 			folder: folderName[locale],
 			bytes,
 			type: 'application/pdf',
 			targets: [{ kind: 'invoice', id: invoiceId }],
+			locked: true,
 		});
 	}
 }

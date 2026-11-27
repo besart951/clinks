@@ -333,6 +333,8 @@ test('sets up a sender domain and a business sender that invoices go out from', 
 	await expect(dialog).toBeHidden();
 	const row = page.getByRole('row').filter({ hasText: 'rechnung@praxis-sonne.ch' });
 	await expect(row).toContainText('Aktiv');
+	await page.getByRole('button', { name: 'Ablage-Adresse erstellen' }).click();
+	await expect(page.getByText(/^ablage-[a-z0-9]{10}@in\.clinks\.ch$/)).toBeVisible();
 
 	// Invoices now go out from it (in the demo: Mail › Gesendet).
 	await page.goto('/#/finance/invoices/new');

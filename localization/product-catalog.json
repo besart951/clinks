@@ -5902,22 +5902,6 @@
         "de-CH": "Einsätze ansehen",
         "en-US": "See your visits"
       },
-      "ui.ws.invoice.delivery.queued": {
-        "de-CH": "Wird gesendet …",
-        "en-US": "Sending …"
-      },
-      "ui.ws.invoice.delivery.bounced": {
-        "de-CH": "Unzustellbar: Die Adresse hat die Mail abgewiesen.",
-        "en-US": "Undeliverable: the address refused the mail."
-      },
-      "ui.ws.invoice.delivery.failed": {
-        "de-CH": "Nicht gesendet: Der Mailserver hat die Mail abgelehnt.",
-        "en-US": "Not sent: the mail server refused it."
-      },
-      "ui.ws.invoice.delivery.suppressed": {
-        "de-CH": "Nicht gesendet: Die Adresse ist gesperrt (abgemeldet oder unzustellbar).",
-        "en-US": "Not sent: the address is blocked (unsubscribed or undeliverable)."
-      },
       "error.ws.mail_domain_invalid": {
         "de-CH": "Bitte eine eigene Domain wie praxis.ch eingeben.",
         "en-US": "Please enter a domain of your own such as praxis.ch."
@@ -6177,6 +6161,54 @@
       "ui.ws.mail_settings.sender_removed": {
         "de-CH": "Absender entfernt",
         "en-US": "Sender removed"
+      },
+      "error.ws.mail_inbound_off": {
+        "de-CH": "Eingehende Mails sind auf diesem Server nicht eingerichtet.",
+        "en-US": "Incoming mail is not set up on this server."
+      },
+      "ui.ws.mail.delivery.queued": {
+        "de-CH": "Wird gesendet …",
+        "en-US": "Sending …"
+      },
+      "ui.ws.mail.delivery.bounced": {
+        "de-CH": "Unzustellbar: Die Adresse hat die Mail abgewiesen.",
+        "en-US": "Undeliverable: the address refused the mail."
+      },
+      "ui.ws.mail.delivery.failed": {
+        "de-CH": "Nicht gesendet: Der Mailserver hat die Mail abgelehnt.",
+        "en-US": "Not sent: the mail server refused it."
+      },
+      "ui.ws.mail.delivery.suppressed": {
+        "de-CH": "Nicht gesendet: Die Adresse ist gesperrt (abgemeldet oder unzustellbar).",
+        "en-US": "Not sent: the address is blocked (unsubscribed or undeliverable)."
+      },
+      "ui.ws.mail_settings.filing": {
+        "de-CH": "Ablage-Adresse",
+        "en-US": "Filing address"
+      },
+      "ui.ws.mail_settings.filing_text": {
+        "de-CH": "Mails an diese Adresse landen in CLinks beim passenden Kontakt, Anhänge unter Dokumente › E-Mail-Ablage.",
+        "en-US": "Mail to this address lands in CLinks at the matching contact, attachments under Documents › E-Mail-Ablage."
+      },
+      "ui.ws.mail_settings.filing_bcc": {
+        "de-CH": "Eigene Mails an Kundinnen und Kunden: die Adresse in BCC setzen, sie erscheinen unter «Gesendet».",
+        "en-US": "Your own mail to customers: put the address in BCC, it appears under «Sent»."
+      },
+      "ui.ws.mail_settings.filing_forward": {
+        "de-CH": "Antworten von Kundinnen und Kunden: im Mailprogramm eine Weiterleitung an diese Adresse einrichten, sie erscheinen im «Posteingang».",
+        "en-US": "Replies from customers: set up forwarding to this address in your mail program, they appear in the «Inbox»."
+      },
+      "ui.ws.mail_settings.filing_create": {
+        "de-CH": "Ablage-Adresse erstellen",
+        "en-US": "Create filing address"
+      },
+      "ui.ws.mail_settings.filing_rotate": {
+        "de-CH": "Neue Adresse (alte gilt nicht mehr)",
+        "en-US": "New address (the old one stops working)"
+      },
+      "ui.ws.mail_settings.filing_rotated": {
+        "de-CH": "Neue Ablage-Adresse erstellt",
+        "en-US": "New filing address created"
       }
     }
   }

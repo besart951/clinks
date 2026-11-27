@@ -22,6 +22,8 @@ export interface MailMessage {
 	/** `<id@host>`; set by the outbox so bounces and replies can be traced to the mail. */
 	messageId?: string;
 	headers?: Record<string, string>;
+	/** The envelope sender: bounces go there (a per-mail address on the inbound domain). */
+	returnPath?: string;
 }
 
 export interface Mailer {
@@ -32,9 +34,10 @@ export interface Mailer {
 export function smtpMailer(url: string, from: string): Mailer {
 	const transport = nodemailer.createTransport(url);
 	return {
-		async send({ fromName, from: own, attachments, ...message }) {
+		async send({ fromName, from: own, attachments, returnPath, ...message }) {
 			await transport.sendMail({
 				...message,
+				envelope: returnPath ? { from: returnPath, to: message.to } : undefined,
 				from: own ?? (fromName ? { name: fromName, address: addressOf(from) } : from),
 				attachments: attachments?.map((file) => ({ ...file, content: Buffer.from(file.content) })),
 			});

@@ -17,6 +17,12 @@ export function randomCode(): string {
 	return String(randomInt(0, 1_000_000)).padStart(6, '0');
 }
 
+/** Lower-case letters and digits for addresses that must be hard to guess, e.g. a filing address (52 bits at 10). */
+export function randomLocalPart(length: number): string {
+	const alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789';
+	return Array.from({ length }, () => alphabet[randomInt(alphabet.length)]).join('');
+}
+
 /** Recovery codes look like `k7m2-x9qp-4hdw`: easy to type, 60 bits each. */
 export function recoveryCode(): string {
 	const alphabet = 'abcdefghjkmnpqrstuvwxyz23456789';

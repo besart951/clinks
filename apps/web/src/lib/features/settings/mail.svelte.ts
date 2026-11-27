@@ -24,7 +24,7 @@ export class MailSettingsModel {
 
 	constructor(workspace: Workspace) {
 		this.#workspace = workspace;
-		this.resource = new Resource(workspace.db, ['mailDomains', 'mailSenders'], async () => {
+		this.resource = new Resource(workspace.db, ['mailDomains', 'mailSenders', 'mailFilingAddresses'], async () => {
 			const [settings, team] = await Promise.all([
 				workspace.mailSettings.settings(),
 				workspace.account.members().catch(() => ({ members: [] as Member[] })),
@@ -92,6 +92,10 @@ export class MailSettingsModel {
 
 	removeSender(id: string) {
 		return this.#run(() => this.#workspace.mailSettings.removeSender(id), 'ui.ws.mail_settings.sender_removed');
+	}
+
+	rotateFilingAddress() {
+		return this.#run(() => this.#workspace.mailSettings.rotateFilingAddress(), 'ui.ws.mail_settings.filing_rotated');
 	}
 
 	copy(text: string) {

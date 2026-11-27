@@ -202,6 +202,8 @@ export const mails = new Table(
 		is_read: column.integer,
 		starred: column.integer,
 		contact_id: column.text,
+		message_id: column.text,
+		delivery: column.text,
 	},
 	{ indexes: { tenant: ['tenant_id'] } },
 );
