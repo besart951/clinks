@@ -29,7 +29,7 @@ export function rowToRecord<T>(table: SyncedTableName, row: SqliteRow): T {
 	for (const column of columnsOf(table)) {
 		const value = fromSqlite(column, row[column.column]);
 		// Optional domain fields stay absent rather than null, as the mock API stores them.
-		if (value === null && column.nullable && column.type === 'text') continue;
+		if (value === null && column.nullable && (column.type === 'text' || column.type === 'boolean')) continue;
 		record[column.field] = value;
 	}
 	return record as T;

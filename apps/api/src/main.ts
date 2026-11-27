@@ -13,6 +13,7 @@ import { MailWorker } from './services/mail-worker.ts';
 import { InboundMail } from './services/inbound.ts';
 import { CampaignDispatcher } from './services/campaigns.ts';
 import { expireSignUps } from './services/newsletter-signup.ts';
+import { AppointmentReminders } from './services/appointment-mail.ts';
 import { imapSource, mailpitSource } from './inbound-sources.ts';
 import { pruneExpiredTokens } from './services/sessions.ts';
 import { TokenService } from './tokens.ts';
@@ -73,18 +74,15 @@ const inboundTimer = inbound
 	: undefined;
 inboundTimer?.unref();
 const campaigns = new CampaignDispatcher(services);
-const campaignTimer = config.MAIL_WORKER
+const reminders = new AppointmentReminders(services);
+const scheduleTimer = config.MAIL_WORKER
 	? setInterval(() => {
-			void campaigns
-				.dispatch()
-				.catch((error: unknown) =>
-					console.error(
-						JSON.stringify({ event: 'mail.campaign_failed', errorType: (error as Error)?.name ?? 'Error' }),
-					),
-				);
+			void Promise.all([campaigns.dispatch(), reminders.dispatch()]).catch((error: unknown) =>
+				console.error(JSON.stringify({ event: 'mail.schedule_failed', errorType: (error as Error)?.name ?? 'Error' })),
+			);
 		}, 30_000)
 	: undefined;
-campaignTimer?.unref();
+scheduleTimer?.unref();
 
 const server = serve({ fetch: app.fetch, port: config.PORT }, (info) =>
 	console.log(`CLinks API on http://localhost:${info.port}`),
@@ -110,7 +108,7 @@ for (const signal of ['SIGINT', 'SIGTERM'] as const) {
 		clearInterval(pruneTimer);
 		mailWorker.stop();
 		clearInterval(inboundTimer);
-		clearInterval(campaignTimer);
+		clearInterval(scheduleTimer);
 		const timeout = setTimeout(() => {
 			void db.destroy().finally(() => process.exit(0));
 		}, 10_000);

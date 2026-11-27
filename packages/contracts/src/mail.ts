@@ -124,3 +124,12 @@ export const ownSenderDto = z.object({
 	active: z.boolean(),
 });
 export type OwnSenderView = z.infer<typeof ownSenderDto>;
+
+/** Settings › E-Mail › Termine (`@clinks/domain/appointment-mail`). */
+export const appointmentMailSettings = z.strictObject({
+	confirmation: z.boolean(),
+	reminder: z.boolean(),
+	hoursBefore: z.number().int().min(1).max(168),
+	text: z.string().trim().max(500),
+	spitexVisits: z.boolean(),
+});

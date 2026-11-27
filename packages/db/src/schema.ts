@@ -1,3 +1,4 @@
+import type { AppointmentMailSettings } from '@clinks/domain/appointment-mail';
 import type { InvoiceSettings } from '@clinks/domain/invoicing';
 import type { MailDelivery } from '@clinks/domain/types';
 import type { ColumnType, Generated, Insertable, Selectable, Updateable } from 'kysely';
@@ -13,6 +14,7 @@ export interface TenantTable {
 	iban: Defaulted<string>;
 	qrIban: Defaulted<string>;
 	invoiceSettings: Defaulted<InvoiceSettings>;
+	appointmentMail: Defaulted<AppointmentMailSettings>;
 	id: string;
 	name: string;
 	industry: 'physio' | 'spitex' | 'services';
@@ -320,6 +322,11 @@ export interface Database {
 		actorId: string | null;
 		campaignId: string | null;
 		createdAt: Timestamp;
+	};
+	'auth.appointmentReminders': {
+		appointmentId: string;
+		tenantId: string;
+		dueAt: Date;
 	};
 	'auth.campaignQueue': {
 		campaignId: string;

@@ -9,6 +9,7 @@ import { uploadToFields } from '@clinks/sync-schema/mapping';
 import { isSyncedTable, syncedTables, type Column, type SyncedTableName } from '@clinks/sync-schema/tables';
 import type { ProductTranslationKey } from '@clinks/i18n-types';
 import { z } from 'zod';
+import { appointmentChanged } from './appointment-mail.ts';
 import { ApiError, forbidden } from '../errors.ts';
 import type { AccessClaims } from '../tokens.ts';
 import { audit } from './audit.ts';
@@ -98,7 +99,7 @@ export class SyncService {
 	) {
 		const clinical = table === 'physio_notes' || table === 'spitex_notes';
 		if (clinical && op.op !== 'PUT') throw forbidden();
-		if (op.op === 'DELETE') return this.#applyDelete(tx, scope.plan, table, op.id);
+		if (op.op === 'DELETE') return this.#applyDelete(tx, scope, table, op.id);
 		const { fields, unknown } = uploadToFields(table, op.data ?? {});
 		if (unknown.length)
 			throw new ApiError(
@@ -116,15 +117,32 @@ export class SyncService {
 		if (check === 'skip') return null;
 		if (deferred) deferred.push({ table, fields });
 		else await checkReferences(tx, scope.tenantId, table, fields);
-		return this.#persistRow(tx, scope, table, op, existing, fields, merged);
+		const action = await this.#persistRow(tx, scope, table, op, existing, fields, merged);
+		// Imports bring old and future appointments at once: they confirm nothing.
+		if (table === 'appointments' && !deferred)
+			await this.#appointmentChanged(tx, scope.tenantId, op.id, existing, merged);
+		return action;
 	}
 
-	async #applyDelete(tx: Tx, plan: PlanWrites, table: SyncedTableName, id: string) {
+	#appointmentChanged(tx: Tx, tenantId: string, id: string, before: Fields | undefined, after: Fields | null) {
+		const view = (fields: Fields) => ({ ...fields, id }) as unknown as Parameters<typeof appointmentChanged>[3];
+		return appointmentChanged(
+			tx,
+			this.#services,
+			tenantId,
+			before ? view(dbToFields('appointments', before)) : null,
+			after ? view(after) : null,
+		);
+	}
+
+	async #applyDelete(tx: Tx, scope: { tenantId: string; plan: PlanWrites }, table: SyncedTableName, id: string) {
+		const { plan } = scope;
 		const row = await tx.selectFrom(table).selectAll().where('id', '=', id).executeTakeFirst();
 		const stored = row ? dbToFields(table, row) : null;
 		plan.check(table, 'DELETE', stored, null);
 		if (stored) await plan.changing(tx, table, id, stored, null);
 		const deleted = await tx.deleteFrom(table).where('id', '=', id).executeTakeFirst();
+		if (table === 'appointments' && row) await this.#appointmentChanged(tx, scope.tenantId, id, row, null);
 		return deleted.numDeletedRows > 0n ? 'deleted' : null;
 	}
 

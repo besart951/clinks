@@ -1,3 +1,4 @@
+import type { AppointmentMailSettings } from './appointment-mail.ts';
 import type { DeliveryMethod, InvoiceSettings } from './invoicing.ts';
 import type {
 	AppointmentId,
@@ -83,6 +84,8 @@ export interface Tenant extends BaseRecord<TenantId> {
 	/** From the bank, for payments with a QR reference; '' when the workspace has none. */
 	qrIban: string;
 	invoiceSettings: InvoiceSettings;
+	/** Confirmations and reminders for appointments; see `@clinks/domain/appointment-mail`. */
+	appointmentMail?: AppointmentMailSettings;
 	locale: string;
 	timeZone: string;
 	plan: PlanCode;
@@ -205,6 +208,10 @@ export interface Contact extends TenantRecord<ContactId> {
 	billingMode?: string;
 	/** Set by the server from the recorded consent; newsletters only reach `subscribed`. */
 	newsletter?: NewsletterStatus;
+	/** Appointment confirmations and reminders; absent means on. */
+	reminders?: boolean;
+	/** For SMS reminders, which follow later. */
+	mobile?: string;
 }
 
 export const newsletterStatuses = ['none', 'pending', 'subscribed', 'unsubscribed'] as const;
@@ -240,6 +247,8 @@ export interface Appointment extends TenantRecord<AppointmentId> {
 	service: SpitexService | PhysioService | null;
 	arrivalWindow: ArrivalWindow | null;
 	billedInvoiceId: InvoiceId | null;
+	/** Set by the server when the reminder for the current start went out. */
+	remindedAt?: Timestamp | null;
 }
 
 export interface Folder extends TenantRecord<FolderId> {

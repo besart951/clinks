@@ -459,6 +459,32 @@ test('signs up for the newsletter with double opt-in, sends a campaign with a se
 	await expect(page.getByText('Danke für Ihre Rückmeldung.')).toBeVisible();
 });
 
+test('turns on appointment reminders for the workspace and off for one contact', async ({ page }) => {
+	await signIn(page);
+	await page.goto('/#/settings/mail');
+	const card = page.locator('[data-slot=card]').filter({ has: page.getByRole('heading', { name: 'Termine' }) });
+	await expect(card.getByLabel('Stunden vorher')).toBeDisabled();
+	await card.getByRole('switch').nth(1).click();
+	await card.getByLabel('Stunden vorher').fill('48');
+	await expect(card.getByRole('radio', { name: 'SMS (folgt)' })).toBeDisabled();
+	await card.getByRole('button', { name: 'Speichern' }).click();
+	await expect(page.getByText('Terminmails gespeichert')).toBeVisible();
+	await page.reload();
+	await expect(card.getByLabel('Stunden vorher')).toHaveValue('48');
+
+	await page.goto('/#/contacts?new=1');
+	await page.getByLabel('Vorname').fill('Rita');
+	await page.getByLabel('Nachname').fill('Termin');
+	await page.getByRole('textbox', { name: 'E-Mail' }).fill('rita.termin@example.ch');
+	await page.getByRole('button', { name: 'Speichern' }).click();
+	await expect(page.getByRole('heading', { level: 1, name: 'Rita Termin' })).toBeVisible();
+	const mails = page.locator('section').filter({ has: page.getByRole('heading', { name: 'Terminmails' }) });
+	await expect(mails.getByRole('switch')).toBeChecked();
+	await mails.getByRole('switch').click();
+	await expect(page.getByText('Terminmails ausgeschaltet')).toBeVisible();
+	await expect(mails.getByRole('switch')).not.toBeChecked();
+});
+
 test('sets the QR-IBAN and the payment term for invoices', async ({ page }) => {
 	await signIn(page);
 	await page.goto('/#/settings');

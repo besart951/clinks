@@ -7,6 +7,7 @@ import {
 } from '@clinks/contracts/mail';
 import { newId } from '@clinks/domain/ids';
 import { expectedRecords, normalizeDomain, senderFits, type DomainPurpose } from '@clinks/domain/mail-domains';
+import { defaultAppointmentMail, type AppointmentMailSettings } from '@clinks/domain/appointment-mail';
 import { MockApiError, type MockMailDomain, type MockMailSender, type WorkspaceCache } from './database.ts';
 import type { RequestContext } from './repository.ts';
 
@@ -148,6 +149,21 @@ export class MockMailSettings {
 
 	#domains(tenantId: string) {
 		return this.#db.table('mailDomains').filter((row) => row.tenantId === tenantId);
+	}
+
+	appointmentMail(): Promise<AppointmentMailSettings> {
+		return this.#db.request(() => {
+			const tenant = this.#db.table('tenants').find((row) => row.id === this.#tenant())!;
+			return { ...defaultAppointmentMail, ...tenant.appointmentMail };
+		});
+	}
+
+	/** The demo keeps the settings; it sends no confirmations or reminders (nothing leaves the browser). */
+	saveAppointmentMail(input: AppointmentMailSettings): Promise<void> {
+		return this.#db.request(() => {
+			const tenant = this.#db.table('tenants').find((row) => row.id === this.#tenant())!;
+			tenant.appointmentMail = { ...input };
+		}, ['tenants']);
 	}
 
 	#senders(tenantId: string) {

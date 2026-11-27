@@ -24,6 +24,8 @@ export const contacts = new Table(
 		language: column.text,
 		billing_mode: column.text,
 		newsletter: column.text,
+		reminders: column.integer,
+		mobile: column.text,
 	},
 	{ indexes: { tenant: ['tenant_id'] } },
 );
@@ -47,6 +49,7 @@ export const appointments = new Table(
 		service: column.text,
 		arrival_window: column.text,
 		billed_invoice_id: column.text,
+		reminded_at: column.text,
 	},
 	{ indexes: { tenant: ['tenant_id'] } },
 );

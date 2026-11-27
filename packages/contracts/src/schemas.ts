@@ -16,6 +16,12 @@ export const contactSchema = z
 		companyName: z.string(),
 		email: optionalEmail,
 		phone: z.string().regex(/^[+\d\s()/-]*$/, { error: 'error.ws.invalid_phone' }),
+		mobile: z
+			.string()
+			.regex(/^[+\d\s()/-]*$/, { error: 'error.ws.invalid_phone' })
+			.nullable()
+			.optional(),
+		reminders: z.boolean().nullable().optional(),
 		address: z.object({
 			street: z.string(),
 			houseNumber: z.string().default(''),
