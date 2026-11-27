@@ -1,4 +1,5 @@
 <script lang="ts">
+	import MailAlertsCard from '#lib/components/settings/MailAlertsCard.svelte';
 	import { useWriteMail, type MailPreference } from '#lib/features/mail/write-mail.svelte';
 	import { onMount } from 'svelte';
 	import Monitor from '@lucide/svelte/icons/monitor';
@@ -21,6 +22,16 @@
 	const workspace = useWorkspace();
 	const writeMail = useWriteMail();
 	const model = new ProfileModel(workspace);
+	/** Turning «Push» on asks the device for permission; a refusal leaves it off and says why. */
+	let pushBlocked = $state(false);
+	async function turnPush(on: boolean) {
+		pushBlocked = false;
+		if (on && !(await workspace.platform.notifier.request())) {
+			pushBlocked = true;
+			return;
+		}
+		model.preferences.push = on;
+	}
 	const user = $derived(workspace.session.user);
 	let enabling = $state(false);
 	let avatarInput: HTMLInputElement;
@@ -116,9 +127,13 @@
 					<div class="flex items-center justify-between gap-4">
 						<Label for="n-push">{workspace.t('ui.ws.settings.notify_push')}</Label><Switch
 							id="n-push"
-							bind:checked={model.preferences.push}
+							checked={model.preferences.push}
+							onCheckedChange={(on) => turnPush(on)}
 						/>
 					</div>
+					{#if pushBlocked}<p class="text-destructive text-xs" role="status">
+							{workspace.t('ui.ws.settings.push_blocked')}
+						</p>{/if}
 					<div class="flex items-center justify-between gap-4">
 						<Label for="n-digest">{workspace.t('ui.ws.settings.digest')}</Label><Choice
 							id="n-digest"
@@ -131,6 +146,9 @@
 						/>
 					</div>
 				</fieldset>
+				{#if model.preferences.push && workspace.session.hasModule('mail') && workspace.session.can('mail.read')}
+					<MailAlertsCard />
+				{/if}
 				<div class="flex justify-end sm:col-span-2">
 					<Button type="submit" disabled={model.busy}>{workspace.t('ui.save')}</Button>
 				</div>

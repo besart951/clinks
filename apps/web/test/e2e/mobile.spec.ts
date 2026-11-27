@@ -230,3 +230,45 @@ test('swipes a mail to archive it and picks several with a long press', async ({
 	await expect(bar).toContainText('2 ausgewählt');
 	await context.close();
 });
+
+test('reads a mail on a phone with the actions at the bottom and refreshes the list by pulling', async ({
+	browser,
+}) => {
+	const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+	const page = await context.newPage();
+	await signIn(page);
+	await page.goto('/#/mail');
+	const rows = page.getByRole('list', { name: 'Posteingang' }).getByRole('listitem');
+	await expect(rows.first()).toBeVisible();
+	// Pulling the list down from the top refreshes it.
+	const area = page.getByRole('list', { name: 'Posteingang' }).locator('..');
+	const box = (await area.boundingBox())!;
+	const at = (y: number) => [{ identifier: 1, clientX: box.x + 40, clientY: y }];
+	await area.dispatchEvent('touchstart', { touches: at(box.y + 10) });
+	await area.dispatchEvent('touchmove', { touches: at(box.y + 90) });
+	await area.dispatchEvent('touchmove', { touches: at(box.y + 200) });
+	await expect(page.getByRole('status').filter({ hasText: 'Zum Aktualisieren ziehen' })).toBeVisible();
+	await area.dispatchEvent('touchend', { touches: [] });
+	await expect(page.getByRole('status').filter({ hasText: /Aktualisieren|aktualisiert/ })).toHaveCount(0);
+
+	const count = await rows.count();
+	await rows.first().getByRole('button').first().tap();
+	const bar = page.getByRole('toolbar', { name: 'Aktionen für die Mail' });
+	await expect(bar).toBeInViewport();
+	await bar.getByRole('button', { name: 'Archivieren' }).tap();
+	await expect(page.getByText('Verschoben nach Archiv')).toBeVisible();
+	await expect(rows).toHaveCount(count - 1);
+	await context.close();
+});
+
+test('lets a phone announce new mail per mailbox once notifications are allowed', async ({ browser }) => {
+	const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+	await context.grantPermissions(['notifications']);
+	const page = await context.newPage();
+	await signIn(page);
+	await page.goto('/#/settings/profile');
+	await page.getByRole('switch', { name: 'Push-Mitteilungen auf dem Handy' }).tap();
+	await expect(page.getByRole('group', { name: 'Mitteilungen für neue Mails' })).toBeVisible();
+	await expect(page.getByRole('switch', { name: 'Alle übrigen Adressen' })).toBeChecked();
+	await context.close();
+});

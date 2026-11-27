@@ -19,6 +19,7 @@
 	import { mailList } from '#lib/features/mail/mail-list.svelte';
 	import SelectableList from '#lib/components/list/SelectableList.svelte';
 	import ListBar from '#lib/components/list/ListBar.svelte';
+	import PullToRefresh from '#lib/components/list/PullToRefresh.svelte';
 	import type { MailMessage } from '@clinks/domain/types';
 	import type { MailId } from '@clinks/domain/ids';
 	import { routeQuery, setQuery } from '#lib/navigation';
@@ -114,42 +115,46 @@
 					</p>
 				</div>
 				<ListBar {list} />
-				<SelectableList {list} class="min-h-0 flex-1 overflow-y-auto rounded-xl border">
-					{#snippet row(mail: MailMessage)}
-						<span class="flex flex-col gap-0.5 px-3 py-2.5 text-sm">
-							<span class="flex items-center gap-2">
-								{#if (model.threadFor(mail)?.unread ?? (mail.read ? 0 : 1)) > 0}<span
-										class="size-2 shrink-0 rounded-full bg-sky-500"
-										aria-label={workspace.t('ui.ws.mail.unread')}
-									></span>{/if}
-								<span class="flex-1 truncate {model.threadFor(mail)?.unread ? 'font-semibold' : ''}">
-									{mail.folder === 'inbox'
-										? mail.fromName
-										: mail.to.join(', ') || workspace.t('ui.ws.mail.no_recipient')}
+				<PullToRefresh refresh={() => model.resource.reload()} class="min-h-0 flex-1 overflow-y-auto rounded-xl border">
+					<SelectableList {list}>
+						{#snippet row(mail: MailMessage)}
+							<span class="flex flex-col gap-0.5 px-3 py-2.5 text-sm">
+								<span class="flex items-center gap-2">
+									{#if (model.threadFor(mail)?.unread ?? (mail.read ? 0 : 1)) > 0}<span
+											class="size-2 shrink-0 rounded-full bg-sky-500"
+											aria-label={workspace.t('ui.ws.mail.unread')}
+										></span>{/if}
+									<span class="flex-1 truncate {model.threadFor(mail)?.unread ? 'font-semibold' : ''}">
+										{mail.folder === 'inbox'
+											? mail.fromName
+											: mail.to.join(', ') || workspace.t('ui.ws.mail.no_recipient')}
+									</span>
+									{#if (model.threadFor(mail)?.mails.length ?? 1) > 1}<span
+											class="text-muted-foreground text-xs tabular-nums"
+											aria-label={workspace.t('ui.ws.mail.in_conversation', {
+												count: model.threadFor(mail)!.mails.length,
+											})}
+										>
+											{model.threadFor(mail)!.mails.length}
+										</span>{/if}
+									{#if mail.starred}<Star class="size-3.5 fill-amber-400 text-amber-400" />{/if}
+									<span class="text-muted-foreground shrink-0 text-xs">{workspace.i18n.relative(mail.sentAt)}</span>
 								</span>
-								{#if (model.threadFor(mail)?.mails.length ?? 1) > 1}<span
-										class="text-muted-foreground text-xs tabular-nums"
-										aria-label={workspace.t('ui.ws.mail.in_conversation', {
-											count: model.threadFor(mail)!.mails.length,
-										})}
-									>
-										{model.threadFor(mail)!.mails.length}
-									</span>{/if}
-								{#if mail.starred}<Star class="size-3.5 fill-amber-400 text-amber-400" />{/if}
-								<span class="text-muted-foreground shrink-0 text-xs">{workspace.i18n.relative(mail.sentAt)}</span>
+								<span class="truncate {mail.read ? 'text-muted-foreground' : 'font-medium'}">
+									{mail.subject || workspace.t('ui.ws.mail.no_subject')}
+								</span>
+								<span class="text-muted-foreground truncate text-xs">
+									{mail.body.replace(/\s+/g, ' ').slice(0, 90)}
+								</span>
 							</span>
-							<span class="truncate {mail.read ? 'text-muted-foreground' : 'font-medium'}">
-								{mail.subject || workspace.t('ui.ws.mail.no_subject')}
-							</span>
-							<span class="text-muted-foreground truncate text-xs">
-								{mail.body.replace(/\s+/g, ' ').slice(0, 90)}
-							</span>
-						</span>
-					{/snippet}
-					{#snippet empty()}
-						<p class="text-muted-foreground px-3 py-10 text-center text-sm">{workspace.t('ui.ws.mail.empty_folder')}</p>
-					{/snippet}
-				</SelectableList>
+						{/snippet}
+						{#snippet empty()}
+							<p class="text-muted-foreground px-3 py-10 text-center text-sm">
+								{workspace.t('ui.ws.mail.empty_folder')}
+							</p>
+						{/snippet}
+					</SelectableList>
+				</PullToRefresh>
 			</section>
 
 			<article
