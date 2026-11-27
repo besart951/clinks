@@ -19,6 +19,7 @@
 	import { AxisSetting } from '#lib/features/calendar/axis.svelte';
 	import FloatingAddButton from '#lib/components/common/FloatingAddButton.svelte';
 	import Grip from '@lucide/svelte/icons/grip-vertical';
+	import Pencil from '@lucide/svelte/icons/pencil';
 	import Users from '@lucide/svelte/icons/users';
 	import { personBadge } from '@clinks/ui/kit/avatar';
 	import AppointmentSheet from '#lib/components/calendar/AppointmentSheet.svelte';
@@ -42,6 +43,7 @@
 	const people = new PeopleDirectory(workspace);
 	const canWrite = $derived(workspace.session.can('spitex.write') && workspace.session.can('calendar.write'));
 	const canAddClient = $derived(canWrite && workspace.session.can('contacts.write'));
+	const canEditClients = $derived(workspace.session.can('contacts.write'));
 	const canRelease = $derived(workspace.session.can('spitex.release'));
 	let clientSheet: ContactFormSheet;
 	const staff = $derived(people.people);
@@ -160,6 +162,10 @@
 			.sort((left, right) =>
 				left.slot && right.slot ? left.slot.localeCompare(right.slot) : left.slot ? -1 : right.slot ? 1 : 0,
 			);
+	}
+
+	function clientOf(visit: Appointment) {
+		return visit.contactId ? (model.resource.data?.contacts.get(visit.contactId) ?? null) : null;
 	}
 
 	function windowLabel(visit: Appointment) {
@@ -294,7 +300,7 @@
 								<ul class="space-y-2">
 									{#each model.open as visit (visit.id)}
 										<li
-											class="bg-background relative rounded-lg border border-dashed p-2 text-sm {canWrite
+											class="group/visit bg-background relative rounded-lg border border-dashed p-2 text-sm {canWrite
 												? 'ps-7'
 												: ''} {dragging?.id === visit.id ? 'opacity-40' : ''}"
 											onpointerenter={() => (pointedVisit = visit)}
@@ -313,7 +319,20 @@
 													<Grip class="size-4" />
 												</span>
 											{/if}
-											<p class="font-medium">{visit.title}</p>
+											{#if canEditClients && clientOf(visit)}
+												{@const client = clientOf(visit)!}
+												<Button
+													size="icon-xs"
+													variant="ghost"
+													class="absolute end-1 top-1 opacity-0 transition-opacity group-focus-within/visit:opacity-100 group-hover/visit:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100"
+													aria-label={workspace.t('ui.ws.spitex.edit_client', { name: contactName(client) })}
+													title={workspace.t('ui.ws.spitex.edit_client', { name: contactName(client) })}
+													onclick={() => clientSheet.show(client)}
+												>
+													<Pencil class="size-3.5" />
+												</Button>
+											{/if}
+											<p class="pe-6 font-medium">{visit.title}</p>
 											<p class="text-muted-foreground text-xs">
 												{workspace.t('ui.ws.spitex.window', { window: windowLabel(visit) })} · {visit.service
 													? workspace.t(`ui.ws.spitex.service.${visit.service}`)
@@ -452,4 +471,4 @@
 		<FloatingAddButton label={workspace.t('ui.ws.spitex.new_visit')} onclick={() => createVisit()} />
 	{/if}
 </ModuleGate>
-<ContactFormSheet bind:this={clientSheet} onSaved={planFirstVisit} />
+<ContactFormSheet bind:this={clientSheet} onSaved={(client, created) => created && planFirstVisit(client)} />
