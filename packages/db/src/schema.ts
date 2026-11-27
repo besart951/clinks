@@ -323,6 +323,10 @@ export interface Database {
 		campaignId: string | null;
 		createdAt: Timestamp;
 	};
+	'auth.mailRetention': {
+		tenantId: string;
+		checkedAt: Defaulted<Date>;
+	};
 	'auth.appointmentReminders': {
 		appointmentId: string;
 		tenantId: string;

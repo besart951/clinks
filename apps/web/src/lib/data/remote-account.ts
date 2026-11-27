@@ -27,6 +27,8 @@ export class RemoteAccountApi extends AccountApi {
 	}
 	override async exportTenantData() {
 		const data = await super.exportTenantData();
+		// Mail data the synced tables do not hold: senders, consents, blocked addresses, the outbox log.
+		Object.assign(data, await this.#client.request<{ [table: string]: unknown[] }>('GET', '/mail/export'));
 		const role = roleFor(this.#db, this.#caller.userId(), this.#caller.tenantId());
 		if (!roleGrants(role, 'team.manage') && !roleGrants(role, 'roles.manage')) return data;
 		const { members, roles, invitations } = await this.members();

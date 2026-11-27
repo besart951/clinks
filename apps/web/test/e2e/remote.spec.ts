@@ -486,6 +486,13 @@ test('sends an invoice as a secure link the recipient opens, and books its payme
 	// The recipient: the mail names no amount; the link opens with the postcode only.
 	const mail = await mailFor(recipient, new RegExp(`Rechnung ${number} von Physio Versand`));
 	expect(mail).not.toMatch(/120|Physiotherapie/);
+	// It went through the outbox: the send log knows it was handed over.
+	await expect
+		.poll(
+			async () =>
+				(await api<{ delivery: string }[]>('GET', `/finance/invoices/${invoiceId}/sends`, { token }))[0]?.delivery,
+		)
+		.toBe('sent');
 	const link = /(\/#\/invoice-link\/[A-Za-z0-9_%-]+)/.exec(mail)![1];
 	await page.goto(link);
 	await expect(page.getByRole('heading', { level: 1, name: `Rechnung ${number}` })).toBeVisible();

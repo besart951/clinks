@@ -12,6 +12,12 @@ DO $$ BEGIN
  THEN RAISE EXCEPTION 'logical replication missing, inactive or over 256 MiB behind'; END IF;
  IF (SELECT count(*) FROM audit WHERE action IN ('auth.locked','auth.sign_in_failed') AND created_at>now()-interval '5 minutes')>=20
  THEN RAISE EXCEPTION 'high failed sign-in rate'; END IF;
+ IF (SELECT count(*) FROM mail_outbox WHERE status='failed' AND created_at>now()-interval '1 hour')>=3
+ AND (SELECT count(*) FILTER (WHERE status='failed')::float/greatest(count(*),1) FROM mail_outbox
+ WHERE created_at>now()-interval '1 hour' AND status IN ('sent','bounced','failed'))>0.01
+ THEN RAISE EXCEPTION 'more than 1 %% of mails failed in the last hour'; END IF;
+ IF EXISTS (SELECT 1 FROM auth.mail_queue WHERE due_at<now()-interval '30 minutes' AND locked_until IS NULL)
+ THEN RAISE EXCEPTION 'mail queue stalled: no MAIL_WORKER is sending'; END IF;
 END $$;
 SQL
 if ! test -f "$BACKUP_STAMP" || ! find "$BACKUP_STAMP" -mmin -1560 -print -quit | grep -q .; then

@@ -78,6 +78,11 @@ export async function enqueueMail(tx: Tx, tenantId: string, mail: QueuedMail): P
 		})
 		.execute();
 	if (!suppressed) await tx.insertInto('auth.mailQueue').values({ outboxId: id, tenantId }).execute();
+	await tx
+		.insertInto('auth.mailRetention')
+		.values({ tenantId })
+		.onConflict((conflict) => conflict.doNothing())
+		.execute();
 	if (mail.file ?? (!!mail.contactId && mail.kind !== 'campaign')) {
 		const now = new Date();
 		await tx

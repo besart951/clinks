@@ -2,7 +2,10 @@ import * as mail from '@clinks/contracts/mail';
 import { z } from 'zod';
 import { body, json, route, type RouteDeps, type Router } from './helpers.ts';
 
-export function registerMailRoutes(me: Router, { mailSettings, mailCompose, appointmentMail, caller }: RouteDeps) {
+export function registerMailRoutes(
+	me: Router,
+	{ mailSettings, mailCompose, appointmentMail, mailExport, caller }: RouteDeps,
+) {
 	const params = z.object({ id: z.uuid() });
 	const done = { 204: { description: 'Done' } };
 
@@ -150,5 +153,18 @@ export function registerMailRoutes(me: Router, { mailSettings, mailCompose, appo
 			await appointmentMail.save(c.var.claims, c.req.valid('json'), caller(c));
 			return c.body(null, 204);
 		},
+	);
+
+	me.openapi(
+		route(
+			{
+				method: 'get',
+				path: '/mail/export',
+				tags: ['mail'],
+				responses: { 200: json(z.record(z.string(), z.array(z.unknown()))) },
+			},
+			true,
+		),
+		async (c) => c.json(await mailExport.export(c.var.claims), 200),
 	);
 }

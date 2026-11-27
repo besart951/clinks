@@ -208,14 +208,22 @@ List-Unsubscribe=One-Click`; `POST /mail/unsubscribe/<token>` suppresses scope `
 
 ### 7 · Go-live check
 
-- [ ] e2e on the demo: domain setup screen, compose and send, filing (pasted .eml), newsletter sign-up → confirm →
-      campaign → unsubscribe, reminder appears in Gesendet. e2e against the API with Mailpit: invoice through the
-      outbox with delivery state, newsletter double opt-in and RFC 8058 unsubscribe, a bounce marks the row.
-- [ ] Side effects: data export (consents, senders, outbox without bodies older than 90 days, suppressions), account
-      deletion (personal sender and signature removed), role templates, search, notifications, Flutter OpenAPI.
-- [ ] Retention: outbox bodies deleted after 90 days (metadata kept 2 years for proof), inbound raw messages not kept.
-- [ ] Ops (`docs/ops/livegang.md`): relay account and processor agreement, SPF/DKIM/DMARC for `clinks.ch`,
-      `in.clinks.ch` MX and catch-all mailbox, `MAIL_WORKER` on exactly one instance, alert on `failed` > 1 % per hour.
+- [x] e2e on the demo: domain setup screen, compose and send, newsletter sign-up → confirm → campaign (second
+      approver) → unsubscribe page, appointment-mail settings and the contact switch. e2e against the API with
+      Mailpit: invoice through the outbox with delivery `sent`, newsletter double opt-in, campaign and a mail app's
+      RFC 8058 POST. The demo sends nothing, so reminders in Gesendet and bounces are covered by the integration
+      tests (CI has no inbound mailbox); filing is tested with raw messages there too.
+- [x] Side effects: data export (`GET /mail/export`: domains without keys, senders, forms, consents, suppressions,
+      outbox as a log without bodies; the demo's export leaves out sign-up tokens), account deletion (personal senders
+      go with the user, the signature is on the user), role templates (Physio reception and Spitex planning write
+      mail with `mail.business`), search and notifications unchanged (campaign review notice exists), Flutter
+      OpenAPI regenerated.
+- [x] Retention: outbox bodies, attachments and headers cleared after 90 days, rows deleted after two years, per
+      workspace once a day (`auth.mail_retention`, the hourly prune timer); filed copies under Gesendet are the
+      workspace's mailbox and stay; inbound raw messages are never kept.
+- [x] Ops ([livegang.md](../ops/livegang.md)): relay account and processor agreement, SPF/DKIM/DMARC for `clinks.ch`,
+      `_spf.clinks.ch`, `in.clinks.ch` MX and catch-all mailbox, `API_ORIGIN`, `MAIL_WORKER` on exactly one instance,
+      limits, a probe to Gmail/Outlook; `monitor.sh` alerts on > 1 % failed per hour and on a stalled queue.
 - [ ] Owner: choose the relay provider (EU/CH, SMTP relay allowing own DKIM per customer domain, bounce via
       Return-Path) and the per-plan mail limits; have consent and reminder texts checked.
 
