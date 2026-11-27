@@ -36,7 +36,6 @@
 	let sheet: ContactFormSheet;
 	let mergeDialog: MergeContactsDialog;
 	let importOpen = $state(false);
-	let mergeSet = $state<Contact[]>([]);
 	let confirm = $state<ConfirmRequest | null>(null);
 	const selectedContacts = $derived(
 		(model.resource.data ?? []).filter((contact) => model.selected.includes(contact.id)),
@@ -53,7 +52,6 @@
 	});
 
 	function openMerge(contacts: Contact[]) {
-		mergeSet = contacts;
 		mergeDialog.show(contacts);
 	}
 
@@ -243,7 +241,6 @@
 <ImportContactsDialog bind:open={importOpen} onImport={(drafts) => model.importContacts(drafts)} />
 <MergeContactsDialog
 	bind:this={mergeDialog}
-	contacts={mergeSet}
-	onMerge={(primary, others) => model.merge(primary, others)}
+	onMerge={(primary, others, patch) => model.merge(primary, others, patch)}
 />
 <ConfirmDialog bind:request={confirm} />
