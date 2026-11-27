@@ -1289,3 +1289,34 @@ test('works the mail and the files with the keyboard and lists the keys under «
 	await page.keyboard.press('Backspace');
 	await expect(page.getByRole('navigation', { name: 'Ordnerpfad' }).getByRole('button')).toHaveCount(1);
 });
+
+test('answers right under the conversation and drags mails onto a folder or a task', async ({ page }) => {
+	await page.setViewportSize({ width: 1440, height: 900 });
+	await signIn(page);
+	await page.goto('/#/mail');
+	const rows = page.getByRole('list', { name: 'Posteingang' }).getByRole('listitem');
+	await rows.first().getByRole('button').first().click();
+	const reader = page.getByRole('article').first();
+	const reply = page.getByRole('form', { name: 'Antworten' });
+	await reply.getByRole('textbox').fill('Danke, bis dann.');
+	await reply.getByRole('textbox').press('ControlOrMeta+Enter');
+	await expect(page.getByText('Mail gesendet')).toBeVisible();
+	// The answer joins the conversation: the earlier mail folds, the answer is open.
+	await expect(page.getByText(/^2 Mails im Verlauf$/)).toBeVisible();
+	await expect(reader.page().getByText('Danke, bis dann.')).toBeVisible();
+
+	// Dragging a mail onto «Archiv» moves it; while dragging, «Als Aufgabe» appears as a target too.
+	const count = await rows.count();
+	await rows.nth(1).dragTo(page.getByRole('navigation', { name: 'Ordner' }).getByRole('button', { name: 'Archiv' }));
+	await expect(page.getByText('Verschoben nach Archiv')).toBeVisible();
+	await expect(rows).toHaveCount(count - 1);
+	// The target only exists once the drag started, so the mouse is moved by hand.
+	await rows.nth(1).hover();
+	await page.mouse.down();
+	await page.mouse.move(400, 300, { steps: 5 });
+	const task = page.getByRole('navigation', { name: 'Ordner' }).getByText('Als Aufgabe', { exact: true });
+	const box = (await task.boundingBox())!;
+	await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 5 });
+	await page.mouse.up();
+	await expect(page.getByText('Aufgabe aus Mail erstellt')).toBeVisible();
+});

@@ -1,5 +1,6 @@
 import type { MailId } from '@clinks/domain/ids';
 import type { Contact, MailFolder, MailMessage, MailTemplate } from '@clinks/domain/types';
+import { threadKey, threads, type MailThread } from '@clinks/domain/mail-threads';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { RunOptions, Workspace } from '../../workspace.svelte.ts';
 
@@ -29,15 +30,42 @@ export class MailboxModel {
 		});
 	}
 
-	get messages(): MailMessage[] {
+	/** The folder's conversations, newest first; the search finds a conversation by any of its mails. */
+	readonly threads: MailThread[] = $derived.by(() => {
 		const query = this.search.trim().toLowerCase();
+		return threads((this.resource.data?.mails ?? []).filter((mail) => mail.folder === this.folder)).filter(
+			(thread) =>
+				!query ||
+				thread.mails.some((mail) =>
+					`${mail.subject} ${mail.fromName} ${mail.from} ${mail.body}`.toLowerCase().includes(query),
+				),
+		);
+	});
+	/** Each conversation by the id of its newest mail, which stands for it in the list. */
+	readonly #byLatest = $derived(new Map(this.threads.map((thread) => [thread.latest.id, thread])));
+
+	/** One entry per conversation: its newest mail. */
+	get messages(): MailMessage[] {
+		return this.threads.map((thread) => thread.latest);
+	}
+
+	/** The folder's conversation that `mail` stands for in the list. */
+	threadFor(mail: MailMessage): MailThread | null {
+		return this.#byLatest.get(mail.id) ?? null;
+	}
+
+	/** The mails of that conversation; just the mail when it stands alone. */
+	threadOf(mail: MailMessage): MailMessage[] {
+		return this.threadFor(mail)?.mails ?? [mail];
+	}
+
+	/** The whole conversation for the reading pane, across folders (received, sent, archived), oldest first. */
+	conversation(mail: MailMessage): MailMessage[] {
+		if (mail.folder === 'drafts') return [mail];
+		const key = threadKey(mail);
 		return (this.resource.data?.mails ?? [])
-			.filter(
-				(mail) =>
-					mail.folder === this.folder &&
-					(!query || `${mail.subject} ${mail.fromName} ${mail.from} ${mail.body}`.toLowerCase().includes(query)),
-			)
-			.sort((left, right) => right.sentAt.localeCompare(left.sentAt));
+			.filter((candidate) => candidate.folder !== 'drafts' && threadKey(candidate) === key)
+			.sort((left, right) => left.sentAt.localeCompare(right.sentAt));
 	}
 
 	get selected(): MailMessage | null {
@@ -61,15 +89,18 @@ export class MailboxModel {
 		);
 	}
 
+	/** Opens a conversation and marks its unread mails read. */
 	async select(mail: MailMessage) {
 		this.selectedId = mail.id;
-		if (!mail.read && this.#workspace.session.can('mail.write')) {
-			this.resource.patch((data) => ({
-				...data,
-				mails: data.mails.map((row) => (row.id === mail.id ? { ...row, read: true } : row)),
-			}));
-			await this.#workspace.api.mails.update(mail.id, mail.revision, { read: true }).catch(() => undefined);
-		}
+		const unread = this.threadOf(mail).filter((row) => !row.read);
+		if (unread.length === 0 || !this.#workspace.session.can('mail.write')) return;
+		const ids = new Set(unread.map((row) => row.id));
+		this.resource.patch((data) => ({
+			...data,
+			mails: data.mails.map((row) => (ids.has(row.id) ? { ...row, read: true } : row)),
+		}));
+		for (const row of unread)
+			await this.#workspace.api.mails.update(row.id, row.revision, { read: true }).catch(() => undefined);
 	}
 
 	async setStar(mails: MailMessage[], starred: boolean) {

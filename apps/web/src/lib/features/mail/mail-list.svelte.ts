@@ -13,6 +13,7 @@ import type { MailMessage } from '@clinks/domain/types';
 import { ListModel, type ListAction } from '../list/list-model.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
 import type { MailboxModel } from './mailbox.svelte.ts';
+import { startMailDrag } from './mail-drag.ts';
 
 /** What the mail list hands back to the page, which owns the compose sheet and the appointment sheet. */
 export interface MailListHandlers {
@@ -32,6 +33,8 @@ export function mailList(workspace: Workspace, mailbox: MailboxModel, handlers: 
 	const allRead = (mails: MailMessage[]) => mails.every((mail) => mail.read);
 	const archived = (mails: MailMessage[]) => mails.every((mail) => mail.folder === 'archive');
 	const writes = () => can('mail.write');
+	/** Read, archive and delete act on the whole conversation in the folder, as in mail programs. */
+	const whole = (mails: MailMessage[]) => mails.flatMap((mail) => mailbox.threadOf(mail));
 
 	const actions = (): ListAction<MailMessage>[] => [
 		{
@@ -56,12 +59,12 @@ export function mailList(workspace: Workspace, mailbox: MailboxModel, handlers: 
 		},
 		{
 			id: 'read',
-			label: (mails) => t(allRead(mails) ? 'ui.ws.mail.mark_unread' : 'ui.ws.mail.mark_read'),
-			icon: (mails) => (allRead(mails) ? Mail : MailOpen),
+			label: (mails) => t(allRead(whole(mails)) ? 'ui.ws.mail.mark_unread' : 'ui.ws.mail.mark_read'),
+			icon: (mails) => (allRead(whole(mails)) ? Mail : MailOpen),
 			inline: true,
 			key: 'u',
 			when: (mails) => writes() && mails.every((mail) => mail.folder !== 'drafts'),
-			run: (mails) => mailbox.setRead(mails, !allRead(mails)),
+			run: (mails) => mailbox.setRead(whole(mails), !allRead(whole(mails))),
 		},
 		{
 			id: 'archive',
@@ -70,7 +73,7 @@ export function mailList(workspace: Workspace, mailbox: MailboxModel, handlers: 
 			inline: true,
 			key: 'e',
 			when: (mails) => writes() && mails.every((mail) => mail.folder !== 'drafts'),
-			run: (mails) => mailbox.moveTo(mails, archived(mails) ? 'inbox' : 'archive'),
+			run: (mails) => mailbox.moveTo(whole(mails), archived(mails) ? 'inbox' : 'archive'),
 		},
 		{
 			id: 'task',
@@ -96,11 +99,11 @@ export function mailList(workspace: Workspace, mailbox: MailboxModel, handlers: 
 			key: 'Delete',
 			destructive: true,
 			when: writes,
-			run: (mails) => mailbox.remove(mails),
+			run: (mails) => mailbox.remove(whole(mails)),
 		},
 	];
 
-	return new ListModel<MailMessage, MailId>({
+	const list: ListModel<MailMessage, MailId> = new ListModel<MailMessage, MailId>({
 		t,
 		name: () => t(`ui.ws.mail.folder.${mailbox.folder}`),
 		items: () => mailbox.messages,
@@ -110,5 +113,14 @@ export function mailList(workspace: Workspace, mailbox: MailboxModel, handlers: 
 		open: handlers.open,
 		openOn: 'click',
 		swipe: { start: 'read', end: 'archive' },
+		// Dragging a selected mail takes the whole selection, each with its conversation.
+		drag: (event, mail) => {
+			if (writes())
+				startMailDrag(
+					event,
+					whole(list.targets(mail)).map((entry) => entry.id),
+				);
+		},
 	});
+	return list;
 }

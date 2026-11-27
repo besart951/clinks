@@ -1,15 +1,9 @@
 <script lang="ts">
-	import DeliveryNote from '#lib/components/mail/DeliveryNote.svelte';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import PenSquare from '@lucide/svelte/icons/pen-square';
 	import Inbox from '@lucide/svelte/icons/inbox';
-	import Send from '@lucide/svelte/icons/send';
-	import FileText from '@lucide/svelte/icons/file-text';
-	import Archive from '@lucide/svelte/icons/archive';
 	import Star from '@lucide/svelte/icons/star';
-	import ArrowLeft from '@lucide/svelte/icons/arrow-left';
-	import UserRound from '@lucide/svelte/icons/user-round';
 	import { Button } from '@clinks/ui/components/ui/button';
 	import PageHeader from '#lib/components/common/PageHeader.svelte';
 	import AsyncView from '#lib/components/common/AsyncView.svelte';
@@ -18,15 +12,16 @@
 	import { fillViewport } from '#lib/components/common/fill-viewport';
 	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
 	import MailNav from '#lib/components/mail/MailNav.svelte';
+	import MailFolders from '#lib/components/mail/MailFolders.svelte';
+	import MailReader from '#lib/components/mail/MailReader.svelte';
 	import ComposeSheet from '#lib/components/mail/ComposeSheet.svelte';
 	import { MailboxModel } from '#lib/features/mail/mailbox.svelte';
 	import { mailList } from '#lib/features/mail/mail-list.svelte';
 	import SelectableList from '#lib/components/list/SelectableList.svelte';
 	import ListBar from '#lib/components/list/ListBar.svelte';
-	import { contactName } from '#lib/data/workspace-api';
-	import { mailFolders, type MailFolder, type MailMessage } from '@clinks/domain/types';
+	import type { MailFolder, MailMessage } from '@clinks/domain/types';
 	import type { MailId } from '@clinks/domain/ids';
-	import { href, routeQuery, setQuery } from '#lib/navigation';
+	import { routeQuery, setQuery } from '#lib/navigation';
 	import { useQuickCreate } from '#lib/features/shell/quick-create.svelte';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
@@ -35,7 +30,6 @@
 	const model = new MailboxModel(workspace);
 	const canWrite = $derived(workspace.session.can('mail.write'));
 	let compose: ComposeSheet;
-	const icons = { inbox: Inbox, sent: Send, drafts: FileText, archive: Archive };
 	const list = mailList(workspace, model, {
 		open,
 		reply: (mail) => compose.show({ replyTo: mail }),
@@ -44,8 +38,7 @@
 	const query = routeQuery(page.url);
 	if (query.get('folder')) model.folder = query.get('folder') as MailFolder;
 	if (query.get('message')) model.selectedId = query.get('message') as MailId;
-	/** The reading pane's buttons: the list's actions for the open mail; the ones with a short label spelled out. */
-	const spelled = new Set(['reply', 'archive', 'task', 'appointment']);
+	const canPlan = $derived(workspace.session.can('planner.write') && workspace.session.hasModule('planner'));
 
 	onMount(() => {
 		const stop = model.resource.connect();
@@ -95,30 +88,16 @@
 			class="grid gap-4 lg:grid-cols-[13rem_minmax(18rem,24rem)_1fr] lg:grid-rows-[minmax(0,1fr)]"
 			{@attach fillViewport()}
 		>
-			<nav
-				class="flex flex-wrap gap-1 lg:flex-col lg:flex-nowrap lg:overflow-y-auto"
-				aria-label={workspace.t('ui.ws.mail.folders')}
-			>
-				{#each mailFolders as folder (folder)}
-					{@const Icon = icons[folder]}
-					<button
-						class="hover:bg-muted flex shrink-0 items-center gap-2 rounded-md px-2.5 py-1.5 text-sm aria-pressed:bg-muted aria-pressed:font-medium"
-						aria-pressed={model.folder === folder}
-						onclick={() => chooseFolder(folder)}
-					>
-						<Icon class="size-4" /><span class="flex-1 text-left">{workspace.t(`ui.ws.mail.folder.${folder}`)}</span>
-						{#if folder === 'inbox' && model.unread('inbox') > 0}<span
-								class="bg-primary text-primary-foreground rounded-full px-1.5 text-[11px]"
-							>
-								{model.unread('inbox')}
-							</span>{:else if folder === 'drafts' && model.count('drafts') > 0}<span
-								class="text-muted-foreground text-xs"
-							>
-								{model.count('drafts')}
-							</span>{/if}
-					</button>
-				{/each}
-			</nav>
+			<MailFolders
+				{model}
+				choose={chooseFolder}
+				drops={{
+					task: canPlan ? (mails) => mails.forEach((mail) => void model.toTask(mail)) : undefined,
+					appointment: workspace.session.can('calendar.write')
+						? (mails) => quick.appointment({ contactId: model.contactFor(mails[0])?.id ?? null })
+						: undefined,
+				}}
+			/>
 
 			<section
 				class="flex min-h-0 min-w-0 flex-col gap-2 {selected ? 'hidden lg:flex' : ''}"
@@ -130,15 +109,23 @@
 					{#snippet row(mail: MailMessage)}
 						<span class="flex flex-col gap-0.5 px-3 py-2.5 text-sm">
 							<span class="flex items-center gap-2">
-								{#if !mail.read}<span
+								{#if (model.threadFor(mail)?.unread ?? (mail.read ? 0 : 1)) > 0}<span
 										class="size-2 shrink-0 rounded-full bg-sky-500"
 										aria-label={workspace.t('ui.ws.mail.unread')}
 									></span>{/if}
-								<span class="flex-1 truncate {mail.read ? '' : 'font-semibold'}">
+								<span class="flex-1 truncate {model.threadFor(mail)?.unread ? 'font-semibold' : ''}">
 									{mail.folder === 'inbox'
 										? mail.fromName
 										: mail.to.join(', ') || workspace.t('ui.ws.mail.no_recipient')}
 								</span>
+								{#if (model.threadFor(mail)?.mails.length ?? 1) > 1}<span
+										class="text-muted-foreground text-xs tabular-nums"
+										aria-label={workspace.t('ui.ws.mail.in_conversation', {
+											count: model.threadFor(mail)!.mails.length,
+										})}
+									>
+										{model.threadFor(mail)!.mails.length}
+									</span>{/if}
 								{#if mail.starred}<Star class="size-3.5 fill-amber-400 text-amber-400" />{/if}
 								<span class="text-muted-foreground shrink-0 text-xs">{workspace.i18n.relative(mail.sentAt)}</span>
 							</span>
@@ -161,56 +148,7 @@
 				aria-live="polite"
 			>
 				{#if selected}
-					{@const contact = model.contactFor(selected)}
-					<div class="bg-background sticky top-0 z-[1] flex flex-wrap items-center gap-1 border-b p-2">
-						<Button
-							variant="ghost"
-							size="icon-sm"
-							class="lg:hidden"
-							onclick={() => (model.selectedId = null)}
-							aria-label={workspace.t('ui.ws.calendar.previous')}
-						>
-							<ArrowLeft class="size-4" />
-						</Button>
-						{#each list.actionsFor([selected]) as action (action.id)}
-							{@const Icon = action.icon([selected])}
-							{@const pressed = action.pressed?.([selected])}
-							{#if action.destructive}<div class="flex-1"></div>{/if}
-							<Button
-								variant="ghost"
-								size={spelled.has(action.id) ? 'sm' : 'icon-sm'}
-								class={action.destructive ? 'text-destructive' : ''}
-								aria-label={spelled.has(action.id) ? undefined : action.label([selected])}
-								title={action.label([selected])}
-								aria-pressed={pressed}
-								onclick={() => list.run(action, [selected])}
-							>
-								<Icon class="size-4 {pressed ? action.pressedClass : ''}" />{#if spelled.has(action.id)}{action.label([
-										selected,
-									])}{/if}
-							</Button>
-						{/each}
-					</div>
-					<div class="space-y-4 p-5">
-						<header class="space-y-1">
-							<h2 class="text-lg font-semibold">{selected.subject || workspace.t('ui.ws.mail.no_subject')}</h2>
-							<p class="text-sm">
-								<span class="font-medium">{selected.fromName}</span>
-								<span class="text-muted-foreground">&lt;{selected.from}&gt;</span>
-							</p>
-							<p class="text-muted-foreground text-xs">
-								{workspace.t('ui.ws.mail.to')}: {selected.to.join(', ')} · {workspace.i18n.dateTime(selected.sentAt)}
-								<DeliveryNote delivery={selected.delivery} />
-							</p>
-							{#if contact}<a
-									class="bg-muted inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs hover:underline"
-									href={href(`/contacts/${contact.id}`)}
-								>
-									<UserRound class="size-3" />{contactName(contact)}
-								</a>{/if}
-						</header>
-						<p class="text-sm leading-relaxed whitespace-pre-wrap">{selected.body}</p>
-					</div>
+					<MailReader mail={selected} {model} {list} compose={(options) => compose.show(options)} />
 				{:else}
 					<!-- The pane already has a border: the empty state fills it without a second, dashed one. -->
 					<div class="grid flex-1 place-items-center [&>div]:border-0">
