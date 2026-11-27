@@ -15,7 +15,7 @@ concurrency:
 jobs:
   verify:
     name: Verify (format, lint, types, unit tests, build)
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.event_name == 'push' && 'clinks-zep' || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4 # version from packageManager in package.json
@@ -29,7 +29,7 @@ jobs:
 
   integration:
     name: Integration (API + database)
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.event_name == 'push' && 'clinks-zep' || 'ubuntu-latest' }}
     services:
       postgres:
         image: postgres:18.7
@@ -57,7 +57,7 @@ jobs:
 
   e2e:
     name: Browser tests (mock)
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.event_name == 'push' && 'clinks-zep' || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
@@ -66,6 +66,8 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - if: github.event_name == 'push'
+        run: pnpm --filter @clinks/web exec playwright install --with-deps chrome
       - run: pnpm test:e2e
       - if: failure()
         uses: actions/upload-artifact@v4
@@ -76,7 +78,7 @@ jobs:
 
   e2e-remote:
     name: Browser tests (API, PowerSync, S3)
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.event_name == 'push' && 'clinks-zep' || 'ubuntu-latest' }}
     env:
       S3_ENDPOINT: http://localhost:9000
       S3_BUCKET: clinks-e2e-documents
@@ -92,6 +94,8 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - if: github.event_name == 'push'
+        run: pnpm --filter @clinks/web exec playwright install --with-deps chrome
       # The dev stack; PowerSync starts after the migrations so its sync streams find their tables.
       - run: docker compose -f infra/compose.dev.yml up -d --wait postgres objects mail
       - run: pnpm db:migrate
