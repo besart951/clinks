@@ -1,15 +1,20 @@
 import { toast } from 'svelte-sonner';
 import type { CampaignId } from '@clinks/domain/ids';
-import type { Campaign, CampaignStatus, Contact } from '@clinks/domain/types';
+import type { AudienceView } from '@clinks/contracts/newsletter';
+import type { Campaign, CampaignStats, Contact } from '@clinks/domain/types';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
-import { campaignChecks } from './templates.ts';
+import { campaignChecks } from '@clinks/domain/campaigns';
 
 type CampaignFields = Pick<Campaign, 'name' | 'subject' | 'previewText' | 'body' | 'audienceTag'>;
+type WorkflowStep = 'review' | 'withdraw' | 'approve';
 
-/** One campaign: editing, checks and the draft → review → approved → scheduled/sent workflow. */
+/**
+ * One campaign: editing (synced, content only), checks, and the workflow draft → review → approved → scheduled/sent,
+ * whose steps the server takes (four-eyes rule, audience at sending).
+ */
 export class CampaignEditorModel {
-	readonly resource: Resource<{ campaign: Campaign; contacts: Contact[] }>;
+	readonly resource: Resource<{ campaign: Campaign; contacts: Contact[]; audience: AudienceView }>;
 	value = $state<CampaignFields>({ name: '', subject: '', previewText: '', body: '', audienceTag: '' });
 	scheduleAt = $state('');
 	busy = $state(false);
@@ -20,26 +25,27 @@ export class CampaignEditorModel {
 
 	constructor(workspace: Workspace, id: CampaignId) {
 		this.#workspace = workspace;
-		this.resource = new Resource(workspace.db, ['campaigns'], async () => {
-			const [campaign, contacts] = await Promise.all([
+		this.resource = new Resource(workspace.db, ['campaigns', 'contacts'], async () => {
+			const [campaign, contacts, audience] = await Promise.all([
 				workspace.api.campaigns.get(id),
 				workspace.api.contacts.list().catch(() => []),
+				workspace.campaignWorkflow.audience(id).catch(() => ({ count: 0, suppressed: 0 })),
 			]);
 			if (!this.dirty || this.#initial === '') this.#reset(campaign);
-			return { campaign, contacts };
+			return { campaign, contacts, audience };
 		});
 	}
 
+	/** Tags with how many contacts carry them; the campaign reaches only those who subscribed. */
 	get audiences(): { tag: string; count: number }[] {
-		const contacts = (this.resource.data?.contacts ?? []).filter((contact) => contact.email && !contact.archived);
-		const tags = [...new Set(contacts.flatMap((contact) => contact.tags))].sort();
+		const contacts = this.#subscribed();
+		const tags = [...new Set((this.resource.data?.contacts ?? []).flatMap((contact) => contact.tags))].sort();
 		return tags.map((tag) => ({ tag, count: contacts.filter((contact) => contact.tags.includes(tag)).length }));
 	}
 
+	/** Subscribed contacts with the tag (blocked addresses are left out by the server when sending). */
 	get recipients(): Contact[] {
-		return (this.resource.data?.contacts ?? []).filter(
-			(contact) => contact.email && !contact.archived && contact.tags.includes(this.value.audienceTag),
-		);
+		return this.#subscribed().filter((contact) => contact.tags.includes(this.value.audienceTag));
 	}
 
 	get checks() {
@@ -51,11 +57,14 @@ export class CampaignEditorModel {
 		return this.#workspace.session.can('mail.write') && (status === 'draft' || status === 'review');
 	}
 
-	/** Four-eyes rule: only people who manage settings approve campaigns for sending. */
-	get canApprove() {
-		const campaign = this.resource.data?.campaign;
-		const session = this.#workspace.session;
-		return campaign?.status === 'review' && session.can('mail.write') && session.can('settings.manage');
+	/** Who sent it to review sees «Wartet auf Freigabe»; the server decides whether they may approve it themselves. */
+	get submittedByMe() {
+		return this.resource.data?.campaign.submittedBy === this.#workspace.session.user?.id;
+	}
+
+	/** Patient or client status is health data: the editor reminds that only consenting contacts are reached. */
+	get healthData() {
+		return this.#workspace.session.hasModule('physio') || this.#workspace.session.hasModule('spitex');
 	}
 
 	async save() {
@@ -71,39 +80,66 @@ export class CampaignEditorModel {
 		return saved;
 	}
 
-	async transition(status: CampaignStatus) {
-		let campaign = this.resource.data?.campaign;
+	async step(step: WorkflowStep) {
+		const campaign = this.resource.data?.campaign;
 		if (!campaign) return;
-		if (status !== 'draft' && this.checks.some((check) => check.level === 'error')) {
+		if (step === 'review' && this.checks.some((check) => check.level === 'error')) {
 			toast.error(this.#workspace.t('ui.ws.campaign.fix_errors'));
 			return;
 		}
-		if (this.dirty) campaign = (await this.save()) ?? campaign;
-		const session = this.#workspace.session;
-		const patch: Partial<Campaign> = { status };
-		if (status === 'approved') patch.approvedBy = session.user?.id ?? null;
-		if (status === 'scheduled') patch.scheduledAt = new Date(this.scheduleAt).toISOString();
-		if (status === 'sent') {
-			const recipients = this.recipients.length;
-			patch.sentAt = new Date().toISOString();
-			patch.stats = { recipients, opens: 0, clicks: 0, unsubscribes: 0 };
-		}
-		const current = campaign;
-		const saved = await this.#workspace.run(
-			() => this.#workspace.api.campaigns.update(current.id, current.revision, patch),
-			{
-				success: `ui.ws.campaign.transition_${status}`,
-			},
+		if (this.dirty && !(await this.save())) return;
+		const done = await this.#run(
+			() => this.#workspace.campaignWorkflow.step(campaign.id, step),
+			`ui.ws.campaign.step_${step}`,
 		);
-		if (saved && status === 'review') {
+		if (done && step === 'review') {
 			const people = await this.#workspace.api.people();
 			await this.#workspace.api.notify(
 				people.map((person) => person.id),
 				'system',
-				{ key: 'ui.ws.notification.campaign_review', params: { target: saved.name } },
-				`/mail/campaigns/${saved.id}`,
+				{ key: 'ui.ws.notification.campaign_review', params: { target: campaign.name } },
+				`/mail/campaigns/${campaign.id}`,
 			);
 		}
+	}
+
+	/** «Planen» at the chosen time, or «Jetzt senden». */
+	schedule(now: boolean) {
+		const campaign = this.resource.data?.campaign;
+		if (!campaign) return;
+		const at = now ? null : new Date(this.scheduleAt).toISOString();
+		return this.#run(
+			() => this.#workspace.campaignWorkflow.schedule(campaign.id, at),
+			now ? 'ui.ws.campaign.step_send' : 'ui.ws.campaign.step_schedule',
+		);
+	}
+
+	sendTest() {
+		const campaign = this.resource.data?.campaign;
+		if (!campaign) return;
+		return this.#run(() => this.#workspace.campaignWorkflow.step(campaign.id, 'test'), 'ui.ws.campaign.test_sent', {
+			email: this.#workspace.session.user?.email ?? '',
+		});
+	}
+
+	async #run(action: () => Promise<void>, success: string, successParams?: Record<string, string>) {
+		this.busy = true;
+		try {
+			await action();
+			toast.success(this.#workspace.t(success, successParams));
+			return true;
+		} catch (error) {
+			toast.error(this.#workspace.message(error));
+			return false;
+		} finally {
+			this.busy = false;
+		}
+	}
+
+	#subscribed() {
+		return (this.resource.data?.contacts ?? []).filter(
+			(contact) => contact.email && !contact.archived && contact.newsletter === 'subscribed',
+		);
 	}
 
 	#reset(campaign: Campaign) {
@@ -120,6 +156,16 @@ export class CampaignEditorModel {
 		this.scheduleAt = (campaign.scheduledAt ? new Date(campaign.scheduledAt) : inTwoDays).toISOString().slice(0, 16);
 	}
 }
+
+/** The workflow fields of a new campaign; the server sets them from here on (sync ignores them on upload). */
+const unsent = {
+	status: 'draft' as const,
+	scheduledAt: null,
+	sentAt: null,
+	approvedBy: null,
+	submittedBy: null,
+	stats: { recipients: 0, sent: 0, bounced: 0, unsubscribes: 0 } satisfies CampaignStats,
+};
 
 export class CampaignListModel {
 	readonly resource: Resource<Campaign[]>;
@@ -140,11 +186,7 @@ export class CampaignListModel {
 				previewText: '',
 				body: this.#workspace.t('ui.ws.campaign.default_body'),
 				audienceTag: '',
-				status: 'draft',
-				scheduledAt: null,
-				sentAt: null,
-				approvedBy: null,
-				stats: { recipients: 0, opens: 0, clicks: 0, unsubscribes: 0 },
+				...unsent,
 			}),
 		);
 	}
@@ -155,11 +197,7 @@ export class CampaignListModel {
 				this.#workspace.api.campaigns.create({
 					...campaign,
 					name: this.#workspace.t('ui.ws.campaign.copy_of', { name: campaign.name }),
-					status: 'draft',
-					scheduledAt: null,
-					sentAt: null,
-					approvedBy: null,
-					stats: { recipients: 0, opens: 0, clicks: 0, unsubscribes: 0 },
+					...unsent,
 				}),
 			{ success: 'ui.ws.campaign.duplicated' },
 		);

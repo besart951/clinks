@@ -73,6 +73,8 @@ export const syncedTables = {
 			text('insurance_number', 'insuranceNumber', true),
 			text('language', 'language', true),
 			text('billing_mode', 'billingMode', true),
+			// Absent on a contact created on this device until the server's row syncs back (default «none»).
+			{ column: 'newsletter', field: 'newsletter', type: 'text', nullable: true, serverSet: true },
 		],
 	},
 	appointments: {
@@ -212,11 +214,27 @@ export const syncedTables = {
 			text('preview_text', 'previewText'),
 			text('body', 'body'),
 			text('audience_tag', 'audienceTag'),
-			text('status', 'status'),
-			{ column: 'scheduled_at', field: 'scheduledAt', type: 'timestamp', nullable: true },
-			{ column: 'sent_at', field: 'sentAt', type: 'timestamp', nullable: true },
-			{ column: 'approved_by', field: 'approvedBy', type: 'uuid', nullable: true, references: 'users' },
-			{ column: 'stats', field: 'stats', type: 'json' },
+			// The workflow and the numbers are set through /mail/campaigns/{id}/…, never by an upload.
+			{ column: 'status', field: 'status', type: 'text', serverSet: true },
+			{ column: 'scheduled_at', field: 'scheduledAt', type: 'timestamp', nullable: true, serverSet: true },
+			{ column: 'sent_at', field: 'sentAt', type: 'timestamp', nullable: true, serverSet: true },
+			{
+				column: 'approved_by',
+				field: 'approvedBy',
+				type: 'uuid',
+				nullable: true,
+				references: 'users',
+				serverSet: true,
+			},
+			{
+				column: 'submitted_by',
+				field: 'submittedBy',
+				type: 'uuid',
+				nullable: true,
+				references: 'users',
+				serverSet: true,
+			},
+			{ column: 'stats', field: 'stats', type: 'json', serverSet: true },
 		],
 	},
 	prescriptions: {

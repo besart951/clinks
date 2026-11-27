@@ -122,11 +122,13 @@ export const workspaceSchemas = {
 		previewText: text,
 		body: text,
 		audienceTag: text,
-		status: z.enum(campaignStatuses),
-		scheduledAt: timestamp.nullable(),
-		sentAt: timestamp.nullable(),
-		approvedBy: id.nullable(),
-		stats: z.object({ recipients: count, opens: count, clicks: count, unsubscribes: count }),
+		// Set by the server (POST /mail/campaigns/{id}/…); sync ignores them on upload.
+		status: z.enum(campaignStatuses).optional(),
+		scheduledAt: timestamp.nullable().optional(),
+		sentAt: timestamp.nullable().optional(),
+		approvedBy: id.nullable().optional(),
+		submittedBy: id.nullable().optional(),
+		stats: z.object({ recipients: count, sent: count, bounced: count, unsubscribes: count }).optional(),
 	}),
 	prescriptions: prescriptionSchema.extend({
 		contactId: id,

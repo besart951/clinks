@@ -13,6 +13,8 @@ export const lifetimes: { [purpose in OneTimePurpose]: number } = {
 	invitation: 72 * 60 * 60_000,
 	two_factor: 5 * 60_000,
 	invoice_link: linkLifetimeDays * 24 * 60 * 60_000,
+	// Unconfirmed newsletter sign-ups are deleted after this.
+	newsletter_optin: 7 * 24 * 60 * 60_000,
 };
 
 interface Issue {
@@ -21,6 +23,7 @@ interface Issue {
 	invitationId?: string;
 	tenantId?: string;
 	invoiceSendId?: string;
+	newsletterRequestId?: string;
 	now: Date;
 }
 
@@ -52,6 +55,7 @@ async function insert(db: Db | Tx, id: string, tokenHash: Buffer, issue: Issue) 
 			invitationId: issue.invitationId ?? null,
 			tenantId: issue.tenantId ?? null,
 			invoiceSendId: issue.invoiceSendId ?? null,
+			newsletterRequestId: issue.newsletterRequestId ?? null,
 			tokenHash,
 			expiresAt: new Date(issue.now.getTime() + lifetimes[issue.purpose]),
 			usedAt: null,

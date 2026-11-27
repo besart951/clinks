@@ -77,12 +77,14 @@ InboundSource (IMAP prod / Mailpit API dev) ──► InboundRouter ──► fi
 | `mail_outbox`                    | Tenant, kind (`invoice` / `reminder` / `appointment` / `personal` / `campaign` / `optin` / `system`), sender, to, subject, text, html, attachments (document ids), headers, links (contact, invoice send, campaign, mail row), status (`queued` / `sent` / `bounced` / `failed` / `suppressed`), attempts, error, message id (`<outbox id@clinks.ch>`); due time and lock in `auth.mail_queue` |
 | `mail_suppressions`              | Tenant, address (lower case), reason (`unsubscribed` / `bounced` / `complaint` / `manual`), scope (`newsletter` / `all`), since                                                                                                                                                                                                                                                                |
 | `mail_inbound_addresses`         | Tenant, local part of the filing address, active                                                                                                                                                                                                                                                                                                                                               |
-| `newsletter_forms`               | Tenant, public token, title, intro, tags given on sign-up, consent text, active                                                                                                                                                                                                                                                                                                                |
-| `newsletter_consents`            | Tenant, contact, status (`pending` / `subscribed` / `unsubscribed`), source (`form` / `manual` / `import`), consent text, confirmed at, IP hash, unsubscribe token hash                                                                                                                                                                                                                        |
+| `newsletter_forms`               | Tenant, public token (`<workspace base32>-<random>`, so the page finds its workspace without a cross-tenant lookup), title, intro, tags given on confirmation, consent text, active                                                                                                                                                                                                            |
+| `newsletter_requests`            | A sign-up waiting for its link (one-time token `newsletter_optin`, 7 days): name, address, IP hash. Nothing reaches the contacts before confirmation; expired requests are deleted                                                                                                                                                                                                             |
+| `newsletter_consents`            | Append-only proof per contact (no UPDATE grant): status (`subscribed` / `unsubscribed`), source (`form` / `manual` / `import` / `unsubscribe_link` / `bounce`), consent text, note, IP hash, who, campaign of an unsubscribe. Unsubscribe links carry a MAC instead of a stored token                                                                                                          |
 | `contacts` (synced, new cols)    | `newsletter` (server-set: `none` / `pending` / `subscribed` / `unsubscribed`), `reminders` (bool, default true), `mobile`                                                                                                                                                                                                                                                                      |
 | `users` (new col)                | `mail_signature` (plain text, max 1000)                                                                                                                                                                                                                                                                                                                                                        |
 | `appointments` (synced, new col) | `reminded_at`, `confirmed_mail_at` (server-set)                                                                                                                                                                                                                                                                                                                                                |
 | `invoice_sends` (new cols)       | `outbox_id`, `delivery` (`queued` / `sent` / `bounced` / `failed`) so the invoice log shows delivery                                                                                                                                                                                                                                                                                           |
+| `campaigns` (synced, changed)    | `status`, `scheduled_at`, `sent_at`, `approved_by`, new `submitted_by` and `stats` (recipients, sent, bounced, unsubscribes; no opens or clicks) are server-set; `auth.campaign_queue` holds due campaigns for the worker                                                                                                                                                                      |
 | `tenants.mail_settings` (jsonb)  | `appointmentConfirmation`, `appointmentReminder` (`hoursBefore`, text), `smsEnabled` (false), defaults per kind                                                                                                                                                                                                                                                                                |
 
 All tenant tables with RLS like the others; `mail_outbox` and `newsletter_consents` are not synced (REST), the send
@@ -165,21 +167,27 @@ state the UI needs comes through REST.
 
 ### 5 · Newsletter
 
-- [ ] Consent: contact page shows newsletter status with history; «Einwilligung erfassen» (manual, source and note
-      required) and «Abmelden»; import of a CSV of consents with source `import`.
-- [ ] Sign-up form: public page `#/newsletter/<form token>` (name, e-mail, consent text, honeypot, rate limit per
-      IP) → confirmation mail (kind `optin`) → `#/newsletter/confirm/<token>` sets `subscribed` and adds the tags;
-      unconfirmed requests expire after 7 days and are deleted. Embeddable link and QR code for the practice.
-- [ ] Unsubscribe: `#/unsubscribe/<token>` page (one click, then optional reason), `List-Unsubscribe` with the
-      HTTPS link and `List-Unsubscribe-Post: List-Unsubscribe=One-Click` to `POST /mail/unsubscribe/<token>` on the
-      API; both suppress scope `newsletter` and set the contact `unsubscribed`.
-- [ ] Campaigns: audience = tag ∩ `subscribed` − suppressed, shown as a count before approval; the existing review →
-      approve flow requires a second person when the workspace has more than one `mail.write` member; «Planen» at a
-      time or «Jetzt senden»; the worker expands the audience at send time into outbox rows (throttled), then fills
-      `stats` with recipients, sent, bounced, unsubscribed (opens and clicks are dropped from the UI). Test mail to
-      oneself. Physio/Spitex: a notice that patient status is health data and only consenting contacts are reached.
-- [ ] Tests: double opt-in round trip, expiry, unsubscribe via page and RFC 8058 POST, audience arithmetic,
-      approval rule, headers present, no tracking pixel or rewritten links in the HTML.
+- [x] Consent: contact page shows newsletter status with history; «Einwilligung erfassen» (manual, note required)
+      and «Abmelden»; import of consents (pasted list or CSV content, note required) with source `import`, for
+      existing contacts only (unknown addresses are reported back).
+- [x] Sign-up form: public page `#/newsletter/<form token>` (name, e-mail, consent text, honeypot, rate limit per
+      IP) → confirmation mail (kind `optin`) → `#/newsletter/confirm/<token>` subscribes, adds the tags and records the
+      consent with the text shown; unconfirmed requests are deleted after 7 days. Link and QR code in Settings ›
+      E-Mail.
+- [x] Unsubscribe: `#/unsubscribe/<token>` page (opening changes nothing; one click, then an optional reason),
+      `List-Unsubscribe` with the HTTPS link on the API (`API_ORIGIN`) and `List-Unsubscribe-Post:
+List-Unsubscribe=One-Click`; `POST /mail/unsubscribe/<token>` suppresses scope `newsletter` and sets the contact
+      `unsubscribed`; a browser opening that URL is redirected to the page.
+- [x] Campaigns: audience = tag ∩ `subscribed` − suppressed, shown as a count before sending; review → approve
+      needs a second person when the workspace has more than one `mail.write` member; content is frozen after
+      approval (sync refuses edits; withdraw to draft first); «Planen» at a time or «Jetzt senden»; the worker
+      expands the audience at send time into outbox rows (throttled by the outbox), then `stats` follow delivery:
+      recipients, sent, bounced, unsubscribed (opens and clicks are gone from the UI). Test mail to oneself.
+      Physio/Spitex: a notice that patient status is health data and only consenting contacts are reached.
+- [x] Tests: double opt-in round trip, honeypot, expiry, manual consent and import, unsubscribe via RFC 8058 POST
+      (idempotent, tampered token refused, GET redirects), audience arithmetic, approval rule, frozen content,
+      headers present, no tracking pixel or other links in the HTML (integration); the whole path on the demo and
+      against the API with Mailpit (e2e).
 
 ### 6 · Appointment confirmations and reminders
 

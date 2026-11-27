@@ -1,6 +1,7 @@
 import type { TenantId } from '@clinks/domain/ids';
 import type { BankEntryView, BankImportView } from '@clinks/contracts/finance';
 import type { MailSenderView, StoredMailDomain } from '@clinks/contracts/mail';
+import type { ConsentView, NewsletterFormView } from '@clinks/contracts/newsletter';
 import type {
 	AppNotification,
 	Appointment,
@@ -46,6 +47,20 @@ export type MockMailDomain = StoredMailDomain & { tenantId: TenantId };
 export type MockMailSender = Omit<MailSenderView, 'active'> & { tenantId: TenantId };
 /** The demo's filing address per workspace (apps/api: auth.mail_inbound_addresses). */
 export type MockFilingAddress = { id: string; tenantId: TenantId; address: string };
+/** The demo's newsletter: forms, sign-ups waiting for their link, the consent log and blocked addresses. */
+export type MockNewsletterForm = NewsletterFormView & { tenantId: TenantId };
+export type MockNewsletterRequest = {
+	id: string;
+	tenantId: TenantId;
+	formId: string;
+	firstName: string;
+	lastName: string;
+	email: string;
+	/** The server keeps only a hash in auth.one_time_tokens; the demo keeps the token. */
+	token: string;
+	createdAt: string;
+};
+export type MockNewsletterConsent = ConsentView & { tenantId: TenantId; contactId: string; campaignId: string | null };
 
 export interface Tables {
 	tenants: Tenant;
@@ -78,6 +93,9 @@ export interface Tables {
 	mailDomains: MockMailDomain;
 	mailSenders: MockMailSender;
 	mailFilingAddresses: MockFilingAddress;
+	newsletterForms: MockNewsletterForm;
+	newsletterRequests: MockNewsletterRequest;
+	newsletterConsents: MockNewsletterConsent;
 }
 
 export type TableName = keyof Tables;
@@ -114,6 +132,9 @@ export const tableNames: readonly TableName[] = [
 	'mailDomains',
 	'mailSenders',
 	'mailFilingAddresses',
+	'newsletterForms',
+	'newsletterRequests',
+	'newsletterConsents',
 ];
 
 export type ErrorCode =

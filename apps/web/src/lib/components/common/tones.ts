@@ -1,4 +1,10 @@
-import type { AppointmentStatus, CampaignStatus, InvoiceStatus, TaskPriority } from '@clinks/domain/types';
+import type {
+	AppointmentStatus,
+	CampaignStatus,
+	InvoiceStatus,
+	NewsletterStatus,
+	TaskPriority,
+} from '@clinks/domain/types';
 import type { Tone } from './StatusBadge.svelte';
 
 export const invoiceTone: { [status in InvoiceStatus]: Tone } = {
@@ -31,4 +37,11 @@ export const campaignTone: { [status in CampaignStatus]: Tone } = {
 	approved: 'accent',
 	scheduled: 'info',
 	sent: 'success',
+};
+
+export const newsletterTone: { [status in NewsletterStatus]: Tone } = {
+	none: 'neutral',
+	pending: 'warning',
+	subscribed: 'success',
+	unsubscribed: 'neutral',
 };

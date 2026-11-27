@@ -23,6 +23,7 @@ export const contacts = new Table(
 		insurance_number: column.text,
 		language: column.text,
 		billing_mode: column.text,
+		newsletter: column.text,
 	},
 	{ indexes: { tenant: ['tenant_id'] } },
 );
@@ -236,6 +237,7 @@ export const campaigns = new Table(
 		scheduled_at: column.text,
 		sent_at: column.text,
 		approved_by: column.text,
+		submitted_by: column.text,
 		stats: column.text,
 	},
 	{ indexes: { tenant: ['tenant_id'] } },

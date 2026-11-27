@@ -9,6 +9,8 @@ import { startApi, type Api } from './harness.ts';
  * and are reached only through the API's own queries.
  */
 const withoutTenant = [
+	// Campaigns due to go out across workspaces: ids only, like the mail queue.
+	'auth.campaign_queue',
 	'auth.credentials',
 	// The worker's queue across workspaces: ids only, the mail itself is read in the workspace's scope.
 	'auth.mail_queue',

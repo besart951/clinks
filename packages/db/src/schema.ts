@@ -121,6 +121,7 @@ export interface RecoveryCodeTable {
 
 export type MailKind = 'invoice' | 'reminder' | 'appointment' | 'personal' | 'campaign' | 'optin' | 'system';
 export type MailStatus = MailDelivery;
+export type ConsentSource = 'form' | 'manual' | 'import' | 'unsubscribe_link' | 'bounce';
 /** One DNS record of a sender domain as last checked: what CLinks expects, whether it is there, what was found. */
 export interface DomainCheck {
 	record: 'spf' | 'dkim' | 'dmarc';
@@ -135,7 +136,8 @@ export interface OutboxAttachment {
 	sha256?: string;
 }
 
-export type OneTimePurpose = 'verify_email' | 'reset_password' | 'invitation' | 'two_factor' | 'invoice_link';
+export type OneTimePurpose =
+	'verify_email' | 'reset_password' | 'invitation' | 'two_factor' | 'invoice_link' | 'newsletter_optin';
 
 export interface OneTimeTokenTable {
 	id: string;
@@ -144,6 +146,7 @@ export interface OneTimeTokenTable {
 	invitationId: string | null;
 	tenantId: string | null;
 	invoiceSendId: ColumnType<string | null, string | null | undefined, string | null>;
+	newsletterRequestId: ColumnType<string | null, string | null | undefined, string | null>;
 	tokenHash: Uint8Array;
 	attempts: Defaulted<number>;
 	expiresAt: Date;
@@ -275,12 +278,53 @@ export interface Database {
 		attachments: Defaulted<OutboxAttachment[]>;
 		headers: Defaulted<Record<string, string>>;
 		contactId: string | null;
+		campaignId: ColumnType<string | null, string | null | undefined, string | null>;
 		status: Defaulted<MailStatus>;
 		attempts: Defaulted<number>;
 		error: string | null;
 		messageId: string | null;
 		createdAt: Timestamp;
 		sentAt: Date | null;
+	};
+	newsletterForms: {
+		id: string;
+		tenantId: string;
+		token: string;
+		title: string;
+		intro: string;
+		tags: Defaulted<string[]>;
+		consentText: string;
+		active: Defaulted<boolean>;
+		createdAt: Timestamp;
+		updatedAt: Timestamp;
+	};
+	newsletterRequests: {
+		id: string;
+		tenantId: string;
+		formId: string;
+		firstName: string;
+		lastName: string;
+		email: string;
+		ipHash: string | null;
+		createdAt: Timestamp;
+	};
+	newsletterConsents: {
+		id: string;
+		tenantId: string;
+		contactId: string;
+		status: 'subscribed' | 'unsubscribed';
+		source: ConsentSource;
+		consentText: Defaulted<string>;
+		note: Defaulted<string>;
+		ipHash: string | null;
+		actorId: string | null;
+		campaignId: string | null;
+		createdAt: Timestamp;
+	};
+	'auth.campaignQueue': {
+		campaignId: string;
+		tenantId: string;
+		dueAt: Date;
 	};
 	'auth.mailQueue': {
 		outboxId: string;

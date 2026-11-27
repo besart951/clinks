@@ -516,3 +516,66 @@ test('sends an invoice as a secure link the recipient opens, and books its payme
 	await expect(office.getByText('Bezahlt', { exact: true }).first()).toBeVisible({ timeout: 20_000 });
 	await expect(office.getByText(/^Geöffnet am /)).toBeVisible();
 });
+
+test('signs a reader up with double opt-in, sends them a campaign and lets their mail app unsubscribe them', async ({
+	page,
+}) => {
+	test.setTimeout(180_000);
+	const owner = `newsletter-${newId()}@example.ch`;
+	const reader = `leserin-${newId()}@example.org`;
+	await signUpAndOnboard(page, owner, 'Praxis Rundbrief');
+	await page.goto('/#/settings/mail');
+	await page.getByRole('button', { name: 'Anmeldeformular erstellen' }).click();
+	await page.getByRole('dialog', { name: 'Anmeldeformular' }).getByRole('button', { name: 'Speichern' }).click();
+	const form = await page.getByRole('link', { name: /#\/newsletter\// }).getAttribute('href');
+
+	const visitor = await (await page.context().browser()!.newContext()).newPage();
+	await visitor.goto(form!);
+	await visitor.getByLabel('Vorname').fill('Rita');
+	await visitor.getByLabel('Nachname').fill('Leser');
+	await visitor.getByRole('textbox', { name: 'E-Mail' }).fill(reader);
+	await visitor.getByRole('checkbox').check();
+	await visitor.getByRole('button', { name: 'Anmelden' }).click();
+	await expect(visitor.getByRole('heading', { name: 'Bitte bestätigen Sie die Mail' })).toBeVisible();
+	const optin = await mailFor(reader, /Bitte bestätigen Sie Ihre Anmeldung bei Praxis Rundbrief/);
+	await visitor.goto(/(\/#\/newsletter\/confirm\/[A-Za-z0-9_%-]+)/.exec(optin)![1]);
+	await expect(visitor.getByText(/Danke! Sie erhalten ab jetzt den Newsletter/)).toBeVisible();
+
+	// Alone in the workspace, the owner approves their own campaign.
+	await page.goto('/#/mail/campaigns');
+	await page.getByRole('button', { name: 'Neue Kampagne' }).first().click();
+	await expect(page).toHaveURL(/#\/mail\/campaigns\/[0-9a-f-]{36}/);
+	await page.getByLabel('Zielgruppe (Schlagwort)').click();
+	await page.getByRole('option', { name: /^Newsletter/ }).click();
+	await page.getByLabel('Betreff').fill('Neuigkeiten für {vorname} aus der Praxis');
+	// The step goes to the server once the edits are uploaded; the new status then syncs back.
+	await page.getByRole('button', { name: 'Zur Prüfung einreichen' }).click();
+	await expect(page.getByText('Zur Prüfung eingereicht')).toBeVisible({ timeout: 20_000 });
+	await page.getByRole('button', { name: 'Freigeben' }).click();
+	await expect(page.getByText('Kampagne freigegeben')).toBeVisible();
+	await page.getByRole('tab', { name: /Prüfung/ }).click();
+	await page.getByRole('button', { name: 'Jetzt an 1 senden' }).click();
+	await expect(page.getByText('Kampagne geht jetzt raus')).toBeVisible();
+
+	// The worker expands due campaigns every 30 seconds.
+	let id: string | undefined;
+	for (let attempt = 0; attempt < 120 && !id; attempt++) {
+		const { messages } = (await (
+			await fetch(`${mailpit}/api/v1/search?query=${encodeURIComponent(`to:${reader}`)}`)
+		).json()) as { messages: { ID: string; Subject: string }[] };
+		id = messages.find((message) => message.Subject === 'Neuigkeiten für Rita aus der Praxis')?.ID;
+		if (!id) await new Promise((resolve) => setTimeout(resolve, 500));
+	}
+	const headers = (await (await fetch(`${mailpit}/api/v1/message/${id}/headers`)).json()) as Record<string, string[]>;
+	expect(headers['List-Unsubscribe-Post']).toEqual(['List-Unsubscribe=One-Click']);
+	const oneClick = /^<(.+)>$/.exec(headers['List-Unsubscribe'][0])![1];
+	// What a mail app does for «Abmelden» (RFC 8058).
+	const response = await fetch(oneClick, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+		body: 'List-Unsubscribe=One-Click',
+	});
+	expect(response.status).toBe(204);
+	await visitor.goto(`/#/unsubscribe/${oneClick.split('/').at(-1)}`);
+	await expect(visitor.getByRole('heading', { name: 'Sie sind abgemeldet' })).toBeVisible();
+});

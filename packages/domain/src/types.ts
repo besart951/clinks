@@ -203,7 +203,12 @@ export interface Contact extends TenantRecord<ContactId> {
 	insuranceNumber?: string;
 	language?: string;
 	billingMode?: string;
+	/** Set by the server from the recorded consent; newsletters only reach `subscribed`. */
+	newsletter?: NewsletterStatus;
 }
+
+export const newsletterStatuses = ['none', 'pending', 'subscribed', 'unsubscribed'] as const;
+export type NewsletterStatus = (typeof newsletterStatuses)[number];
 
 export const appointmentKinds = ['meeting', 'physio', 'spitex', 'other'] as const;
 export type AppointmentKind = (typeof appointmentKinds)[number];
@@ -424,7 +429,17 @@ export interface Campaign extends TenantRecord<CampaignId> {
 	scheduledAt: Timestamp | null;
 	sentAt: Timestamp | null;
 	approvedBy: UserId | null;
-	stats: { recipients: number; opens: number; clicks: number; unsubscribes: number };
+	/** Who sent it to review; with more than one person writing mail, someone else approves. */
+	submittedBy: UserId | null;
+	/** Set by the server: audience at sending, handed over, bounced and unsubscribed through this campaign. */
+	stats: CampaignStats;
+}
+
+export interface CampaignStats {
+	recipients: number;
+	sent: number;
+	bounced: number;
+	unsubscribes: number;
 }
 
 export const physioTariffs = ['7301', '7311', '7350'] as const;
