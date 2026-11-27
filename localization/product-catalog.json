@@ -1271,16 +1271,8 @@
         "en-US": "Merge contacts"
       },
       "ui.ws.contacts.merge_text": {
-        "de-CH": "Wähle den Kontakt, der bleibt. Leere Felder werden ergänzt, Termine, Rechnungen, Aufgaben und Mails werden umgehängt.",
-        "en-US": "Choose the contact to keep. Empty fields are filled in; appointments, invoices, tasks and emails are moved to it."
-      },
-      "ui.ws.contacts.merge_keep": {
-        "de-CH": "Diesen Kontakt behalten",
-        "en-US": "Keep this contact"
-      },
-      "ui.ws.contacts.merge_submit": {
-        "de-CH": "Zusammenführen",
-        "en-US": "Merge"
+        "de-CH": "Links der Kontakt, der bleibt, rechts der zusammengeführte. Gleiche Werte sind ausgegraut. Einen anderen Wert per Pfeil oder Ziehen in die Mitte übernehmen oder dort selbst ändern.",
+        "en-US": "On the left the contact that stays, on the right the one merged into it. Equal values are greyed out. Take another value with its arrow or by dragging it into the middle, or edit it there."
       },
       "ui.ws.contacts.description": {
         "de-CH": "Eine Kundenbasis für alle Module: Patientinnen, Klienten, Firmen und Kostenträger.",
@@ -6761,6 +6753,46 @@
       "ui.ws.spitex.edit_client": {
         "de-CH": "Angaben von {name} bearbeiten",
         "en-US": "Edit the details of {name}"
+      },
+      "ui.ws.contacts.merge_kept": {
+        "de-CH": "Bleibt",
+        "en-US": "Stays"
+      },
+      "ui.ws.contacts.merge_result": {
+        "de-CH": "Ergebnis",
+        "en-US": "Result"
+      },
+      "ui.ws.contacts.merge_merged": {
+        "de-CH": "Wird zusammengeführt",
+        "en-US": "Merged into it"
+      },
+      "ui.ws.contacts.merge_swap": {
+        "de-CH": "Seiten tauschen",
+        "en-US": "Swap sides"
+      },
+      "ui.ws.contacts.merge_take": {
+        "de-CH": "«{value}» als {field} übernehmen",
+        "en-US": "Use “{value}” as {field}"
+      },
+      "ui.ws.contacts.merge_conflicts": {
+        "de-CH": "{count} Felder unterscheiden sich.",
+        "en-US": "{count} fields differ."
+      },
+      "ui.ws.contacts.merge_no_conflicts": {
+        "de-CH": "Keine widersprüchlichen Werte.",
+        "en-US": "No conflicting values."
+      },
+      "ui.ws.contacts.merge_rest": {
+        "de-CH": "Schlagwörter werden vereint; Termine, Aufgaben, Mails und Rechnungen wandern zum Kontakt, der bleibt.",
+        "en-US": "Tags are combined; appointments, tasks, mails and invoices move to the contact that stays."
+      },
+      "ui.ws.contacts.merge_submit_count": {
+        "de-CH": "{count} Kontakte zusammenführen",
+        "en-US": "Merge {count} contacts"
+      },
+      "ui.ws.contacts.merge_submit": {
+        "de-CH": "Zusammenführen",
+        "en-US": "Merge"
       }
     }
   }

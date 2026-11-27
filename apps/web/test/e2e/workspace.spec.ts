@@ -505,6 +505,7 @@ test('offers the calendar basics in every calendar view: hidden weekdays per vie
 
 	// The calendar keeps its own days.
 	await page.goto('/#/calendar?view=week');
+	await expect(page.getByRole('heading', { level: 1, name: 'Kalender' })).toBeVisible();
 	await expect(page.getByRole('button', { name: /ausgeblendet/ })).toHaveCount(0);
 
 	// The staff page has the small calendar now too.
@@ -543,6 +544,42 @@ test('writes to a contact’s address in CLinks or the mail program, and remembe
 	await expect(page.getByRole('dialog', { name: 'E-Mail schreiben' })).toHaveCount(0);
 	await page.goto('/#/settings/profile');
 	await expect(page.getByLabel('E-Mails schreiben mit')).toContainText('CLinks');
+});
+
+test('merges duplicates in three columns: equal values greyed, others taken by arrow or by dragging', async ({
+	page,
+}) => {
+	await signIn(page);
+	for (const phone of ['032 111 11 11', '079 222 22 22']) {
+		await page.goto('/#/contacts?new=1');
+		await page.getByLabel('Vorname').fill('Dora');
+		await page.getByLabel('Nachname').fill('Doppelt');
+		await page.getByRole('textbox', { name: 'E-Mail' }).fill('dora.doppelt@example.ch');
+		await page.getByRole('textbox', { name: 'Telefon' }).fill(phone);
+		await page.getByRole('button', { name: 'Speichern' }).click();
+		await expect(page.getByRole('heading', { level: 1, name: 'Dora Doppelt' })).toBeVisible();
+	}
+	await page.goto('/#/contacts');
+	await page.getByRole('searchbox', { name: 'Name, E-Mail, Telefon, Ort …' }).fill('Doppelt');
+	for (const box of await page.getByRole('checkbox', { name: 'Dora Doppelt auswählen' }).all()) await box.check();
+	await page.getByRole('region', { name: 'Auswahl' }).getByRole('button', { name: 'Zusammenführen' }).click();
+	const dialog = page.getByRole('dialog', { name: 'Kontakte zusammenführen' });
+	await expect(dialog.getByText('1 Felder unterscheiden sich.')).toBeVisible();
+	// Equal values offer nothing to take.
+	await expect(dialog.getByRole('button', { name: /als E-Mail übernehmen/ })).toHaveCount(0);
+	const phone = dialog.getByRole('textbox', { name: 'Telefon' });
+	const first = await phone.inputValue();
+	const other = first === '032 111 11 11' ? '079 222 22 22' : '032 111 11 11';
+	await dialog.getByRole('button', { name: `«${other}» als Telefon übernehmen` }).click();
+	await expect(phone).toHaveValue(other);
+	await dialog.getByRole('button', { name: `«${first}» als Telefon übernehmen` }).dragTo(phone);
+	await expect(phone).toHaveValue(first);
+	await phone.fill('031 333 33 33');
+	await dialog.getByRole('button', { name: '2 Kontakte zusammenführen' }).click();
+	await expect(dialog).toBeHidden();
+	await expect(page.getByRole('main').getByRole('link', { name: 'Dora Doppelt' })).toHaveCount(1);
+	await page.getByRole('main').getByRole('link', { name: 'Dora Doppelt' }).click();
+	await expect(page.getByText('031 333 33 33')).toBeVisible();
 });
 
 test('sets the QR-IBAN and the payment term for invoices', async ({ page }) => {

@@ -114,12 +114,10 @@ export class ContactsModel {
 		return result !== null;
 	}
 
-	/** Keeps the first contact, fills its empty fields from the others and moves all references to it. */
-	async merge(primary: Contact, others: Contact[]) {
+	/** Keeps `primary` with the decided values (`@clinks/domain/contact-merge`) and moves all references to it. */
+	async merge(primary: Contact, others: Contact[], patch: Partial<Contact>) {
 		const { api } = this.#workspace;
 		const otherIds = new Set<string>(others.map((contact) => contact.id));
-		const fill = <K extends 'email' | 'phone' | 'insurer' | 'notes'>(key: K) =>
-			primary[key] || others.find((other) => other[key])?.[key] || '';
 		const done = await this.#workspace.run(
 			async () => {
 				const repoint = async <T extends { id: string; revision: number; contactId: ContactId | null }>(
@@ -138,13 +136,7 @@ export class ContactsModel {
 				if (this.#workspace.session.can('finance.read')) {
 					await repoint(await api.invoices.list(), (id, revision, patch) => api.invoices.update(id, revision, patch));
 				}
-				await api.contacts.update(primary.id, primary.revision, {
-					email: fill('email'),
-					phone: fill('phone'),
-					insurer: fill('insurer'),
-					notes: [primary.notes, ...others.map((other) => other.notes)].filter(Boolean).join('\n\n'),
-					tags: [...new Set([primary, ...others].flatMap((contact) => contact.tags))],
-				});
+				await api.contacts.update(primary.id, primary.revision, patch);
 				for (const other of others) await api.contacts.remove(other.id);
 			},
 			{ success: 'ui.ws.contacts.merged', successParams: { count: others.length + 1 } },
