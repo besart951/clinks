@@ -11,6 +11,8 @@ import { RateLimiter } from './rate-limit.ts';
 import type { Services } from './services/context.ts';
 import { MailWorker } from './services/mail-worker.ts';
 import { InboundMail } from './services/inbound.ts';
+import { CampaignDispatcher } from './services/campaigns.ts';
+import { expireSignUps } from './services/newsletter-signup.ts';
 import { imapSource, mailpitSource } from './inbound-sources.ts';
 import { pruneExpiredTokens } from './services/sessions.ts';
 import { TokenService } from './tokens.ts';
@@ -70,17 +72,33 @@ const inboundTimer = inbound
 		}, 30_000)
 	: undefined;
 inboundTimer?.unref();
+const campaigns = new CampaignDispatcher(services);
+const campaignTimer = config.MAIL_WORKER
+	? setInterval(() => {
+			void campaigns
+				.dispatch()
+				.catch((error: unknown) =>
+					console.error(
+						JSON.stringify({ event: 'mail.campaign_failed', errorType: (error as Error)?.name ?? 'Error' }),
+					),
+				);
+		}, 30_000)
+	: undefined;
+campaignTimer?.unref();
 
 const server = serve({ fetch: app.fetch, port: config.PORT }, (info) =>
 	console.log(`CLinks API on http://localhost:${info.port}`),
 );
 
 const pruneTimer = setInterval(() => {
-	void pruneExpiredTokens(db, new Date()).catch((error: unknown) =>
-		console.error(
-			JSON.stringify({ event: 'auth.prune_failed', message: error instanceof Error ? error.message : String(error) }),
-		),
-	);
+	// Unconfirmed sign-ups first: deleting them by their expired link needs the link still there.
+	void expireSignUps(db, new Date())
+		.then(() => pruneExpiredTokens(db, new Date()))
+		.catch((error: unknown) =>
+			console.error(
+				JSON.stringify({ event: 'auth.prune_failed', message: error instanceof Error ? error.message : String(error) }),
+			),
+		);
 }, 60 * 60_000);
 pruneTimer.unref();
 
@@ -92,6 +110,7 @@ for (const signal of ['SIGINT', 'SIGTERM'] as const) {
 		clearInterval(pruneTimer);
 		mailWorker.stop();
 		clearInterval(inboundTimer);
+		clearInterval(campaignTimer);
 		const timeout = setTimeout(() => {
 			void db.destroy().finally(() => process.exit(0));
 		}, 10_000);

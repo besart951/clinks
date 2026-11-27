@@ -185,6 +185,9 @@ function emptySnapshot(): Snapshot {
 		mailDomains: [],
 		mailSenders: [],
 		mailFilingAddresses: [],
+		newsletterForms: [],
+		newsletterRequests: [],
+		newsletterConsents: [],
 	};
 }
 
@@ -589,10 +592,11 @@ function seedMail(context: SeedContext, tenantId: TenantId, tenantName: string, 
 			scheduledAt: status === 'scheduled' ? new Date(context.now.getTime() + 3 * 86_400_000).toISOString() : null,
 			sentAt: status === 'sent' ? new Date(context.now.getTime() - 12 * 86_400_000).toISOString() : null,
 			approvedBy: status === 'scheduled' || status === 'sent' ? me.id : null,
+			submittedBy: status === 'draft' ? null : me.id,
 			stats: {
 				recipients,
-				opens: Math.round(recipients * 0.46),
-				clicks: Math.round(recipients * 0.12),
+				sent: recipients,
+				bounced: Math.round(recipients * 0.02),
 				unsubscribes: Math.round(recipients * 0.01),
 			},
 		});
@@ -831,6 +835,23 @@ export function createSeed(now: Date = new Date(), seed = 20261121): Snapshot {
 		company(context, physioId, name, ['Kostenträger']),
 	);
 	for (const patient of patients.slice(0, 20)) patient.tags.push('Newsletter');
+	// Most of them agreed to the newsletter in the practice's previous program; the rest only carry the tag. Written
+	// without drawing from the seeded random numbers, so the demo data after this stays as it was.
+	for (const patient of patients.slice(0, 16)) {
+		patient.newsletter = 'subscribed';
+		context.snapshot.newsletterConsents.push({
+			id: `${patient.id}-consent`,
+			createdAt: patient.createdAt,
+			tenantId: physioId,
+			contactId: patient.id,
+			campaignId: null,
+			status: 'subscribed',
+			source: 'import',
+			consentText: '',
+			note: 'Übernahme aus dem bisherigen Programm',
+			actorName: `${besi.firstName} ${besi.lastName}`,
+		});
+	}
 	const physioTherapists = physioStaff.filter((member) => member.role === 'user').map((member) => member.user);
 	seedCalendar(context, physioId, 'physio', [besi, ...physioTherapists], patients);
 	seedFinance(context, physioId, 'physio', [...patients.slice(0, 14), ...physioCompanies]);

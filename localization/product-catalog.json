@@ -2018,26 +2018,6 @@
         "de-CH": "Bitte zuerst die rot markierten Punkte beheben.",
         "en-US": "Please fix the items marked in red first."
       },
-      "ui.ws.campaign.transition_draft": {
-        "de-CH": "Zurück zum Entwurf",
-        "en-US": "Back to draft"
-      },
-      "ui.ws.campaign.transition_review": {
-        "de-CH": "Zur Prüfung eingereicht",
-        "en-US": "Submitted for review"
-      },
-      "ui.ws.campaign.transition_approved": {
-        "de-CH": "Kampagne freigegeben",
-        "en-US": "Campaign approved"
-      },
-      "ui.ws.campaign.transition_scheduled": {
-        "de-CH": "Versand geplant",
-        "en-US": "Sending scheduled"
-      },
-      "ui.ws.campaign.transition_sent": {
-        "de-CH": "Kampagne versendet",
-        "en-US": "Campaign sent"
-      },
       "ui.ws.campaign.untitled": {
         "de-CH": "Neue Kampagne",
         "en-US": "New campaign"
@@ -2094,14 +2074,6 @@
         "de-CH": "Empfänger",
         "en-US": "Recipients"
       },
-      "ui.ws.campaign.opens": {
-        "de-CH": "Öffnungen",
-        "en-US": "Opens"
-      },
-      "ui.ws.campaign.clicks": {
-        "de-CH": "Klicks",
-        "en-US": "Clicks"
-      },
       "ui.ws.campaign.sent_at": {
         "de-CH": "Versendet am {date}",
         "en-US": "Sent on {date}"
@@ -2143,8 +2115,8 @@
         "en-US": "Choose audience"
       },
       "ui.ws.campaign.audience_option": {
-        "de-CH": "{tag} · {count} Kontakte",
-        "en-US": "{tag} · {count} contacts"
+        "de-CH": "{tag} · {count} mit Einwilligung",
+        "en-US": "{tag} · {count} consenting"
       },
       "ui.ws.campaign.length": {
         "de-CH": "{count} Zeichen",
@@ -2191,8 +2163,8 @@
         "en-US": "Choose an audience for a personal preview."
       },
       "ui.ws.campaign.footer": {
-        "de-CH": "Du erhältst diese Mail von {company}. Abmelden · Einstellungen",
-        "en-US": "You receive this email from {company}. Unsubscribe · Preferences"
+        "de-CH": "Du erhältst diese Mail von {company}, weil du eingewilligt hast. Vom Newsletter abmelden",
+        "en-US": "You get this mail from {company} because you consented. Unsubscribe from the newsletter"
       },
       "ui.ws.campaign.check_subject_missing": {
         "de-CH": "Der Betreff fehlt.",
@@ -2231,12 +2203,12 @@
         "en-US": "Tip: {vorname} makes the email more personal."
       },
       "ui.ws.campaign.check_no_recipients": {
-        "de-CH": "Keine Empfänger in der gewählten Zielgruppe.",
-        "en-US": "No recipients in the chosen audience."
+        "de-CH": "Niemand in der Zielgruppe hat eingewilligt.",
+        "en-US": "Nobody in the audience has consented."
       },
       "ui.ws.campaign.check_recipients": {
-        "de-CH": "{count} Empfänger mit E-Mail-Adresse.",
-        "en-US": "{count} recipients with an email address."
+        "de-CH": "{count} Empfänger mit Einwilligung.",
+        "en-US": "{count} recipients with consent."
       },
       "ui.ws.campaign.check_unsubscribe": {
         "de-CH": "Abmeldelink wird automatisch eingefügt.",
@@ -4133,14 +4105,6 @@
       "ui.ws.campaign.scheduled_label": {
         "de-CH": "Geplant für",
         "en-US": "Scheduled for"
-      },
-      "ui.ws.campaign.stat_clicks": {
-        "de-CH": "Klicks",
-        "en-US": "Clicks"
-      },
-      "ui.ws.campaign.stat_opens": {
-        "de-CH": "Geöffnet",
-        "en-US": "Opens"
       },
       "ui.ws.campaign.stat_recipients": {
         "de-CH": "Empfänger",
@@ -6269,6 +6233,366 @@
       "ui.ws.mail.sent_suppressed": {
         "de-CH": "Nicht gesendet an {addresses}: Die Adresse war zuvor nicht zustellbar.",
         "en-US": "Not sent to {addresses}: the address bounced before."
+      },
+      "error.ws.campaign_in_past": {
+        "de-CH": "Der Zeitpunkt liegt in der Vergangenheit.",
+        "en-US": "The time is in the past."
+      },
+      "error.ws.campaign_not_ready": {
+        "de-CH": "Die Kampagne hat noch Fehler: Betreff und Empfänger sind nötig.",
+        "en-US": "The campaign still has errors: subject and recipients are needed."
+      },
+      "error.ws.campaign_second_person": {
+        "de-CH": "Eine zweite Person muss die Kampagne freigeben.",
+        "en-US": "A second person has to approve the campaign."
+      },
+      "error.ws.campaign_wrong_step": {
+        "de-CH": "Die Kampagne ist inzwischen in einem anderen Schritt. Bitte neu laden.",
+        "en-US": "The campaign has moved to another step meanwhile. Please reload."
+      },
+      "error.ws.newsletter_form_unknown": {
+        "de-CH": "Dieses Anmeldeformular gibt es nicht mehr.",
+        "en-US": "This sign-up form no longer exists."
+      },
+      "error.ws.newsletter_link_invalid": {
+        "de-CH": "Dieser Link ist abgelaufen oder wurde schon verwendet.",
+        "en-US": "This link has expired or was used already."
+      },
+      "error.ws.newsletter_consent_required": {
+        "de-CH": "Bitte bestätigen Sie die Einwilligung.",
+        "en-US": "Please confirm your consent."
+      },
+      "mail.newsletter.optin_subject": {
+        "de-CH": "Bitte bestätigen Sie Ihre Anmeldung bei {tenant}",
+        "en-US": "Please confirm your sign-up with {tenant}"
+      },
+      "mail.newsletter.optin_body": {
+        "de-CH": "Guten Tag {name}\n\nSie haben sich für den Newsletter von {tenant} angemeldet. Bitte bestätigen Sie die Anmeldung mit dem Link. Ohne Bestätigung erhalten Sie nichts, und die Anfrage wird nach 7 Tagen gelöscht.\n\n{link}\n\nWaren Sie das nicht? Dann ignorieren Sie diese Mail.",
+        "en-US": "Hello {name}\n\nYou signed up for the newsletter of {tenant}. Please confirm with the link. Without confirmation you receive nothing, and the request is deleted after 7 days.\n\n{link}\n\nNot you? Then ignore this mail."
+      },
+      "mail.newsletter.optin_button": {
+        "de-CH": "Anmeldung bestätigen",
+        "en-US": "Confirm sign-up"
+      },
+      "mail.newsletter.unsubscribe": {
+        "de-CH": "Vom Newsletter abmelden",
+        "en-US": "Unsubscribe from the newsletter"
+      },
+      "ui.ws.campaign.stat_sent": {
+        "de-CH": "Zugestellt",
+        "en-US": "Handed over"
+      },
+      "ui.ws.campaign.stat_bounced": {
+        "de-CH": "Unzustellbar",
+        "en-US": "Bounced"
+      },
+      "ui.ws.campaign.step_review": {
+        "de-CH": "Zur Prüfung eingereicht",
+        "en-US": "Sent to review"
+      },
+      "ui.ws.campaign.step_withdraw": {
+        "de-CH": "Zurück zum Entwurf",
+        "en-US": "Back to draft"
+      },
+      "ui.ws.campaign.step_approve": {
+        "de-CH": "Kampagne freigegeben",
+        "en-US": "Campaign approved"
+      },
+      "ui.ws.campaign.step_schedule": {
+        "de-CH": "Versand geplant",
+        "en-US": "Sending scheduled"
+      },
+      "ui.ws.campaign.step_send": {
+        "de-CH": "Kampagne geht jetzt raus",
+        "en-US": "The campaign is going out now"
+      },
+      "ui.ws.campaign.send_test": {
+        "de-CH": "Testmail an mich",
+        "en-US": "Test mail to me"
+      },
+      "ui.ws.campaign.test_sent": {
+        "de-CH": "Testmail an {email} geschickt",
+        "en-US": "Test mail sent to {email}"
+      },
+      "ui.ws.campaign.review_waiting_text": {
+        "de-CH": "Arbeiten mehrere Personen mit Mails, gibt eine zweite Person frei.",
+        "en-US": "When several people work with mail, a second person approves."
+      },
+      "ui.ws.campaign.audience_now": {
+        "de-CH": "Erreicht jetzt {count} Kontakte mit Einwilligung.",
+        "en-US": "Reaches {count} consenting contacts now."
+      },
+      "ui.ws.campaign.audience_suppressed": {
+        "de-CH": "{count} Adressen sind gesperrt (unzustellbar oder abgemeldet).",
+        "en-US": "{count} addresses are blocked (bounced or unsubscribed)."
+      },
+      "ui.ws.campaign.health_notice": {
+        "de-CH": "Ob jemand Patient:in oder Klient:in ist, sind Gesundheitsdaten. Der Newsletter erreicht nur Kontakte, die eingewilligt haben – schreibe nichts, was auf eine Behandlung schliessen lässt.",
+        "en-US": "Whether someone is a patient or client is health data. The newsletter reaches only contacts who consented – write nothing that points to a treatment."
+      },
+      "ui.ws.campaign.no_tracking": {
+        "de-CH": "CLinks zählt keine Öffnungen und Klicks: Die Mails enthalten weder Zählpixel noch umgeleitete Links.",
+        "en-US": "CLinks counts no opens or clicks: the mails carry no tracking pixels or redirected links."
+      },
+      "ui.ws.campaign.demo_unsubscribe": {
+        "de-CH": "Abmeldeseite ansehen, wie {email} sie bekommt (Demo)",
+        "en-US": "See the unsubscribe page as {email} gets it (demo)"
+      },
+      "ui.ws.newsletter_public.intro": {
+        "de-CH": "Neuigkeiten von {tenant} per E-Mail.",
+        "en-US": "News from {tenant} by e-mail."
+      },
+      "ui.ws.newsletter_public.first_name": {
+        "de-CH": "Vorname",
+        "en-US": "First name"
+      },
+      "ui.ws.newsletter_public.last_name": {
+        "de-CH": "Nachname",
+        "en-US": "Last name"
+      },
+      "ui.ws.newsletter_public.email": {
+        "de-CH": "E-Mail",
+        "en-US": "E-mail"
+      },
+      "ui.ws.newsletter_public.submit": {
+        "de-CH": "Anmelden",
+        "en-US": "Sign up"
+      },
+      "ui.ws.newsletter_public.privacy": {
+        "de-CH": "Sie erhalten zuerst eine Mail mit einem Bestätigungslink. Abmelden können Sie sich jederzeit über den Link in jedem Newsletter von {tenant}.",
+        "en-US": "You first receive a mail with a confirmation link. You can unsubscribe any time through the link in every newsletter from {tenant}."
+      },
+      "ui.ws.newsletter_public.check_mail": {
+        "de-CH": "Bitte bestätigen Sie die Mail",
+        "en-US": "Please confirm the mail"
+      },
+      "ui.ws.newsletter_public.check_mail_text": {
+        "de-CH": "Wir haben einen Bestätigungslink an {email} geschickt.",
+        "en-US": "We sent a confirmation link to {email}."
+      },
+      "ui.ws.newsletter_public.expires": {
+        "de-CH": "Erst mit dem Klick auf den Link sind Sie angemeldet. Der Link gilt 7 Tage; ohne Bestätigung wird die Anfrage gelöscht.",
+        "en-US": "You are signed up only once you click the link. It is valid for 7 days; without confirmation the request is deleted."
+      },
+      "ui.ws.newsletter_public.demo_link": {
+        "de-CH": "Bestätigungslink öffnen (Demo: es wird keine Mail verschickt)",
+        "en-US": "Open the confirmation link (demo: no mail is sent)"
+      },
+      "ui.ws.newsletter_public.confirm_title": {
+        "de-CH": "Anmeldung bestätigen",
+        "en-US": "Confirm sign-up"
+      },
+      "ui.ws.newsletter_public.confirmed": {
+        "de-CH": "Danke! Sie erhalten ab jetzt den Newsletter von {tenant}.",
+        "en-US": "Thank you! From now on you receive the newsletter from {tenant}."
+      },
+      "ui.ws.unsubscribe.title": {
+        "de-CH": "Newsletter von {tenant} abbestellen",
+        "en-US": "Unsubscribe from the newsletter of {tenant}"
+      },
+      "ui.ws.unsubscribe.text": {
+        "de-CH": "Mit einem Klick erhalten Sie keine Newsletter von {tenant} mehr. Rechnungen und Terminmails sind davon nicht betroffen.",
+        "en-US": "With one click you receive no more newsletters from {tenant}. Invoices and appointment mails are not affected."
+      },
+      "ui.ws.unsubscribe.button": {
+        "de-CH": "Abmelden",
+        "en-US": "Unsubscribe"
+      },
+      "ui.ws.unsubscribe.done_title": {
+        "de-CH": "Sie sind abgemeldet",
+        "en-US": "You are unsubscribed"
+      },
+      "ui.ws.unsubscribe.done": {
+        "de-CH": "{tenant} schickt Ihnen keine Newsletter mehr.",
+        "en-US": "{tenant} sends you no more newsletters."
+      },
+      "ui.ws.unsubscribe.reason": {
+        "de-CH": "Möchten Sie uns sagen, warum? (freiwillig)",
+        "en-US": "Would you like to tell us why? (optional)"
+      },
+      "ui.ws.unsubscribe.send_reason": {
+        "de-CH": "Senden",
+        "en-US": "Send"
+      },
+      "ui.ws.unsubscribe.thanks": {
+        "de-CH": "Danke für Ihre Rückmeldung.",
+        "en-US": "Thank you for your feedback."
+      },
+      "ui.ws.newsletter_forms.title": {
+        "de-CH": "Newsletter-Anmeldung",
+        "en-US": "Newsletter sign-up"
+      },
+      "ui.ws.newsletter_forms.text": {
+        "de-CH": "Ein Formular mit Double-Opt-in: Erst nach dem Klick auf den Bestätigungslink wird der Kontakt angelegt und erhält Newsletter. Den Link auf die Website stellen oder den QR-Code am Empfang auflegen.",
+        "en-US": "A form with double opt-in: only after the click on the confirmation link is the contact added and gets newsletters. Put the link on the website or the QR code at the desk."
+      },
+      "ui.ws.newsletter_forms.empty": {
+        "de-CH": "Noch kein Anmeldeformular.",
+        "en-US": "No sign-up form yet."
+      },
+      "ui.ws.newsletter_forms.new": {
+        "de-CH": "Anmeldeformular erstellen",
+        "en-US": "Create sign-up form"
+      },
+      "ui.ws.newsletter_forms.import": {
+        "de-CH": "Einwilligungen importieren",
+        "en-US": "Import consents"
+      },
+      "ui.ws.newsletter_forms.active": {
+        "de-CH": "Aktiv",
+        "en-US": "Active"
+      },
+      "ui.ws.newsletter_forms.remove": {
+        "de-CH": "Löschen",
+        "en-US": "Delete"
+      },
+      "ui.ws.newsletter_forms.removed": {
+        "de-CH": "Anmeldeformular gelöscht",
+        "en-US": "Sign-up form deleted"
+      },
+      "ui.ws.newsletter_forms.saved": {
+        "de-CH": "Anmeldeformular gespeichert",
+        "en-US": "Sign-up form saved"
+      },
+      "ui.ws.newsletter_forms.qr": {
+        "de-CH": "QR-Code für «{title}»",
+        "en-US": "QR code for “{title}”"
+      },
+      "ui.ws.newsletter_forms.default_title": {
+        "de-CH": "Unser Newsletter",
+        "en-US": "Our newsletter"
+      },
+      "ui.ws.newsletter_forms.default_consent": {
+        "de-CH": "Ich möchte den Newsletter von {tenant} per E-Mail erhalten. Ich kann mich jederzeit über den Link in jeder Ausgabe abmelden.",
+        "en-US": "I would like to receive the newsletter of {tenant} by e-mail. I can unsubscribe any time through the link in every issue."
+      },
+      "ui.ws.newsletter_forms.dialog_title": {
+        "de-CH": "Anmeldeformular",
+        "en-US": "Sign-up form"
+      },
+      "ui.ws.newsletter_forms.dialog_text": {
+        "de-CH": "So sieht die öffentliche Seite aus. Der Einwilligungstext wird mit jeder Anmeldung als Nachweis gespeichert.",
+        "en-US": "This is what the public page shows. The consent text is stored with every sign-up as proof."
+      },
+      "ui.ws.newsletter_forms.form_title": {
+        "de-CH": "Titel",
+        "en-US": "Title"
+      },
+      "ui.ws.newsletter_forms.intro": {
+        "de-CH": "Einleitung",
+        "en-US": "Introduction"
+      },
+      "ui.ws.newsletter_forms.tags": {
+        "de-CH": "Schlagworte",
+        "en-US": "Tags"
+      },
+      "ui.ws.newsletter_forms.tags_hint": {
+        "de-CH": "Mit Komma getrennt; der Kontakt erhält sie bei der Bestätigung. Kampagnen wählen ihre Zielgruppe nach Schlagwort.",
+        "en-US": "Comma-separated; the contact gets them on confirmation. Campaigns pick their audience by tag."
+      },
+      "ui.ws.newsletter_forms.consent": {
+        "de-CH": "Einwilligungstext",
+        "en-US": "Consent text"
+      },
+      "ui.ws.newsletter_forms.consent_hint": {
+        "de-CH": "Was die Person ankreuzt. Klar sagen, wer schreibt, was und wie man sich abmeldet.",
+        "en-US": "What the person ticks. Say clearly who writes, what, and how to unsubscribe."
+      },
+      "ui.ws.newsletter_forms.import_text": {
+        "de-CH": "Für Kontakte, die schon anderswo eingewilligt haben (bisheriges Programm, Papierformular). Nur bestehende Kontakte werden angemeldet.",
+        "en-US": "For contacts who consented elsewhere already (previous tool, paper form). Only existing contacts are subscribed."
+      },
+      "ui.ws.newsletter_forms.import_emails": {
+        "de-CH": "E-Mail-Adressen (Liste oder CSV-Inhalt einfügen)",
+        "en-US": "E-mail addresses (paste a list or CSV content)"
+      },
+      "ui.ws.newsletter_forms.import_note": {
+        "de-CH": "Woher stammen die Einwilligungen?",
+        "en-US": "Where do the consents come from?"
+      },
+      "ui.ws.newsletter_forms.import_note_hint": {
+        "de-CH": "Wird als Nachweis bei jedem Kontakt gespeichert, z. B. «Anmeldeliste Infoabend 2025».",
+        "en-US": "Stored as proof at each contact, e.g. “Sign-up list info evening 2025”."
+      },
+      "ui.ws.newsletter_forms.import_run": {
+        "de-CH": "Importieren",
+        "en-US": "Import"
+      },
+      "ui.ws.newsletter_forms.import_done": {
+        "de-CH": "{count} Kontakte sind angemeldet.",
+        "en-US": "{count} contacts are subscribed."
+      },
+      "ui.ws.newsletter_forms.import_unknown": {
+        "de-CH": "Keine Kontakte gefunden für: {addresses}",
+        "en-US": "No contacts found for: {addresses}"
+      },
+      "ui.ws.newsletter.title": {
+        "de-CH": "Newsletter",
+        "en-US": "Newsletter"
+      },
+      "ui.ws.newsletter.status.none": {
+        "de-CH": "Keine Einwilligung",
+        "en-US": "No consent"
+      },
+      "ui.ws.newsletter.status.pending": {
+        "de-CH": "Bestätigung ausstehend",
+        "en-US": "Confirmation pending"
+      },
+      "ui.ws.newsletter.status.subscribed": {
+        "de-CH": "Angemeldet",
+        "en-US": "Subscribed"
+      },
+      "ui.ws.newsletter.status.unsubscribed": {
+        "de-CH": "Abgemeldet",
+        "en-US": "Unsubscribed"
+      },
+      "ui.ws.newsletter.source.form": {
+        "de-CH": "Anmeldeformular (bestätigt)",
+        "en-US": "Sign-up form (confirmed)"
+      },
+      "ui.ws.newsletter.source.manual": {
+        "de-CH": "Von Hand erfasst",
+        "en-US": "Recorded by hand"
+      },
+      "ui.ws.newsletter.source.import": {
+        "de-CH": "Importiert",
+        "en-US": "Imported"
+      },
+      "ui.ws.newsletter.source.unsubscribe_link": {
+        "de-CH": "Abmeldelink",
+        "en-US": "Unsubscribe link"
+      },
+      "ui.ws.newsletter.source.bounce": {
+        "de-CH": "Unzustellbar",
+        "en-US": "Bounced"
+      },
+      "ui.ws.newsletter.record": {
+        "de-CH": "Einwilligung erfassen",
+        "en-US": "Record consent"
+      },
+      "ui.ws.newsletter.record_text": {
+        "de-CH": "Nur wenn die Person eingewilligt hat, z. B. auf dem Anmeldebogen. Die Notiz wird als Nachweis gespeichert.",
+        "en-US": "Only when the person consented, e.g. on the registration sheet. The note is stored as proof."
+      },
+      "ui.ws.newsletter.unsubscribe": {
+        "de-CH": "Abmelden",
+        "en-US": "Unsubscribe"
+      },
+      "ui.ws.newsletter.unsubscribe_text": {
+        "de-CH": "Die Person erhält keine Newsletter mehr; Rechnungen und Terminmails gehen weiter.",
+        "en-US": "The person receives no more newsletters; invoices and appointment mails continue."
+      },
+      "ui.ws.newsletter.note": {
+        "de-CH": "Notiz",
+        "en-US": "Note"
+      },
+      "ui.ws.newsletter.note_hint": {
+        "de-CH": "Wie und wann, z. B. «Anmeldebogen am Empfang, 3.12.»",
+        "en-US": "How and when, e.g. “Registration sheet at the desk, 3 Dec”"
+      },
+      "ui.ws.newsletter.history": {
+        "de-CH": "{count} frühere Einträge",
+        "en-US": "{count} earlier entries"
       }
     }
   }

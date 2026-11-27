@@ -5,6 +5,7 @@ import { InvoiceDelivery } from './data/invoice-delivery.ts';
 import { BankImports } from './data/bank-imports.ts';
 import { MailSettings } from './data/mail-settings.ts';
 import { MailOutgoing } from './data/mail-outgoing.ts';
+import { CampaignWorkflow, NewsletterConsents, NewsletterForms } from './data/newsletter.ts';
 import { createContext } from 'svelte';
 import { toast } from 'svelte-sonner';
 import { AccountApi, roleFor } from './data/account-api.ts';
@@ -56,6 +57,9 @@ export class Workspace {
 	readonly bankImports: BankImports;
 	readonly mailSettings: MailSettings;
 	readonly mailOutgoing: MailOutgoing;
+	readonly newsletterForms: NewsletterForms;
+	readonly newsletterConsents: NewsletterConsents;
+	readonly campaignWorkflow: CampaignWorkflow;
 	readonly remote: ApiClient | null;
 	/** Sign-in, onboarding and invitations: against the API when `VITE_API_URL` is set, otherwise the demo. */
 	readonly auth: AuthGateway;
@@ -100,6 +104,9 @@ export class Workspace {
 		this.bankImports = new BankImports(client, () => this.api);
 		this.mailSettings = new MailSettings(client, () => this.api);
 		this.mailOutgoing = new MailOutgoing(client, () => this.api);
+		this.newsletterForms = new NewsletterForms(client, () => this.api);
+		this.newsletterConsents = new NewsletterConsents(client, () => this.api);
+		this.campaignWorkflow = new CampaignWorkflow(client, () => this.api);
 		if (client) {
 			this.sync = new SyncEngine(
 				client,

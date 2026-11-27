@@ -24,6 +24,8 @@
 	import { campaignTone } from '#lib/components/common/tones';
 	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
 	import { CampaignEditorModel } from '#lib/features/mail/campaign.svelte';
+	import { demoUnsubscribeToken } from '#lib/data/mock-newsletter';
+	import ShieldAlert from '@lucide/svelte/icons/shield-alert';
 	import { fillPlaceholders, placeholders } from '@clinks/domain/placeholders';
 	import type { CampaignId } from '@clinks/domain/ids';
 	import { useWorkspace } from '#lib/workspace.svelte';
@@ -48,7 +50,7 @@
 
 <ModuleGate module="mail" permission="mail.read">
 	<AsyncView resource={model.resource} skeleton="detail">
-		{#snippet children({ campaign })}
+		{#snippet children({ campaign, audience })}
 			{@const statusIndex = campaignStatuses.indexOf(campaign.status)}
 			{@const okChecks = model.checks.filter((check) => check.level === 'ok').length}
 			<a
@@ -67,7 +69,7 @@
 						/>
 						<span>{model.value.audienceTag || workspace.t('ui.ws.campaign.choose_audience')}</span>
 						<span>·</span>
-						<span>{workspace.t('ui.ws.campaign.recipient_count', { count: model.recipients.length })}</span>
+						<span>{workspace.t('ui.ws.campaign.recipient_count', { count: audience.count })}</span>
 					</div>
 				</div>
 				<div class="flex flex-wrap gap-2">
@@ -78,11 +80,14 @@
 						>
 							{workspace.t('ui.save')}
 						</Button>{/if}
-					{#if campaign.status === 'draft' && model.editable}<Button onclick={() => model.transition('review')}>
+					{#if campaign.status === 'draft' && model.editable}<Button
+							disabled={model.busy}
+							onclick={() => model.step('review')}
+						>
 							{workspace.t('ui.ws.campaign.submit_review')}
 						</Button>{/if}
-					{#if campaign.status === 'review'}
-						<Button variant="outline" onclick={() => model.transition('draft')}>
+					{#if ['review', 'approved', 'scheduled'].includes(campaign.status) && workspace.session.can('mail.write')}
+						<Button variant="outline" disabled={model.busy} onclick={() => model.step('withdraw')}>
 							{workspace.t('ui.ws.campaign.back_to_draft')}
 						</Button>
 					{/if}
@@ -106,13 +111,17 @@
 					</span>
 					<div class="min-w-0 flex-1">
 						<p class="text-sm font-semibold">
-							{model.canApprove
-								? workspace.t('ui.ws.campaign.review_banner')
-								: workspace.t('ui.ws.campaign.review_waiting')}
+							{model.submittedByMe
+								? workspace.t('ui.ws.campaign.review_waiting')
+								: workspace.t('ui.ws.campaign.review_banner')}
 						</p>
-						<p class="text-muted-foreground text-[13px]">{workspace.t('ui.ws.campaign.review_banner_text')}</p>
+						<p class="text-muted-foreground text-[13px]">
+							{model.submittedByMe
+								? workspace.t('ui.ws.campaign.review_waiting_text')
+								: workspace.t('ui.ws.campaign.review_banner_text')}
+						</p>
 					</div>
-					{#if model.canApprove}<Button onclick={() => model.transition('approved')}>
+					{#if workspace.session.can('mail.write')}<Button disabled={model.busy} onclick={() => model.step('approve')}>
 							{workspace.t('ui.ws.campaign.approve')}
 						</Button>{/if}
 				</div>
@@ -136,6 +145,15 @@
 			{#if tab === 'content'}
 				<div class="grid gap-6 xl:grid-cols-[1fr_24rem]">
 					<div class="space-y-6">
+						{#if model.healthData}
+							<p
+								class="bg-muted/50 text-muted-foreground flex items-start gap-2 rounded-lg border px-3 py-2 text-[13px]"
+								data-testid="health-notice"
+							>
+								<ShieldAlert class="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+								{workspace.t('ui.ws.campaign.health_notice')}
+							</p>
+						{/if}
 						<Card.Root>
 							<Card.Content class="space-y-4">
 								<fieldset disabled={!model.editable} class="space-y-4">
@@ -264,15 +282,24 @@
 							<Card.Root>
 								<Card.Header><Card.Title>{workspace.t('ui.ws.campaign.sending')}</Card.Title></Card.Header>
 								<Card.Content class="space-y-3">
+									<p class="text-muted-foreground text-[13px]">
+										{workspace.t('ui.ws.campaign.audience_now', { count: audience.count })}
+										{#if audience.suppressed > 0}
+											{workspace.t('ui.ws.campaign.audience_suppressed', { count: audience.suppressed })}
+										{/if}
+									</p>
 									<FormField id="cp-schedule" label={workspace.t('ui.ws.campaign.schedule_at')}>
 										<Input id="cp-schedule" type="datetime-local" bind:value={model.scheduleAt} />
 									</FormField>
-									<div class="flex gap-2">
-										<Button variant="outline" onclick={() => model.transition('scheduled')}>
+									<div class="flex flex-wrap gap-2">
+										<Button variant="outline" disabled={model.busy} onclick={() => model.schedule(false)}>
 											{workspace.t('ui.ws.campaign.schedule')}
 										</Button>
-										<Button onclick={() => model.transition('sent')}>
-											{workspace.t('ui.ws.campaign.send_now', { count: model.recipients.length })}
+										<Button disabled={model.busy || audience.count === 0} onclick={() => model.schedule(true)}>
+											{workspace.t('ui.ws.campaign.send_now', { count: audience.count })}
+										</Button>
+										<Button variant="ghost" disabled={model.busy} onclick={() => model.sendTest()}>
+											{workspace.t('ui.ws.campaign.send_test')}
 										</Button>
 									</div>
 								</Card.Content>
@@ -309,13 +336,22 @@
 				</section>
 			{:else}
 				<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-					{#each [['recipients', campaign.stats.recipients], ['opens', campaign.stats.opens], ['clicks', campaign.stats.clicks], ['unsubscribes', campaign.stats.unsubscribes]] as const as [key, value] (key)}
+					{#each [['recipients', campaign.stats.recipients], ['sent', campaign.stats.sent], ['bounced', campaign.stats.bounced], ['unsubscribes', campaign.stats.unsubscribes]] as const as [key, value] (key)}
 						<div class="bg-card grid gap-1 rounded-xl border p-4 shadow-[var(--shadow-sm)]">
 							<span class="text-muted-foreground text-[13px]">{workspace.t(`ui.ws.campaign.stat_${key}`)}</span>
 							<span class="text-[28px] leading-9 font-semibold tabular-nums">{value}</span>
 						</div>
 					{/each}
 				</div>
+				<p class="text-muted-foreground mt-3 text-[13px]">{workspace.t('ui.ws.campaign.no_tracking')}</p>
+				{#if workspace.campaignWorkflow.demo && model.recipients[0]}
+					<a
+						class="text-primary mt-2 inline-block text-[13px] underline-offset-2 hover:underline"
+						href={href(`/unsubscribe/${demoUnsubscribeToken(model.recipients[0].id, campaign.id)}`)}
+					>
+						{workspace.t('ui.ws.campaign.demo_unsubscribe', { email: model.recipients[0].email })}
+					</a>
+				{/if}
 			{/if}
 		{/snippet}
 	</AsyncView>

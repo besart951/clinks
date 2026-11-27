@@ -391,6 +391,74 @@ test('sends a template to two recipients, each with their placeholders filled, a
 	await expect(page.getByRole('article').getByText(`Guten Tag ${name.trim()}`)).toBeVisible();
 });
 
+test('signs up for the newsletter with double opt-in, sends a campaign with a second approver and unsubscribes', async ({
+	page,
+}) => {
+	await signIn(page);
+	await page.goto('/#/settings/mail');
+	await page.getByRole('button', { name: 'Anmeldeformular erstellen' }).click();
+	const dialog = page.getByRole('dialog', { name: 'Anmeldeformular' });
+	await dialog.getByRole('button', { name: 'Speichern' }).click();
+	await expect(dialog).toBeHidden();
+	await expect(page.getByRole('img', { name: 'QR-Code für «Unser Newsletter»' })).toBeVisible();
+	const link = await page.getByRole('link', { name: /#\/newsletter\// }).getAttribute('href');
+
+	// The public page: nothing happens without the consent box, then the confirmation link (shown in the demo).
+	await page.goto(link!);
+	await expect(page.getByRole('heading', { name: 'Unser Newsletter' })).toBeVisible();
+	await page.getByLabel('Vorname').fill('Mia');
+	await page.getByLabel('Nachname').fill('Sommer');
+	await page.getByRole('textbox', { name: 'E-Mail' }).fill('mia.sommer@example.org');
+	await page.getByRole('button', { name: 'Anmelden' }).click();
+	await expect(page.getByText('Bitte bestätigen Sie die Einwilligung.')).toBeVisible();
+	await page.getByRole('checkbox').check();
+	await page.getByRole('button', { name: 'Anmelden' }).click();
+	await expect(page.getByRole('heading', { name: 'Bitte bestätigen Sie die Mail' })).toBeVisible();
+	await page.getByRole('link', { name: /Bestätigungslink öffnen/ }).click();
+	await expect(page.getByText(/Danke! Sie erhalten ab jetzt den Newsletter von Stille Physio/)).toBeVisible();
+
+	await page.goto('/#/contacts');
+	await page.getByRole('searchbox', { name: 'Name, E-Mail, Telefon, Ort …' }).fill('Mia Sommer');
+	await page.getByRole('link', { name: 'Mia Sommer' }).first().click();
+	const card = page
+		.getByRole('region', { name: 'Newsletter' })
+		.or(page.locator('section').filter({ hasText: /^Newsletter/ }));
+	await expect(card.getByText('Angemeldet').first()).toBeVisible();
+	await expect(card.getByText(/Anmeldeformular \(bestätigt\)/)).toBeVisible();
+
+	// A campaign to the «Newsletter» tag: its sender may not approve it alone.
+	await page.goto('/#/mail/campaigns');
+	await page.getByText('Rückenkurs Frühling').first().click();
+	await expect(page.getByTestId('health-notice')).toBeVisible();
+	await page.getByRole('button', { name: 'Zur Prüfung einreichen' }).click();
+	await expect(page.getByText('Wartet auf Freigabe')).toBeVisible();
+	await page.getByRole('button', { name: 'Freigeben' }).click();
+	await expect(page.getByText('Eine zweite Person muss die Kampagne freigeben.')).toBeVisible();
+	const campaignUrl = page.url();
+
+	await switchAccount(page, 'nicole.weber@stille.ch');
+	await page.goto(campaignUrl);
+	await page.getByRole('button', { name: 'Freigeben' }).click();
+	await expect(page.getByText('Kampagne freigegeben')).toBeVisible();
+	await page.getByRole('tab', { name: /Prüfung/ }).click();
+	const sendNow = page.getByRole('button', { name: /^Jetzt an \d+ senden$/ });
+	const count = Number(/\d+/.exec((await sendNow.innerText()) ?? '')![0]);
+	expect(count).toBeGreaterThan(0);
+	await sendNow.click();
+	await expect(page.getByText('Kampagne geht jetzt raus')).toBeVisible();
+	await page.getByRole('tab', { name: 'Ergebnisse' }).click();
+	await expect(page.getByText('CLinks zählt keine Öffnungen und Klicks', { exact: false })).toBeVisible();
+
+	// The recipient's unsubscribe page: opening it changes nothing, the button does.
+	await page.getByRole('link', { name: /Abmeldeseite ansehen/ }).click();
+	await expect(page.getByRole('heading', { name: 'Newsletter von Stille Physio abbestellen' })).toBeVisible();
+	await page.getByRole('button', { name: 'Abmelden' }).click();
+	await expect(page.getByRole('heading', { name: 'Sie sind abgemeldet' })).toBeVisible();
+	await page.getByLabel(/Möchten Sie uns sagen, warum/).fill('Zu viele Mails');
+	await page.getByRole('button', { name: 'Senden' }).click();
+	await expect(page.getByText('Danke für Ihre Rückmeldung.')).toBeVisible();
+});
+
 test('sets the QR-IBAN and the payment term for invoices', async ({ page }) => {
 	await signIn(page);
 	await page.goto('/#/settings');

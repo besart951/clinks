@@ -1,4 +1,4 @@
-import { createHash, randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
+import { createHash, createHmac, hkdfSync, randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
 import { CompactEncrypt, compactDecrypt } from 'jose';
 import { newId } from '@clinks/domain/ids';
 
@@ -66,6 +66,12 @@ export class SecretBox {
 			.encrypt(this.#key);
 	}
 
+	/** A short tag proving that CLinks made `message` (e.g. an unsubscribe link), with a key of its own per use. */
+	mac(message: string, context: string): string {
+		const key = Buffer.from(hkdfSync('sha256', this.#key, new Uint8Array(0), `clinks-mac:${context}`, 32));
+		return createHmac('sha256', key).update(message).digest('base64url').slice(0, 22);
+	}
+
 	async open(sealed: string, context: string): Promise<string> {
 		const { plaintext, protectedHeader } = await compactDecrypt(sealed, this.#key, {
 			keyManagementAlgorithms: ['dir'],
@@ -74,4 +80,30 @@ export class SecretBox {
 		if (protectedHeader.ctx !== context) throw new Error('Secret belongs to another context');
 		return new TextDecoder().decode(plaintext);
 	}
+}
+
+const alphabet = 'abcdefghijklmnopqrstuvwxyz234567';
+/** A pattern matching one `uuidToBase32` value. */
+export const base32Uuid = '[a-z2-7]{26}';
+
+/** A UUID as 26 lower-case base32 letters: fits mail local parts and URLs, survives lower-casing. */
+export function uuidToBase32(uuidValue: string) {
+	const bytes = Buffer.from(uuidValue.replace(/-/g, ''), 'hex');
+	let bits = '';
+	for (const byte of bytes) bits += byte.toString(2).padStart(8, '0');
+	let out = '';
+	for (let index = 0; index < bits.length; index += 5)
+		out += alphabet[parseInt(bits.slice(index, index + 5).padEnd(5, '0'), 2)];
+	return out;
+}
+
+export function uuidFromBase32(value: string) {
+	let bits = '';
+	for (const char of value) bits += alphabet.indexOf(char).toString(2).padStart(5, '0');
+	const hex = Array.from({ length: 16 }, (_, index) =>
+		parseInt(bits.slice(index * 8, index * 8 + 8), 2)
+			.toString(16)
+			.padStart(2, '0'),
+	).join('');
+	return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }

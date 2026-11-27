@@ -6,6 +6,7 @@ import { decodeBase32IgnorePadding } from '@oslojs/encoding';
 import { createApp } from '../../src/app.ts';
 import { MemoryMailer } from '../../src/mailer.ts';
 import { MailWorker } from '../../src/services/mail-worker.ts';
+import { CampaignDispatcher } from '../../src/services/campaigns.ts';
 import { InboundMail } from '../../src/services/inbound.ts';
 import { MemoryInbound } from '../../src/inbound-sources.ts';
 import { RateLimiter } from '../../src/rate-limit.ts';
@@ -42,6 +43,7 @@ export async function startApi(billing?: Billing, options: { allowInternalStorag
 		resolveHost: async (host: string) => (host === 'internal.example.com' ? ['10.1.2.3'] : ['185.10.20.30']),
 		config: {
 			WEB_ORIGIN: 'http://web.test',
+			API_ORIGIN: 'http://api.test',
 			STORAGE_ALLOW_INTERNAL: options.allowInternalStorage ?? false,
 			INBOUND_DOMAIN: 'in.clinks.test',
 		},
@@ -53,6 +55,8 @@ export async function startApi(billing?: Billing, options: { allowInternalStorag
 	});
 	// The outbox is sent after every request, so tests see the mails a call caused right after it.
 	const mailWorker = new MailWorker(services, { ratePerSecond: 10_000 });
+	// Due campaigns are expanded into the outbox after every request too.
+	const campaignDispatcher = new CampaignDispatcher(services);
 	// The catch-all mailbox: tests drop raw messages in and read them like the worker does.
 	const mailbox = new MemoryInbound();
 	const inbound = new InboundMail(services, mailbox, 'in.clinks.test');
@@ -88,6 +92,7 @@ export async function startApi(billing?: Billing, options: { allowInternalStorag
 					headers,
 					body: options.body === undefined ? undefined : JSON.stringify(options.body),
 				});
+				await campaignDispatcher.dispatch();
 				await mailWorker.drain();
 				const setCookie = response.headers.get('set-cookie');
 				if (setCookie) cookie = setCookie.includes('Max-Age=0') ? null : setCookie.split(';')[0];
@@ -153,6 +158,7 @@ export async function startApi(billing?: Billing, options: { allowInternalStorag
 		relay,
 		dns,
 		mailWorker,
+		campaignDispatcher,
 		mailbox,
 		inbound,
 		clock,

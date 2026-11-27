@@ -157,6 +157,8 @@ export class SyncService {
 			fields.uploadedBy !== (existing?.uploadedBy ?? scope.userId)
 		)
 			throw forbidden();
+		// Once approved, a campaign's content is what was approved: back to draft first (withdraw) to change it.
+		if (table === 'campaigns' && stored && !['draft', 'review'].includes(String(stored.status))) throw forbidden();
 		// Only «Senden» files a mail under Gesendet: a new row or a draft cannot pretend to be sent.
 		if (table === 'mails' && merged.folder === 'sent' && (stored?.folder ?? 'drafts') === 'drafts') throw forbidden();
 		if (
@@ -280,7 +282,8 @@ function dbToFields(table: SyncedTableName, row: Fields): Fields {
 function fieldsToDb(table: SyncedTableName, fields: Fields): Fields {
 	const values: Fields = {};
 	for (const column of syncedTables[table].columns) {
-		if (!(column.field in fields)) continue;
+		// Server-owned columns keep what the server set (or their default); an upload never writes them.
+		if (!(column.field in fields) || ('serverSet' in column && column.serverSet)) continue;
 		const value = fields[column.field];
 		// pg would send a JS array as a Postgres array literal, not as JSON.
 		values[dbKey(column)] =

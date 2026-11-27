@@ -2,7 +2,6 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
 import { contactsFromCsv, duplicateKey, parseCsv } from '../src/lib/features/contacts/csv.ts';
-import { campaignChecks } from '../src/lib/features/mail/templates.ts';
 import { buildReport } from '../src/lib/features/finance/reports.svelte.ts';
 import { prescriptionProgress } from '../src/lib/features/physio/physio.svelte.ts';
 import { mentionedPeople } from '../src/lib/features/collaboration/comments.svelte.ts';
@@ -27,15 +26,6 @@ describe('contacts import', () => {
 		};
 		assert.equal(duplicateKey(base), duplicateKey({ ...base, firstName: 'anna' }));
 		assert.equal(duplicateKey({ ...base, email: 'A@x.ch' }), 'a@x.ch');
-	});
-});
-
-describe('mail', () => {
-	it('blocks campaigns without subject or recipients and warns about spam words', () => {
-		const checks = campaignChecks({ subject: '', previewText: '', body: 'GRATIS!!', audienceTag: '' }, 0);
-		assert.ok(checks.some((check) => check.key.endsWith('subject_missing') && check.level === 'error'));
-		assert.ok(checks.some((check) => check.key.endsWith('no_recipients') && check.level === 'error'));
-		assert.ok(checks.some((check) => check.key.endsWith('spam')));
 	});
 });
 

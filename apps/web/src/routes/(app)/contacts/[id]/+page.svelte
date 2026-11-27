@@ -1,5 +1,6 @@
 <script lang="ts">
 	import DeliveryNote from '#lib/components/mail/DeliveryNote.svelte';
+	import NewsletterCard from '#lib/components/newsletter/NewsletterCard.svelte';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import CalendarPlus from '@lucide/svelte/icons/calendar-plus';
@@ -340,6 +341,7 @@
 							{/if}
 						</SideCard>
 					{/if}
+					{#if session.can('mail.read') && session.hasModule('mail')}<NewsletterCard {contact} />{/if}
 				</aside>
 			</div>
 		{/snippet}

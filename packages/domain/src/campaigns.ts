@@ -6,7 +6,7 @@ export type CampaignCheck = {
 
 const spamWords = ['gratis', 'kostenlos!!', 'gewinn', '100%', 'jetzt kaufen', 'free'];
 
-/** Content checks shown next to the campaign editor before it goes out. */
+/** Content checks shown next to the campaign editor; an `error` keeps it from going to review. */
 export function campaignChecks(
 	campaign: { subject: string; previewText: string; body: string; audienceTag: string },
 	recipients: number,
@@ -31,4 +31,12 @@ export function campaignChecks(
 	else checks.push({ key: 'ui.ws.campaign.check_recipients', level: 'ok', params: { count: recipients } });
 	checks.push({ key: 'ui.ws.campaign.check_unsubscribe', level: 'ok' });
 	return checks;
+}
+
+/**
+ * Four-eyes rule: when more than one person in the workspace writes mail, the one who sent a campaign to review does
+ * not approve it too. A workspace of one approves its own.
+ */
+export function mayApprove(campaign: { submittedBy: string | null }, approverId: string, writers: number): boolean {
+	return writers <= 1 || campaign.submittedBy !== approverId;
 }

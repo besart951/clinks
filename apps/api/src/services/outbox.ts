@@ -2,7 +2,8 @@ import type { MailKind, OutboxAttachment } from '@clinks/db/schema';
 import type { MailDelivery } from '@clinks/domain/types';
 import type { Tx } from '@clinks/db/scope';
 import { renderMail, type MailContent, type MailExtras } from '@clinks/mail-layout/layout';
-import { uuid } from '../crypto.ts';
+import { refreshCampaignStats } from './campaign-stats.ts';
+import { base32Uuid, uuid, uuidFromBase32, uuidToBase32 } from '../crypto.ts';
 import type { Sender } from './mail-senders.ts';
 
 /** One mail a workspace sends; the outbox renders it in the workspace's layout and the worker sends it. */
@@ -20,6 +21,8 @@ export interface QueuedMail {
 	attachments?: OutboxAttachment[];
 	headers?: Record<string, string>;
 	contactId?: string | null;
+	/** The campaign this newsletter mail belongs to; its numbers follow the delivery. */
+	campaignId?: string;
 	/** Keep a copy under Mail › Gesendet: by default for mail to a contact, never for newsletters. */
 	file?: boolean;
 	extras?: MailExtras;
@@ -69,6 +72,7 @@ export async function enqueueMail(tx: Tx, tenantId: string, mail: QueuedMail): P
 			attachments: JSON.stringify(mail.attachments ?? []) as never,
 			headers: JSON.stringify(mail.headers ?? {}) as never,
 			contactId: mail.contactId ?? null,
+			campaignId: mail.campaignId ?? null,
 			messageId: outboxMessageId(id),
 			status: suppressed ? 'suppressed' : 'queued',
 		})
@@ -131,7 +135,13 @@ export function dequeue(tx: Tx, outboxId: string) {
  * the queue. Bounces arrive later through the inbound mailbox and settle again.
  */
 export async function settle(tx: Tx, outboxId: string, status: MailDelivery, now: Date) {
-	await tx.updateTable('mailOutbox').set({ status }).where('id', '=', outboxId).execute();
+	const row = await tx
+		.updateTable('mailOutbox')
+		.set({ status })
+		.where('id', '=', outboxId)
+		.returning('campaignId')
+		.executeTakeFirst();
+	if (row?.campaignId) await refreshCampaignStats(tx, row.campaignId, now);
 	await tx
 		.updateTable('mails')
 		.set((eb) => ({ delivery: status, revision: eb('revision', '+', 1), updatedAt: now }))
@@ -145,33 +155,10 @@ export async function settle(tx: Tx, outboxId: string, status: MailDelivery, now
  * across workspaces and survives servers that lower-case addresses.
  */
 export function bounceAddress(outboxId: string, tenantId: string, domain: string) {
-	return `b-${base32(outboxId)}-${base32(tenantId)}@${domain}`;
+	return `b-${uuidToBase32(outboxId)}-${uuidToBase32(tenantId)}@${domain}`;
 }
 
 export function readBounceAddress(local: string) {
-	const match = /^b-([a-z2-7]{26})-([a-z2-7]{26})$/.exec(local.toLowerCase());
-	return match ? { outboxId: fromBase32(match[1]), tenantId: fromBase32(match[2]) } : null;
-}
-
-const alphabet = 'abcdefghijklmnopqrstuvwxyz234567';
-
-function base32(uuidValue: string) {
-	const bytes = Buffer.from(uuidValue.replace(/-/g, ''), 'hex');
-	let bits = '';
-	for (const byte of bytes) bits += byte.toString(2).padStart(8, '0');
-	let out = '';
-	for (let index = 0; index < bits.length; index += 5)
-		out += alphabet[parseInt(bits.slice(index, index + 5).padEnd(5, '0'), 2)];
-	return out;
-}
-
-function fromBase32(value: string) {
-	let bits = '';
-	for (const char of value) bits += alphabet.indexOf(char).toString(2).padStart(5, '0');
-	const hex = Array.from({ length: 16 }, (_, index) =>
-		parseInt(bits.slice(index * 8, index * 8 + 8), 2)
-			.toString(16)
-			.padStart(2, '0'),
-	).join('');
-	return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+	const match = new RegExp(`^b-(${base32Uuid})-(${base32Uuid})$`).exec(local.toLowerCase());
+	return match ? { outboxId: uuidFromBase32(match[1]), tenantId: uuidFromBase32(match[2]) } : null;
 }

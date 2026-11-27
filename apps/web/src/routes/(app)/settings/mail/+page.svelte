@@ -16,6 +16,7 @@
 	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
 	import MailDomainCard from '#lib/components/settings/MailDomainCard.svelte';
 	import MailSenderDialog from '#lib/components/settings/MailSenderDialog.svelte';
+	import NewsletterFormsCard from '#lib/components/newsletter/NewsletterFormsCard.svelte';
 	import { MailSettingsModel } from '#lib/features/settings/mail.svelte';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
@@ -172,6 +173,7 @@
 						</div>
 					</Card.Content>
 				</Card.Root>
+				{#if workspace.session.hasModule('mail')}<NewsletterFormsCard />{/if}
 			</div>
 			<MailSenderDialog {model} {members} />
 		{/snippet}

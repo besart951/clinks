@@ -83,12 +83,12 @@
 										<dd class="font-semibold">{workspace.i18n.number(campaign.stats.recipients)}</dd>
 									</div>
 									<div>
-										<dt class="text-muted-foreground text-xs">{workspace.t('ui.ws.campaign.opens')}</dt>
-										<dd class="font-semibold">{rate(campaign.stats.opens, campaign.stats.recipients)}</dd>
+										<dt class="text-muted-foreground text-xs">{workspace.t('ui.ws.campaign.stat_bounced')}</dt>
+										<dd class="font-semibold">{rate(campaign.stats.bounced, campaign.stats.recipients)}</dd>
 									</div>
 									<div>
-										<dt class="text-muted-foreground text-xs">{workspace.t('ui.ws.campaign.clicks')}</dt>
-										<dd class="font-semibold">{rate(campaign.stats.clicks, campaign.stats.recipients)}</dd>
+										<dt class="text-muted-foreground text-xs">{workspace.t('ui.ws.campaign.stat_unsubscribes')}</dt>
+										<dd class="font-semibold">{rate(campaign.stats.unsubscribes, campaign.stats.recipients)}</dd>
 									</div>
 								</dl>
 								<p class="text-muted-foreground text-xs">

@@ -29,6 +29,11 @@ import { FileService } from './services/files.ts';
 import { BankImportService } from './services/bank-imports.ts';
 import { MailSettingsService } from './services/mail-settings.ts';
 import { MailComposeService } from './services/mail-compose.ts';
+import { NewsletterForms, NewsletterSignUp } from './services/newsletter-signup.ts';
+import { NewsletterConsents } from './services/newsletter-consents.ts';
+import { Campaigns } from './services/campaigns.ts';
+import { Unsubscribe } from './services/unsubscribe.ts';
+import { registerNewsletterRoutes } from './routes/newsletter.ts';
 import { InvoiceService } from './services/invoices.ts';
 import { InvoiceLinks } from './services/invoice-links.ts';
 import { SessionService } from './services/sessions.ts';
@@ -58,6 +63,11 @@ export function createApp({ services, config }: AppOptions) {
 		bankImports: new BankImportService(services),
 		mailSettings: new MailSettingsService(services),
 		mailCompose: new MailComposeService(services),
+		newsletterForms: new NewsletterForms(services),
+		newsletterSignUp: new NewsletterSignUp(services),
+		newsletterConsents: new NewsletterConsents(services),
+		campaigns: new Campaigns(services),
+		unsubscribe: new Unsubscribe(services),
 		sync: new SyncService(services),
 		caller: (c) => callerOf(c, config.TRUST_PROXY),
 		deliver: (c, opened) => deliverSession(c, opened, config.COOKIE_SECURE),
@@ -125,6 +135,7 @@ export function createApp({ services, config }: AppOptions) {
 	registerFileRoutes(me, deps);
 	registerFinanceRoutes(app, me, deps);
 	registerMailRoutes(me, deps);
+	registerNewsletterRoutes(app, me, deps);
 
 	app.route('/', me);
 
