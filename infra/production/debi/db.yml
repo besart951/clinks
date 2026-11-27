@@ -1,0 +1,24 @@
+name: clinks-storage
+services:
+  postgres:
+    image: postgres:18.6-alpine3.23@sha256:885cf05d376c7cf27afef02073e6bdac3841252537f16e244fd1c1e6a7c99fb1
+    restart: unless-stopped
+    command: [postgres, -c, wal_level=logical]
+    environment:
+      POSTGRES_DB: clinks
+      POSTGRES_PASSWORD_FILE: /run/secrets/owner
+    volumes:
+      - database:/var/lib/postgresql
+      - /srv/clinks/config/owner:/run/secrets/owner:ro
+    networks: [database]
+    healthcheck:
+      test: [CMD, pg_isready, -U, postgres, -d, clinks]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+volumes:
+  database:
+networks:
+  database:
+    name: clinks-database
+    internal: true

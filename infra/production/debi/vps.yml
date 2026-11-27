@@ -1,0 +1,27 @@
+services:
+  api:
+    networks: [default, database]
+  collab:
+    networks: [default, database]
+  powersync:
+    networks: [default, database]
+    volumes:
+      - /srv/clinks/config/powersync.yaml:/config/service.yaml:ro
+  caddy:
+    networks:
+      default: {}
+      ingress:
+        aliases: [clinks-web]
+    ports: !override ['127.0.0.1:18780:80']
+    environment:
+      WEB_HOST: http://www.clinks.ch
+      API_HOST: http://api.clinks.ch
+      SYNC_HOST: http://sync.clinks.ch
+      COLLAB_HOST: http://collab.clinks.ch
+networks:
+  database:
+    external: true
+    name: clinks-database
+  ingress:
+    external: true
+    name: clinks-ingress

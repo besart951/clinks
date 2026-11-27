@@ -1,0 +1,72 @@
+#!/bin/bash
+set -euo pipefail
+umask 077
+cd /srv/clinks
+[[ $# == 2 && $2 =~ ^[0-9a-f]{40}$ ]] || exit 2
+mode=$1
+export RELEASE=$2
+export WEB_HOST=www.clinks.ch API_HOST=api.clinks.ch SYNC_HOST=sync.clinks.ch COLLAB_HOST=collab.clinks.ch
+export CONFIG_DIR="/srv/clinks/releases/$RELEASE/config"
+install -d -m 700 "$CONFIG_DIR"
+exec 9>/srv/clinks/release.lock
+flock 9
+if [[ $mode == providers ]]; then
+    tmp=$(mktemp "$CONFIG_DIR/providers.XXXX")
+    trap 'rm -f "$tmp"' EXIT
+    cat > "$tmp"
+    python3 - "$tmp" <<'PY'
+import sys
+from pathlib import Path
+required = set('S3_ENDPOINT S3_BUCKET S3_REGION AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY SMTP_URL MAIL_FROM'.split())
+allowed = required | set('SMTP_RELAY_URL INBOUND_IMAP_URL STRIPE_SECRET_KEY STRIPE_WEBHOOK_SECRET STRIPE_PRICES STRIPE_TAX'.split())
+seen = set()
+for line in Path(sys.argv[1]).read_text().splitlines():
+    if not line.strip() or line.startswith('#'):
+        continue
+    key, sep, value = line.partition('=')
+    if not sep or key not in allowed or key in seen or not value.strip():
+        sys.exit('Invalid or duplicate provider setting')
+    seen.add(key)
+if required - seen:
+    sys.exit('Missing settings: ' + ', '.join(sorted(required - seen)))
+PY
+    cat config/api.base "$tmp" > "$CONFIG_DIR/api.env.next"
+    mv "$CONFIG_DIR/api.env.next" "$CONFIG_DIR/api.env"
+    cp config/{collab,powersync}.env "$CONFIG_DIR/"
+    exit
+fi
+[[ $mode == release && -s "$CONFIG_DIR/api.env" ]] || exit 2
+if [[ ! -d repository.git ]]; then git init --bare -q repository.git; fi
+git --git-dir=repository.git fetch -q --depth=1 https://github.com/besart951/clinks.git refs/heads/main
+[[ $(git --git-dir=repository.git rev-parse FETCH_HEAD) == "$RELEASE" ]] || { echo 'Push superseded'; exit 1; }
+source_dir="/srv/clinks/releases/$RELEASE/source"
+mkdir -p "$source_dir"
+git --git-dir=repository.git archive "$RELEASE" infra | tar -x -C "$source_dir"
+docker load
+docker image inspect "clinks-workspace:$RELEASE" "clinks-edge:$RELEASE" >/dev/null
+cd "$source_dir/infra/production"
+sed 's/sslmode: verify-full/sslmode: disable/g' powersync.yaml > /srv/clinks/config/powersync.yaml
+chmod 644 /srv/clinks/config/powersync.yaml
+chmod 644 ../powersync/sync-config.yaml
+compose=(docker compose -p clinks-live -f compose.yml -f debi/vps.yml)
+"${compose[@]}" config -q
+for name in "$WEB_HOST" "$API_HOST" "$SYNC_HOST" "$COLLAB_HOST"; do
+    getent ahostsv4 "$name" | awk '{print $1}' | grep -Fx 83.228.246.96 >/dev/null || { echo "DNS missing: $name"; exit 1; }
+done
+docker run --rm -v /etc/letsencrypt:/etc/letsencrypt -v /srv/codelinks/state/acme:/var/www/certbot certbot/certbot:v5.7.0@sha256:34ee91d2f43008eb78a007d22f23ed4b2eaa9a454cb27ca2c042b49527a695b4 certonly --non-interactive --webroot -w /var/www/certbot --keep-until-expiring --cert-name clinks-services -d api.clinks.ch -d sync.clinks.ch -d collab.clinks.ch
+export DATABASE_OWNER_URL="postgres://postgres:$(cat /srv/clinks/config/owner)@postgres:5432/clinks"
+docker run --rm --network clinks-database -e DATABASE_OWNER_URL "clinks-workspace:$RELEASE" node packages/db/src/migrate.ts
+unset DATABASE_OWNER_URL
+"${compose[@]}" up -d --no-build --wait api collab
+"${compose[@]}" up -d --no-build --no-deps caddy
+if ! docker network inspect clinks-ingress --format '{{range .Containers}}{{println .Name}}{{end}}' | grep -qx codelinks-nginx-1; then
+    docker network connect clinks-ingress codelinks-nginx-1
+fi
+python3 debi/route.py services
+curl --fail --retry 6 --retry-all-errors "https://$API_HOST/.well-known/jwks.json" -o /dev/null
+"${compose[@]}" up -d --no-build --wait --wait-timeout 180
+curl -fsS -H "Host: $WEB_HOST" http://127.0.0.1:18780/ -o /dev/null
+python3 debi/route.py web
+curl -fsS "https://$WEB_HOST/" -o /dev/null
+case $(curl -sS -o /dev/null -w '%{http_code}' "https://$WEB_HOST/besmir/") in 200|302|401) ;; *) exit 1 ;; esac
+ln -sfn "$source_dir" /srv/clinks/current

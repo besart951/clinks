@@ -10,7 +10,7 @@ permissions:
 
 concurrency:
   group: quality-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   verify:
@@ -141,3 +141,49 @@ jobs:
           name: playwright-remote-results
           path: apps/web/test-results
           retention-days: 7
+
+  deploy:
+    name: Deploy to debi
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [verify, integration, e2e, e2e-remote]
+    runs-on: clinks-zep
+    environment: production
+    steps:
+      - name: Check production configuration
+        id: config
+        shell: bash
+        env:
+          PROVIDERS: ${{ secrets.CLINKS_PROVIDER_ENV }}
+        run: |
+          if [[ -n "$PROVIDERS" ]]; then
+            echo 'ready=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'Deployment pending: add CLINKS_PROVIDER_ENV to the production environment.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - if: steps.config.outputs.ready == 'true'
+        uses: actions/checkout@v6
+      - name: Build production images
+        if: steps.config.outputs.ready == 'true'
+        shell: bash
+        run: |
+          docker build -f infra/production/Dockerfile --target workspace -t "clinks-workspace:$GITHUB_SHA" .
+          docker build -f infra/production/Dockerfile --target edge -t "clinks-edge:$GITHUB_SHA" \
+            --build-arg API_ORIGIN=https://api.clinks.ch --build-arg SYNC_ORIGIN=https://sync.clinks.ch \
+            --build-arg COLLAB_ORIGIN=wss://collab.clinks.ch .
+      - name: Release images over SSH
+        if: steps.config.outputs.ready == 'true'
+        shell: bash
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+          HOST_KEYS: ${{ vars.DEPLOY_KNOWN_HOSTS }}
+          PROVIDERS: ${{ secrets.CLINKS_PROVIDER_ENV }}
+        run: |
+          umask 077
+          key=$(mktemp)
+          hosts=$(mktemp)
+          trap 'rm -f "$key" "$hosts"' EXIT
+          printf '%s\n' "$DEPLOY_KEY" > "$key"
+          printf '%s\n' "$HOST_KEYS" > "$hosts"
+          remote=(ssh -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o "UserKnownHostsFile=$hosts" -i "$key" debian@83.228.246.96)
+          printf '%s\n' "$PROVIDERS" | "${remote[@]}" "providers $GITHUB_SHA"
+          docker save "clinks-workspace:$GITHUB_SHA" "clinks-edge:$GITHUB_SHA" | gzip -1 | "${remote[@]}" "release $GITHUB_SHA"
