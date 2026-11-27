@@ -31,7 +31,7 @@ const queue = (
 			subject: 'Hallo',
 			content: { blocks: [{ kind: 'text', text: 'Guten Tag' }] },
 			...extra,
-		}),
+		}).then((queued) => queued.id),
 	);
 const row = (id: string) =>
 	api.owner.selectFrom('mailOutbox').selectAll().where('id', '=', id).executeTakeFirstOrThrow();

@@ -1939,8 +1939,8 @@
         "en-US": "Reply"
       },
       "ui.ws.mail.compose_text": {
-        "de-CH": "Gesendet von {email}. Im Prototyp verlässt keine Mail den Browser.",
-        "en-US": "Sent from {email}. In the prototype no email leaves the browser."
+        "de-CH": "Jede Empfängerin und jeder Empfänger erhält eine eigene Mail.",
+        "en-US": "Every recipient gets a mail of their own."
       },
       "ui.ws.mail.to": {
         "de-CH": "An",
@@ -6209,6 +6209,66 @@
       "ui.ws.mail_settings.filing_rotated": {
         "de-CH": "Neue Ablage-Adresse erstellt",
         "en-US": "New filing address created"
+      },
+      "ui.ws.roles.area_mail_business": {
+        "de-CH": "Mails von Geschäftsadressen senden",
+        "en-US": "Send mail from business addresses"
+      },
+      "error.ws.mail_limit": {
+        "de-CH": "Das Tageslimit für Mails ist erreicht. Morgen geht es weiter.",
+        "en-US": "The daily mail limit is reached. It resets tomorrow."
+      },
+      "error.ws.mail_sender_forbidden": {
+        "de-CH": "Von dieser Absenderadresse dürfen Sie nicht senden.",
+        "en-US": "You may not send from this sender address."
+      },
+      "error.ws.mail_attachment_invalid": {
+        "de-CH": "Ein Anhang wurde nicht gefunden.",
+        "en-US": "An attachment was not found."
+      },
+      "ui.ws.audit.mail.sent": {
+        "de-CH": "hat Mail «{target}» gesendet",
+        "en-US": "sent email “{target}”"
+      },
+      "ui.ws.mail.sender": {
+        "de-CH": "Von",
+        "en-US": "From"
+      },
+      "ui.ws.mail.sender_platform": {
+        "de-CH": "{name} über CLinks (Antworten an {email})",
+        "en-US": "{name} via CLinks (replies to {email})"
+      },
+      "ui.ws.mail.sender_pending": {
+        "de-CH": "{address} – Domain noch nicht bestätigt, geht über CLinks",
+        "en-US": "{address} – domain not confirmed yet, goes via CLinks"
+      },
+      "ui.ws.mail.placeholder_hint": {
+        "de-CH": "Platzhalter wie {example} werden pro Empfänger aus dem Kontakt ersetzt; ohne Kontakt bleiben sie leer.",
+        "en-US": "Placeholders such as {example} are filled per recipient from the contact; without a contact they stay empty."
+      },
+      "ui.ws.mail.attachments": {
+        "de-CH": "Anhänge",
+        "en-US": "Attachments"
+      },
+      "ui.ws.mail.attach": {
+        "de-CH": "Dokument anhängen",
+        "en-US": "Attach document"
+      },
+      "ui.ws.mail.attach_search": {
+        "de-CH": "Dokument suchen …",
+        "en-US": "Search documents …"
+      },
+      "ui.ws.mail.attach_remove": {
+        "de-CH": "{name} entfernen",
+        "en-US": "Remove {name}"
+      },
+      "ui.ws.mail.queued": {
+        "de-CH": "{count} Mails in Versand gegeben",
+        "en-US": "{count} mails queued for sending"
+      },
+      "ui.ws.mail.sent_suppressed": {
+        "de-CH": "Nicht gesendet an {addresses}: Die Adresse war zuvor nicht zustellbar.",
+        "en-US": "Not sent to {addresses}: the address bounced before."
       }
     }
   }

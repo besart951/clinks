@@ -358,6 +358,39 @@ test('sets up a sender domain and a business sender that invoices go out from', 
 	await expect(page.getByText('Praxis Sonne Buchhaltung').first()).toBeVisible();
 });
 
+test('sends a template to two recipients, each with their placeholders filled, and an attachment', async ({ page }) => {
+	await signIn(page);
+	await page.goto('/#/mail');
+	await page.getByRole('button', { name: 'Neue Mail' }).click();
+	const sheet = page.getByRole('dialog', { name: 'Neue Mail' });
+	const to = sheet.getByLabel('An', { exact: true });
+	await to.fill('example');
+	const suggestion = sheet.locator('ul button').first();
+	const [name] = (await suggestion.innerText()).split('\n');
+	await suggestion.click();
+	await to.fill('neu@example.org');
+	await to.press('Enter');
+	await sheet.getByRole('button', { name: 'Vorlagen' }).click();
+	await page.getByRole('menuitem', { name: 'Terminbestätigung' }).click();
+	await expect(sheet.getByLabel('Betreff')).toHaveValue('Ihr Termin bei {firma}');
+	await expect(sheet.getByTestId('placeholder-hint')).toBeVisible();
+	await sheet.getByRole('button', { name: 'Dokument anhängen' }).click();
+	const document = page.getByRole('option').first();
+	const attachment = await document.innerText();
+	await document.click();
+	await expect(sheet.getByRole('button', { name: `${attachment} entfernen` })).toBeVisible();
+	await sheet.getByRole('button', { name: 'Senden' }).click();
+	await expect(page.getByText('2 Mails in Versand gegeben')).toBeVisible();
+	await expect(sheet).toBeHidden();
+
+	await page.getByRole('button', { name: /^Gesendet/ }).click();
+	const sent = page.getByText(/^Ihr Termin bei /);
+	await expect(sent).toHaveCount(2);
+	await expect(sent.first()).not.toContainText('{firma}');
+	await page.getByRole('button').filter({ hasText: name.trim() }).filter({ hasText: 'Ihr Termin bei' }).first().click();
+	await expect(page.getByRole('article').getByText(`Guten Tag ${name.trim()}`)).toBeVisible();
+});
+
 test('sets the QR-IBAN and the payment term for invoices', async ({ page }) => {
 	await signIn(page);
 	await page.goto('/#/settings');

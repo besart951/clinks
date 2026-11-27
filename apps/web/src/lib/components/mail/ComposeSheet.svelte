@@ -9,6 +9,8 @@
 	import { Textarea } from '@clinks/ui/components/ui/textarea';
 	import FormField from '#lib/components/common/FormField.svelte';
 	import ConfirmDialog, { type ConfirmRequest } from '#lib/components/common/ConfirmDialog.svelte';
+	import Choice from '#lib/components/common/Choice.svelte';
+	import AttachmentPicker from './AttachmentPicker.svelte';
 	import { ComposeModel } from '#lib/features/mail/compose.svelte';
 	import { contactName } from '#lib/data/workspace-api';
 	import type { Contact, MailTemplate } from '@clinks/domain/types';
@@ -43,6 +45,28 @@
 		onClose?.();
 	}
 
+	const user = $derived(workspace.session.user);
+	/** «''» stands for the platform address in the caller's name (Select needs a string). */
+	const senderOptions = $derived([
+		...form.senders.map((sender) => ({
+			value: sender.id,
+			label: sender.active
+				? `${sender.displayName} <${sender.address}>`
+				: workspace.t('ui.ws.mail.sender_pending', { address: sender.address }),
+		})),
+		...(form.senders.some((sender) => sender.kind === 'personal')
+			? []
+			: [
+					{
+						value: '',
+						label: workspace.t('ui.ws.mail.sender_platform', {
+							name: `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim(),
+							email: user?.email ?? '',
+						}),
+					},
+				]),
+	]);
+
 	function close(next: boolean) {
 		if (next) return;
 		if (!form.dirty) return finish();
@@ -58,7 +82,7 @@
 
 	async function send(event: SubmitEvent) {
 		event.preventDefault();
-		if (await form.send(contacts)) finish();
+		if (await form.send()) finish();
 	}
 
 	function onRecipientKey(event: KeyboardEvent) {
@@ -77,11 +101,19 @@
 			<Sheet.Title>
 				{form.replyTo ? workspace.t('ui.ws.mail.reply') : workspace.t('ui.ws.command.new_mail')}
 			</Sheet.Title>
-			<Sheet.Description>
-				{workspace.t('ui.ws.mail.compose_text', { email: workspace.session.user?.email ?? '' })}
-			</Sheet.Description>
+			<Sheet.Description>{workspace.t('ui.ws.mail.compose_text')}</Sheet.Description>
 		</Sheet.Header>
 		<form id="compose-form" class="space-y-4 px-4" onsubmit={send} novalidate>
+			{#if senderOptions.length > 1}
+				<FormField id="m-from" label={workspace.t('ui.ws.mail.sender')}>
+					<Choice
+						id="m-from"
+						label={workspace.t('ui.ws.mail.sender')}
+						bind:value={() => form.senderId ?? '', (next) => (form.senderId = next || null)}
+						options={senderOptions}
+					/>
+				</FormField>
+			{/if}
 			<FormField
 				id="m-to"
 				label={workspace.t('ui.ws.mail.to')}
@@ -138,6 +170,16 @@
 			<FormField id="m-body" label={workspace.t('ui.ws.mail.message')}>
 				<Textarea id="m-body" rows={14} bind:value={form.body} />
 			</FormField>
+			{#if form.usesPlaceholders}
+				<p class="text-muted-foreground text-xs" data-testid="placeholder-hint">
+					{workspace.t('ui.ws.mail.placeholder_hint', { example: '{vorname}' })}
+				</p>
+			{/if}
+			<AttachmentPicker
+				attached={form.attachments}
+				onattach={(document) => form.attach(document)}
+				ondetach={(document) => form.detach(document)}
+			/>
 		</form>
 		<Sheet.Footer class="flex-row flex-wrap items-center">
 			{#if templates.length > 0}
@@ -153,9 +195,7 @@
 							</Button>{/snippet}
 					</DropdownMenu.Trigger>
 					<DropdownMenu.Content align="start">
-						{#each templates as template (template.id)}<DropdownMenu.Item
-								onclick={() => form.applyTemplate(template, contacts)}
-							>
+						{#each templates as template (template.id)}<DropdownMenu.Item onclick={() => form.applyTemplate(template)}>
 								{template.name}
 							</DropdownMenu.Item>{/each}
 					</DropdownMenu.Content>

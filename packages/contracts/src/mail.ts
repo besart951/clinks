@@ -91,3 +91,36 @@ export function mailDomainView(domain: StoredMailDomain, spfInclude: string): Ma
 		}),
 	};
 }
+
+/** «Senden» in the mail module: one mail per recipient, placeholders filled for each. */
+export const mailSendInput = z.strictObject({
+	/** A sender the caller may use; null: their personal sender, else the platform address in their name. */
+	senderId: uuid.nullable(),
+	to: z.array(email).min(1).max(20),
+	subject: z.string().trim().min(1).max(300),
+	body: z.string().max(50_000),
+	/** Documents to attach. */
+	attachmentIds: z.array(uuid).max(5),
+	/** The mail answered: its Message-ID threads the reply. */
+	replyToId: uuid.nullable(),
+	/** The draft this was; it is removed once sent. */
+	draftId: uuid.nullable(),
+});
+export type MailSendInput = z.infer<typeof mailSendInput>;
+
+export const mailSendResult = z.object({
+	queued: z.number().int(),
+	/** Recipients that got nothing: the address bounced before. */
+	suppressed: z.array(z.string()),
+});
+export type MailSendResult = z.infer<typeof mailSendResult>;
+
+/** A sender the caller may pick in the compose form. */
+export const ownSenderDto = z.object({
+	id: uuid,
+	kind: z.enum(['business', 'personal']),
+	address: z.string(),
+	displayName: z.string(),
+	active: z.boolean(),
+});
+export type OwnSenderView = z.infer<typeof ownSenderDto>;

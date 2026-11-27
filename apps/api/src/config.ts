@@ -55,6 +55,8 @@ const environment = z.object({
 	MAIL_WORKER: boolean.default(true),
 	/** Upper bound for the outbox, across workspaces; the mail provider's limit decides. */
 	MAIL_RATE_PER_SECOND: z.coerce.number().positive().default(5),
+	/** Personal and business mails a workspace may send per day from the mail module (not invoices, not newsletters). */
+	MAIL_DAILY_LIMIT: z.coerce.number().int().positive().default(500),
 	/** Secure cookies need HTTPS; browsers treat http://localhost as secure too. */
 	COOKIE_SECURE: boolean.default(true),
 	/** Behind Caddy the client address comes from X-Forwarded-For. */

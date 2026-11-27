@@ -24,7 +24,7 @@
 	import { campaignTone } from '#lib/components/common/tones';
 	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
 	import { CampaignEditorModel } from '#lib/features/mail/campaign.svelte';
-	import { fillPlaceholders, placeholders } from '#lib/features/mail/templates';
+	import { fillPlaceholders, placeholders } from '@clinks/domain/placeholders';
 	import type { CampaignId } from '@clinks/domain/ids';
 	import { useWorkspace } from '#lib/workspace.svelte';
 

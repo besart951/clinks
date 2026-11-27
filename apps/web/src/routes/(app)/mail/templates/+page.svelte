@@ -13,7 +13,7 @@
 	import FormField from '#lib/components/common/FormField.svelte';
 	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
 	import MailNav from '#lib/components/mail/MailNav.svelte';
-	import { placeholders } from '#lib/features/mail/templates';
+	import { placeholders } from '@clinks/domain/placeholders';
 	import { Resource } from '#lib/state/resource.svelte';
 	import type { MailTemplate } from '@clinks/domain/types';
 	import { useWorkspace } from '#lib/workspace.svelte';

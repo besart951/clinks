@@ -261,6 +261,7 @@ function tenant(context: SeedContext, seed: TenantSeed): { tenant: Tenant; roles
 			'calendar.write',
 			'mail.read',
 			'mail.write',
+			'mail.business',
 			'documents.read',
 			'planner.read',
 			'physio.read',

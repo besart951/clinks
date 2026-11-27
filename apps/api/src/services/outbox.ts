@@ -20,16 +20,24 @@ export interface QueuedMail {
 	attachments?: OutboxAttachment[];
 	headers?: Record<string, string>;
 	contactId?: string | null;
+	/** Keep a copy under Mail › Gesendet: by default for mail to a contact, never for newsletters. */
+	file?: boolean;
 	extras?: MailExtras;
+}
+
+/** The queued mail; `suppressed` when the address bounced before and nothing will be sent. */
+export interface Enqueued {
+	id: string;
+	suppressed: boolean;
 }
 
 /**
  * Writes the mail to the outbox in the caller's transaction, so it goes out exactly when the change that causes it
  * is saved. Mail to a contact is also filed under Mail › Gesendet at that contact, with its delivery. An address the
  * workspace may not write to any more (bounced; unsubscribed, for newsletters) gets nothing: the row says
- * `suppressed`. Returns the outbox id.
+ * `suppressed`.
  */
-export async function enqueueMail(tx: Tx, tenantId: string, mail: QueuedMail): Promise<string> {
+export async function enqueueMail(tx: Tx, tenantId: string, mail: QueuedMail): Promise<Enqueued> {
 	const tenant = await tx
 		.selectFrom('tenants')
 		.select(['name', 'brandColor', 'address', 'locale'])
@@ -66,7 +74,7 @@ export async function enqueueMail(tx: Tx, tenantId: string, mail: QueuedMail): P
 		})
 		.execute();
 	if (!suppressed) await tx.insertInto('auth.mailQueue').values({ outboxId: id, tenantId }).execute();
-	if (mail.contactId && mail.kind !== 'campaign') {
+	if (mail.file ?? (!!mail.contactId && mail.kind !== 'campaign')) {
 		const now = new Date();
 		await tx
 			.insertInto('mails')
@@ -82,7 +90,7 @@ export async function enqueueMail(tx: Tx, tenantId: string, mail: QueuedMail): P
 				sentAt: now,
 				isRead: true,
 				starred: false,
-				contactId: mail.contactId,
+				contactId: mail.contactId ?? null,
 				messageId: outboxMessageId(id),
 				delivery: suppressed ? 'suppressed' : 'queued',
 				createdAt: now,
@@ -90,7 +98,7 @@ export async function enqueueMail(tx: Tx, tenantId: string, mail: QueuedMail): P
 			})
 			.execute();
 	}
-	return id;
+	return { id, suppressed };
 }
 
 /** The Message-ID of an outbox mail; bounces and replies point back to it. */

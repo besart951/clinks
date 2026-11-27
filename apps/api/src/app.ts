@@ -28,6 +28,7 @@ import type { Services } from './services/context.ts';
 import { FileService } from './services/files.ts';
 import { BankImportService } from './services/bank-imports.ts';
 import { MailSettingsService } from './services/mail-settings.ts';
+import { MailComposeService } from './services/mail-compose.ts';
 import { InvoiceService } from './services/invoices.ts';
 import { InvoiceLinks } from './services/invoice-links.ts';
 import { SessionService } from './services/sessions.ts';
@@ -56,6 +57,7 @@ export function createApp({ services, config }: AppOptions) {
 		invoiceLinks: new InvoiceLinks(services),
 		bankImports: new BankImportService(services),
 		mailSettings: new MailSettingsService(services),
+		mailCompose: new MailComposeService(services),
 		sync: new SyncService(services),
 		caller: (c) => callerOf(c, config.TRUST_PROXY),
 		deliver: (c, opened) => deliverSession(c, opened, config.COOKIE_SECURE),

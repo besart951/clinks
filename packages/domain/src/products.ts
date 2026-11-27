@@ -46,7 +46,13 @@ export const products: readonly Product[] = [
 		permissions: ['planner.read', 'planner.write'],
 		templates: [],
 	},
-	{ key: 'mail', availability: 'plan', modules: ['mail'], permissions: ['mail.read', 'mail.write'], templates: [] },
+	{
+		key: 'mail',
+		availability: 'plan',
+		modules: ['mail'],
+		permissions: ['mail.read', 'mail.write', 'mail.business'],
+		templates: [],
+	},
 	{
 		key: 'finance',
 		availability: 'plan',
