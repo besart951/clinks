@@ -1942,6 +1942,30 @@
         "de-CH": "Verschoben nach {folder}",
         "en-US": "Moved to {folder}"
       },
+      "ui.ws.mail.reply_to": {
+        "de-CH": "Antwort an {to}",
+        "en-US": "Reply to {to}"
+      },
+      "ui.ws.mail.reply_placeholder": {
+        "de-CH": "Antwort schreiben …",
+        "en-US": "Write a reply …"
+      },
+      "ui.ws.mail.reply_expand": {
+        "de-CH": "Im Fenster",
+        "en-US": "In a window"
+      },
+      "ui.ws.mail.reply_hint": {
+        "de-CH": "Ctrl + Enter sendet",
+        "en-US": "Ctrl + Enter sends"
+      },
+      "ui.ws.mail.drop_targets": {
+        "de-CH": "Hierher ziehen",
+        "en-US": "Drop here"
+      },
+      "ui.ws.mail.in_conversation": {
+        "de-CH": "{count} Mails im Verlauf",
+        "en-US": "{count} emails in the conversation"
+      },
       "ui.ws.mail.undo_send": {
         "de-CH": "Senden rückgängig",
         "en-US": "Undo send"
