@@ -645,11 +645,24 @@ test('shows the offline banner when the connection is simulated away', async ({ 
 	await expect(page.getByRole('alert').filter({ hasText: 'Keine Verbindung' })).toBeVisible();
 });
 
-test('switches the interface to English', async ({ page }) => {
+test('switches the interface to English from a menu with flags, also in the app', async ({ page }) => {
 	await page.goto('/#/login');
-	await page.getByRole('button', { name: 'Sprachen' }).click();
-	await page.getByRole('menuitemradio', { name: 'English' }).click();
+	await page.getByRole('button', { name: /^Sprachen/ }).click();
+	// A menu, not a switch, so more languages fit; each with its flag and its own name.
+	const english = page.getByRole('menuitemradio', { name: 'English' });
+	await expect(page.getByRole('menuitemradio')).toHaveCount(2);
+	await expect(english.locator('svg')).toHaveCount(1);
+	await english.click();
 	await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
+	await expect(page.getByRole('menu')).toBeHidden();
+
+	await page.goto('/#/login');
+	await page.getByRole('button', { name: /^Languages/ }).click();
+	await page.getByRole('menuitemradio', { name: 'Deutsch (Schweiz)' }).click();
+	await signIn(page);
+	await page.getByRole('complementary').getByRole('button', { name: 'Sprachen: Deutsch (Schweiz)' }).click();
+	await page.getByRole('menuitemradio', { name: 'English' }).click();
+	await expect(page.getByRole('link', { name: 'Contacts' }).first()).toBeVisible();
 });
 
 test('edits master data in place and collapses sections', async ({ page }) => {

@@ -4690,6 +4690,14 @@
         "de-CH": "PDF-Vorschau",
         "en-US": "PDF preview"
       },
+      "ui.ws.locale.de_ch": {
+        "de-CH": "Deutsch (Schweiz)",
+        "en-US": "Deutsch (Schweiz)"
+      },
+      "ui.ws.locale.en_us": {
+        "de-CH": "English",
+        "en-US": "English"
+      },
       "ui.ws.language.de": {
         "de-CH": "Deutsch",
         "en-US": "German"

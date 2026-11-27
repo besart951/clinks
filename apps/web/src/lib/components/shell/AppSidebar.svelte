@@ -15,7 +15,7 @@
 	import UserMenu from './UserMenu.svelte';
 	import { navigationAccess, navigationGroups, type NavigationItem } from '#lib/features/shell/navigation-items';
 	import { NavBadges } from '#lib/features/shell/nav-badges.svelte';
-	import { locales, type Locale } from '@clinks/i18n-types/catalog';
+	import LocalePicker from './LocalePicker.svelte';
 	import { href, routePath } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
@@ -26,7 +26,6 @@
 	const session = workspace.session;
 	const badges = new NavBadges(workspace);
 	const sidebarKey = 'clinks.workspace.sidebar.open';
-	const localeNames: { [locale in Locale]: string } = { 'de-CH': 'DE', 'en-US': 'EN' };
 	let dark = $state(false);
 	/** Collapsed on a wide screen: an icon rail with tooltips instead of the full menu. */
 	const rail = $derived(!sidebar.mobile && !sidebar.open);
@@ -189,24 +188,7 @@
 					? workspace.t('ui.ws.shell.demo_note')
 					: workspace.t('ui.ws.shell.demo_note_volatile')}
 			</p>
-			<div
-				class="bg-muted mb-1 grid grid-cols-2 rounded-md p-0.5"
-				role="group"
-				aria-label={workspace.t('ui.languages')}
-			>
-				{#each locales as locale (locale)}
-					<button
-						type="button"
-						class="h-7 rounded text-xs font-medium transition-colors {workspace.i18n.locale === locale
-							? 'bg-background text-foreground shadow-[var(--shadow-sm)]'
-							: 'text-muted-foreground hover:text-foreground'}"
-						aria-pressed={workspace.i18n.locale === locale}
-						onclick={() => workspace.i18n.setLocale(locale)}
-					>
-						{localeNames[locale]}
-					</button>
-				{/each}
-			</div>
+			<div class="mb-1"><LocalePicker look="full" /></div>
 		{/if}
 		<button
 			type="button"

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Component, Snippet } from 'svelte';
 	import * as Card from '@clinks/ui/components/ui/card';
-	import LocaleSwitch from '#lib/components/shell/LocaleSwitch.svelte';
+	import LocalePicker from '#lib/components/shell/LocalePicker.svelte';
 
 	/** The frame of a page people open from a mail without an account: invoice links, newsletter sign-up and links. */
 	let {
@@ -29,6 +29,6 @@
 			</Card.Header>
 			<Card.Content class="space-y-4">{@render children()}</Card.Content>
 		</Card.Root>
-		<div class="flex justify-center"><LocaleSwitch /></div>
+		<div class="flex justify-center"><LocalePicker /></div>
 	</div>
 </main>
