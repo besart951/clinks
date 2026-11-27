@@ -25,6 +25,8 @@ export interface QueuedMail {
 	campaignId?: string;
 	/** Keep a copy under Mail › Gesendet: by default for mail to a contact, never for newsletters. */
 	file?: boolean;
+	/** Not before then, e.g. while «undo send» can still take it back; omitted: right away. */
+	dueAt?: Date;
 	extras?: MailExtras;
 }
 
@@ -77,7 +79,11 @@ export async function enqueueMail(tx: Tx, tenantId: string, mail: QueuedMail): P
 			status: suppressed ? 'suppressed' : 'queued',
 		})
 		.execute();
-	if (!suppressed) await tx.insertInto('auth.mailQueue').values({ outboxId: id, tenantId }).execute();
+	if (!suppressed)
+		await tx
+			.insertInto('auth.mailQueue')
+			.values({ outboxId: id, tenantId, ...(mail.dueAt ? { dueAt: mail.dueAt } : {}) })
+			.execute();
 	await tx
 		.insertInto('auth.mailRetention')
 		.values({ tenantId })

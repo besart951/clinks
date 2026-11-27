@@ -31,7 +31,8 @@ describe('sending from the mail module', () => {
 			body: 'Guten Tag {anrede}\n\nIhr Termin ist bestätigt.\n\n{firma}',
 		});
 		assert.equal(sent.status, 201, JSON.stringify(sent.body));
-		assert.deepEqual(sent.body, { queued: 2, suppressed: [] });
+		assert.equal(sent.body.queued, 2);
+		assert.deepEqual([sent.body.suppressed, sent.body.outboxIds.length, sent.body.undoUntil], [[], 2, null]);
 		const lea = api.mailer.last('lea@example.ch');
 		assert.equal(lea.subject, 'Termin für Lea');
 		assert.match(lea.text, /^Guten Tag Lea Muster\n\nIhr Termin ist bestätigt\.\n\nPraxis Post/);
@@ -184,6 +185,31 @@ describe('sending from the mail module', () => {
 		};
 		const written = await call('POST', '/sync/write', { ops: [{ op: 'PUT', table: 'mails', id: uuid(), data: fake }] });
 		assert.equal(written.status, 403);
+	});
+
+	it('takes a send back while it waits for «undo send», and refuses once it is on its way', async () => {
+		api.config.MAIL_UNDO_SECONDS = 10;
+		try {
+			const sent = await send({ to: ['zurueck@example.ch'], subject: 'Doch nicht', body: 'Entwurf' });
+			assert.equal(sent.status, 201, JSON.stringify(sent.body));
+			assert.ok(sent.body.undoUntil);
+			// The worker ran after the request, but the mail waits.
+			assert.equal(api.mailer.sent.filter((mail) => mail.to === 'zurueck@example.ch').length, 0);
+			const cancelled = await call('POST', '/mail/send/cancel', { outboxIds: sent.body.outboxIds });
+			assert.deepEqual([cancelled.status, cancelled.body], [200, { cancelled: 1 }]);
+			const left = await api.owner.selectFrom('mails').select('id').where('subject', '=', 'Doch nicht').execute();
+			assert.deepEqual(left, []);
+
+			const later = await send({ to: ['spaeter@example.ch'], subject: 'Geht raus', body: 'Text' });
+			api.clock.offset += 11_000;
+			await api.mailWorker.drain();
+			assert.equal(api.mailer.sent.filter((mail) => mail.to === 'spaeter@example.ch').length, 1);
+			const tooLate = await call('POST', '/mail/send/cancel', { outboxIds: later.body.outboxIds });
+			assert.equal(tooLate.status, 409);
+		} finally {
+			api.config.MAIL_UNDO_SECONDS = undefined;
+			api.clock.offset = 0;
+		}
 	});
 
 	it('stops at the daily limit, also for parallel sends', async () => {

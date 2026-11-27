@@ -364,6 +364,31 @@ test('sets up a sender domain and a business sender that invoices go out from', 
 	await expect(page.getByText('Praxis Sonne Buchhaltung').first()).toBeVisible();
 });
 
+test('takes a sent mail back with «Senden rückgängig» and opens it again', async ({ page }) => {
+	await signIn(page);
+	await page.goto('/#/mail');
+	await page.getByRole('button', { name: 'Neue Mail' }).click();
+	const sheet = page.getByRole('dialog', { name: 'Neue Mail' });
+	await sheet.getByLabel('An', { exact: true }).fill('zurueck@example.org');
+	await sheet.getByLabel('An', { exact: true }).press('Enter');
+	await sheet.getByLabel('Betreff').fill('Doch noch nicht');
+	await sheet.getByRole('button', { name: 'Senden' }).click();
+	await expect(sheet).toBeHidden();
+	await page.getByRole('button', { name: 'Senden rückgängig' }).click();
+	await expect(page.getByText('Nicht gesendet – die Mail ist wieder offen')).toBeVisible();
+	await expect(sheet.getByLabel('Betreff')).toHaveValue('Doch noch nicht');
+	// Closing it offers to keep it as a draft: it was taken back, not sent.
+	await sheet.getByRole('button', { name: 'Schliessen' }).click();
+	await page
+		.getByRole('dialog', { name: 'Entwurf speichern?' })
+		.getByRole('button', { name: 'Als Entwurf speichern' })
+		.click();
+	await page.getByRole('button', { name: /^Entwürfe/ }).click();
+	await expect(page.getByText('Doch noch nicht')).toHaveCount(1);
+	await page.getByRole('button', { name: /^Gesendet/ }).click();
+	await expect(page.getByText('Doch noch nicht')).toHaveCount(0);
+});
+
 test('sends a template to two recipients, each with their placeholders filled, and an attachment', async ({ page }) => {
 	await signIn(page);
 	await page.goto('/#/mail');

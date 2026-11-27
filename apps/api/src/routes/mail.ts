@@ -128,6 +128,20 @@ export function registerMailRoutes(
 	me.openapi(
 		route(
 			{
+				method: 'post',
+				path: '/mail/send/cancel',
+				tags: ['mail'],
+				request: body(mail.mailSendCancelInput),
+				responses: { 200: json(z.object({ cancelled: z.number().int() })) },
+			},
+			true,
+		),
+		async (c) => c.json(await mailCompose.cancel(c.var.claims, c.req.valid('json'), caller(c)), 200),
+	);
+
+	me.openapi(
+		route(
+			{
 				method: 'get',
 				path: '/mail/appointment-settings',
 				tags: ['mail'],

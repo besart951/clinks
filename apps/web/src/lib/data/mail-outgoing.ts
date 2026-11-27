@@ -1,4 +1,4 @@
-import type { MailSendInput, MailSendResult, OwnSenderView } from '@clinks/contracts/mail';
+import type { MailSendCancelInput, MailSendInput, MailSendResult, OwnSenderView } from '@clinks/contracts/mail';
 import type { ApiClient } from './api-client.ts';
 import type { WorkspaceApi } from './workspace-api.ts';
 
@@ -21,5 +21,12 @@ export class MailOutgoing {
 		return this.#client
 			? this.#client.request<MailSendResult>('POST', '/mail/send', input)
 			: this.#api().mailOutgoing.send(input);
+	}
+
+	/** «Undo send» while the mails still wait in the queue. */
+	cancel(input: MailSendCancelInput): Promise<{ cancelled: number }> {
+		return this.#client
+			? this.#client.request<{ cancelled: number }>('POST', '/mail/send/cancel', input)
+			: this.#api().mailOutgoing.cancel(input);
 	}
 }

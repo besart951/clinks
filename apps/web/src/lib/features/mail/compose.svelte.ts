@@ -4,6 +4,16 @@ import { placeholders } from '@clinks/domain/placeholders';
 import type { Contact, MailMessage, MailTemplate, StoredDocument } from '@clinks/domain/types';
 import type { Workspace } from '../../workspace.svelte.ts';
 
+/** What was sent, to open the form with it again after «undo send». */
+interface SentMail {
+	to: string[];
+	subject: string;
+	body: string;
+	attachments: StoredDocument[];
+	replyTo: MailMessage | null;
+	senderId: string | null;
+}
+
 const placeholderPattern = new RegExp(`\\{(${placeholders.join('|')})\\}`);
 
 /** Writing a new message, a reply or continuing a draft. */
@@ -22,13 +32,16 @@ export class ComposeModel {
 	attachments = $state.raw<StoredDocument[]>([]);
 	#initial = $state('');
 	#workspace: Workspace;
+	readonly #reopen: () => void;
 
 	dirty = $derived(JSON.stringify([this.to, this.subject, this.body]) !== this.#initial);
 	/** Placeholders are filled per recipient when sending; the form says so while the text has any. */
 	usesPlaceholders = $derived(placeholderPattern.test(`${this.subject}\n${this.body}`));
 
-	constructor(workspace: Workspace) {
+	/** `reopen` shows the form again after «undo send», with what was sent. */
+	constructor(workspace: Workspace, reopen: () => void = () => undefined) {
 		this.#workspace = workspace;
+		this.#reopen = reopen;
 	}
 
 	start(
@@ -109,15 +122,51 @@ export class ComposeModel {
 				draftId: this.draft?.id ?? null,
 			});
 			this.#initial = JSON.stringify([this.to, this.subject, this.body]);
-			if (result.queued > 0)
-				toast.success(
+			if (result.queued > 0) {
+				const message =
 					result.queued === 1
 						? this.#workspace.t('ui.ws.mail.sent')
-						: this.#workspace.t('ui.ws.mail.queued', { count: result.queued }),
+						: this.#workspace.t('ui.ws.mail.queued', { count: result.queued });
+				const left = result.undoUntil ? Date.parse(result.undoUntil) - Date.now() : 0;
+				const sent = this.#snapshot();
+				toast.success(
+					message,
+					left > 0
+						? {
+								duration: left,
+								action: {
+									label: this.#workspace.t('ui.ws.mail.undo_send'),
+									onClick: () => void this.#undoSend(result.outboxIds, sent),
+								},
+							}
+						: undefined,
 				);
+			}
 			if (result.suppressed.length > 0)
 				toast.warning(this.#workspace.t('ui.ws.mail.sent_suppressed', { addresses: result.suppressed.join(', ') }));
 		});
+	}
+
+	#snapshot(): SentMail {
+		return {
+			to: [...this.to],
+			subject: this.subject,
+			body: this.body,
+			attachments: this.attachments,
+			replyTo: this.replyTo,
+			senderId: this.senderId,
+		};
+	}
+
+	/** Takes the mails back and opens the form again with what was sent, unsaved, to change and send again. */
+	async #undoSend(outboxIds: string[], sent: SentMail) {
+		const taken = await this.#workspace.run(() => this.#workspace.mailOutgoing.cancel({ outboxIds }), {
+			success: 'ui.ws.mail.send_undone',
+		});
+		if (!taken) return;
+		Object.assign(this, { ...sent, draft: null, recipientInput: '', fields: {} });
+		this.#initial = '';
+		this.#reopen();
 	}
 
 	/** Drafts stay internal: a row under Entwürfe, synced like any other. */

@@ -160,6 +160,8 @@ export async function startApi(billing?: Billing, options: { allowInternalStorag
 		mailer,
 		relay,
 		dns,
+		/** The services' settings, for a test that changes one (and sets it back). */
+		config: services.config as typeof services.config & { MAIL_UNDO_SECONDS?: number },
 		mailWorker,
 		campaignDispatcher,
 		appointmentReminders,

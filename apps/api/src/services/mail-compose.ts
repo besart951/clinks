@@ -1,4 +1,4 @@
-import type { MailSendInput, MailSendResult, OwnSenderView } from '@clinks/contracts/mail';
+import type { MailSendCancelInput, MailSendInput, MailSendResult, OwnSenderView } from '@clinks/contracts/mail';
 import type { Tx } from '@clinks/db/scope';
 import { roleGrants } from '@clinks/domain/permissions';
 import { fillPlaceholders } from '@clinks/domain/placeholders';
@@ -10,7 +10,7 @@ import type { AccessClaims } from '../tokens.ts';
 import { audit } from './audit.ts';
 import type { Caller, Services } from './context.ts';
 import type { Sender } from './mail-senders.ts';
-import { enqueueMail } from './outbox.ts';
+import { enqueueMail, outboxMessageId } from './outbox.ts';
 import { activeRole, withPermission, type MemberScope } from './permissions.ts';
 
 /**
@@ -67,6 +67,9 @@ export class MailComposeService {
 				.where('id', '=', scope.tenantId)
 				.executeTakeFirstOrThrow();
 			const suppressed: string[] = [];
+			const outboxIds: string[] = [];
+			const delay = this.#services.config.MAIL_UNDO_SECONDS ?? 0;
+			const dueAt = delay > 0 ? new Date(this.#services.now().getTime() + delay * 1000) : undefined;
 			for (const to of input.to) {
 				const contact = await contactByAddress(tx, to);
 				const queued = await enqueueMail(tx, scope.tenantId, {
@@ -79,8 +82,10 @@ export class MailComposeService {
 					headers,
 					contactId: contact?.id ?? null,
 					file: true,
+					dueAt,
 				});
 				if (queued.suppressed) suppressed.push(to);
+				else outboxIds.push(queued.id);
 			}
 			if (input.draftId)
 				await tx.deleteFrom('mails').where('id', '=', input.draftId).where('folder', '=', 'drafts').execute();
@@ -94,7 +99,52 @@ export class MailComposeService {
 				},
 				caller,
 			);
-			return { queued: input.to.length - suppressed.length, suppressed };
+			return {
+				queued: outboxIds.length,
+				suppressed,
+				outboxIds,
+				undoUntil: dueAt && outboxIds.length > 0 ? dueAt.toISOString() : null,
+			};
+		});
+	}
+
+	/**
+	 * «Undo send»: takes the mails back while they still wait in the queue, with their copies under Gesendet. All or
+	 * nothing: once one of them is due or being sent, it is too late for the whole send.
+	 */
+	cancel(claims: AccessClaims, input: MailSendCancelInput, caller: Caller): Promise<{ cancelled: number }> {
+		return withPermission(this.#services.db, claims, 'mail.write', async (tx, scope) => {
+			const now = this.#services.now();
+			const waiting = await tx
+				.selectFrom('mailOutbox')
+				.innerJoin('auth.mailQueue', 'auth.mailQueue.outboxId', 'mailOutbox.id')
+				.select('mailOutbox.id')
+				.where('mailOutbox.id', 'in', input.outboxIds)
+				.where('mailOutbox.kind', '=', 'personal')
+				.where('mailOutbox.status', '=', 'queued')
+				.where('auth.mailQueue.dueAt', '>', now)
+				.where('auth.mailQueue.lockedUntil', 'is', null)
+				.forUpdate()
+				.execute();
+			if (waiting.length !== new Set(input.outboxIds).size) throw new ApiError(409, 'error.ws.mail_already_sent');
+			await tx
+				.deleteFrom('mails')
+				.where('folder', '=', 'sent')
+				.where('messageId', 'in', input.outboxIds.map(outboxMessageId))
+				.execute();
+			// The queue entries go with their outbox rows.
+			await tx.deleteFrom('mailOutbox').where('id', 'in', input.outboxIds).execute();
+			await audit(
+				tx,
+				{
+					action: 'mail.cancelled',
+					actorId: scope.userId,
+					tenantId: scope.tenantId,
+					meta: { recipients: input.outboxIds.length },
+				},
+				caller,
+			);
+			return { cancelled: input.outboxIds.length };
 		});
 	}
 
