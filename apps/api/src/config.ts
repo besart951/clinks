@@ -59,6 +59,8 @@ const environment = z.object({
 	MAIL_RATE_PER_SECOND: z.coerce.number().positive().default(5),
 	/** Personal and business mails a workspace may send per day from the mail module (not invoices, not newsletters). */
 	MAIL_DAILY_LIMIT: z.coerce.number().int().positive().default(500),
+	/** Seconds a mail written in CLinks waits in the queue, so «undo send» can still take it back. */
+	MAIL_UNDO_SECONDS: z.coerce.number().int().min(0).max(60).default(10),
 	/** Secure cookies need HTTPS; browsers treat http://localhost as secure too. */
 	COOKIE_SECURE: boolean.default(true),
 	/** Behind Caddy the client address comes from X-Forwarded-For. */

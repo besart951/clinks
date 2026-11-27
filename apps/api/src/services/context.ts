@@ -27,7 +27,12 @@ export interface Services {
 	limiter: RateLimiter;
 	config: Pick<Config, 'WEB_ORIGIN'> &
 		Partial<Pick<Config, 'API_ORIGIN'>> &
-		Partial<Pick<Config, 'STORAGE_ALLOW_INTERNAL' | 'MAIL_SPF_INCLUDE' | 'INBOUND_DOMAIN' | 'MAIL_DAILY_LIMIT'>>;
+		Partial<
+			Pick<
+				Config,
+				'STORAGE_ALLOW_INTERNAL' | 'MAIL_SPF_INCLUDE' | 'INBOUND_DOMAIN' | 'MAIL_DAILY_LIMIT' | 'MAIL_UNDO_SECONDS'
+			>
+		>;
 	now: () => Date;
 }
 

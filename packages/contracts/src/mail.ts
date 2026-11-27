@@ -112,8 +112,16 @@ export const mailSendResult = z.object({
 	queued: z.number().int(),
 	/** Recipients that got nothing: the address bounced before. */
 	suppressed: z.array(z.string()),
+	/** The queued mails, to take them back with `/mail/send/cancel` until `undoUntil`. */
+	outboxIds: z.array(uuid),
+	/** Until when the mails wait before they go out; null: they go out right away. */
+	undoUntil: z.string().nullable(),
 });
 export type MailSendResult = z.infer<typeof mailSendResult>;
+
+/** «Undo send»: takes back mails that still wait in the queue. */
+export const mailSendCancelInput = z.strictObject({ outboxIds: z.array(uuid).min(1).max(20) });
+export type MailSendCancelInput = z.infer<typeof mailSendCancelInput>;
 
 /** A sender the caller may pick in the compose form. */
 export const ownSenderDto = z.object({

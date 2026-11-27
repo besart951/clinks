@@ -19,7 +19,7 @@
 	let { contacts, templates, onClose }: { contacts: Contact[]; templates: MailTemplate[]; onClose?: () => void } =
 		$props();
 	const workspace = useWorkspace();
-	const form = new ComposeModel(workspace);
+	const form = new ComposeModel(workspace, () => (open = true));
 	let open = $state(false);
 	let confirm = $state<ConfirmRequest | null>(null);
 	const suggestions = $derived(

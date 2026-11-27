@@ -1,9 +1,14 @@
-import type { MailSendInput, MailSendResult, OwnSenderView } from '@clinks/contracts/mail';
+import type { MailSendCancelInput, MailSendInput, MailSendResult, OwnSenderView } from '@clinks/contracts/mail';
 import { newId, type MailId } from '@clinks/domain/ids';
 import { fillPlaceholders } from '@clinks/domain/placeholders';
 import type { MailMessage } from '@clinks/domain/types';
 import { stamp, type WorkspaceCache } from './database.ts';
 import { allowedCaller, appendAudit, mockError, type RequestContext } from './repository.ts';
+
+/** Like the API's `MAIL_UNDO_SECONDS`: how long a sent mail can still be taken back. */
+const undoMs = 10_000;
+/** Mails still waiting, by id, until when; across instances, like the server's queue. */
+const waiting = new Map<string, number>();
 
 /**
  * The demo's stand-in for «Senden» (apps/api services/mail-compose.ts): the same sender rules and one mail per
@@ -80,7 +85,32 @@ export class MockMailOutgoing {
 				action: 'mail.sent',
 				target: { kind: 'mail', id: filed[0], label: input.subject },
 			});
-			return { queued: input.to.length, suppressed: [] };
+			const until = Date.now() + undoMs;
+			for (const id of filed) waiting.set(id, until);
+			return { queued: input.to.length, suppressed: [], outboxIds: filed, undoUntil: new Date(until).toISOString() };
+		}, ['mails', 'audit']);
+	}
+
+	/** «Undo send»: removes the filed mails while they still wait, all or nothing. */
+	cancel(input: MailSendCancelInput): Promise<{ cancelled: number }> {
+		return this.#db.request(() => {
+			const { tenantId, actorId } = allowedCaller(this.#context, 'mail.write');
+			if (input.outboxIds.some((id) => (waiting.get(id) ?? 0) <= Date.now()))
+				throw mockError(this.#context, 'conflict', 'error.ws.mail_already_sent');
+			const mails = this.#db.table('mails');
+			const subject = mails.find((row) => row.id === input.outboxIds[0])?.subject ?? '';
+			for (const id of input.outboxIds) {
+				waiting.delete(id);
+				const index = mails.findIndex((row) => row.id === id && row.tenantId === tenantId);
+				if (index >= 0) mails.splice(index, 1);
+			}
+			appendAudit(this.#db, {
+				tenantId,
+				actorId,
+				action: 'mail.cancelled',
+				target: { kind: 'mail', id: input.outboxIds[0], label: subject },
+			});
+			return { cancelled: input.outboxIds.length };
 		}, ['mails', 'audit']);
 	}
 
