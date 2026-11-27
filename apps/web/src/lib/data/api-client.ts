@@ -45,7 +45,9 @@ export class ApiClient {
 		if (response.status === 401 && this.#accessToken && !path.startsWith('/auth/') && (await this.refresh()))
 			response = await this.#send(method, path, body);
 		if (!response.ok) throw await toError(response);
-		return (response.status === 204 ? undefined : await response.json()) as T;
+		// 202 and 204 may come without a body (e.g. a newsletter sign-up, which answers the same whatever happened).
+		const text = response.status === 204 ? '' : await response.text();
+		return (text ? JSON.parse(text) : undefined) as T;
 	}
 
 	/** Keeps the session the API just opened. */
