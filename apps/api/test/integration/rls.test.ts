@@ -9,6 +9,8 @@ import { startApi, type Api } from './harness.ts';
  * and are reached only through the API's own queries.
  */
 const withoutTenant = [
+	// Reminders due across workspaces: ids only, like the mail queue.
+	'auth.appointment_reminders',
 	// Campaigns due to go out across workspaces: ids only, like the mail queue.
 	'auth.campaign_queue',
 	'auth.credentials',

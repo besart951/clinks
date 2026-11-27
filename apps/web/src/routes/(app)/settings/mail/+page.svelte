@@ -17,6 +17,7 @@
 	import MailDomainCard from '#lib/components/settings/MailDomainCard.svelte';
 	import MailSenderDialog from '#lib/components/settings/MailSenderDialog.svelte';
 	import NewsletterFormsCard from '#lib/components/newsletter/NewsletterFormsCard.svelte';
+	import AppointmentMailCard from '#lib/components/settings/AppointmentMailCard.svelte';
 	import { MailSettingsModel } from '#lib/features/settings/mail.svelte';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
@@ -173,6 +174,7 @@
 						</div>
 					</Card.Content>
 				</Card.Root>
+				<AppointmentMailCard />
 				{#if workspace.session.hasModule('mail')}<NewsletterFormsCard />{/if}
 			</div>
 			<MailSenderDialog {model} {members} />

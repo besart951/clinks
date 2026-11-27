@@ -12305,6 +12305,327 @@
 				}
 			}
 		},
+		"/mail/appointment-settings": {
+			"get": {
+				"tags": [
+					"mail"
+				],
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"confirmation": {
+											"type": "boolean"
+										},
+										"reminder": {
+											"type": "boolean"
+										},
+										"hoursBefore": {
+											"type": "integer",
+											"minimum": 1,
+											"maximum": 168
+										},
+										"text": {
+											"type": "string",
+											"maxLength": 500
+										},
+										"spitexVisits": {
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"confirmation",
+										"reminder",
+										"hoursBefore",
+										"text",
+										"spitexVisits"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Not signed in",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Not allowed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"tags": [
+					"mail"
+				],
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"confirmation": {
+										"type": "boolean"
+									},
+									"reminder": {
+										"type": "boolean"
+									},
+									"hoursBefore": {
+										"type": "integer",
+										"minimum": 1,
+										"maximum": 168
+									},
+									"text": {
+										"type": "string",
+										"maxLength": 500
+									},
+									"spitexVisits": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"confirmation",
+									"reminder",
+									"hoursBefore",
+									"text",
+									"spitexVisits"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"responses": {
+					"204": {
+						"description": "Done"
+					},
+					"400": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Not signed in",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Not allowed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"error": {
+											"type": "object",
+											"properties": {
+												"code": {
+													"type": "string"
+												},
+												"message": {
+													"type": "string"
+												},
+												"fields": {
+													"type": "object",
+													"additionalProperties": {
+														"type": "string"
+													}
+												}
+											},
+											"required": [
+												"code",
+												"message"
+											]
+										}
+									},
+									"required": [
+										"error"
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/mail/newsletter-forms": {
 			"get": {
 				"tags": [

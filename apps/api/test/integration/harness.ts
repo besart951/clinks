@@ -7,6 +7,7 @@ import { createApp } from '../../src/app.ts';
 import { MemoryMailer } from '../../src/mailer.ts';
 import { MailWorker } from '../../src/services/mail-worker.ts';
 import { CampaignDispatcher } from '../../src/services/campaigns.ts';
+import { AppointmentReminders } from '../../src/services/appointment-mail.ts';
 import { InboundMail } from '../../src/services/inbound.ts';
 import { MemoryInbound } from '../../src/inbound-sources.ts';
 import { RateLimiter } from '../../src/rate-limit.ts';
@@ -57,6 +58,7 @@ export async function startApi(billing?: Billing, options: { allowInternalStorag
 	const mailWorker = new MailWorker(services, { ratePerSecond: 10_000 });
 	// Due campaigns are expanded into the outbox after every request too.
 	const campaignDispatcher = new CampaignDispatcher(services);
+	const appointmentReminders = new AppointmentReminders(services);
 	// The catch-all mailbox: tests drop raw messages in and read them like the worker does.
 	const mailbox = new MemoryInbound();
 	const inbound = new InboundMail(services, mailbox, 'in.clinks.test');
@@ -93,6 +95,7 @@ export async function startApi(billing?: Billing, options: { allowInternalStorag
 					body: options.body === undefined ? undefined : JSON.stringify(options.body),
 				});
 				await campaignDispatcher.dispatch();
+				await appointmentReminders.dispatch();
 				await mailWorker.drain();
 				const setCookie = response.headers.get('set-cookie');
 				if (setCookie) cookie = setCookie.includes('Max-Age=0') ? null : setCookie.split(';')[0];
@@ -159,6 +162,7 @@ export async function startApi(billing?: Billing, options: { allowInternalStorag
 		dns,
 		mailWorker,
 		campaignDispatcher,
+		appointmentReminders,
 		mailbox,
 		inbound,
 		clock,

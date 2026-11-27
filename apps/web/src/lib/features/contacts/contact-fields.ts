@@ -77,6 +77,13 @@ export function contactFields(contact: Contact, text: FieldText): InlineFieldSpe
 		...name,
 		...person,
 		{ key: 'phone', label: text.t('ui.ws.field.phone'), value: contact.phone, kind: 'tel' },
+		{
+			key: 'mobile',
+			label: text.t('ui.ws.field.mobile'),
+			value: contact.mobile ?? '',
+			kind: 'tel',
+			removable: true,
+		},
 		{ key: 'email', label: text.t('ui.email'), value: contact.email, kind: 'email' },
 		addressField(contact.address, text),
 		{ key: 'insurer', label: text.t('ui.ws.field.insurer'), value: contact.insurer, removable: true },

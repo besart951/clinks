@@ -75,6 +75,8 @@ export const syncedTables = {
 			text('billing_mode', 'billingMode', true),
 			// Absent on a contact created on this device until the server's row syncs back (default «none»).
 			{ column: 'newsletter', field: 'newsletter', type: 'text', nullable: true, serverSet: true },
+			{ column: 'reminders', field: 'reminders', type: 'boolean', nullable: true },
+			text('mobile', 'mobile', true),
 		],
 	},
 	appointments: {
@@ -95,6 +97,7 @@ export const syncedTables = {
 			text('service', 'service', true),
 			{ column: 'arrival_window', field: 'arrivalWindow', type: 'json', nullable: true },
 			{ column: 'billed_invoice_id', field: 'billedInvoiceId', type: 'uuid', nullable: true, references: 'invoices' },
+			{ column: 'reminded_at', field: 'remindedAt', type: 'timestamp', nullable: true, serverSet: true },
 		],
 	},
 	folders: {

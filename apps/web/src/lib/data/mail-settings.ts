@@ -1,5 +1,6 @@
 import type { MailDomainView, MailSenderInput, MailSenderView, MailSettingsView } from '@clinks/contracts/mail';
 import type { DomainPurpose } from '@clinks/domain/mail-domains';
+import type { AppointmentMailSettings } from '@clinks/domain/appointment-mail';
 import type { ApiClient } from './api-client.ts';
 import type { WorkspaceApi } from './workspace-api.ts';
 
@@ -57,5 +58,17 @@ export class MailSettings {
 		return this.#client
 			? this.#client.request<void>('DELETE', `/mail/senders/${id}`)
 			: this.#api().mailSettings.removeSender(id);
+	}
+
+	appointmentMail(): Promise<AppointmentMailSettings> {
+		return this.#client
+			? this.#client.request<AppointmentMailSettings>('GET', '/mail/appointment-settings')
+			: this.#api().mailSettings.appointmentMail();
+	}
+
+	saveAppointmentMail(input: AppointmentMailSettings): Promise<void> {
+		return this.#client
+			? this.#client.request<void>('POST', '/mail/appointment-settings', input)
+			: this.#api().mailSettings.saveAppointmentMail(input);
 	}
 }

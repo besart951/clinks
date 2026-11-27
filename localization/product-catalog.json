@@ -6593,6 +6593,118 @@
       "ui.ws.newsletter.history": {
         "de-CH": "{count} frühere Einträge",
         "en-US": "{count} earlier entries"
+      },
+      "mail.appointment.confirmation_subject": {
+        "de-CH": "Terminbestätigung: {date}",
+        "en-US": "Appointment confirmed: {date}"
+      },
+      "mail.appointment.confirmation_body": {
+        "de-CH": "Guten Tag {name}\n\nWir bestätigen Ihren Termin bei {tenant}:\n{when}\n{address}",
+        "en-US": "Hello {name}\n\nWe confirm your appointment with {tenant}:\n{when}\n{address}"
+      },
+      "mail.appointment.reminder_subject": {
+        "de-CH": "Erinnerung: Ihr Termin am {date}",
+        "en-US": "Reminder: your appointment on {date}"
+      },
+      "mail.appointment.reminder_body": {
+        "de-CH": "Guten Tag {name}\n\nWir erinnern Sie an Ihren Termin bei {tenant}:\n{when}\n{address}",
+        "en-US": "Hello {name}\n\nA reminder of your appointment with {tenant}:\n{when}\n{address}"
+      },
+      "mail.appointment.when_time": {
+        "de-CH": "{date} um {time} Uhr",
+        "en-US": "{date} at {time}"
+      },
+      "mail.appointment.when_window": {
+        "de-CH": "{date}, Ankunft zwischen {from} und {to} Uhr",
+        "en-US": "{date}, arrival between {from} and {to}"
+      },
+      "mail.appointment.cancel": {
+        "de-CH": "Termin absagen oder verschieben? Antworten Sie einfach auf diese Mail.",
+        "en-US": "Need to cancel or move it? Simply reply to this mail."
+      },
+      "ui.ws.field.mobile": {
+        "de-CH": "Mobile",
+        "en-US": "Mobile"
+      },
+      "ui.ws.appointment_mail.title": {
+        "de-CH": "Termine",
+        "en-US": "Appointments"
+      },
+      "ui.ws.appointment_mail.text": {
+        "de-CH": "Bestätigungen und Erinnerungen per E-Mail an Kontakte mit Termin. Sie gehen von der Geschäftsadresse aus; Antworten landen dort.",
+        "en-US": "Confirmations and reminders by e-mail to contacts with an appointment. They go out from the business address; replies arrive there."
+      },
+      "ui.ws.appointment_mail.confirmation": {
+        "de-CH": "Bestätigung, wenn ein Termin vereinbart oder verschoben wird",
+        "en-US": "Confirmation when an appointment is made or moved"
+      },
+      "ui.ws.appointment_mail.confirmation_hint": {
+        "de-CH": "Nicht für Spitex-Einsätze: deren Plan ist bis zur Freigabe ein Entwurf.",
+        "en-US": "Not for home-care visits: their plan is a draft until it is released."
+      },
+      "ui.ws.appointment_mail.reminder": {
+        "de-CH": "Erinnerung vor dem Termin",
+        "en-US": "Reminder before the appointment"
+      },
+      "ui.ws.appointment_mail.hours": {
+        "de-CH": "Stunden vorher",
+        "en-US": "Hours before"
+      },
+      "ui.ws.appointment_mail.spitex": {
+        "de-CH": "Auch Spitex-Einsätze erinnern",
+        "en-US": "Remind home-care visits too"
+      },
+      "ui.ws.appointment_mail.spitex_hint": {
+        "de-CH": "Mit dem Ankunftsfenster statt einer Uhrzeit, sobald die Woche freigegeben ist; nur für Klient:innen mit eingeschalteten Terminmails.",
+        "en-US": "With the arrival window instead of a time, once the week is released; only for clients with appointment mails turned on."
+      },
+      "ui.ws.appointment_mail.own_text": {
+        "de-CH": "Eigener Text",
+        "en-US": "Own text"
+      },
+      "ui.ws.appointment_mail.own_text_hint": {
+        "de-CH": "Zum Beispiel, wo man parkiert oder was mitzubringen ist.",
+        "en-US": "For example where to park or what to bring."
+      },
+      "ui.ws.appointment_mail.channel": {
+        "de-CH": "Kanal",
+        "en-US": "Channel"
+      },
+      "ui.ws.appointment_mail.sms_soon": {
+        "de-CH": "SMS (folgt)",
+        "en-US": "SMS (coming)"
+      },
+      "ui.ws.appointment_mail.privacy": {
+        "de-CH": "Die Mails nennen nur Arbeitsbereich, Datum, Uhrzeit und Adresse – nie Behandlung, Leistung oder Notizen.",
+        "en-US": "The mails name only the workspace, date, time and address – never treatment, service or notes."
+      },
+      "ui.ws.appointment_mail.saved": {
+        "de-CH": "Terminmails gespeichert",
+        "en-US": "Appointment mails saved"
+      },
+      "ui.ws.appointment_mail.contact_title": {
+        "de-CH": "Terminmails",
+        "en-US": "Appointment mails"
+      },
+      "ui.ws.appointment_mail.contact_switch": {
+        "de-CH": "Bestätigungen und Erinnerungen",
+        "en-US": "Confirmations and reminders"
+      },
+      "ui.ws.appointment_mail.contact_hint": {
+        "de-CH": "Wenn der Arbeitsbereich sie verschickt (Einstellungen › E-Mail).",
+        "en-US": "When the workspace sends them (Settings › E-mail)."
+      },
+      "ui.ws.appointment_mail.contact_no_email": {
+        "de-CH": "Ohne E-Mail-Adresse gehen keine Terminmails raus.",
+        "en-US": "Without an e-mail address no appointment mails go out."
+      },
+      "ui.ws.appointment_mail.contact_on": {
+        "de-CH": "Terminmails eingeschaltet",
+        "en-US": "Appointment mails on"
+      },
+      "ui.ws.appointment_mail.contact_off": {
+        "de-CH": "Terminmails ausgeschaltet",
+        "en-US": "Appointment mails off"
       }
     }
   }
