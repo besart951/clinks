@@ -139,12 +139,13 @@ test('syncs a document uploaded offline to another device', async ({ page, brows
 	await expect(laptop.getByText('Besuchsbericht.txt', { exact: true })).toHaveCount(0);
 	await context.setOffline(false);
 	await expect(laptop.getByText('Besuchsbericht.txt', { exact: true })).toBeVisible({ timeout: 30_000 });
-	await laptop.getByText('Besuchsbericht.txt', { exact: true }).click();
+	// A click marks the file, a double click opens it.
+	await laptop.getByText('Besuchsbericht.txt', { exact: true }).dblclick();
 	await expect(laptop.getByText('Termin bestätigt', { exact: true })).toBeVisible();
 	if (process.env.TEST_VERSIONED_FILES) {
 		await laptop.keyboard.press('Escape');
-		const row = laptop.getByRole('row').filter({ hasText: 'Besuchsbericht.txt' });
-		await row.getByRole('button').last().click();
+		const row = laptop.getByRole('listitem').filter({ hasText: 'Besuchsbericht.txt' });
+		await row.click({ button: 'right' });
 		await laptop.getByRole('menuitem', { name: 'Versionen' }).click();
 		await laptop
 			.getByLabel('Neue Version hochladen')
@@ -154,7 +155,7 @@ test('syncs a document uploaded offline to another device', async ({ page, brows
 		await dialog.getByRole('button', { name: 'Wiederherstellen' }).click();
 		await expect(dialog.getByRole('listitem')).toHaveCount(3);
 		await laptop.keyboard.press('Escape');
-		await laptop.getByText('Besuchsbericht.txt', { exact: true }).click();
+		await laptop.getByText('Besuchsbericht.txt', { exact: true }).dblclick();
 		await expect(laptop.getByText('Termin bestätigt', { exact: true })).toBeVisible();
 	}
 });

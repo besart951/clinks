@@ -1,7 +1,7 @@
 import type { MailId } from '@clinks/domain/ids';
 import type { Contact, MailFolder, MailMessage, MailTemplate } from '@clinks/domain/types';
 import { Resource } from '../../state/resource.svelte.ts';
-import type { Workspace } from '../../workspace.svelte.ts';
+import type { RunOptions, Workspace } from '../../workspace.svelte.ts';
 
 export interface MailboxData {
 	mails: MailMessage[];
@@ -72,37 +72,79 @@ export class MailboxModel {
 		}
 	}
 
-	async toggleStar(mail: MailMessage) {
-		await this.#workspace.run(() =>
-			this.#workspace.api.mails.update(mail.id, mail.revision, { starred: !mail.starred }),
+	async setStar(mails: MailMessage[], starred: boolean) {
+		await this.#update(mails, { starred });
+	}
+
+	async setRead(mails: MailMessage[], read: boolean) {
+		await this.#update(mails, { read });
+		if (!read && mails.some((mail) => mail.id === this.selectedId)) this.selectedId = null;
+	}
+
+	async moveTo(mails: MailMessage[], folder: MailFolder) {
+		if (mails.some((mail) => mail.id === this.selectedId)) this.selectedId = null;
+		await this.#update(
+			mails,
+			{ folder },
+			{
+				success: mails.length > 1 ? 'ui.ws.mail.moved_many' : 'ui.ws.mail.moved',
+				successParams: { folder: this.#workspace.t(`ui.ws.mail.folder.${folder}`), count: mails.length },
+				undo: true,
+			},
 		);
 	}
 
-	async markUnread(mail: MailMessage) {
-		await this.#workspace.run(() => this.#workspace.api.mails.update(mail.id, mail.revision, { read: false }));
-		this.selectedId = null;
-	}
-
-	async moveTo(mail: MailMessage, folder: MailFolder) {
-		const previous = mail.folder;
-		this.selectedId = null;
-		await this.#workspace.run(() => this.#workspace.api.mails.update(mail.id, mail.revision, { folder }), {
-			success: 'ui.ws.mail.moved',
-			successParams: { folder: this.#workspace.t(`ui.ws.mail.folder.${folder}`) },
-			undo: async () => {
-				const current = await this.#workspace.api.mails.get(mail.id);
-				return this.#workspace.api.mails.update(current.id, current.revision, { folder: previous });
-			},
-		});
-	}
-
-	async remove(mail: MailMessage) {
+	async remove(mails: MailMessage[]) {
 		const api = this.#workspace.api.mails;
-		this.selectedId = null;
-		await this.#workspace.run(() => api.remove(mail.id), {
-			success: 'ui.ws.mail.deleted',
-			undo: () => api.restore(mail),
-		});
+		if (mails.some((mail) => mail.id === this.selectedId)) this.selectedId = null;
+		await this.#workspace.run(
+			async () => {
+				for (const mail of mails) await api.remove(mail.id);
+			},
+			{
+				success: mails.length > 1 ? 'ui.ws.mail.deleted_many' : 'ui.ws.mail.deleted',
+				successParams: { count: mails.length },
+				undo: async () => {
+					for (const mail of mails) await api.restore(mail);
+				},
+			},
+		);
+	}
+
+	/**
+	 * Changes several mails at once. With `undo`, the toast offers to set the changed fields back to what each
+	 * mail had before.
+	 */
+	async #update(
+		mails: MailMessage[],
+		patch: Partial<Pick<MailMessage, 'read' | 'starred' | 'folder'>>,
+		toast: Pick<RunOptions, 'success' | 'successParams'> & { undo?: boolean } = {},
+	) {
+		const api = this.#workspace.api.mails;
+		const changed = mails.filter((mail) =>
+			(Object.keys(patch) as (keyof typeof patch)[]).some((key) => mail[key] !== patch[key]),
+		);
+		if (changed.length === 0) return;
+		await this.#workspace.run(
+			async () => {
+				for (const mail of changed) await api.update(mail.id, mail.revision, patch);
+			},
+			{
+				success: toast.success,
+				successParams: toast.successParams,
+				undo: toast.undo
+					? async () => {
+							for (const mail of changed) {
+								const current = await api.get(mail.id);
+								const before = Object.fromEntries(
+									(Object.keys(patch) as (keyof typeof patch)[]).map((key) => [key, mail[key]]),
+								);
+								await api.update(current.id, current.revision, before);
+							}
+						}
+					: undefined,
+			},
+		);
 	}
 
 	async toTask(mail: MailMessage) {

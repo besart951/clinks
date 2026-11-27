@@ -8,17 +8,12 @@
 	import FileText from '@lucide/svelte/icons/file-text';
 	import FileImage from '@lucide/svelte/icons/file-image';
 	import Ellipsis from '@lucide/svelte/icons/ellipsis';
-	import Eye from '@lucide/svelte/icons/eye';
-	import Download from '@lucide/svelte/icons/download';
-	import History from '@lucide/svelte/icons/history';
 	import Lock from '@lucide/svelte/icons/lock';
 	import PenLine from '@lucide/svelte/icons/pen-line';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
-	import Link2 from '@lucide/svelte/icons/link-2';
 	import * as Dialog from '@clinks/ui/components/ui/dialog';
 	import * as DropdownMenu from '@clinks/ui/components/ui/dropdown-menu';
-	import * as Table from '@clinks/ui/components/ui/table';
 	import { Button } from '@clinks/ui/components/ui/button';
 	import { Input } from '@clinks/ui/components/ui/input';
 	import PageHeader from '#lib/components/common/PageHeader.svelte';
@@ -29,14 +24,16 @@
 	import ConfirmDialog, { type ConfirmRequest } from '#lib/components/common/ConfirmDialog.svelte';
 	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
 	import { DocumentsModel } from '#lib/features/documents/documents.svelte';
+	import { documentList } from '#lib/features/documents/document-list.svelte';
+	import SelectableList from '#lib/components/list/SelectableList.svelte';
+	import ListBar from '#lib/components/list/ListBar.svelte';
 	import FolderTree, { type FolderTreeActions } from '#lib/components/documents/FolderTree.svelte';
 	import FolderMoveMenu from '#lib/components/documents/FolderMoveMenu.svelte';
-	import { carriesFiles, carriesItem, readItem, startItemDrag } from '#lib/components/documents/drag-item';
+	import { carriesFiles, carriesItem, readItem, startItemDrag } from '#lib/features/documents/drag-item';
 	import { formatBytes } from '#lib/features/collaboration/attachments.svelte';
 	import { contactName } from '#lib/data/workspace-api';
 	import type { Folder as FolderRecord, StoredDocument } from '@clinks/domain/types';
 	import type { ContactId, FolderId } from '@clinks/domain/ids';
-	import { href } from '#lib/navigation';
 	import { useWorkspace } from '#lib/workspace.svelte';
 
 	const workspace = useWorkspace();
@@ -74,6 +71,13 @@
 		)
 			await showVersions(doc);
 	}
+	const list = documentList(workspace, model, {
+		preview: showPreview,
+		versions: showVersions,
+		rename: (document) =>
+			ask(workspace.t('ui.ws.documents.rename'), document.name, (name) => model.rename(document, name)),
+		link: (document) => (linking = document),
+	});
 	let naming = $state<{ title: string; value: string; save: (name: string) => Promise<unknown> } | null>(null);
 	let linking = $state<StoredDocument | null>(null);
 	let linkContact = $state<ContactId | null>(null);
@@ -287,110 +291,48 @@
 							description={canWrite ? workspace.t('ui.ws.documents.empty_text') : undefined}
 						/>
 					{:else}
+						<ListBar {list} class="mb-2" />
 						<div class="rounded-xl border">
-							<Table.Root>
-								<Table.Header>
-									<Table.Row>
-										<Table.Head>{workspace.t('ui.ws.contacts.name')}</Table.Head>
-										<Table.Head class="hidden md:table-cell">{workspace.t('ui.ws.documents.linked_to')}</Table.Head>
-										<Table.Head class="hidden sm:table-cell">{workspace.t('ui.ws.documents.size')}</Table.Head>
-										<Table.Head class="hidden lg:table-cell">{workspace.t('ui.ws.documents.uploaded_at')}</Table.Head>
-										<Table.Head class="w-10"><span class="sr-only">{workspace.t('ui.action')}</span></Table.Head>
-									</Table.Row>
-								</Table.Header>
-								<Table.Body>
-									{#each model.files as document (document.id)}
-										<Table.Row>
-											<Table.Cell>
-												<button
-													class="flex items-center gap-2 text-left font-medium hover:underline"
-													draggable={canWrite}
-													ondragstart={(event) => startItemDrag(event, { kind: 'document', id: document.id })}
-													onclick={() => showPreview(document)}
+							<div
+								class="text-muted-foreground grid grid-cols-[minmax(0,1fr)_6rem] gap-3 border-b py-2 ps-10 pe-3 text-xs font-medium md:grid-cols-[minmax(0,1fr)_12rem_6rem] lg:grid-cols-[minmax(0,1fr)_12rem_6rem_7rem]"
+								aria-hidden="true"
+							>
+								<span>{workspace.t('ui.ws.contacts.name')}</span>
+								<span class="hidden md:block">{workspace.t('ui.ws.documents.linked_to')}</span>
+								<span>{workspace.t('ui.ws.documents.size')}</span>
+								<span class="hidden lg:block">{workspace.t('ui.ws.documents.uploaded_at')}</span>
+							</div>
+							<SelectableList {list}>
+								{#snippet row(document: StoredDocument)}
+									<span
+										class="grid grid-cols-[minmax(0,1fr)_6rem] items-center gap-3 py-2.5 ps-2 pe-3 text-sm md:grid-cols-[minmax(0,1fr)_12rem_6rem] lg:grid-cols-[minmax(0,1fr)_12rem_6rem_7rem]"
+									>
+										<span class="flex min-w-0 items-center gap-2 font-medium">
+											{#if document.mimeType.startsWith('image/')}<FileImage
+													class="text-muted-foreground size-4 shrink-0"
+												/>{:else}<FileText class="text-muted-foreground size-4 shrink-0" />{/if}
+											<span class="truncate">{document.name}</span>
+											{#if document.locked}<span
+													class="text-muted-foreground inline-flex shrink-0 items-center gap-1 text-xs font-normal"
+													title={workspace.t('ui.ws.documents.archived_hint')}
 												>
-													{#if document.mimeType.startsWith('image/')}<FileImage
-															class="text-muted-foreground size-4"
-														/>{:else}<FileText class="text-muted-foreground size-4" />{/if}
-													{document.name}
-												</button>
-												{#if document.locked}<span
-														class="text-muted-foreground inline-flex items-center gap-1 text-xs"
-														title={workspace.t('ui.ws.documents.archived_hint')}
-													>
-														<Lock class="size-3" aria-hidden="true" />{workspace.t('ui.ws.documents.archived')}
-													</span>{/if}
-											</Table.Cell>
-											<Table.Cell class="hidden md:table-cell">
-												<div class="flex flex-wrap gap-1">
-													{#each linkedContacts(document) as contact (contact.id)}<a
-															class="bg-muted rounded-full px-2 py-0.5 text-xs hover:underline"
-															href={href(`/contacts/${contact.id}`)}
-														>
-															{contactName(contact)}
-														</a>{/each}
-												</div>
-											</Table.Cell>
-											<Table.Cell class="text-muted-foreground hidden sm:table-cell">
-												{formatBytes(document.size, (value) => workspace.i18n.number(value))}
-											</Table.Cell>
-											<Table.Cell class="text-muted-foreground hidden lg:table-cell">
-												{workspace.i18n.date(document.createdAt)}
-											</Table.Cell>
-											<Table.Cell>
-												<DropdownMenu.Root>
-													<DropdownMenu.Trigger>
-														{#snippet child({ props })}<Button
-																{...props}
-																variant="ghost"
-																size="icon-xs"
-																aria-label={workspace.t('ui.ws.documents.folder_actions', { name: document.name })}
-															>
-																<Ellipsis class="size-4" />
-															</Button>{/snippet}
-													</DropdownMenu.Trigger>
-													<DropdownMenu.Content align="end" class="w-60">
-														<DropdownMenu.Label class="text-muted-foreground truncate text-xs font-normal">
-															{document.name}
-														</DropdownMenu.Label>
-														<DropdownMenu.Item onclick={() => showPreview(document)}>
-															<Eye />{workspace.t('ui.ws.documents.preview')}
-														</DropdownMenu.Item>
-														<DropdownMenu.Item
-															onclick={() => workspace.run(() => workspace.documentFiles.save(document))}
-														>
-															<Download />{workspace.t('ui.ws.documents.download')}
-														</DropdownMenu.Item>
-														{#if document.dataUrl.startsWith('version:')}
-															<DropdownMenu.Item onclick={() => showVersions(document)}>
-																<History />{workspace.t('ui.ws.documents.versions')}
-															</DropdownMenu.Item>
-														{/if}
-														{#if canWrite}
-															<DropdownMenu.Separator />
-															{#if !document.locked}<DropdownMenu.Item
-																	onclick={() =>
-																		ask(workspace.t('ui.ws.documents.rename'), document.name, (name) =>
-																			model.rename(document, name),
-																		)}
-																>
-																	<PenLine />{workspace.t('ui.ws.documents.rename')}
-																</DropdownMenu.Item>{/if}
-															<DropdownMenu.Item onclick={() => (linking = document)}>
-																<Link2 />{workspace.t('ui.ws.documents.link_contact')}
-															</DropdownMenu.Item>
-															<FolderMoveMenu {model} {document} />
-															{#if !document.locked}<DropdownMenu.Separator />
-																<DropdownMenu.Item variant="destructive" onclick={() => model.remove(document)}>
-																	<Trash2 />{workspace.t('ui.ws.delete')}
-																</DropdownMenu.Item>{/if}
-														{/if}
-													</DropdownMenu.Content>
-												</DropdownMenu.Root>
-											</Table.Cell>
-										</Table.Row>
-									{/each}
-								</Table.Body>
-							</Table.Root>
+													<Lock class="size-3" aria-hidden="true" />{workspace.t('ui.ws.documents.archived')}
+												</span>{/if}
+										</span>
+										<span class="hidden min-w-0 flex-wrap gap-1 md:flex">
+											{#each linkedContacts(document) as contact (contact.id)}<span
+													class="bg-muted truncate rounded-full px-2 py-0.5 text-xs"
+												>
+													{contactName(contact)}
+												</span>{/each}
+										</span>
+										<span class="text-muted-foreground">
+											{formatBytes(document.size, (value) => workspace.i18n.number(value))}
+										</span>
+										<span class="text-muted-foreground hidden lg:block">{workspace.i18n.date(document.createdAt)}</span>
+									</span>
+								{/snippet}
+							</SelectableList>
 						</div>
 					{/if}
 					{#if canWrite}<p class="text-muted-foreground text-xs">

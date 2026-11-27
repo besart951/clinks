@@ -1362,6 +1362,14 @@
         "de-CH": "Alle auswählen",
         "en-US": "Select all"
       },
+      "ui.ws.list.clear_selection": {
+        "de-CH": "Auswahl aufheben",
+        "en-US": "Clear selection"
+      },
+      "ui.ws.list.more_actions": {
+        "de-CH": "Weitere Aktionen",
+        "en-US": "More actions"
+      },
       "ui.ws.select": {
         "de-CH": "{name} auswählen",
         "en-US": "Select {name}"
@@ -1894,6 +1902,26 @@
         "de-CH": "Verschoben nach {folder}",
         "en-US": "Moved to {folder}"
       },
+      "ui.ws.mail.moved_many": {
+        "de-CH": "{count} Mails verschoben nach {folder}",
+        "en-US": "{count} emails moved to {folder}"
+      },
+      "ui.ws.mail.deleted_many": {
+        "de-CH": "{count} Mails gelöscht",
+        "en-US": "{count} emails deleted"
+      },
+      "ui.ws.mail.mark_read": {
+        "de-CH": "Als gelesen markieren",
+        "en-US": "Mark as read"
+      },
+      "ui.ws.mail.unstar": {
+        "de-CH": "Markierung entfernen",
+        "en-US": "Remove star"
+      },
+      "ui.ws.mail.to_inbox": {
+        "de-CH": "In den Posteingang",
+        "en-US": "Move to inbox"
+      },
       "ui.ws.mail.deleted": {
         "de-CH": "Mail gelöscht",
         "en-US": "Email deleted"
@@ -2249,6 +2277,18 @@
       "ui.ws.documents.linked": {
         "de-CH": "Mit Kontakt verknüpft",
         "en-US": "Linked to contact"
+      },
+      "ui.ws.documents.file_list": {
+        "de-CH": "Dateien",
+        "en-US": "Files"
+      },
+      "ui.ws.documents.moved_many": {
+        "de-CH": "{count} Dateien verschoben",
+        "en-US": "{count} files moved"
+      },
+      "ui.ws.documents.deleted_many": {
+        "de-CH": "{count} Dateien gelöscht",
+        "en-US": "{count} files deleted"
       },
       "ui.ws.documents.deleted": {
         "de-CH": "«{name}» gelöscht",

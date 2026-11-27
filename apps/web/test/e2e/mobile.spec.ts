@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Locator } from '@playwright/test';
 import { failOnCspViolations } from './csp-guard.ts';
 import { signIn } from './helpers.ts';
 
@@ -199,4 +199,34 @@ test('shows one board column at a time on a phone', async ({ page }) => {
 	// The calendar is a list by day: seven narrow columns would not fit the titles.
 	await page.getByRole('tab', { name: 'Kalender' }).click();
 	await expect(page.locator('section[aria-labelledby^="due-"]').first()).toBeVisible();
+});
+
+test('swipes a mail to archive it and picks several with a long press', async ({ browser }) => {
+	const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+	const page = await context.newPage();
+	await signIn(page);
+	await page.goto('/#/mail');
+	const rows = page.getByRole('list', { name: 'Posteingang' }).getByRole('listitem');
+	await expect(rows.first()).toBeVisible();
+	const count = await rows.count();
+	const touch = async (row: Locator, type: string, x: number, y: number) =>
+		row.dispatchEvent(type, { pointerType: 'touch', pointerId: 7, isPrimary: true, clientX: x, clientY: y });
+	// Swiping left far enough archives the mail.
+	const box = (await rows.first().boundingBox())!;
+	const y = box.y + box.height / 2;
+	await touch(rows.first(), 'pointerdown', box.x + box.width - 20, y);
+	for (const step of [30, 80, 160, 240]) await touch(rows.first(), 'pointermove', box.x + box.width - 20 - step, y);
+	await touch(rows.first(), 'pointerup', box.x + 20, y);
+	await expect(page.getByText('Verschoben nach Archiv')).toBeVisible();
+	await expect(rows).toHaveCount(count - 1);
+	// A long press starts picking; a tap then adds another mail instead of opening it.
+	const first = (await rows.first().boundingBox())!;
+	await touch(rows.first(), 'pointerdown', first.x + 40, first.y + 10);
+	await page.waitForTimeout(650);
+	await touch(rows.first(), 'pointerup', first.x + 40, first.y + 10);
+	const bar = page.getByRole('region', { name: 'Auswahl' });
+	await expect(bar).toContainText('1 ausgewählt');
+	await rows.nth(1).getByRole('button').first().tap();
+	await expect(bar).toContainText('2 ausgewählt');
+	await context.close();
 });
