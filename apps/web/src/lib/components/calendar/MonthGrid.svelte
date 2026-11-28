@@ -3,6 +3,7 @@
 
 	export interface MonthHandlers {
 		appointmentsOn(date: CalendarDate): Appointment[];
+		label?(appointment: Appointment): string;
 		color(appointment: Appointment): string;
 		open(appointment: Appointment): void;
 		day(date: CalendarDate): void;
@@ -102,7 +103,7 @@
 								<span class="size-1.5 shrink-0 rounded-full" style:background-color={handlers.color(appointment)}
 								></span>
 								<span class="tabular-nums">{workspace.i18n.time(appointment.start)}</span>
-								<span class="truncate">{appointment.title}</span>
+								<span class="truncate">{handlers.label?.(appointment) ?? appointment.title}</span>
 							</button>
 						</li>
 					{/each}

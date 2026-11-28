@@ -318,6 +318,25 @@ export const time_entries = new Table(
 	{ indexes: { tenant: ['tenant_id'] } },
 );
 
+export const spitex_visit_needs = new Table(
+	{
+		tenant_id: column.text,
+		revision: column.integer,
+		created_at: column.text,
+		updated_at: column.text,
+		contact_id: column.text,
+		title: column.text,
+		notes: column.text,
+		starts_on: column.text,
+		ends_on: column.text,
+		weekdays: column.text,
+		start_time: column.text,
+		duration_minutes: column.integer,
+		arrival_window: column.text,
+	},
+	{ indexes: { tenant: ['tenant_id'] } },
+);
+
 export const spitex_week_releases = new Table(
 	{
 		tenant_id: column.text,
@@ -376,4 +395,4 @@ export const visit_clients = new Table({
 	address: column.text,
 });
 
-export const powerSyncSchema = new Schema({ contacts, appointments, folders, documents, invoices, expenses, tasks, contact_comments, task_comments, invoice_comments, mails, templates, campaigns, prescriptions, physio_notes, spitex_notes, time_entries, spitex_week_releases, notifications, audit, users, memberships, visit_clients });
+export const powerSyncSchema = new Schema({ contacts, appointments, folders, documents, invoices, expenses, tasks, contact_comments, task_comments, invoice_comments, mails, templates, campaigns, prescriptions, physio_notes, spitex_notes, time_entries, spitex_visit_needs, spitex_week_releases, notifications, audit, users, memberships, visit_clients });

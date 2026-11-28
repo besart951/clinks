@@ -411,6 +411,7 @@ export interface Database {
 	physio_notes: SyncedRow;
 	spitex_notes: SyncedRow;
 	time_entries: SyncedRow;
+	spitex_visit_needs: SyncedRow;
 	spitex_week_releases: SyncedRow;
 	notifications: SyncedRow;
 	contacts: SyncedRow;

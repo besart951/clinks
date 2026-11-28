@@ -26,7 +26,7 @@
 	import ContactFormSheet from '#lib/components/contacts/ContactFormSheet.svelte';
 	import type { AppointmentFields } from '#lib/features/calendar/appointment-form.svelte';
 	import { clientTag } from '#lib/features/spitex/clients.svelte';
-	import { contactName } from '#lib/data/workspace-api';
+	import { contactName, visitLabel } from '@clinks/domain/contacts';
 	import { PlanningModel } from '#lib/features/spitex/planning.svelte';
 	import { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
 	import { minutesToTime } from '@clinks/domain/dates';
@@ -102,6 +102,7 @@
 	}
 
 	const handlers: GridHandlers = {
+		label: (visit) => visitLabel(visit, visit.contactId ? model.resource.data?.contacts.get(visit.contactId) : null),
 		open: (appointment) => sheet.show(appointment),
 		create: () => canWrite && createVisit(),
 		drop: (appointment, _date, minutes, assigneeId) =>
@@ -331,7 +332,7 @@
 													<Pencil class="size-3.5" />
 												</Button>
 											{/if}
-											<p class="pe-6 font-medium">{visit.title}</p>
+											<p class="pe-6 font-medium">{handlers.label?.(visit) ?? visit.title}</p>
 											<p class="text-muted-foreground text-xs">
 												{workspace.t('ui.ws.spitex.window', { window: windowLabel(visit) })} · {visit.service
 													? workspace.t(`ui.ws.spitex.service.${visit.service}`)

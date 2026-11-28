@@ -1,3 +1,4 @@
+import { generateVisits } from './mock-visit-needs.ts';
 import { MockDocumentShares } from './mock-document-shares.ts';
 import type { UserId } from '@clinks/domain/ids';
 import type { AppNotification, CommentTarget, MyVisits, NotificationKind } from '@clinks/domain/types';
@@ -41,6 +42,7 @@ export class WorkspaceApi {
 	readonly physioNotes: Pick<Repository<Tables['notes']>, 'list' | 'get' | 'create'>;
 	readonly spitexNotes: Pick<Repository<Tables['notes']>, 'list' | 'get' | 'create'>;
 	readonly timeEntries;
+	readonly visitNeeds;
 	readonly weekReleases;
 	readonly notifications;
 	readonly audit: Pick<Repository<Tables['audit']>, 'list'>;
@@ -76,6 +78,7 @@ export class WorkspaceApi {
 		function repository<Name extends SyncedTableName>(
 			table: Name,
 			options: {
+				touches?: TableName[];
 				label?: (row: Tables[WorkspaceTable<Name>]) => string;
 				visible?: (row: Tables[WorkspaceTable<Name>]) => boolean;
 				/** Demo backend only: runs inside the write, like a trigger on the server. */
@@ -94,7 +97,7 @@ export class WorkspaceApi {
 				visible,
 			};
 			if (audit && label) config.audit = { kind: audit, label };
-			if (after) config.after = { run: after, touches: ['notifications'] };
+			if (after) config.after = { run: after, touches: options.touches ?? ['notifications'] };
 			return new TenantRepository<WorkspaceTable<Name>>(db, context, config);
 		}
 		this.contacts = repository('contacts', { label: contactName });
@@ -125,6 +128,13 @@ export class WorkspaceApi {
 			visible: (row) => row.kind === 'spitex',
 		});
 		this.timeEntries = repository('time_entries');
+		this.visitNeeds = repository('spitex_visit_needs', {
+			label: (row) => row.title,
+			touches: ['appointments'],
+			after: (before, after) => {
+				if (after && (!before || after.startsOn > before.endsOn)) generateVisits(db, after);
+			},
+		});
 		this.weekReleases = repository('spitex_week_releases', {
 			label: (row) => row.weekStart,
 			after: (before, after) => plan.releaseChanged(before, after),

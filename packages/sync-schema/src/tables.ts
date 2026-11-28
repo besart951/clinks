@@ -271,6 +271,22 @@ export const syncedTables = {
 			text('description', 'description'),
 		],
 	},
+	spitex_visit_needs: {
+		read: 'spitex.read',
+		write: 'spitex.write',
+		audit: 'plan',
+		columns: [
+			{ column: 'contact_id', field: 'contactId', type: 'uuid', references: 'contacts' },
+			text('title', 'title'),
+			text('notes', 'notes'),
+			{ column: 'starts_on', field: 'startsOn', type: 'date' },
+			{ column: 'ends_on', field: 'endsOn', type: 'date' },
+			{ column: 'weekdays', field: 'weekdays', type: 'json' },
+			text('start_time', 'startTime'),
+			{ column: 'duration_minutes', field: 'durationMinutes', type: 'integer' },
+			{ column: 'arrival_window', field: 'arrivalWindow', type: 'json', nullable: true },
+		],
+	},
 	spitex_week_releases: {
 		read: 'spitex.own.read',
 		write: 'spitex.release',

@@ -69,6 +69,15 @@ streams:
           AND 'spitex.own.read' IN s.read_permissions
       )
 
+  spitex_visit_needs:
+    auto_subscribe: true
+    query: |
+      SELECT * FROM spitex_visit_needs WHERE tenant_id IN (
+        SELECT tenant_id FROM sync_access
+        WHERE user_id = auth.user_id() AND tenant_id = auth.parameter('tenant_id')
+          AND 'spitex.read' IN read_permissions
+      )
+
   spitex_week_releases:
     auto_subscribe: true
     queries:
