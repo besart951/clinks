@@ -18,8 +18,11 @@
 	header Content-Security-Policy "frame-ancestors 'none'"
 	header X-Frame-Options DENY
 	header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
-	try_files {path} /index.html
-	file_server
+	route {
+		import /etc/caddy/web-routes/*.caddy
+		try_files {path} /index.html
+		file_server
+	}
 }
 {$API_HOST} {
 	import security
@@ -35,3 +38,5 @@
 	import security
 	reverse_proxy collab:1234
 }
+
+import /etc/caddy/sites/*.caddy

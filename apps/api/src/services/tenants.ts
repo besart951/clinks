@@ -1,3 +1,5 @@
+import { invitationMail } from '../invitation-mail.ts';
+import { publicRoutes, webLink } from '@clinks/contracts/public-links';
 import { activeRole } from './permissions.ts';
 import type { CreateTenantRequest, InvitationDetails, MeResponse } from '@clinks/contracts/auth';
 import { administratorPermissions, roleGrants, userPermissions } from '@clinks/domain/permissions';
@@ -128,11 +130,11 @@ export class TenantService {
 	async invite(claims: AccessClaims, input: { email: string; roleId: string }, caller: Caller) {
 		this.#limit(`invite:user:${claims.sub}`, 20);
 		const { now } = this.#services;
-		const { invitation, token, tenantName } = await this.#asManager(claims, async (tx, tenantId) => {
+		const { invitation, token, tenant, roleName } = await this.#asManager(claims, async (tx, tenantId) => {
 			this.#limit(`invite:tenant:${tenantId}`, 30);
 			const role = await tx
 				.selectFrom('roles')
-				.select(['id', 'permissions', 'kind', 'template'])
+				.select(['id', 'permissions', 'kind', 'template', 'name'])
 				.where('id', '=', input.roleId)
 				.where('tenantId', '=', tenantId)
 				.executeTakeFirst();
@@ -166,25 +168,29 @@ export class TenantService {
 				.returningAll()
 				.executeTakeFirstOrThrow();
 			const link = await issueLink(tx, { purpose: 'invitation', invitationId: id, tenantId, now: now() });
-			const tenant = await tx.selectFrom('tenants').select('name').where('id', '=', tenantId).executeTakeFirstOrThrow();
+			const tenant = await tx
+				.selectFrom('tenants')
+				.select(['name', 'logoDataUrl'])
+				.where('id', '=', tenantId)
+				.executeTakeFirstOrThrow();
 			await audit(tx, { action: 'invitation.created', actorId: claims.sub, tenantId, target: id }, caller);
-			return { invitation: row, token: link.token, tenantName: tenant.name };
+			return { invitation: row, token: link.token, tenant, roleName: role.name };
 		});
-		await this.#sendInvitation(input.email, tenantName, token, caller);
+		await this.#sendInvitation(input.email, tenant, roleName, token, caller);
 		return invitationDto(invitation);
 	}
 
 	async resend(claims: AccessClaims, id: string, caller: Caller) {
 		this.#limit(`invite:user:${claims.sub}`, 20);
 		this.#limit(`invite:resend:${id}`, 5);
-		const { email, tenantName, token } = await this.#asManager(claims, async (tx, tenantId) => {
+		const { email, tenant, roleName, token } = await this.#asManager(claims, async (tx, tenantId) => {
 			const row = await tx
 				.updateTable('invitations')
 				.set({ expiresAt: new Date(this.#services.now().getTime() + lifetimes.invitation) })
 				.where('tenantId', '=', tenantId)
 				.where('id', '=', id)
 				.where('status', '=', 'pending')
-				.returning('email')
+				.returning(['email', 'roleId'])
 				.executeTakeFirst();
 			if (!row) throw new ApiError(404, 'error.invitation_invalid');
 			await tx
@@ -199,19 +205,37 @@ export class TenantService {
 				tenantId,
 				now: this.#services.now(),
 			});
-			const tenant = await tx.selectFrom('tenants').select('name').where('id', '=', tenantId).executeTakeFirstOrThrow();
+			const tenant = await tx
+				.selectFrom('tenants')
+				.select(['name', 'logoDataUrl'])
+				.where('id', '=', tenantId)
+				.executeTakeFirstOrThrow();
 			await audit(tx, { tenantId, actorId: claims.sub, action: 'invitation.resent', target: id }, caller);
-			return { email: row.email, tenantName: tenant.name, token: link.token };
+			const role = await tx
+				.selectFrom('roles')
+				.select('name')
+				.where('id', '=', row.roleId)
+				.where('tenantId', '=', tenantId)
+				.executeTakeFirstOrThrow();
+			return { email: row.email, tenant, roleName: role.name, token: link.token };
 		});
-		await this.#sendInvitation(email, tenantName, token, caller);
+		await this.#sendInvitation(email, tenant, roleName, token, caller);
 	}
-	async #sendInvitation(email: string, tenantName: string, token: string, caller: Caller) {
+	async #sendInvitation(
+		email: string,
+		tenant: { name: string; logoDataUrl: string | null },
+		roleName: string,
+		token: string,
+		caller: Caller,
+	) {
 		await this.#services.mailer.send({
 			to: email,
-			subject: translate(caller.locale, 'mail.invitation.subject', { tenant: tenantName }),
-			text: translate(caller.locale, 'mail.invitation.body', {
-				tenant: tenantName,
-				link: `${this.#services.config.WEB_ORIGIN}/#/invitation/${encodeURIComponent(token)}`,
+			...invitationMail({
+				locale: caller.locale,
+				tenant: tenant.name,
+				role: roleName,
+				logo: tenant.logoDataUrl,
+				link: webLink(this.#services.config.WEB_ORIGIN, publicRoutes.invitation(token)),
 			}),
 		});
 	}

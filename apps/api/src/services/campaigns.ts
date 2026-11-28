@@ -1,3 +1,4 @@
+import { publicRoutes, unsubscribeEndpoint, webLink } from '@clinks/contracts/public-links';
 import type { AudienceView } from '@clinks/contracts/newsletter';
 import type { Db } from '@clinks/db/client';
 import { inScope, type Tx } from '@clinks/db/scope';
@@ -207,7 +208,7 @@ async function campaignComposer(tx: Tx, services: Services, tenantId: string, ca
 	const label = translate(pickLocale(tenant.locale), 'mail.newsletter.unsubscribe');
 	return (recipient: Recipient, link: { contactId: string; campaignId: string | null } | null) => {
 		const token = link ? unsubscribeToken(services, { tenantId, ...link }) : 'test';
-		const oneClick = `${services.config.API_ORIGIN ?? services.config.WEB_ORIGIN}/mail/unsubscribe/${token}`;
+		const oneClick = unsubscribeEndpoint(services.config.API_ORIGIN, token);
 		return {
 			kind: 'campaign' as const,
 			to: recipient.email,
@@ -221,7 +222,7 @@ async function campaignComposer(tx: Tx, services: Services, tenantId: string, ca
 			campaignId: link?.campaignId ?? undefined,
 			file: false,
 			headers: { 'List-Unsubscribe': `<${oneClick}>`, 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click' },
-			extras: { unsubscribe: { label, href: `${services.config.WEB_ORIGIN}/#/unsubscribe/${token}` } },
+			extras: { unsubscribe: { label, href: webLink(services.config.WEB_ORIGIN, publicRoutes.unsubscribe(token)) } },
 		};
 	};
 }

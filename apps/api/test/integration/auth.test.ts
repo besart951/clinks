@@ -319,6 +319,7 @@ describe('password reset', () => {
 		assert.equal(unknown.status, 204, 'same answer for unknown addresses');
 		await api.client().call('POST', '/auth/password-reset/request', { body: { email: 'reset@example.ch' } });
 		const token = api.linkTokenIn('reset@example.ch');
+		assert.ok(api.mailer.last('reset@example.ch').text.includes(`/#/forgot-password?token=${encodeURIComponent(token)}`));
 		const reset = await api
 			.client()
 			.call('POST', '/auth/password-reset', { body: { token, password: 'a-brand-new-password' } });

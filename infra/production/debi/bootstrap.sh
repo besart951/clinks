@@ -19,10 +19,10 @@ jwk = dict(kty='OKP', crv='Ed25519', alg='EdDSA', kid='clinks-vps-1', d=der(), x
 def secret(name):
     return Path(name).read_text().strip()
 url = 'postgres://clinks_api:'+secret('api-password')+'@postgres:5432/clinks'
-common = f'DATABASE_URL={url}\nTOKEN_ISSUER=https://api.clinks.ch\nTOKEN_AUDIENCE=clinks\n'
-Path('api.base').write_text(common + "WEB_ORIGIN=https://www.clinks.ch\nAPI_ORIGIN=https://api.clinks.ch\nSIGNING_KEY='"+json.dumps(jwk)+"'\nSTORAGE_SECRET_KEY="+secret('storage-key')+'\n')
-Path('collab.env').write_text(common+'JWKS_URL=https://api.clinks.ch/.well-known/jwks.json\n')
-Path('powersync.env').write_text('PS_DATA_SOURCE_URI=postgres://clinks_replication:'+secret('replication-password')+'@postgres:5432/clinks\nPS_STORAGE_SOURCE_URI=postgres://powersync:'+secret('metadata-password')+'@postgres:5432/powersync_storage\nPS_JWKS_URI=https://api.clinks.ch/.well-known/jwks.json\nPS_ADMIN_TOKEN='+secret('sync-token')+'\n')
+common = f'DATABASE_URL={url}\nTOKEN_AUDIENCE=clinks\n'
+Path('api.base').write_text(common + "SIGNING_KEY='"+json.dumps(jwk)+"'\nSTORAGE_SECRET_KEY="+secret('storage-key')+'\n')
+Path('collab.env').write_text(common)
+Path('powersync.env').write_text('PS_DATA_SOURCE_URI=postgres://clinks_replication:'+secret('replication-password')+'@postgres:5432/clinks\nPS_STORAGE_SOURCE_URI=postgres://powersync:'+secret('metadata-password')+'@postgres:5432/powersync_storage\nPS_ADMIN_TOKEN='+secret('sync-token')+'\n')
 PY
 cd ..
 docker compose -f db.yml up -d --wait

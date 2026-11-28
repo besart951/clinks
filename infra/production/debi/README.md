@@ -2,6 +2,8 @@
 
 Bei einem Push auf `main` laufen die vier Quality-Jobs auf dem Runner `clinks-zep`. Auf zep startet der Benutzerdienst `clinks-ci.service` für jeden Job eine neue KVM-VM. Pull Requests verwenden GitHub-gehostete Runner. Für neue Runner-Registrierungen benötigt der Benutzerdienst die GitHub-Anmeldung auf zep.
 
+Die Basisdomain für das Web-Build, die Dienste und Caddy steht in `infra/production/debi/hosts.sh`. Nach einer Änderung DNS und externe Freigaben (etwa S3-CORS) anpassen und neu deployen.
+
 ## Produktion aktivieren
 
 1. Im DNS der Zone `clinks.ch` zeigen die A-Records `www`, `api`, `sync` und `collab` auf `83.228.246.96`. Eventuelle AAAA-Records müssen denselben Dienst über IPv6 erreichen.
@@ -26,4 +28,4 @@ Bei einem Push auf `main` laufen die vier Quality-Jobs auf dem Runner `clinks-ze
 
 Auf debi läuft PostgreSQL in `clinks-storage` mit einem eigenen Volume und internem Docker-Netz ohne veröffentlichten Port. Die lokalen Datenbankverbindungen laufen über dieses Netz. Unter `/srv/clinks/config` liegen auch der dauerhafte Signatur- und Verschlüsselungsschlüssel. Diese Dateien und die neue Datenbank gehören in die Produktionssicherung.
 
-Der SSH-Schlüssel darf über `gate.sh` nur Provider-Konfiguration und Releases annehmen. `receive.sh` akzeptiert für ein Release nur den aktuellen Stand von `main`. Er richtet Zertifikate für die Dienstnamen ein und aktiviert die Webroute nach den Dienstprüfungen durch einen Nginx-Reload. Die bestehende Route für `/besmir/`, ihr Backend und ihre Datenbank bleiben eigenständig. Der laufende gemeinsame Nginx, die Zertifikatserneuerung und ihre Dateien unter `/srv/codelinks` werden weiter benötigt. Vor Änderungen der installierten Empfangsskripte die Versionen unter `/usr/local/sbin` mitprüfen.
+Der SSH-Schlüssel darf über `gate.sh` nur Provider-Konfiguration und Releases annehmen. `receive.sh` akzeptiert für ein Release nur den aktuellen Stand von `main`. Caddy veröffentlicht HTTP und HTTPS auf den Ports 80 und 443 und verwaltet die Zertifikate im persistenten Volume `clinks-live_caddy_data`. Der DNS-Eintrag für `clinks.ch` muss ebenfalls auf debi zeigen. Die Besmir-App benötigt im externen Docker-Netz `clinks-ingress` den Alias `besmir-app`. Der Deployment-Job prüft die öffentliche Startseite und die PlanerLink-Anmeldung. Der Zugangsmarker und die Planer-Downloads werden schreibgeschützt eingebunden. Bei Änderungen an `receive.sh` auch die installierte Version unter `/usr/local/sbin/clinks-receive` aktualisieren.

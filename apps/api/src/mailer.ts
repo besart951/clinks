@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer';
 
 export interface MailAttachment {
+	cid?: string;
 	filename: string;
 	content: Uint8Array;
 	contentType: string;

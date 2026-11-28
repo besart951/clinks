@@ -1,3 +1,4 @@
+import { publicRoutes, webLink } from '@clinks/contracts/public-links';
 import type { ConsentImportResult, NewsletterFormInput, NewsletterFormView } from '@clinks/contracts/newsletter';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
@@ -21,7 +22,7 @@ export class NewsletterFormsModel {
 
 	/** The page people sign up on; it goes on the practice's website, in mails or as QR code at the desk. */
 	link(form: NewsletterFormView) {
-		return `${location.origin}${location.pathname}#/newsletter/${form.token}`;
+		return webLink(location.href, publicRoutes.newsletter(form.token));
 	}
 
 	create() {
