@@ -12,12 +12,12 @@ services:
       default: {}
       ingress:
         aliases: [clinks-web]
-    ports: !override ['127.0.0.1:18780:80']
-    environment:
-      WEB_HOST: http://www.clinks.ch
-      API_HOST: http://api.clinks.ch
-      SYNC_HOST: http://sync.clinks.ch
-      COLLAB_HOST: http://collab.clinks.ch
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./debi/web-routes:/etc/caddy/web-routes:ro
+      - ./debi/sites:/etc/caddy/sites:ro
+      - /srv/codelinks/recovery-control/gate:/run/recovery:ro
+      - /srv/codelinks/state/planer-downloads:/srv/planer-downloads:ro
 networks:
   database:
     external: true

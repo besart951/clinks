@@ -1,0 +1,3 @@
+clinks.ch {
+	redir https://www.clinks.ch{uri} 308
+}
