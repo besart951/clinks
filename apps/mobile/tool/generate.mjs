@@ -42,6 +42,8 @@ const keys = [
 	'ui.sign_out',
 	'ui.tenants',
 	'ui.ws.auth.code',
+	'ui.ws.auth.show_password',
+	'ui.ws.auth.hide_password',
 	'ui.ws.module.contacts',
 	'ui.ws.contacts.empty_title',
 	'error.internal',

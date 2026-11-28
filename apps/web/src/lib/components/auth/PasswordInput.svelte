@@ -16,23 +16,16 @@
 	let visible = $state(false);
 </script>
 
-<div class="relative">
-	<Input
-		{...attributes}
-		{disabled}
-		type={visible ? 'text' : 'password'}
-		class="pr-11 [&::-ms-reveal]:hidden"
-		bind:value
-	/>
+<div class="grid min-w-0 gap-1">
+	<Input {...attributes} {disabled} type={visible ? 'text' : 'password'} class="[&::-ms-reveal]:hidden" bind:value />
 	<button
 		type="button"
-		class="absolute inset-y-0 right-0 flex w-10 items-center justify-center rounded-md text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
+		class="text-foreground focus-visible:outline-ring flex min-h-9 items-center gap-2 justify-self-end rounded-md px-2 text-sm hover:underline focus-visible:outline-2"
 		{disabled}
-		aria-label={workspace.t('ui.ws.auth.show_password')}
-		aria-pressed={visible}
 		onmousedown={(event) => event.preventDefault()}
 		onclick={() => (visible = !visible)}
 	>
 		{#if visible}<EyeOff size={17} aria-hidden="true" />{:else}<Eye size={17} aria-hidden="true" />{/if}
+		{workspace.t(visible ? 'ui.ws.auth.hide_password' : 'ui.ws.auth.show_password')}
 	</button>
 </div>

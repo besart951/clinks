@@ -20,6 +20,7 @@ class _WorkspacePageState extends State<WorkspacePage> {
       WidgetsBinding.instance.platformDispatcher.locale.languageCode != 'de';
   late final backend = MobileBackend(english ? 'en-US' : 'de-CH');
   bool busy = false;
+  bool showPassword = false;
   String? error, tenantId;
   String t(String key) => labels[key]![english ? 1 : 0];
   bool valid(String origin) {
@@ -169,8 +170,24 @@ class _WorkspacePageState extends State<WorkspacePage> {
                   ),
                   TextField(
                     controller: password,
-                    decoration: InputDecoration(labelText: t('ui.password')),
-                    obscureText: true,
+                    decoration: InputDecoration(
+                      labelText: t('ui.password'),
+                      suffixIcon: IconButton(
+                        tooltip: t(
+                          showPassword
+                              ? 'ui.ws.auth.hide_password'
+                              : 'ui.ws.auth.show_password',
+                        ),
+                        icon: Icon(
+                          showPassword ? Icons.visibility_off : Icons.visibility,
+                        ),
+                        onPressed: () =>
+                            setState(() => showPassword = !showPassword),
+                      ),
+                    ),
+                    obscureText: !showPassword,
+                    autocorrect: false,
+                    enableSuggestions: false,
                     autofillHints: const [AutofillHints.password],
                   ),
                 ],
@@ -185,6 +202,7 @@ class _WorkspacePageState extends State<WorkspacePage> {
                             await backend.confirm(code.text);
                             code.clear();
                           } else {
+                            setState(() => showPassword = false);
                             await backend.login(email.text, password.text);
                             password.clear();
                           }

@@ -478,6 +478,10 @@
         "de-CH": "Falls ein Konto für {email} existiert, ist ein Code unterwegs.",
         "en-US": "If an account exists for {email}, a code is on its way."
       },
+      "ui.ws.auth.hide_password": {
+        "de-CH": "Passwort verbergen",
+        "en-US": "Hide password"
+      },
       "ui.ws.auth.show_password": {
         "de-CH": "Passwort anzeigen",
         "en-US": "Show password"
