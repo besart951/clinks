@@ -1602,4 +1602,9 @@ test('plans a recurring client activity and checks the phone form', async ({ pag
 	await expect(section.getByText('Einkauf begleiten', { exact: true })).toBeVisible();
 	await section.getByRole('button', { name: 'Nächsten Zeitraum planen' }).click();
 	await expect(section.getByLabel('Planen ab')).toHaveValue('2026-11-30');
+	const clientName = (await page.title()).split(' · ')[0];
+	await page.goto('/#/spitex?date=2026-11-23');
+	const cards = page.getByRole('list').filter({ has: page.getByTitle(/zuzuweisen/) });
+	await expect(cards.getByText(clientName, { exact: true }).first()).toBeVisible();
+	await expect(cards).not.toContainText('Einkauf begleiten');
 });

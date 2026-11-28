@@ -3474,6 +3474,10 @@
         "de-CH": "Alles zugewiesen",
         "en-US": "All assigned"
       },
+      "ui.ws.spitex.no_linked_client": {
+        "de-CH": "Klient nicht zugeordnet",
+        "en-US": "No linked client"
+      },
       "ui.ws.spitex.window": {
         "de-CH": "Ankunft {window}",
         "en-US": "Arrival {window}"
