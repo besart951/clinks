@@ -1,4 +1,5 @@
 <script lang="ts">
+	import PasswordInput from '#lib/components/auth/PasswordInput.svelte';
 	import MailAlertsCard from '#lib/components/settings/MailAlertsCard.svelte';
 	import LocalePicker from '#lib/components/shell/LocalePicker.svelte';
 	import { useWriteMail, type MailPreference } from '#lib/features/mail/write-mail.svelte';
@@ -194,10 +195,10 @@
 		<Card.Content class="space-y-6">
 			<form class="grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end" onsubmit={changePassword} novalidate>
 				<FormField id="pw-current" label={workspace.t('ui.ws.settings.current_password')} error={model.fields.current}>
-					<Input id="pw-current" type="password" autocomplete="current-password" bind:value={model.currentPassword} />
+					<PasswordInput id="pw-current" autocomplete="current-password" bind:value={model.currentPassword} />
 				</FormField>
 				<FormField id="pw-new" label={workspace.t('ui.ws.auth.new_password')} error={model.fields.next}>
-					<Input id="pw-new" type="password" autocomplete="new-password" bind:value={model.newPassword} />
+					<PasswordInput id="pw-new" autocomplete="new-password" bind:value={model.newPassword} />
 				</FormField>
 				<Button type="submit" variant="outline" disabled={!model.currentPassword || !model.newPassword}>
 					{workspace.t('ui.ws.settings.change_password')}
@@ -240,10 +241,9 @@
 								label={workspace.t('ui.ws.settings.current_password')}
 								error={model.fields.password}
 							>
-								<Input
+								<PasswordInput
 									id="tf-password"
 									name="password"
-									type="password"
 									autocomplete="current-password"
 									required
 									bind:value={model.twoFactorPassword}

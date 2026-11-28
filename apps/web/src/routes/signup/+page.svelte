@@ -1,4 +1,5 @@
 <script lang="ts">
+	import PasswordInput from '#lib/components/auth/PasswordInput.svelte';
 	import * as Alert from '@clinks/ui/components/ui/alert';
 	import { Button } from '@clinks/ui/components/ui/button';
 	import { Input } from '@clinks/ui/components/ui/input';
@@ -53,9 +54,8 @@
 			error={form.fields.password}
 			hint={workspace.t('error.ws.password_too_short')}
 		>
-			<Input
+			<PasswordInput
 				id="password"
-				type="password"
 				autocomplete="new-password"
 				bind:value={form.password}
 				aria-invalid={!!form.fields.password}

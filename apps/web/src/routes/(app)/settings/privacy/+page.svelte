@@ -1,9 +1,9 @@
 <script lang="ts">
+	import PasswordInput from '#lib/components/auth/PasswordInput.svelte';
 	import Download from '@lucide/svelte/icons/download';
 	import * as Card from '@clinks/ui/components/ui/card';
 	import * as Dialog from '@clinks/ui/components/ui/dialog';
 	import { Button } from '@clinks/ui/components/ui/button';
-	import { Input } from '@clinks/ui/components/ui/input';
 	import PageHeader from '#lib/components/common/PageHeader.svelte';
 	import FormField from '#lib/components/common/FormField.svelte';
 	import { PrivacyModel } from '#lib/features/settings/settings.svelte';
@@ -70,7 +70,7 @@
 		</Dialog.Header>
 		<form id="delete-form" onsubmit={remove}>
 			<FormField id="del-password" label={workspace.t('ui.password')} error={model.fields.password}>
-				<Input id="del-password" type="password" bind:value={model.password} />
+				<PasswordInput id="del-password" autocomplete="current-password" bind:value={model.password} />
 			</FormField>
 		</form>
 		<Dialog.Footer>
