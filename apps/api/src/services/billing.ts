@@ -1,3 +1,4 @@
+import { publicRoutes, webLink } from '@clinks/contracts/public-links';
 import { inScope } from '@clinks/db/scope';
 import { planCodes, coreModules } from '@clinks/domain/types';
 import { planFor } from '@clinks/domain/plans';
@@ -30,7 +31,7 @@ export class BillingService {
 	async open(claims: AccessClaims, input?: z.infer<typeof checkoutRequest>) {
 		if (!claims.tenant_id) throw forbidden();
 		const tenantId = claims.tenant_id;
-		const returnUrl = this.#services.config.WEB_ORIGIN + '/#/settings/billing';
+		const returnUrl = webLink(this.#services.config.WEB_ORIGIN, publicRoutes.billing());
 		const initial = await inScope(this.#services.db, { tenantId, userId: claims.sub }, async (tx) => {
 			await requirePermission(tx, tenantId, claims.sub, 'billing.manage');
 			const account = await tx

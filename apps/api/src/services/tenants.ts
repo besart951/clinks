@@ -1,3 +1,4 @@
+import { publicRoutes, webLink } from '@clinks/contracts/public-links';
 import { activeRole } from './permissions.ts';
 import type { CreateTenantRequest, InvitationDetails, MeResponse } from '@clinks/contracts/auth';
 import { administratorPermissions, roleGrants, userPermissions } from '@clinks/domain/permissions';
@@ -211,7 +212,7 @@ export class TenantService {
 			subject: translate(caller.locale, 'mail.invitation.subject', { tenant: tenantName }),
 			text: translate(caller.locale, 'mail.invitation.body', {
 				tenant: tenantName,
-				link: `${this.#services.config.WEB_ORIGIN}/#/invitation/${encodeURIComponent(token)}`,
+				link: webLink(this.#services.config.WEB_ORIGIN, publicRoutes.invitation(token)),
 			}),
 		});
 	}

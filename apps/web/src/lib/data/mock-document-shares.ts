@@ -1,3 +1,4 @@
+import { publicRoutes, webLink } from '@clinks/contracts/public-links';
 import type {
 	DocumentShareCreated,
 	DocumentShareView,
@@ -61,7 +62,7 @@ export class MockDocumentShares {
 				target: { kind: 'document', id: documentId, label: document.name },
 			});
 			const { token, tenantId: _tenant, documentId: _document, ...view } = share;
-			return { ...view, url: `${location.origin}${location.pathname}#/share/${token}` };
+			return { ...view, url: webLink(location.href, publicRoutes.documentShare(token)) };
 		}, ['documentShares', 'audit']);
 	}
 

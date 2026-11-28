@@ -50,7 +50,7 @@
 			{@const contact = data.contacts.find((row) => row.id === model.contactId) ?? null}
 			<a
 				class="text-muted-foreground hover:text-foreground inline-flex h-7 items-center gap-1 pr-2 text-[13px]"
-				href={href('/finance/invoices')}
+				href={href('/finance')}
 			>
 				<ChevronLeft class="size-4" />{workspace.t('ui.ws.command.group_invoices')}
 			</a>

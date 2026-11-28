@@ -5,7 +5,6 @@ cd /srv/clinks
 [[ $# == 2 && $2 =~ ^[0-9a-f]{40}$ ]] || exit 2
 mode=$1
 export RELEASE=$2
-export WEB_HOST=www.clinks.ch API_HOST=api.clinks.ch SYNC_HOST=sync.clinks.ch COLLAB_HOST=collab.clinks.ch
 export CONFIG_DIR="/srv/clinks/releases/$RELEASE/config"
 install -d -m 700 "$CONFIG_DIR"
 exec 9>/srv/clinks/release.lock
@@ -45,6 +44,8 @@ git --git-dir=repository.git archive "$RELEASE" infra | tar -x -C "$source_dir"
 docker load
 docker image inspect "clinks-workspace:$RELEASE" "clinks-edge:$RELEASE" >/dev/null
 cd "$source_dir/infra/production"
+. debi/hosts.sh
+python3 debi/configure-origins.py
 sed 's/sslmode: verify-full/sslmode: disable/g' powersync.yaml > /srv/clinks/config/powersync.yaml
 chmod 644 /srv/clinks/config/powersync.yaml
 chmod 644 ../powersync/sync-config.yaml

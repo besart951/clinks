@@ -2,6 +2,8 @@
 
 Bei einem Push auf `main` laufen die vier Quality-Jobs auf dem Runner `clinks-zep`. Auf zep startet der Benutzerdienst `clinks-ci.service` für jeden Job eine neue KVM-VM. Pull Requests verwenden GitHub-gehostete Runner. Für neue Runner-Registrierungen benötigt der Benutzerdienst die GitHub-Anmeldung auf zep.
 
+Die Basisdomain für das Web-Build, die Dienste und Caddy steht in `infra/production/debi/hosts.sh`. Nach einer Änderung DNS und externe Freigaben (etwa S3-CORS) anpassen und neu deployen.
+
 ## Produktion aktivieren
 
 1. Im DNS der Zone `clinks.ch` zeigen die A-Records `www`, `api`, `sync` und `collab` auf `83.228.246.96`. Eventuelle AAAA-Records müssen denselben Dienst über IPv6 erreichen.

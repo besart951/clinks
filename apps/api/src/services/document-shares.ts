@@ -1,3 +1,4 @@
+import { publicRoutes, webLink } from '@clinks/contracts/public-links';
 import type {
 	DocumentShareCreated,
 	DocumentShareView,
@@ -56,14 +57,14 @@ export class DocumentShares {
 				},
 				caller,
 			);
-			const origin = this.#services.config.WEB_ORIGIN ?? '';
+			const origin = this.#services.config.WEB_ORIGIN;
 			return {
 				id,
 				expiresAt: expiresAt.toISOString(),
 				revokedAt: null,
 				openCount: 0,
 				createdAt: now.toISOString(),
-				url: `${origin}/#/share/${token}`,
+				url: webLink(origin, publicRoutes.documentShare(token)),
 			};
 		});
 	}

@@ -171,7 +171,7 @@
 			{/if}
 			{#if session.hasModule('finance') && session.can('finance.read')}
 				<KpiCard
-					path="/finance/invoices"
+					path="/finance"
 					kpi={{
 						icon: Wallet,
 						label: workspace.t('ui.ws.dashboard.open_invoices'),

@@ -1,3 +1,4 @@
+import { publicRoutes, webLink } from '@clinks/contracts/public-links';
 import * as newsletter from '@clinks/contracts/newsletter';
 import { z } from 'zod';
 import { body, json, route, type RouteDeps, type Router } from './helpers.ts';
@@ -257,7 +258,6 @@ export function registerNewsletterRoutes(
 			request: { params: tokenParams },
 			responses: { 302: { description: 'To the unsubscribe page' } },
 		}),
-		(c) =>
-			c.redirect(`${services.config.WEB_ORIGIN}/#/unsubscribe/${encodeURIComponent(c.req.valid('param').token)}`, 302),
+		(c) => c.redirect(webLink(services.config.WEB_ORIGIN, publicRoutes.unsubscribe(c.req.valid('param').token)), 302),
 	);
 }

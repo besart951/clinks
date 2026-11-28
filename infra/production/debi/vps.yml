@@ -8,6 +8,8 @@ services:
     volumes:
       - /srv/clinks/config/powersync.yaml:/config/service.yaml:ro
   caddy:
+    environment:
+      APEX_HOST: ${APEX_HOST:?apex host required}
     networks:
       default: {}
       ingress:

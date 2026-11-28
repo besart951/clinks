@@ -1,3 +1,3 @@
-clinks.ch {
-	redir https://www.clinks.ch{uri} 308
+{$APEX_HOST} {
+	redir https://{$WEB_HOST}{uri} 308
 }

@@ -1,3 +1,4 @@
+import { publicRoutes, webLink } from '@clinks/contracts/public-links';
 import type { InvoiceLinkDetails, InvoiceLinkFile, InvoiceSendInput } from '@clinks/contracts/finance';
 import { newId, type InvoiceId, type InvoiceSendId, type MailId } from '@clinks/domain/ids';
 import { linkAttempts, linkLifetimeDays, nextReminder, samePostcode } from '@clinks/domain/invoicing';
@@ -130,7 +131,7 @@ export class MockInvoiceSends {
 		const body = token
 			? t('mail.invoice.body_link', {
 					...params,
-					link: `${location.origin}${location.pathname}#/invoice-link/${token}`,
+					link: webLink(location.href, publicRoutes.invoice(token)),
 					expires: date(row.linkExpiresAt!),
 				})
 			: t(delivery.kind === 'invoice' ? 'mail.invoice.body_attachment' : 'mail.invoice.reminder_body', params);

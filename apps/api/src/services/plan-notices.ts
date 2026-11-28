@@ -1,3 +1,4 @@
+import { publicRoutes, webLink } from '@clinks/contracts/public-links';
 import { createHash } from 'node:crypto';
 import { sql } from 'kysely';
 import type { Tx } from '@clinks/db/scope';
@@ -126,7 +127,7 @@ export async function recordPlanNotices(
 			week: isoWeek(notice.weekStart),
 			from: date(notice.weekStart),
 			to: date(addDays(notice.weekStart, 6)),
-			link: `${services.config.WEB_ORIGIN}/#/visits?week=${notice.weekStart}`,
+			link: webLink(services.config.WEB_ORIGIN, publicRoutes.visitWeek(notice.weekStart)),
 		};
 		await enqueueMail(tx, scope.tenantId, {
 			kind: 'system',
