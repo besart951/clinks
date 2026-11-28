@@ -503,6 +503,19 @@ export interface MyVisits {
 	releases: WeekRelease[];
 }
 
+/** A bounded planning period for a recurring client activity. Visits retain their own snapshot. */
+export interface VisitNeed extends TenantRecord<SeriesId> {
+	contactId: ContactId;
+	title: string;
+	notes: string;
+	startsOn: CalendarDate;
+	endsOn: CalendarDate;
+	weekdays: number[];
+	startTime: string;
+	durationMinutes: number;
+	arrivalWindow: ArrivalWindow | null;
+}
+
 /**
  * A released week of the Spitex plan: while the record exists, staff see their own visits of that week.
  * `createdAt` is when it was released.

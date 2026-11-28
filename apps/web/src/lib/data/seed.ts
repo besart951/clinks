@@ -176,6 +176,7 @@ function emptySnapshot(): Snapshot {
 		prescriptions: [],
 		notes: [],
 		timeEntries: [],
+		visitNeeds: [],
 		weekReleases: [],
 		notifications: [],
 		audit: [],

@@ -297,3 +297,68 @@ describe('releasing the Spitex plan', () => {
 		);
 	});
 });
+it('generates open visits once per period in tenant time and preserves a moved visit', async () => {
+	const contactId = uuid(),
+		id = uuid();
+	await api.owner
+		.insertInto('contacts')
+		.values({ id: contactId, tenantId: admin.tenantId, kind: 'person', lastName: 'Muster' })
+		.execute();
+	const data = {
+		contact_id: contactId,
+		title: 'Einkaufen',
+		notes: 'Tasche mitbringen',
+		starts_on: '2027-03-22',
+		ends_on: '2027-03-29',
+		weekdays: [1],
+		start_time: '09:00',
+		duration_minutes: 35,
+	};
+	const put = { op: 'PUT', table: 'spitex_visit_needs', id, data };
+	const send = async (op: unknown) => {
+		const res = await write(admin.token, [op]);
+		assert.equal(res.status, 200, JSON.stringify(res.body));
+	};
+	await send(put);
+	await send(put);
+	const visits = () =>
+		api.owner.selectFrom('appointments').selectAll().where('seriesId', '=', id).orderBy('startsAt').execute();
+	const created = await visits();
+	assert.deepEqual(
+		created.map((v) => new Date(String(v.startsAt)).toISOString()),
+		['2027-03-22T08:00:00.000Z', '2027-03-29T07:00:00.000Z'],
+	);
+	assert.ok(created.every((v) => v.assigneeId === null && v.title === data.title && v.contactId === contactId));
+	await api.owner
+		.updateTable('appointments')
+		.set({ title: 'Individuell geändert' })
+		.where('id', '=', String(created[0].id))
+		.execute();
+	const patch = {
+		op: 'PATCH',
+		table: 'spitex_visit_needs',
+		id,
+		data: { starts_on: '2027-04-01', ends_on: '2027-04-05', title: 'Begleitung' },
+	};
+	await send(patch);
+	await send(patch);
+	assert.deepEqual(
+		(await visits()).map((v) => v.title),
+		['Individuell geändert', 'Einkaufen', 'Begleitung'],
+	);
+	// Imports carry the historical visits as separate rows. Replaying the snapshot must not schedule new visits.
+	const importedId = uuid();
+	const snapshot = { ops: [{ ...put, id: importedId }] };
+	for (let attempt = 0; attempt < 2; attempt++) {
+		const result = await api.client().call('POST', '/sync/import', { token: admin.token, body: snapshot });
+		assert.equal(result.status, 200, JSON.stringify(result.body));
+	}
+	assert.equal(
+		(await api.owner.selectFrom('appointments').select('id').where('seriesId', '=', importedId).execute()).length,
+		0,
+	);
+	const other = await api.administrator('other-care@example.ch', 'Andere Spitex');
+	assert.notEqual((await write(other.token, [{ ...put, id: uuid() }])).status, 200);
+	const staff = await member('need-staff@example.ch', ['spitex.own.read']);
+	assert.equal((await write(staff.token, [put])).status, 403);
+});

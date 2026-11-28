@@ -1,4 +1,5 @@
 <script lang="ts">
+	import VisitNeeds from '#lib/components/spitex/VisitNeeds.svelte';
 	import MapLink from '#lib/components/common/MapLink.svelte';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
@@ -73,9 +74,8 @@
 				{workspace.i18n.format(new Date(visit.start), { weekday: 'short', day: 'numeric', month: 'short' })}
 			</b>
 			<span class="text-muted-foreground truncate">
-				{workspace.i18n.time(visit.start)} · {visit.service
-					? workspace.t(`ui.ws.spitex.service.${visit.service}`)
-					: visit.title}
+				{workspace.i18n.time(visit.start)} · {visit.title}
+				{visit.service ? workspace.t(`ui.ws.spitex.service.${visit.service}`) : ''}
 			</span>
 		</span>
 		{#if assignee}<span title={assignee.name}><Initials name={assignee.name} size="sm" /></span>{:else}<span
@@ -88,7 +88,7 @@
 
 <ModuleGate module="spitex" permission="spitex.read">
 	<AsyncView resource={model.resource} skeleton="detail">
-		{#snippet children({ client, visits, notes })}
+		{#snippet children({ client, visits, notes, needs })}
 			{@const now = new Date().toISOString()}
 			{@const upcoming = visits.filter((visit) => visit.start >= now).reverse()}
 			{@const past = visits.filter((visit) => visit.start < now)}
@@ -133,6 +133,8 @@
 					/>
 				</div>
 			</div>
+
+			<VisitNeeds contactId={client.id} {needs} />
 
 			<div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
 				<Accordion>

@@ -1,6 +1,6 @@
 import { today, toCalendarDate } from '@clinks/domain/dates';
 import type { ContactId } from '@clinks/domain/ids';
-import type { Appointment, ClinicalNote, Contact, TimeEntry } from '@clinks/domain/types';
+import type { Appointment, ClinicalNote, Contact, TimeEntry, VisitNeed } from '@clinks/domain/types';
 import { contactPatch } from '../contacts/contact-fields.ts';
 import { Resource } from '../../state/resource.svelte.ts';
 import type { Workspace } from '../../workspace.svelte.ts';
@@ -54,7 +54,7 @@ export class ClientsModel {
 
 /** A client's file: care documentation and visits. */
 export class ClientFileModel {
-	readonly resource: Resource<{ client: Contact; visits: Appointment[]; notes: ClinicalNote[] }>;
+	readonly resource: Resource<{ client: Contact; visits: Appointment[]; notes: ClinicalNote[]; needs: VisitNeed[] }>;
 	draft = $state({ subjective: '', objective: '', assessment: '', plan: '' });
 	busy = $state(false);
 	#workspace: Workspace;
@@ -63,14 +63,16 @@ export class ClientFileModel {
 	constructor(workspace: Workspace, id: ContactId) {
 		this.#workspace = workspace;
 		this.#id = id;
-		this.resource = new Resource(workspace.db, ['contacts', 'appointments', 'notes'], async () => {
-			const [client, visits, notes] = await Promise.all([
+		this.resource = new Resource(workspace.db, ['contacts', 'appointments', 'notes', 'visitNeeds'], async () => {
+			const [client, visits, notes, needs] = await Promise.all([
 				workspace.api.contacts.get(id),
 				workspace.api.appointments.list((row) => row.contactId === id),
 				workspace.api.spitexNotes.list((row) => row.contactId === id && row.kind === 'spitex'),
+				workspace.api.visitNeeds.list((row) => row.contactId === id),
 			]);
 			return {
 				client,
+				needs,
 				visits: visits.sort((left, right) => right.start.localeCompare(left.start)),
 				notes: notes.sort(
 					(left, right) => right.date.localeCompare(left.date) || right.createdAt.localeCompare(left.createdAt),

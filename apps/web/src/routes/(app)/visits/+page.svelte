@@ -10,7 +10,7 @@
 	import ModuleGate from '#lib/components/shell/ModuleGate.svelte';
 	import CalendarToolbar from '#lib/components/calendar/CalendarToolbar.svelte';
 	import { MyVisitsModel } from '#lib/features/spitex/my-visits.svelte';
-	import { contactName } from '#lib/data/workspace-api';
+	import { visitLabel } from '@clinks/domain/contacts';
 	import { formatAddress } from '@clinks/domain/address';
 	import { isoWeek, minutesBetween, today } from '@clinks/domain/dates';
 	import { page } from '$app/state';
@@ -81,7 +81,7 @@
 									</div>
 									<div class="min-w-0 space-y-1 text-sm">
 										<p class="flex flex-wrap items-center gap-x-2 gap-y-1 font-medium">
-											<span class={cancelled ? 'line-through' : ''}>{client ? contactName(client) : visit.title}</span>
+											<span class={cancelled ? 'line-through' : ''}>{visitLabel(visit, client)}</span>
 											{#if cancelled}
 												<span class="bg-muted rounded px-1.5 py-0.5 text-xs font-medium">
 													{workspace.t('ui.ws.visits.cancelled')}

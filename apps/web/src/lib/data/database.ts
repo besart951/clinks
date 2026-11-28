@@ -28,6 +28,7 @@ import type {
 	Tenant,
 	TimeEntry,
 	User,
+	VisitNeed,
 	WeekRelease,
 } from '@clinks/domain/types';
 import type { StorageSettings } from '@clinks/domain/storage';
@@ -86,6 +87,7 @@ export interface Tables {
 	prescriptions: Prescription;
 	notes: ClinicalNote;
 	timeEntries: TimeEntry;
+	visitNeeds: VisitNeed;
 	weekReleases: WeekRelease;
 	notifications: AppNotification;
 	audit: AuditEntry;
@@ -126,6 +128,7 @@ export const tableNames: readonly TableName[] = [
 	'prescriptions',
 	'notes',
 	'timeEntries',
+	'visitNeeds',
 	'weekReleases',
 	'notifications',
 	'audit',

@@ -201,3 +201,5 @@ The security model rests on one rule: only values signed into the JWT decide wha
 | Offline conflicts on the same record                                                                                      | Lost edits                            | Revisions per row, last write wins per field, care notes append-only                                                                 |
 | Browser storage can be evicted (Safari)                                                                                   | Unsynced writes lost                  | Request persistent storage, show unsynced count, warn before sign-out                                                                |
 | Health data on staff devices                                                                                              | Data protection                       | Working window only, wipe on sign-out, server-only data class for sensitive notes                                                    |
+
+- [x] Wiederkehrender Spitex-Bedarf und einzelne Tätigkeiten im Kalender. [Ablauf und Migration](product/spitex-freigabe.md#tätigkeit-bedarf-und-einsatz)

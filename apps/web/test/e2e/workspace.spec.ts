@@ -1574,3 +1574,32 @@ test('shows every open dashboard visit when eight appointments share a planning 
 	await expect(visits).toHaveCount(8);
 	expect(new Set(await visits.evaluateAll((links) => links.map((link) => link.getAttribute('href')))).size).toBe(1);
 });
+test('plans a recurring client activity and checks the phone form', async ({ page }) => {
+	await signIn(page);
+	await page.getByRole('button', { name: 'Arbeitsbereich' }).click();
+	await page.getByRole('menuitem', { name: 'Stille Spitex Seeland' }).click();
+	await page.goto('/#/spitex/clients');
+	await page.locator('tbody tr').first().click();
+	const section = page.getByRole('region', { name: 'Wiederkehrender Pflegebedarf' });
+	await section.getByRole('button', { name: 'Bedarf planen' }).click();
+	await section.getByLabel('Tätigkeit').fill('Einkauf begleiten');
+	await section.getByLabel('Notizen').fill('Gemeinsam die Einkaufsliste mitnehmen.');
+	for (const width of [1440, 390, 320]) {
+		await page.setViewportSize({ width, height: 844 });
+		await expect(section.getByRole('button', { name: '1 offenen Einsatz anlegen' })).toBeEnabled();
+		await expect
+			.poll(() =>
+				section.evaluate((el) =>
+					[el.scrollWidth - el.clientWidth, document.documentElement.scrollWidth - innerWidth].every(
+						(excess) => excess <= 1,
+					),
+				),
+			)
+			.toBe(true);
+		await section.screenshot({ path: test.info().outputPath('visit-need-' + width + '.png') });
+	}
+	await section.getByRole('button', { name: '1 offenen Einsatz anlegen' }).click();
+	await expect(section.getByText('Einkauf begleiten', { exact: true })).toBeVisible();
+	await section.getByRole('button', { name: 'Nächsten Zeitraum planen' }).click();
+	await expect(section.getByLabel('Planen ab')).toHaveValue('2026-11-30');
+});

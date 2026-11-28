@@ -22,6 +22,7 @@
 		drop(appointment: Appointment, date: CalendarDate, minutes: number, assigneeId: UserId | null | undefined): void;
 		/** New start and end after dragging the top or bottom edge of an appointment. */
 		resize(appointment: Appointment, times: { start: string; end: string }): void;
+		label?(appointment: Appointment): string;
 		color(appointment: Appointment): string;
 		/** Name of the person the appointment is assigned to, for the info card on hover. */
 		assignee(appointment: Appointment): string | null;
@@ -356,7 +357,7 @@
 		<span class="mt-1.5 size-2.5 shrink-0 rounded-full" style:background-color={color}></span>
 		<div class="min-w-0">
 			<p class="leading-snug font-medium {appointment.status === 'cancelled' ? 'line-through' : ''}">
-				{appointment.title}
+				{handlers.label?.(appointment) ?? appointment.title}
 			</p>
 			<p class="text-muted-foreground text-xs tabular-nums">
 				{workspace.i18n.format(toCalendarDate(appointment.start), { weekday: 'short', day: 'numeric', month: 'short' })} ·
@@ -523,7 +524,7 @@
 							style:background-color="color-mix(in oklab, {color} 14%, var(--background))"
 							aria-label="{workspace.i18n.time(appointment.start)}–{workspace.i18n.time(
 								appointment.end,
-							)} {appointment.title}{mark ? ` (${mark})` : ''}"
+							)} {handlers.label?.(appointment) ?? appointment.title}{mark ? ` (${mark})` : ''}"
 						>
 							{#if mark}<span
 									class="absolute end-1 top-1 size-1.5 rounded-full bg-amber-500"
@@ -533,7 +534,7 @@
 							<!-- The start and the title only; the end, the person and the service are in the info card. -->
 							<span class="block truncate {mark ? 'pe-2.5' : ''}">
 								<span class="text-muted-foreground tabular-nums">{workspace.i18n.time(appointment.start)}</span>
-								<span class="font-medium">{appointment.title}</span>
+								<span class="font-medium">{handlers.label?.(appointment) ?? appointment.title}</span>
 							</span>
 							{#if live}
 								<span class="block truncate font-medium tabular-nums">{label(live.start)}–{label(live.end)}</span>

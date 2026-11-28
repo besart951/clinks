@@ -21,7 +21,7 @@
 	import AppointmentSheet from '#lib/components/calendar/AppointmentSheet.svelte';
 	import { CalendarModel, type CalendarView } from '#lib/features/calendar/calendar.svelte';
 	import { PeopleDirectory } from '#lib/features/collaboration/people.svelte';
-	import { contactName } from '#lib/data/workspace-api';
+	import { contactName, visitLabel } from '@clinks/domain/contacts';
 	import { atTime, isoWeekday, minutesToTime, startOfWeek, today, weekDays } from '@clinks/domain/dates';
 	import { appointmentKinds, type Appointment } from '@clinks/domain/types';
 	import type { ContactId } from '@clinks/domain/ids';
@@ -84,6 +84,7 @@
 	}
 
 	const handlers: GridHandlers = {
+		label: (visit) => visitLabel(visit, visit.contactId ? model.resource.data?.contacts.get(visit.contactId) : null),
 		open: (appointment) => sheet.show(appointment),
 		create: (date, minutes, assigneeId) => create(date, minutes, assigneeId),
 		drop: (appointment, date, minutes, assigneeId) =>
@@ -299,6 +300,7 @@
 						handlers={{
 							appointmentsOn: (date) => model.on(date),
 							color: handlers.color,
+							label: handlers.label,
 							open: handlers.open,
 							day: openDay,
 							hideWeekday: (weekday) => period.hideWeekday(weekday),

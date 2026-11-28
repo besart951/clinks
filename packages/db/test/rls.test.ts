@@ -155,3 +155,30 @@ it('keeps operational access out of another team while retaining access to that 
 	assert.ok((await directory(tenantA, alice)).includes(operator));
 	assert.ok((await directory(tenantB, operator)).includes(bob));
 });
+
+it('keeps recurring client needs inside the planning tenant', async () => {
+	const contactId = randomUUID(),
+		id = randomUUID();
+	await owner
+		.insertInto('contacts')
+		.values({ id: contactId, tenantId: tenantB, kind: 'person', lastName: 'Muster' })
+		.execute();
+	await owner
+		.insertInto('spitex_visit_needs')
+		.values({
+			id,
+			tenantId: tenantB,
+			contactId,
+			title: 'Einkaufen',
+			startsOn: '2027-04-05',
+			endsOn: '2027-04-05',
+			weekdays: '[1]',
+			startTime: '10:00',
+			durationMinutes: 30,
+		})
+		.execute();
+	const seen = await inScope(app, { tenantId: tenantA, userId: alice }, (tx) =>
+		tx.selectFrom('spitex_visit_needs').select('id').where('id', '=', id).execute(),
+	);
+	assert.deepEqual(seen, []);
+});

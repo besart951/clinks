@@ -7241,6 +7241,62 @@
       "ui.ws.contacts.merge_submit": {
         "de-CH": "Zusammenführen",
         "en-US": "Merge"
+      },
+      "ui.ws.spitex.needs": {
+        "de-CH": "Wiederkehrender Pflegebedarf",
+        "en-US": "Recurring care needs"
+      },
+      "ui.ws.spitex.activity": {
+        "de-CH": "Tätigkeit",
+        "en-US": "Activity"
+      },
+      "ui.ws.spitex.create_need": {
+        "de-CH": "Bedarf planen",
+        "en-US": "Plan recurring visits"
+      },
+      "ui.ws.spitex.continue_need": {
+        "de-CH": "Nächsten Zeitraum planen",
+        "en-US": "Plan next period"
+      },
+      "ui.ws.spitex.starts_on": {
+        "de-CH": "Planen ab",
+        "en-US": "Plan from"
+      },
+      "ui.ws.spitex.ends_on": {
+        "de-CH": "Planen bis",
+        "en-US": "Plan through"
+      },
+      "ui.ws.spitex.days": {
+        "de-CH": "Wochentage",
+        "en-US": "Weekdays"
+      },
+      "ui.ws.spitex.time": {
+        "de-CH": "Beginn",
+        "en-US": "Start time"
+      },
+      "ui.ws.spitex.duration": {
+        "de-CH": "Dauer in Minuten",
+        "en-US": "Duration in minutes"
+      },
+      "ui.ws.spitex.activity_hint": {
+        "de-CH": "Welche Tätigkeit ist bei diesem Besuch geplant?",
+        "en-US": "What activity is planned for this visit?"
+      },
+      "ui.ws.spitex.plan_one": {
+        "de-CH": "1 offenen Einsatz anlegen",
+        "en-US": "Create 1 unassigned visit"
+      },
+      "ui.ws.spitex.plan_count": {
+        "de-CH": "{count} offene Einsätze anlegen",
+        "en-US": "Create {count} unassigned visits"
+      },
+      "ui.ws.spitex.period_limit": {
+        "de-CH": "Pro Planung sind bis zu 93 Tage möglich. Bereits geplante Einsätze bleiben erhalten.",
+        "en-US": "Plan up to 93 days at a time. Existing visits keep their schedule."
+      },
+      "ui.ws.spitex.through": {
+        "de-CH": "Geplant bis {date}",
+        "en-US": "Planned through {date}"
       }
     }
   }

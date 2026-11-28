@@ -28,10 +28,10 @@
 </script>
 
 <section class="reveal-scope border-b" data-open={open ? '' : undefined}>
-	<div class="flex items-center gap-1">
+	<div class="flex flex-wrap items-center gap-1">
 		<button
 			type="button"
-			class="hover:text-foreground flex h-12 flex-1 items-center gap-2 rounded-md px-1 text-left text-[13px] font-semibold"
+			class="hover:text-foreground flex min-h-12 min-w-0 flex-auto items-center gap-2 rounded-md px-1 text-left text-[13px] font-semibold"
 			aria-expanded={open}
 			aria-controls={contentId}
 			onclick={toggle}
@@ -41,14 +41,14 @@
 					? ''
 					: '-rotate-90'}"
 			/>
-			{section.title}
+			<span class="min-w-0 [overflow-wrap:anywhere]">{section.title}</span>
 			{#if section.count !== undefined && section.count !== ''}<span
 					class="text-muted-foreground font-normal tabular-nums"
 				>
 					{section.count}
 				</span>{/if}
 		</button>
-		{#if tools}<span class="reveal flex items-center gap-1">{@render tools()}</span>{/if}
+		{#if tools}<span class="reveal ms-auto flex max-w-full flex-wrap items-center gap-1">{@render tools()}</span>{/if}
 	</div>
 	<div
 		id={contentId}

@@ -89,3 +89,5 @@ Details, gates and sub-items: [docs/plan.md](docs/plan.md). Product scope: [docs
 - [x] **5 · Files and collaboration** — versioned objects, offline uploads, restore, planning-board presence and shared notes.
 - [ ] **6 · Production, billing, pilot** — deployment, backups, restore drills, monitoring probes and Stripe integration implemented. Internal security review done ([docs/security-review.md](docs/security-review.md)). Provider setup ([docs/ops/livegang.md](docs/ops/livegang.md)), commercial configuration, alert delivery, external penetration test and real pilot remain open.
 - [x] **7 · Native clients** — Tauri desktop shell and Flutter contact directory. Native signing, iOS validation and distribution remain release steps.
+
+- [x] Wiederkehrender Spitex-Bedarf und einzelne Tätigkeiten im Kalender. [Ablauf und Migration](docs/product/spitex-freigabe.md#tätigkeit-bedarf-und-einsatz)

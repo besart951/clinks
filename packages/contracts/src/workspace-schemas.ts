@@ -1,3 +1,4 @@
+import { visitNeedDays } from '@clinks/domain/visit-needs';
 import { z } from 'zod';
 import {
 	campaignStatuses,
@@ -145,6 +146,25 @@ export const workspaceSchemas = {
 		minutes: z.int().positive(),
 		description: text,
 	}),
+	spitex_visit_needs: z
+		.object({
+			contactId: id,
+			title: text.trim().min(1).max(200),
+			notes: text.max(4000),
+			startsOn: date,
+			endsOn: date,
+			weekdays: z.array(z.int().min(1).max(7)).min(1).max(7),
+			startTime: text.regex(/^([01]\d|2[0-3]):[0-5]\d$/),
+			durationMinutes: z.int().min(1).max(1440),
+			arrivalWindow: z
+				.object({ from: text.regex(/^([01]\d|2[0-3]):[0-5]\d$/), to: text.regex(/^([01]\d|2[0-3]):[0-5]\d$/) })
+				.nullish(),
+		})
+		.refine(
+			(v) =>
+				visitNeedDays(v).length > 0 &&
+				(!v.arrivalWindow || (v.arrivalWindow.from <= v.startTime && v.startTime <= v.arrivalWindow.to)),
+		),
 	spitex_week_releases: z.object({
 		weekStart: date.refine((value) => new Date(`${value}T00:00:00Z`).getUTCDay() === 1, { error: 'error.validation' }),
 		releasedBy: id,
