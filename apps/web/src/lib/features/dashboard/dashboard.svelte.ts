@@ -14,6 +14,7 @@ export interface SetupStep {
 
 /** One actionable notice in the "Hinweise" list. */
 export interface DashboardHint {
+	id: string;
 	kind: 'invoice' | 'task' | 'visit' | 'billing';
 	title: string;
 	key: string;
@@ -40,6 +41,7 @@ export function dashboardHints(sources: HintSources): DashboardHint[] {
 	const overdue: DashboardHint[] = sources.invoices
 		.filter((invoice) => ['overdue', 'reminded'].includes(effectiveStatus(invoice, day)))
 		.map((invoice) => ({
+			id: `invoice-${invoice.id}`,
 			kind: 'invoice',
 			title: name(invoice.contactId),
 			key: 'ui.ws.dashboard.hint_overdue',
@@ -52,6 +54,7 @@ export function dashboardHints(sources: HintSources): DashboardHint[] {
 				task.status !== 'done' && task.dueDate !== null && task.dueDate < day && task.assigneeIds.includes(sources.me),
 		)
 		.map((task) => ({
+			id: `task-${task.id}`,
 			kind: 'task',
 			title: task.title,
 			key: 'ui.ws.dashboard.hint_task_late',
@@ -61,6 +64,7 @@ export function dashboardHints(sources: HintSources): DashboardHint[] {
 	const openVisits: DashboardHint[] = sources.appointments
 		.filter((entry) => entry.kind === 'spitex' && entry.assigneeId === null && entry.start >= sources.now.toISOString())
 		.map((entry) => ({
+			id: `visit-${entry.id}`,
 			kind: 'visit',
 			title: name(entry.contactId) || entry.title,
 			key: 'ui.ws.dashboard.hint_open_visit',
@@ -72,6 +76,7 @@ export function dashboardHints(sources: HintSources): DashboardHint[] {
 		if (entry.kind === 'physio' && entry.status === 'done' && entry.billedInvoiceId === null && entry.contactId)
 			unbilled.set(entry.contactId, (unbilled.get(entry.contactId) ?? 0) + 1);
 	const billing: DashboardHint[] = [...unbilled].map(([contactId, count]) => ({
+		id: `billing-${contactId}`,
 		kind: 'billing',
 		title: name(contactId),
 		key: 'ui.ws.dashboard.hint_unbilled',

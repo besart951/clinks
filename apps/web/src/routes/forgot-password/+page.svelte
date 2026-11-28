@@ -1,4 +1,5 @@
 <script lang="ts">
+	import PasswordInput from '#lib/components/auth/PasswordInput.svelte';
 	import MailCheck from '@lucide/svelte/icons/mail-check';
 	import { Button } from '@clinks/ui/components/ui/button';
 	import { Input } from '@clinks/ui/components/ui/input';
@@ -57,7 +58,7 @@
 					label={workspace.t('ui.ws.auth.new_password')}
 					error={form.fields.password ?? (form.fromLink ? form.error : undefined)}
 				>
-					<Input id="password" type="password" autocomplete="new-password" required bind:value={form.password} />
+					<PasswordInput id="password" autocomplete="new-password" required bind:value={form.password} />
 				</FormField>
 				<Button type="submit" class="w-full" disabled={form.busy}>{workspace.t('ui.ws.auth.set_password')}</Button>
 			</form>
