@@ -2,6 +2,8 @@ import { expect, type Locator, type Page } from '@playwright/test';
 
 /** Signs in to the in-browser mock with a demo account, without simulated latency or failures. */
 export async function signIn(page: Page, email = 'besi@stille.ch') {
+	// Demo visits exist on weekdays. Keep the mock calendar reproducible on every CI run.
+	await page.clock.install({ time: new Date('2026-11-23T09:00:00Z') });
 	await page.goto('/');
 	await page.evaluate(() => {
 		localStorage.clear();
