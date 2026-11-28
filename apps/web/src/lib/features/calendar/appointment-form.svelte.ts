@@ -107,7 +107,10 @@ export class AppointmentFormModel {
 	}
 
 	get dropsWindow() {
-		return this.value.kind !== 'spitex' && !!(this.value.windowFrom || this.value.windowTo);
+		const { kind, windowFrom, windowTo } = this.value;
+		if (kind === 'spitex' || !(windowFrom || windowTo)) return false;
+		const existing = this.original?.arrivalWindow;
+		return kind !== this.original?.kind || windowFrom !== existing?.from || windowTo !== existing?.to;
 	}
 
 	removeWindow() {
@@ -165,7 +168,11 @@ export class AppointmentFormModel {
 			location: v.location,
 			notes: v.notes,
 			service: v.service,
-			arrivalWindow: withWindow ? { from: v.windowFrom, to: v.windowTo } : null,
+			arrivalWindow: withWindow
+				? { from: v.windowFrom, to: v.windowTo }
+				: this.original && this.original.kind === v.kind && v.kind !== 'spitex'
+					? this.original.arrivalWindow
+					: null,
 		};
 		const api = this.#workspace.api;
 		try {
