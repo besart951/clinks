@@ -57,9 +57,6 @@
 	let showService = $state(false);
 	let showNotes = $state(false);
 	let editLocation = $state(false);
-	const suggestedAddress = $derived(
-		contact ? [streetLine(contact.address), contact.address.city].filter(Boolean).join(', ') : '',
-	);
 	const wide = new MediaQuery('min-width: 64rem');
 	const inline = $derived(docked && wide.current);
 	let panel = $state<HTMLDialogElement>();
@@ -90,6 +87,9 @@
 	const canWrite = $derived(session.can('calendar.write'));
 	const conflicts = $derived(open ? form.conflicts(appointments) : []);
 	const contact = $derived(contacts.find((candidate) => candidate.id === form.value.contactId) ?? null);
+	const suggestedAddress = $derived(
+		contact ? [streetLine(contact.address), contact.address.city].filter(Boolean).join(', ') : '',
+	);
 
 	export function show(appointment: Appointment | null, preset: Partial<AppointmentFields> = {}) {
 		const load = () => {
