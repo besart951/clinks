@@ -561,6 +561,35 @@ test('writes to a contact’s address in CLinks or the mail program, and remembe
 	await page.getByRole('button', { name: 'E-Mail an mona.mail@example.ch schreiben' }).click();
 	const ask = page.getByRole('dialog', { name: 'E-Mail schreiben' });
 	await expect(ask.getByRole('button', { name: /Mit dem Mail-Programm des Geräts/ })).toBeVisible();
+	for (const viewport of [
+		{ width: 1440, height: 900 },
+		{ width: 390, height: 844 },
+		{ width: 320, height: 568 },
+	]) {
+		await page.setViewportSize(viewport);
+		await expect
+			.poll(() =>
+				ask.evaluate((dialog) => {
+					const bounds = dialog.getBoundingClientRect();
+					const options = [...dialog.querySelectorAll('button')].filter(
+						(b) => b.textContent?.includes('schreiben') || b.textContent?.includes('Mail-Programm'),
+					);
+					return (
+						options.length === 2 &&
+						options.every((button) => {
+							const rect = button.getBoundingClientRect();
+							return (
+								rect.left >= bounds.left && rect.right <= bounds.right && button.scrollWidth <= button.clientWidth + 1
+							);
+						}) &&
+						dialog.scrollWidth <= dialog.clientWidth + 1
+					);
+				}),
+			)
+			.toBe(true);
+		await page.screenshot({ path: test.info().outputPath('mail-' + viewport.width + '.png') });
+	}
+	await page.setViewportSize({ width: 1400, height: 900 });
 	await ask.getByRole('checkbox').check();
 	await ask.getByRole('button', { name: /In CLinks schreiben/ }).click();
 	const compose = page.getByRole('dialog', { name: 'Neue Mail' });
@@ -1490,4 +1519,26 @@ test('scans two pages into one PDF, takes files shared into CLinks and keeps a f
 		.getByRole('button', { name: /^Verträge/ })
 		.click();
 	await expect(page.getByRole('list', { name: 'Dateien' }).getByLabel('Offline verfügbar').first()).toBeVisible();
+});
+
+test('keeps the shortcuts dialog reachable on a landscape phone', async ({ page }) => {
+	await signIn(page);
+	await page.goto('/#/mail');
+	await page.getByRole('button', { name: 'Kontomenü' }).click();
+	await page.getByRole('menuitem', { name: /Tastenkürzel/ }).click();
+	const overview = page.getByRole('dialog', { name: 'Tastenkürzel' });
+	await page.setViewportSize({ width: 844, height: 390 });
+	await expect
+		.poll(() =>
+			overview.evaluate((dialog) => {
+				const rect = dialog.getBoundingClientRect();
+				return rect.top >= 0 && rect.bottom <= innerHeight && dialog.scrollHeight > dialog.clientHeight;
+			}),
+		)
+		.toBe(true);
+	await overview.locator('kbd').last().scrollIntoViewIfNeeded();
+	await expect(overview.locator('kbd').last()).toBeInViewport();
+	await page.screenshot({ path: test.info().outputPath('shortcuts-landscape.png') });
+	await page.keyboard.press('Escape');
+	await expect(overview).toHaveCount(0);
 });
