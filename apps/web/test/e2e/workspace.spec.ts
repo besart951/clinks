@@ -1303,12 +1303,10 @@ test('works the mail and the files with the keyboard and lists the keys under «
 	await page.keyboard.press('ArrowDown');
 	await expect(rows.first().getByRole('button').first()).toBeFocused();
 	await expect(page.getByRole('article').getByRole('heading', { level: 2 })).toBeVisible();
+	const star = page.getByRole('article').getByRole('button', { name: /^(Markieren|Markierung entfernen)$/ });
+	const wasStarred = (await star.getAttribute('aria-pressed')) === 'true';
 	await page.keyboard.press('s');
-	// The reading pane's star shows the change (the row's buttons only show on hover).
-	await expect(page.getByRole('button', { name: 'Markierung entfernen' }).first()).toHaveAttribute(
-		'aria-pressed',
-		'true',
-	);
+	await expect(star).toHaveAttribute('aria-pressed', String(!wasStarred));
 	await page.keyboard.press('e');
 	await expect(page.getByText('Verschoben nach Archiv')).toBeVisible();
 	await expect(rows).toHaveCount(count - 1);
