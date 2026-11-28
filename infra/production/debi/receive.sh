@@ -53,20 +53,13 @@ compose=(docker compose -p clinks-live -f compose.yml -f debi/vps.yml)
 for name in "$WEB_HOST" "$API_HOST" "$SYNC_HOST" "$COLLAB_HOST"; do
     getent ahostsv4 "$name" | awk '{print $1}' | grep -Fx 83.228.246.96 >/dev/null || { echo "DNS missing: $name"; exit 1; }
 done
-docker run --rm -v /etc/letsencrypt:/etc/letsencrypt -v /srv/codelinks/state/acme:/var/www/certbot certbot/certbot:v5.7.0@sha256:34ee91d2f43008eb78a007d22f23ed4b2eaa9a454cb27ca2c042b49527a695b4 certonly --non-interactive --webroot -w /var/www/certbot --keep-until-expiring --cert-name clinks-services -d api.clinks.ch -d sync.clinks.ch -d collab.clinks.ch
 export DATABASE_OWNER_URL="postgres://postgres:$(cat /srv/clinks/config/owner)@postgres:5432/clinks"
 docker run --rm --network clinks-database -e DATABASE_OWNER_URL "clinks-workspace:$RELEASE" node packages/db/src/migrate.ts
 unset DATABASE_OWNER_URL
 "${compose[@]}" up -d --no-build --wait api collab
 "${compose[@]}" up -d --no-build --no-deps caddy
-if ! docker network inspect clinks-ingress --format '{{range .Containers}}{{println .Name}}{{end}}' | grep -qx codelinks-nginx-1; then
-    docker network connect clinks-ingress codelinks-nginx-1
-fi
-python3 debi/route.py services
 curl --fail --retry 6 --retry-all-errors "https://$API_HOST/.well-known/jwks.json" -o /dev/null
 "${compose[@]}" up -d --no-build --wait --wait-timeout 180
-curl -fsS -H "Host: $WEB_HOST" http://127.0.0.1:18780/ -o /dev/null
-python3 debi/route.py web
 expected=$(docker exec clinks-live-caddy-1 sha256sum /srv/index.html | cut -d' ' -f1)
 for attempt in {1..10}; do
     actual=$(curl -fsS "https://$WEB_HOST/" | sha256sum | cut -d' ' -f1)
@@ -74,5 +67,5 @@ for attempt in {1..10}; do
     sleep 1
 done
 [[ $actual == "$expected" ]] || { echo 'Public home page differs from release'; exit 1; }
-case $(curl -sS -o /dev/null -w '%{http_code}' "https://$WEB_HOST/besmir/") in 200|302|401) ;; *) exit 1 ;; esac
+curl -fsS "https://$WEB_HOST/besmir/login" | grep -F 'Login | PlanerLink' >/dev/null
 ln -sfn "$source_dir" /srv/clinks/current
