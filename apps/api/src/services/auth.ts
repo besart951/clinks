@@ -163,7 +163,7 @@ export class AuthService {
 			to: email,
 			subject: translate(locale, 'mail.reset_password.subject'),
 			text: translate(locale, 'mail.reset_password.body', {
-				link: `${config.WEB_ORIGIN}/#/reset-password?token=${encodeURIComponent(token)}`,
+				link: `${config.WEB_ORIGIN}/#/forgot-password?token=${encodeURIComponent(token)}`,
 			}),
 		});
 		await audit(db, { action: 'auth.password_reset_requested', actorId: user.id }, caller);
