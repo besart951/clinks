@@ -74,6 +74,8 @@ that are not Baseline widely available, and name the applied guides in the PR. S
 and test-only work. Update with `pnpx modern-web-guidance@latest update`. If your tool cannot load skills, read
 `.agents/skills/modern-web-guidance/SKILL.md` directly.
 
+For UI changes, follow the [desktop and mobile review](docs/design-system/responsive-review.md) and verify the opened interaction with populated data.
+
 ## Phases
 
 Details, gates and sub-items: [docs/plan.md](docs/plan.md). Product scope: [docs/product/backlog.md](docs/product/backlog.md).
