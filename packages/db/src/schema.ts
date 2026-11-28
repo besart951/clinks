@@ -68,6 +68,7 @@ export interface RoleTable {
 }
 
 export interface MembershipTable {
+	platformAccess: Defaulted<boolean>;
 	id: string;
 	tenantId: string;
 	userId: string;
