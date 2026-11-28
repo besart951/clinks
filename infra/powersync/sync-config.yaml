@@ -241,7 +241,7 @@ streams:
     auto_subscribe: true
     queries:
       - |
-        SELECT id, tenant_id, user_id, job_title FROM memberships WHERE status = 'active' AND tenant_id IN (
+        SELECT id, tenant_id, user_id, job_title FROM memberships WHERE status = 'active' AND platform_access = false AND tenant_id IN (
           SELECT tenant_id FROM memberships WHERE user_id = auth.user_id()
             AND tenant_id = auth.parameter('tenant_id') AND status = 'active'
         )
@@ -249,5 +249,5 @@ streams:
         SELECT id, first_name, last_name, email, avatar_color FROM users WHERE id IN (
           SELECT m.user_id FROM memberships m INNER JOIN memberships caller ON caller.tenant_id = m.tenant_id
           WHERE caller.user_id = auth.user_id() AND caller.tenant_id = auth.parameter('tenant_id')
-            AND m.tenant_id = auth.parameter('tenant_id') AND caller.status = 'active' AND m.status = 'active'
+            AND m.tenant_id = auth.parameter('tenant_id') AND caller.status = 'active' AND m.status = 'active' AND m.platform_access = false
         )

@@ -129,3 +129,29 @@ it('updates the stream lookup on role, module and membership changes within the 
 		assert.equal(await read(), undefined);
 	});
 });
+it('keeps operational access out of another team while retaining access to that team', async () => {
+	const operator = randomUUID();
+	await owner
+		.insertInto('users')
+		.values({ id: operator, email: 'platform@example.test', globalRole: 'super_administrator', emailVerifiedAt: null })
+		.execute();
+	await owner
+		.insertInto('memberships')
+		.values([
+			{ id: randomUUID(), tenantId: tenantA, roleId: roleA, userId: operator },
+			{ id: randomUUID(), tenantId: tenantB, roleId: roleB, userId: operator, platformAccess: true },
+		])
+		.execute();
+	const directory = (tenantId: string, userId: string) =>
+		inScope(app, { tenantId, userId }, (tx) =>
+			tx
+				.selectFrom('memberships')
+				.select('userId')
+				.where('tenantId', '=', tenantId)
+				.execute()
+				.then((rows) => rows.map((row) => row.userId)),
+		);
+	assert.ok(!(await directory(tenantB, bob)).includes(operator));
+	assert.ok((await directory(tenantA, alice)).includes(operator));
+	assert.ok((await directory(tenantB, operator)).includes(bob));
+});
