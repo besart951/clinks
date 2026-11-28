@@ -69,6 +69,8 @@ export class AppointmentFormModel {
 	value = $state<AppointmentFields>(blankFields());
 	original = $state.raw<Appointment | null>(null);
 	busy = $state(false);
+	windowEnabled = $state(false);
+	#services: Partial<Record<AppointmentKind, AppointmentFields['service']>> = {};
 	fields = $state<{ [field: string]: string }>({});
 	#initial = $state('');
 	#workspace: Workspace;
@@ -87,7 +89,31 @@ export class AppointmentFormModel {
 			assigneeId: this.#workspace.session.user?.id ?? null,
 		};
 		this.value = appointment ? fieldsFrom(appointment) : { ...defaults, ...preset };
+		this.windowEnabled = !!(this.value.windowFrom || this.value.windowTo);
+		this.#services = {};
 		this.#initial = JSON.stringify(this.value);
+		this.fields = {};
+	}
+
+	changeKind(kind: AppointmentKind) {
+		if (kind === this.value.kind) return;
+		this.#services[this.value.kind] = this.value.service;
+		this.value.kind = kind;
+		this.value.service = this.#services[kind] ?? null;
+	}
+
+	get dropsService() {
+		return Object.entries(this.#services).some(([kind, service]) => kind !== this.value.kind && !!service);
+	}
+
+	get dropsWindow() {
+		return this.value.kind !== 'spitex' && !!(this.value.windowFrom || this.value.windowTo);
+	}
+
+	removeWindow() {
+		this.windowEnabled = false;
+		this.value.windowFrom = '';
+		this.value.windowTo = '';
 		this.fields = {};
 	}
 
@@ -111,14 +137,23 @@ export class AppointmentFormModel {
 	}
 
 	get outsideWindow(): boolean {
-		if (!this.value.windowFrom || !this.value.windowTo) return false;
+		if (this.value.kind !== 'spitex' || !this.windowEnabled || !this.value.windowFrom || !this.value.windowTo)
+			return false;
 		return !withinArrivalWindow(this.startIso, { from: this.value.windowFrom, to: this.value.windowTo });
 	}
 
 	async save(): Promise<Appointment | null> {
-		this.busy = true;
 		this.fields = {};
 		const v = $state.snapshot(this.value);
+		const withWindow = v.kind === 'spitex' && this.windowEnabled;
+		if (withWindow) {
+			if (!v.windowFrom) this.fields.windowFrom = this.#workspace.t('ui.ws.calendar.missing_earliest');
+			if (!v.windowTo) this.fields.windowTo = this.#workspace.t('ui.ws.calendar.missing_latest');
+			if (v.windowFrom && v.windowTo && v.windowTo < v.windowFrom)
+				this.fields.windowTo = this.#workspace.t('ui.ws.calendar.window_order');
+			if (Object.keys(this.fields).length) return null;
+		}
+		this.busy = true;
 		const draft = {
 			title: v.title,
 			kind: v.kind,
@@ -130,7 +165,7 @@ export class AppointmentFormModel {
 			location: v.location,
 			notes: v.notes,
 			service: v.service,
-			arrivalWindow: v.windowFrom && v.windowTo ? { from: v.windowFrom, to: v.windowTo } : null,
+			arrivalWindow: withWindow ? { from: v.windowFrom, to: v.windowTo } : null,
 		};
 		const api = this.#workspace.api;
 		try {

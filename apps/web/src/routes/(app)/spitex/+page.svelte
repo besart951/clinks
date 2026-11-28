@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { streetLine } from '@clinks/domain/address';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import Wand from '@lucide/svelte/icons/wand-sparkles';
@@ -86,8 +85,6 @@
 			assigneeId: null,
 			startTime: '08:00',
 			endTime: '08:30',
-			windowFrom: '08:00',
-			windowTo: '08:30',
 			...preset,
 		});
 	}
@@ -96,8 +93,6 @@
 	function planFirstVisit(client: Contact) {
 		createVisit({
 			contactId: client.id,
-			title: contactName(client),
-			location: [streetLine(client.address), client.address.city].filter(Boolean).join(', '),
 		});
 	}
 
@@ -195,7 +190,7 @@
 				<Button
 					variant={model.release || !canRelease ? 'default' : 'outline'}
 					class="hidden md:inline-flex"
-					onclick={createVisit}
+					onclick={() => createVisit()}
 					aria-keyshortcuts="N"
 				>
 					<Plus class="size-4" />{workspace.t('ui.ws.spitex.new_visit')}

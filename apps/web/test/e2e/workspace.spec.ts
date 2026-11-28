@@ -985,7 +985,8 @@ test('adds a client from the open visits and plans their first visit', async ({ 
 	await page.getByLabel('Nachname').fill('Planbar');
 	await page.getByRole('button', { name: 'Speichern' }).click();
 	const visit = page.getByRole('dialog', { name: 'Neuer Termin' });
-	await expect(visit.getByLabel('Titel')).toHaveValue('Rosa Planbar');
+	await expect(visit.locator('#a-contact')).toHaveText('Rosa Planbar');
+	await expect(visit.getByLabel('Tätigkeit', { exact: true })).toHaveValue('');
 });
 
 test('edits a client from their open visit, without planning a new visit', async ({ page }) => {
@@ -1607,4 +1608,42 @@ test('plans a recurring client activity and checks the phone form', async ({ pag
 	const cards = page.getByRole('list').filter({ has: page.getByTitle(/zuzuweisen/) });
 	await expect(cards.getByText(clientName, { exact: true }).first()).toBeVisible();
 	await expect(cards).not.toContainText('Einkauf begleiten');
+});
+test('guides optional visit details and keeps the mobile save action visible', async ({ page }) => {
+	await signIn(page);
+	await page.getByRole('button', { name: 'Arbeitsbereich' }).click();
+	await page.getByRole('menuitem', { name: 'Stille Spitex Seeland' }).click();
+	await page.goto('/#/spitex');
+	await page.getByRole('button', { name: 'Neuer Einsatz', exact: true }).click();
+	const dialog = page.getByRole('dialog', { name: 'Neuer Termin' });
+	await expect(dialog.locator('#a-contact')).toHaveText('Klient zuordnen');
+	await expect(dialog.locator('#a-window-from')).toHaveCount(0);
+	await expect(dialog.locator('#a-notes')).toHaveCount(0);
+	await dialog.locator('#a-title').fill('Begleitung');
+	await dialog.getByRole('button', { name: 'Notiz ergänzen' }).click();
+	await dialog.locator('#a-notes').fill('Treffpunkt am Empfang');
+	await dialog.getByRole('button', { name: 'Ankunftsfenster ergänzen' }).click();
+	await dialog.locator('#a-window-from').fill('07:30');
+	const save = dialog.getByRole('button', { name: 'Speichern' });
+	await save.click();
+	await expect(dialog.locator('#a-window-to')).toBeFocused();
+	await expect(dialog.getByText('Späteste Ankunft eingeben.')).toBeVisible();
+	await dialog.locator('#a-window-to').fill('08:30');
+	await dialog.locator('#a-kind').click();
+	await page.getByRole('option', { name: 'Besprechung' }).click();
+	await expect(dialog.locator('#a-window-from')).toHaveCount(0);
+	await save.click();
+	const confirmation = page.getByRole('dialog', { name: 'Terminart ändern?' });
+	await expect(confirmation).toContainText('Ankunftsfenster');
+	await confirmation.getByRole('button', { name: 'Abbrechen' }).click();
+	await dialog.locator('#a-kind').click();
+	await page.getByRole('option', { name: 'Einsatz', exact: true }).click();
+	await expect(dialog.locator('#a-window-from')).toHaveValue('07:30');
+	await expect(dialog.locator('#a-notes')).toHaveValue('Treffpunkt am Empfang');
+	for (const width of [390, 320]) {
+		await page.setViewportSize({ width, height: 844 });
+		await expect(save).toBeInViewport({ ratio: 1 });
+	}
+	await save.click();
+	await expect(dialog).toBeHidden();
 });

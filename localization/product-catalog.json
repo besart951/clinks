@@ -1670,6 +1670,94 @@
         "de-CH": "Konflikte mit anderen Terminen werden sofort angezeigt.",
         "en-US": "Conflicts with other appointments are shown right away."
       },
+      "ui.ws.calendar.client": {
+        "de-CH": "Klient",
+        "en-US": "Client"
+      },
+      "ui.ws.calendar.link_client": {
+        "de-CH": "Klient zuordnen",
+        "en-US": "Link client"
+      },
+      "ui.ws.calendar.client_activity": {
+        "de-CH": "Klient und Tätigkeit",
+        "en-US": "Client and activity"
+      },
+      "ui.ws.calendar.appointment_details": {
+        "de-CH": "Terminangaben",
+        "en-US": "Appointment details"
+      },
+      "ui.ws.calendar.time_place": {
+        "de-CH": "Zeit und Einsatzort",
+        "en-US": "Time and location"
+      },
+      "ui.ws.calendar.assignment": {
+        "de-CH": "Zuweisung",
+        "en-US": "Assignment"
+      },
+      "ui.ws.calendar.add_service": {
+        "de-CH": "Leistung ergänzen",
+        "en-US": "Add service"
+      },
+      "ui.ws.calendar.no_service": {
+        "de-CH": "Keine Leistung",
+        "en-US": "No service"
+      },
+      "ui.ws.calendar.add_note": {
+        "de-CH": "Notiz ergänzen",
+        "en-US": "Add note"
+      },
+      "ui.ws.calendar.add_location": {
+        "de-CH": "Ort ergänzen",
+        "en-US": "Add location"
+      },
+      "ui.ws.calendar.edit_location": {
+        "de-CH": "Ort ändern",
+        "en-US": "Change location"
+      },
+      "ui.ws.calendar.use_address": {
+        "de-CH": "Adresse übernehmen · {address}",
+        "en-US": "Use address · {address}"
+      },
+      "ui.ws.calendar.arrival_window": {
+        "de-CH": "Ankunftsfenster",
+        "en-US": "Arrival window"
+      },
+      "ui.ws.calendar.add_window": {
+        "de-CH": "Ankunftsfenster ergänzen",
+        "en-US": "Add arrival window"
+      },
+      "ui.ws.calendar.remove_window": {
+        "de-CH": "Ankunftsfenster entfernen",
+        "en-US": "Remove arrival window"
+      },
+      "ui.ws.calendar.missing_earliest": {
+        "de-CH": "Früheste Ankunft eingeben.",
+        "en-US": "Enter the earliest arrival."
+      },
+      "ui.ws.calendar.missing_latest": {
+        "de-CH": "Späteste Ankunft eingeben.",
+        "en-US": "Enter the latest arrival."
+      },
+      "ui.ws.calendar.window_order": {
+        "de-CH": "Die späteste Ankunft muss nach oder zur frühesten Ankunft liegen.",
+        "en-US": "Latest arrival must be at or after earliest arrival."
+      },
+      "ui.ws.calendar.change_kind": {
+        "de-CH": "Terminart ändern?",
+        "en-US": "Change appointment type?"
+      },
+      "ui.ws.calendar.removed_on_save": {
+        "de-CH": "Beim Speichern entfallen folgende Angaben: {removed}.",
+        "en-US": "Saving removes the following details: {removed}."
+      },
+      "ui.ws.calendar.open_assign": {
+        "de-CH": "Offen · Pflegeperson zuweisen",
+        "en-US": "Open · assign care worker"
+      },
+      "ui.ws.calendar.save_before_bill": {
+        "de-CH": "Änderungen vor der Abrechnung speichern.",
+        "en-US": "Save changes before billing."
+      },
       "ui.ws.calendar.title": {
         "de-CH": "Titel",
         "en-US": "Title"

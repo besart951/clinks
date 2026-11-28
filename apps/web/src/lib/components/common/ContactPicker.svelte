@@ -15,6 +15,7 @@
 		contacts,
 		invalid = false,
 		allowEmpty = true,
+		placeholder,
 		onchange,
 	}: {
 		id?: string;
@@ -22,6 +23,7 @@
 		contacts: Contact[];
 		invalid?: boolean;
 		allowEmpty?: boolean;
+		placeholder?: string;
 		onchange?: (contact: Contact | null) => void;
 	} = $props();
 
@@ -54,7 +56,7 @@
 				aria-expanded={open}
 			>
 				<span class="truncate" class:text-muted-foreground={!selected}>
-					{selected ? contactName(selected) : workspace.t('ui.ws.contact_picker.placeholder')}
+					{selected ? contactName(selected) : (placeholder ?? workspace.t('ui.ws.contact_picker.placeholder'))}
 				</span>
 				<ChevronsUpDown class="text-muted-foreground size-4" />
 			</Button>
