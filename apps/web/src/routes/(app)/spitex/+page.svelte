@@ -102,7 +102,7 @@
 	}
 
 	const handlers: GridHandlers = {
-		label: (visit) => visitLabel(visit, visit.contactId ? model.resource.data?.contacts.get(visit.contactId) : null),
+		label: (visit) => (visit.assigneeId === null ? openVisitName(visit) : visitLabel(visit, clientOf(visit))),
 		open: (appointment) => sheet.show(appointment),
 		create: () => canWrite && createVisit(),
 		drop: (appointment, _date, minutes, assigneeId) =>
@@ -166,6 +166,11 @@
 
 	function clientOf(visit: Appointment) {
 		return visit.contactId ? (model.resource.data?.contacts.get(visit.contactId) ?? null) : null;
+	}
+
+	function openVisitName(visit: Appointment) {
+		const client = clientOf(visit);
+		return (client && contactName(client)) || workspace.t('ui.ws.spitex.no_linked_client');
 	}
 
 	function windowLabel(visit: Appointment) {
@@ -299,6 +304,7 @@
 							<Card.Content>
 								<ul class="space-y-2">
 									{#each model.open as visit (visit.id)}
+										{@const name = openVisitName(visit)}
 										<li
 											class="group/visit bg-background relative rounded-lg border border-dashed p-2 text-sm {canWrite
 												? 'ps-7'
@@ -311,7 +317,7 @@
 												<span
 													draggable="true"
 													aria-hidden="true"
-													title={workspace.t('ui.ws.spitex.drag_visit', { title: visit.title })}
+													title={workspace.t('ui.ws.spitex.drag_visit', { title: name })}
 													class="text-muted-foreground hover:bg-muted hover:text-foreground absolute inset-y-1 start-1 flex w-5 cursor-grab items-center justify-center rounded select-none active:cursor-grabbing"
 													ondragstart={(event) => startDrag(event, visit)}
 													ondragend={() => (dragging = null)}
@@ -332,7 +338,7 @@
 													<Pencil class="size-3.5" />
 												</Button>
 											{/if}
-											<p class="pe-6 font-medium">{handlers.label?.(visit) ?? visit.title}</p>
+											<p class="pe-6 font-medium">{name}</p>
 											<p class="text-muted-foreground text-xs">
 												{workspace.t('ui.ws.spitex.window', { window: windowLabel(visit) })} · {visit.service
 													? workspace.t(`ui.ws.spitex.service.${visit.service}`)
@@ -347,7 +353,7 @@
 													</DropdownMenu.Trigger>
 													<DropdownMenu.Content align="start" class="w-72">
 														<DropdownMenu.Label class="text-muted-foreground text-xs font-normal">
-															{workspace.t('ui.ws.spitex.assign_to', { title: visit.title })}
+															{workspace.t('ui.ws.spitex.assign_to', { title: name })}
 														</DropdownMenu.Label>
 														{#each candidates(visit) as { person, slot } (person.id)}
 															<DropdownMenu.Item class="gap-2.5 py-1.5" onclick={() => assignTo(visit, person.id)}>
