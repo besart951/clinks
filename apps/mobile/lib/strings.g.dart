@@ -6,6 +6,8 @@ const labels = <String, List<String>>{
   'ui.sign_out': ["Abmelden", "Sign out"],
   'ui.tenants': ["Mandanten", "Tenants"],
   'ui.ws.auth.code': ["Code", "Code"],
+  'ui.ws.auth.show_password': ["Passwort anzeigen", "Show password"],
+  'ui.ws.auth.hide_password': ["Passwort verbergen", "Hide password"],
   'ui.ws.module.contacts': ["Kontakte", "Contacts"],
   'ui.ws.contacts.empty_title': ["Keine Kontakte gefunden", "No contacts found"],
   'error.internal': ["Ein interner Fehler ist aufgetreten. Bitte versuche es erneut.", "An internal error occurred. Please try again."],

@@ -4,6 +4,24 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
 void main() {
+  testWidgets('password visibility toggles without losing input', (tester) async {
+    await tester.pumpWidget(const MaterialApp(home: WorkspacePage()));
+    final field = find.byWidgetPredicate(
+      (widget) => widget is TextField &&
+          (widget.autofillHints?.contains(AutofillHints.password) ?? false),
+    );
+    expect(tester.widget<TextField>(field).obscureText, isTrue);
+    await tester.enterText(field, 'example');
+    await tester.tap(find.byIcon(Icons.visibility));
+    await tester.pump();
+    expect(tester.widget<TextField>(field).obscureText, isFalse);
+    expect(tester.widget<TextField>(field).controller!.text, 'example');
+    await tester.tap(find.byIcon(Icons.visibility_off));
+    await tester.pump();
+    expect(tester.widget<TextField>(field).obscureText, isTrue);
+    expect(tester.widget<TextField>(field).controller!.text, 'example');
+  });
+
   testWidgets('sign-in is disabled without configured origins', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: WorkspacePage()));
     await tester.pump();
