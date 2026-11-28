@@ -1491,3 +1491,37 @@ test('scans two pages into one PDF, takes files shared into CLinks and keeps a f
 		.click();
 	await expect(page.getByRole('list', { name: 'Dateien' }).getByLabel('Offline verfügbar').first()).toBeVisible();
 });
+
+test('shows every open dashboard visit when eight appointments share a planning link', async ({ page }) => {
+	await signIn(page);
+	await page.getByRole('button', { name: 'Arbeitsbereich' }).click();
+	await page.getByRole('menuitem', { name: 'Stille Spitex Seeland' }).click();
+	await page.evaluate(() => {
+		const key = 'clinks.workspace.database.v1';
+		const snapshot = JSON.parse(localStorage.getItem(key)!);
+		const sample = snapshot.appointments.find((a: { kind: string }) => a.kind === 'spitex');
+		const tomorrow = new Date();
+		tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+		tomorrow.setUTCHours(10, 0, 0, 0);
+		snapshot.invoices = [];
+		snapshot.tasks = [];
+		snapshot.appointments = Array.from({ length: 8 }, (_, index) => ({
+			...sample,
+			id: crypto.randomUUID(),
+			title: 'Testbesuch ' + (index + 1),
+			start: tomorrow.toISOString(),
+			end: new Date(+tomorrow + 3600000).toISOString(),
+			contactId: null,
+			assigneeId: null,
+			kind: 'spitex',
+			status: 'planned',
+		}));
+		localStorage.setItem(key, JSON.stringify(snapshot));
+	});
+	await page.reload();
+	const visits = page.getByRole('link', { name: /Testbesuch/ });
+	await expect(visits).toHaveCount(6);
+	await page.getByText('2 weitere', { exact: true }).click();
+	await expect(visits).toHaveCount(8);
+	expect(new Set(await visits.evaluateAll((links) => links.map((link) => link.getAttribute('href')))).size).toBe(1);
+});
