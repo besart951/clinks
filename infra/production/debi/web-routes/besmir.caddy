@@ -1,0 +1,25 @@
+@gateClosed not file {
+	root /run/recovery
+	try_files /access-open
+}
+respond @gateClosed 503
+header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+request_body {
+	max_size 10MiB
+}
+
+@retired path /api/kurs/media/* /codelinks.admin.v1.AdminService/IssuePlatformRealtimeAdmission /codelinks.loka.v1.DirectoryAdminService/CreateImport /connect/codelinks.loka.v1.DirectoryAdminService/CreateImport
+respond @retired 410
+@private path_regexp ^/(healthz/private|readyz|metrics|internal)(/|$)
+respond @private 404
+redir /besmir /besmir/ 308
+reverse_proxy /besmir/* besmir-app:3000
+
+handle_path /planer/downloads/* {
+	@otherMethods not method GET HEAD
+	respond @otherMethods 403
+	header Content-Disposition attachment
+	header Cache-Control "public, max-age=31536000, immutable"
+	root * /srv/planer-downloads
+	file_server
+}

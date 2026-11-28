@@ -36,6 +36,8 @@ The app `tsconfig` must extend `$app/tsconfig`. The same rules apply to `package
 - Every visible text is a catalog key (`ui.ws.*`, `error.ws.*`). Dates and CHF in de-CH format.
 - Run the `modern-web-guidance` skill before writing HTML/CSS/client JS (see root `AGENTS.md`).
 
+For UI changes, follow the [desktop and mobile review](../../docs/design-system/responsive-review.md) and verify the opened interaction with populated data.
+
 ## Tests
 
 - Tests live in `test/`, never next to code in `src/`. Unit: Vitest (`pnpm --filter @clinks/web test`).

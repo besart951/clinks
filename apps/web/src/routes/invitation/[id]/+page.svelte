@@ -1,4 +1,5 @@
 <script lang="ts">
+	import PasswordInput from '#lib/components/auth/PasswordInput.svelte';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import { toast } from 'svelte-sonner';
@@ -88,14 +89,7 @@
 					</FormField>
 				</div>
 				<FormField id="iv-password" label={workspace.t('ui.password')}>
-					<Input
-						id="iv-password"
-						type="password"
-						autocomplete="new-password"
-						minlength={10}
-						required
-						bind:value={password}
-					/>
+					<PasswordInput id="iv-password" autocomplete="new-password" minlength={10} required bind:value={password} />
 				</FormField>
 			{/if}
 			{#if workspace.session.status === 'authenticated' && workspace.session.user?.email !== details.email}<p

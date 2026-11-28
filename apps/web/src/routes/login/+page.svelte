@@ -1,4 +1,5 @@
 <script lang="ts">
+	import PasswordInput from '#lib/components/auth/PasswordInput.svelte';
 	import { Button } from '@clinks/ui/components/ui/button';
 	import { Input } from '@clinks/ui/components/ui/input';
 	import * as Alert from '@clinks/ui/components/ui/alert';
@@ -34,7 +35,7 @@
 			<Input id="email" type="email" autocomplete="email" bind:value={form.email} required />
 		</FormField>
 		<FormField id="password" label={workspace.t('ui.password')}>
-			<Input id="password" type="password" autocomplete="current-password" bind:value={form.password} required />
+			<PasswordInput id="password" autocomplete="current-password" bind:value={form.password} required />
 		</FormField>
 		<div class="flex justify-end text-sm">
 			<a

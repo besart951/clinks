@@ -561,6 +561,35 @@ test('writes to a contact’s address in CLinks or the mail program, and remembe
 	await page.getByRole('button', { name: 'E-Mail an mona.mail@example.ch schreiben' }).click();
 	const ask = page.getByRole('dialog', { name: 'E-Mail schreiben' });
 	await expect(ask.getByRole('button', { name: /Mit dem Mail-Programm des Geräts/ })).toBeVisible();
+	for (const viewport of [
+		{ width: 1440, height: 900 },
+		{ width: 390, height: 844 },
+		{ width: 320, height: 568 },
+	]) {
+		await page.setViewportSize(viewport);
+		await expect
+			.poll(() =>
+				ask.evaluate((dialog) => {
+					const bounds = dialog.getBoundingClientRect();
+					const options = [...dialog.querySelectorAll('button')].filter(
+						(b) => b.textContent?.includes('schreiben') || b.textContent?.includes('Mail-Programm'),
+					);
+					return (
+						options.length === 2 &&
+						options.every((button) => {
+							const rect = button.getBoundingClientRect();
+							return (
+								rect.left >= bounds.left && rect.right <= bounds.right && button.scrollWidth <= button.clientWidth + 1
+							);
+						}) &&
+						dialog.scrollWidth <= dialog.clientWidth + 1
+					);
+				}),
+			)
+			.toBe(true);
+		await page.screenshot({ path: test.info().outputPath('mail-' + viewport.width + '.png') });
+	}
+	await page.setViewportSize({ width: 1400, height: 900 });
 	await ask.getByRole('checkbox').check();
 	await ask.getByRole('button', { name: /In CLinks schreiben/ }).click();
 	const compose = page.getByRole('dialog', { name: 'Neue Mail' });
@@ -1274,12 +1303,10 @@ test('works the mail and the files with the keyboard and lists the keys under «
 	await page.keyboard.press('ArrowDown');
 	await expect(rows.first().getByRole('button').first()).toBeFocused();
 	await expect(page.getByRole('article').getByRole('heading', { level: 2 })).toBeVisible();
+	const star = page.getByRole('article').getByRole('button', { name: /^(Markieren|Markierung entfernen)$/ });
+	const wasStarred = (await star.getAttribute('aria-pressed')) === 'true';
 	await page.keyboard.press('s');
-	// The reading pane's star shows the change (the row's buttons only show on hover).
-	await expect(page.getByRole('button', { name: 'Markierung entfernen' }).first()).toHaveAttribute(
-		'aria-pressed',
-		'true',
-	);
+	await expect(star).toHaveAttribute('aria-pressed', String(!wasStarred));
 	await page.keyboard.press('e');
 	await expect(page.getByText('Verschoben nach Archiv')).toBeVisible();
 	await expect(rows).toHaveCount(count - 1);
@@ -1490,4 +1517,60 @@ test('scans two pages into one PDF, takes files shared into CLinks and keeps a f
 		.getByRole('button', { name: /^Verträge/ })
 		.click();
 	await expect(page.getByRole('list', { name: 'Dateien' }).getByLabel('Offline verfügbar').first()).toBeVisible();
+});
+
+test('keeps the shortcuts dialog reachable on a landscape phone', async ({ page }) => {
+	await signIn(page);
+	await page.goto('/#/mail');
+	await page.getByRole('button', { name: 'Kontomenü' }).click();
+	await page.getByRole('menuitem', { name: /Tastenkürzel/ }).click();
+	const overview = page.getByRole('dialog', { name: 'Tastenkürzel' });
+	await page.setViewportSize({ width: 844, height: 390 });
+	await expect
+		.poll(() =>
+			overview.evaluate((dialog) => {
+				const rect = dialog.getBoundingClientRect();
+				return rect.top >= 0 && rect.bottom <= innerHeight && dialog.scrollHeight > dialog.clientHeight;
+			}),
+		)
+		.toBe(true);
+	await overview.locator('kbd').last().scrollIntoViewIfNeeded();
+	await expect(overview.locator('kbd').last()).toBeInViewport();
+	await page.screenshot({ path: test.info().outputPath('shortcuts-landscape.png') });
+	await page.keyboard.press('Escape');
+	await expect(overview).toHaveCount(0);
+});
+
+test('shows every open dashboard visit when eight appointments share a planning link', async ({ page }) => {
+	await signIn(page);
+	await page.getByRole('button', { name: 'Arbeitsbereich' }).click();
+	await page.getByRole('menuitem', { name: 'Stille Spitex Seeland' }).click();
+	await page.evaluate(() => {
+		const key = 'clinks.workspace.database.v1';
+		const snapshot = JSON.parse(localStorage.getItem(key)!);
+		const sample = snapshot.appointments.find((a: { kind: string }) => a.kind === 'spitex');
+		const tomorrow = new Date();
+		tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+		tomorrow.setUTCHours(10, 0, 0, 0);
+		snapshot.invoices = [];
+		snapshot.tasks = [];
+		snapshot.appointments = Array.from({ length: 8 }, (_, index) => ({
+			...sample,
+			id: crypto.randomUUID(),
+			title: 'Testbesuch ' + (index + 1),
+			start: tomorrow.toISOString(),
+			end: new Date(+tomorrow + 3600000).toISOString(),
+			contactId: null,
+			assigneeId: null,
+			kind: 'spitex',
+			status: 'planned',
+		}));
+		localStorage.setItem(key, JSON.stringify(snapshot));
+	});
+	await page.reload();
+	const visits = page.getByRole('link', { name: /Testbesuch/ });
+	await expect(visits).toHaveCount(6);
+	await page.getByText('2 weitere', { exact: true }).click();
+	await expect(visits).toHaveCount(8);
+	expect(new Set(await visits.evaluateAll((links) => links.map((link) => link.getAttribute('href')))).size).toBe(1);
 });

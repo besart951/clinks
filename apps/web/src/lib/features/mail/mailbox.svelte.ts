@@ -23,6 +23,7 @@ export class MailboxModel {
 	selectedId = $state<MailId | null>(null);
 	search = $state('');
 	#workspace: Workspace;
+	#readWrites = new Map<MailId, { from: number; revision: Promise<number> }>();
 
 	constructor(workspace: Workspace) {
 		this.#workspace = workspace;
@@ -112,8 +113,20 @@ export class MailboxModel {
 			...data,
 			mails: data.mails.map((row) => (ids.has(row.id) ? { ...row, read: true } : row)),
 		}));
-		for (const row of unread)
-			await this.#workspace.api.mails.update(row.id, row.revision, { read: true }).catch(() => undefined);
+		const writes = unread.map((row) => {
+			const revision = this.#workspace.api.mails.update(row.id, row.revision, { read: true }).then(
+				(saved) => saved.revision,
+				() => row.revision,
+			);
+			const write = { from: row.revision, revision };
+			this.#readWrites.set(row.id, write);
+			return { id: row.id, write };
+		});
+		await Promise.all(writes.map(({ write }) => write.revision));
+		await this.resource.reload(true);
+		for (const { id, write } of writes) {
+			if (this.#readWrites.get(id) === write) this.#readWrites.delete(id);
+		}
 	}
 
 	async setStar(mails: MailMessage[], starred: boolean) {
@@ -187,7 +200,12 @@ export class MailboxModel {
 		if (changed.length === 0) return;
 		await this.#workspace.run(
 			async () => {
-				for (const mail of changed) await api.update(mail.id, mail.revision, patch);
+				for (const mail of changed) {
+					// Opening an unread message can still be saving when its next action arrives.
+					const read = this.#readWrites.get(mail.id);
+					const revision = read?.from === mail.revision ? await read.revision : mail.revision;
+					await api.update(mail.id, revision, patch);
+				}
 			},
 			{
 				success: toast.success,

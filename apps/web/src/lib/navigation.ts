@@ -1,3 +1,4 @@
+import { routeHash as href } from '@clinks/contracts/public-links';
 import { goto } from '$app/navigation';
 
 /** The part of a URL the hash router reads; `page.url` from `$app/state` satisfies it. */
@@ -5,10 +6,7 @@ export interface RouteUrl {
 	readonly hash: string;
 }
 
-/** Hash-router link for a path such as `/contacts/123`. */
-export function href(path: string): string {
-	return `#${path.startsWith('/') ? path : `/${path}`}`;
-}
+export { routeHash as href } from '@clinks/contracts/public-links';
 
 export function navigate(path: string, options: { replace?: boolean } = {}) {
 	return goto(href(path), options);

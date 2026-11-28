@@ -16,19 +16,28 @@
 	<Dialog.Content closeLabel={workspace.t('ui.ws.close')} class="sm:max-w-md">
 		<Dialog.Header>
 			<Dialog.Title>{workspace.t('ui.ws.write_mail.title')}</Dialog.Title>
-			<Dialog.Description>{workspace.t('ui.ws.write_mail.text', { email: model.asking ?? '' })}</Dialog.Description>
+			<Dialog.Description class="[overflow-wrap:anywhere]">
+				{workspace.t('ui.ws.write_mail.text', { email: model.asking ?? '' })}
+			</Dialog.Description>
 		</Dialog.Header>
-		<div class="grid gap-2">
-			<Button class="h-auto justify-start py-3 text-left" onclick={() => model.choose('clinks')}>
+		<div class="grid grid-cols-1 gap-2">
+			<Button
+				class="h-auto w-full min-w-0 justify-start py-3 text-left whitespace-normal"
+				onclick={() => model.choose('clinks')}
+			>
 				<Mail class="size-5 shrink-0" />
-				<span>
+				<span class="min-w-0 [overflow-wrap:anywhere]">
 					{workspace.t('ui.ws.write_mail.clinks')}
 					<span class="block text-xs font-normal opacity-80">{workspace.t('ui.ws.write_mail.clinks_hint')}</span>
 				</span>
 			</Button>
-			<Button variant="outline" class="h-auto justify-start py-3 text-left" onclick={() => model.choose('system')}>
+			<Button
+				variant="outline"
+				class="h-auto w-full min-w-0 justify-start py-3 text-left whitespace-normal"
+				onclick={() => model.choose('system')}
+			>
 				<AppWindow class="size-5 shrink-0" />
-				<span>
+				<span class="min-w-0 [overflow-wrap:anywhere]">
 					{workspace.t('ui.ws.write_mail.system')}
 					<span class="text-muted-foreground block text-xs font-normal">
 						{workspace.t('ui.ws.write_mail.system_hint')}

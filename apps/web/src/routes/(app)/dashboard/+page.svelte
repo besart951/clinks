@@ -171,7 +171,7 @@
 			{/if}
 			{#if session.hasModule('finance') && session.can('finance.read')}
 				<KpiCard
-					path="/finance/invoices"
+					path="/finance"
 					kpi={{
 						icon: Wallet,
 						label: workspace.t('ui.ws.dashboard.open_invoices'),
@@ -285,11 +285,11 @@
 					<p class="text-muted-foreground px-1 text-[13px]">{workspace.t('ui.ws.dashboard.no_hints')}</p>
 				{/if}
 				<div class="grid">
-					{#each data.hints.slice(0, 6) as hint (hint.path + hint.key)}{@render hintRow(hint)}{/each}
+					{#each data.hints.slice(0, 6) as hint (hint.id)}{@render hintRow(hint)}{/each}
 				</div>
 				{#if data.hints.length > 6}
 					<PastToggle label={workspace.t('ui.ws.dashboard.more_hints', { count: data.hints.length - 6 })}>
-						{#each data.hints.slice(6) as hint (hint.path + hint.key)}{@render hintRow(hint)}{/each}
+						{#each data.hints.slice(6) as hint (hint.id)}{@render hintRow(hint)}{/each}
 					</PastToggle>
 				{/if}
 			</SideCard>

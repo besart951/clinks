@@ -25,8 +25,7 @@ export interface Services {
 	/** DNS TXT lookup for sender domains; tests pass a fixed table. */
 	resolveTxt?: (host: string) => Promise<string[][]>;
 	limiter: RateLimiter;
-	config: Pick<Config, 'WEB_ORIGIN'> &
-		Partial<Pick<Config, 'API_ORIGIN'>> &
+	config: Pick<Config, 'WEB_ORIGIN' | 'API_ORIGIN'> &
 		Partial<
 			Pick<
 				Config,

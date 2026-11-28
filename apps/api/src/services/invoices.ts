@@ -1,3 +1,4 @@
+import { publicRoutes, webLink } from '@clinks/contracts/public-links';
 import type { Tx } from '@clinks/db/scope';
 import type { InvoiceSendInput } from '@clinks/contracts/finance';
 import { nextReminder, type InvoiceSettings } from '@clinks/domain/invoicing';
@@ -182,7 +183,7 @@ export class InvoiceService {
 	/** A secure link to the send's file; only its hash is stored. */
 	async #linkUrl(tx: Tx, tenantId: string, invoiceSendId: string, now: Date) {
 		const { token } = await issueLink(tx, { purpose: 'invoice_link', tenantId, invoiceSendId, now });
-		return `${this.#services.config.WEB_ORIGIN}/#/invoice-link/${encodeURIComponent(token)}`;
+		return webLink(this.#services.config.WEB_ORIGIN, publicRoutes.invoice(token));
 	}
 
 	async #sends(tx: Tx, invoiceId: string): Promise<InvoiceSend[]> {

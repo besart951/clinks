@@ -1,3 +1,4 @@
+import { publicRoutes, webLink } from '@clinks/contracts/public-links';
 import type {
 	ConfirmedView,
 	NewsletterFormInput,
@@ -121,7 +122,7 @@ export class NewsletterSignUp {
 			const params = {
 				tenant: tenant.name,
 				name: input.firstName,
-				link: `${this.#services.config.WEB_ORIGIN}/#/newsletter/confirm/${encodeURIComponent(link.token)}`,
+				link: webLink(this.#services.config.WEB_ORIGIN, publicRoutes.confirmNewsletter(link.token)),
 			};
 			await enqueueMail(tx, tenantId, {
 				kind: 'optin',

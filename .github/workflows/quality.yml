@@ -166,10 +166,11 @@ jobs:
         if: steps.config.outputs.ready == 'true'
         shell: bash
         run: |
+          . infra/production/debi/hosts.sh
           docker build -f infra/production/Dockerfile --target workspace -t "clinks-workspace:$GITHUB_SHA" .
           docker build -f infra/production/Dockerfile --target edge -t "clinks-edge:$GITHUB_SHA" \
-            --build-arg API_ORIGIN=https://api.clinks.ch --build-arg SYNC_ORIGIN=https://sync.clinks.ch \
-            --build-arg COLLAB_ORIGIN=wss://collab.clinks.ch .
+            --build-arg API_ORIGIN=https://"$API_HOST" --build-arg SYNC_ORIGIN=https://"$SYNC_HOST" \
+            --build-arg COLLAB_ORIGIN=wss://"$COLLAB_HOST" .
       - name: Release images over SSH
         if: steps.config.outputs.ready == 'true'
         shell: bash

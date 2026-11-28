@@ -1,3 +1,4 @@
+import { publicRoutes, webLink } from '@clinks/contracts/public-links';
 import type { SignInResponse } from '@clinks/contracts/auth';
 import { encodeBase32UpperCaseNoPadding } from '@oslojs/encoding';
 import { createTOTPKeyURI, verifyHOTP } from '@oslojs/otp';
@@ -163,7 +164,7 @@ export class AuthService {
 			to: email,
 			subject: translate(locale, 'mail.reset_password.subject'),
 			text: translate(locale, 'mail.reset_password.body', {
-				link: `${config.WEB_ORIGIN}/#/reset-password?token=${encodeURIComponent(token)}`,
+				link: webLink(config.WEB_ORIGIN, publicRoutes.passwordReset(token)),
 			}),
 		});
 		await audit(db, { action: 'auth.password_reset_requested', actorId: user.id }, caller);

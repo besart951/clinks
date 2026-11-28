@@ -1,3 +1,4 @@
+import { publicRoutes, webLink } from '@clinks/contracts/public-links';
 import { self } from '$app/service-worker';
 import { immutable, assets } from '$app/manifest';
 import { version } from '$app/env';
@@ -46,7 +47,7 @@ async function receiveShare(request: Request) {
 			}),
 		);
 	}
-	return Response.redirect(new URL('./#/documents?shared=1', self.registration.scope).href, 303);
+	return Response.redirect(webLink(self.registration.scope, publicRoutes.sharedDocuments()), 303);
 }
 
 self.addEventListener('fetch', (event) => {
