@@ -6,6 +6,7 @@
 	import ReceiptText from '@lucide/svelte/icons/receipt-text';
 	import UserRound from '@lucide/svelte/icons/user-round';
 	import XIcon from '@lucide/svelte/icons/x';
+	import { tick } from 'svelte';
 	import { MediaQuery } from 'svelte/reactivity';
 	import * as Sheet from '@clinks/ui/components/ui/sheet';
 	import { Button } from '@clinks/ui/components/ui/button';
@@ -53,6 +54,9 @@
 	const session = workspace.session;
 	const form = new AppointmentFormModel(workspace);
 	let open = $state(false);
+	let showService = $state(false);
+	let showNotes = $state(false);
+	let editLocation = $state(false);
 	const wide = new MediaQuery('min-width: 64rem');
 	const inline = $derived(docked && wide.current);
 	let panel = $state<HTMLDialogElement>();
@@ -83,10 +87,16 @@
 	const canWrite = $derived(session.can('calendar.write'));
 	const conflicts = $derived(open ? form.conflicts(appointments) : []);
 	const contact = $derived(contacts.find((candidate) => candidate.id === form.value.contactId) ?? null);
+	const suggestedAddress = $derived(
+		contact ? [streetLine(contact.address), contact.address.city].filter(Boolean).join(', ') : '',
+	);
 
 	export function show(appointment: Appointment | null, preset: Partial<AppointmentFields> = {}) {
 		const load = () => {
 			form.start(appointment, preset);
+			showService = !!form.value.service;
+			showNotes = !!form.value.notes;
+			editLocation = false;
 			// The opened appointment is the marked one; it stays marked after the panel closes.
 			selectedId = appointment?.id ?? null;
 			open = true;
@@ -117,10 +127,30 @@
 
 	async function submit(event: SubmitEvent) {
 		event.preventDefault();
+		if (form.dropsService || form.dropsWindow) {
+			const removed = [
+				form.dropsService && workspace.t('ui.ws.calendar.service'),
+				form.dropsWindow && workspace.t('ui.ws.calendar.arrival_window'),
+			]
+				.filter(Boolean)
+				.join(', ');
+			confirm = {
+				title: workspace.t('ui.ws.calendar.change_kind'),
+				description: workspace.t('ui.ws.calendar.removed_on_save', { removed }),
+				confirmLabel: workspace.t('ui.save'),
+				onConfirm: save,
+			};
+		} else await save();
+	}
+
+	async function save() {
 		const saved = await form.save();
 		if (saved) {
 			open = false;
 			onSaved?.(saved);
+		} else {
+			await tick();
+			document.querySelector<HTMLElement>('#appointment-form [aria-invalid="true"]')?.focus();
 		}
 	}
 
@@ -134,12 +164,6 @@
 				if (await form.remove()) open = false;
 			},
 		};
-	}
-
-	function pickContact(picked: Contact | null) {
-		if (picked && !form.value.title) form.value.title = contactName(picked);
-		if (picked && form.value.kind === 'spitex' && !form.value.location)
-			form.value.location = `${streetLine(picked.address)}, ${picked.address.city}`;
 	}
 
 	const serviceOptions = $derived(
@@ -162,28 +186,11 @@
 {#snippet fields()}
 	<form id="appointment-form" class="space-y-4 px-4" onsubmit={submit} novalidate>
 		<fieldset disabled={!canWrite} class="space-y-4">
-			<FormField
-				id="a-title"
-				label={workspace.t('ui.ws.calendar.title')}
-				hint={form.value.kind === 'spitex' ? workspace.t('ui.ws.spitex.activity_hint') : undefined}
-				error={form.fields.title}
-			>
-				<Input
-					id="a-title"
-					aria-describedby={form.fields.title
-						? 'a-title-error'
-						: form.value.kind === 'spitex'
-							? 'a-title-hint'
-							: undefined}
-					bind:value={form.value.title}
-					aria-invalid={!!form.fields.title}
-				/>
-			</FormField>
 			<div class="grid grid-cols-2 gap-3">
 				<FormField id="a-kind" label={workspace.t('ui.ws.calendar.kind')}>
 					<Choice
 						id="a-kind"
-						bind:value={form.value.kind}
+						value={form.value.kind}
 						options={appointmentKinds
 							.filter((kind) =>
 								kind === 'physio'
@@ -193,7 +200,10 @@
 										: true,
 							)
 							.map((kind) => ({ value: kind, label: workspace.t(`ui.ws.calendar.kind_${kind}`) }))}
-						onchange={() => (form.value.service = null)}
+						onchange={(kind) => {
+							form.changeKind(kind as AppointmentFields['kind']);
+							showService = !!form.value.service;
+						}}
 					/>
 				</FormField>
 				<FormField id="a-status" label={workspace.t('ui.ws.status')}>
@@ -207,81 +217,180 @@
 					/>
 				</FormField>
 			</div>
-			{#if serviceOptions.length > 0}
-				<FormField id="a-service" label={workspace.t('ui.ws.calendar.service')}>
-					<Choice
-						id="a-service"
-						value={form.value.service ?? ''}
-						options={serviceOptions}
-						placeholder={workspace.t('ui.ws.calendar.choose_service')}
-						onchange={(value) => (form.value.service = value as AppointmentFields['service'])}
+			<fieldset class="min-w-0 space-y-3 border-t pt-3">
+				<legend class="pe-2 text-sm font-semibold">
+					{workspace.t(
+						form.value.kind === 'spitex' ? 'ui.ws.calendar.client_activity' : 'ui.ws.calendar.appointment_details',
+					)}
+				</legend>
+				<FormField
+					id="a-contact"
+					label={workspace.t(form.value.kind === 'spitex' ? 'ui.ws.calendar.client' : 'ui.ws.calendar.contact')}
+				>
+					<ContactPicker
+						id="a-contact"
+						bind:value={form.value.contactId}
+						placeholder={form.value.kind === 'spitex' ? workspace.t('ui.ws.calendar.link_client') : undefined}
+						{contacts}
+						onchange={(picked) => {
+							if (picked && form.value.kind !== 'spitex' && !form.value.title) form.value.title = contactName(picked);
+						}}
 					/>
 				</FormField>
-			{/if}
-			<FormField id="a-contact" label={workspace.t('ui.ws.calendar.contact')}>
-				<ContactPicker id="a-contact" bind:value={form.value.contactId} {contacts} onchange={pickContact} />
-			</FormField>
-			<FormField id="a-assignee" label={workspace.t('ui.ws.calendar.assignee')}>
-				<Choice
-					id="a-assignee"
-					value={form.value.assigneeId ?? ''}
-					options={[
-						{ value: '', label: workspace.t('ui.ws.calendar.unassigned') },
-						...people.map((person) => ({ value: person.id, label: person.name })),
-					]}
-					onchange={(value) => (form.value.assigneeId = (value || null) as AppointmentFields['assigneeId'])}
-				/>
-			</FormField>
-			<!-- On a phone the date takes its own row, so the times have room for «07:30». -->
-			<div class="grid grid-cols-2 gap-3 sm:grid-cols-[minmax(0,1fr)_6.5rem_6.5rem]">
-				<FormField id="a-date" label={workspace.t('ui.ws.calendar.date')} class="col-span-2 sm:col-span-1">
-					<Input id="a-date" type="date" bind:value={form.value.date} />
-				</FormField>
-				<FormField id="a-start" label={workspace.t('ui.from')}>
-					<Input id="a-start" type="time" step="300" bind:value={form.value.startTime} />
-				</FormField>
-				<FormField id="a-end" label={workspace.t('ui.to')} error={form.fields.end}>
-					<Input id="a-end" type="time" step="300" bind:value={form.value.endTime} aria-invalid={!!form.fields.end} />
-				</FormField>
-			</div>
-			{#if form.value.kind === 'spitex'}
-				<div class="grid grid-cols-2 gap-3">
-					<FormField id="a-window-from" label={workspace.t('ui.ws.spitex.window_from')}>
-						<Input id="a-window-from" type="time" step="300" bind:value={form.value.windowFrom} />
-					</FormField>
-					<FormField id="a-window-to" label={workspace.t('ui.ws.spitex.window_to')}>
-						<Input id="a-window-to" type="time" step="300" bind:value={form.value.windowTo} />
-					</FormField>
-				</div>
-			{/if}
-			{#if conflicts.length > 0 || form.outsideWindow}
-				<div
-					class="space-y-1 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-900 dark:text-amber-200"
-					role="alert"
+				<FormField
+					id="a-title"
+					label={workspace.t(form.value.kind === 'spitex' ? 'ui.ws.spitex.activity' : 'ui.ws.calendar.title')}
+					hint={form.value.kind === 'spitex' ? workspace.t('ui.ws.spitex.activity_hint') : undefined}
+					error={form.fields.title}
 				>
-					{#each conflicts as conflict (conflict.id)}
-						<p class="flex items-start gap-2">
-							<TriangleAlert class="mt-0.5 size-4 shrink-0" />{workspace.t('ui.ws.calendar.conflict', {
-								title: conflict.title,
-								from: workspace.i18n.time(conflict.start),
-								to: workspace.i18n.time(conflict.end),
-							})}
-						</p>
-					{/each}
-					{#if form.outsideWindow}<p class="flex items-start gap-2">
-							<TriangleAlert class="mt-0.5 size-4 shrink-0" />{workspace.t('ui.ws.spitex.outside_window')}
-						</p>{/if}
+					<Input
+						id="a-title"
+						aria-describedby={form.fields.title
+							? 'a-title-error'
+							: form.value.kind === 'spitex'
+								? 'a-title-hint'
+								: undefined}
+						bind:value={form.value.title}
+						aria-invalid={!!form.fields.title}
+					/>
+				</FormField>
+				{#if serviceOptions.length > 0}
+					{#if showService}
+						<FormField id="a-service" label={workspace.t('ui.ws.calendar.service')}>
+							<Choice
+								id="a-service"
+								value={form.value.service ?? ''}
+								options={[{ value: '', label: workspace.t('ui.ws.calendar.no_service') }, ...serviceOptions]}
+								placeholder={workspace.t('ui.ws.calendar.choose_service')}
+								onchange={(value) => (form.value.service = (value || null) as AppointmentFields['service'])}
+							/>
+						</FormField>
+					{:else if canWrite}<Button type="button" variant="outline" size="sm" onclick={() => (showService = true)}>
+							{workspace.t('ui.ws.calendar.add_service')}
+						</Button>{/if}{/if}
+				{#if showNotes}
+					<FormField id="a-notes" label={workspace.t('ui.ws.field.notes')}>
+						<Textarea id="a-notes" rows={3} bind:value={form.value.notes} />
+					</FormField>
+				{:else if canWrite}<Button variant="outline" size="sm" onclick={() => (showNotes = true)}>
+						{workspace.t('ui.ws.calendar.add_note')}
+					</Button>{/if}
+			</fieldset>
+			<fieldset class="min-w-0 space-y-3 border-t pt-3">
+				<legend class="pe-2 text-sm font-semibold">{workspace.t('ui.ws.calendar.time_place')}</legend>
+				<!-- On a phone the date takes its own row, so the times have room for «07:30». -->
+				<div class="grid grid-cols-2 gap-3 sm:grid-cols-[minmax(0,1fr)_6.5rem_6.5rem]">
+					<FormField id="a-date" label={workspace.t('ui.ws.calendar.date')} class="col-span-2 sm:col-span-1">
+						<Input id="a-date" type="date" bind:value={form.value.date} />
+					</FormField>
+					<FormField id="a-start" label={workspace.t('ui.from')}>
+						<Input id="a-start" type="time" step="300" bind:value={form.value.startTime} />
+					</FormField>
+					<FormField id="a-end" label={workspace.t('ui.to')} error={form.fields.end}>
+						<Input id="a-end" type="time" step="300" bind:value={form.value.endTime} aria-invalid={!!form.fields.end} />
+					</FormField>
 				</div>
-			{/if}
-			<FormField id="a-location" label={workspace.t('ui.ws.calendar.location')}>
-				<div class="flex items-center gap-1">
-					<Input id="a-location" bind:value={form.value.location} />
-					{#if form.value.location.trim()}<MapLink place={form.value.location} class="size-8" />{/if}
-				</div>
-			</FormField>
-			<FormField id="a-notes" label={workspace.t('ui.ws.field.notes')}>
-				<Textarea id="a-notes" rows={3} bind:value={form.value.notes} />
-			</FormField>
+				{#if form.value.kind === 'spitex'}
+					{#if form.windowEnabled}
+						<div class="grid grid-cols-2 gap-3">
+							<FormField
+								id="a-window-from"
+								label={workspace.t('ui.ws.spitex.window_from')}
+								error={form.fields.windowFrom}
+							>
+								<Input
+									id="a-window-from"
+									type="time"
+									step="300"
+									aria-invalid={!!form.fields.windowFrom}
+									aria-describedby={form.fields.windowFrom ? 'a-window-from-error' : undefined}
+									bind:value={form.value.windowFrom}
+								/>
+							</FormField>
+							<FormField id="a-window-to" label={workspace.t('ui.ws.spitex.window_to')} error={form.fields.windowTo}>
+								<Input
+									id="a-window-to"
+									type="time"
+									step="300"
+									aria-invalid={!!form.fields.windowTo}
+									aria-describedby={form.fields.windowTo ? 'a-window-to-error' : undefined}
+									bind:value={form.value.windowTo}
+								/>
+							</FormField>
+						</div>
+						{#if canWrite}<Button variant="ghost" size="sm" onclick={() => form.removeWindow()}>
+								{workspace.t('ui.ws.calendar.remove_window')}
+							</Button>{/if}
+					{:else if canWrite}<Button variant="outline" size="sm" onclick={() => (form.windowEnabled = true)}>
+							{workspace.t('ui.ws.calendar.add_window')}
+						</Button>{/if}{/if}
+				{#if editLocation}
+					<FormField id="a-location" label={workspace.t('ui.ws.calendar.location')}>
+						<div class="flex items-center gap-1">
+							<Input id="a-location" bind:value={form.value.location} />
+							{#if form.value.location.trim()}<MapLink place={form.value.location} class="size-8" />{/if}
+						</div>
+					</FormField>
+				{:else if form.value.location}
+					<div class="flex flex-wrap items-center gap-2">
+						<span class="min-w-0 break-words">{form.value.location}</span><MapLink
+							place={form.value.location}
+							class="size-8"
+						/>{#if canWrite}<Button variant="ghost" size="sm" onclick={() => (editLocation = true)}>
+								{workspace.t('ui.ws.calendar.edit_location')}
+							</Button>{/if}
+					</div>
+				{:else if canWrite}<Button variant="outline" size="sm" onclick={() => (editLocation = true)}>
+						{workspace.t('ui.ws.calendar.add_location')}
+					</Button>{/if}
+				{#if canWrite && form.value.kind === 'spitex' && suggestedAddress && !form.value.location}
+					<Button
+						class="h-auto max-w-full whitespace-normal break-words"
+						variant="ghost"
+						size="sm"
+						onclick={() => (form.value.location = suggestedAddress)}
+					>
+						{workspace.t('ui.ws.calendar.use_address', { address: suggestedAddress })}
+					</Button>{/if}
+			</fieldset>
+			<fieldset class="min-w-0 space-y-3 border-t pt-3">
+				<legend class="pe-2 text-sm font-semibold">{workspace.t('ui.ws.calendar.assignment')}</legend>
+				<FormField id="a-assignee" label={workspace.t('ui.ws.calendar.assignee')}>
+					<Choice
+						id="a-assignee"
+						value={form.value.assigneeId ?? ''}
+						options={[
+							{
+								value: '',
+								label: workspace.t(
+									form.value.kind === 'spitex' ? 'ui.ws.calendar.open_assign' : 'ui.ws.calendar.unassigned',
+								),
+							},
+							...people.map((person) => ({ value: person.id, label: person.name })),
+						]}
+						onchange={(value) => (form.value.assigneeId = (value || null) as AppointmentFields['assigneeId'])}
+					/>
+				</FormField>
+				{#if conflicts.length > 0 || form.outsideWindow}
+					<div
+						class="space-y-1 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-900 dark:text-amber-200"
+						role="alert"
+					>
+						{#each conflicts as conflict (conflict.id)}
+							<p class="flex items-start gap-2">
+								<TriangleAlert class="mt-0.5 size-4 shrink-0" />{workspace.t('ui.ws.calendar.conflict', {
+									title: conflict.title,
+									from: workspace.i18n.time(conflict.start),
+									to: workspace.i18n.time(conflict.end),
+								})}
+							</p>
+						{/each}
+						{#if form.outsideWindow}<p class="flex items-start gap-2">
+								<TriangleAlert class="mt-0.5 size-4 shrink-0" />{workspace.t('ui.ws.spitex.outside_window')}
+							</p>{/if}
+					</div>
+				{/if}
+			</fieldset>
 		</fieldset>
 		{#if form.original}
 			<div class="flex flex-wrap gap-2 border-t pt-4">
@@ -292,6 +401,8 @@
 					<Button
 						variant="outline"
 						size="sm"
+						disabled={form.dirty}
+						title={form.dirty ? workspace.t('ui.ws.calendar.save_before_bill') : undefined}
 						onclick={() => navigate(`/finance/invoices/new?appointment=${form.original?.id}`)}
 					>
 						<ReceiptText class="size-4" />{workspace.t('ui.ws.calendar.bill')}
@@ -348,13 +459,17 @@
 	</dialog>
 {:else}
 	<Sheet.Root {open} onOpenChange={close}>
-		<Sheet.Content closeLabel={workspace.t('ui.ws.close')} class="w-full overflow-y-auto sm:max-w-lg">
+		<Sheet.Content closeLabel={workspace.t('ui.ws.close')} class="w-full max-h-dvh overflow-hidden sm:max-w-lg">
 			<Sheet.Header>
 				<Sheet.Title>{@render title()}</Sheet.Title>
 				<Sheet.Description>{@render description()}</Sheet.Description>
 			</Sheet.Header>
-			{@render fields()}
-			<Sheet.Footer class="flex-row flex-wrap items-center">{@render actions()}</Sheet.Footer>
+			<div class="min-h-0 flex-1 overflow-y-auto">{@render fields()}</div>
+			<Sheet.Footer
+				class="shrink-0 flex-row flex-wrap items-center border-t pb-[max(1rem,env(safe-area-inset-bottom))]"
+			>
+				{@render actions()}
+			</Sheet.Footer>
 		</Sheet.Content>
 	</Sheet.Root>
 {/if}
