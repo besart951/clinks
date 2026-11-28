@@ -7278,6 +7278,14 @@
         "de-CH": "Dauer in Minuten",
         "en-US": "Duration in minutes"
       },
+      "ui.ws.spitex.activity_hint": {
+        "de-CH": "Welche Tätigkeit ist bei diesem Besuch geplant?",
+        "en-US": "What activity is planned for this visit?"
+      },
+      "ui.ws.spitex.plan_one": {
+        "de-CH": "1 offenen Einsatz anlegen",
+        "en-US": "Create 1 unassigned visit"
+      },
       "ui.ws.spitex.plan_count": {
         "de-CH": "{count} offene Einsätze anlegen",
         "en-US": "Create {count} unassigned visits"

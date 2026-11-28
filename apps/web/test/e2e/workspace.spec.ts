@@ -1586,7 +1586,7 @@ test('plans a recurring client activity and checks the phone form', async ({ pag
 	await section.getByLabel('Notizen').fill('Gemeinsam die Einkaufsliste mitnehmen.');
 	for (const width of [1440, 390, 320]) {
 		await page.setViewportSize({ width, height: 844 });
-		await expect(section.getByRole('button', { name: '1 offene Einsätze anlegen' })).toBeEnabled();
+		await expect(section.getByRole('button', { name: '1 offenen Einsatz anlegen' })).toBeEnabled();
 		expect(
 			await section.evaluate(
 				(el) => el.scrollWidth <= el.clientWidth + 1 && document.documentElement.scrollWidth <= innerWidth + 1,
@@ -1594,7 +1594,7 @@ test('plans a recurring client activity and checks the phone form', async ({ pag
 		).toBe(true);
 		await section.screenshot({ path: test.info().outputPath('visit-need-' + width + '.png') });
 	}
-	await section.getByRole('button', { name: '1 offene Einsätze anlegen' }).click();
+	await section.getByRole('button', { name: '1 offenen Einsatz anlegen' }).click();
 	await expect(section.getByText('Einkauf begleiten', { exact: true })).toBeVisible();
 	await section.getByRole('button', { name: 'Nächsten Zeitraum planen' }).click();
 	await expect(section.getByLabel('Planen ab')).toHaveValue('2026-11-30');

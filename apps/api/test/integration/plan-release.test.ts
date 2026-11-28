@@ -332,7 +332,7 @@ it('generates open visits once per period in tenant time and preserves a moved v
 	await api.owner
 		.updateTable('appointments')
 		.set({ title: 'Individuell geändert' })
-		.where('id', '=', created[0].id)
+		.where('id', '=', String(created[0].id))
 		.execute();
 	const patch = {
 		op: 'PATCH',
@@ -345,6 +345,17 @@ it('generates open visits once per period in tenant time and preserves a moved v
 	assert.deepEqual(
 		(await visits()).map((v) => v.title),
 		['Individuell geändert', 'Einkaufen', 'Begleitung'],
+	);
+	// Imports carry the historical visits as separate rows. Replaying the snapshot must not schedule new visits.
+	const importedId = uuid();
+	const snapshot = { ops: [{ ...put, id: importedId }] };
+	for (let attempt = 0; attempt < 2; attempt++) {
+		const result = await api.client().call('POST', '/sync/import', { token: admin.token, body: snapshot });
+		assert.equal(result.status, 200, JSON.stringify(result.body));
+	}
+	assert.equal(
+		(await api.owner.selectFrom('appointments').select('id').where('seriesId', '=', importedId).execute()).length,
+		0,
 	);
 	const other = await api.administrator('other-care@example.ch', 'Andere Spitex');
 	assert.notEqual((await write(other.token, [{ ...put, id: uuid() }])).status, 200);

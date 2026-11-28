@@ -10,6 +10,7 @@
 
 	let { contactId, needs }: { contactId: ContactId; needs: VisitNeed[] } = $props();
 	const workspace = useWorkspace();
+	const canPlan = $derived(workspace.session.can('spitex.write') && workspace.session.can('calendar.write'));
 	const weekdays = [1, 2, 3, 4, 5, 6, 7];
 	const dayLabel = (day: number) => workspace.i18n.format(new Date(2024, 0, day, 12), { weekday: 'short' });
 	let editing = $state(false);
@@ -63,11 +64,7 @@
 <section class="mb-5 min-w-0 space-y-3 rounded-xl border p-4" aria-labelledby="visit-needs-title">
 	<div class="flex flex-wrap items-center justify-between gap-2">
 		<h2 id="visit-needs-title" class="font-heading font-medium">{workspace.t('ui.ws.spitex.needs')}</h2>
-		{#if workspace.session.can('spitex.write') && !editing}<Button
-				size="sm"
-				variant="outline"
-				onclick={() => start(null)}
-			>
+		{#if canPlan && !editing}<Button size="sm" variant="outline" onclick={() => start(null)}>
 				{workspace.t('ui.ws.spitex.create_need')}
 			</Button>{/if}
 	</div>
@@ -82,11 +79,7 @@
 					)}
 				</p>
 			</div>
-			{#if workspace.session.can('spitex.write') && !editing}<Button
-					size="sm"
-					variant="ghost"
-					onclick={() => start(need)}
-				>
+			{#if canPlan && !editing}<Button size="sm" variant="ghost" onclick={() => start(need)}>
 					{workspace.t('ui.ws.spitex.continue_need')}
 				</Button>{/if}
 		</div>
@@ -153,7 +146,7 @@
 			<p class="text-muted-foreground text-sm">{workspace.t('ui.ws.spitex.period_limit')}</p>
 			<div class="flex flex-wrap gap-2">
 				<Button type="submit" disabled={busy || !count || !draft.title.trim()}>
-					{workspace.t('ui.ws.spitex.plan_count', { count })}
+					{count === 1 ? workspace.t('ui.ws.spitex.plan_one') : workspace.t('ui.ws.spitex.plan_count', { count })}
 				</Button>
 				<Button variant="ghost" disabled={busy} onclick={() => (editing = false)}>{workspace.t('ui.ws.cancel')}</Button>
 			</div>

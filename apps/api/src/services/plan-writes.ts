@@ -21,6 +21,7 @@ export class PlanWrites {
 	readonly #timeZone: string;
 	readonly #planner: boolean;
 	readonly #seesPlan: boolean;
+	readonly #writesCalendar: boolean;
 	readonly #notices: PlanNotice[] = [];
 
 	constructor(
@@ -33,11 +34,14 @@ export class PlanWrites {
 		this.#userId = scope.userId;
 		this.#timeZone = scope.timeZone;
 		this.#planner = roleGrants(role, 'spitex.write');
+		this.#writesCalendar = roleGrants(role, 'calendar.write');
 		this.#seesPlan = roleGrants(role, 'spitex.read');
 	}
 
 	/** Refuses a write the plan does not allow. `existing` and `merged` are `null` for a delete's new state. */
 	check(table: SyncedTableName, op: 'PUT' | 'PATCH' | 'DELETE', existing: Fields | null, merged: Fields | null) {
+		if (table === 'spitex_visit_needs' && (!this.#seesPlan || !this.#writesCalendar || op === 'DELETE'))
+			throw forbidden();
 		if (table === 'spitex_week_releases') {
 			// Releasing touches every visit of the week, so it takes the whole plan in view; a release is given or
 			// withdrawn, never edited, and only in one's own name.

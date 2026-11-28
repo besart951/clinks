@@ -9,6 +9,7 @@ import { uploadToFields } from '@clinks/sync-schema/mapping';
 import { isSyncedTable, syncedTables, type Column, type SyncedTableName } from '@clinks/sync-schema/tables';
 import type { ProductTranslationKey } from '@clinks/i18n-types';
 import { z } from 'zod';
+import { sql } from 'kysely';
 import { appointmentChanged } from './appointment-mail.ts';
 import { ApiError, forbidden } from '../errors.ts';
 import type { AccessClaims } from '../tokens.ts';
@@ -45,6 +46,9 @@ export class SyncService {
 		const tenantId = claims.tenant_id;
 		if (!tenantId) throw forbidden();
 		await inScope(this.#services.db, { tenantId, userId: claims.sub }, async (tx) => {
+			// Snapshot imports bring their own appointments, including manually moved visits.
+			if (mode === 'import' && request.ops.some((op) => op.table === 'spitex_visit_needs'))
+				await sql`select set_config('clinks.import_visit_snapshot','on',true)`.execute(tx);
 			const deferred: { table: SyncedTableName; fields: Fields }[] = [];
 			const role = await activeRole(tx, tenantId, claims.sub);
 			if (!role) throw forbidden();

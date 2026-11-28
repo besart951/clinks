@@ -162,8 +162,22 @@
 {#snippet fields()}
 	<form id="appointment-form" class="space-y-4 px-4" onsubmit={submit} novalidate>
 		<fieldset disabled={!canWrite} class="space-y-4">
-			<FormField id="a-title" label={workspace.t('ui.ws.calendar.title')} error={form.fields.title}>
-				<Input id="a-title" bind:value={form.value.title} aria-invalid={!!form.fields.title} />
+			<FormField
+				id="a-title"
+				label={workspace.t('ui.ws.calendar.title')}
+				hint={form.value.kind === 'spitex' ? workspace.t('ui.ws.spitex.activity_hint') : undefined}
+				error={form.fields.title}
+			>
+				<Input
+					id="a-title"
+					aria-describedby={form.fields.title
+						? 'a-title-error'
+						: form.value.kind === 'spitex'
+							? 'a-title-hint'
+							: undefined}
+					bind:value={form.value.title}
+					aria-invalid={!!form.fields.title}
+				/>
 			</FormField>
 			<div class="grid grid-cols-2 gap-3">
 				<FormField id="a-kind" label={workspace.t('ui.ws.calendar.kind')}>

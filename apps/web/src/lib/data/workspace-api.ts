@@ -13,7 +13,7 @@ import { MockCampaignWorkflow, MockNewsletterConsents, MockNewsletterForms } fro
 import type { Repository } from '@clinks/contracts/repository';
 import { workspaceSchemas } from '@clinks/contracts/workspace-schemas';
 import { syncedTables, type SyncedTableName } from '@clinks/sync-schema/tables';
-import { MockApiError, type WorkspaceCache, type Tables } from './database.ts';
+import { MockApiError, type WorkspaceCache, type TableName, type Tables } from './database.ts';
 import { TenantRepository, type RequestContext, type RepositoryConfig } from './repository.ts';
 import type { SyncEngine } from '../sync/sync-engine.svelte.ts';
 import { SyncedRepository } from '../sync/synced-repository.ts';

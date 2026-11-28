@@ -18,7 +18,14 @@ CREATE TABLE spitex_visit_needs (
 CREATE INDEX spitex_visit_needs_client ON spitex_visit_needs(tenant_id,contact_id);
 ALTER TABLE spitex_visit_needs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE spitex_visit_needs FORCE ROW LEVEL SECURITY;
-CREATE POLICY tenant_scope ON spitex_visit_needs USING (tenant_id=current_tenant_id());
+CREATE POLICY tenant_scope ON spitex_visit_needs USING (
+ tenant_id=current_tenant_id() AND (
+  current_user_id() IS NULL OR EXISTS (
+   SELECT 1 FROM sync_access s WHERE s.tenant_id=spitex_visit_needs.tenant_id
+   AND s.user_id=current_user_id() AND 'spitex.read'=ANY(s.read_permissions)
+  )
+ )
+);
 GRANT SELECT,INSERT,UPDATE,DELETE ON spitex_visit_needs TO clinks_app;
 ALTER PUBLICATION powersync ADD TABLE spitex_visit_needs;
 
@@ -35,6 +42,7 @@ BEGIN
    RAISE EXCEPTION 'Planning periods overlap' USING ERRCODE='23514';
   END IF;
  END IF;
+ IF current_setting('clinks.import_visit_snapshot',true)='on' THEN RETURN NEW; END IF;
  SELECT time_zone INTO STRICT zone FROM tenants WHERE id=NEW.tenant_id;
  INSERT INTO appointments(id,tenant_id,contact_id,series_id,title,notes,kind,status,starts_at,ends_at,arrival_window)
  SELECT uuidv7(),NEW.tenant_id,NEW.contact_id,NEW.id,NEW.title,NEW.notes,'spitex','planned',
