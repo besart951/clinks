@@ -1587,11 +1587,15 @@ test('plans a recurring client activity and checks the phone form', async ({ pag
 	for (const width of [1440, 390, 320]) {
 		await page.setViewportSize({ width, height: 844 });
 		await expect(section.getByRole('button', { name: '1 offenen Einsatz anlegen' })).toBeEnabled();
-		expect(
-			await section.evaluate(
-				(el) => el.scrollWidth <= el.clientWidth + 1 && document.documentElement.scrollWidth <= innerWidth + 1,
-			),
-		).toBe(true);
+		await expect
+			.poll(() =>
+				section.evaluate((el) =>
+					[el.scrollWidth - el.clientWidth, document.documentElement.scrollWidth - innerWidth].every(
+						(excess) => excess <= 1,
+					),
+				),
+			)
+			.toBe(true);
 		await section.screenshot({ path: test.info().outputPath('visit-need-' + width + '.png') });
 	}
 	await section.getByRole('button', { name: '1 offenen Einsatz anlegen' }).click();
